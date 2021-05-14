@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "rift",
+  "version": "${version}",
+
+  "name": "Prehistoric Rift",
+  "description": "This is a port of the Minecraft Bedrock addon Prehistoric Rift. It aims to add dinosaurs and expand upon gameplay.",
+  "authors": [
+    "ANightDazingZoroark"
+  ],
+  "contact": {
+    "homepage": "https://anightdazingzoroark.github.io/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/rift/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.anightdazingzoroark.rift.Entities",
+      "com.anightdazingzoroark.rift.Items",
+      "com.anightdazingzoroark.rift.Blocks"
+    ]
+  },
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
