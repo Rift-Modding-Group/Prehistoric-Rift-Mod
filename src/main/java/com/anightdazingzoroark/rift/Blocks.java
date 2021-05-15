@@ -1,5 +1,6 @@
 package com.anightdazingzoroark.rift;
 
+import com.anightdazingzoroark.rift.registry.ModBlocks;
 import net.fabricmc.api.ModInitializer;
 
 public class Blocks implements ModInitializer {
@@ -8,5 +9,6 @@ public class Blocks implements ModInitializer {
     @Override
     public void onInitialize() {
         System.out.println("Blocks!");
+        ModBlocks.registerBlocks();
     }
 }

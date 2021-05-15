@@ -1,4 +1,12 @@
 {
+  "block.rift.oak_thatch_block": "Oak Thatch Block",
+  "block.rift.birch_thatch_block": "Birch Thatch Block",
+  "block.rift.spruce_thatch_block": "Spruce Thatch Block",
+  "block.rift.jungle_thatch_block": "Jungle Thatch Block",
+  "block.rift.dark_oak_thatch_block": "Dark Oak Thatch Block",
+  "block.rift.acacia_thatch_block": "Acacia Thatch Block",
+  "block.rift.crimson_thatch_block": "Crimson Thatch Block",
+  "block.rift.warped_thatch_block": "Warped Thatch Block",
   "item.rift.oak_thatch": "Oak Thatch",
   "item.rift.birch_thatch": "Birch Thatch",
   "item.rift.spruce_thatch": "Spruce Thatch",
