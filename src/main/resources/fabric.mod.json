@@ -21,7 +21,8 @@
     "main": [
       "com.anightdazingzoroark.rift.Entities",
       "com.anightdazingzoroark.rift.Items",
-      "com.anightdazingzoroark.rift.Blocks"
+      "com.anightdazingzoroark.rift.Blocks",
+      "com.anightdazingzoroark.rift.CreativeTab"
     ]
   },
 

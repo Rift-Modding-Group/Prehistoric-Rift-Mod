@@ -13,6 +13,17 @@
   "item.rift.cooked_dodo_meat": "Cooked Dodo Meat",
   "item.rift.raw_hadrosaur_meat": "Raw Hadrosaur Meat",
   "item.rift.cooked_hadrosaur_meat": "Cooked Hadrosaur Meat",
+  "item.rift.small_fried_egg": "Small Fried Egg",
+  "item.rift.medium_fried_egg": "Medium Fried Egg",
+  "item.rift.large_fried_egg": "Large Fried Egg",
+  "item.rift.mixed_meat": "Mixed Meat",
+  "item.rift.enchanted_mixed_meat": "Enchanted Mixed Meat",
+  "item.rift.flesh_treat": "Flesh Treat",
+  "item.rift.fish_treat": "Fish Treat",
+  "item.rift.berry_treat": "Berry Treat",
+  "item.rift.rooted_treat": "Rooted Treat",
+  "item.rift.grassy_treat": "Grassy Treat",
+  "item.rift.leafy_treat": "Leafy Treat",
   "item.rift.oak_thatch": "Oak Thatch",
   "item.rift.birch_thatch": "Birch Thatch",
   "item.rift.spruce_thatch": "Spruce Thatch",
@@ -28,5 +39,6 @@
   "item.rift.utahraptor_claw": "Utahraptor Claw",
   "item.rift.apatosaurus_vertebrae": "Apatosaurus Vertebrae",
   "item.rift.parasaurolophus_horn": "Parasaurolophus Horn",
-  "item.rift.dimetrodon_sail": "Dimetrodon Sail"
+  "item.rift.dimetrodon_sail": "Dimetrodon Sail",
+  "itemGroup.rift.rift_items": "Prehistoric Rift Items"
 }
