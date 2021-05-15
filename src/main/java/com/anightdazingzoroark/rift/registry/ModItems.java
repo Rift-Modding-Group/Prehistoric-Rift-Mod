@@ -1,6 +1,7 @@
 package com.anightdazingzoroark.rift.registry;
 
 import com.anightdazingzoroark.rift.Items;
+import com.anightdazingzoroark.rift.items.FoodItems;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -20,6 +21,13 @@ public class ModItems {
     public static final Item WARPED_THATCH_BLOCK = new BlockItem(ModBlocks.WARPED_THATCH_BLOCK, new Item.Settings().group(ItemGroup.BUILDING_BLOCKS));
 
     //items
+    ///meat items
+    public static final Item RAW_EXOTIC_MEAT = new Item(new Item.Settings().group(ItemGroup.MATERIALS).food(FoodItems.RAW_EXOTIC_MEAT));
+    public static final Item COOKED_EXOTIC_MEAT = new Item(new Item.Settings().group(ItemGroup.MATERIALS).food(FoodItems.COOKED_EXOTIC_MEAT));
+    public static final Item RAW_DODO_MEAT = new Item(new Item.Settings().group(ItemGroup.MATERIALS).food(FoodItems.RAW_DODO_MEAT));
+    public static final Item COOKED_DODO_MEAT = new Item(new Item.Settings().group(ItemGroup.MATERIALS).food(FoodItems.COOKED_DODO_MEAT));
+    public static final Item RAW_HADROSAUR_MEAT = new Item(new Item.Settings().group(ItemGroup.MATERIALS).food(FoodItems.RAW_HADROSAUR_MEAT));
+    public static final Item COOKED_HADROSAUR_MEAT = new Item(new Item.Settings().group(ItemGroup.MATERIALS).food(FoodItems.COOKED_HADROSAUR_MEAT));
     ///thatch items
     public static final Item OAK_THATCH = new Item(new Item.Settings().group(ItemGroup.MATERIALS));
     public static final Item BIRCH_THATCH = new Item(new Item.Settings().group(ItemGroup.MATERIALS));
@@ -52,6 +60,13 @@ public class ModItems {
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "warped_thatch_block"), WARPED_THATCH_BLOCK);
 
         //items
+        ///meat items
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "raw_exotic_meat"), RAW_EXOTIC_MEAT);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "cooked_exotic_meat"), COOKED_EXOTIC_MEAT);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "raw_dodo_meat"), RAW_DODO_MEAT);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "cooked_dodo_meat"), COOKED_DODO_MEAT);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "raw_hadrosaur_meat"), RAW_HADROSAUR_MEAT);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "cooked_hadrosaur_meat"), COOKED_HADROSAUR_MEAT);
         ///thatch items
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "oak_thatch"), OAK_THATCH);
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "birch_thatch"), BIRCH_THATCH);
