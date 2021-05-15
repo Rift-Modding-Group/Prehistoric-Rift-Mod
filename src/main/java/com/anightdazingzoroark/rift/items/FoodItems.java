@@ -11,7 +11,7 @@ public class FoodItems {
             .build();
     public static final FoodComponent COOKED_EXOTIC_MEAT = new FoodComponent.Builder()
             .hunger(8)
-            .saturationModifier(6)
+            .saturationModifier(8)
             .build();
     public static final FoodComponent RAW_DODO_MEAT = new FoodComponent.Builder()
             .hunger(2)
