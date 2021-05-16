@@ -22,6 +22,16 @@ public class ModItems {
     public static final Item WARPED_THATCH_BLOCK = new BlockItem(ModBlocks.WARPED_THATCH_BLOCK, new Item.Settings().group(CreativeTab.RIFT_ITEMS));
 
     //items
+    ///tools
+    public static final Item COMMAND_STAFF = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).maxCount(1));
+    public static final Item HARVEST_STAFF = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).maxCount(1));
+    public static final Item COMMAND_CONSOLE = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).maxCount(1));
+    public static final Item WRENCH = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).maxCount(1));
+    ///stationary weapon ammo
+    public static final Item CANNONBALL = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).maxCount(1));
+    public static final Item MORTAR_SHELL = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).maxCount(1));
+    ///fruit/vegetable/edible fungus items
+    public static final Item TRUFFLE = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).food(FoodItems.TRUFFLE));
     ///meat items
     public static final Item RAW_EXOTIC_MEAT = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).food(FoodItems.RAW_EXOTIC_MEAT));
     public static final Item COOKED_EXOTIC_MEAT = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).food(FoodItems.COOKED_EXOTIC_MEAT));
@@ -42,6 +52,10 @@ public class ModItems {
     public static final Item ROOTED_TREAT = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).food(FoodItems.TREAT));
     public static final Item GRASSY_TREAT = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).food(FoodItems.TREAT));
     public static final Item LEAFY_TREAT = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS).food(FoodItems.TREAT));
+    ///stimulant items
+    public static final Item FLAME_STIMULANT = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
+    public static final Item FROST_STIMULANT = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
+    public static final Item NEUTRAL_STIMULANT = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
     ///thatch items
     public static final Item OAK_THATCH = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
     public static final Item BIRCH_THATCH = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
@@ -51,6 +65,8 @@ public class ModItems {
     public static final Item ACACIA_THATCH = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
     public static final Item CRIMSON_THATCH = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
     public static final Item WARPED_THATCH = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
+    //other resource items
+    public static final Item GRASS_FIBER = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
     ///tribute items
     public static final Item STEGOSAURUS_PLATE = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
     public static final Item TYRANNOSAURUS_ARM = new Item(new Item.Settings().group(CreativeTab.RIFT_ITEMS));
@@ -74,6 +90,16 @@ public class ModItems {
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "warped_thatch_block"), WARPED_THATCH_BLOCK);
 
         //items
+        ///tools
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "command_staff"), COMMAND_STAFF);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "harvest_staff"), HARVEST_STAFF);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "command_console"), COMMAND_CONSOLE);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "wrench"), WRENCH);
+        ///stationary weapon ammo
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "cannonball"), CANNONBALL);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "mortar_shell"), MORTAR_SHELL);
+        ///fruit/vegetable/edible fungus items
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "truffle"), TRUFFLE);
         ///meat items
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "raw_exotic_meat"), RAW_EXOTIC_MEAT);
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "cooked_exotic_meat"), COOKED_EXOTIC_MEAT);
@@ -94,6 +120,10 @@ public class ModItems {
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "rooted_treat"), ROOTED_TREAT);
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "grassy_treat"), GRASSY_TREAT);
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "leafy_treat"), LEAFY_TREAT);
+        ///stimulant items
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "flame_stimulant"), FLAME_STIMULANT);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "frost_stimulant"), FROST_STIMULANT);
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "neutral_stimulant"), NEUTRAL_STIMULANT);
         ///thatch items
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "oak_thatch"), OAK_THATCH);
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "birch_thatch"), BIRCH_THATCH);
@@ -103,6 +133,8 @@ public class ModItems {
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "acacia_thatch"), ACACIA_THATCH);
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "crimson_thatch"), CRIMSON_THATCH);
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "warped_thatch"), WARPED_THATCH);
+        //other resource items
+        Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "grass_fiber"), GRASS_FIBER);
         ///tribute items
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "stegosaurus_plate"), STEGOSAURUS_PLATE);
         Registry.register(Registry.ITEM, new Identifier(Items.MOD_ID, "tyrannosaurus_arm"), TYRANNOSAURUS_ARM);

@@ -5,6 +5,10 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.FoodComponent;
 
 public class FoodItems {
+    public static final FoodComponent TRUFFLE = new FoodComponent.Builder()
+            .hunger(2)
+            .saturationModifier(2)
+            .build();
     public static final FoodComponent RAW_EXOTIC_MEAT = new FoodComponent.Builder()
             .hunger(4)
             .saturationModifier(2)
