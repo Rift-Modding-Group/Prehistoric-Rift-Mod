@@ -19,11 +19,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.anightdazingzoroark.rift.Entities",
-      "com.anightdazingzoroark.rift.Items",
-      "com.anightdazingzoroark.rift.Blocks",
-      "com.anightdazingzoroark.rift.CreativeTab",
-      "com.anightdazingzoroark.rift.Models"
+      "com.anightdazingzoroark.rift.InitializeServer"
+    ],
+    "client": [
+      "com.anightdazingzoroark.rift.InitializeClient"
     ]
   },
 
