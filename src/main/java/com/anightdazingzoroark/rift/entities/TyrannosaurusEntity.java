@@ -8,6 +8,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 public class TyrannosaurusEntity extends PathAwareEntity implements IAnimatable {
+    private final AnimationFactory factory = new AnimationFactory(this);
     public TyrannosaurusEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -19,6 +20,6 @@ public class TyrannosaurusEntity extends PathAwareEntity implements IAnimatable 
 
     @Override
     public AnimationFactory getFactory() {
-        return null;
+        return factory;
     }
 }

@@ -9,6 +9,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 public class ModItems {
+    //spawn eggs
+
     //blocks
     ///thatch blocks
     public static final Item OAK_THATCH_BLOCK = new BlockItem(ModBlocks.OAK_THATCH_BLOCK, new Item.Settings().group(InitializeServer.RIFT_ITEMS));
