@@ -18,6 +18,6 @@ public class ModEntities {
     );
 
     public static void registerEntities() {
-        FabricDefaultAttributeRegistry.register(TYRANNOSAURUS, TyrannosaurusEntity.createMobAttributes());
+        FabricDefaultAttributeRegistry.register(ModEntities.TYRANNOSAURUS, TyrannosaurusEntity.createAttributes());
     }
 }
