@@ -7,6 +7,7 @@
   "block.rift.acacia_thatch_block": "Acacia Thatch Block",
   "block.rift.crimson_thatch_block": "Crimson Thatch Block",
   "block.rift.warped_thatch_block": "Warped Thatch Block",
+  "entity.rift.tyrannosaurus": "Tyrannosaurus",
   "item.rift.command_staff": "Command Staff",
   "item.rift.harvest_staff": "Harvest Staff",
   "item.rift.command_console": "Command Console",
@@ -51,5 +52,6 @@
   "item.rift.apatosaurus_vertebrae": "Apatosaurus Vertebrae",
   "item.rift.parasaurolophus_horn": "Parasaurolophus Horn",
   "item.rift.dimetrodon_sail": "Dimetrodon Sail",
+  "item.rift.tyrannosaurus_spawn_egg": "Spawn Tyrannosaurus",
   "itemGroup.rift.rift_items": "Prehistoric Rift Items"
 }

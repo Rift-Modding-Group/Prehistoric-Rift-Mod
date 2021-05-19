@@ -5,11 +5,13 @@ import com.anightdazingzoroark.rift.items.FoodItems;
 import com.anightdazingzoroark.rift.items.GlintItems;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 public class ModItems {
     //spawn eggs
+    public static final Item TYRANNOSAURUS_SPAWN_EGG = new SpawnEggItem(ModEntities.TYRANNOSAURUS, 3670016, 2428687, new Item.Settings().group(InitializeServer.RIFT_ITEMS));
 
     //blocks
     ///thatch blocks
@@ -79,6 +81,9 @@ public class ModItems {
     public static final Item DIMETRODON_SAIL = new Item(new Item.Settings().group(InitializeServer.RIFT_ITEMS));
 
     public static void registerItems() {
+        //spawn eggs
+        Registry.register(Registry.ITEM, new Identifier(InitializeServer.MOD_ID, "tyrannosaurus_spawn_egg"), TYRANNOSAURUS_SPAWN_EGG);
+
         //blocks
         ///thatch blocks
         Registry.register(Registry.ITEM, new Identifier(InitializeServer.MOD_ID, "oak_thatch_block"), OAK_THATCH_BLOCK);
