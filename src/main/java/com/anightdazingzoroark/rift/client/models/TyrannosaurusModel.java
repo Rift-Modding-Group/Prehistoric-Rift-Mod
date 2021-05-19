@@ -22,23 +22,7 @@ public class TyrannosaurusModel extends AnimatedGeoModel<TyrannosaurusEntity> {
 
     @Override
     public Identifier getTextureLocation(TyrannosaurusEntity object) {
-        Identifier textureVariant = null;
-        switch (TyrannosaurusEntity.VARIANT) {
-            case 0:
-                textureVariant = TEXTURE_ONE;
-                break;
-            case 1:
-                textureVariant = TEXTURE_TWO;
-                break;
-            case 2:
-                textureVariant = TEXTURE_THREE;
-                break;
-            case 3:
-                textureVariant = TEXTURE_FOUR;
-                break;
-        }
-
-        return textureVariant;
+        return TEXTURE_ONE;
     }
 
     @Override

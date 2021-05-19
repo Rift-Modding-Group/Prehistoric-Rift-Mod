@@ -1,6 +1,6 @@
 package com.anightdazingzoroark.rift.registry;
 
-import com.anightdazingzoroark.rift.client.renderer.TyrannosaurusRenderer;
+import com.anightdazingzoroark.rift.client.renderers.TyrannosaurusRenderer;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 
 public class ModRenderers {
