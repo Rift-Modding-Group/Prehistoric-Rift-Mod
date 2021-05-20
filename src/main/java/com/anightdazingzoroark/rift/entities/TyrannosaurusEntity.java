@@ -23,14 +23,14 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
 
     protected void initGoals() {
         this.goalSelector.add(2, new MeleeAttackGoal(this, 1, true));
-        this.goalSelector.add(3, new WanderAroundFarGoal(this, 0.25D));
+        this.goalSelector.add(3, new WanderAroundFarGoal(this, 1.0D));
     }
 
 
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 160)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 1.2)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 35);
     }
 
