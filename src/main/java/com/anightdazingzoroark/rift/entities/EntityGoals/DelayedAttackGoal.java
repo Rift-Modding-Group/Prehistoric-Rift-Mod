@@ -97,7 +97,7 @@ public class DelayedAttackGoal extends Goal {
 
         this.field_24667 = Math.max(this.field_24667 - 1, 0);
 
-        System.out.println(this.updateCountdownTicks * 0.05);
+        System.out.println(this.updateCountdownTicks);
 
         if (d <= this.getSquaredMaxAttackDistance(livingEntity)) {
             this.updateCountdownTicks = Math.max(this.updateCountdownTicks - 1, 0);
@@ -117,6 +117,7 @@ public class DelayedAttackGoal extends Goal {
             }
         }
         if ((this.updateCountdownTicks * 0.05) == 0) {
+            this.updateCountdownTicks = 0;
             this.mob.setAttacking(false);
         }
     }
