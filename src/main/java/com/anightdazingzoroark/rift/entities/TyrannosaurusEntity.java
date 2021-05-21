@@ -10,6 +10,10 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
@@ -55,6 +59,18 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         this.targetSelector.add(2, new FollowTargetGoal(this, PandaEntity.class, true));
     }
 
+    private <E extends IAnimatable> PlayState controller(AnimationEvent<E> event) {
+        if (event.isMoving() == true) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk"));
+        }
+        else if (event.isMoving() == false) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.standing"));
+        }
+
+        return PlayState.CONTINUE;
+    }
+
+
     @Nullable
     @Override
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
@@ -89,7 +105,7 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
 
     @Override
     public void registerControllers(AnimationData animationData) {
-
+        animationData.addAnimationController(new AnimationController<>(this, "controller", 0.0f, this::controller));
     }
 
     @Override

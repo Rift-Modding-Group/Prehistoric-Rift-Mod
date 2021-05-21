@@ -3,7 +3,6 @@
 	"animations": {
 		"animation.tyrannosaurus.walk": {
 			"loop": true,
-			"anim_time_update": "query.modified_distance_moved",
 			"bones": {
 				"hips": {
 					"position": [0, "math.abs(math.sin(query.anim_time * 30))", 0]

@@ -9,6 +9,7 @@ import net.minecraft.client.render.entity.*;
 import net.minecraft.client.util.math.MatrixStack;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderer.geo.GeoEntityRenderer;
+import software.bernie.geckolib3.resource.GeckoLibCache;
 
 public class TyrannosaurusRenderer extends GeoEntityRenderer<TyrannosaurusEntity>{
     public TyrannosaurusRenderer(EntityRenderDispatcher entityRenderDispatcher) {
@@ -19,6 +20,7 @@ public class TyrannosaurusRenderer extends GeoEntityRenderer<TyrannosaurusEntity
     @Override
     public void render(GeoModel model, TyrannosaurusEntity animatable, float partialTicks, RenderLayer type, MatrixStack matrixStackIn, VertexConsumerProvider renderTypeBuffer, VertexConsumer vertexBuilder, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
         matrixStackIn.scale(1.5F, 1.5F, 1.5F);
+        GeckoLibCache.getInstance().parser.setValue("walkSpeed", 2);
         super.render(model, animatable, partialTicks, type, matrixStackIn, renderTypeBuffer, vertexBuilder, packedLightIn, packedOverlayIn, red, green, blue, alpha);
     }
 }
