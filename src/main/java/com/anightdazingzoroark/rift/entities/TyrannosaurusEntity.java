@@ -1,5 +1,6 @@
 package com.anightdazingzoroark.rift.entities;
 
+import com.anightdazingzoroark.rift.entities.EntityGoals.DelayedAttackGoal;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.*;
@@ -41,7 +42,7 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
     }
 
     protected void initGoals() {
-        this.goalSelector.add(3, new MeleeAttackGoal(this, 1, true));
+        this.goalSelector.add(3, new DelayedAttackGoal(this, 1, false, 0.5, 0.5));
         this.goalSelector.add(4, new WanderAroundFarGoal(this, 1.0D));
         this.goalSelector.add(5, new LookAroundGoal(this));
         this.findTargets();
@@ -78,18 +79,17 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
             return PlayState.CONTINUE;
         }
 
-        if(this.dataTracker.get(ATTACKING) == true) {
-            System.out.println("attack anim!");
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", true));
+        if (this.dataTracker.get(ATTACKING) == true) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", false));
             return PlayState.CONTINUE;
         }
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.look_at_target", true));
+
         return PlayState.CONTINUE;
     }
 
     @Environment(EnvType.CLIENT)
     public boolean isAttacking() {
-        return (Boolean) this.dataTracker.get(ATTACKING);
+        return this.dataTracker.get(ATTACKING);
     }
 
     public void setAttacking(boolean attacking) {
