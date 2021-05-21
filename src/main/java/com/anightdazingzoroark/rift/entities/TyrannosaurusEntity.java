@@ -36,10 +36,12 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
     protected void initGoals() {
         this.goalSelector.add(3, new MeleeAttackGoal(this, 1, true));
         this.goalSelector.add(4, new WanderAroundFarGoal(this, 1.0D));
+        this.goalSelector.add(5, new LookAroundGoal(this));
         this.findTargets();
     }
 
     private void findTargets() {
+        this.targetSelector.add(1, new RevengeGoal(this));
         this.targetSelector.add(2, new FollowTargetGoal(this, PlayerEntity.class, true));
         this.targetSelector.add(2, new FollowTargetGoal(this, VillagerEntity.class, true));
         this.targetSelector.add(2, new FollowTargetGoal(this, WanderingTraderEntity.class, true));
