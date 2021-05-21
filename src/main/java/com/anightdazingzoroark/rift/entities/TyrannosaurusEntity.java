@@ -1,6 +1,11 @@
 package com.anightdazingzoroark.rift.entities;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.entity.*;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.ai.goal.*;
@@ -20,6 +25,8 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import java.util.UUID;
 
 public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, Angerable {
+    private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+
     private final AnimationFactory factory = new AnimationFactory(this);
 
     public TyrannosaurusEntity(EntityType<? extends TameableEntity> entityType, World world) {
@@ -62,16 +69,37 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
     }
 
     private <E extends IAnimatable> PlayState controller(AnimationEvent<E> event) {
-        if (event.isMoving() == true) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk"));
+        if (event.isMoving() == true && this.dataTracker.get(ATTACKING) == false) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk", true));
+            return PlayState.CONTINUE;
         }
-        else if (event.isMoving() == false) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.standing"));
+        else if (event.isMoving() == false && this.dataTracker.get(ATTACKING) == false) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.standing", true));
+            return PlayState.CONTINUE;
         }
 
+        if(this.dataTracker.get(ATTACKING) == true) {
+            System.out.println("attack anim!");
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", true));
+            return PlayState.CONTINUE;
+        }
+        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.look_at_target", true));
         return PlayState.CONTINUE;
     }
 
+    @Environment(EnvType.CLIENT)
+    public boolean isAttacking() {
+        return (Boolean) this.dataTracker.get(ATTACKING);
+    }
+
+    public void setAttacking(boolean attacking) {
+        this.dataTracker.set(ATTACKING, attacking);
+    }
+
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(ATTACKING, false);
+    }
 
     @Nullable
     @Override
