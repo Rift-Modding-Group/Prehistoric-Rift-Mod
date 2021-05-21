@@ -14,7 +14,7 @@ public class ModEntities {
     public static final EntityType<TyrannosaurusEntity> TYRANNOSAURUS = Registry.register(
             Registry.ENTITY_TYPE,
             new Identifier(InitializeServer.MOD_ID, "tyrannosaurus"),
-            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, TyrannosaurusEntity::new).dimensions(EntityDimensions.fixed(1.5f,1.5f)).build()
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, TyrannosaurusEntity::new).dimensions(EntityDimensions.fixed(2.5f,3.5f)).build()
     );
 
     public static void registerEntities() {

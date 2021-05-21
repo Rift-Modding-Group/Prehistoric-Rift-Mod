@@ -3,7 +3,12 @@ package com.anightdazingzoroark.rift.client.models;
 import com.anightdazingzoroark.rift.InitializeServer;
 import com.anightdazingzoroark.rift.entities.TyrannosaurusEntity;
 import net.minecraft.util.Identifier;
+import software.bernie.geckolib3.core.processor.IBone;
+import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
+import net.minecraft.client.util.math.*;
+import net.minecraft.client.util.math.MatrixStack;
+
 
 public class TyrannosaurusModel extends AnimatedGeoModel<TyrannosaurusEntity> {
     private static final Identifier MODEL = InitializeServer.id("geo/tyrannosaurus.geo.json");

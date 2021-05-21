@@ -26,7 +26,7 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         return MobEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 160)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 35);
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 19);
     }
 
     protected void initGoals() {
