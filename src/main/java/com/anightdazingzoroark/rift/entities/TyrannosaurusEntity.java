@@ -42,7 +42,7 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
     }
 
     protected void initGoals() {
-        this.goalSelector.add(3, new DelayedAttackGoal(this, 1, false, 0.5, 0.5));
+        this.goalSelector.add(3, new DelayedAttackGoal(this, 1, false, 0.75, 0.5));
         this.goalSelector.add(4, new WanderAroundFarGoal(this, 1.0D));
         this.goalSelector.add(5, new LookAroundGoal(this));
         this.findTargets();
@@ -69,21 +69,27 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         this.targetSelector.add(2, new FollowTargetGoal(this, PandaEntity.class, true));
     }
 
-    private <E extends IAnimatable> PlayState controller(AnimationEvent<E> event) {
-        if (event.isMoving() == true && this.dataTracker.get(ATTACKING) == false) {
+    private <E extends IAnimatable> PlayState movement(AnimationEvent<E> event) {
+        if (event.isMoving()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk", true));
             return PlayState.CONTINUE;
         }
-        else if (event.isMoving() == false && this.dataTracker.get(ATTACKING) == false) {
+        else if (!event.isMoving()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.standing", true));
             return PlayState.CONTINUE;
         }
+        return PlayState.CONTINUE;
+    }
 
-        if (this.dataTracker.get(ATTACKING) == true) {
+    private <E extends IAnimatable> PlayState attack(AnimationEvent<E> event) {
+        if (this.dataTracker.get(ATTACKING)) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", false));
             return PlayState.CONTINUE;
         }
-
+        else if (!this.dataTracker.get(ATTACKING)) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.null", false));
+            return PlayState.CONTINUE;
+        }
         return PlayState.CONTINUE;
     }
 
@@ -135,7 +141,8 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
 
     @Override
     public void registerControllers(AnimationData animationData) {
-        animationData.addAnimationController(new AnimationController<>(this, "controller", 0.0f, this::controller));
+        animationData.addAnimationController(new AnimationController<>(this, "movement", 0.0f, this::movement));
+        animationData.addAnimationController(new AnimationController<>(this, "attack", 0.0f, this::attack));
     }
 
     @Override

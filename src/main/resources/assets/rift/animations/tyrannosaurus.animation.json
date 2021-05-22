@@ -183,6 +183,9 @@
 					}
 				}
 			}
+		},
+		"animation.tyrannosaurus.null": {
+			"loop": true
 		}
 	}
 }

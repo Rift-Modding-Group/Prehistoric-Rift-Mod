@@ -86,7 +86,6 @@ public class DelayedAttackGoal extends Goal {
         }
 
         this.mob.getNavigation().stop();
-        this.updateCountdownTicks = 0;
         this.mob.setAttacking(false);
     }
 
@@ -113,11 +112,10 @@ public class DelayedAttackGoal extends Goal {
                 this.mob.tryAttack(livingEntity);
             }
         }
-        if ((this.updateCountdownTicks * 0.05) == this.attackAnimLength) {
+        if ((this.updateCountdownTicks * 0.05) >= this.attackAnimLength) {
             this.mob.setAttacking(false);
             this.updateCountdownTicks = 0;
         }
-        System.out.println(this.updateCountdownTicks);
     }
 
     protected void method_28346() {
