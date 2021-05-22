@@ -4,6 +4,7 @@ import com.anightdazingzoroark.rift.entities.EntityGoals.DelayedAttackGoal;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.*;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -12,7 +13,9 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -23,10 +26,19 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, Angerable {
     private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> ROARING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final Predicate<Entity> IMMUNE_TO_ROAR = (entity) -> {
+        return entity.isAlive() && !(entity instanceof TyrannosaurusEntity);
+    };
+    private int roarTick;
 
     private final AnimationFactory factory = new AnimationFactory(this);
 
@@ -38,7 +50,8 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         return MobEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 160)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 19);
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 19)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0D);
     }
 
     protected void initGoals() {
@@ -69,30 +82,6 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         this.targetSelector.add(2, new FollowTargetGoal(this, PandaEntity.class, true));
     }
 
-    private <E extends IAnimatable> PlayState movement(AnimationEvent<E> event) {
-        if (event.isMoving()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk", true));
-            return PlayState.CONTINUE;
-        }
-        else if (!event.isMoving()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.standing", true));
-            return PlayState.CONTINUE;
-        }
-        return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState attack(AnimationEvent<E> event) {
-        if (this.dataTracker.get(ATTACKING)) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", false));
-            return PlayState.CONTINUE;
-        }
-        else if (!this.dataTracker.get(ATTACKING)) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.null", false));
-            return PlayState.CONTINUE;
-        }
-        return PlayState.CONTINUE;
-    }
-
     @Environment(EnvType.CLIENT)
     public boolean isAttacking() {
         return this.dataTracker.get(ATTACKING);
@@ -102,9 +91,67 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         this.dataTracker.set(ATTACKING, attacking);
     }
 
+    public boolean isRoaring() {
+        return this.dataTracker.get(ROARING);
+    }
+
+    public void setRoaring(boolean roaring) {
+        this.dataTracker.set(ROARING, roaring);
+    }
+
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(ATTACKING, false);
+        this.dataTracker.startTracking(ROARING, false);
+    }
+
+    @Override
+    public void tick() {
+        knockbackRoar();
+        super.tick();
+    }
+
+    private void knockbackRoar() {
+        if(this.hurtTime > 0){
+            Random rand = new Random();
+            int roarChance = rand.nextInt(4);
+
+            if(roarChance == 0) {
+                ++roarTick;
+                System.out.println(roarTick);
+                this.setRoaring(true);
+                List<Entity> list = this.world.getEntitiesByClass(LivingEntity.class, this.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
+
+                Entity entity;
+                for(Iterator var2 = list.iterator(); var2.hasNext(); this.knockback(entity)) {
+                    entity = (Entity)var2.next();
+                    if (!(entity instanceof IllagerEntity)) {
+                        entity.damage(DamageSource.mob(this), 2.0F);
+                    }
+                }
+
+                Vec3d vec3d = this.getBoundingBox().getCenter();
+
+                for(int i = 0; i < 40; ++i) {
+                    double d = this.random.nextGaussian() * 0.2D;
+                    double e = this.random.nextGaussian() * 0.2D;
+                    double f = this.random.nextGaussian() * 0.2D;
+                    this.world.addParticle(ParticleTypes.POOF, vec3d.x, vec3d.y, vec3d.z, d, e, f);
+                }
+
+                if(roarTick * 0.05 >= 1.5) {
+                    this.setRoaring(false);
+                    this.roarTick = 0;
+                }
+            }
+        }
+    }
+
+    protected void knockback(Entity entity) {
+        double d = entity.getX() - this.getX();
+        double e = entity.getZ() - this.getZ();
+        double f = Math.max(d * d + e * e, 0.001D);
+        entity.addVelocity(d / f * 15.0D, 0.5D, e / f * 15.0D);
     }
 
     @Nullable
@@ -139,10 +186,48 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
 
     }
 
+    //animations
     @Override
     public void registerControllers(AnimationData animationData) {
         animationData.addAnimationController(new AnimationController<>(this, "movement", 0.0f, this::movement));
         animationData.addAnimationController(new AnimationController<>(this, "attack", 0.0f, this::attack));
+        animationData.addAnimationController(new AnimationController<>(this, "roar", 0.0f, this::roar));
+    }
+
+    private <E extends IAnimatable> PlayState movement(AnimationEvent<E> event) {
+        if (event.isMoving()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk", true));
+            return PlayState.CONTINUE;
+        }
+        else if (!event.isMoving()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.standing", true));
+            return PlayState.CONTINUE;
+        }
+        return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState attack(AnimationEvent<E> event) {
+        if (this.dataTracker.get(ATTACKING)) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", false));
+            return PlayState.CONTINUE;
+        }
+        else if (!this.dataTracker.get(ATTACKING)) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.null", false));
+            return PlayState.CONTINUE;
+        }
+        return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState roar(AnimationEvent<E> event) {
+        if (this.dataTracker.get(ROARING)) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.roar", false));
+            return PlayState.CONTINUE;
+        }
+        else if (!this.dataTracker.get(ROARING)) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.null", false));
+            return PlayState.CONTINUE;
+        }
+        return PlayState.CONTINUE;
     }
 
     @Override
