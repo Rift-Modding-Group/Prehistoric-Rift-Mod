@@ -4,7 +4,7 @@ import com.anightdazingzoroark.rift.entities.EntityGoals.DelayedAttackGoal;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.*;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.*;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -35,10 +35,8 @@ import java.util.function.Predicate;
 public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, Angerable {
     private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> ROARING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final Predicate<Entity> IMMUNE_TO_ROAR = (entity) -> {
-        return entity.isAlive() && !(entity instanceof TyrannosaurusEntity);
-    };
-    private int roarTick;
+    private static final Predicate<Entity> IMMUNE_TO_ROAR = (entity) -> entity.isAlive() && !(entity instanceof TyrannosaurusEntity);
+    private int roarTick = 0;
 
     private final AnimationFactory factory = new AnimationFactory(this);
 
@@ -107,25 +105,24 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
 
     @Override
     public void tick() {
-        knockbackRoar();
+        knockbackRoarSystem();
         super.tick();
     }
 
-    private void knockbackRoar() {
-        if(this.hurtTime > 0){
+    private void knockbackRoarSystem() {
+        if(this.getAttacker() instanceof Entity && Math.floor(this.hurtTime) == 1 && this.isAlive()){
             Random rand = new Random();
             int roarChance = rand.nextInt(4);
 
             if(roarChance == 0) {
                 ++roarTick;
-                System.out.println(roarTick);
                 this.setRoaring(true);
                 List<Entity> list = this.world.getEntitiesByClass(LivingEntity.class, this.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
 
                 Entity entity;
                 for(Iterator var2 = list.iterator(); var2.hasNext(); this.knockback(entity)) {
                     entity = (Entity)var2.next();
-                    if (!(entity instanceof IllagerEntity)) {
+                    if (!(entity instanceof TyrannosaurusEntity)) {
                         entity.damage(DamageSource.mob(this), 2.0F);
                     }
                 }
@@ -139,9 +136,10 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
                     this.world.addParticle(ParticleTypes.POOF, vec3d.x, vec3d.y, vec3d.z, d, e, f);
                 }
 
-                if(roarTick * 0.05 >= 1.5) {
+                if(this.roarTick * 0.05 >= 1.5) {
                     this.setRoaring(false);
                     this.roarTick = 0;
+                    this.hurtTime = 0;
                 }
             }
         }
@@ -151,7 +149,7 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         double d = entity.getX() - this.getX();
         double e = entity.getZ() - this.getZ();
         double f = Math.max(d * d + e * e, 0.001D);
-        entity.addVelocity(d / f * 15.0D, 0.5D, e / f * 15.0D);
+        entity.addVelocity(d / f * 15.0D, 0.0125D, e / f * 15.0D);
     }
 
     @Nullable

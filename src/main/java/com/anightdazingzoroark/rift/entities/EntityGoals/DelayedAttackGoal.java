@@ -22,7 +22,6 @@ public class DelayedAttackGoal extends Goal {
     private double targetY;
     private double targetZ;
     private int updateCountdownTicks;
-    private int field_24667;
     private final int attackIntervalTicks = 20;
     private long lastUpdateTime;
 
@@ -76,13 +75,12 @@ public class DelayedAttackGoal extends Goal {
     public void start() {
         this.mob.getNavigation().startMovingAlong(this.path, this.speed);
         this.updateCountdownTicks = 0;
-        this.field_24667 = 0;
     }
 
     public void stop() {
         LivingEntity livingEntity = this.mob.getTarget();
         if (!EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(livingEntity)) {
-            this.mob.setTarget((LivingEntity)null);
+            this.mob.setTarget(null);
         }
 
         this.mob.getNavigation().stop();
@@ -94,8 +92,6 @@ public class DelayedAttackGoal extends Goal {
         this.mob.getLookControl().lookAt(livingEntity, 30.0F, 30.0F);
         double d = this.mob.squaredDistanceTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
 
-        this.field_24667 = Math.max(this.field_24667 - 1, 0);
-
         if (d <= this.getSquaredMaxAttackDistance(livingEntity)) {
             ++this.updateCountdownTicks;
             if ((this.pauseWhenMobIdle || this.mob.getVisibilityCache().canSee(livingEntity)) && this.updateCountdownTicks <= 0 && (this.targetX == 0.0D && this.targetY == 0.0D && this.targetZ == 0.0D || livingEntity.squaredDistanceTo(this.targetX, this.targetY, this.targetZ) >= 1.0D || this.mob.getRandom().nextFloat() < 0.05F)) {
@@ -103,35 +99,21 @@ public class DelayedAttackGoal extends Goal {
                 this.targetY = livingEntity.getY();
                 this.targetZ = livingEntity.getZ();
             }
-            this.field_24667 = Math.max(this.field_24667 - 1, 0);
             this.mob.setAttacking(true);
 
             if ((this.updateCountdownTicks * 0.05) == this.attackTime){
-                this.method_28346();
-                this.mob.swingHand(Hand.MAIN_HAND);
-                this.mob.tryAttack(livingEntity);
+                if (this.mob.tryAttack(livingEntity)) {
+                    System.out.println("successful attack");
+                }
+                else if (d > this.getSquaredMaxAttackDistance(livingEntity)){
+                    System.out.println("not successful attack");
+                }
             }
         }
         if ((this.updateCountdownTicks * 0.05) >= this.attackAnimLength) {
             this.mob.setAttacking(false);
             this.updateCountdownTicks = 0;
         }
-    }
-
-    protected void method_28346() {
-        this.field_24667 = 20;
-    }
-
-    protected boolean method_28347() {
-        return this.field_24667 <= 0;
-    }
-
-    protected int method_28348() {
-        return this.field_24667;
-    }
-
-    protected int method_28349() {
-        return 20;
     }
 
     protected double getSquaredMaxAttackDistance(LivingEntity entity) {
