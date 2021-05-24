@@ -53,7 +53,7 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
     }
 
     protected void initGoals() {
-        this.goalSelector.add(3, new DelayedAttackGoal(this, 1, false, 0.75, 0.5));
+        this.goalSelector.add(3, new DelayedAttackGoal(this, 1, false, 0.5, 0.5));
         this.goalSelector.add(4, new WanderAroundFarGoal(this, 1.0D));
         this.goalSelector.add(5, new LookAroundGoal(this));
         this.findTargets();
@@ -106,13 +106,15 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
     @Override
     public void tick() {
         knockbackRoarSystem();
+        stopKnockback();
         super.tick();
     }
 
     private void knockbackRoarSystem() {
-        if(this.getAttacker() instanceof Entity && Math.floor(this.hurtTime) == 1 && this.isAlive()){
+        if(this.getAttacker() instanceof Entity && this.isAlive() && ((this.roarTick * 0.05) <= 0)){
             Random rand = new Random();
             int roarChance = rand.nextInt(4);
+            System.out.println("yeet rawr");
 
             if(roarChance == 0) {
                 ++roarTick;
@@ -135,12 +137,6 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
                     double f = this.random.nextGaussian() * 0.2D;
                     this.world.addParticle(ParticleTypes.POOF, vec3d.x, vec3d.y, vec3d.z, d, e, f);
                 }
-
-                if(this.roarTick * 0.05 >= 1.5) {
-                    this.setRoaring(false);
-                    this.roarTick = 0;
-                    this.hurtTime = 0;
-                }
             }
         }
     }
@@ -150,6 +146,14 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         double e = entity.getZ() - this.getZ();
         double f = Math.max(d * d + e * e, 0.001D);
         entity.addVelocity(d / f * 15.0D, 0.0125D, e / f * 15.0D);
+    }
+
+    protected void stopKnockback() {
+        if(this.roarTick * 0.05 >= 1.5) {
+            this.setRoaring(false);
+            this.roarTick = 0;
+            this.hurtTime = 0;
+        }
     }
 
     @Nullable

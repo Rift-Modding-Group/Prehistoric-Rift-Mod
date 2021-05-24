@@ -61,13 +61,20 @@ public class DelayedAttackGoal extends Goal {
         LivingEntity livingEntity = this.mob.getTarget();
         if (livingEntity == null) {
             return false;
-        } else if (!livingEntity.isAlive()) {
+        }
+        else if (!livingEntity.isAlive()) {
             return false;
-        } else if (!this.pauseWhenMobIdle) {
+        }
+        else if (!this.pauseWhenMobIdle) {
             return !this.mob.getNavigation().isIdle();
-        } else if (!this.mob.isInWalkTargetRange(livingEntity.getBlockPos())) {
+        }
+        else if (!this.mob.isInWalkTargetRange(livingEntity.getBlockPos())) {
             return false;
-        } else {
+        }
+        else if ((this.updateCountdownTicks * 0.05) >= this.attackAnimLength) {
+            return false;
+        }
+        else {
             return !(livingEntity instanceof PlayerEntity) || !livingEntity.isSpectator() && !((PlayerEntity)livingEntity).isCreative();
         }
     }
@@ -78,12 +85,8 @@ public class DelayedAttackGoal extends Goal {
     }
 
     public void stop() {
-        LivingEntity livingEntity = this.mob.getTarget();
-        if (!EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(livingEntity)) {
-            this.mob.setTarget(null);
-        }
-
         this.mob.getNavigation().stop();
+        this.updateCountdownTicks = 0;
         this.mob.setAttacking(false);
     }
 
@@ -102,17 +105,12 @@ public class DelayedAttackGoal extends Goal {
             this.mob.setAttacking(true);
 
             if ((this.updateCountdownTicks * 0.05) == this.attackTime){
-                if (this.mob.tryAttack(livingEntity)) {
-                    System.out.println("successful attack");
-                }
-                else if (d > this.getSquaredMaxAttackDistance(livingEntity)){
-                    System.out.println("not successful attack");
-                }
+                this.mob.tryAttack(livingEntity);
             }
-        }
-        if ((this.updateCountdownTicks * 0.05) >= this.attackAnimLength) {
-            this.mob.setAttacking(false);
-            this.updateCountdownTicks = 0;
+            if ((this.updateCountdownTicks * 0.05) >= this.attackAnimLength) {
+                this.mob.setAttacking(false);
+                this.updateCountdownTicks = 0;
+            }
         }
     }
 
