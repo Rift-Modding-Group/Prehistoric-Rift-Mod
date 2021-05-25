@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:leafy_treat_acacia"
+    ]
+  },
+  "criteria": {
+    "has_acacia_leaves": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:acacia_leaves"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:leafy_treat"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_acacia_leaves",
+      "has_the_recipe"
+    ]
+  ]
+}

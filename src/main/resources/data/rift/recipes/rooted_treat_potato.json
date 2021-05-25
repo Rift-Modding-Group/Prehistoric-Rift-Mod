@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
-  "group": "treat",
+  "group": "rooted_treat",
   "pattern": [
     "X#X",
     "#X#",

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:rooted_treat_potato"
+    ]
+  },
+  "criteria": {
+    "has_potatoes": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:potato"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:rooted_treat_potato"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_potatoes",
+      "has_the_recipe"
+    ]
+  ]
+}
