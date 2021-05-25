@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:crimson_thatch_block"
+    ]
+  },
+  "criteria": {
+    "has_crimson_thatch": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "rift:crimson_thatch"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:crimson_thatch_block"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_crimson_thatch",
+      "has_the_recipe"
+    ]
+  ]
+}

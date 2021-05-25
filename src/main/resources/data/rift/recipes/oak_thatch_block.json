@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "thatch_block",
+  "pattern": [
+    "XX",
+    "XX"
+  ],
+  "key": {
+    "X": {
+      "item": "rift:oak_thatch"
+    }
+  },
+  "result": {
+    "item": "rift:oak_thatch_block",
+    "count": 1
+  }
+}
