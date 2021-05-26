@@ -1,10 +1,10 @@
 package com.anightdazingzoroark.rift.entities;
 
 import com.anightdazingzoroark.rift.entities.EntityGoals.DelayedAttackGoal;
+import com.anightdazingzoroark.rift.entities.EntityGoals.TyrannosaurusWildRoarGoal;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.*;
-import net.minecraft.entity.damage.*;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -13,9 +13,7 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -26,17 +24,11 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, Angerable {
     private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> ROARING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final Predicate<Entity> IMMUNE_TO_ROAR = (entity) -> entity.isAlive() && !(entity instanceof TyrannosaurusEntity);
-    private int roarTick = 0;
 
     private final AnimationFactory factory = new AnimationFactory(this);
 
@@ -53,6 +45,7 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
     }
 
     protected void initGoals() {
+        this.goalSelector.add(2, new TyrannosaurusWildRoarGoal(this));
         this.goalSelector.add(3, new DelayedAttackGoal(this, 1, false, 0.5, 0.5));
         this.goalSelector.add(4, new WanderAroundFarGoal(this, 1.0D));
         this.goalSelector.add(5, new LookAroundGoal(this));
@@ -89,6 +82,7 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         this.dataTracker.set(ATTACKING, attacking);
     }
 
+    @Environment(EnvType.CLIENT)
     public boolean isRoaring() {
         return this.dataTracker.get(ROARING);
     }
@@ -101,59 +95,6 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
         super.initDataTracker();
         this.dataTracker.startTracking(ATTACKING, false);
         this.dataTracker.startTracking(ROARING, false);
-    }
-
-    @Override
-    public void tick() {
-        knockbackRoarSystem();
-        stopKnockback();
-        super.tick();
-    }
-
-    private void knockbackRoarSystem() {
-        if(this.getAttacker() instanceof Entity && this.isAlive() && ((this.roarTick * 0.05) <= 0)){
-            Random rand = new Random();
-            int roarChance = rand.nextInt(4);
-            System.out.println("yeet rawr");
-
-            if(roarChance == 0) {
-                ++roarTick;
-                this.setRoaring(true);
-                List<Entity> list = this.world.getEntitiesByClass(LivingEntity.class, this.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
-
-                Entity entity;
-                for(Iterator var2 = list.iterator(); var2.hasNext(); this.knockback(entity)) {
-                    entity = (Entity)var2.next();
-                    if (!(entity instanceof TyrannosaurusEntity)) {
-                        entity.damage(DamageSource.mob(this), 2.0F);
-                    }
-                }
-
-                Vec3d vec3d = this.getBoundingBox().getCenter();
-
-                for(int i = 0; i < 40; ++i) {
-                    double d = this.random.nextGaussian() * 0.2D;
-                    double e = this.random.nextGaussian() * 0.2D;
-                    double f = this.random.nextGaussian() * 0.2D;
-                    this.world.addParticle(ParticleTypes.POOF, vec3d.x, vec3d.y, vec3d.z, d, e, f);
-                }
-            }
-        }
-    }
-
-    protected void knockback(Entity entity) {
-        double d = entity.getX() - this.getX();
-        double e = entity.getZ() - this.getZ();
-        double f = Math.max(d * d + e * e, 0.001D);
-        entity.addVelocity(d / f * 15.0D, 0.0125D, e / f * 15.0D);
-    }
-
-    protected void stopKnockback() {
-        if(this.roarTick * 0.05 >= 1.5) {
-            this.setRoaring(false);
-            this.roarTick = 0;
-            this.hurtTime = 0;
-        }
     }
 
     @Nullable
