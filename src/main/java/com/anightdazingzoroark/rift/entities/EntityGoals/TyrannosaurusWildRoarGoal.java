@@ -42,7 +42,7 @@ public class TyrannosaurusWildRoarGoal extends Goal {
 
     @Override
     public boolean shouldContinue() {
-        if (this.updateCountdownTicks * 0.05 >= 1.5) {
+        if ((this.updateCountdownTicks * 0.05) > 1.5) {
             return false;
         }
         else {
@@ -52,7 +52,7 @@ public class TyrannosaurusWildRoarGoal extends Goal {
 
     @Override
     public void start() {
-        this.mob.setRoaring(true);
+        this.updateCountdownTicks = 0;
         List<Entity> list = this.mob.world.getEntitiesByClass(LivingEntity.class, this.mob.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
 
         Entity entity;
@@ -74,11 +74,13 @@ public class TyrannosaurusWildRoarGoal extends Goal {
 
     @Override
     public void stop() {
-        this.mob.setRoaring(false);
+        System.out.println("stop");
+        this.updateCountdownTicks = 0;
     }
 
     @Override
     public void tick() {
+        System.out.println(updateCountdownTicks);
         ++updateCountdownTicks;
     }
 
