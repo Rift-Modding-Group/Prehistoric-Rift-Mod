@@ -1,13 +1,12 @@
 package com.anightdazingzoroark.rift.client.renderers;
 
 import com.anightdazingzoroark.rift.client.models.TyrannosaurusModel;
-import com.anightdazingzoroark.rift.entities.TyrannosaurusEntity;
+import com.anightdazingzoroark.rift.entities.Creatures.TyrannosaurusEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.*;
 import net.minecraft.client.util.math.MatrixStack;
-import software.bernie.geckolib3.geo.render.built.GeoCube;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderer.geo.GeoEntityRenderer;
 

@@ -1,4 +1,4 @@
-package com.anightdazingzoroark.rift.entities;
+package com.anightdazingzoroark.rift.entities.Creatures;
 
 import com.anightdazingzoroark.rift.entities.EntityGoals.DelayedAttackGoal;
 import com.anightdazingzoroark.rift.entities.EntityGoals.TyrannosaurusWildRoarGoal;
@@ -80,15 +80,6 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
 
     public void setAttacking(boolean attacking) {
         this.dataTracker.set(ATTACKING, attacking);
-    }
-
-    @Environment(EnvType.CLIENT)
-    public boolean isRoaring() {
-        return this.dataTracker.get(ROARING);
-    }
-
-    public void setRoaring(boolean roaring) {
-        this.dataTracker.set(ROARING, roaring);
     }
 
     protected void initDataTracker() {

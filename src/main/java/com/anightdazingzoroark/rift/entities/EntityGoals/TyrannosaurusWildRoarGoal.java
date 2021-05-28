@@ -1,6 +1,6 @@
 package com.anightdazingzoroark.rift.entities.EntityGoals;
 
-import com.anightdazingzoroark.rift.entities.TyrannosaurusEntity;
+import com.anightdazingzoroark.rift.entities.Creatures.TyrannosaurusEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
@@ -17,7 +17,6 @@ import java.util.function.Predicate;
 public class TyrannosaurusWildRoarGoal extends Goal {
     private static final Predicate<Entity> IMMUNE_TO_ROAR = (entity) -> entity.isAlive() && !(entity instanceof TyrannosaurusEntity);
     protected final PathAwareEntity mob;
-    private int updateCountdownTicks;
     Random rand = new Random();
 
     public TyrannosaurusWildRoarGoal(PathAwareEntity mob) {
@@ -26,9 +25,10 @@ public class TyrannosaurusWildRoarGoal extends Goal {
 
     @Override
     public boolean canStart() {
-        if (this.mob.getAttacker() instanceof Entity) {
-            int roarChance = rand.nextInt(4);
-            if (roarChance == 0) {
+        if ((this.mob.getAttacker() instanceof Entity) && (this.mob.hurtTime == 0)) {
+            int roarChance = rand.nextInt(15);
+            System.out.println("roar chance is "+roarChance);
+            if ((roarChance == 0) && (this.mob.hurtTime == 0)) {
                 return true;
             }
             else {
@@ -42,7 +42,10 @@ public class TyrannosaurusWildRoarGoal extends Goal {
 
     @Override
     public boolean shouldContinue() {
-        if ((this.updateCountdownTicks * 0.05) > 1.5) {
+        if (this.mob.getAttacker() == null) {
+            return false;
+        }
+        else if (this.mob.hurtTime > 0) {
             return false;
         }
         else {
@@ -52,7 +55,7 @@ public class TyrannosaurusWildRoarGoal extends Goal {
 
     @Override
     public void start() {
-        this.updateCountdownTicks = 0;
+        System.out.println("start");
         List<Entity> list = this.mob.world.getEntitiesByClass(LivingEntity.class, this.mob.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
 
         Entity entity;
@@ -75,13 +78,6 @@ public class TyrannosaurusWildRoarGoal extends Goal {
     @Override
     public void stop() {
         System.out.println("stop");
-        this.updateCountdownTicks = 0;
-    }
-
-    @Override
-    public void tick() {
-        System.out.println(updateCountdownTicks);
-        ++updateCountdownTicks;
     }
 
     public void knockback(Entity entity) {
