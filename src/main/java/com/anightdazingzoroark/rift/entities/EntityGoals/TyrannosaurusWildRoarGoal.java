@@ -1,11 +1,11 @@
 package com.anightdazingzoroark.rift.entities.EntityGoals;
 
 import com.anightdazingzoroark.rift.entities.Creatures.TyrannosaurusEntity;
+import com.anightdazingzoroark.rift.entities.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.Vec3d;
 
@@ -16,10 +16,10 @@ import java.util.function.Predicate;
 
 public class TyrannosaurusWildRoarGoal extends Goal {
     private static final Predicate<Entity> IMMUNE_TO_ROAR = (entity) -> entity.isAlive() && !(entity instanceof TyrannosaurusEntity);
-    protected final PathAwareEntity mob;
+    protected final RiftCreature mob;
     Random rand = new Random();
 
-    public TyrannosaurusWildRoarGoal(PathAwareEntity mob) {
+    public TyrannosaurusWildRoarGoal(RiftCreature mob) {
         this.mob = mob;
     }
 
@@ -56,6 +56,7 @@ public class TyrannosaurusWildRoarGoal extends Goal {
     @Override
     public void start() {
         System.out.println("start");
+        this.mob.setRoaring(true);
         List<Entity> list = this.mob.world.getEntitiesByClass(LivingEntity.class, this.mob.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
 
         Entity entity;
@@ -77,6 +78,7 @@ public class TyrannosaurusWildRoarGoal extends Goal {
 
     @Override
     public void stop() {
+        this.mob.setRoaring(false);
         System.out.println("stop");
     }
 
