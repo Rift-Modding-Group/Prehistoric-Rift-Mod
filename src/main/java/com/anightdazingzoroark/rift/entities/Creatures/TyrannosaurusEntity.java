@@ -2,6 +2,7 @@ package com.anightdazingzoroark.rift.entities.Creatures;
 
 import com.anightdazingzoroark.rift.entities.EntityGoals.DelayedAttackGoal;
 import com.anightdazingzoroark.rift.entities.EntityGoals.TyrannosaurusWildRoarGoal;
+import com.anightdazingzoroark.rift.entities.RiftCreature;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.*;
@@ -26,13 +27,13 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import java.util.UUID;
 
-public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, Angerable {
+public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, Angerable {
     private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> ROARING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     private final AnimationFactory factory = new AnimationFactory(this);
 
-    public TyrannosaurusEntity(EntityType<? extends TameableEntity> entityType, World world) {
+    protected TyrannosaurusEntity(EntityType<? extends RiftCreature> entityType, World world) {
         super(entityType, world);
     }
 
@@ -80,6 +81,16 @@ public class TyrannosaurusEntity extends TameableEntity implements IAnimatable, 
 
     public void setAttacking(boolean attacking) {
         this.dataTracker.set(ATTACKING, attacking);
+    }
+
+    @Override
+    public boolean isRoaring() {
+        return this.dataTracker.get(ROARING);
+    }
+
+    @Override
+    public void setRoaring(boolean roaring) {
+        this.dataTracker.set(ROARING, roaring);
     }
 
     protected void initDataTracker() {
