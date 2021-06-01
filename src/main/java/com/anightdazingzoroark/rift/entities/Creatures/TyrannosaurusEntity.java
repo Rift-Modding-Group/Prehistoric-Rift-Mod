@@ -33,7 +33,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
 
     private final AnimationFactory factory = new AnimationFactory(this);
 
-    protected TyrannosaurusEntity(EntityType<? extends RiftCreature> entityType, World world) {
+    public TyrannosaurusEntity(EntityType<? extends RiftCreature> entityType, World world) {
         super(entityType, world);
     }
 
