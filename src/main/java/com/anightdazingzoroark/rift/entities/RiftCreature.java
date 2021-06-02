@@ -10,7 +10,6 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-// read if you are gay
 public class RiftCreature extends TameableEntity {
     protected static final TrackedData<Byte> RIFT_FLAGS;
 
