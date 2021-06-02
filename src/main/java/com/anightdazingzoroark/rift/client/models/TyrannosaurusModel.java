@@ -8,12 +8,7 @@ import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class TyrannosaurusModel extends AnimatedGeoModel<TyrannosaurusEntity> {
     private static final Identifier MODEL = InitializeServer.id("geo/tyrannosaurus.geo.json");
-
-    private static final Identifier TEXTURE_ONE = InitializeServer.id("textures/entities/tyrannosaurus/tyrannosaurus_1.png");
-    private static final Identifier TEXTURE_TWO = InitializeServer.id("textures/entities/tyrannosaurus/tyrannosaurus_2.png");
-    private static final Identifier TEXTURE_THREE = InitializeServer.id("textures/entities/tyrannosaurus/tyrannosaurus_3.png");
-    private static final Identifier TEXTURE_FOUR = InitializeServer.id("textures/entities/tyrannosaurus/tyrannosaurus_4.png");
-
+    private static Identifier TEXTURE;
     private static final Identifier ANIMATION = InitializeServer.id("animations/tyrannosaurus.animation.json");
 
     @Override
@@ -23,7 +18,25 @@ public class TyrannosaurusModel extends AnimatedGeoModel<TyrannosaurusEntity> {
 
     @Override
     public Identifier getTextureLocation(TyrannosaurusEntity object) {
-        return TEXTURE_ONE;
+        switch (object.getVariant()) {
+            case 0:
+                TEXTURE = InitializeServer.id("textures/entities/tyrannosaurus/tyrannosaurus_1.png");
+                break;
+            case 1:
+                TEXTURE = InitializeServer.id("textures/entities/tyrannosaurus/tyrannosaurus_2.png");
+                break;
+            case 2:
+                TEXTURE = InitializeServer.id("textures/entities/tyrannosaurus/tyrannosaurus_3.png");
+                break;
+            case 3:
+                TEXTURE = InitializeServer.id("textures/entities/tyrannosaurus/tyrannosaurus_4.png");
+                break;
+            default:
+                TEXTURE = InitializeServer.id("textures/entities/tyrannosaurus/tyrannosaurus_1.png");
+                break;
+        }
+
+        return TEXTURE;
     }
 
     @Override

@@ -14,7 +14,11 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.LocalDifficulty;
+import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -25,16 +29,24 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
+import java.util.Random;
 import java.util.UUID;
 
 public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, Angerable {
     private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> ROARING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-
+    private static final TrackedData<Integer> VARIANT = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    Random rand = new Random();
     private final AnimationFactory factory = new AnimationFactory(this);
 
     public TyrannosaurusEntity(EntityType<? extends RiftCreature> entityType, World world) {
         super(entityType, world);
+    }
+
+    @Override
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable CompoundTag entityTag) {
+        this.setVariant(rand.nextInt(4));
+        return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
     }
 
     public static DefaultAttributeContainer.Builder createAttributes() {
@@ -74,11 +86,33 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         this.targetSelector.add(2, new FollowTargetGoal(this, PandaEntity.class, true));
     }
 
+    @Override
+    public void writeCustomDataToTag(CompoundTag tag) {
+        super.writeCustomDataToTag(tag);
+        tag.putInt("Variant", this.getVariant());
+    }
+
+    @Override
+    public void readCustomDataFromTag(CompoundTag tag) {
+        super.readCustomDataFromTag(tag);
+        this.setVariant(tag.getInt("Variant"));
+    }
+
+    public int getVariant() {
+        return MathHelper.clamp((Integer)this.dataTracker.get(VARIANT), 0, 3);
+    }
+
+    public void setVariant(int variant) {
+        this.dataTracker.set(VARIANT, variant);
+    }
+
     @Environment(EnvType.CLIENT)
+    @Override
     public boolean isAttacking() {
         return this.dataTracker.get(ATTACKING);
     }
 
+    @Override
     public void setAttacking(boolean attacking) {
         this.dataTracker.set(ATTACKING, attacking);
     }
@@ -95,6 +129,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
 
     protected void initDataTracker() {
         super.initDataTracker();
+        this.dataTracker.startTracking(VARIANT, 0);
         this.dataTracker.startTracking(ATTACKING, false);
         this.dataTracker.startTracking(ROARING, false);
     }

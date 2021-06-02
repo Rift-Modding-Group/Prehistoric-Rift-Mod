@@ -11,7 +11,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 public class RiftCreature extends TameableEntity {
-    protected static final TrackedData<Byte> RIFT_FLAGS;
+    protected static final TrackedData<Byte> RIFT_FLAGS = DataTracker.registerData(RiftCreature.class, TrackedDataHandlerRegistry.BYTE);;
 
     protected RiftCreature(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
@@ -35,9 +35,5 @@ public class RiftCreature extends TameableEntity {
 
     public boolean isRoaring() {
         return ((Byte)this.dataTracker.get(RIFT_FLAGS) & 1001) != 0;
-    }
-
-    static {
-        RIFT_FLAGS = DataTracker.registerData(RiftCreature.class, TrackedDataHandlerRegistry.BYTE);
     }
 }
