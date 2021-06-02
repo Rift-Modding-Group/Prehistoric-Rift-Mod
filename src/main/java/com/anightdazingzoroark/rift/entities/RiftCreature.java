@@ -10,7 +10,7 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-
+// read if you are gay
 public class RiftCreature extends TameableEntity {
     protected static final TrackedData<Byte> RIFT_FLAGS;
 
@@ -31,14 +31,14 @@ public class RiftCreature extends TameableEntity {
 
     public void setRoaring(boolean roaring) {
         byte b = (Byte)this.dataTracker.get(RIFT_FLAGS);
-        this.dataTracker.set(RIFT_FLAGS, roaring ? (byte)(b | 1000) : (byte)(b & -1001));
+        this.dataTracker.set(RIFT_FLAGS, roaring ? (byte)(b | 1001) : (byte)(b & -1002));
     }
 
     public boolean isRoaring() {
-        return ((Byte)this.dataTracker.get(RIFT_FLAGS) & 1000) != 0;
+        return ((Byte)this.dataTracker.get(RIFT_FLAGS) & 1001) != 0;
     }
 
     static {
-        RIFT_FLAGS = DataTracker.registerData(MobEntity.class, TrackedDataHandlerRegistry.BYTE);
+        RIFT_FLAGS = DataTracker.registerData(RiftCreature.class, TrackedDataHandlerRegistry.BYTE);
     }
 }
