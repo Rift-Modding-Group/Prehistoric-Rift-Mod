@@ -2,6 +2,7 @@ package com.anightdazingzoroark.rift.entities.EntityGoals;
 
 import com.anightdazingzoroark.rift.entities.Creatures.TyrannosaurusEntity;
 import com.anightdazingzoroark.rift.entities.RiftCreature;
+import com.anightdazingzoroark.rift.registry.ModSounds;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
@@ -52,6 +53,7 @@ public class TyrannosaurusWildRoarGoal extends Goal {
         int roarChance = rand.nextInt(4);
         if (roarChance == 0) {
             this.mob.setRoaring(true);
+            this.mob.playSound(ModSounds.ROAR_TYRANNOSAURUS_EVENT, 1, 1);
             List<Entity> list = this.mob.world.getEntitiesByClass(LivingEntity.class, this.mob.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
 
             Entity entity;

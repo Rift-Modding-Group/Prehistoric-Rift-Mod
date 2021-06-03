@@ -1,7 +1,6 @@
 package com.anightdazingzoroark.rift.entities.Creatures;
 
-import com.anightdazingzoroark.rift.entities.EntityGoals.DelayedAttackGoal;
-import com.anightdazingzoroark.rift.entities.EntityGoals.TyrannosaurusWildRoarGoal;
+import com.anightdazingzoroark.rift.entities.EntityGoals.*;
 import com.anightdazingzoroark.rift.entities.RiftCreature;
 import com.anightdazingzoroark.rift.registry.ModSounds;
 import net.fabricmc.api.EnvType;
