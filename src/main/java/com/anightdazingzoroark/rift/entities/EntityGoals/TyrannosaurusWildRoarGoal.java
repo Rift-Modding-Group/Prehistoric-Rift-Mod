@@ -50,9 +50,7 @@ public class TyrannosaurusWildRoarGoal extends Goal {
     @Override
     public void start() {
         int roarChance = rand.nextInt(4);
-        System.out.println("roar chance is "+roarChance);
         if (roarChance == 0) {
-            System.out.println("start");
             this.mob.setRoaring(true);
             List<Entity> list = this.mob.world.getEntitiesByClass(LivingEntity.class, this.mob.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
 
@@ -84,7 +82,6 @@ public class TyrannosaurusWildRoarGoal extends Goal {
     public void stop() {
         this.mob.setRoaring(false);
         this.wildRoarTick = 0;
-        System.out.println("stop");
     }
 
     public void knockback(Entity entity) {
