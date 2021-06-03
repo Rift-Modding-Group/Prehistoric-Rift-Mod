@@ -3,6 +3,7 @@ package com.anightdazingzoroark.rift;
 import com.anightdazingzoroark.rift.registry.ModBlocks;
 import com.anightdazingzoroark.rift.registry.ModEntities;
 import com.anightdazingzoroark.rift.registry.ModItems;
+import com.anightdazingzoroark.rift.registry.ModSounds;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.ItemGroup;
@@ -28,6 +29,7 @@ public class InitializeServer implements ModInitializer {
         ModBlocks.registerBlocks();
         ModItems.registerItems();
         ModEntities.registerEntities();
+        ModSounds.registerSounds();
         GeckoLib.initialize();
     }
 }

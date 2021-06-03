@@ -3,9 +3,11 @@ package com.anightdazingzoroark.rift.entities.Creatures;
 import com.anightdazingzoroark.rift.entities.EntityGoals.DelayedAttackGoal;
 import com.anightdazingzoroark.rift.entities.EntityGoals.TyrannosaurusWildRoarGoal;
 import com.anightdazingzoroark.rift.entities.RiftCreature;
+import com.anightdazingzoroark.rift.registry.ModSounds;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.*;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -16,6 +18,7 @@ import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
@@ -132,6 +135,24 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         this.dataTracker.startTracking(VARIANT, 0);
         this.dataTracker.startTracking(ATTACKING, false);
         this.dataTracker.startTracking(ROARING, false);
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return this.random.nextInt(100) > 75 ? ModSounds.AMBIENT_TYRANNOSAURUS_EVENT : super.getAmbientSound();
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return ModSounds.HURT_TYRANNOSAURUS_EVENT;
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getDeathSound() {
+        return ModSounds.DEATH_TYRANNOSAURUS_EVENT;
     }
 
     @Nullable

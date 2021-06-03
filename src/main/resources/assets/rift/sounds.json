@@ -1,0 +1,26 @@
+{
+  "ambient_tyrannosaurus": {
+    "category": "hostile",
+    "sounds": [
+      "rift:tyrannosaurus_ambient"
+    ]
+  },
+  "death_tyrannosaurus": {
+    "category": "hostile",
+    "sounds": [
+      "rift:tyrannosaurus_death"
+    ]
+  },
+  "hurt_tyrannosaurus": {
+    "category": "hostile",
+    "sounds": [
+      "rift:tyrannosaurus_hurt"
+    ]
+  },
+  "roar_tyrannosaurus": {
+    "category": "hostile",
+    "sounds": [
+      "rift:tyrannosaurus_roar"
+    ]
+  }
+}
