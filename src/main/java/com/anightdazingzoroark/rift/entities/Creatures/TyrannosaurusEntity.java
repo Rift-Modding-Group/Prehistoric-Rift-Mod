@@ -39,8 +39,8 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     private static final TrackedData<Boolean> ROARING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Integer> VARIANT = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private final AnimationFactory factory = new AnimationFactory(this);
-    private static boolean hunting;
-    private static int huntingTick = 0;
+    private boolean hunting;
+    private int huntingTick = 0;
     Random rand = new Random();
 
     public TyrannosaurusEntity(EntityType<? extends RiftCreature> entityType, World world) {
@@ -70,6 +70,27 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         this.goalSelector.add(5, new LookAroundGoal(this));
     }
 
+    
+    private void stopFindingTargets() {
+        this.targetSelector.remove(new FollowTargetGoal(this, PlayerEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, VillagerEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, WanderingTraderEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, PigEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, SheepEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, CowEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, ChickenEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, WolfEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, CatEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, OcelotEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, FoxEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, PolarBearEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, HorseEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, DonkeyEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, MuleEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, ParrotEntity.class, true));
+        this.targetSelector.remove(new FollowTargetGoal(this, PandaEntity.class, true));
+    }
+
     private void findTargets() {
         this.targetSelector.add(2, new FollowTargetGoal(this, PlayerEntity.class, true));
         this.targetSelector.add(2, new FollowTargetGoal(this, VillagerEntity.class, true));
@@ -93,8 +114,16 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     @Override
     protected void mobTick() {
         this.huntingTick++;
+        System.out.println(this.huntingTick * 0.05);
 
+        if ((this.huntingTick * 0.05 <= 45) && this.hunting) {
+            this.findTargets();
+        }
+        if ((this.huntingTick * 0.05 <= 45) && !this.hunting) {
+            this.stopFindingTargets();
+        }
         if ((this.huntingTick * 0.05 >= 45) && this.hunting) {
+            this.stopFindingTargets();
             this.hunting = false;
             this.huntingTick = 0;
         }
