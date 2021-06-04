@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:cooked_dodo_meat_from_smoking"
+    ]
+  },
+  "criteria": {
+    "has_dodo_meat": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "rift:raw_dodo_meat"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:cooked_dodo_meat_from_smoking"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_dodo_meat",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smoking",
+  "ingredient": {
+    "item": "rift:raw_hadrosaur_meat"
+  },
+  "result": "rift:cooked_hadrosaur_meat",
+  "experience": 0.35,
+  "cookingtime": 100
+}
