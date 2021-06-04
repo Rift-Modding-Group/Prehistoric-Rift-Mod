@@ -23,6 +23,7 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.injection.selectors.TargetSelector;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -38,6 +39,23 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> ROARING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Integer> VARIANT = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private final FollowTargetGoal attackPlayerGoal = new FollowTargetGoal(this, PlayerEntity.class, true);
+    private final FollowTargetGoal attackVillagerGoal = new FollowTargetGoal(this, VillagerEntity.class, true);
+    private final FollowTargetGoal attackWanderingTraderGoal = new FollowTargetGoal(this, WanderingTraderEntity.class, true);
+    private final FollowTargetGoal attackPigGoal = new FollowTargetGoal(this, PigEntity.class, true);
+    private final FollowTargetGoal attackSheepGoal = new FollowTargetGoal(this, SheepEntity.class, true);
+    private final FollowTargetGoal attackCowGoal = new FollowTargetGoal(this, CowEntity.class, true);
+    private final FollowTargetGoal attackChickenGoal = new FollowTargetGoal(this, ChickenEntity.class, true);
+    private final FollowTargetGoal attackWolfGoal = new FollowTargetGoal(this, WolfEntity.class, true);
+    private final FollowTargetGoal attackCatGoal = new FollowTargetGoal(this, CatEntity.class, true);
+    private final FollowTargetGoal attackOcelotGoal = new FollowTargetGoal(this, OcelotEntity.class, true);
+    private final FollowTargetGoal attackFoxGoal = new FollowTargetGoal(this, FoxEntity.class, true);
+    private final FollowTargetGoal attackPolarBearGoal = new FollowTargetGoal(this, PolarBearEntity.class, true);
+    private final FollowTargetGoal attackHorseGoal = new FollowTargetGoal(this, HorseEntity.class, true);
+    private final FollowTargetGoal attackDonkeyGoal = new FollowTargetGoal(this, DonkeyEntity.class, true);
+    private final FollowTargetGoal attackMuleGoal = new FollowTargetGoal(this, MuleEntity.class, true);
+    private final FollowTargetGoal attackParrotGoal = new FollowTargetGoal(this, ParrotEntity.class, true);
+    private final FollowTargetGoal attackPandaGoal = new FollowTargetGoal(this, PandaEntity.class, true);
     private final AnimationFactory factory = new AnimationFactory(this);
     private boolean hunting;
     private int huntingTick = 0;
@@ -70,64 +88,63 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         this.goalSelector.add(5, new LookAroundGoal(this));
     }
 
-    
+
     private void stopFindingTargets() {
-        this.targetSelector.remove(new FollowTargetGoal(this, PlayerEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, VillagerEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, WanderingTraderEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, PigEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, SheepEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, CowEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, ChickenEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, WolfEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, CatEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, OcelotEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, FoxEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, PolarBearEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, HorseEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, DonkeyEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, MuleEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, ParrotEntity.class, true));
-        this.targetSelector.remove(new FollowTargetGoal(this, PandaEntity.class, true));
+        this.targetSelector.remove(this.attackPlayerGoal);
+        this.targetSelector.remove(this.attackVillagerGoal);
+        this.targetSelector.remove(this.attackWanderingTraderGoal);
+        this.targetSelector.remove(this.attackPigGoal);
+        this.targetSelector.remove(this.attackSheepGoal);
+        this.targetSelector.remove(this.attackCowGoal);
+        this.targetSelector.remove(this.attackChickenGoal);
+        this.targetSelector.remove(this.attackWolfGoal);
+        this.targetSelector.remove(this.attackCatGoal);
+        this.targetSelector.remove(this.attackOcelotGoal);
+        this.targetSelector.remove(this.attackFoxGoal);
+        this.targetSelector.remove(this.attackPolarBearGoal);
+        this.targetSelector.remove(this.attackHorseGoal);
+        this.targetSelector.remove(this.attackDonkeyGoal);
+        this.targetSelector.remove(this.attackMuleGoal);
+        this.targetSelector.remove(this.attackParrotGoal);
+        this.targetSelector.remove(this.attackPandaGoal);
     }
 
     private void findTargets() {
-        this.targetSelector.add(2, new FollowTargetGoal(this, PlayerEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, VillagerEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, WanderingTraderEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, PigEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, SheepEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, CowEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, ChickenEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, WolfEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, CatEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, OcelotEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, FoxEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, PolarBearEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, HorseEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, DonkeyEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, MuleEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, ParrotEntity.class, true));
-        this.targetSelector.add(2, new FollowTargetGoal(this, PandaEntity.class, true));
+        this.targetSelector.add(2, this.attackPlayerGoal);
+        this.targetSelector.add(2, this.attackVillagerGoal);
+        this.targetSelector.add(2, this.attackWanderingTraderGoal);
+        this.targetSelector.add(2, this.attackPigGoal);
+        this.targetSelector.add(2, this.attackSheepGoal);
+        this.targetSelector.add(2, this.attackCowGoal);
+        this.targetSelector.add(2, this.attackChickenGoal);
+        this.targetSelector.add(2, this.attackWolfGoal);
+        this.targetSelector.add(2, this.attackCatGoal);
+        this.targetSelector.add(2, this.attackOcelotGoal);
+        this.targetSelector.add(2, this.attackFoxGoal);
+        this.targetSelector.add(2, this.attackPolarBearGoal);
+        this.targetSelector.add(2, this.attackHorseGoal);
+        this.targetSelector.add(2, this.attackDonkeyGoal);
+        this.targetSelector.add(2, this.attackMuleGoal);
+        this.targetSelector.add(2, this.attackParrotGoal);
+        this.targetSelector.add(2, this.attackPandaGoal);
     }
 
     @Override
     protected void mobTick() {
         this.huntingTick++;
-        System.out.println(this.huntingTick * 0.05);
 
-        if ((this.huntingTick * 0.05 <= 45) && this.hunting) {
+        if ((this.huntingTick * 0.05 <= 90) && this.hunting) {
             this.findTargets();
         }
-        if ((this.huntingTick * 0.05 <= 45) && !this.hunting) {
+        if ((this.huntingTick * 0.05 <= 90) && !this.hunting) {
             this.stopFindingTargets();
         }
-        if ((this.huntingTick * 0.05 >= 45) && this.hunting) {
+        if ((this.huntingTick * 0.05 >= 90) && this.hunting) {
             this.stopFindingTargets();
             this.hunting = false;
             this.huntingTick = 0;
         }
-        if ((this.huntingTick * 0.05 >= 45) && !this.hunting) {
+        if ((this.huntingTick * 0.05 >= 90) && !this.hunting) {
             this.findTargets();
             this.hunting = true;
             this.huntingTick = 0;
