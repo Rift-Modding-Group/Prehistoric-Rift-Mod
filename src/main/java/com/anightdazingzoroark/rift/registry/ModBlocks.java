@@ -14,49 +14,49 @@ public class ModBlocks {
     public static final Block OAK_THATCH_BLOCK = new Block(FabricBlockSettings
         .of(Material.WOOD)
         .breakByHand(true)
-        .breakByTool(FabricToolTags.PICKAXES, 0)
+        .breakByTool(FabricToolTags.AXES, 0)
         .strength(0.75f, 2f)
         .sounds(BlockSoundGroup.WOOD));
     public static final Block BIRCH_THATCH_BLOCK = new Block(FabricBlockSettings
             .of(Material.WOOD)
             .breakByHand(true)
-            .breakByTool(FabricToolTags.PICKAXES, 0)
+            .breakByTool(FabricToolTags.AXES, 0)
             .strength(0.75f, 2f)
             .sounds(BlockSoundGroup.WOOD));
     public static final Block SPRUCE_THATCH_BLOCK = new Block(FabricBlockSettings
             .of(Material.WOOD)
             .breakByHand(true)
-            .breakByTool(FabricToolTags.PICKAXES, 0)
+            .breakByTool(FabricToolTags.AXES, 0)
             .strength(0.75f, 2f)
             .sounds(BlockSoundGroup.WOOD));
     public static final Block JUNGLE_THATCH_BLOCK = new Block(FabricBlockSettings
             .of(Material.WOOD)
             .breakByHand(true)
-            .breakByTool(FabricToolTags.PICKAXES, 0)
+            .breakByTool(FabricToolTags.AXES, 0)
             .strength(0.75f, 2f)
             .sounds(BlockSoundGroup.WOOD));
     public static final Block DARK_OAK_THATCH_BLOCK = new Block(FabricBlockSettings
             .of(Material.WOOD)
             .breakByHand(true)
-            .breakByTool(FabricToolTags.PICKAXES, 0)
+            .breakByTool(FabricToolTags.AXES, 0)
             .strength(0.75f, 2f)
             .sounds(BlockSoundGroup.WOOD));
     public static final Block ACACIA_THATCH_BLOCK = new Block(FabricBlockSettings
             .of(Material.WOOD)
             .breakByHand(true)
-            .breakByTool(FabricToolTags.PICKAXES, 0)
+            .breakByTool(FabricToolTags.AXES, 0)
             .strength(0.75f, 2f)
             .sounds(BlockSoundGroup.WOOD));
     public static final Block CRIMSON_THATCH_BLOCK = new Block(FabricBlockSettings
             .of(Material.WOOD)
             .breakByHand(true)
-            .breakByTool(FabricToolTags.PICKAXES, 0)
+            .breakByTool(FabricToolTags.AXES, 0)
             .strength(0.75f, 2f)
             .sounds(BlockSoundGroup.WOOD));
     public static final Block WARPED_THATCH_BLOCK = new Block(FabricBlockSettings
             .of(Material.WOOD)
             .breakByHand(true)
-            .breakByTool(FabricToolTags.PICKAXES, 0)
+            .breakByTool(FabricToolTags.AXES, 0)
             .strength(0.75f, 2f)
             .sounds(BlockSoundGroup.WOOD));
 

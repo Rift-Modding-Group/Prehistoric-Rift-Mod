@@ -15,7 +15,6 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
@@ -46,6 +45,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     private final FollowTargetGoal attackSheepGoal = new FollowTargetGoal(this, SheepEntity.class, true);
     private final FollowTargetGoal attackCowGoal = new FollowTargetGoal(this, CowEntity.class, true);
     private final FollowTargetGoal attackChickenGoal = new FollowTargetGoal(this, ChickenEntity.class, true);
+    private final FollowTargetGoal attackGoatGoal = new FollowTargetGoal(this, GoatEntity.class, true);
     private final FollowTargetGoal attackRabbitGoal = new FollowTargetGoal(this, RabbitEntity.class, true);
     private final FollowTargetGoal attackWolfGoal = new FollowTargetGoal(this, WolfEntity.class, true);
     private final FollowTargetGoal attackCatGoal = new FollowTargetGoal(this, CatEntity.class, true);
@@ -90,7 +90,6 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         this.goalSelector.add(5, new LookAroundGoal(this));
     }
 
-
     private void stopFindingTargets() {
         this.targetSelector.remove(this.attackPlayerGoal);
         this.targetSelector.remove(this.attackVillagerGoal);
@@ -99,6 +98,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         this.targetSelector.remove(this.attackSheepGoal);
         this.targetSelector.remove(this.attackCowGoal);
         this.targetSelector.remove(this.attackChickenGoal);
+        this.targetSelector.remove(this.attackGoatGoal);
         this.targetSelector.remove(this.attackRabbitGoal);
         this.targetSelector.remove(this.attackWolfGoal);
         this.targetSelector.remove(this.attackCatGoal);
@@ -121,6 +121,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         this.targetSelector.add(2, this.attackSheepGoal);
         this.targetSelector.add(2, this.attackCowGoal);
         this.targetSelector.add(2, this.attackChickenGoal);
+        this.targetSelector.add(2, this.attackGoatGoal);
         this.targetSelector.add(2, this.attackRabbitGoal);
         this.targetSelector.add(2, this.attackWolfGoal);
         this.targetSelector.add(2, this.attackCatGoal);

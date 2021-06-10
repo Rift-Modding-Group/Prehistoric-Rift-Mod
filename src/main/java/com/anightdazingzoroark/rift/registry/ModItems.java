@@ -1,13 +1,17 @@
 package com.anightdazingzoroark.rift.registry;
 
 import com.anightdazingzoroark.rift.InitializeServer;
+import com.anightdazingzoroark.rift.entities.Eggs.TyrannosaurusEgg;
 import com.anightdazingzoroark.rift.items.FoodItems;
 import com.anightdazingzoroark.rift.items.GlintItems;
+import com.anightdazingzoroark.rift.items.RiftEggItem;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.BoatItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import software.bernie.shadowed.eliotlash.mclib.math.functions.classic.Mod;
 
 public class ModItems {
     //spawn eggs
@@ -25,6 +29,8 @@ public class ModItems {
     public static final Item WARPED_THATCH_BLOCK = new BlockItem(ModBlocks.WARPED_THATCH_BLOCK, new Item.Settings().group(InitializeServer.RIFT_ITEMS));
 
     //items
+    ///eggs
+    public static final Item TYRANNOSAURUS_EGG = new RiftEggItem(ModEntities.TYRANNOSAURUS_EGG, new Item.Settings().group(InitializeServer.RIFT_ITEMS).maxCount(1));
     ///tools
     public static final Item COMMAND_STAFF = new Item(new Item.Settings().group(InitializeServer.RIFT_ITEMS).maxCount(1));
     public static final Item HARVEST_STAFF = new Item(new Item.Settings().group(InitializeServer.RIFT_ITEMS).maxCount(1));
@@ -96,6 +102,8 @@ public class ModItems {
         Registry.register(Registry.ITEM, new Identifier(InitializeServer.MOD_ID, "warped_thatch_block"), WARPED_THATCH_BLOCK);
 
         //items
+        ///eggs
+        Registry.register(Registry.ITEM, new Identifier(InitializeServer.MOD_ID, "tyrannosaurus_egg"), TYRANNOSAURUS_EGG);
         ///tools
         Registry.register(Registry.ITEM, new Identifier(InitializeServer.MOD_ID, "command_staff"), COMMAND_STAFF);
         Registry.register(Registry.ITEM, new Identifier(InitializeServer.MOD_ID, "harvest_staff"), HARVEST_STAFF);
