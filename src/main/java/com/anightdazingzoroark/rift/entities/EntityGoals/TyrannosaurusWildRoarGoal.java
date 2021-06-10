@@ -54,7 +54,7 @@ public class TyrannosaurusWildRoarGoal extends Goal {
         if (roarChance == 0) {
             this.mob.setRoaring(true);
             this.mob.playSound(ModSounds.ROAR_TYRANNOSAURUS_EVENT, 1, 1);
-            List<Entity> list = this.mob.world.getEntitiesByClass(LivingEntity.class, this.mob.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
+            List<? extends LivingEntity> list = this.mob.world.getEntitiesByClass(LivingEntity.class, this.mob.getBoundingBox().expand(25.0D), IMMUNE_TO_ROAR);
 
             Entity entity;
             for(Iterator var2 = list.iterator(); var2.hasNext(); this.knockback(entity)) {

@@ -5,15 +5,14 @@ import com.anightdazingzoroark.rift.entities.Creatures.TyrannosaurusEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.*;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderer.geo.GeoEntityRenderer;
+import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class TyrannosaurusRenderer extends GeoEntityRenderer<TyrannosaurusEntity>{
-    public TyrannosaurusRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new TyrannosaurusModel());
-        this.shadowRadius = 1.5F;
+public class TyrannosaurusRenderer extends GeoEntityRenderer<TyrannosaurusEntity> {
+    public TyrannosaurusRenderer(EntityRendererFactory.Context renderManagerIn) {
+        super(renderManagerIn, new TyrannosaurusModel());
     }
 
     @Override

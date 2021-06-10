@@ -5,8 +5,6 @@ import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 
 public class ModRenderers {
     public static void registerRenderers() {
-        EntityRendererRegistry.INSTANCE.register(ModEntities.TYRANNOSAURUS, (dispatcher, context) -> {
-            return new TyrannosaurusRenderer(dispatcher);
-        });
+        EntityRendererRegistry.INSTANCE.register(ModEntities.TYRANNOSAURUS, (ctx) -> new TyrannosaurusRenderer(ctx));
     }
 }
