@@ -41,7 +41,7 @@ public class RiftEgg extends PathAwareEntity implements IAnimatable {
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.putInt("Variant", this.getEggType());
+        nbt.putInt("Type", this.getEggType());
     }
 
     @Override
