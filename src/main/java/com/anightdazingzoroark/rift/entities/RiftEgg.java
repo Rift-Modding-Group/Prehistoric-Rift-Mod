@@ -1,6 +1,7 @@
 package com.anightdazingzoroark.rift.entities;
 
 import com.anightdazingzoroark.rift.entities.Creatures.TyrannosaurusEntity;
+import com.anightdazingzoroark.rift.registry.ModEntities;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -71,5 +72,22 @@ public class RiftEgg extends PathAwareEntity implements IAnimatable {
     @Override
     public AnimationFactory getFactory() {
         return factory;
+    }
+
+    public <T extends RiftCreature> T hatchTo(EntityType<T> entityType) {
+        if (this.isRemoved()) {
+            return null;
+        }
+        else {
+            T riftCreature = (T) entityType.create(this.world);
+            riftCreature.copyPositionAndRotation(this);
+            riftCreature.setBaby(true);
+            riftCreature.setVariant(random.nextInt(4));
+
+            this.world.spawnEntity(riftCreature);
+
+            this.discard();
+            return riftCreature;
+        }
     }
 }

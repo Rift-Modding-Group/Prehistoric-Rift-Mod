@@ -17,7 +17,13 @@ public class TyrannosaurusRenderer extends GeoEntityRenderer<TyrannosaurusEntity
 
     @Override
     public void render(GeoModel model, TyrannosaurusEntity animatable, float partialTicks, RenderLayer type, MatrixStack matrixStackIn, VertexConsumerProvider renderTypeBuffer, VertexConsumer vertexBuilder, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        matrixStackIn.scale(1.5F, 1.5F, 1.5F);
+        if (animatable.isBaby()) {
+            matrixStackIn.scale(0.3F, 0.3F, 0.3F);
+        }
+        else {
+            matrixStackIn.scale(1.5F, 1.5F, 1.5F);
+        }
+
         model.getBone("chest").get().setHidden(true);
         model.getBone("headSaddle").get().setHidden(true);
         model.getBone("saddle").get().setHidden(true);

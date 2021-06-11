@@ -37,7 +37,6 @@ import java.util.UUID;
 public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, Angerable {
     private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> ROARING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<Integer> VARIANT = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private final FollowTargetGoal attackPlayerGoal = new FollowTargetGoal(this, PlayerEntity.class, true);
     private final FollowTargetGoal attackVillagerGoal = new FollowTargetGoal(this, VillagerEntity.class, true);
     private final FollowTargetGoal attackWanderingTraderGoal = new FollowTargetGoal(this, WanderingTraderEntity.class, true);
@@ -58,6 +57,8 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     private final FollowTargetGoal attackLlamaGoal = new FollowTargetGoal(this, LlamaEntity.class, true);
     private final FollowTargetGoal attackParrotGoal = new FollowTargetGoal(this, ParrotEntity.class, true);
     private final FollowTargetGoal attackPandaGoal = new FollowTargetGoal(this, PandaEntity.class, true);
+    private final RevengeGoal revenge = new RevengeGoal(this);
+    private final TyrannosaurusWildRoarGoal wildRoarGoal = new TyrannosaurusWildRoarGoal(this);
     private final AnimationFactory factory = new AnimationFactory(this);
     private boolean hunting;
     private int huntingTick = 0;
@@ -76,15 +77,13 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
 
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 160)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 150)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 19)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0D);
     }
 
     protected void initGoals() {
-        this.targetSelector.add(1, new RevengeGoal(this));
-        this.goalSelector.add(2, new TyrannosaurusWildRoarGoal(this));
         this.goalSelector.add(3, new DelayedAttackGoal(this, 1, false, 0.5, 0.5));
         this.goalSelector.add(4, new WanderAroundFarGoal(this, 1.0D, 1));
         this.goalSelector.add(5, new LookAroundGoal(this));
@@ -114,9 +113,12 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     }
 
     private void findTargets() {
-        this.targetSelector.add(2, this.attackPlayerGoal);
-        this.targetSelector.add(2, this.attackVillagerGoal);
-        this.targetSelector.add(2, this.attackWanderingTraderGoal);
+        if (!this.isBaby()) {
+            this.targetSelector.add(2, this.attackPlayerGoal);
+            this.targetSelector.add(2, this.attackVillagerGoal);
+            this.targetSelector.add(2, this.attackWanderingTraderGoal);
+        }
+
         this.targetSelector.add(2, this.attackPigGoal);
         this.targetSelector.add(2, this.attackSheepGoal);
         this.targetSelector.add(2, this.attackCowGoal);
@@ -138,6 +140,10 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
 
     @Override
     protected void mobTick() {
+        this.huntingSystem();
+    }
+
+    private void huntingSystem() {
         this.huntingTick++;
 
         if ((this.huntingTick * 0.05 <= 90) && this.hunting) {
@@ -159,24 +165,32 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        nbt.putInt("Variant", this.getVariant());
-
+    protected void onGrowUp() {
+        if (!this.isBaby()) {
+            this.targetSelector.add(1, this.revenge);
+            this.goalSelector.add(2, this.wildRoarGoal);
+            this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(150);
+            this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(19);
+        }
+        else {
+            this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(20);
+            this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(7);
+        }
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        this.setVariant(nbt.getInt("Variant"));
+    public EntityDimensions getDimensions(EntityPose pose) {
+        if (this.isBaby()) {
+            return super.getDimensions(pose).scaled(1f, 1f);
+        }
+        else {
+            return super.getDimensions(pose).scaled(2f, 2f);
+        }
     }
 
-    public int getVariant() {
-        return MathHelper.clamp((Integer)this.dataTracker.get(VARIANT), 0, 3);
-    }
-
-    public void setVariant(int variant) {
-        this.dataTracker.set(VARIANT, variant);
+    @Override
+    public boolean isBaby() {
+        return super.isBaby();
     }
 
     @Environment(EnvType.CLIENT)
@@ -202,7 +216,6 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
 
     protected void initDataTracker() {
         super.initDataTracker();
-        this.dataTracker.startTracking(VARIANT, 0);
         this.dataTracker.startTracking(ATTACKING, false);
         this.dataTracker.startTracking(ROARING, false);
     }
