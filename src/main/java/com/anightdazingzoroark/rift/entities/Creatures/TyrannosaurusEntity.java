@@ -62,6 +62,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     private final AnimationFactory factory = new AnimationFactory(this);
     private boolean hunting;
     private int huntingTick = 0;
+    private int ageTick = 0;
     Random rand = new Random();
 
     public TyrannosaurusEntity(EntityType<? extends RiftCreature> entityType, World world) {
@@ -79,7 +80,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         return MobEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 150)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 19)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 20)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0D);
     }
 
@@ -141,6 +142,9 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     @Override
     protected void mobTick() {
         this.huntingSystem();
+        if (this.isBaby()) {
+            this.age();
+        }
     }
 
     private void huntingSystem() {
@@ -164,17 +168,25 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         }
     }
 
+    private void age() {
+        this.ageTick++;
+        System.out.println(this.ageTick);
+        if (ageTick >= 1200) {
+            this.setBaby(false);
+        }
+    }
+
     @Override
     protected void onGrowUp() {
         if (!this.isBaby()) {
             this.targetSelector.add(1, this.revenge);
             this.goalSelector.add(2, this.wildRoarGoal);
             this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(150);
-            this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(19);
+            this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(20);
         }
         else {
             this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(20);
-            this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(7);
+            this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(8);
         }
     }
 
