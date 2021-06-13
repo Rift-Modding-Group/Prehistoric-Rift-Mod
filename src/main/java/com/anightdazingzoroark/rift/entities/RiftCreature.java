@@ -33,6 +33,7 @@ public class RiftCreature extends TameableEntity {
         this.dataTracker.startTracking(VARIANT, 0);
     }
 
+    //for roaring stuff in case the creature can roar
     public void setRoaring(boolean roaring) {
         byte b = (Byte)this.dataTracker.get(RIFT_FLAGS);
         this.dataTracker.set(RIFT_FLAGS, roaring ? (byte)(b | 1001) : (byte)(b & -1002));
@@ -42,11 +43,20 @@ public class RiftCreature extends TameableEntity {
         return ((Byte)this.dataTracker.get(RIFT_FLAGS) & 1001) != 0;
     }
 
+    //for tyranno hunting system (until more big predators get added)
+    public void setHunting(boolean hunting) {
+        byte b = (Byte)this.dataTracker.get(RIFT_FLAGS);
+        this.dataTracker.set(RIFT_FLAGS, hunting ? (byte)(b | 1002) : (byte)(b & -1003));
+    }
+
+    public boolean isHunting() {
+        return ((Byte)this.dataTracker.get(RIFT_FLAGS) & 1002) != 0;
+    }
+
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
         nbt.putInt("Variant", this.getVariant());
-
     }
 
     @Override

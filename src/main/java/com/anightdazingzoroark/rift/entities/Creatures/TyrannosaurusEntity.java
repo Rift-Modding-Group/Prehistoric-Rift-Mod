@@ -18,7 +18,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
@@ -37,6 +36,7 @@ import java.util.UUID;
 public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, Angerable {
     private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> ROARING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> HUNTING = DataTracker.registerData(TyrannosaurusEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private final FollowTargetGoal attackPlayerGoal = new FollowTargetGoal(this, PlayerEntity.class, true);
     private final FollowTargetGoal attackVillagerGoal = new FollowTargetGoal(this, VillagerEntity.class, true);
     private final FollowTargetGoal attackWanderingTraderGoal = new FollowTargetGoal(this, WanderingTraderEntity.class, true);
@@ -60,7 +60,6 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     private final RevengeGoal revenge = new RevengeGoal(this);
     private final TyrannosaurusWildRoarGoal wildRoarGoal = new TyrannosaurusWildRoarGoal(this);
     private final AnimationFactory factory = new AnimationFactory(this);
-    private boolean hunting;
     private int huntingTick = 0;
     private int ageTick = 0;
     Random rand = new Random();
@@ -72,7 +71,8 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.setVariant(rand.nextInt(4));
-        this.hunting = rand.nextBoolean();
+        this.setHunting(rand.nextBoolean());
+        System.out.println(this.isHunting());
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     }
 
@@ -149,21 +149,22 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
 
     private void huntingSystem() {
         this.huntingTick++;
+        System.out.println(this.huntingTick * 0.05);
 
-        if ((this.huntingTick * 0.05 <= 90) && this.hunting) {
+        if ((this.huntingTick * 0.05 <= 90) && this.isHunting()) {
             this.findTargets();
         }
-        if ((this.huntingTick * 0.05 <= 90) && !this.hunting) {
+        if ((this.huntingTick * 0.05 <= 90) && !this.isHunting()) {
             this.stopFindingTargets();
         }
-        if ((this.huntingTick * 0.05 >= 90) && this.hunting) {
+        if ((this.huntingTick * 0.05 >= 90) && this.isHunting()) {
             this.stopFindingTargets();
-            this.hunting = false;
+            this.setHunting(false);
             this.huntingTick = 0;
         }
-        if ((this.huntingTick * 0.05 >= 90) && !this.hunting) {
+        if ((this.huntingTick * 0.05 >= 90) && !this.isHunting()) {
             this.findTargets();
-            this.hunting = true;
+            this.setHunting(true);
             this.huntingTick = 0;
         }
     }
@@ -226,10 +227,21 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable, An
         this.dataTracker.set(ROARING, roaring);
     }
 
+    @Override
+    public boolean isHunting() {
+        return this.dataTracker.get(HUNTING);
+    }
+
+    @Override
+    public void setHunting(boolean hunting) {
+        this.dataTracker.set(HUNTING, hunting);
+    }
+
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(ATTACKING, false);
         this.dataTracker.startTracking(ROARING, false);
+        this.dataTracker.startTracking(HUNTING, false);
     }
 
     @Nullable

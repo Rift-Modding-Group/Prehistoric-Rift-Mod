@@ -1,7 +1,5 @@
 package com.anightdazingzoroark.rift.entities;
 
-import com.anightdazingzoroark.rift.entities.Creatures.TyrannosaurusEntity;
-import com.anightdazingzoroark.rift.registry.ModEntities;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -36,8 +34,7 @@ public class RiftEgg extends PathAwareEntity implements IAnimatable {
         return false;
     }
 
-    protected void pushAway(Entity entity) {
-    }
+    protected void pushAway(Entity entity) {}
 
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
