@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "berry_treat",
+  "pattern": [
+    "X#X",
+    "#X#",
+    "X#X"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "minecraft:sweet_berries"
+    }
+  },
+  "result": {
+    "item": "rift:berry_treat",
+    "count": 8
+  }
+}

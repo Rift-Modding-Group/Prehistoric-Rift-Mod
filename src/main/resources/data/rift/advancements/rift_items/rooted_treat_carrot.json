@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:rooted_treat_carrot"
+    ]
+  },
+  "criteria": {
+    "has_carrots": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:carrot"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:rooted_treat_carrot"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_carrots",
+      "has_the_recipe"
+    ]
+  ]
+}

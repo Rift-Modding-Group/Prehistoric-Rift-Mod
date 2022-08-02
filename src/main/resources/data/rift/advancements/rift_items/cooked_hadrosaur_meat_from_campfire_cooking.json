@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:cooked_hadrosaur_meat_from_campfire_cooking"
+    ]
+  },
+  "criteria": {
+    "has_hadrosaur_meat": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "rift:raw_hadrosaur_meat"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:cooked_hadrosaur_meat_from_campfire_cooking"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_hadrosaur_meat",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smoking",
+  "ingredient": {
+    "item": "rift:raw_dodo_meat"
+  },
+  "result": "rift:cooked_dodo_meat",
+  "experience": 0.35,
+  "cookingtime": 100
+}
