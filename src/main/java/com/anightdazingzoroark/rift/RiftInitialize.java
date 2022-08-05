@@ -14,13 +14,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 
-// The value here should match an entry in the META-INF/mods.toml file
 @Mod(RiftInitialize.MODID)
 public class RiftInitialize {
     public static final String MODID = "rift";
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final CreativeModeTab RIFT_ITEMS_TAB = new CreativeModeTab("riftItemsTab") {
+    public static final CreativeModeTab RIFT_ITEMS_TAB = new CreativeModeTab("rift.items_tab") {
         @Override
         public ItemStack makeIcon() {
             return new ItemStack(RiftItems.TYRANNOSAURUS_ARM.get());
@@ -34,13 +33,11 @@ public class RiftInitialize {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
-    }
+    private void commonSetup(final FMLCommonSetupEvent event) {}
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientModEvents {
         @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-        }
+        public static void onClientSetup(FMLClientSetupEvent event) {}
     }
 }

@@ -4,5 +4,9 @@
   "item.rift.carrion_treat": "Carrion Treat",
   "item.rift.bug_treat": "Bug Treat",
 
-  "item.rift.tyrannosaurus_arm": "Tyrannosaurus Arm"
+  "item.rift.tyrannosaurus_arm": "Tyrannosaurus Arm",
+
+  "itemGroup.rift.items_tab": "Prehistoric Rift Items",
+
+  "tooltip.rift.treat": "Certain creatures love certain treats for taming and breeding!"
 }
