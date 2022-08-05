@@ -1,0 +1,35 @@
+package com.anightdazingzoroark.rift.items;
+
+import com.anightdazingzoroark.rift.RiftInitialize;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+
+public class RiftItems {
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, RiftInitialize.MODID);
+
+    //treats
+    public static final RegistryObject<Item> FLESH_TREAT = ITEMS.register("flesh_treat",
+            () -> new Item(new Item.Properties().tab(RiftInitialize.RIFT_ITEMS_TAB)
+                    .food(new FoodProperties.Builder().nutrition(2).saturationMod(0.2f).build())));
+    public static final RegistryObject<Item> FISH_TREAT = ITEMS.register("fish_treat",
+            () -> new Item(new Item.Properties().tab(RiftInitialize.RIFT_ITEMS_TAB)
+                    .food(new FoodProperties.Builder().nutrition(2).saturationMod(0.2f).build())));
+    public static final RegistryObject<Item> CARRION_TREAT = ITEMS.register("carrion_treat",
+            () -> new Item(new Item.Properties().tab(RiftInitialize.RIFT_ITEMS_TAB)
+                    .food(new FoodProperties.Builder().nutrition(2).saturationMod(0.2f).build())));
+    public static final RegistryObject<Item> BUG_TREAT = ITEMS.register("bug_treat",
+            () -> new Item(new Item.Properties().tab(RiftInitialize.RIFT_ITEMS_TAB)
+                    .food(new FoodProperties.Builder().nutrition(2).saturationMod(0.2f).build())));
+
+    //tribute items
+    public static final RegistryObject<Item> TYRANNOSAURUS_ARM = ITEMS.register("tyrannosaurus_arm",
+            () -> new Item(new Item.Properties().tab(RiftInitialize.RIFT_ITEMS_TAB)));
+
+    public static void register(IEventBus eventBus) {
+        ITEMS.register(eventBus);
+    }
+}
