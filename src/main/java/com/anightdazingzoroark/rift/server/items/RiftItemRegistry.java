@@ -1,8 +1,12 @@
 package com.anightdazingzoroark.rift.server.items;
 
 import com.anightdazingzoroark.rift.RiftInitialize;
+import com.anightdazingzoroark.rift.server.entities.RiftEntityRegistry;
+import com.anightdazingzoroark.rift.server.entities.creatures.TyrannosaurusEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -40,6 +44,11 @@ public class RiftItemRegistry {
     //tribute items
     public static final RegistryObject<Item> TYRANNOSAURUS_ARM = ITEMS.register("tyrannosaurus_arm",
             () -> new Item(new Item.Properties().tab(RiftInitialize.RIFT_ITEMS_TAB)));
+
+    //spawn eggs
+    public static final RegistryObject<Item> TYRANNOSAURUS_SPAWN_EGG = ITEMS.register("tyrannosaurus_spawn_egg",
+            () -> new ForgeSpawnEggItem(RiftEntityRegistry.TYRANNOSAURUS,3670016, 2428687,
+                    new Item.Properties().tab(RiftInitialize.RIFT_ENTITIES_TAB)));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

@@ -30,6 +30,13 @@ public class RiftInitialize {
         }
     };
 
+    public static final CreativeModeTab RIFT_ENTITIES_TAB = new CreativeModeTab("rift.entities_tab") {
+        @Override
+        public ItemStack makeIcon() {
+            return new ItemStack(RiftItemRegistry.TYRANNOSAURUS_SPAWN_EGG.get());
+        }
+    };
+
     public RiftInitialize() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 

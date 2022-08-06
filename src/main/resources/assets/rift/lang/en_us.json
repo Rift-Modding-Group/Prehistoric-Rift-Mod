@@ -10,7 +10,10 @@
 
   "item.rift.tyrannosaurus_arm": "Tyrannosaurus Arm",
 
+  "item.rift.tyrannosaurus_spawn_egg": "Tyrannosaurus Spawn Egg",
+
   "itemGroup.rift.items_tab": "Prehistoric Rift Items",
+  "itemGroup.rift.entities_tab": "Prehistoric Rift Entities",
 
   "tooltip.rift.treat": "Certain creatures love certain treats for taming and breeding!"
 }

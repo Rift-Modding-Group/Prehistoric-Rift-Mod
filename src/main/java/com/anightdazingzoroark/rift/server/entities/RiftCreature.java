@@ -1,5 +1,6 @@
 package com.anightdazingzoroark.rift.server.entities;
 
+import com.anightdazingzoroark.rift.server.entities.creatures.TyrannosaurusEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -16,6 +17,7 @@ import java.util.Random;
 
 public class RiftCreature extends TamableAnimal {
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(RiftCreature.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(RiftCreature.class, EntityDataSerializers.BOOLEAN);
 
     protected RiftCreature(EntityType<? extends TamableAnimal> type, Level world) {
         super(type, world);
@@ -35,9 +37,18 @@ public class RiftCreature extends TamableAnimal {
         this.entityData.set(VARIANT, variant);
     }
 
+    public boolean isAttacking() {
+        return this.entityData.get(ATTACKING);
+    }
+
+    public void setAttacking(boolean bool) {
+        this.entityData.set(ATTACKING, bool);
+    }
+
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(VARIANT, 0);
+        this.entityData.define(ATTACKING, false);
     }
 
     public void addAdditionalSaveData(CompoundTag compoundTag) {
