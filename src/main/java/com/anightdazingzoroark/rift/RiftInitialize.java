@@ -38,6 +38,7 @@ public class RiftInitialize {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(RiftClientManagement::registerRenderers);
+
         MinecraftForge.EVENT_BUS.register(this);
         GeckoLib.initialize();
     }

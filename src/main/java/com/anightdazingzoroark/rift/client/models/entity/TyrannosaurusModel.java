@@ -38,8 +38,8 @@ public class TyrannosaurusModel extends AnimatedTickingGeoModel<TyrannosaurusEnt
 
         EntityModelData extraData = (EntityModelData) customPredicate.getExtraDataOfType(EntityModelData.class).get(0);
         if (neck != null) {
-            neck.setRotationX((float) Math.toRadians(extraData.headPitch));
-            neck.setRotationY((float) Math.toRadians(extraData.netHeadYaw));
+            neck.setRotationX((float) Math.max(Math.toRadians(-12.5), Math.min(Math.toRadians(12.5), Math.toRadians(extraData.headPitch))));
+            neck.setRotationY((float) Math.max(Math.toRadians(-12.5), Math.min(Math.toRadians(12.5), Math.toRadians(extraData.netHeadYaw))));
         }
     }
 }
