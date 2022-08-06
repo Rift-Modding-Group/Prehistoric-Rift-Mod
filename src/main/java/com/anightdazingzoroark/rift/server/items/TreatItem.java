@@ -1,4 +1,4 @@
-package com.anightdazingzoroark.rift.items;
+package com.anightdazingzoroark.rift.server.items;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
