@@ -15,7 +15,7 @@ import software.bernie.geckolib3.model.AnimatedGeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
 public class TyrannosaurusRenderer extends GeoEntityRenderer<TyrannosaurusEntity> {
-    public TyrannosaurusRenderer(EntityRendererProvider.Context renderManager, AnimatedGeoModel<TyrannosaurusEntity> modelProvider) {
+    public TyrannosaurusRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new TyrannosaurusModel());
     }
 

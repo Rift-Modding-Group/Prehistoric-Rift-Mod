@@ -1,5 +1,6 @@
 package com.anightdazingzoroark.rift;
 
+import com.anightdazingzoroark.rift.client.RiftClientManagement;
 import com.anightdazingzoroark.rift.client.renderer.entity.TyrannosaurusRenderer;
 import com.anightdazingzoroark.rift.server.entities.RiftEntityRegistry;
 import com.anightdazingzoroark.rift.server.items.RiftItemRegistry;
@@ -31,8 +32,12 @@ public class RiftInitialize {
 
     public RiftInitialize() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
         RiftItemRegistry.register(modEventBus);
+        RiftEntityRegistry.register(modEventBus);
+
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(RiftClientManagement::registerRenderers);
         MinecraftForge.EVENT_BUS.register(this);
         GeckoLib.initialize();
     }

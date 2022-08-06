@@ -14,7 +14,6 @@ public class RiftEntityRegistry {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES,
         RiftInitialize.MODID);
 
-
     public static final RegistryObject<EntityType<TyrannosaurusEntity>> TYRANNOSAURUS = ENTITY_TYPES
             .register("tyrannosaurus",
                     () -> EntityType.Builder.<TyrannosaurusEntity>of(TyrannosaurusEntity::new, MobCategory.CREATURE)

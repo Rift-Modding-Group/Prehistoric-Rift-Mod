@@ -12,7 +12,7 @@ import software.bernie.geckolib3.model.provider.data.EntityModelData;
 public class TyrannosaurusModel extends AnimatedTickingGeoModel<TyrannosaurusEntity> {
     @Override
     public ResourceLocation getModelResource(TyrannosaurusEntity object) {
-        return new ResourceLocation(RiftInitialize.MODID, "models/entity/tyrannosaurus.model.json");
+        return new ResourceLocation(RiftInitialize.MODID, "geo/tyrannosaurus.model.json");
     }
 
     @Override
