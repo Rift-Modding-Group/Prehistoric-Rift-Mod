@@ -38,7 +38,7 @@ public class TyrannosaurusModel extends AnimatedGeoModel<TyrannosaurusEntity> {
         EntityModelData extraData = (EntityModelData) customPredicate.getExtraDataOfType(EntityModelData.class).get(0);
 
         //for looking around
-        if (neck != null) {
+        if (neck != null && !entity.isRoaring()) {
             neck.setRotationX((float) Math.max(Math.toRadians(-12.5), Math.min(Math.toRadians(12.5), Math.toRadians(extraData.headPitch))));
             neck.setRotationY((float) Math.max(Math.toRadians(-12.5), Math.min(Math.toRadians(12.5), Math.toRadians(extraData.netHeadYaw))));
         }

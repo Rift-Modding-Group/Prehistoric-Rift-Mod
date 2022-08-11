@@ -1,14 +1,14 @@
 package com.anightdazingzoroark.rift.server.entities.goals;
 
 import com.anightdazingzoroark.rift.server.entities.RiftCreature;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class RiftAttackGoal extends Goal {
     protected final RiftCreature mob;
@@ -65,7 +65,8 @@ public class RiftAttackGoal extends Goal {
                 this.path = this.mob.getNavigation().createPath(livingentity, 0);
                 if (this.path != null) {
                     return true;
-                } else {
+                }
+                else {
                     return this.getAttackReachSqr(livingentity) >= this.mob.distanceToSqr(livingentity.getX(), livingentity.getY(), livingentity.getZ());
                 }
             }
@@ -95,6 +96,7 @@ public class RiftAttackGoal extends Goal {
         this.mob.getNavigation().moveTo(this.path, this.speedModifier);
         this.mob.setAggressive(true);
         this.ticksUntilNextPathRecalculation = 0;
+        this.animTick = 0;
     }
 
     public void stop() {
@@ -105,6 +107,8 @@ public class RiftAttackGoal extends Goal {
 
         this.mob.setAggressive(false);
         this.mob.getNavigation().stop();
+        this.animTick = 0;
+        this.mob.setAttacking(false);
     }
 
     public boolean requiresUpdateEveryTick() {
@@ -130,13 +134,15 @@ public class RiftAttackGoal extends Goal {
                             failedPathFindingPenalty = 0;
                         else
                             failedPathFindingPenalty += 10;
-                    } else {
+                    }
+                    else {
                         failedPathFindingPenalty += 10;
                     }
                 }
                 if (d0 > 1024.0D) {
                     this.ticksUntilNextPathRecalculation += 10;
-                } else if (d0 > 256.0D) {
+                }
+                else if (d0 > 256.0D) {
                     this.ticksUntilNextPathRecalculation += 5;
                 }
 
@@ -153,13 +159,20 @@ public class RiftAttackGoal extends Goal {
 
     protected void checkAndPerformAttack(LivingEntity target, double distance) {
         double d0 = this.getAttackReachSqr(target);
+        float knockbackForce = (float)this.mob.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
         if (distance <= d0) {
             this.mob.setAttacking(true);
             this.animTick++;
             if (this.animTick == this.attackTime) {
-                this.mob.doHurtTarget(target);
+                boolean flag = target.hurt(DamageSource.mobAttack(this.mob), (float)this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE));
+                if (flag) {
+                    if (knockbackForce > 0.0f && target instanceof LivingEntity) {
+                        ((LivingEntity)target).knockback((double)(knockbackForce * 0.5F), (double)Mth.sin(target.getYRot() * ((float)Math.PI / 180F)), (double)(-Mth.cos(target.getYRot() * ((float)Math.PI / 180F))));
+                        target.setDeltaMovement(target.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
+                    }
+                }
             }
-            if (this.animTick >= this.animationTime) {
+            if (this.animTick > this.animationTime) {
                 this.animTick = 0;
                 this.mob.setAttacking(false);
             }
