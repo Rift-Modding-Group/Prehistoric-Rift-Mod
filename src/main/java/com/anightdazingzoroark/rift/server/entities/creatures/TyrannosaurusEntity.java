@@ -28,6 +28,8 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
+import java.util.Objects;
+import java.util.Random;
 import java.util.function.Predicate;
 import java.util.random.RandomGenerator;
 
@@ -36,6 +38,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
         return entity.isAlive() && !(entity instanceof TyrannosaurusEntity);
     };
     public static final EntityDataAccessor<Boolean> ROARING = SynchedEntityData.defineId(TyrannosaurusEntity.class, EntityDataSerializers.BOOLEAN);
+    private final RiftAttackGoal attackGoal = new RiftAttackGoal(this, 0.5, 0.5, 1, true);
     private final AnimationFactory factory = new AnimationFactory(this);
 
     public TyrannosaurusEntity(EntityType<? extends TamableAnimal> type, Level world) {
@@ -44,8 +47,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
 
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new TyrannosaurusRoarGoal(this, 2.08, 0.64));
-        this.goalSelector.addGoal(2, new RiftAttackGoal(this, 0.5, 0.5, 1, true));
+        this.goalSelector.addGoal(1, new TyrannosaurusRoarGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Pig.class, true));
         this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Ravager.class, true));
@@ -60,6 +62,19 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
                 .add(Attributes.ATTACK_DAMAGE, 35D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1D);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.isRoaring()) {
+            this.goalSelector.addGoal(2, this.attackGoal);
+            Objects.requireNonNull(this.getAttribute(Attributes.MOVEMENT_SPEED)).setBaseValue(0.25D);
+        }
+        else {
+            this.goalSelector.removeGoal(this.attackGoal);
+            Objects.requireNonNull(this.getAttribute(Attributes.MOVEMENT_SPEED)).setBaseValue(0D);
+        }
     }
 
     private <E extends IAnimatable> PlayState movement(AnimationEvent<E> event) {
@@ -119,55 +134,37 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
 
     class TyrannosaurusRoarGoal extends Goal {
         protected final TyrannosaurusEntity mob;
-        protected final double animationTime;
-        protected final double roarTime;
         private int roarTick;
+        private int roarChance;
 
-        public TyrannosaurusRoarGoal(TyrannosaurusEntity mob, double animationTime, double roarTime) {
+        public TyrannosaurusRoarGoal(TyrannosaurusEntity mob) {
             this.mob = mob;
-            this.animationTime = Math.floor(animationTime * 20);
-            this.roarTime = Math.floor(roarTime * 20);
+            this.roarChance = new Random().nextInt(4);
         }
+
         @Override
         public boolean canUse() {
-            if (this.mob.getLastHurtByMob() != null && this.mob.hurtTime == 0) {
-                return true;
-            }
-            else {
-                return false;
-            }
+            return this.mob.getLastHurtByMob() != null && this.roarTick == 0 && this.roarChance == 0;
         }
 
         @Override
         public boolean canContinueToUse() {
-            if (this.roarTick > this.roarTime) {
-                return false;
-            }
-            else if (this.mob.getLastHurtByMob() == null) {
-                return false;
-            }
-            else {
-                return true;
-            }
+            return !(this.roarTick > 60);
         }
 
         @Override
         public void start() {
-            this.roarTick = 0;
             this.mob.setRoaring(true);
-            System.out.println("start");
         }
 
         @Override
         public void stop() {
-            this.mob.setRoaring(false);
-            System.out.println("stop");
+            this.roarTick = 0;
         }
 
         @Override
         public void tick() {
-            this.roarTick++;
-            if (this.roarTick == this.roarTime) {
+            if (this.roarTick == 8) {
                 if (this.mob.isAlive()) {
                     for(LivingEntity livingentity : this.mob.level.getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(25.0D), ROAR_TARGETS)) {
                         if (!(livingentity instanceof TyrannosaurusEntity)) {
@@ -186,6 +183,10 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
                     }
                 }
             }
+            if (this.roarTick > 20) {
+                this.mob.setRoaring(false);
+            }
+            this.roarTick++;
         }
 
         private void strongKnockback(Entity target) {

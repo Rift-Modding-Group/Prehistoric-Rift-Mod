@@ -17,6 +17,7 @@ import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 public class TyrannosaurusRenderer extends GeoEntityRenderer<TyrannosaurusEntity> {
     public TyrannosaurusRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new TyrannosaurusModel());
+        this.shadowRadius = 2F;
     }
 
     @Override
