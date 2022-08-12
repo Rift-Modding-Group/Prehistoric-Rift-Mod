@@ -1,11 +1,9 @@
 package com.anightdazingzoroark.rift;
 
-import com.anightdazingzoroark.rift.client.RiftClientManagement;
-import com.anightdazingzoroark.rift.client.renderer.entity.TyrannosaurusRenderer;
+import com.anightdazingzoroark.rift.client.renderer.RiftRendererRegistry;
 import com.anightdazingzoroark.rift.server.entities.RiftEntityRegistry;
 import com.anightdazingzoroark.rift.server.items.RiftItemRegistry;
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -44,7 +42,7 @@ public class RiftInitialize {
         RiftEntityRegistry.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(RiftClientManagement::registerRenderers);
+        modEventBus.addListener(RiftRendererRegistry::registerRenderers);
 
         MinecraftForge.EVENT_BUS.register(this);
         GeckoLib.initialize();

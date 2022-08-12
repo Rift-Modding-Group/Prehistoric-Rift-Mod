@@ -1,4 +1,4 @@
-package com.anightdazingzoroark.rift.client;
+package com.anightdazingzoroark.rift.client.renderer;
 
 import com.anightdazingzoroark.rift.RiftInitialize;
 import com.anightdazingzoroark.rift.client.renderer.entity.TyrannosaurusRenderer;
@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = RiftInitialize.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public class RiftClientManagement {
+public class RiftRendererRegistry {
     @SubscribeEvent
     public static void registerRenderers(final FMLClientSetupEvent event) {
         EntityRenderers.register(RiftEntityRegistry.TYRANNOSAURUS.get(), TyrannosaurusRenderer::new);
