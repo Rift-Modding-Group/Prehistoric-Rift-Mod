@@ -1,4 +1,6 @@
 {
+  "entity.rift.tyrannosaurus": "Tyrannosaurus",
+
   "item.rift.berry_treat": "Berry Treat",
   "item.rift.grassy_treat": "Grassy Treat",
   "item.rift.rooted_treat": "Rooted Treat",
@@ -19,6 +21,11 @@
 
   "itemGroup.rift.items_tab": "Prehistoric Rift Items",
   "itemGroup.rift.entities_tab": "Prehistoric Rift Entities",
+
+  "rift.sound.subtitle.tyrannosaurus_ambient": "Tyrannosaurus growls",
+  "rift.sound.subtitle.tyrannosaurus_hurt": "Tyrannosaurus growls in pain",
+  "rift.sound.subtitle.tyrannosaurus_death": "Tyrannosaurus dies",
+  "rift.sound.subtitle.tyrannosaurus_roar": "Tyrannosaurus roars",
 
   "tooltip.rift.treat": "Certain creatures love certain treats for taming and breeding!"
 }

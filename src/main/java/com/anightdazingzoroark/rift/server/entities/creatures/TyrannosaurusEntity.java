@@ -1,11 +1,14 @@
 package com.anightdazingzoroark.rift.server.entities.creatures;
 
+import com.anightdazingzoroark.rift.client.sounds.RiftSoundRegistry;
 import com.anightdazingzoroark.rift.server.entities.RiftCreature;
+import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackAnimalsGoal;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackGoal;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -20,6 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -49,8 +53,8 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new TyrannosaurusRoarGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Pig.class, true));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Ravager.class, true));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(4, new RiftAttackAnimalsGoal(this, true, true));
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
@@ -61,7 +65,8 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
                 .add(Attributes.MAX_HEALTH, 160D)
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
                 .add(Attributes.ATTACK_DAMAGE, 35D)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 1D);
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1D)
+                .add(Attributes.FOLLOW_RANGE, 35D);
     }
 
     @Override
@@ -114,6 +119,18 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
         data.addAnimationController(new AnimationController(this, "roaring", 0, this::roaring));
     }
 
+    protected SoundEvent getAmbientSound() {
+        return RiftSoundRegistry.TYRANNOSAURUS_AMBIENT.get();
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSoundRegistry.TYRANNOSAURUS_HURT.get();
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSoundRegistry.TYRANNOSAURUS_DEATH.get();
+    }
+
     @Override
     public AnimationFactory getFactory() {
         return factory;
@@ -164,6 +181,9 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
 
         @Override
         public void tick() {
+            if (this.roarTick == 7) {
+                playSound(RiftSoundRegistry.TYRANNOSAURUS_ROAR.get());
+            }
             if (this.roarTick == 8) {
                 if (this.mob.isAlive()) {
                     for(LivingEntity livingentity : this.mob.level.getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(25.0D), ROAR_TARGETS)) {
@@ -172,9 +192,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
                         }
                         this.strongKnockback(livingentity);
                     }
-
                     Vec3 vec3 = this.mob.getBoundingBox().getCenter();
-
                     for(int i = 0; i < 40; ++i) {
                         double d0 = this.mob.random.nextGaussian() * 0.2D;
                         double d1 = this.mob.random.nextGaussian() * 0.2D;
@@ -193,7 +211,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
             double d0 = target.getX() - this.mob.getX();
             double d1 = target.getZ() - this.mob.getZ();
             double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
-            target.push(d0 / d2 * 4.0D, 0.2D, d1 / d2 * 4.0D);
+            target.push(d0 / d2 * 8.0D, 0.2D, d1 / d2 * 8.0D);
         }
     }
 }

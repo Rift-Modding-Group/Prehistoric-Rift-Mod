@@ -1,6 +1,7 @@
 package com.anightdazingzoroark.rift;
 
 import com.anightdazingzoroark.rift.client.renderer.RiftRendererRegistry;
+import com.anightdazingzoroark.rift.client.sounds.RiftSoundRegistry;
 import com.anightdazingzoroark.rift.server.entities.RiftEntityRegistry;
 import com.anightdazingzoroark.rift.server.items.RiftItemRegistry;
 import com.mojang.logging.LogUtils;
@@ -41,6 +42,7 @@ public class RiftInitialize {
         RiftItemRegistry.register(modEventBus);
         RiftEntityRegistry.register(modEventBus);
 
+        RiftSoundRegistry.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(RiftRendererRegistry::registerRenderers);
 
