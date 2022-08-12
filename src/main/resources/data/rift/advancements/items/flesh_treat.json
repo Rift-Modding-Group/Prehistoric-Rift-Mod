@@ -1,0 +1,50 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:flesh_treat"
+    ]
+  },
+  "criteria": {
+    "has_raw_meat": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:porkchop",
+              "minecraft:mutton",
+              "minecraft:beef",
+              "minecraft:chicken",
+              "minecraft:rabbit",
+              "rift:raw_exotic_meat"
+            ]
+          }
+        ]
+      }
+    },
+    "has_bone": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:bone"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:flesh_treat"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_raw_meat",
+      "has_bone",
+      "has_the_recipe"
+    ]
+  ]
+}

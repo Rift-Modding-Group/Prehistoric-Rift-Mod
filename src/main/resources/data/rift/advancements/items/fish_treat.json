@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:fish_treat"
+    ]
+  },
+  "criteria": {
+    "has_edible_raw_fish": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:cod",
+              "minecraft:salmon",
+              "minecraft:tropical_fish"
+            ]
+          }
+        ]
+      }
+    },
+    "has_bone": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:bone"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:fish_treat"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_edible_raw_fish",
+      "has_bone",
+      "has_the_recipe"
+    ]
+  ]
+}

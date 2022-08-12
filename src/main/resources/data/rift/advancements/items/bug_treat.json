@@ -1,0 +1,45 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:bug_treat"
+    ]
+  },
+  "criteria": {
+    "has_raw_hemolymph": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "rift:raw_hemolymph"
+            ]
+          }
+        ]
+      }
+    },
+    "has_bone": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:bone"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:bug_treat"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_raw_hemolymph",
+      "has_bone",
+      "has_the_recipe"
+    ]
+  ]
+}

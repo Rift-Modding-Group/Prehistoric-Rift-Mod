@@ -7,14 +7,11 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-
-import java.util.function.Supplier;
 
 public class RiftItemRegistry {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, RiftInitialize.MODID);
@@ -56,11 +53,13 @@ public class RiftItemRegistry {
 
     public static final RegistryObject<Item> RAW_HEMOLYMPH = ITEMS.register("raw_hemolymph",
             () -> new Item(new Item.Properties().tab(RiftInitialize.RIFT_ITEMS_TAB)
-                    .food(new FoodProperties.Builder().nutrition(4).saturationMod(0.6f).build())));
+                    .food(new FoodProperties.Builder().nutrition(1).saturationMod(0.6f).effect(
+                            () -> new MobEffectInstance(MobEffects.POISON, 600, 0),
+            1F).build())));
 
     public static final RegistryObject<Item> BOILED_HEMOLYMPH = ITEMS.register("boiled_hemolymph",
             () -> new Item(new Item.Properties().tab(RiftInitialize.RIFT_ITEMS_TAB)
-                    .food(new FoodProperties.Builder().nutrition(8).saturationMod(1.6f).build())));
+                    .food(new FoodProperties.Builder().nutrition(6).saturationMod(1.6f).build())));
 
     //tribute items
     public static final RegistryObject<Item> TYRANNOSAURUS_ARM = ITEMS.register("tyrannosaurus_arm",
