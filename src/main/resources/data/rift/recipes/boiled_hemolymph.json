@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "rift:raw_hemolymph"
+  },
+  "result": "rift:boiled_hemolymph",
+  "experience": 0.35,
+  "cookingtime": 200
+}

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "rift:boiled_hemolymph"
+    ]
+  },
+  "criteria": {
+    "has_raw_hemolymph": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "rift:raw_hemolymph"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "rift:boiled_hemolymph"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_raw_hemolymph",
+      "has_the_recipe"
+    ]
+  ]
+}
