@@ -4,6 +4,8 @@ import com.anightdazingzoroark.rift.client.sounds.RiftSoundRegistry;
 import com.anightdazingzoroark.rift.server.entities.RiftCreature;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackAnimalsGoal;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackGoal;
+import com.anightdazingzoroark.rift.server.entities.goals.RiftPickUpItems;
+import com.anightdazingzoroark.rift.server.items.RiftItemRegistry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -20,7 +22,9 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
@@ -64,8 +68,9 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new TyrannosaurusRoarGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.targetSelector.addGoal(5, new RiftPickUpItems(this, getFavoriteFoodItems()));
+        this.targetSelector.addGoal(5, new RiftPickUpItems(this, getFavoriteTreats()));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
     }
 
@@ -172,6 +177,20 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
     @Override
     public AnimationFactory getFactory() {
         return factory;
+    }
+
+    @Override
+    public Predicate<ItemEntity> getFavoriteFoodItems() {
+        return (entity) -> {
+            return entity.isAlive() && entity.getItem().is(RiftItemRegistry.Tags.TYRANNOSAURUS_FAVORITE_FOOD);
+        };
+    }
+
+    @Override
+    public Predicate<ItemEntity> getFavoriteTreats() {
+        return (entity) -> {
+            return entity.isAlive() && entity.getItem().getItem() == RiftItemRegistry.FLESH_TREAT.get();
+        };
     }
 
     public boolean isRoaring() {

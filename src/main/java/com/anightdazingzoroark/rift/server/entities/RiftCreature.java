@@ -1,6 +1,7 @@
 package com.anightdazingzoroark.rift.server.entities;
 
 import com.anightdazingzoroark.rift.server.entities.creatures.TyrannosaurusEntity;
+import com.anightdazingzoroark.rift.server.items.RiftItemRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -9,11 +10,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
+import java.util.function.Predicate;
 
 public class RiftCreature extends TamableAnimal {
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(RiftCreature.class, EntityDataSerializers.INT);
@@ -29,6 +33,12 @@ public class RiftCreature extends TamableAnimal {
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
+    public Predicate<ItemEntity> getFavoriteFoodItems() {
+        return Entity::isAlive;
+    }
+    public Predicate<ItemEntity> getFavoriteTreats() {
+        return Entity::isAlive;
+    }
     public int getVariant() {
         return Mth.clamp(this.entityData.get(VARIANT), 0, 3);
     }

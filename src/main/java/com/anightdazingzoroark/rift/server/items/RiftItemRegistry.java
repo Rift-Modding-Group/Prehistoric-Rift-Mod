@@ -2,7 +2,9 @@ package com.anightdazingzoroark.rift.server.items;
 
 import com.anightdazingzoroark.rift.RiftInitialize;
 import com.anightdazingzoroark.rift.server.entities.RiftEntityRegistry;
-import com.anightdazingzoroark.rift.server.entities.creatures.TyrannosaurusEntity;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
@@ -13,8 +15,10 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import static com.anightdazingzoroark.rift.RiftInitialize.MODID;
+
 public class RiftItemRegistry {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, RiftInitialize.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
     //treats
     public static final RegistryObject<Item> BERRY_TREAT = ITEMS.register("berry_treat",
@@ -69,6 +73,10 @@ public class RiftItemRegistry {
     public static final RegistryObject<Item> TYRANNOSAURUS_SPAWN_EGG = ITEMS.register("tyrannosaurus_spawn_egg",
             () -> new ForgeSpawnEggItem(RiftEntityRegistry.TYRANNOSAURUS,3670016, 2428687,
                     new Item.Properties().tab(RiftInitialize.RIFT_ENTITIES_TAB)));
+
+    public static class Tags {
+        public static final TagKey<Item> TYRANNOSAURUS_FAVORITE_FOOD = ItemTags.create(new ResourceLocation(MODID,"tyrannosaurus_favorite_foods"));
+    }
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
