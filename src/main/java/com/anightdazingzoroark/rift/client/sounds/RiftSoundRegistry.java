@@ -17,7 +17,7 @@ public class RiftSoundRegistry {
     public static final RegistryObject<SoundEvent> TYRANNOSAURUS_ROAR = registerSoundEvent("tyrannosaurus_roar");
 
     private static RegistryObject<SoundEvent> registerSoundEvent(String name) {
-        return SOUND_EVENTS.register(name, () -> new SoundEvent(new ResourceLocation(RiftInitialize.MODID, name)));
+        return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(RiftInitialize.MODID, name)));
     }
 
     public static void register(IEventBus eventBus) {

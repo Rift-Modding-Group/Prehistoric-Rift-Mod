@@ -11,6 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -39,6 +40,7 @@ public class RiftCreature extends TamableAnimal {
     public Predicate<ItemEntity> getFavoriteTreats() {
         return Entity::isAlive;
     }
+
     public int getVariant() {
         return Mth.clamp(this.entityData.get(VARIANT), 0, 3);
     }

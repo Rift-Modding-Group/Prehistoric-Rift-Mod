@@ -3,8 +3,12 @@ package com.anightdazingzoroark.rift.server.entities.goals;
 import com.anightdazingzoroark.rift.server.entities.RiftCreature;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
@@ -164,7 +168,7 @@ public class RiftAttackGoal extends Goal {
             this.mob.setAttacking(true);
             this.animTick++;
             if (this.animTick == this.attackTime) {
-                boolean flag = target.hurt(DamageSource.mobAttack(this.mob), (float)this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE));
+                boolean flag = target.hurt(this.mob.damageSources().mobAttack(this.mob), (float)this.mob.getAttributeValue(Attributes.ATTACK_DAMAGE));
                 if (flag) {
                     if (knockbackForce > 0.0f && target instanceof LivingEntity) {
                         ((LivingEntity)target).knockback((double)(knockbackForce * 0.5F), (double)Mth.sin(target.getYRot() * ((float)Math.PI / 180F)), (double)(-Mth.cos(target.getYRot() * ((float)Math.PI / 180F))));

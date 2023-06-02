@@ -24,24 +24,24 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.Animation;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
 
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Predicate;
 
-public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
+public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
     private static final Predicate<Entity> ROAR_TARGETS = (entity) -> {
         return entity.isAlive() && !(entity instanceof TyrannosaurusEntity);
     };
@@ -51,7 +51,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
     private final RiftAttackGoal attackGoal = new RiftAttackGoal(this, 0.5, 0.5, 1, true);
     private final NearestAttackableTargetGoal attackPlayerGoal = new NearestAttackableTargetGoal<>(this, Player.class, true);
     private final RiftAttackAnimalsGoal attackAnimalsGoal = new RiftAttackAnimalsGoal(this, true, true);
-    private final AnimationFactory factory = new AnimationFactory(this);
+    private AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 
     public TyrannosaurusEntity(EntityType<? extends TamableAnimal> type, Level world) {
         super(type, world);
@@ -125,41 +125,41 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
         this.setHuntingTick(this.getHuntingTick() - 1);
     }
 
-    private <E extends IAnimatable> PlayState movement(AnimationEvent<E> event) {
-        if (event.isMoving()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk", true));
-            return PlayState.CONTINUE;
-        }
-        else {
-            return PlayState.STOP;
-        }
-    }
-
-    private <E extends IAnimatable> PlayState attacking(AnimationEvent<E> event) {
-        if (this.entityData.get(ATTACKING)) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", true));
-            return PlayState.CONTINUE;
-        }
-        else {
-            return PlayState.STOP;
-        }
-    }
-
-    private <E extends IAnimatable> PlayState roaring(AnimationEvent<E> event) {
-        if (this.entityData.get(ROARING)) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.roar", true));
-            return PlayState.CONTINUE;
-        }
-        else {
-            return PlayState.STOP;
-        }
-    }
-
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::movement));
-        data.addAnimationController(new AnimationController(this, "attacking", 0, this::attacking));
-        data.addAnimationController(new AnimationController(this, "roaring", 0, this::roaring));
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new AnimationController<>(this, "movement", 0, this::movement));
+        controllerRegistrar.add(new AnimationController<>(this, "attacking", 0, this::attacking));
+        controllerRegistrar.add(new AnimationController<>(this, "roaring", 0, this::roaring));
+    }
+
+    private PlayState movement(software.bernie.geckolib.core.animation.AnimationState<TyrannosaurusEntity> tyrannosaurusEntityAnimationState) {
+        if (tyrannosaurusEntityAnimationState.isMoving()) {
+            tyrannosaurusEntityAnimationState.getController().setAnimation(RawAnimation.begin().then("animation.tyrannosaurus.walk", Animation.LoopType.LOOP));
+            return PlayState.CONTINUE;
+        }
+        else {
+            return PlayState.STOP;
+        }
+    }
+
+    private PlayState attacking(software.bernie.geckolib.core.animation.AnimationState<TyrannosaurusEntity> tyrannosaurusEntityAnimationState) {
+        if (this.entityData.get(ATTACKING)) {
+            tyrannosaurusEntityAnimationState.getController().setAnimation(RawAnimation.begin().then("animation.tyrannosaurus.attack", Animation.LoopType.LOOP));
+            return PlayState.CONTINUE;
+        }
+        else {
+            return PlayState.STOP;
+        }
+    }
+
+    private PlayState roaring(software.bernie.geckolib.core.animation.AnimationState<TyrannosaurusEntity> tyrannosaurusEntityAnimationState) {
+        if (this.entityData.get(ROARING)) {
+            tyrannosaurusEntityAnimationState.getController().setAnimation(RawAnimation.begin().then("animation.tyrannosaurus.roar", Animation.LoopType.LOOP));
+            return PlayState.CONTINUE;
+        }
+        else {
+            return PlayState.STOP;
+        }
     }
 
     protected SoundEvent getAmbientSound() {
@@ -175,8 +175,8 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return factory;
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 
     @Override
@@ -276,7 +276,7 @@ public class TyrannosaurusEntity extends RiftCreature implements IAnimatable {
                 if (this.mob.isAlive()) {
                     for(LivingEntity livingentity : this.mob.level.getEntitiesOfClass(LivingEntity.class, this.mob.getBoundingBox().inflate(25.0D), ROAR_TARGETS)) {
                         if (!(livingentity instanceof TyrannosaurusEntity)) {
-                            livingentity.hurt(DamageSource.mobAttack(this.mob), 2.0F);
+                            livingentity.hurt(damageSources().mobAttack(this.mob), 2.0F);
                         }
                         this.strongKnockback(livingentity);
                     }
