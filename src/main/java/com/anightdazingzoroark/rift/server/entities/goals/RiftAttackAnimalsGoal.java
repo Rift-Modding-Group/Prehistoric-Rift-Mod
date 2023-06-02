@@ -17,6 +17,7 @@ import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.phys.AABB;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 public class RiftAttackAnimalsGoal extends TargetGoal {
@@ -24,6 +25,27 @@ public class RiftAttackAnimalsGoal extends TargetGoal {
     protected TargetingConditions targetConditions;
     protected final int randomInterval;
     protected LivingEntity target;
+    protected final Class[] animals = {
+            Pig.class,
+            Sheep.class,
+            Cow.class,
+            MushroomCow.class,
+            Chicken.class,
+            Horse.class,
+            Donkey.class,
+            Mule.class,
+            Llama.class,
+            Rabbit.class,
+            Frog.class,
+            Strider.class,
+            Goat.class,
+            Parrot.class,
+            Fox.class,
+            Wolf.class,
+            Ocelot.class,
+            Cat.class,
+            Panda.class
+    };
 
     public RiftAttackAnimalsGoal(RiftCreature mob, boolean mustSee, boolean mustReach) {
         this(mob, mustSee, mustReach, (Predicate<LivingEntity>)null);
@@ -46,7 +68,7 @@ public class RiftAttackAnimalsGoal extends TargetGoal {
                 return false;
             }
             else {
-                return (this.target.getClass() == Fox.class || this.target.getClass() == Pig.class || this.target.getClass() == Frog.class || this.target.getClass() == Strider.class || this.target.getClass() == Ocelot.class || this.target.getClass() == Panda.class || this.target.getClass() == Goat.class || this.target.getClass() == Cow.class || this.target.getClass() == MushroomCow.class || this.target.getClass() == Rabbit.class || this.target.getClass() == Chicken.class || this.target.getClass() == Horse.class || this.target.getClass() == Mule.class || this.target.getClass() == Llama.class || this.target.getClass() == Donkey.class || this.target.getClass() == Wolf.class || this.target.getClass() == Parrot.class || this.target.getClass() == Cat.class || this.target.getClass() == PolarBear.class || this.target.getClass() == Sheep.class);
+                return Arrays.asList(animals).contains(this.target.getClass());
             }
         }
     }

@@ -80,7 +80,7 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
                 .add(Attributes.ATTACK_DAMAGE, 35D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1D)
-                .add(Attributes.FOLLOW_RANGE, 35D);
+                .add(Attributes.FOLLOW_RANGE, 16D);
     }
 
     @Override

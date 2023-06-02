@@ -5,6 +5,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -20,7 +21,7 @@ public class RiftPickUpItems extends Goal {
     @Override
     public boolean canUse() {
         if (this.mob.getTarget() == null && this.mob.getLastHurtByMob() == null) {
-            List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(this.mob.getAttributeValue(Attributes.FOLLOW_RANGE), 8.0D, this.mob.getAttributeValue(Attributes.FOLLOW_RANGE)), this.itemsToGet);
+            List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(this.mob.getAttributeValue(Attributes.FOLLOW_RANGE), this.mob.getAttributeValue(Attributes.FOLLOW_RANGE), this.mob.getAttributeValue(Attributes.FOLLOW_RANGE)), this.itemsToGet);
             return !list.isEmpty();
         }
         else {
@@ -29,16 +30,17 @@ public class RiftPickUpItems extends Goal {
     }
 
     public void tick() {
-        List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(this.mob.getAttributeValue(Attributes.FOLLOW_RANGE), 8.0D, this.mob.getAttributeValue(Attributes.FOLLOW_RANGE)), this.itemsToGet);
+        System.out.println("where item");
+        List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(this.mob.getAttributeValue(Attributes.FOLLOW_RANGE), this.mob.getAttributeValue(Attributes.FOLLOW_RANGE), this.mob.getAttributeValue(Attributes.FOLLOW_RANGE)), this.itemsToGet);
         if (!list.isEmpty()) {
-            this.mob.getNavigation().moveTo(list.get(0), 1.2F);
+            this.mob.getNavigation().moveTo(list.get(0), 1F);
         }
     }
 
     public void start() {
-        List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(this.mob.getAttributeValue(Attributes.FOLLOW_RANGE), 8.0D, this.mob.getAttributeValue(Attributes.FOLLOW_RANGE)), this.itemsToGet);
+        List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(this.mob.getAttributeValue(Attributes.FOLLOW_RANGE), this.mob.getAttributeValue(Attributes.FOLLOW_RANGE), this.mob.getAttributeValue(Attributes.FOLLOW_RANGE)), this.itemsToGet);
         if (!list.isEmpty()) {
-            this.mob.getNavigation().moveTo(list.get(0), 1.2F);
+            this.mob.getNavigation().moveTo(list.get(0), 1F);
         }
     }
 }
