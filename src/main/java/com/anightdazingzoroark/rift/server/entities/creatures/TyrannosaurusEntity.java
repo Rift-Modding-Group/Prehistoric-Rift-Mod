@@ -2,6 +2,7 @@ package com.anightdazingzoroark.rift.server.entities.creatures;
 
 import com.anightdazingzoroark.rift.server.client.sounds.RiftSoundRegistry;
 import com.anightdazingzoroark.rift.server.entities.RiftCreature;
+import com.anightdazingzoroark.rift.server.entities.RiftEgg;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackAnimalsGoal;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackGoal;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftPickUpItems;
@@ -47,12 +48,15 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
     private static final Predicate<Entity> ROAR_TARGETS = (entity) -> {
         return entity.isAlive() && !(entity instanceof TyrannosaurusEntity);
     };
+    private static final Predicate<Entity> WEAKNESS_TARGETS = (entity) -> {
+        return entity.isAlive() && !(entity instanceof TyrannosaurusEntity) && !(entity instanceof RiftEgg);
+    };
     public static final EntityDataAccessor<Boolean> ROARING = SynchedEntityData.defineId(TyrannosaurusEntity.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<Boolean> HUNTING = SynchedEntityData.defineId(TyrannosaurusEntity.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<Integer> HUNTINGTICK = SynchedEntityData.defineId(TyrannosaurusEntity.class, EntityDataSerializers.INT);
     private final RiftAttackGoal attackGoal = new RiftAttackGoal(this, 0.5, 0.5, 1, true);
     private final NearestAttackableTargetGoal attackPlayerGoal = new NearestAttackableTargetGoal<>(this, Player.class, true);
-    private final RiftAttackAnimalsGoal attackAnimalsGoal = new RiftAttackAnimalsGoal(this, true, true);
+    public final RiftAttackAnimalsGoal attackAnimalsGoal = new RiftAttackAnimalsGoal(this, true, true);
     private AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 
     public TyrannosaurusEntity(EntityType<? extends TamableAnimal> type, Level world) {
@@ -61,19 +65,21 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setHunting(new Random().nextBoolean());
+        this.setHunting(!this.isBaby() && new Random().nextBoolean());
         this.setHuntingTick(new Random().nextInt(900, 1500));
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new TyrannosaurusRoarGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(5, new RiftPickUpItems(this, getFavoriteTreats()));
         this.targetSelector.addGoal(5, new RiftPickUpItems(this, getFavoriteFoodItems()));
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+        if (!this.isBaby()) {
+            this.goalSelector.addGoal(1, new TyrannosaurusRoarGoal(this));
+        }
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -88,6 +94,7 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
+//        System.out.println(this.getAge());
         //for changing attributes when roaring
         if (!this.isRoaring()) {
             this.goalSelector.addGoal(2, this.attackGoal);
@@ -99,32 +106,39 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
         }
 
         //for casting weakness
-        for(LivingEntity livingentity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(12.0D), ROAR_TARGETS)) {
-            if (!livingentity.hasEffect(MobEffects.WEAKNESS) || livingentity.getEffect(MobEffects.WEAKNESS).getAmplifier() <= 1) {
-                livingentity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 600, 1));
+        if (!this.isBaby()) {
+            for (LivingEntity livingentity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(12.0D), WEAKNESS_TARGETS)) {
+                if (!livingentity.hasEffect(MobEffects.WEAKNESS) || livingentity.getEffect(MobEffects.WEAKNESS).getAmplifier() <= 1) {
+                    livingentity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 600, 1));
+                }
             }
         }
 
         //for managing hunting system
-        if (this.isHunting()) {
-            this.goalSelector.addGoal(4, this.attackPlayerGoal);
-            this.goalSelector.addGoal(4, this.attackAnimalsGoal);
+        if (!this.isBaby()) {
+            if (this.isHunting()) {
+                this.goalSelector.addGoal(4, this.attackAnimalsGoal);
+                this.goalSelector.addGoal(4, this.attackPlayerGoal);
+            }
+            else {
+                this.goalSelector.removeGoal(this.attackPlayerGoal);
+                this.goalSelector.removeGoal(this.attackAnimalsGoal);
+            }
+
+            if (this.getHuntingTick() <= 0 && this.isHunting()) {
+                this.setHunting(false);
+                this.setHuntingTick(new Random().nextInt(900, 1500));
+            }
+            else if (this.getHuntingTick() <= 0 && !this.isHunting()) {
+                this.setHunting(true);
+                this.setHuntingTick(new Random().nextInt(900, 1500));
+            }
+
+            this.setHuntingTick(this.getHuntingTick() - 1);
         }
         else {
-            this.goalSelector.removeGoal(this.attackPlayerGoal);
-            this.goalSelector.removeGoal(this.attackAnimalsGoal);
+            this.goalSelector.addGoal(4, this.attackAnimalsGoal);
         }
-
-        if (this.getHuntingTick() <= 0 && this.isHunting()) {
-            this.setHunting(false);
-            this.setHuntingTick(new Random().nextInt(900, 1500));
-        }
-        else if (this.getHuntingTick() <= 0 && !this.isHunting()) {
-            this.setHunting(true);
-            this.setHuntingTick(new Random().nextInt(900, 1500));
-        }
-
-        this.setHuntingTick(this.getHuntingTick() - 1);
     }
 
     @Override

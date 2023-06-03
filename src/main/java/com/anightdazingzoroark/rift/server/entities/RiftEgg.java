@@ -5,7 +5,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -33,7 +32,7 @@ public class RiftEgg extends TamableAnimal implements GeoAnimatable {
     }
 
     public int getEggType() {
-        return Mth.clamp(this.entityData.get(EGGTYPE), 0, 3);
+        return this.entityData.get(EGGTYPE);
     }
 
     public void setEggType(int type) {
@@ -62,9 +61,7 @@ public class RiftEgg extends TamableAnimal implements GeoAnimatable {
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-
-    }
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {}
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
