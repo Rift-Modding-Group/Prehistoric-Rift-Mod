@@ -2,6 +2,7 @@ package com.anightdazingzoroark.rift.server.entities;
 
 import com.anightdazingzoroark.rift.RiftInitialize;
 import com.anightdazingzoroark.rift.server.entities.creatures.TyrannosaurusEntity;
+import com.anightdazingzoroark.rift.server.entities.eggs.TyrannosaurusEgg;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -13,12 +14,19 @@ import net.minecraftforge.registries.RegistryObject;
 public class RiftEntityRegistry {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES,
         RiftInitialize.MODID);
-
+    //creatures
     public static final RegistryObject<EntityType<TyrannosaurusEntity>> TYRANNOSAURUS = ENTITY_TYPES
             .register("tyrannosaurus",
                     () -> EntityType.Builder.<TyrannosaurusEntity>of(TyrannosaurusEntity::new, MobCategory.CREATURE)
                             .sized(1.5F, 1.5F)
                             .build(new ResourceLocation(RiftInitialize.MODID, "tyrannosaurus").toString()));
+
+    //eggs
+    public static final RegistryObject<EntityType<TyrannosaurusEgg>> TYRANNOSAURUS_EGG = ENTITY_TYPES
+            .register("tyrannosaurus_egg",
+                    () -> EntityType.Builder.<TyrannosaurusEgg>of(TyrannosaurusEgg::new, MobCategory.AMBIENT)
+                            .sized(1F, 1F)
+                            .build(new ResourceLocation(RiftInitialize.MODID, "tyrannosaurus_egg").toString()));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

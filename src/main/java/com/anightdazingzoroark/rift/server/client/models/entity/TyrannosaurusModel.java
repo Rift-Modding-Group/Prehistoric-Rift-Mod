@@ -1,9 +1,8 @@
-package com.anightdazingzoroark.rift.client.models.entity;
+package com.anightdazingzoroark.rift.server.client.models.entity;
 
 import com.anightdazingzoroark.rift.RiftInitialize;
 import com.anightdazingzoroark.rift.server.entities.creatures.TyrannosaurusEntity;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
 import software.bernie.geckolib.core.animation.AnimationState;

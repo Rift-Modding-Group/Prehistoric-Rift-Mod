@@ -69,6 +69,10 @@ public class RiftItemRegistry {
     public static final RegistryObject<Item> TYRANNOSAURUS_ARM = ITEMS.register("tyrannosaurus_arm",
             () -> new Item(new Item.Properties()));
 
+    //eggs
+    public static final RegistryObject<Item> TYRANNOSAURUS_EGG = ITEMS.register("tyrannosaurus_egg",
+            () -> new EggItem(RiftEntityRegistry.TYRANNOSAURUS_EGG, new Item.Properties()));
+
     //spawn eggs
     public static final RegistryObject<Item> TYRANNOSAURUS_SPAWN_EGG = ITEMS.register("tyrannosaurus_spawn_egg",
             () -> new ForgeSpawnEggItem(RiftEntityRegistry.TYRANNOSAURUS,3670016, 2428687,

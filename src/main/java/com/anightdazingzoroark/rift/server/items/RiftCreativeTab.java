@@ -45,6 +45,9 @@ public class RiftCreativeTab {
 
             //tribute items
             event.accept(RiftItemRegistry.TYRANNOSAURUS_ARM);
+
+            //eggs
+            event.accept(RiftItemRegistry.TYRANNOSAURUS_EGG);
         }
         if (event.getTab() == RiftCreativeTab.RIFT_ENTITIES_TAB) {
             event.accept(RiftItemRegistry.TYRANNOSAURUS_SPAWN_EGG);

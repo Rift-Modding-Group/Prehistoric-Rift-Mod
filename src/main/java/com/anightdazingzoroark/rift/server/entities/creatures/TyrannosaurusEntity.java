@@ -1,6 +1,6 @@
 package com.anightdazingzoroark.rift.server.entities.creatures;
 
-import com.anightdazingzoroark.rift.client.sounds.RiftSoundRegistry;
+import com.anightdazingzoroark.rift.server.client.sounds.RiftSoundRegistry;
 import com.anightdazingzoroark.rift.server.entities.RiftCreature;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackAnimalsGoal;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackGoal;

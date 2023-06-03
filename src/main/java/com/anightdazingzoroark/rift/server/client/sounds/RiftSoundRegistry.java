@@ -1,4 +1,4 @@
-package com.anightdazingzoroark.rift.client.sounds;
+package com.anightdazingzoroark.rift.server.client.sounds;
 
 import com.anightdazingzoroark.rift.RiftInitialize;
 import net.minecraft.resources.ResourceLocation;
