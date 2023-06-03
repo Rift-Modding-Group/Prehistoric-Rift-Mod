@@ -19,8 +19,8 @@
 
   "item.rift.tyrannosaurus_spawn_egg": "Tyrannosaurus Spawn Egg",
 
-  "itemGroup.rift.items_tab": "Prehistoric Rift Items",
-  "itemGroup.rift.entities_tab": "Prehistoric Rift Entities",
+  "rift.items_tab": "Prehistoric Rift Items",
+  "rift.entities_tab": "Prehistoric Rift Entities",
 
   "rift.sound.subtitle.tyrannosaurus_ambient": "Tyrannosaurus growls",
   "rift.sound.subtitle.tyrannosaurus_hurt": "Tyrannosaurus growls in pain",

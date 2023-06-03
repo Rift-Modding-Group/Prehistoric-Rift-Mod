@@ -83,10 +83,14 @@ public class RiftCreature extends TamableAnimal {
     protected void pickUpItem(ItemEntity item) {
         ItemStack itemstack = item.getItem();
         ItemStack itemstack1 = this.equipItemIfPossible(itemstack.copy());
-        if (getFavoriteFoodItems().test(item) || getFavoriteTreats().test(item)) {
+        if (!itemstack1.isEmpty() && (getFavoriteFoodItems().test(item) || getFavoriteTreats().test(item))) {
             this.onItemPickup(item);
             this.take(item, itemstack1.getCount());
-            this.getMainHandItem().shrink(1);
+            itemstack.shrink(itemstack1.getCount());
+            this.getMainHandItem().setCount(0);
+            if (itemstack.isEmpty()) {
+                item.discard();
+            }
         }
     }
     

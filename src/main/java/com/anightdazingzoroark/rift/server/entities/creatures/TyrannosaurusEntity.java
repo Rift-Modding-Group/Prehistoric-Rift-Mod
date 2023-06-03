@@ -68,8 +68,8 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new TyrannosaurusRoarGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(5, new RiftPickUpItems(this, getFavoriteFoodItems()));
         this.targetSelector.addGoal(5, new RiftPickUpItems(this, getFavoriteTreats()));
+        this.targetSelector.addGoal(5, new RiftPickUpItems(this, getFavoriteFoodItems()));
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
     }

@@ -17,7 +17,7 @@ public class RiftEntityRegistry {
     public static final RegistryObject<EntityType<TyrannosaurusEntity>> TYRANNOSAURUS = ENTITY_TYPES
             .register("tyrannosaurus",
                     () -> EntityType.Builder.<TyrannosaurusEntity>of(TyrannosaurusEntity::new, MobCategory.CREATURE)
-                            .sized(1F, 1F)
+                            .sized(1.5F, 1.5F)
                             .build(new ResourceLocation(RiftInitialize.MODID, "tyrannosaurus").toString()));
 
     public static void register(IEventBus eventBus) {
