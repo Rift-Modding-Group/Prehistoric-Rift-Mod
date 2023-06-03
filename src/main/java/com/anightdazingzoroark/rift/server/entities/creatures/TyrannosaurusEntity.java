@@ -6,6 +6,7 @@ import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackAnimalsGoal;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackGoal;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftPickUpItems;
 import com.anightdazingzoroark.rift.server.items.RiftItemRegistry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -191,6 +193,10 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
         return (entity) -> {
             return entity.isAlive() && entity.getItem().is(RiftItemRegistry.Tags.TYRANNOSAURUS_FAVORITE_TREATS);
         };
+    }
+
+    protected @NotNull Vec3i getPickupReach() {
+        return new Vec3i(3, 3, 3);
     }
 
     public boolean isRoaring() {
