@@ -9,10 +9,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnGroupData;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.level.Level;
@@ -39,15 +36,12 @@ public class TyrannosaurusEgg extends RiftEgg {
         super.tick();
         this.setHatchTime(this.getHatchTime() - 20);
         if (this.getHatchTime() <= 0) {
-            TyrannosaurusEntity tyrannosaurus = this.convertTo(RiftEntityRegistry.TYRANNOSAURUS.get(), true);
+            TyrannosaurusEntity tyrannosaurus = this.hatchTo(RiftEntityRegistry.TYRANNOSAURUS.get());
             if (tyrannosaurus != null) {
-                tyrannosaurus.setBaby(true);
-                tyrannosaurus.setAge(-24000);
                 tyrannosaurus.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20.0D);
                 tyrannosaurus.setHealth(20.0F);
                 tyrannosaurus.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(6.0D);
                 tyrannosaurus.goalSelector.addGoal(4, tyrannosaurus.attackAnimalsGoal);
-                tyrannosaurus.setVariant(new Random().nextInt(4));
             }
         }
     }

@@ -94,7 +94,7 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
-//        System.out.println(this.getAge());
+        System.out.println(this.getAge());
         //for changing attributes when roaring
         if (!this.isRoaring()) {
             this.goalSelector.addGoal(2, this.attackGoal);

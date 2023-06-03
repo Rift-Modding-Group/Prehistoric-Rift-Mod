@@ -5,18 +5,18 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
+
+import java.util.Random;
 
 public class RiftEgg extends TamableAnimal implements GeoAnimatable {
     private static final EntityDataAccessor<Integer> EGGTYPE = SynchedEntityData.defineId(RiftEgg.class, EntityDataSerializers.INT);
@@ -29,6 +29,32 @@ public class RiftEgg extends TamableAnimal implements GeoAnimatable {
 
     protected RiftEgg(EntityType<? extends TamableAnimal> p_21803_, Level p_21804_) {
         super(p_21803_, p_21804_);
+    }
+
+    public <T extends RiftCreature> T hatchTo(EntityType<T> entity) {
+        if (this.isRemoved()) {
+            return (T)null;
+        }
+        else {
+            T t = entity.create(this.level);
+            if (t == null) {
+                return (T)null;
+            }
+            else {
+                t.copyPosition(this);
+                t.setBaby(true);
+                t.setVariant(new Random().nextInt(4));
+                if (this.hasCustomName()) {
+                    t.setCustomName(this.getCustomName());
+                    t.setCustomNameVisible(this.isCustomNameVisible());
+                }
+
+                this.level.addFreshEntity(t);
+
+                this.discard();
+                return t;
+            }
+        }
     }
 
     public int getEggType() {
