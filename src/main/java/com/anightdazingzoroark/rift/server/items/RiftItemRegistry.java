@@ -76,6 +76,7 @@ public class RiftItemRegistry {
 
     public static class Tags {
         public static final TagKey<Item> TYRANNOSAURUS_FAVORITE_FOOD = ItemTags.create(new ResourceLocation(MODID,"tyrannosaurus_favorite_foods"));
+        public static final TagKey<Item> TYRANNOSAURUS_FAVORITE_TREATS = ItemTags.create(new ResourceLocation(MODID,"tyrannosaurus_favorite_treats"));
     }
 
     public static void register(IEventBus eventBus) {

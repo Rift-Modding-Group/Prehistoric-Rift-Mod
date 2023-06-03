@@ -189,7 +189,7 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
     @Override
     public Predicate<ItemEntity> getFavoriteTreats() {
         return (entity) -> {
-            return entity.isAlive() && entity.getItem().getItem() == RiftItemRegistry.FLESH_TREAT.get();
+            return entity.isAlive() && entity.getItem().is(RiftItemRegistry.Tags.TYRANNOSAURUS_FAVORITE_TREATS);
         };
     }
 

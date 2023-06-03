@@ -4,11 +4,9 @@ import com.anightdazingzoroark.rift.server.entities.RiftCreature;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Predicate;
 
