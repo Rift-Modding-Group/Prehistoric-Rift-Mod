@@ -8,7 +8,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -20,6 +19,7 @@ import java.util.Random;
 
 public class RiftEgg extends TamableAnimal implements GeoAnimatable {
     private static final EntityDataAccessor<Integer> EGGTYPE = SynchedEntityData.defineId(RiftEgg.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> HATCHTIME = SynchedEntityData.defineId(RiftEgg.class, EntityDataSerializers.INT);
     private AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -65,9 +65,18 @@ public class RiftEgg extends TamableAnimal implements GeoAnimatable {
         this.entityData.set(EGGTYPE, type);
     }
 
+    public int getHatchTime() {
+        return this.entityData.get(HATCHTIME);
+    }
+
+    public void setHatchTime(int time) {
+        this.entityData.set(HATCHTIME, time);
+    }
+
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(EGGTYPE, 0);
+        this.entityData.define(HATCHTIME, 0);
     }
 
     public void addAdditionalSaveData(CompoundTag compoundTag) {

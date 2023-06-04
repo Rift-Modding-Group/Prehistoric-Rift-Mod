@@ -1,7 +1,7 @@
 package com.anightdazingzoroark.rift;
 
-import com.anightdazingzoroark.rift.server.client.renderer.RiftRendererRegistry;
-import com.anightdazingzoroark.rift.server.client.sounds.RiftSoundRegistry;
+import com.anightdazingzoroark.rift.client.renderer.RiftRendererRegistry;
+import com.anightdazingzoroark.rift.client.sounds.RiftSoundRegistry;
 import com.anightdazingzoroark.rift.server.entities.RiftEntityRegistry;
 import com.anightdazingzoroark.rift.server.items.RiftCreativeTab;
 import com.anightdazingzoroark.rift.server.items.RiftItemRegistry;

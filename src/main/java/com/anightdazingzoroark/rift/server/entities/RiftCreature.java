@@ -72,14 +72,9 @@ public class RiftCreature extends TamableAnimal {
         super.readAdditionalSaveData(compoundTag);
         this.setVariant(compoundTag.getInt("Variant"));
     }
-
-    public boolean canTakeItem(ItemStack item) {
-        return true;
-    }
     public boolean canPickUpLoot() {
         return true;
     }
-
     protected void pickUpItem(ItemEntity item) {
         ItemStack itemstack = item.getItem();
         ItemStack itemstack1 = this.equipItemIfPossible(itemstack.copy());

@@ -1,12 +1,16 @@
 package com.anightdazingzoroark.rift.server.entities.creatures;
 
-import com.anightdazingzoroark.rift.server.client.sounds.RiftSoundRegistry;
+import com.anightdazingzoroark.rift.client.sounds.RiftSoundRegistry;
+import com.anightdazingzoroark.rift.server.blocks.RiftBlockRegistry;
 import com.anightdazingzoroark.rift.server.entities.RiftCreature;
 import com.anightdazingzoroark.rift.server.entities.RiftEgg;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackAnimalsGoal;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftAttackGoal;
 import com.anightdazingzoroark.rift.server.entities.goals.RiftPickUpItems;
 import com.anightdazingzoroark.rift.server.items.RiftItemRegistry;
+import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -26,8 +30,12 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +49,9 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
@@ -94,7 +104,6 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
-        System.out.println(this.getAge());
         //for changing attributes when roaring
         if (!this.isRoaring()) {
             this.goalSelector.addGoal(2, this.attackGoal);
@@ -139,6 +148,10 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
         else {
             this.goalSelector.addGoal(4, this.attackAnimalsGoal);
         }
+    }
+
+    public boolean canTakeItem(ItemStack item) {
+        return item.is(RiftItemRegistry.Tags.TYRANNOSAURUS_FAVORITE_FOOD) || item.is(RiftItemRegistry.Tags.TYRANNOSAURUS_FAVORITE_TREATS);
     }
 
     @Override
@@ -260,16 +273,25 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
     class TyrannosaurusRoarGoal extends Goal {
         protected final TyrannosaurusEntity mob;
         private int roarTick;
-        private int roarChance;
+        private int roarCooldown;
+        private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList<>();
 
         public TyrannosaurusRoarGoal(TyrannosaurusEntity mob) {
             this.mob = mob;
-            this.roarChance = new Random().nextInt(3);
+            this.roarCooldown = 0;
         }
 
         @Override
         public boolean canUse() {
-            return this.mob.getLastHurtByMob() != null && this.roarTick == 0 && this.roarChance == 0;
+            this.roarCooldown++;
+            if (this.mob.getLastHurtByMob() != null && this.roarCooldown >= 100) {
+                int roarChance = new Random().nextInt(3);
+                this.roarCooldown = 0;
+                return this.mob.getLastHurtByMob() != null && this.roarTick == 0 && roarChance == 0 && !this.mob.isBaby();
+            }
+            else {
+                return false;
+            }
         }
 
         @Override
@@ -299,6 +321,7 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
                             livingentity.hurt(damageSources().mobAttack(this.mob), 2.0F);
                         }
                         this.strongKnockback(livingentity);
+                        this.destroyBlocks();
                     }
                     Vec3 vec3 = this.mob.getBoundingBox().getCenter();
                     for(int i = 0; i < 40; ++i) {
@@ -320,6 +343,20 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
             double d1 = target.getZ() - this.mob.getZ();
             double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
             target.push(d0 / d2 * 8.0D, 0.2D, d1 / d2 * 8.0D);
+        }
+
+        private void destroyBlocks() {
+            for (double x = this.mob.getX() - 8D; x <= this.mob.getX() + 8D; x++) {
+                for (double y = this.mob.getY(); y <= this.mob.getY() + 8D; y++) {
+                    for (double z = this.mob.getZ() - 8D; z <= this.mob.getZ() + 8D; z++) {
+                        BlockPos blockPos = BlockPos.containing(x, y, z);
+                        BlockState blockstate = this.mob.level.getBlockState(blockPos);
+                        if (!blockstate.isAir() && blockstate.is(RiftBlockRegistry.Tags.WOOD_AND_WEAKER)) {
+                          this.mob.level.destroyBlock(blockPos, true, this.mob);
+                      }
+                    }
+                }
+            }
         }
     }
 }

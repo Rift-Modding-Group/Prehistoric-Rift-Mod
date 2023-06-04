@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Random;
 
 public class TyrannosaurusEgg extends RiftEgg {
-    private static final EntityDataAccessor<Integer> HATCHTIME = SynchedEntityData.defineId(RiftEgg.class, EntityDataSerializers.INT);
 
     public TyrannosaurusEgg(EntityType<? extends TamableAnimal> p_21803_, Level p_21804_) {
         super(p_21803_, p_21804_);
@@ -28,6 +27,7 @@ public class TyrannosaurusEgg extends RiftEgg {
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setEggType(0);
+        this.setHatchTime(10*20);
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
@@ -44,19 +44,6 @@ public class TyrannosaurusEgg extends RiftEgg {
                 tyrannosaurus.goalSelector.addGoal(4, tyrannosaurus.attackAnimalsGoal);
             }
         }
-    }
-
-    public int getHatchTime() {
-        return this.entityData.get(HATCHTIME);
-    }
-
-    public void setHatchTime(int time) {
-        this.entityData.set(HATCHTIME, time);
-    }
-
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(HATCHTIME, 10 * 20);
     }
 
     public void addAdditionalSaveData(CompoundTag compoundTag) {

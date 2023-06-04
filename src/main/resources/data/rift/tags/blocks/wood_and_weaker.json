@@ -1,0 +1,26 @@
+{
+  "values": [
+    "minecraft:bamboo",
+    "minecraft:cactus",
+    "#minecraft:beds",
+    "#minecraft:candles",
+    "#minecraft:cave_vines",
+    "#minecraft:corals",
+    "#minecraft:crops",
+    "#minecraft:coral_blocks",
+    "#minecraft:dirt",
+    "#minecraft:flowers",
+    "#minecraft:ice",
+    "#minecraft:replaceable_plants",
+    "#minecraft:saplings",
+    "#minecraft:wall_corals",
+    "#minecraft:wool",
+    "#minecraft:wool_carpets",
+    "#minecraft:mineable/axe",
+    "#minecraft:mineable/hoe",
+    "#minecraft:mineable/shovel",
+    "#forge:barrels",
+    "#forge:glass",
+    "#forge:glass_panes"
+  ]
+}

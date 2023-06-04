@@ -1,7 +1,7 @@
-package com.anightdazingzoroark.rift.server.client.renderer.entity;
+package com.anightdazingzoroark.rift.client.renderer.entity;
 
 import com.anightdazingzoroark.rift.RiftInitialize;
-import com.anightdazingzoroark.rift.server.client.models.entity.EggModel;
+import com.anightdazingzoroark.rift.client.models.entity.EggModel;
 import com.anightdazingzoroark.rift.server.entities.RiftEgg;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;

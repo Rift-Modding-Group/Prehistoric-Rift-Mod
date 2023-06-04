@@ -1,4 +1,4 @@
-package com.anightdazingzoroark.rift.server.client.models.entity;
+package com.anightdazingzoroark.rift.client.models.entity;
 
 import com.anightdazingzoroark.rift.RiftInitialize;
 import com.anightdazingzoroark.rift.server.entities.creatures.TyrannosaurusEntity;
