@@ -78,7 +78,7 @@ public class RiftEgg extends TamableAnimal implements GeoAnimatable {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
 //        System.out.println(this.getHatchTime()/20);
         Minecraft.getInstance().setScreen(new EggInfo(this));
-        return super.mobInteract(player, hand);
+        return InteractionResult.sidedSuccess(this.level.isClientSide);
     }
 
     public int getEggType() {
