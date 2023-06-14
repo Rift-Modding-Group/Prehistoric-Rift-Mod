@@ -274,7 +274,6 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
         protected final TyrannosaurusEntity mob;
         private int roarTick;
         private int roarCooldown;
-        private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList<>();
 
         public TyrannosaurusRoarGoal(TyrannosaurusEntity mob) {
             this.mob = mob;
@@ -283,10 +282,8 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
 
         @Override
         public boolean canUse() {
-            this.roarCooldown++;
             if (this.mob.getLastHurtByMob() != null && this.roarCooldown >= 100) {
                 int roarChance = new Random().nextInt(3);
-                this.roarCooldown = 0;
                 return this.mob.getLastHurtByMob() != null && this.roarTick == 0 && roarChance == 0 && !this.mob.isBaby();
             }
             else {
@@ -302,11 +299,13 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
         @Override
         public void start() {
             this.mob.setRoaring(true);
+            this.roarCooldown = 0;
         }
 
         @Override
         public void stop() {
             this.roarTick = 0;
+            this.roarCooldown = 0;
         }
 
         @Override
@@ -335,6 +334,7 @@ public class TyrannosaurusEntity extends RiftCreature implements GeoEntity {
             if (this.roarTick > 20) {
                 this.mob.setRoaring(false);
             }
+            this.roarCooldown++;
             this.roarTick++;
         }
 

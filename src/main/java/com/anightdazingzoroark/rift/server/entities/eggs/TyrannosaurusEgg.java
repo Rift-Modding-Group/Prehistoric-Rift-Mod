@@ -27,7 +27,7 @@ public class TyrannosaurusEgg extends RiftEgg {
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setEggType(0);
-        this.setHatchTime(10*20);
+        this.setHatchTime(180*20);
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 

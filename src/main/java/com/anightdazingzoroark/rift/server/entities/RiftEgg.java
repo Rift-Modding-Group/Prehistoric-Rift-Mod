@@ -1,13 +1,20 @@
 package com.anightdazingzoroark.rift.server.entities;
 
+import com.anightdazingzoroark.rift.RiftInitialize;
+import com.anightdazingzoroark.rift.client.ui.EggInfo;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -55,6 +62,23 @@ public class RiftEgg extends TamableAnimal implements GeoAnimatable {
                 return t;
             }
         }
+    }
+
+    public boolean hurt(DamageSource damageSource, float damage) {
+        if (this.isInvulnerableTo(damageSource)) {
+            return false;
+        }
+        else {
+            this.discard();
+            return true;
+        }
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+//        System.out.println(this.getHatchTime()/20);
+        Minecraft.getInstance().setScreen(new EggInfo(this));
+        return super.mobInteract(player, hand);
     }
 
     public int getEggType() {

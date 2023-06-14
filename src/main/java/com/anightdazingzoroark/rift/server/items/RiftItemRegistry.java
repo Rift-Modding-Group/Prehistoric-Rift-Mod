@@ -71,7 +71,7 @@ public class RiftItemRegistry {
 
     //eggs
     public static final RegistryObject<Item> TYRANNOSAURUS_EGG = ITEMS.register("tyrannosaurus_egg",
-            () -> new EggItem(RiftEntityRegistry.TYRANNOSAURUS_EGG, new Item.Properties()));
+            () -> new EggItem(RiftEntityRegistry.TYRANNOSAURUS_EGG, new Item.Properties().stacksTo(1)));
 
     //spawn eggs
     public static final RegistryObject<Item> TYRANNOSAURUS_SPAWN_EGG = ITEMS.register("tyrannosaurus_spawn_egg",
