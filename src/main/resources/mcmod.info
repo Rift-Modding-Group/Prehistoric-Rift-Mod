@@ -1,0 +1,16 @@
+[
+{
+  "modid": "rift",
+  "name": "Prehistoric Rift",
+  "description": " A Minecraft Java mod that aims to add dinosaurs and expand upon gameplay. Formerly on Bedrock.",
+  "version": "0.0.1",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["ANightDazingZoroark"],
+  "credits": "Authors of this project",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "rift:item/cooked_exotic_meat"
+    "layer0": "rift:items/cooked_exotic_meat"
   }
 }

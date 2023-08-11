@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "rift:item/tyrannosaurus_arm"
+    "layer0": "rift:items/tyrannosaurus_arm"
   }
 }
