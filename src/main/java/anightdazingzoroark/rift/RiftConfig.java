@@ -9,6 +9,8 @@ public class RiftConfig {
     public static String[] tyrannosaurusSpawnBiomes = {"minecraft:plains", "minecraft:extreme_hills", "minecraft:smaller_extreme_hills"};
     public static String[] tyrannosaurusFavoriteFood = {"minecraft:beef", "minecraft:cooked_beef", "minecraft:porkchop", "minecraft:cooked_porkchop", "minecraft:chicken", "minecraft:cooked_chicken", "minecraft:mutton", "minecraft:cooked_mutton", "minecraft:rabbit", "minecraft:cooked_rabbit", "minecraft:rotten_flesh", "rift:raw_exotic_meat", "rift:cooked_exotic_meat"};
     public static String[] tyrannosaurusTargets = {"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule"};
+    public static boolean tyrannosaurusRoarTargetsWhitelist = false;
+    public static String[] tyrannosaurusRoarTargetBlacklist = {"rift:tyrannosaurus"};
 
     public static void readConfig() {
         Configuration cfg = RiftInitialize.config;
@@ -31,5 +33,7 @@ public class RiftConfig {
         tyrannosaurusSpawnBiomes = config.getStringList("Tyrannosaurus Spawn Biomes", "Tyrannosaurus", new String[]{"minecraft:plains", "minecraft:extreme_hills", "minecraft:smaller_extreme_hills"}, "List of biomes Tyrannosauruses will spawn in");
         tyrannosaurusFavoriteFood = config.getStringList("Tyrannosaurus Favorite Food", "Tyrannosaurus", new String[]{"minecraft:beef", "minecraft:cooked_beef", "minecraft:porkchop", "minecraft:cooked_porkchop", "minecraft:chicken", "minecraft:cooked_chicken", "minecraft:mutton", "minecraft:cooked_mutton", "minecraft:rabbit", "minecraft:cooked_rabbit", "minecraft:rotten_flesh", "rift:raw_exotic_meat", "rift:cooked_exotic_meat"}, "List of foods Tyrannosaurus will eat (when tamed) or pick up when on the ground");
         tyrannosaurusTargets = config.getStringList("Tyrannosaurus Targets", "Tyrannosaurus", new String[]{"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule"}, "Identifiers of mobs that the Tyrannosaurus will actively hunt");
+        tyrannosaurusRoarTargetsWhitelist = config.getBoolean("Use Tyrannosaurus roar blacklist as a whitelist", "Tyrannosaurus", false, "Turn tyrannosaurusRoarTargetBlacklist into a whitelist of affected mobs");
+        tyrannosaurusRoarTargetBlacklist = config.getStringList("Mobs unaffected by Tyrannosaurus roar", "Tyrannosaurus", new String[]{"rift:tyrannosaurus"}, "Mobs within this list are immune to this mobs knockback roar");
     }
 }
