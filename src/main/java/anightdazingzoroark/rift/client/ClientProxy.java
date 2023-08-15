@@ -1,6 +1,6 @@
 package anightdazingzoroark.rift.client;
 
-import anightdazingzoroark.rift.client.renderer.RiftRenderers;
+import anightdazingzoroark.rift.client.renderer.EntityRenderer;
 import anightdazingzoroark.rift.server.ServerProxy;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -19,7 +19,7 @@ public class ClientProxy extends ServerProxy {
     @Override
     public void preInit(FMLPreInitializationEvent e) {
         super.preInit(e);
-        RiftRenderers.registerRenderers();
+        EntityRenderer.registerRenderers();
     }
 
     @SideOnly(Side.CLIENT)

@@ -5,6 +5,8 @@ import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Level;
 
 public class RiftConfig {
+    public static String[] weakerThanWood = {"oreDic:logWood", "oreDic:plankWood", "oreDic:slabWood", "oreDic:stairWood", "oreDic:fenceWood", "oreDic:fenceGateWood", "oreDic:doorWood", "oreDic:treeSapling", "oreDic:treeLeaves", "oreDic:vine", "oreDic:dirt", "oreDic:grass", "oreDic:gravel", "oreDic:sand", "oreDic:torch", "oreDic:workbench", "oreDic:blockSlime", "oreDic:blockGlassColorless", "oreDic:blockGlass", "oreDic:paneGlassColorless", "oreDic:paneGlass", "oreDic:wool", "oreDic:chestWood"};
+
     public static int tyrannosaurusSpawnWeight = 6;
     public static String[] tyrannosaurusSpawnBiomes = {"minecraft:plains", "minecraft:extreme_hills", "minecraft:smaller_extreme_hills"};
     public static String[] tyrannosaurusFavoriteFood = {"minecraft:beef", "minecraft:cooked_beef", "minecraft:porkchop", "minecraft:cooked_porkchop", "minecraft:chicken", "minecraft:cooked_chicken", "minecraft:mutton", "minecraft:cooked_mutton", "minecraft:rabbit", "minecraft:cooked_rabbit", "minecraft:rotten_flesh", "rift:raw_exotic_meat", "rift:cooked_exotic_meat"};
@@ -29,6 +31,8 @@ public class RiftConfig {
     }
 
     public static void init(Configuration config) {
+        weakerThanWood = config.getStringList("List of oreDic tags or Blocks weaker than wood", "Misc", new String[]{"oreDic:logWood", "oreDic:plankWood", "oreDic:slabWood", "oreDic:stairWood", "oreDic:fenceWood", "oreDic:fenceGateWood", "oreDic:doorWood", "oreDic:treeSapling", "oreDic:treeLeaves", "oreDic:vine", "oreDic:dirt", "oreDic:grass", "oreDic:gravel", "oreDic:sand", "oreDic:torch", "oreDic:workbench", "oreDic:blockSlime", "oreDic:blockGlassColorless", "oreDic:blockGlass", "oreDic:paneGlassColorless", "oreDic:paneGlass", "oreDic:wool", "oreDic:chestWood"}, "Blocks and oreDic tags here will be considered weaker than wood, making them breakable by the Tyrannosaurus' roar and the like");
+
         tyrannosaurusSpawnWeight = config.getInt("Tyrannosaurus Spawn Weight", "Tyrannosaurus", 6, 1, 100000000, "Spawn weight of Tyrannosaurus. Higher value = more common");
         tyrannosaurusSpawnBiomes = config.getStringList("Tyrannosaurus Spawn Biomes", "Tyrannosaurus", new String[]{"minecraft:plains", "minecraft:extreme_hills", "minecraft:smaller_extreme_hills"}, "List of biomes Tyrannosauruses will spawn in");
         tyrannosaurusFavoriteFood = config.getStringList("Tyrannosaurus Favorite Food", "Tyrannosaurus", new String[]{"minecraft:beef", "minecraft:cooked_beef", "minecraft:porkchop", "minecraft:cooked_porkchop", "minecraft:chicken", "minecraft:cooked_chicken", "minecraft:mutton", "minecraft:cooked_mutton", "minecraft:rabbit", "minecraft:cooked_rabbit", "minecraft:rotten_flesh", "rift:raw_exotic_meat", "rift:cooked_exotic_meat"}, "List of foods Tyrannosaurus will eat (when tamed) or pick up when on the ground");
