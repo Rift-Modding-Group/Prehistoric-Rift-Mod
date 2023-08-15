@@ -1,21 +1,26 @@
 package anightdazingzoroark.rift.server.entity.creature;
 
 import anightdazingzoroark.rift.RiftConfig;
+import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.ai.RiftAttack;
 import anightdazingzoroark.rift.server.entity.ai.RiftPickUpItems;
 import anightdazingzoroark.rift.server.entity.ai.RiftTyrannosaurusRoar;
+import com.google.common.base.Predicate;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.*;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
@@ -25,9 +30,61 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.List;
 
 public class Tyrannosaurus extends RiftCreature implements IAnimatable {
+    private static final Predicate<EntityLivingBase> WEAKNESS_BLACKLIST = new Predicate<EntityLivingBase>() {
+        @Override
+        public boolean apply(@Nullable EntityLivingBase entity) {
+            List<String> blacklist = Arrays.asList(RiftConfig.apexAffectedBlacklist);
+            if (!blacklist.isEmpty()) {
+                if (entity instanceof EntityPlayer) {
+                    return entity.isEntityAlive() && !blacklist.contains("minecraft:player") && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+                else if (entity instanceof RiftCreature) {
+                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+                else {
+                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+            }
+            else {
+                if (entity instanceof RiftCreature) {
+                    return entity.isEntityAlive() && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+                else {
+                    return entity.isEntityAlive() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+            }
+        }
+    };
+    private static final Predicate<EntityLivingBase> WEAKNESS_WHITELIST = new Predicate<EntityLivingBase>() {
+        @Override
+        public boolean apply(@Nullable EntityLivingBase entity) {
+            List<String> blacklist = Arrays.asList(RiftConfig.apexAffectedBlacklist);
+            if (!blacklist.isEmpty()) {
+                if (entity instanceof EntityPlayer) {
+                    return entity.isEntityAlive() && blacklist.contains("minecraft:player") && entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+                else if (entity instanceof RiftCreature) {
+                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+                else {
+                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+            }
+            else {
+                if (entity instanceof RiftCreature) {
+                    return entity.isEntityAlive() && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+                else {
+                    return entity.isEntityAlive() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                }
+            }
+        }
+    };
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROAR = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private AnimationFactory factory = new AnimationFactory(this);
@@ -44,6 +101,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         super.entityInit();
         this.dataManager.register(CAN_ROAR, Boolean.valueOf(true));
         this.dataManager.register(ROARING, Boolean.valueOf(false));
+        this.dataManager.register(APEX, Boolean.valueOf(true));
     }
 
     @Override
@@ -77,14 +135,26 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageCanRoar();
+        this.manageApplyWeakness();
     }
 
-    public void manageCanRoar() {
+    private void manageCanRoar() {
         this.roarCooldownTicks++;
         if (this.roarCooldownTicks >= 200) {
             this.setCanRoar(true);
             this.roarCooldownTicks = 0;
         }
+    }
+
+    private void manageApplyWeakness() {
+        Predicate<EntityLivingBase> targetPredicate = RiftConfig.tyrannosaurusRoarTargetsWhitelist ? WEAKNESS_WHITELIST : WEAKNESS_BLACKLIST;
+        for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(), targetPredicate)) {
+            entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
+        }
+    }
+
+    protected AxisAlignedBB getTargetableArea() {
+        return this.getEntityBoundingBox().grow(16.0D, 16.0D, 16.0D);
     }
 
     @Override
@@ -103,6 +173,17 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             this.onItemPickup(itemEntity, itemstack.getCount());
             itemEntity.setDead();
         }
+    }
+
+    @Override
+    public boolean canPickUpLoot() {
+        return true;
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus");
     }
 
     public void setRoaring(boolean value) {

@@ -1,9 +1,13 @@
 package anightdazingzoroark.rift.server;
 
+import anightdazingzoroark.rift.RiftConfig;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RiftUtil {
     public static String[] removeElementFromArray(String[] array, String element) {
@@ -22,12 +26,28 @@ public class RiftUtil {
     public static boolean blockInOreDicType(Block block, String oreDicType) {
         NonNullList<ItemStack> blocksInOreDicType = OreDictionary.getOres(oreDicType);
         for (ItemStack item : blocksInOreDicType) {
-            return item.getItem() == new ItemStack(block).getItem();
+            if (item.getItem().equals(new ItemStack(block).getItem())) return true;
         }
         return false;
     }
 
     public static boolean blockWeakerThanWood(Block block) {
-        return blockInOreDicType(block, "logWood") || blockInOreDicType(block, "plankWood") || blockInOreDicType(block, "slabWood") || blockInOreDicType(block, "stairWood") || blockInOreDicType(block, "fenceWood") || blockInOreDicType(block, "fenceGateWood") || blockInOreDicType(block, "doorWood") || blockInOreDicType(block, "treeSapling") || blockInOreDicType(block, "treeLeaves") || blockInOreDicType(block, "vine") || blockInOreDicType(block, "dirt") || blockInOreDicType(block, "grass") || blockInOreDicType(block, "gravel") || blockInOreDicType(block, "sand") || blockInOreDicType(block, "torch") || blockInOreDicType(block, "workbench") || blockInOreDicType(block, "blockSlime") || blockInOreDicType(block, "blockGlassColorless") || blockInOreDicType(block, "blockGlass") || blockInOreDicType(block, "paneGlassColorless") || blockInOreDicType(block, "paneGlass") || blockInOreDicType(block, "wool") || blockInOreDicType(block, "chestWood");
+        List<String> oreDicList = new ArrayList<>();
+        List<String> blockList = new ArrayList<>();
+        for (String entry : RiftConfig.weakerThanWood) {
+            if (entry.contains("oreDic:")) {
+                oreDicList.add(entry.replace("oreDic:", ""));
+            }
+            if (entry.contains("block:")) {
+                blockList.add(entry.replace("block:", ""));
+            }
+        }
+        for (String oreDicEntry : oreDicList) {
+            if (blockInOreDicType(block, oreDicEntry)) return true;
+        }
+        for (String blockEntry : blockList) {
+            if (Block.getBlockFromName(blockEntry).equals(block)) return true;
+        }
+        return false;
     }
 }

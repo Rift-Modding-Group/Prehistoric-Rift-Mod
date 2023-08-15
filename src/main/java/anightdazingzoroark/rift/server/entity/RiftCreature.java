@@ -1,5 +1,6 @@
 package anightdazingzoroark.rift.server.entity;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -16,6 +17,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 
 public class RiftCreature extends EntityTameable {
+    public static final DataParameter<Boolean> APEX = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     public RiftCreature(World worldIn) {
@@ -69,14 +71,13 @@ public class RiftCreature extends EntityTameable {
         this.dataManager.set(ATTACKING, Boolean.valueOf(value));
     }
 
+    public boolean isApexPredator() {
+        return this.dataManager.get(APEX).booleanValue();
+    }
+
     @Nullable
     @Override
     public EntityAgeable createChild(EntityAgeable ageable) {
         return null;
-    }
-
-    @Override
-    public boolean canPickUpLoot() {
-        return true;
     }
 }

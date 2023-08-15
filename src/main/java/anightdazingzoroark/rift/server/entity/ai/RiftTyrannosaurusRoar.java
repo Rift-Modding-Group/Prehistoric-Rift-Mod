@@ -11,17 +11,12 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.event.terraingen.OreGenEvent;
-import org.lwjgl.Sys;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -29,32 +24,47 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import static anightdazingzoroark.rift.server.RiftUtil.removeElementFromArray;
-
 public class RiftTyrannosaurusRoar extends EntityAIBase {
-    private static final Predicate<EntityLiving> ROAR_BLACKLIST = new Predicate<EntityLiving>() {
+    private static final Predicate<EntityLivingBase> ROAR_BLACKLIST = new Predicate<EntityLivingBase>() {
         @Override
-        public boolean apply(@Nullable EntityLiving entity) {
-            String[] blacklist = RiftConfig.tyrannosaurusRoarTargetBlacklist;
-            blacklist = removeElementFromArray(blacklist, "minecraft:player");
-            return entity.isEntityAlive() && !Arrays.asList(blacklist).contains(EntityList.getKey(entity).toString());
+        public boolean apply(@Nullable EntityLivingBase entity) {
+            List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
+            if (!blacklist.isEmpty()) {
+                if (entity instanceof EntityPlayer) {
+                    return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
+                }
+                else {
+                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString());
+                }
+            }
+            else {
+                return entity.isEntityAlive();
+            }
         }
     };
-    private static final Predicate<EntityLiving> ROAR_WHITELIST = new Predicate<EntityLiving>() {
+    private static final Predicate<EntityLivingBase> ROAR_WHITELIST = new Predicate<EntityLivingBase>() {
         @Override
-        public boolean apply(@Nullable EntityLiving entity) {
-            String[] blacklist = RiftConfig.tyrannosaurusRoarTargetBlacklist;
-            blacklist = removeElementFromArray(blacklist, "minecraft:player");
-            return entity.isEntityAlive() && Arrays.asList(blacklist).contains(EntityList.getKey(entity).toString());
+        public boolean apply(@Nullable EntityLivingBase entity) {
+            List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
+
+            if (!blacklist.isEmpty()) {
+                if (entity instanceof EntityPlayer) {
+                    return entity.isEntityAlive() && blacklist.contains("minecraft:player");
+                }
+                else {
+                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString());
+                }
+            }
+            else {
+                return entity.isEntityAlive();
+            }
         }
     };
     protected final Tyrannosaurus mob;
-    private int useTick;
     private int roarTick;
 
     public RiftTyrannosaurusRoar(Tyrannosaurus mob) {
         this.mob = mob;
-        this.useTick = 0;
         this.roarTick = 0;
     }
 
@@ -84,15 +94,9 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
     public void updateTask() {
         this.roarTick++;
         if (this.roarTick == 10 && this.mob.isEntityAlive()) {
-            Predicate<EntityLiving> targetPredicate = RiftConfig.tyrannosaurusRoarTargetsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
-            for (Entity entity : this.mob.world.getEntitiesWithinAABB(EntityLiving.class, this.getTargetableArea(12.0D), targetPredicate)) {
+            Predicate<EntityLivingBase> targetPredicate = RiftConfig.tyrannosaurusRoarTargetsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
+            for (Entity entity : this.mob.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(12.0D), targetPredicate)) {
                 if (entity != this.mob) {
-                    entity.attackEntityFrom(DamageSource.causeMobDamage(this.mob), 2f);
-                    this.strongKnockback(entity);
-                }
-            }
-            if ((Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist).contains("minecraft:player") && RiftConfig.tyrannosaurusRoarTargetsWhitelist) || (!Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist).contains("minecraft:player") && !RiftConfig.tyrannosaurusRoarTargetsWhitelist)) {
-                for (EntityPlayer entity : this.mob.world.getEntitiesWithinAABB(EntityPlayer.class, this.getTargetableArea(12.0D), null)) {
                     entity.attackEntityFrom(DamageSource.causeMobDamage(this.mob), 2f);
                     this.strongKnockback(entity);
                 }
