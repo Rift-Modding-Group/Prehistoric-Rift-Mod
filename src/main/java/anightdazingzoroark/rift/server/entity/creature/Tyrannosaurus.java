@@ -22,6 +22,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Tyrannosaurus extends RiftCreature implements IAnimatable {
+    public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus"));
     private static final Predicate<EntityLivingBase> WEAKNESS_BLACKLIST = new Predicate<EntityLivingBase>() {
         @Override
         public boolean apply(@Nullable EntityLivingBase entity) {
@@ -183,7 +185,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     @Override
     @Nullable
     protected ResourceLocation getLootTable() {
-        return new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus");
+        return LOOT;
     }
 
     public void setRoaring(boolean value) {
