@@ -2,6 +2,8 @@ package anightdazingzoroark.rift.server.items;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.creativetab.RiftCreativeTabs;
+import anightdazingzoroark.rift.server.entity.CreatureCategory;
+import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.util.ResourceLocation;
@@ -27,6 +29,13 @@ public class RiftItems {
         COOKED_EXOTIC_MEAT = riftFoodItem("cooked_exotic_meat", 8, 0.6f, true);
 
         TYRANNOSAURUS_ARM = riftGenericItem("tyrannosaurus_arm");
+
+        for (int x = 0; x < RiftCreatureType.values().length; x++) {
+            RiftCreatureType creature = RiftCreatureType.values()[x];
+            if (creature.getCreatureCategory().equals(CreatureCategory.DINOSAUR) || creature.getCreatureCategory().equals(CreatureCategory.REPTILE) || creature.getCreatureCategory().equals(CreatureCategory.BIRD)) {
+                riftEggItem(creature.name().toLowerCase()+"_egg", creature);
+            }
+        }
     }
 
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {
@@ -37,6 +46,12 @@ public class RiftItems {
 
     public static Item riftGenericItem(String registryName) {
         final Item item = new Item();
+        ITEMS.add(item);
+        return registerItem(item, registryName);
+    }
+
+    public static Item riftEggItem(String registryName, RiftCreatureType creature) {
+        final Item item = new RiftEggItem(creature);
         ITEMS.add(item);
         return registerItem(item, registryName);
     }

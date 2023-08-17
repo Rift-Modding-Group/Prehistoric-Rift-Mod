@@ -3,6 +3,8 @@ package anightdazingzoroark.rift.server.entity.creature;
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.RiftCreatureType;
+import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.entity.ai.RiftAttack;
 import anightdazingzoroark.rift.server.entity.ai.RiftPickUpItems;
 import anightdazingzoroark.rift.server.entity.ai.RiftTyrannosaurusRoar;
@@ -29,7 +31,6 @@ import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -49,7 +50,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                     return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
                 }
                 else {
-                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS) && !(entity instanceof RiftEgg);
                 }
             }
             else {
@@ -57,7 +58,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                     return entity.isEntityAlive() && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
                 }
                 else {
-                    return entity.isEntityAlive() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                    return entity.isEntityAlive() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS) && !(entity instanceof RiftEgg);
                 }
             }
         }
@@ -74,26 +75,20 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                     return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
                 }
                 else {
-                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS) && !(entity instanceof RiftEgg);
                 }
             }
             else {
-                if (entity instanceof RiftCreature) {
-                    return entity.isEntityAlive() && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
-                }
-                else {
-                    return entity.isEntityAlive() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
-                }
+                return false;
             }
         }
     };
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROAR = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
-    private AnimationFactory factory = new AnimationFactory(this);
     public int roarCooldownTicks;
 
     public Tyrannosaurus(World worldIn) {
-        super(worldIn);
+        super(worldIn, RiftCreatureType.TYRANNOSAURUS);
         this.setSize(3.25F, 5F);
         this.roarCooldownTicks = 0;
     }
@@ -161,7 +156,12 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     @Override
     public float getRenderSizeModifier() {
-        return 3.25f;
+        if (this.isChild()) {
+            return 0.5f;
+        }
+        else {
+            return 3.25f;
+        }
     }
 
     @Override
@@ -241,10 +241,5 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             event.getController().clearAnimationCache();
             return PlayState.CONTINUE;
         }
-    }
-
-    @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
     }
 }

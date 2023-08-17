@@ -2,6 +2,7 @@ package anightdazingzoroark.rift.server.entity.ai;
 
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.server.RiftUtil;
+import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
@@ -34,11 +35,11 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
                     return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
                 }
                 else {
-                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString());
+                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
                 }
             }
             else {
-                return entity.isEntityAlive();
+                return entity.isEntityAlive() && !(entity instanceof RiftEgg);
             }
         }
     };
@@ -52,11 +53,11 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
                     return entity.isEntityAlive() && blacklist.contains("minecraft:player");
                 }
                 else {
-                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString());
+                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
                 }
             }
             else {
-                return entity.isEntityAlive();
+                return false;
             }
         }
     };
