@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static anightdazingzoroark.rift.server.entity.RiftCreatureType.registerEggs;
+
 public class RiftItems {
     public static final List<Item> ITEMS = new ArrayList<>();
     public static final HashMap<String, Item> items = new HashMap<String, Item>();
@@ -30,12 +32,7 @@ public class RiftItems {
 
         TYRANNOSAURUS_ARM = riftGenericItem("tyrannosaurus_arm");
 
-        for (int x = 0; x < RiftCreatureType.values().length; x++) {
-            RiftCreatureType creature = RiftCreatureType.values()[x];
-            if (creature.getCreatureCategory().equals(CreatureCategory.DINOSAUR) || creature.getCreatureCategory().equals(CreatureCategory.REPTILE) || creature.getCreatureCategory().equals(CreatureCategory.BIRD)) {
-                riftEggItem(creature.name().toLowerCase()+"_egg", creature);
-            }
-        }
+        registerEggs();
     }
 
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {

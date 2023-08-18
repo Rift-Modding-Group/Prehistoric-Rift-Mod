@@ -23,6 +23,7 @@ public class RiftInitialize {
     public static RiftInitialize instance;
     public static Logger logger;
     public static Configuration config;
+    public static Object EGG;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {

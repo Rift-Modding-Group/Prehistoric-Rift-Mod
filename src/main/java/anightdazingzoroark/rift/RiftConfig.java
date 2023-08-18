@@ -1,6 +1,5 @@
 package anightdazingzoroark.rift;
 
-import anightdazingzoroark.rift.server.ServerProxy;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Level;
 

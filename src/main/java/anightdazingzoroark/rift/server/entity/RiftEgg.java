@@ -1,11 +1,17 @@
 package anightdazingzoroark.rift.server.entity;
 
+import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.server.ServerProxy;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -35,6 +41,11 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
     }
 
     @Override
+    protected boolean canDespawn() {
+        return false;
+    }
+
+    @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
 
@@ -52,6 +63,31 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
                 this.setDead();
             }
         }
+    }
+
+    @Override
+    public boolean processInteract(EntityPlayer player, EnumHand hand) {
+        if (this.getOwnerId().equals(player.getUniqueID())) {
+            if (player.isSneaking()) {
+                ItemStack eggStack = new ItemStack(this.creatureType.eggItem);
+                if (!player.capabilities.isCreativeMode) player.inventory.addItemStackToInventory(eggStack);
+                this.setDead();
+            }
+            else {
+                RiftInitialize.EGG = this;
+                player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, (int) posX, (int) posY, (int) posZ);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float damage) {
+        if (damage > 0 && !this.world.isRemote) {
+            this.setDead();
+        }
+        return super.attackEntityFrom(source, damage);
     }
 
     @Nullable
@@ -78,6 +114,13 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
 
     public void setHatchTime(int time) {
         this.dataManager.set(HATCH_TIME, time);
+    }
+
+    public int[] getHatchTimeMinutes() {
+        int minutes = (int)((float)this.getHatchTime() / 1200F);
+        int seconds = (int)((float)this.getHatchTime() / 20F);
+        seconds = seconds - (minutes * 60);
+        return new int[]{minutes, seconds};
     }
 
     @Override
