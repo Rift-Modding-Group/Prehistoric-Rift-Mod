@@ -2,6 +2,7 @@ package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.ServerProxy;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,12 +13,15 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class RiftEgg extends EntityTameable implements IAnimatable {
     public RiftCreatureType creatureType;
@@ -50,14 +54,20 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         super.onLivingUpdate();
 
         this.setHatchTime(this.getHatchTime() - 1);
-        if (this.getHatchTime() <= 0) {
+        if (this.getHatchTime() == 0) {
             RiftCreature creature = this.creatureType.invokeClass(this.world);
             if (creature != null) {
-                creature.setGrowingAge(0);
+                creature.setGrowingAge(-24000);
                 creature.setTamed(true);
                 creature.setOwnerId(this.getOwnerId());
+                creature.setTameStatus(TameStatusType.SIT);
+                creature.setTameBehavior(TameBehaviorType.PASSIVE);
                 creature.setLocationAndAngles(Math.floor(this.posX), Math.floor(this.posY) + 1, Math.floor(this.posZ), this.world.rand.nextFloat() * 360.0F, 0.0F);
                 if (!this.world.isRemote) {
+                    List<EntityPlayer> nearby = world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB(this.posX - 50.0, this.posY - 50.0, this.posZ - 50.0, this.posX + 50.0, this.posY + 50.0, this.posZ + 50.0));
+                    for (EntityPlayer player : nearby) {
+                        if (player.getUniqueID().equals(this.getOwnerId())) player.sendStatusMessage(new TextComponentTranslation("rift.notify.egg_hatched"), false);
+                    }
                     this.world.spawnEntity(creature);
                 }
                 this.setDead();
@@ -79,15 +89,16 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
             }
             return true;
         }
+        else {
+            //insert stuff here that tells whoever's interacting that the egg isn't theirs
+        }
         return false;
     }
 
     @Override
-    public boolean attackEntityFrom(DamageSource source, float damage) {
-        if (damage > 0 && !this.world.isRemote) {
-            this.setDead();
-        }
-        return super.attackEntityFrom(source, damage);
+    public boolean hitByEntity(Entity entityIn) {
+        this.setDead();
+        return super.hitByEntity(entityIn);
     }
 
     @Nullable

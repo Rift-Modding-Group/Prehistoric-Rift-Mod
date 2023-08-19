@@ -4,3 +4,11 @@ item.cooked_exotic_meat.name=Cooked Exotic Meat
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 
 itemGroup.rift_items=Prehistoric Rift Items
+
+item.tyrannosaurus_egg.name=Tyrannosaurus Egg
+
+rift.egg.time=Time
+rift.egg.minutes=minute(s)
+rift.egg.seconds=second(s)
+
+rift.notify.egg_hatched=Your Egg has hatched!

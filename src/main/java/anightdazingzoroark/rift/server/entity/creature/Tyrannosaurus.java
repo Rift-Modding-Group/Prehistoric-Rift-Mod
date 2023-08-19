@@ -2,16 +2,16 @@ package anightdazingzoroark.rift.server.entity.creature;
 
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
-import anightdazingzoroark.rift.server.entity.RiftCreatureType;
-import anightdazingzoroark.rift.server.entity.RiftEgg;
+import anightdazingzoroark.rift.server.entity.*;
 import anightdazingzoroark.rift.server.entity.ai.RiftAttack;
+import anightdazingzoroark.rift.server.entity.ai.RiftGetTargets;
 import anightdazingzoroark.rift.server.entity.ai.RiftPickUpItems;
 import anightdazingzoroark.rift.server.entity.ai.RiftTyrannosaurusRoar;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
@@ -33,6 +33,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -85,12 +86,18 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     };
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROAR = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
+    private List<EntityAINearestAttackableTarget> attackableTargets = new ArrayList<>();
     public int roarCooldownTicks;
+    private final EntityAIWander wanderTask = new EntityAIWander(this, 1.0D);
+    private final EntityAIFollowOwner followOwner = new EntityAIFollowOwner(this, 1.0D, 10.0F, 2.0F);
+    private final RiftGetTargets getTargetTask = new RiftGetTargets(this, RiftConfig.tyrannosaurusTargets, true);
+    private final EntityAIHurtByTarget hurtByTargetTask = new EntityAIHurtByTarget(this, false, new Class[0]);
 
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
         this.setSize(3.25F, 5F);
         this.roarCooldownTicks = 0;
+        this.isRideable = true;
     }
 
     @Override
@@ -112,19 +119,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     protected void initEntityAI() {
-        this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
-        for (String target : RiftConfig.tyrannosaurusTargets) {
-            if (!"minecraft:player".equals(target)) {
-                this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityList.getClass(new ResourceLocation(target)), true));
-            }
-            else {
-                this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
-            }
-        }
-        this.targetTasks.addTask(3, new RiftPickUpItems(this, RiftConfig.tyrannosaurusFavoriteFood, true));
         this.tasks.addTask(2, new RiftAttack(this, 1.0D, false, 0.5F, 0.5F));
-        this.tasks.addTask(3, new EntityAIWander(this, 1.0D));
         this.tasks.addTask(4, new EntityAILookIdle(this));
     }
 
@@ -133,6 +128,8 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         super.onLivingUpdate();
         this.manageCanRoar();
         this.manageApplyWeakness();
+        this.manageAttributesByAge();
+        this.manageTasksByTameStatus();
     }
 
     private void manageCanRoar() {
@@ -146,7 +143,88 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private void manageApplyWeakness() {
         Predicate<EntityLivingBase> targetPredicate = RiftConfig.tyrannosaurusRoarTargetsWhitelist ? WEAKNESS_WHITELIST : WEAKNESS_BLACKLIST;
         for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(), targetPredicate)) {
-            entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
+            if (this.isTamed() && !entityLivingBase.getUniqueID().equals(this.getOwnerId())) {
+                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
+            }
+            else if (this.isTamed() && entityLivingBase instanceof EntityTameable) {
+                if (!((EntityTameable) entityLivingBase).getOwnerId().equals(this.getOwnerId())) {
+                    entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
+                }
+            }
+            else if (!this.isTamed()) {
+                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
+            }
+        }
+    }
+
+    private void manageAttributesByAge() {
+        if (this.isChild()) {
+            this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20D);
+            this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4D);
+        }
+        else {
+            this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(160D);
+            this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(35.0D);
+        }
+    }
+
+    private void manageTasksByTameStatus() {
+        if (!this.isTamed()) {
+            this.targetTasks.addTask(2, this.getTargetTask);
+            this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
+            this.targetTasks.addTask(1, this.hurtByTargetTask);
+            this.targetTasks.addTask(3, new RiftPickUpItems(this, RiftConfig.tyrannosaurusFavoriteFood, true));
+            this.tasks.addTask(3, this.wanderTask);
+        }
+        else {
+            if (!this.world.isRemote) {
+                switch (this.tameStatus) {
+                    case SIT:
+                        if (this.getAttackTarget() == null) this.setSitting(true);
+                        this.tasks.removeTask(this.wanderTask);
+                        this.tasks.removeTask(this.followOwner);
+                        break;
+                    case STAND:
+                        this.setSitting(false);
+                        this.tasks.removeTask(this.wanderTask);
+                        this.tasks.addTask(3, this.followOwner);
+                        break;
+                    case WANDER:
+                        this.setSitting(false);
+                        this.tasks.addTask(3, this.wanderTask);
+                        this.tasks.removeTask(this.followOwner);
+                        break;
+                }
+                switch (this.tameBehavior) {
+                    case ASSIST:
+                        this.targetTasks.addTask(1, this.hurtByTargetTask);
+                        this.targetTasks.addTask(2, this.defendOwner);
+                        this.targetTasks.addTask(3, this.attackForOwner);
+                        this.targetTasks.removeTask(this.getAggressiveModeTargets);
+                        if (this.getAttackTarget() != null) this.setSitting(false);
+                        break;
+                    case NEUTRAL:
+                        this.targetTasks.addTask(1, this.hurtByTargetTask);
+                        this.targetTasks.removeTask(this.defendOwner);
+                        this.targetTasks.removeTask(this.attackForOwner);
+                        this.targetTasks.removeTask(this.getAggressiveModeTargets);
+                        if (this.getAttackTarget() != null) this.setSitting(false);
+                        break;
+                    case AGGRESSIVE:
+                        this.targetTasks.addTask(1, this.hurtByTargetTask);
+                        this.targetTasks.removeTask(this.defendOwner);
+                        this.targetTasks.removeTask(this.attackForOwner);
+                        this.targetTasks.addTask(2, this.getAggressiveModeTargets);
+                        if (this.getAttackTarget() != null) this.setSitting(false);
+                        break;
+                    case PASSIVE:
+                        this.targetTasks.removeTask(this.hurtByTargetTask);
+                        this.targetTasks.removeTask(this.defendOwner);
+                        this.targetTasks.removeTask(this.attackForOwner);
+                        this.targetTasks.removeTask(this.getAggressiveModeTargets);
+                        break;
+                }
+            }
         }
     }
 
@@ -162,6 +240,14 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         else {
             return 3.25f;
         }
+    }
+
+    public boolean isFavoriteFood(ItemStack stack) {
+        List<String> favoriteFoodList = Arrays.asList(RiftConfig.tyrannosaurusFavoriteFood);
+        for (String foodItem : favoriteFoodList) {
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(foodItem))) return true;
+        }
+        return false;
     }
 
     @Override
@@ -212,13 +298,16 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusMovement(AnimationEvent<E> event) {
+        if (this.isSitting()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.sitting", true));
+            return PlayState.CONTINUE;
+        }
         if (event.isMoving()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk", true));
             return PlayState.CONTINUE;
         }
-        else {
-            return PlayState.STOP;
-        }
+        event.getController().clearAnimationCache();
+        return PlayState.STOP;
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusAttack(AnimationEvent<E> event) {

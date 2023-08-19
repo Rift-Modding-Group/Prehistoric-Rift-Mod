@@ -71,7 +71,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.mob.hurtTime > 0 && new Random().nextInt(4) == 0 && this.mob.canRoar();
+        return this.mob.hurtTime > 0 && new Random().nextInt(4) == 0 && this.mob.canRoar() && !this.mob.isTamed();
     }
 
     @Override

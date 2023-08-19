@@ -100,6 +100,32 @@
 					}
 				}
 			}
+		},
+		"animation.tyrannosaurus.sitting": {
+			"loop": true,
+			"bones": {
+				"body": {
+					"position": [0, -6, 0]
+				},
+				"leftLeg": {
+					"position": [0, -6, 0]
+				},
+				"leftShin": {
+					"position": [0, 7, -3]
+				},
+				"leftFoot": {
+					"position": [0, -1, 0]
+				},
+				"rightLeg": {
+					"position": [0, -6, 0]
+				},
+				"rightShin": {
+					"position": [0, 7, -3]
+				},
+				"rightFoot": {
+					"position": [0, -1, 0]
+				}
+			}
 		}
 	}
 }

@@ -32,7 +32,6 @@ public class RiftEggMenu extends GuiScreen {
 
     @Override
     public void initGui() {
-        buttonList.clear();
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
         int centerX = (this.width - this.xGui) / 2;
@@ -95,19 +94,17 @@ public class RiftEggMenu extends GuiScreen {
 
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         reset();
-        int wordLength = 90;
         RiftEgg egg = (RiftEgg) RiftInitialize.EGG;
         GlStateManager.pushMatrix();
-        String s = I18n.format(egg.creatureType.friendlyName + " " + I18n.format("rift.egg"));
-        GlStateManager.scale(1F, 1F, 1F);
-        printStringXY(s, (-this.fontRenderer.getStringWidth(s) / 2) + 65, 60, 66, 48, 36);
+        String s = I18n.format(I18n.format("item."+egg.creatureType.name().toLowerCase()+"_egg.name"));
+        printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 20, 0, 0, 0);
         GlStateManager.popMatrix();
         {
             int minutes = egg.getHatchTimeMinutes()[0];
             int seconds = egg.getHatchTimeMinutes()[1];
             String minutesString = minutes > 0 ? minutes + " " + I18n.format("rift.egg.minutes") : "";
             String s1 = I18n.format("rift.egg.time") + ": " + minutesString + " " + seconds + " " + I18n.format("rift.egg.seconds");
-            printStringXY(s1, wordLength / 2, 120, 157, 126, 103);
+            printStringXY(s1, (-this.fontRenderer.getStringWidth(s1) + this.xGui)/ 2, 140, 0, 0, 0);
         }
     }
 
@@ -123,7 +120,7 @@ public class RiftEggMenu extends GuiScreen {
         int l = (this.height - this.ySize) / 2;
         drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, (176F), (166F));
         GlStateManager.pushMatrix();
-        renderEgg((RiftEgg) RiftInitialize.EGG, k + 100, l + 80, 50, 0, 0);
+        renderEgg((RiftEgg) RiftInitialize.EGG, k + 90, l + 50, 50, 0, 0);
         GlStateManager.popMatrix();
     }
 

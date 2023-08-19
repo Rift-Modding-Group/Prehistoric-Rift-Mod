@@ -26,30 +26,36 @@ public class RiftItems {
 
     public static Item TYRANNOSAURUS_ARM;
 
+    public static Item COMMAND_STAFF;
+
     public static void registerItems() {
         RAW_EXOTIC_MEAT = riftFoodItem("raw_exotic_meat", 4, 0.3f, true);
         COOKED_EXOTIC_MEAT = riftFoodItem("cooked_exotic_meat", 8, 0.6f, true);
 
         TYRANNOSAURUS_ARM = riftGenericItem("tyrannosaurus_arm");
 
+        COMMAND_STAFF = riftUnstackableItem("command_staff");
+
         registerEggs();
+    }
+
+    public static Item riftUnstackableItem(String registryName) {
+        final Item item = new Item().setMaxStackSize(1);
+        return registerItem(item, registryName);
     }
 
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {
         final Item item = new ItemFood(amount, saturation, isWolfFood);
-        ITEMS.add(item);
         return registerItem(item, registryName);
     }
 
     public static Item riftGenericItem(String registryName) {
         final Item item = new Item();
-        ITEMS.add(item);
         return registerItem(item, registryName);
     }
 
     public static Item riftEggItem(String registryName, RiftCreatureType creature) {
         final Item item = new RiftEggItem(creature);
-        ITEMS.add(item);
         return registerItem(item, registryName);
     }
 
