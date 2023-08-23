@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.ServerProxy;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
@@ -11,7 +12,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -84,7 +84,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
                 this.setDead();
             }
             else {
-                RiftInitialize.EGG = this;
+                ClientProxy.EGG = this;
                 player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, (int) posX, (int) posY, (int) posZ);
             }
             return true;

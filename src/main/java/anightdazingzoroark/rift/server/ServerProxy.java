@@ -25,6 +25,7 @@ import java.io.File;
 @Mod.EventBusSubscriber
 public class ServerProxy implements IGuiHandler {
     public static final int GUI_EGG = 0;
+    public static final int GUI_DIAL = 1;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);

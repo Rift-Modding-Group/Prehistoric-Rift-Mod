@@ -127,7 +127,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageCanRoar();
-        this.manageApplyWeakness();
+        if (!this.isChild()) this.manageApplyWeakness();
         this.manageAttributesByAge();
         this.manageTasksByTameStatus();
     }

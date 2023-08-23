@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift.client;
 
 import anightdazingzoroark.rift.client.renderer.EntityRenderer;
+import anightdazingzoroark.rift.client.ui.RiftDialMenu;
 import anightdazingzoroark.rift.client.ui.RiftEggMenu;
 import anightdazingzoroark.rift.server.ServerProxy;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,6 +19,9 @@ import static anightdazingzoroark.rift.client.renderer.ItemRenderer.registerItem
 
 @Mod.EventBusSubscriber
 public class ClientProxy extends ServerProxy {
+    public static Object EGG;
+    public static Object CREATURE;
+
     @SideOnly(Side.CLIENT)
     @Override
     public void preInit(FMLPreInitializationEvent e) {
@@ -47,6 +51,9 @@ public class ClientProxy extends ServerProxy {
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         if (id == GUI_EGG) {
             return new RiftEggMenu();
+        }
+        else if (id == GUI_DIAL) {
+            return new RiftDialMenu();
         }
         return null;
     }

@@ -1,5 +1,8 @@
 package anightdazingzoroark.rift.server.entity;
 
+import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.client.ClientProxy;
+import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.ai.RiftAggressiveModeGetTargets;
 import anightdazingzoroark.rift.server.items.RiftItems;
 import com.google.common.base.Predicate;
@@ -84,20 +87,24 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                 this.consumeItemFromStack(player, itemstack);
                 this.heal((float)((ItemFood)itemstack.getItem()).getHealAmount(itemstack) * 3F);
             }
-            else if (itemstack.isEmpty() && player.isSneaking()) {
-                if (!this.world.isRemote) {
-                    this.getNavigator().clearPath();
-                    this.tameStatus = this.tameStatus.next();
-                    this.sendTameStatusMessage(this.tameStatus);
-                }
+            else if (itemstack.isEmpty()) {
+                ClientProxy.CREATURE = this;
+                player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, (int) posX, (int) posY, (int) posZ);
             }
-            else if (itemstack.getItem().equals(RiftItems.COMMAND_STAFF) && player.isSneaking() && !this.isChild()) {
-                if (!this.world.isRemote) {
-                    this.setAttackTarget((EntityLivingBase)null);
-                    this.tameBehavior = this.tameBehavior.next();
-                    this.sendTameBehaviorMessage(this.tameBehavior);
-                }
-            }
+//            else if (itemstack.isEmpty() && player.isSneaking()) {
+//                if (!this.world.isRemote) {
+//                    this.getNavigator().clearPath();
+//                    this.tameStatus = this.tameStatus.next();
+//                    this.sendTameStatusMessage(this.tameStatus);
+//                }
+//            }
+//            else if (itemstack.getItem().equals(RiftItems.COMMAND_STAFF) && player.isSneaking() && !this.isChild()) {
+//                if (!this.world.isRemote) {
+//                    this.setAttackTarget((EntityLivingBase)null);
+//                    this.tameBehavior = this.tameBehavior.next();
+//                    this.sendTameBehaviorMessage(this.tameBehavior);
+//                }
+//            }
             else if (!this.isFavoriteFood(itemstack) && !player.isSneaking() && !this.isChild()) {
                 if (!this.world.isRemote && this.isRideable) {
                     System.out.println("Rideableee!!!");

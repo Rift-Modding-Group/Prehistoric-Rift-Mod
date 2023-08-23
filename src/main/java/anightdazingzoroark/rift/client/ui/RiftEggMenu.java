@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift.client.ui;
 
 import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
@@ -34,8 +35,6 @@ public class RiftEggMenu extends GuiScreen {
     public void initGui() {
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
-        int centerX = (this.width - this.xGui) / 2;
-        int centerY = (this.height - this.yGui) / 2;
         super.initGui();
     }
 
@@ -47,7 +46,7 @@ public class RiftEggMenu extends GuiScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
-        RiftEgg egg = (RiftEgg) RiftInitialize.EGG;
+        RiftEgg egg = (RiftEgg) ClientProxy.EGG;
         if (!this.mc.player.isEntityAlive() || this.mc.player.isDead) {
             this.mc.player.closeScreen();
         }
@@ -94,7 +93,7 @@ public class RiftEggMenu extends GuiScreen {
 
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         reset();
-        RiftEgg egg = (RiftEgg) RiftInitialize.EGG;
+        RiftEgg egg = (RiftEgg) ClientProxy.EGG;
         GlStateManager.pushMatrix();
         String s = I18n.format(I18n.format("item."+egg.creatureType.name().toLowerCase()+"_egg.name"));
         printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 20, 0, 0, 0);
@@ -120,7 +119,7 @@ public class RiftEggMenu extends GuiScreen {
         int l = (this.height - this.ySize) / 2;
         drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, (176F), (166F));
         GlStateManager.pushMatrix();
-        renderEgg((RiftEgg) RiftInitialize.EGG, k + 90, l + 50, 50, 0, 0);
+        renderEgg((RiftEgg) ClientProxy.EGG, k + 90, l + 50, 50, 0, 0);
         GlStateManager.popMatrix();
     }
 
