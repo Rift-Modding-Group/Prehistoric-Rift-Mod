@@ -41,18 +41,20 @@ public class RiftAggressiveModeGetTargets extends EntityAITarget {
         else {
             List<EntityLivingBase> list = new ArrayList<>();
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), null)) {
-                if (entity instanceof EntityPlayer) {
-                    if (!entity.getUniqueID().equals(((EntityTameable) this.taskOwner).getOwnerId())) {
+                if (!entity.isRiding()) {
+                    if (entity instanceof EntityPlayer) {
+                        if (!entity.getUniqueID().equals(((EntityTameable) this.taskOwner).getOwnerId())) {
+                            list.add(entity);
+                        }
+                    }
+                    else if (entity instanceof EntityTameable) {
+                        if (!(((EntityTameable) entity).getOwnerId().equals(((EntityTameable) this.taskOwner).getOwnerId())) && ((EntityTameable) entity).isTamed()) {
+                            list.add(entity);
+                        }
+                    }
+                    else {
                         list.add(entity);
                     }
-                }
-                else if (entity instanceof EntityTameable) {
-                    if (!(((EntityTameable) entity).getOwnerId().equals(((EntityTameable) this.taskOwner).getOwnerId())) && ((EntityTameable) entity).isTamed()) {
-                        list.add(entity);
-                    }
-                }
-                else {
-                    list.add(entity);
                 }
             }
 

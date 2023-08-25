@@ -9,6 +9,11 @@ itemGroup.rift_items=Prehistoric Rift Items
 
 item.tyrannosaurus_egg.name=Tyrannosaurus Egg
 
+radial.choice.ride=Ride
+radial.choice.state=State
+radial.choice.inventory=Inventory
+radial.choice.behavior=Behavior
+
 rift.egg.time=Time
 rift.egg.minutes=minute(s)
 rift.egg.seconds=second(s)

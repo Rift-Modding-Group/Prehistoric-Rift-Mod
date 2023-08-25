@@ -4,11 +4,8 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.ai.RiftAggressiveModeGetTargets;
-import anightdazingzoroark.rift.server.items.RiftItems;
-import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
 import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
@@ -31,6 +28,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class RiftCreature extends EntityTameable implements IAnimatable {
     public static final DataParameter<Boolean> APEX = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -44,12 +42,16 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     public final EntityAIOwnerHurtByTarget defendOwner =  new EntityAIOwnerHurtByTarget(this);
     public final EntityAIOwnerHurtTarget attackForOwner = new EntityAIOwnerHurtTarget(this);
     public boolean isRideable;
+    public List<RiftTameRadialChoice> radialChoices;
+    public int radialChoiceMenu;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
         this.creatureType = creatureType;
         this.tameStatus = TameStatusType.STAND;
         this.tameBehavior = TameBehaviorType.ASSIST;
+        this.radialChoices = RiftTameRadius.getMain();
+        this.radialChoiceMenu = 0; //0 is main, 1 is state, 2 is behavior
     }
 
     @Override
@@ -105,11 +107,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
 //                    this.sendTameBehaviorMessage(this.tameBehavior);
 //                }
 //            }
-            else if (!this.isFavoriteFood(itemstack) && !player.isSneaking() && !this.isChild()) {
-                if (!this.world.isRemote && this.isRideable) {
-                    System.out.println("Rideableee!!!");
-                }
-            }
+//            else if (!this.isFavoriteFood(itemstack) && !player.isSneaking() && !this.isChild()) {
+//                if (!this.world.isRemote && this.isRideable) {
+//                    System.out.println("Rideableee!!!");
+//                }
+//            }
             return true;
         }
         return false;

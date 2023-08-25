@@ -14,6 +14,8 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -90,7 +92,8 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
             return true;
         }
         else {
-            //insert stuff here that tells whoever's interacting that the egg isn't theirs
+            ITextComponent itextcomponent = new TextComponentString(this.getOwner().getName());
+            player.sendStatusMessage(new TextComponentTranslation("reminder.not_egg_owner", itextcomponent), false);
         }
         return false;
     }

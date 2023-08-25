@@ -58,14 +58,16 @@ public class RiftGetTargets extends EntityAITarget {
         else {
             List<EntityLivingBase> list = new ArrayList<>();
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
-                if (entity instanceof EntityPlayer) {
-                    if (this.targetList.contains("minecraft:player")) {
-                        list.add(entity);
+                if (!entity.isRiding()) {
+                    if (entity instanceof EntityPlayer) {
+                        if (this.targetList.contains("minecraft:player")) {
+                            list.add(entity);
+                        }
                     }
-                }
-                else {
-                    if (this.targetList.contains(EntityList.getKey(entity).toString())) {
-                        list.add(entity);
+                    else {
+                        if (this.targetList.contains(EntityList.getKey(entity).toString())) {
+                            list.add(entity);
+                        }
                     }
                 }
             }

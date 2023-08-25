@@ -1,7 +1,8 @@
 package anightdazingzoroark.rift.client.ui;
 
+import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.ClientProxy;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -18,12 +19,18 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import java.util.List;
+
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class RiftDialMenu extends GuiScreen {
     private int selectedItem = -1;
+    private RiftCreature creature;
+    private List<RiftTameRadialChoice> choices;
 
     public RiftDialMenu()  {
         super();
+        this.creature = (RiftCreature) ClientProxy.CREATURE;
+        this.choices = creature.radialChoices;
     }
 
     @Override
@@ -34,10 +41,17 @@ public class RiftDialMenu extends GuiScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
-        RiftCreature creature = (RiftCreature) ClientProxy.CREATURE;
+        this.choices = creature.radialChoices;
         if (creature.isDead) {
             this.mc.player.closeScreen();
         }
+    }
+
+    @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+        creature.radialChoices = RiftTameRadius.getMain();
+        this.creature.radialChoiceMenu = 0;
     }
 
     @SubscribeEvent
@@ -53,8 +67,7 @@ public class RiftDialMenu extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         super.drawScreen(mouseX, mouseY, partialTicks);
-        int numItems = 4;
-        RiftCreature creature = (RiftCreature) ClientProxy.CREATURE;
+        int numItems = this.choices.size();
 
         String creatureTypeName = "entity."+creature.creatureType.name().toLowerCase()+".name";
         String creatureName = creature.hasCustomName() ? creature.getName()+"\n" : "";
@@ -66,6 +79,7 @@ public class RiftDialMenu extends GuiScreen {
 
         float radiusIn = 40f;
         float radiusOut = radiusIn * 3;
+        float itemRadius = (radiusIn + radiusOut) / 1.625f;
 
         int x = width / 2;
         int y = height / 2;
@@ -103,10 +117,10 @@ public class RiftDialMenu extends GuiScreen {
             float s = (((i - 0.5f) / (float) numItems) + 0.25f) * 360;
             float e = (((i + 0.5f) / (float) numItems) + 0.25f) * 360;
             if (selectedItem == i) {
-                drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 255, 255, 255, 64);
+                drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 255, 255, 255, 128);
             }
             else {
-                drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+                drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
             }
         }
 
@@ -125,6 +139,20 @@ public class RiftDialMenu extends GuiScreen {
         GlStateManager.enableTexture2D();
 
         RenderHelper.enableGUIStandardItemLighting();
+
+        for (int i = 0; i < numItems; i++) {
+            String radialString = I18n.format("radial.choice."+creature.radialChoices.get(i).name().toLowerCase());
+
+            float angle1 = ((i / (float) numItems) + 0.25f) * 2 * (float) Math.PI;
+            float posX = x + 75 + itemRadius * (float) Math.cos(angle1) - (float)(this.fontRenderer.getStringWidth(radialString) / 2);
+            float posY = y + 40 + itemRadius * (float) Math.sin(angle1);
+
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(0.75f, 0.75f, 0.75f);
+            this.fontRenderer.drawString(radialString, (int) posX, (int) posY, 0xFFFFFFFF);
+            GlStateManager.popMatrix();
+        }
+
         RenderHelper.disableStandardItemLighting();
 
         GlStateManager.popMatrix();
@@ -134,8 +162,8 @@ public class RiftDialMenu extends GuiScreen {
         float angle = endAngle - startAngle;
         int sections = Math.max(1, MathHelper.ceil(angle / 5));
 
-        startAngle = (float) Math.toRadians(startAngle);
-        endAngle = (float) Math.toRadians(endAngle);
+        startAngle = (float) Math.toRadians(startAngle + (startAngle > 0 ? 2.5 : -2.5));
+        endAngle = (float) Math.toRadians(endAngle + (endAngle > 0 ? -2.5: 2.5));
         angle = endAngle - startAngle;
 
         for (int i = 0; i < sections; i++) {
@@ -155,6 +183,57 @@ public class RiftDialMenu extends GuiScreen {
             buffer.pos(pos1InX, pos1InY, z).color(r, g, b, a).endVertex();
             buffer.pos(pos2InX, pos2InY, z).color(r, g, b, a).endVertex();
             buffer.pos(pos2OutX, pos2OutY, z).color(r, g, b, a).endVertex();
+        }
+    }
+
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        super.mouseReleased(mouseX, mouseY, state);
+        switch (creature.radialChoiceMenu) {
+            case 0:
+                if (selectedItem == 1) {
+                    this.creature.radialChoices = RiftTameRadius.getState();
+                    this.creature.radialChoiceMenu = 1;
+                }
+                else if (selectedItem == 3) {
+                    this.creature.radialChoices = RiftTameRadius.getBehavior();
+                    this.creature.radialChoiceMenu = 2;
+                }
+                break;
+            case 1:
+                if (selectedItem == 0) {
+                    this.creature.radialChoices = RiftTameRadius.getMain();
+                    this.creature.radialChoiceMenu = 0;
+                }
+                else if (selectedItem == 1) {
+                    this.creature.setTameStatus(TameStatusType.STAND);
+//                    RiftInitialize.NETWORK_WRAPPER.sendToServer();
+                }
+                else if (selectedItem == 2) {
+                    this.creature.setTameStatus(TameStatusType.SIT);
+                }
+                else if (selectedItem == 3) {
+                    this.creature.setTameStatus(TameStatusType.WANDER);
+                }
+                break;
+            case 2:
+                if (selectedItem == 0) {
+                    this.creature.radialChoices = RiftTameRadius.getMain();
+                    this.creature.radialChoiceMenu = 0;
+                }
+                else if (selectedItem == 1) {
+                    this.creature.setTameBehavior(TameBehaviorType.ASSIST);
+                }
+                else if (selectedItem == 2) {
+                    this.creature.setTameBehavior(TameBehaviorType.NEUTRAL);
+                }
+                else if (selectedItem == 3) {
+                    this.creature.setTameBehavior(TameBehaviorType.AGGRESSIVE);
+                }
+                else if (selectedItem == 4) {
+                    this.creature.setTameBehavior(TameBehaviorType.PASSIVE);
+                }
+                break;
         }
     }
 }

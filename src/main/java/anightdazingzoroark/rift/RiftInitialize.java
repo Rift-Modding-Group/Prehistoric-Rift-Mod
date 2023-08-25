@@ -7,6 +7,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.logging.log4j.Logger;
 import software.bernie.geckolib3.GeckoLib;
 
@@ -19,6 +20,7 @@ public class RiftInitialize {
     public static final String MODVERSION= "0.0.1";
     @SidedProxy(clientSide = "anightdazingzoroark.rift.client.ClientProxy", serverSide = "anightdazingzoroark.rift.server.ServerProxy")
     public static ServerProxy PROXY;
+    public static SimpleNetworkWrapper NETWORK_WRAPPER;
     @Mod.Instance
     public static RiftInitialize instance;
     public static Logger logger;
