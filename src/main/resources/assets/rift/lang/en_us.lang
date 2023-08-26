@@ -13,6 +13,15 @@ radial.choice.ride=Ride
 radial.choice.state=State
 radial.choice.inventory=Inventory
 radial.choice.behavior=Behavior
+radial.choice.back=Back
+radial.choice.stand=Follow
+radial.choice.sit=Sit
+radial.choice.wander=Wander
+radial.choice.assist=Assist
+radial.choice.neutral=Neutral
+radial.choice.aggressive=Aggressive
+radial.choice.passive=Passive
+radial.choice.turret=Turret Mode
 
 rift.egg.time=Time
 rift.egg.minutes=minute(s)

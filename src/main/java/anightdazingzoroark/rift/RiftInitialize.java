@@ -20,7 +20,6 @@ public class RiftInitialize {
     public static final String MODVERSION= "0.0.1";
     @SidedProxy(clientSide = "anightdazingzoroark.rift.client.ClientProxy", serverSide = "anightdazingzoroark.rift.server.ServerProxy")
     public static ServerProxy PROXY;
-    public static SimpleNetworkWrapper NETWORK_WRAPPER;
     @Mod.Instance
     public static RiftInitialize instance;
     public static Logger logger;

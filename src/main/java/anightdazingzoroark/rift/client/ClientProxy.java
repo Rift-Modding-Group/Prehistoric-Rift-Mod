@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.client.renderer.EntityRenderer;
 import anightdazingzoroark.rift.client.ui.RiftDialMenu;
 import anightdazingzoroark.rift.client.ui.RiftEggMenu;
 import anightdazingzoroark.rift.server.ServerProxy;
+import anightdazingzoroark.rift.server.entity.RiftCreature;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -20,6 +21,7 @@ import static anightdazingzoroark.rift.client.renderer.ItemRenderer.registerItem
 @Mod.EventBusSubscriber
 public class ClientProxy extends ServerProxy {
     public static Object EGG;
+    public static RiftCreature CREATURE;
 
     @SideOnly(Side.CLIENT)
     @Override

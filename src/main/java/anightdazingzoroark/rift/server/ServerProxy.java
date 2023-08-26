@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.entity.RiftEntities;
 import anightdazingzoroark.rift.server.items.RiftItems;
+import anightdazingzoroark.rift.server.message.RiftMessages;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -26,13 +27,13 @@ import java.io.File;
 public class ServerProxy implements IGuiHandler {
     public static final int GUI_EGG = 0;
     public static final int GUI_DIAL = 1;
-    public static Object CREATURE;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
         RiftItems.registerItems();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
         RiftEntities.registerEntities();
+        initMessages();
     }
 
     public void init(FMLInitializationEvent event) {}
@@ -55,5 +56,9 @@ public class ServerProxy implements IGuiHandler {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         return null;
+    }
+
+    private void initMessages() {
+        RiftMessages.registerMessages("radialMenu");
     }
 }

@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.ai.RiftAggressiveModeGetTargets;
+import anightdazingzoroark.rift.server.message.RiftMessages;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -19,9 +20,6 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -36,22 +34,16 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     public final RiftCreatureType creatureType;
     public AnimationFactory factory = new AnimationFactory(this);
-    public TameStatusType tameStatus;
-    public TameBehaviorType tameBehavior;
+    private TameStatusType tameStatus;
+    private TameBehaviorType tameBehavior;
     public final RiftAggressiveModeGetTargets getAggressiveModeTargets = new RiftAggressiveModeGetTargets(this, true);
     public final EntityAIOwnerHurtByTarget defendOwner =  new EntityAIOwnerHurtByTarget(this);
     public final EntityAIOwnerHurtTarget attackForOwner = new EntityAIOwnerHurtTarget(this);
     public boolean isRideable;
-    public List<RiftTameRadialChoice> radialChoices;
-    public int radialChoiceMenu;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
         this.creatureType = creatureType;
-        this.tameStatus = TameStatusType.STAND;
-        this.tameBehavior = TameBehaviorType.ASSIST;
-        this.radialChoices = RiftTameRadius.getMain();
-        this.radialChoiceMenu = 0; //0 is main, 1 is state, 2 is behavior
     }
 
     @Override
@@ -59,6 +51,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         super.entityInit();
         this.dataManager.register(ATTACKING, Boolean.valueOf(false));
         this.dataManager.register(VARIANT, Integer.valueOf(rand.nextInt(4)));
+        this.setTameStatus(TameStatusType.STAND);
+        this.setTameBehavior(TameBehaviorType.ASSIST);
     }
 
     @Override
@@ -93,25 +87,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                 ClientProxy.CREATURE = this;
                 player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, (int) posX, (int) posY, (int) posZ);
             }
-//            else if (itemstack.isEmpty() && player.isSneaking()) {
-//                if (!this.world.isRemote) {
-//                    this.getNavigator().clearPath();
-//                    this.tameStatus = this.tameStatus.next();
-//                    this.sendTameStatusMessage(this.tameStatus);
-//                }
-//            }
-//            else if (itemstack.getItem().equals(RiftItems.COMMAND_STAFF) && player.isSneaking() && !this.isChild()) {
-//                if (!this.world.isRemote) {
-//                    this.setAttackTarget((EntityLivingBase)null);
-//                    this.tameBehavior = this.tameBehavior.next();
-//                    this.sendTameBehaviorMessage(this.tameBehavior);
-//                }
-//            }
-//            else if (!this.isFavoriteFood(itemstack) && !player.isSneaking() && !this.isChild()) {
-//                if (!this.world.isRemote && this.isRideable) {
-//                    System.out.println("Rideableee!!!");
-//                }
-//            }
             return true;
         }
         return false;
@@ -119,22 +94,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
 
     public boolean isFavoriteFood(ItemStack stack) {
         return false;
-    }
-
-    private void sendTameStatusMessage(TameStatusType tameStatus) {
-        String tameStatusName = "tame_status."+tameStatus.name().toLowerCase();
-        ITextComponent itextcomponent = new TextComponentString(this.getName());
-        if (this.getOwner() instanceof EntityPlayer) {
-            ((EntityPlayer) this.getOwner()).sendStatusMessage(new TextComponentTranslation(tameStatusName, itextcomponent), false);
-        }
-    }
-
-    private void sendTameBehaviorMessage(TameBehaviorType tameBehavior) {
-        String tameBehaviorName = "tame_behavior."+tameBehavior.name().toLowerCase();
-        ITextComponent itextcomponent = new TextComponentString(this.getName());
-        if (this.getOwner() instanceof EntityPlayer) {
-            ((EntityPlayer) this.getOwner()).sendStatusMessage(new TextComponentTranslation(tameBehaviorName, itextcomponent), false);
-        }
     }
 
     @Override
@@ -170,10 +129,16 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.dataManager.set(ATTACKING, Boolean.valueOf(value));
     }
 
+    public TameStatusType getTameStatus() {
+        return this.tameStatus;
+    }
     public void setTameStatus(TameStatusType tameStatus) {
         this.tameStatus = tameStatus;
     }
 
+    public TameBehaviorType getTameBehavior() {
+        return this.tameBehavior;
+    }
     public void setTameBehavior(TameBehaviorType tameBehavior) {
         this.tameBehavior = tameBehavior;
     }
@@ -189,9 +154,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-
-    }
+    public void registerControllers(AnimationData data) {}
 
     @Override
     public AnimationFactory getFactory() {

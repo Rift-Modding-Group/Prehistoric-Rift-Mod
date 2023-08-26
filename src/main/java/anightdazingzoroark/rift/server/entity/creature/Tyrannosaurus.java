@@ -178,7 +178,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         }
         else {
             if (!this.world.isRemote) {
-                switch (this.tameStatus) {
+                switch (this.getTameStatus()) {
                     case SIT:
                         if (this.getAttackTarget() == null) this.setSitting(true);
                         this.tasks.removeTask(this.wanderTask);
@@ -195,7 +195,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                         this.tasks.removeTask(this.followOwner);
                         break;
                 }
-                switch (this.tameBehavior) {
+                switch (this.getTameBehavior()) {
                     case ASSIST:
                         this.targetTasks.addTask(1, this.hurtByTargetTask);
                         this.targetTasks.addTask(2, this.defendOwner);
