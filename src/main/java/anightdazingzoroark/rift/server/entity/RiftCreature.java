@@ -12,9 +12,11 @@ import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
 import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -40,9 +42,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     public final EntityAIOwnerHurtByTarget defendOwner =  new EntityAIOwnerHurtByTarget(this);
     public final EntityAIOwnerHurtTarget attackForOwner = new EntityAIOwnerHurtTarget(this);
     public boolean isRideable;
+    public InventoryBasic creatureInventory;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
+        initInventory();
         this.creatureType = creatureType;
     }
 
@@ -85,6 +89,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
             }
             else if (itemstack.isEmpty()) {
                 ClientProxy.CREATURE = this;
+                ClientProxy.TAME_STATUS = this.getTameStatus();
+                ClientProxy.TAME_BEHAVIOR = this.getTameBehavior();
                 player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, (int) posX, (int) posY, (int) posZ);
             }
             return true;
@@ -102,6 +108,19 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         compound.setInteger("Variant", this.getVariant());
         compound.setByte("TameStatus", (byte) this.tameStatus.ordinal());
         compound.setByte("TameBehavior", (byte) this.tameBehavior.ordinal());
+        if (creatureType != null) {
+            NBTTagList nbttaglist = new NBTTagList();
+            for (int i = 0; i < creatureInventory.getSizeInventory(); ++i) {
+                ItemStack itemstack = creatureInventory.getStackInSlot(i);
+                if (!itemstack.isEmpty()) {
+                    NBTTagCompound nbttagcompound = new NBTTagCompound();
+                    nbttagcompound.setByte("Slot", (byte) i);
+                    itemstack.writeToNBT(nbttagcompound);
+                    nbttaglist.appendTag(nbttagcompound);
+                }
+            }
+            compound.setTag("Items", nbttaglist);
+        }
     }
 
     @Override
@@ -110,6 +129,30 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.setVariant(compound.getInteger("Variant"));
         if (compound.hasKey("TameStatus")) this.setTameStatus(TameStatusType.values()[compound.getByte("TameStatus")]);
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
+        if (creatureInventory != null) {
+            NBTTagList nbtTagList = compound.getTagList("Items", 10);
+            this.initInventory();
+            for (int i = 0; i < nbtTagList.tagCount(); ++i) {
+                NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
+                int j = nbttagcompound.getByte("Slot") & 255;
+                if (j <= 4) {
+                    creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
+                }
+            }
+        }
+    }
+
+    private void initInventory() {
+        creatureInventory = new InventoryBasic("creatureInventory", false, 27);
+        creatureInventory.setCustomName(this.getName());
+        if (creatureInventory != null) {
+            for (int i = 0; i < creatureInventory.getSizeInventory(); ++i) {
+                ItemStack itemStack = creatureInventory.getStackInSlot(i);
+                if (!itemStack.isEmpty()) {
+                    creatureInventory.setInventorySlotContents(i, itemStack.copy());
+                }
+            }
+        }
     }
 
     public int getVariant() {

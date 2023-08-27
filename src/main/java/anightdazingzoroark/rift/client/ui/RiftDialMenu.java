@@ -20,6 +20,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Mod.EventBusSubscriber(Side.CLIENT)
@@ -32,7 +33,7 @@ public class RiftDialMenu extends GuiScreen {
     public RiftDialMenu()  {
         super();
         this.creature = ClientProxy.CREATURE;
-        this.choices = RiftTameRadius.getMain();
+        this.choices = getMain();
         this.radialChoiceMenu = 0;
     }
 
@@ -44,6 +45,8 @@ public class RiftDialMenu extends GuiScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
+        this.creature.setTameStatus(ClientProxy.TAME_STATUS);
+        this.creature.setTameBehavior(ClientProxy.TAME_BEHAVIOR);
         if (creature.isDead) {
             this.mc.player.closeScreen();
         }
@@ -52,7 +55,7 @@ public class RiftDialMenu extends GuiScreen {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        this.choices = RiftTameRadius.getMain();
+        this.choices = getMain();
         this.radialChoiceMenu = 0;
     }
 
@@ -200,17 +203,17 @@ public class RiftDialMenu extends GuiScreen {
         switch (this.radialChoiceMenu) {
             case 0:
                 if (selectedItem == 1) {
-                    this.choices = RiftTameRadius.getState();
+                    this.choices = getState();
                     this.radialChoiceMenu = 1;
                 }
                 else if (selectedItem == 3) {
-                    this.choices = RiftTameRadius.getBehavior();
+                    this.choices = getBehavior();
                     this.radialChoiceMenu = 2;
                 }
                 break;
             case 1:
                 if (selectedItem == 0) {
-                    this.choices = RiftTameRadius.getMain();
+                    this.choices = getMain();
                     this.radialChoiceMenu = 0;
                 }
                 else if (selectedItem == 1) {
@@ -228,7 +231,7 @@ public class RiftDialMenu extends GuiScreen {
                 break;
             case 2:
                 if (selectedItem == 0) {
-                    this.choices = RiftTameRadius.getMain();
+                    this.choices = getMain();
                     this.radialChoiceMenu = 0;
                 }
                 else if (selectedItem == 1) {
@@ -249,5 +252,29 @@ public class RiftDialMenu extends GuiScreen {
                 }
                 break;
         }
+    }
+
+    private static List<RiftTameRadialChoice> getMain() {
+        return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.RIDE, RiftTameRadialChoice.BEHAVIOR);
+    }
+
+    private static List<RiftTameRadialChoice> getMainUnrideable() {
+        return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.BEHAVIOR);
+    }
+
+    private static List<RiftTameRadialChoice> getState() {
+        return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.STAND, RiftTameRadialChoice.SIT, RiftTameRadialChoice.WANDER);
+    }
+
+    private static List<RiftTameRadialChoice> getBehavior() {
+        return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.ASSIST, RiftTameRadialChoice.NEUTRAL, RiftTameRadialChoice.AGGRESSIVE, RiftTameRadialChoice.PASSIVE);
+    }
+
+    private static List<RiftTameRadialChoice> getBehaviorCanTurret() {
+        return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.ASSIST, RiftTameRadialChoice.NEUTRAL, RiftTameRadialChoice.AGGRESSIVE, RiftTameRadialChoice.PASSIVE, RiftTameRadialChoice.TURRET);
+    }
+
+    private static List<RiftTameRadialChoice> getBehaviorTurretOnly() {
+        return Arrays.asList(RiftTameRadialChoice.BACK,RiftTameRadialChoice.PASSIVE, RiftTameRadialChoice.TURRET);
     }
 }

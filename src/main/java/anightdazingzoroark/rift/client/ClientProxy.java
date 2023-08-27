@@ -5,6 +5,8 @@ import anightdazingzoroark.rift.client.ui.RiftDialMenu;
 import anightdazingzoroark.rift.client.ui.RiftEggMenu;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.TameBehaviorType;
+import anightdazingzoroark.rift.server.entity.TameStatusType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -22,6 +24,8 @@ import static anightdazingzoroark.rift.client.renderer.ItemRenderer.registerItem
 public class ClientProxy extends ServerProxy {
     public static Object EGG;
     public static RiftCreature CREATURE;
+    public static TameStatusType TAME_STATUS;
+    public static TameBehaviorType TAME_BEHAVIOR;
 
     @SideOnly(Side.CLIENT)
     @Override
