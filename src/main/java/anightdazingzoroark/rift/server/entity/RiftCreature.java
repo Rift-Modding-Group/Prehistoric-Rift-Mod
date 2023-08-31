@@ -11,6 +11,7 @@ import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
 import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.inventory.InventoryBasic;
@@ -135,10 +136,19 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
             for (int i = 0; i < nbtTagList.tagCount(); ++i) {
                 NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
                 int j = nbttagcompound.getByte("Slot") & 255;
-                int nonInvSlots = this.canBeSaddled() ? 1 : 0;
-                if (j >= nonInvSlots) {
+                int inventorySize = this.slotCount() + (this.canBeSaddled() ? 1 : 0);
+                if (j <= inventorySize) {
                     creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
                 }
+            }
+        }
+        else {
+            NBTTagList nbtTagList = compound.getTagList("Items", 10);
+            this.initInventory();
+            for (int i = 0; i < nbtTagList.tagCount(); ++i) {
+                NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
+                int j = nbttagcompound.getByte("Slot") & 255;
+                creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
             }
         }
     }
@@ -155,13 +165,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
                 }
             }
         }
+        this.creatureInventory.addInventoryChangeListener(this);
     }
 
-    @Override
     public void onInventoryChanged(IInventory invBasic) {
-        if (!this.world.isRemote) {
-            this.setSaddled(!this.creatureInventory.getStackInSlot(0).isEmpty() && this.canBeSaddled());
-        }
+        ItemStack saddle = this.creatureInventory.getStackInSlot(0);
+        System.out.println(saddle.getItem() == Items.SADDLE && !saddle.isEmpty());
+        if (!this.world.isRemote) this.setSaddled(saddle.getItem() == Items.SADDLE && !saddle.isEmpty());
     }
 
     public int getVariant() {
@@ -183,6 +193,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
     public TameStatusType getTameStatus() {
         return TameStatusType.values()[this.dataManager.get(STATUS).byteValue()];
     }
+
     public void setTameStatus(TameStatusType tameStatus) {
         this.dataManager.set(STATUS, (byte) tameStatus.ordinal());
     }

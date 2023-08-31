@@ -1,7 +1,5 @@
 package anightdazingzoroark.rift.server.message;
 
-import anightdazingzoroark.rift.RiftInitialize;
-import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.TameBehaviorType;
 import anightdazingzoroark.rift.server.entity.TameStatusType;

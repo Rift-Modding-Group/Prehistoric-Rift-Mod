@@ -16,10 +16,6 @@ public class RiftCreatureInventoryFromMenu implements IMessage {
 
     public RiftCreatureInventoryFromMenu() {}
 
-    public RiftCreatureInventoryFromMenu(RiftCreature creature) {
-        this.creatureId = creature.getEntityId();
-    }
-
     @Override
     public void fromBytes(ByteBuf buf) {
         this.creatureId = buf.readInt();
@@ -40,10 +36,9 @@ public class RiftCreatureInventoryFromMenu implements IMessage {
         private void handle(RiftCreatureInventoryFromMenu message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             World world = playerEntity.getEntityWorld();
-            RiftCreature interacted = (RiftCreature) playerEntity.world.getEntityByID(message.creatureId);
 
             if (world != null) {
-                playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_INVENTORY, world, interacted.getEntityId(), 0, 0);
+                playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_INVENTORY, world, 0, 0, 0);
             }
         }
     }

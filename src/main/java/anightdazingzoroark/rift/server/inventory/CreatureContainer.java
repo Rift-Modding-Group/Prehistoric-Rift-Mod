@@ -71,7 +71,7 @@ public class CreatureContainer extends Container {
                     return ItemStack.EMPTY;
                 }
             }
-            else if (this.getSlot(1).isItemValid(itemStack1) && !this.getSlot(1).getHasStack()) {
+            else if (this.getSlot(0).isItemValid(itemStack1) && !this.getSlot(1).getHasStack()) {
                 if (!this.mergeItemStack(itemStack1, 0, 1, false)) {
                     return ItemStack.EMPTY;
                 }

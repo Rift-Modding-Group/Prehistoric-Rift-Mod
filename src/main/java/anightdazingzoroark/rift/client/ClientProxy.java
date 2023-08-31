@@ -28,8 +28,6 @@ import static anightdazingzoroark.rift.client.renderer.ItemRenderer.registerItem
 public class ClientProxy extends ServerProxy {
     @Mod.Instance(RiftInitialize.MODID)
     public static Object EGG;
-    @Mod.Instance(RiftInitialize.MODID)
-    public static Object CREATURE;
 
     @SideOnly(Side.CLIENT)
     @Override

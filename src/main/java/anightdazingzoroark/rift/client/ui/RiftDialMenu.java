@@ -1,7 +1,5 @@
 package anightdazingzoroark.rift.client.ui;
 
-import anightdazingzoroark.rift.RiftInitialize;
-import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.*;
 import anightdazingzoroark.rift.server.message.RiftChangeCreatureFromMenu;
@@ -35,7 +33,7 @@ public class RiftDialMenu extends GuiScreen {
 
     public RiftDialMenu()  {
         super();
-        this.creature = (RiftCreature) ClientProxy.CREATURE;
+        this.creature = (RiftCreature) ServerProxy.CREATURE;
         this.choices = getMain();
         this.radialChoiceMenu = 0;
     }
@@ -204,8 +202,7 @@ public class RiftDialMenu extends GuiScreen {
         switch (this.radialChoiceMenu) {
             case 0:
                 if (selectedItem == 0) {
-                    ClientProxy.CREATURE = this.creature;
-                    RiftMessages.OPEN_INVENTORY.sendToServer(new RiftCreatureInventoryFromMenu(this.creature));
+                    RiftMessages.OPEN_INVENTORY.sendToServer(new RiftCreatureInventoryFromMenu());
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 1) {

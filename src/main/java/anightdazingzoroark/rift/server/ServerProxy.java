@@ -28,6 +28,8 @@ import java.io.File;
 
 @Mod.EventBusSubscriber
 public class ServerProxy implements IGuiHandler {
+    @Mod.Instance(RiftInitialize.MODID)
+    public static Object CREATURE;
     public static final int GUI_EGG = 0;
     public static final int GUI_DIAL = 1;
     public static final int GUI_CREATURE_INVENTORY = 2;
@@ -53,10 +55,9 @@ public class ServerProxy implements IGuiHandler {
     @Nullable
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-        Entity entity = world.getEntityByID(x);
         if (id == GUI_CREATURE_INVENTORY) {
-            if (entity != null && entity instanceof RiftCreature) {
-                return new CreatureContainer((RiftCreature) entity, player);
+            if (CREATURE != null && CREATURE instanceof RiftCreature) {
+                return new CreatureContainer((RiftCreature) CREATURE, player);
             }
         }
         return null;
