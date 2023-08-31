@@ -86,7 +86,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     };
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROAR = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
-    private List<EntityAINearestAttackableTarget> attackableTargets = new ArrayList<>();
     public int roarCooldownTicks;
     private final EntityAIWander wanderTask = new EntityAIWander(this, 1.0D);
     private final EntityAIFollowOwner followOwner = new EntityAIFollowOwner(this, 1.0D, 10.0F, 2.0F);
@@ -97,6 +96,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
         this.setSize(3.25F, 5F);
         this.roarCooldownTicks = 0;
+        this.initInventory();
         this.isRideable = true;
     }
 
@@ -105,7 +105,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         super.entityInit();
         this.dataManager.register(CAN_ROAR, Boolean.valueOf(true));
         this.dataManager.register(ROARING, Boolean.valueOf(false));
-        this.dataManager.register(APEX, Boolean.valueOf(true));
     }
 
     @Override
@@ -252,14 +251,16 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     @Override
     protected void updateEquipmentIfNeeded(EntityItem itemEntity) {
-        ItemStack itemstack = itemEntity.getItem();
-        Item item = itemstack.getItem();
-        EntityEquipmentSlot entityequipmentslot = getSlotForItemStack(itemstack);
+        if (!this.isTamed()) {
+            ItemStack itemstack = itemEntity.getItem();
+            Item item = itemstack.getItem();
+            EntityEquipmentSlot entityequipmentslot = getSlotForItemStack(itemstack);
 
-        if (Arrays.asList(RiftConfig.tyrannosaurusFavoriteFood).contains(Item.REGISTRY.getNameForObject(item).toString()) && this.canEquipItem(itemstack)) {
-            this.setItemStackToSlot(entityequipmentslot, new ItemStack(Items.AIR));
-            this.onItemPickup(itemEntity, itemstack.getCount());
-            itemEntity.setDead();
+            if (Arrays.asList(RiftConfig.tyrannosaurusFavoriteFood).contains(Item.REGISTRY.getNameForObject(item).toString()) && this.canEquipItem(itemstack)) {
+                this.setItemStackToSlot(entityequipmentslot, new ItemStack(Items.AIR));
+                this.onItemPickup(itemEntity, itemstack.getCount());
+                itemEntity.setDead();
+            }
         }
     }
 
@@ -288,6 +289,21 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     public boolean canRoar() {
         return this.dataManager.get(CAN_ROAR);
+    }
+
+    @Override
+    public boolean isApexPredator() {
+        return true;
+    }
+
+    @Override
+    public boolean canBeSaddled() {
+        return true;
+    }
+
+    @Override
+    public int slotCount() {
+        return 54;
     }
 
     @Override

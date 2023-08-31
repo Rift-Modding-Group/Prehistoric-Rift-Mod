@@ -1,8 +1,11 @@
 package anightdazingzoroark.rift.client.ui;
 
+import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.ClientProxy;
+import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.*;
 import anightdazingzoroark.rift.server.message.RiftChangeCreatureFromMenu;
+import anightdazingzoroark.rift.server.message.RiftCreatureInventoryFromMenu;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -32,7 +35,7 @@ public class RiftDialMenu extends GuiScreen {
 
     public RiftDialMenu()  {
         super();
-        this.creature = ClientProxy.CREATURE;
+        this.creature = (RiftCreature) ClientProxy.CREATURE;
         this.choices = getMain();
         this.radialChoiceMenu = 0;
     }
@@ -45,8 +48,6 @@ public class RiftDialMenu extends GuiScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
-        this.creature.setTameStatus(ClientProxy.TAME_STATUS);
-        this.creature.setTameBehavior(ClientProxy.TAME_BEHAVIOR);
         if (creature.isDead) {
             this.mc.player.closeScreen();
         }
@@ -202,7 +203,12 @@ public class RiftDialMenu extends GuiScreen {
         super.mouseReleased(mouseX, mouseY, state);
         switch (this.radialChoiceMenu) {
             case 0:
-                if (selectedItem == 1) {
+                if (selectedItem == 0) {
+                    ClientProxy.CREATURE = this.creature;
+                    RiftMessages.OPEN_INVENTORY.sendToServer(new RiftCreatureInventoryFromMenu(this.creature));
+                    this.mc.player.closeScreen();
+                }
+                else if (selectedItem == 1) {
                     this.choices = getState();
                     this.radialChoiceMenu = 1;
                 }
@@ -217,15 +223,15 @@ public class RiftDialMenu extends GuiScreen {
                     this.radialChoiceMenu = 0;
                 }
                 else if (selectedItem == 1) {
-                    RiftMessages.NETWORK_WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.STAND));
+                    RiftMessages.RADIAL_MENU.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.STAND));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 2) {
-                    RiftMessages.NETWORK_WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.SIT));
+                    RiftMessages.RADIAL_MENU.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.SIT));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 3) {
-                    RiftMessages.NETWORK_WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.WANDER));
+                    RiftMessages.RADIAL_MENU.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.WANDER));
                     this.mc.player.closeScreen();
                 }
                 break;
@@ -235,19 +241,19 @@ public class RiftDialMenu extends GuiScreen {
                     this.radialChoiceMenu = 0;
                 }
                 else if (selectedItem == 1) {
-                    RiftMessages.NETWORK_WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.ASSIST));
+                    RiftMessages.RADIAL_MENU.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.ASSIST));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 2) {
-                    RiftMessages.NETWORK_WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.NEUTRAL));
+                    RiftMessages.RADIAL_MENU.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.NEUTRAL));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 3) {
-                    RiftMessages.NETWORK_WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.AGGRESSIVE));
+                    RiftMessages.RADIAL_MENU.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.AGGRESSIVE));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 4) {
-                    RiftMessages.NETWORK_WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.PASSIVE));
+                    RiftMessages.RADIAL_MENU.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.PASSIVE));
                     this.mc.player.closeScreen();
                 }
                 break;

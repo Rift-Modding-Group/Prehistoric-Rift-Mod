@@ -1,4 +1,4 @@
-package anightdazingzoroark.rift.server;
+package anightdazingzoroark.rift;
 
 import anightdazingzoroark.rift.RiftConfig;
 import net.minecraft.block.Block;

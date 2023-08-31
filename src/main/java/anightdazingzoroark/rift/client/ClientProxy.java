@@ -1,13 +1,17 @@
 package anightdazingzoroark.rift.client;
 
+import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.renderer.EntityRenderer;
+import anightdazingzoroark.rift.client.ui.RiftCreatureInventory;
 import anightdazingzoroark.rift.client.ui.RiftDialMenu;
 import anightdazingzoroark.rift.client.ui.RiftEggMenu;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.TameBehaviorType;
 import anightdazingzoroark.rift.server.entity.TameStatusType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -22,10 +26,10 @@ import static anightdazingzoroark.rift.client.renderer.ItemRenderer.registerItem
 
 @Mod.EventBusSubscriber
 public class ClientProxy extends ServerProxy {
+    @Mod.Instance(RiftInitialize.MODID)
     public static Object EGG;
-    public static RiftCreature CREATURE;
-    public static TameStatusType TAME_STATUS;
-    public static TameBehaviorType TAME_BEHAVIOR;
+    @Mod.Instance(RiftInitialize.MODID)
+    public static Object CREATURE;
 
     @SideOnly(Side.CLIENT)
     @Override
@@ -59,6 +63,11 @@ public class ClientProxy extends ServerProxy {
         }
         else if (id == GUI_DIAL) {
             return new RiftDialMenu();
+        }
+        else if (id == GUI_CREATURE_INVENTORY) {
+            IInventory playerInventory = player.inventory;
+            IInventory creatureInventory = ((RiftCreature) CREATURE).creatureInventory;
+            return new RiftCreatureInventory(playerInventory, creatureInventory, (RiftCreature) CREATURE);
         }
         return null;
     }

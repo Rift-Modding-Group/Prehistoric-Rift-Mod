@@ -4,7 +4,6 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.ai.RiftAggressiveModeGetTargets;
-import anightdazingzoroark.rift.server.message.RiftMessages;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -12,6 +11,8 @@ import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
 import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
@@ -28,16 +29,15 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
-public class RiftCreature extends EntityTameable implements IAnimatable {
-    public static final DataParameter<Boolean> APEX = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+public class RiftCreature extends EntityTameable implements IAnimatable, IInventoryChangedListener {
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
+    private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
+    private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     public final RiftCreatureType creatureType;
     public AnimationFactory factory = new AnimationFactory(this);
-    private TameStatusType tameStatus;
-    private TameBehaviorType tameBehavior;
     public final RiftAggressiveModeGetTargets getAggressiveModeTargets = new RiftAggressiveModeGetTargets(this, true);
     public final EntityAIOwnerHurtByTarget defendOwner =  new EntityAIOwnerHurtByTarget(this);
     public final EntityAIOwnerHurtTarget attackForOwner = new EntityAIOwnerHurtTarget(this);
@@ -46,17 +46,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
-        initInventory();
         this.creatureType = creatureType;
     }
 
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(ATTACKING, Boolean.valueOf(false));
-        this.dataManager.register(VARIANT, Integer.valueOf(rand.nextInt(4)));
-        this.setTameStatus(TameStatusType.STAND);
-        this.setTameBehavior(TameBehaviorType.ASSIST);
+        this.dataManager.register(ATTACKING, Boolean.FALSE);
+        this.dataManager.register(VARIANT, rand.nextInt(4));
+        this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
+        this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
+        this.dataManager.register(SADDLED, Boolean.FALSE);
     }
 
     @Override
@@ -89,9 +89,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
             }
             else if (itemstack.isEmpty()) {
                 ClientProxy.CREATURE = this;
-                ClientProxy.TAME_STATUS = this.getTameStatus();
-                ClientProxy.TAME_BEHAVIOR = this.getTameBehavior();
-                player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, (int) posX, (int) posY, (int) posZ);
+                player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, 0, 0, 0);
             }
             return true;
         }
@@ -106,8 +104,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         compound.setInteger("Variant", this.getVariant());
-        compound.setByte("TameStatus", (byte) this.tameStatus.ordinal());
-        compound.setByte("TameBehavior", (byte) this.tameBehavior.ordinal());
+        compound.setByte("TameStatus", (byte) this.getTameStatus().ordinal());
+        compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
+        compound.setBoolean("Saddled", this.isSaddled());
         if (creatureType != null) {
             NBTTagList nbttaglist = new NBTTagList();
             for (int i = 0; i < creatureInventory.getSizeInventory(); ++i) {
@@ -129,29 +128,39 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.setVariant(compound.getInteger("Variant"));
         if (compound.hasKey("TameStatus")) this.setTameStatus(TameStatusType.values()[compound.getByte("TameStatus")]);
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
+        this.setSaddled(compound.getBoolean("Saddled"));
         if (creatureInventory != null) {
             NBTTagList nbtTagList = compound.getTagList("Items", 10);
             this.initInventory();
             for (int i = 0; i < nbtTagList.tagCount(); ++i) {
                 NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
                 int j = nbttagcompound.getByte("Slot") & 255;
-                if (j <= 4) {
+                int nonInvSlots = this.canBeSaddled() ? 1 : 0;
+                if (j >= nonInvSlots) {
                     creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
                 }
             }
         }
     }
 
-    private void initInventory() {
-        creatureInventory = new InventoryBasic("creatureInventory", false, 27);
+    public void initInventory() {
+        int inventorySize = this.slotCount() + (this.canBeSaddled() ? 1 : 0);
+        creatureInventory = new InventoryBasic("creatureInventory", false, inventorySize);
         creatureInventory.setCustomName(this.getName());
         if (creatureInventory != null) {
-            for (int i = 0; i < creatureInventory.getSizeInventory(); ++i) {
+            for (int i = 0; i < inventorySize; ++i) {
                 ItemStack itemStack = creatureInventory.getStackInSlot(i);
                 if (!itemStack.isEmpty()) {
                     creatureInventory.setInventorySlotContents(i, itemStack.copy());
                 }
             }
+        }
+    }
+
+    @Override
+    public void onInventoryChanged(IInventory invBasic) {
+        if (!this.world.isRemote) {
+            this.setSaddled(!this.creatureInventory.getStackInSlot(0).isEmpty() && this.canBeSaddled());
         }
     }
 
@@ -163,7 +172,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.dataManager.set(VARIANT, variant);
     }
 
-
     public boolean isAttacking() {
         return this.dataManager.get(ATTACKING);
     }
@@ -173,21 +181,37 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     }
 
     public TameStatusType getTameStatus() {
-        return this.tameStatus;
+        return TameStatusType.values()[this.dataManager.get(STATUS).byteValue()];
     }
     public void setTameStatus(TameStatusType tameStatus) {
-        this.tameStatus = tameStatus;
+        this.dataManager.set(STATUS, (byte) tameStatus.ordinal());
     }
 
     public TameBehaviorType getTameBehavior() {
-        return this.tameBehavior;
+        return TameBehaviorType.values()[this.dataManager.get(BEHAVIOR).byteValue()];
     }
     public void setTameBehavior(TameBehaviorType tameBehavior) {
-        this.tameBehavior = tameBehavior;
+        this.dataManager.set(BEHAVIOR, (byte) tameBehavior.ordinal());
+    }
+
+    public boolean isSaddled() {
+        return this.dataManager.get(SADDLED);
+    }
+
+    public void setSaddled(boolean value) {
+        this.dataManager.set(SADDLED, Boolean.valueOf(value));
     }
 
     public boolean isApexPredator() {
-        return this.dataManager.get(APEX).booleanValue();
+        return false;
+    }
+
+    public boolean canBeSaddled() {
+        return false;
+    }
+
+    public int slotCount() {
+        return 0;
     }
 
     @Nullable

@@ -1,7 +1,7 @@
 package anightdazingzoroark.rift.server.entity.ai;
 
 import anightdazingzoroark.rift.RiftConfig;
-import anightdazingzoroark.rift.server.RiftUtil;
+import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import com.google.common.base.Predicate;
