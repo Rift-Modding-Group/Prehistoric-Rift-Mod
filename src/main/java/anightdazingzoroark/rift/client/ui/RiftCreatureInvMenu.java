@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class RiftCreatureInventory extends GuiContainer {
+public class RiftCreatureInvMenu extends GuiContainer {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_inventory.png");
     private final IInventory playerInventory;
     private final IInventory creatureInventory;
@@ -20,7 +20,7 @@ public class RiftCreatureInventory extends GuiContainer {
     private float mousePosx;
     private float mousePosY;
 
-    public RiftCreatureInventory(IInventory playerInventory, RiftCreature creature) {
+    public RiftCreatureInvMenu(IInventory playerInventory, RiftCreature creature) {
         super(new CreatureContainer(creature, Minecraft.getMinecraft().player));
         this.playerInventory = playerInventory;
         this.creatureInventory = creature.creatureInventory;

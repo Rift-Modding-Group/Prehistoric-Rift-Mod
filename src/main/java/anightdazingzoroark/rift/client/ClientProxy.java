@@ -2,13 +2,14 @@ package anightdazingzoroark.rift.client;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.renderer.EntityRenderer;
-import anightdazingzoroark.rift.client.ui.RiftCreatureInventory;
+import anightdazingzoroark.rift.client.ui.RiftCreatureInvMenu;
 import anightdazingzoroark.rift.client.ui.RiftDialMenu;
 import anightdazingzoroark.rift.client.ui.RiftEggMenu;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -63,7 +64,7 @@ public class ClientProxy extends ServerProxy {
         }
         else if (id == GUI_CREATURE_INVENTORY) {
             IInventory playerInventory = player.inventory;
-            return new RiftCreatureInventory(playerInventory, (RiftCreature) entity);
+            return new RiftCreatureInvMenu(playerInventory, (RiftCreature) entity);
         }
         return null;
     }

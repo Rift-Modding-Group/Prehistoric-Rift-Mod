@@ -91,7 +91,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                     this.heal((float)((ItemFood)itemstack.getItem()).getHealAmount(itemstack) * 3F);
                 }
                 else if (itemstack.isEmpty()) {
-                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId(), 0, 0);
+                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                 }
             }
             return true;

@@ -2,9 +2,7 @@ package anightdazingzoroark.rift.server.message;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.ServerProxy;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
