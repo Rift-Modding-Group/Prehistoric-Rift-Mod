@@ -6,7 +6,6 @@ import anightdazingzoroark.rift.server.inventory.CreatureContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
@@ -22,7 +21,7 @@ public class RiftCreatureInventory extends GuiContainer {
     private float mousePosY;
 
     public RiftCreatureInventory(IInventory playerInventory, IInventory creatureInventory, RiftCreature creature) {
-        super(new CreatureContainer(creature, Minecraft.getMinecraft().player));
+        super(new CreatureContainer(playerInventory, creature, Minecraft.getMinecraft().player));
         this.playerInventory = playerInventory;
         this.creatureInventory = creatureInventory;
         this.creature = creature;

@@ -57,7 +57,7 @@ public class ServerProxy implements IGuiHandler {
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         if (id == GUI_CREATURE_INVENTORY) {
             if (CREATURE != null && CREATURE instanceof RiftCreature) {
-                return new CreatureContainer((RiftCreature) CREATURE, player);
+                return new CreatureContainer(player.inventory, (RiftCreature) CREATURE, player);
             }
         }
         return null;

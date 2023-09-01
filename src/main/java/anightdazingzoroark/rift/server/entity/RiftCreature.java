@@ -170,7 +170,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
 
     public void onInventoryChanged(IInventory invBasic) {
         ItemStack saddle = this.creatureInventory.getStackInSlot(0);
-        System.out.println(saddle.getItem() == Items.SADDLE && !saddle.isEmpty());
         if (!this.world.isRemote) this.setSaddled(saddle.getItem() == Items.SADDLE && !saddle.isEmpty());
     }
 

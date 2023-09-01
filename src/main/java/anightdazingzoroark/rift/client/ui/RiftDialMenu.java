@@ -60,7 +60,7 @@ public class RiftDialMenu extends GuiScreen {
 
     @SubscribeEvent
     public static void overlayEvent(RenderGameOverlayEvent event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.CROSSHAIRS && event.getType() != RenderGameOverlayEvent.ElementType.HOTBAR) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.CROSSHAIRS && event.getType() != RenderGameOverlayEvent.ElementType.HOTBAR && event.getType() != RenderGameOverlayEvent.ElementType.EXPERIENCE && event.getType() != RenderGameOverlayEvent.ElementType.HEALTH && event.getType() != RenderGameOverlayEvent.ElementType.FOOD && event.getType() != RenderGameOverlayEvent.ElementType.ARMOR) {
             return;
         }
         if (Minecraft.getMinecraft().currentScreen instanceof RiftDialMenu) {
