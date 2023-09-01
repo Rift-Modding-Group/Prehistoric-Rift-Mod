@@ -43,7 +43,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(HATCH_TIME, Integer.valueOf(300 * 20));
+        this.dataManager.register(HATCH_TIME, Integer.valueOf(1 * 20));
     }
 
     @Override

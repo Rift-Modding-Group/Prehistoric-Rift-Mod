@@ -12,9 +12,9 @@ import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.ContainerHorseChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
-import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -31,7 +31,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 
-public class RiftCreature extends EntityTameable implements IAnimatable, IInventoryChangedListener {
+public class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
@@ -43,11 +43,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
     public final EntityAIOwnerHurtByTarget defendOwner =  new EntityAIOwnerHurtByTarget(this);
     public final EntityAIOwnerHurtTarget attackForOwner = new EntityAIOwnerHurtTarget(this);
     public boolean isRideable;
-    public InventoryBasic creatureInventory;
+    public RiftCreatureInventory creatureInventory;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
         this.creatureType = creatureType;
+        this.initInventory();
     }
 
     @Override
@@ -79,18 +80,19 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
-        if (this.getOwnerId().equals(player.getUniqueID())) {
-            if (this.isFavoriteFood(itemstack) && this.isChild() && this.getHealth() == this.getMaxHealth()) {
-                this.consumeItemFromStack(player, itemstack);
-                this.ageUp((int)((float)(-this.getGrowingAge() / 20) * 0.1F), true);
-            }
-            else if (this.isFavoriteFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
-                this.consumeItemFromStack(player, itemstack);
-                this.heal((float)((ItemFood)itemstack.getItem()).getHealAmount(itemstack) * 3F);
-            }
-            else if (itemstack.isEmpty()) {
-                ClientProxy.CREATURE = this;
-                player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, 0, 0, 0);
+        if (this.getOwnerId() != null) {
+            if (this.getOwnerId().equals(player.getUniqueID())) {
+                if (this.isFavoriteFood(itemstack) && this.isChild() && this.getHealth() == this.getMaxHealth()) {
+                    this.consumeItemFromStack(player, itemstack);
+                    this.ageUp((int)((float)(-this.getGrowingAge() / 20) * 0.1F), true);
+                }
+                else if (this.isFavoriteFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
+                    this.consumeItemFromStack(player, itemstack);
+                    this.heal((float)((ItemFood)itemstack.getItem()).getHealAmount(itemstack) * 3F);
+                }
+                else if (itemstack.isEmpty()) {
+                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId(), 0, 0);
+                }
             }
             return true;
         }
@@ -110,8 +112,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
         compound.setBoolean("Saddled", this.isSaddled());
         if (creatureType != null) {
             NBTTagList nbttaglist = new NBTTagList();
-            for (int i = 0; i < creatureInventory.getSizeInventory(); ++i) {
-                ItemStack itemstack = creatureInventory.getStackInSlot(i);
+            for (int i = 0; i < this.creatureInventory.getSizeInventory(); ++i) {
+                ItemStack itemstack = this.creatureInventory.getStackInSlot(i);
                 if (!itemstack.isEmpty()) {
                     NBTTagCompound nbttagcompound = new NBTTagCompound();
                     nbttagcompound.setByte("Slot", (byte) i);
@@ -137,9 +139,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
                 NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
                 int j = nbttagcompound.getByte("Slot") & 255;
                 int inventorySize = this.slotCount() + (this.canBeSaddled() ? 1 : 0);
-                if (j <= inventorySize) {
-                    creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
-                }
+                if (j < inventorySize) this.creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
             }
         }
         else {
@@ -148,27 +148,26 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
             for (int i = 0; i < nbtTagList.tagCount(); ++i) {
                 NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
                 int j = nbttagcompound.getByte("Slot") & 255;
-                creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
+                this.creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
             }
         }
     }
 
-    public void initInventory() {
+    private void initInventory() {
         int inventorySize = this.slotCount() + (this.canBeSaddled() ? 1 : 0);
-        creatureInventory = new InventoryBasic("creatureInventory", false, inventorySize);
-        creatureInventory.setCustomName(this.getName());
-        if (creatureInventory != null) {
+        this.creatureInventory = new RiftCreatureInventory("creatureInventory", inventorySize, this);
+        this.creatureInventory.setCustomName(this.getName());
+        if (this.creatureInventory != null) {
             for (int i = 0; i < inventorySize; ++i) {
-                ItemStack itemStack = creatureInventory.getStackInSlot(i);
+                ItemStack itemStack = this.creatureInventory.getStackInSlot(i);
                 if (!itemStack.isEmpty()) {
-                    creatureInventory.setInventorySlotContents(i, itemStack.copy());
+                    this.creatureInventory.setInventorySlotContents(i, itemStack.copy());
                 }
             }
         }
-        this.creatureInventory.addInventoryChangeListener(this);
     }
 
-    public void onInventoryChanged(IInventory invBasic) {
+    public void refreshInventory() {
         ItemStack saddle = this.creatureInventory.getStackInSlot(0);
         if (!this.world.isRemote) this.setSaddled(saddle.getItem() == Items.SADDLE && !saddle.isEmpty());
     }
@@ -236,5 +235,25 @@ public class RiftCreature extends EntityTameable implements IAnimatable, IInvent
     @Override
     public AnimationFactory getFactory() {
         return this.factory;
+    }
+
+    public class RiftCreatureInventory extends ContainerHorseChest {
+        public RiftCreatureInventory(String inventoryTitle, int slotCount, RiftCreature creature) {
+            super(inventoryTitle, slotCount);
+            this.addInventoryChangeListener(new RiftCreatureInvListener(creature));
+        }
+    }
+
+    class RiftCreatureInvListener implements IInventoryChangedListener {
+        RiftCreature creature;
+
+        public RiftCreatureInvListener(RiftCreature creature) {
+            this.creature = creature;
+        }
+
+        @Override
+        public void onInventoryChanged(IInventory invBasic) {
+            creature.refreshInventory();
+        }
     }
 }

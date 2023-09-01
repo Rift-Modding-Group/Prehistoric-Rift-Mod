@@ -7,8 +7,6 @@ import anightdazingzoroark.rift.client.ui.RiftDialMenu;
 import anightdazingzoroark.rift.client.ui.RiftEggMenu;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
-import anightdazingzoroark.rift.server.entity.TameBehaviorType;
-import anightdazingzoroark.rift.server.entity.TameStatusType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -56,16 +54,16 @@ public class ClientProxy extends ServerProxy {
     @Override
     @SideOnly(Side.CLIENT)
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+        Entity entity = world.getEntityByID(x);
         if (id == GUI_EGG) {
             return new RiftEggMenu();
         }
         else if (id == GUI_DIAL) {
-            return new RiftDialMenu();
+            return new RiftDialMenu((RiftCreature) entity);
         }
         else if (id == GUI_CREATURE_INVENTORY) {
             IInventory playerInventory = player.inventory;
-            IInventory creatureInventory = ((RiftCreature) CREATURE).creatureInventory;
-            return new RiftCreatureInventory(playerInventory, creatureInventory, (RiftCreature) CREATURE);
+            return new RiftCreatureInventory(playerInventory, (RiftCreature) entity);
         }
         return null;
     }

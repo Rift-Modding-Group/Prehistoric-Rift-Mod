@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -15,6 +16,10 @@ public class RiftCreatureInventoryFromMenu implements IMessage {
     private int creatureId;
 
     public RiftCreatureInventoryFromMenu() {}
+
+    public RiftCreatureInventoryFromMenu(int creatureId) {
+        this.creatureId = creatureId;
+    }
 
     @Override
     public void fromBytes(ByteBuf buf) {
@@ -37,9 +42,7 @@ public class RiftCreatureInventoryFromMenu implements IMessage {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             World world = playerEntity.getEntityWorld();
 
-            if (world != null) {
-                playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_INVENTORY, world, 0, 0, 0);
-            }
+            playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_INVENTORY, world, message.creatureId, 0, 0);
         }
     }
 }

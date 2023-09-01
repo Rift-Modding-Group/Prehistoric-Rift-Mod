@@ -96,7 +96,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
         this.setSize(3.25F, 5F);
         this.roarCooldownTicks = 0;
-        this.initInventory();
         this.isRideable = true;
     }
 

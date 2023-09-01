@@ -20,16 +20,15 @@ public class RiftCreatureInventory extends GuiContainer {
     private float mousePosx;
     private float mousePosY;
 
-    public RiftCreatureInventory(IInventory playerInventory, IInventory creatureInventory, RiftCreature creature) {
-        super(new CreatureContainer(playerInventory, creature, Minecraft.getMinecraft().player));
+    public RiftCreatureInventory(IInventory playerInventory, RiftCreature creature) {
+        super(new CreatureContainer(creature, Minecraft.getMinecraft().player));
         this.playerInventory = playerInventory;
-        this.creatureInventory = creatureInventory;
+        this.creatureInventory = creature.creatureInventory;
         this.creature = creature;
         this.allowUserInput = false;
         this.ySize = 222;
     }
 
-    @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(background);
@@ -37,12 +36,11 @@ public class RiftCreatureInventory extends GuiContainer {
         int l = (this.height - this.ySize) / 2;
         this.drawTexturedModalRect(k, l, 0, 0, this.xSize, this.ySize);
 
-        if (this.creature.canBeSaddled()) {
+        if (this.creature.canBeSaddled() && !this.creature.isChild()) {
             this.drawTexturedModalRect(k + 7, l + 17, 180, 222, 18, 18);
         }
     }
 
-    @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.mousePosx = mouseX;
         this.mousePosY = mouseY;
