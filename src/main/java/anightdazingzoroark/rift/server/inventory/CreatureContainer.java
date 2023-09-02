@@ -1,6 +1,9 @@
 package anightdazingzoroark.rift.server.inventory;
 
 import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.message.RiftChangeInventoryFromMenu;
+import anightdazingzoroark.rift.server.message.RiftMessages;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
@@ -11,12 +14,14 @@ import net.minecraft.item.ItemStack;
 public class CreatureContainer extends Container {
     private final IInventory creatureInventory;
     private final RiftCreature creature;
+    private final EntityPlayer player;
     private final int slots;
     private final int rows;
 
     public CreatureContainer(final RiftCreature creature, EntityPlayer player) {
         this.creatureInventory = creature.creatureInventory;
         this.creature = creature;
+        this.player = player;
         this.slots = creatureInventory.getSizeInventory() - (creature.canBeSaddled() ? 1 : 0);
         this.rows = this.slots / 9;
         creatureInventory.openInventory(player);
@@ -90,6 +95,7 @@ public class CreatureContainer extends Container {
     @Override
     public void onContainerClosed(EntityPlayer player) {
         super.onContainerClosed(player);
+        RiftMessages.WRAPPER.sendToServer(new RiftChangeInventoryFromMenu(this.creature, this.player));
         this.creatureInventory.closeInventory(player);
     }
 }

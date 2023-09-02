@@ -1,9 +1,9 @@
 package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftInitialize;
-import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.ai.RiftAggressiveModeGetTargets;
+import anightdazingzoroark.rift.server.message.RiftChangeInventoryFromMenu;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -241,6 +241,18 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         public RiftCreatureInventory(String inventoryTitle, int slotCount, RiftCreature creature) {
             super(inventoryTitle, slotCount);
             this.addInventoryChangeListener(new RiftCreatureInvListener(creature));
+        }
+
+        public void setInventoryFromData(RiftChangeInventoryFromMenu.RiftCreatureInvData data) {
+            ItemStack[] contents = data.getInventoryContents();
+
+            if (contents.length != getSizeInventory()) {
+                throw new IllegalArgumentException("Invalid inventory size");
+            }
+
+            for (int i = 0; i < getSizeInventory(); i++) {
+                setInventorySlotContents(i, contents[i]);
+            }
         }
     }
 
