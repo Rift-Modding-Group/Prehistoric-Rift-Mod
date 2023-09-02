@@ -6,14 +6,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-
-import static anightdazingzoroark.rift.server.message.RiftChangeInventoryFromMenu.PlayerInvData.applyInventoryData;
 
 public class RiftChangeInventoryFromMenu implements IMessage {
     private int creatureId;
@@ -58,7 +55,7 @@ public class RiftChangeInventoryFromMenu implements IMessage {
             RiftCreature interacted = (RiftCreature) playerEntity.world.getEntityByID(message.creatureId);
 
             interacted.creatureInventory.setInventoryFromData(message.inventory);
-            applyInventoryData(playerEntity, message.playerInventory);
+            PlayerInvData.applyInventoryData(playerEntity, message.playerInventory);
         }
     }
 

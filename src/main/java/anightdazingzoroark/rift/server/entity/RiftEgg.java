@@ -3,6 +3,8 @@ package anightdazingzoroark.rift.server.entity;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.ServerProxy;
+import anightdazingzoroark.rift.server.enums.TameBehaviorType;
+import anightdazingzoroark.rift.server.enums.TameStatusType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.passive.EntityTameable;

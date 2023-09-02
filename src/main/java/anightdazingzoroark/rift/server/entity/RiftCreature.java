@@ -3,6 +3,8 @@ package anightdazingzoroark.rift.server.entity;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.ai.RiftAggressiveModeGetTargets;
+import anightdazingzoroark.rift.server.enums.TameBehaviorType;
+import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.RiftChangeInventoryFromMenu;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;

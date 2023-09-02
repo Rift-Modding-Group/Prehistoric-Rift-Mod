@@ -1,8 +1,8 @@
 package anightdazingzoroark.rift.server.message;
 
 import anightdazingzoroark.rift.server.entity.RiftCreature;
-import anightdazingzoroark.rift.server.entity.TameBehaviorType;
-import anightdazingzoroark.rift.server.entity.TameStatusType;
+import anightdazingzoroark.rift.server.enums.TameBehaviorType;
+import anightdazingzoroark.rift.server.enums.TameStatusType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;

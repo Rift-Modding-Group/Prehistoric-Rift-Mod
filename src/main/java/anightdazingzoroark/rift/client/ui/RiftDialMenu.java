@@ -1,6 +1,9 @@
 package anightdazingzoroark.rift.client.ui;
 
 import anightdazingzoroark.rift.server.entity.*;
+import anightdazingzoroark.rift.server.enums.RiftTameRadialChoice;
+import anightdazingzoroark.rift.server.enums.TameBehaviorType;
+import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.RiftChangeCreatureFromMenu;
 import anightdazingzoroark.rift.server.message.RiftCreatureInventoryFromMenu;
 import anightdazingzoroark.rift.server.message.RiftMessages;
@@ -116,6 +119,7 @@ public class RiftDialMenu extends GuiScreen {
             }
         }
 
+        //circle
         for (int i = 0; i < numItems; i++) {
             float s = (((i - 0.5f) / (float) numItems) + 0.25f) * 360;
             float e = (((i + 0.5f) / (float) numItems) + 0.25f) * 360;
@@ -128,11 +132,15 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 2 && this.creature.getTameBehavior().name().equals(this.choices.get(i).name())) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 128, 0, 128, 128);
             }
+            else if (this.radialChoiceMenu == 0 && this.creature.isChild() && i == 2) {
+                drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+            }
             else {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
             }
         }
 
+        //lock mouse position
         double scaledX = Mouse.getX() - (mc.displayWidth / 2.0f);
         double scaledY = Mouse.getY() - (mc.displayHeight / 2.0f);
         double distance = Math.sqrt(scaledX * scaledX + scaledY * scaledY);
@@ -149,8 +157,10 @@ public class RiftDialMenu extends GuiScreen {
 
         RenderHelper.enableGUIStandardItemLighting();
 
+        //text
         for (int i = 0; i < numItems; i++) {
             String radialString = I18n.format("radial.choice."+this.choices.get(i).name().toLowerCase());
+            if (this.radialChoiceMenu == 0 && (this.creature.isChild() || (!this.creature.isChild() && !this.creature.isSaddled())) && i == 2) radialString = "["+radialString+"]";
 
             float angle1 = ((i / (float) numItems) + 0.25f) * 2 * (float) Math.PI;
             float posX = x + 75 + itemRadius * (float) Math.cos(angle1) - (float)(this.fontRenderer.getStringWidth(radialString) / 2);
@@ -160,6 +170,14 @@ public class RiftDialMenu extends GuiScreen {
             GlStateManager.scale(0.75f, 0.75f, 0.75f);
             this.fontRenderer.drawString(radialString, (int) posX, (int) posY, 0xFFFFFFFF);
             GlStateManager.popMatrix();
+        }
+
+        //hover text
+        if (this.radialChoiceMenu == 0 && this.creature.isChild() && selectedItem == 2) {
+            this.drawHoveringText(I18n.format("radial.note.too_young"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 0 && !this.creature.isSaddled() && selectedItem == 2) {
+            this.drawHoveringText(I18n.format("radial.note.need_saddle"), mouseX, mouseY);
         }
 
         RenderHelper.disableStandardItemLighting();

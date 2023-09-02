@@ -3,7 +3,6 @@ package anightdazingzoroark.rift.server.inventory;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.message.RiftChangeInventoryFromMenu;
 import anightdazingzoroark.rift.server.message.RiftMessages;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
