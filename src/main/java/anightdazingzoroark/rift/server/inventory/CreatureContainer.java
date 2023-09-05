@@ -22,7 +22,7 @@ public class CreatureContainer extends Container {
         this.creature = creature;
         this.player = player;
         this.slots = creatureInventory.getSizeInventory() - (creature.canBeSaddled() ? 1 : 0);
-        this.rows = this.slots / 9;
+        this.rows = creature.invPageCount() > 1 ? 3 : (this.slots / 9);
         creatureInventory.openInventory(player);
 
         //creature saddle slot
@@ -38,19 +38,19 @@ public class CreatureContainer extends Container {
         //creature inventory
         for (int j = 0; j < this.rows; ++j) {
             for (int k = 0; k < 9; ++k) {
-                this.addSlotToContainer(new Slot(creature.creatureInventory, (k + 1) + (j * 9), 8 + k * 18, 72 + j * 18));
+                this.addSlotToContainer(new Slot(creature.creatureInventory, (k + 1) + (j * 9), 8 + k * 18, 74 + j * 18));
             }
         }
 
         //player inventory
         for (int l = 0; l < 3; ++l) {
             for (int j1 = 0; j1 < 9; ++j1) {
-                this.addSlotToContainer(new Slot(player.inventory, j1 + l * 9 + 9, 8 + j1 * 18, 140 + l * 18));
+                this.addSlotToContainer(new Slot(player.inventory, j1 + l * 9 + 9, 8 + j1 * 18, 156 + l * 18));
             }
         }
 
         for (int i1 = 0; i1 < 9; ++i1) {
-            this.addSlotToContainer(new Slot(player.inventory, i1, 8 + i1 * 18, 198));
+            this.addSlotToContainer(new Slot(player.inventory, i1, 8 + i1 * 18, 214));
         }
     }
 
@@ -89,6 +89,12 @@ public class CreatureContainer extends Container {
             }
         }
         return itemStack;
+    }
+
+    @Override
+    public void detectAndSendChanges() {
+        super.detectAndSendChanges();
+        RiftMessages.WRAPPER.sendToServer(new RiftChangeInventoryFromMenu(this.creature, this.player));
     }
 
     @Override
