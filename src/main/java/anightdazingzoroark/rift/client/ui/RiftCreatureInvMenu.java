@@ -7,10 +7,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.LinkedList;
+import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class RiftCreatureInvMenu extends GuiContainer {
@@ -20,20 +25,14 @@ public class RiftCreatureInvMenu extends GuiContainer {
     private final RiftCreature creature;
     private float mousePosx;
     private float mousePosY;
-    private GuiButton prevButton;
-    private GuiButton nextButton;
 
     public RiftCreatureInvMenu(IInventory playerInventory, RiftCreature creature) {
         super(new CreatureContainer(creature, Minecraft.getMinecraft().player));
-        this.buttonList.clear();
         this.playerInventory = playerInventory;
         this.creatureInventory = creature.creatureInventory;
         this.creature = creature;
         this.allowUserInput = false;
-        this.ySize = 238;
-        if (creatureInventory.getSizeInventory() - (creature.canBeSaddled() ? 1 : 0) > 27) {
-            this.addPageButtons();
-        }
+        this.ySize = 254;
     }
 
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
@@ -45,31 +44,27 @@ public class RiftCreatureInvMenu extends GuiContainer {
 
         //saddle slot
         if (this.creature.canBeSaddled() && !this.creature.isChild()) {
-            this.drawTexturedModalRect(k + 7, l + 17, 180, 238, 18, 18);
+            this.drawTexturedModalRect(k + 7, l + 17, 212, 0, 18, 18);
         }
 
         //normal inventory slots
         int slots = this.creatureInventory.getSizeInventory() - (this.creature.canBeSaddled() ? 1 : 0);
-        for (int i = 0; i < Math.min(3, slots / 9); i++) {
-            this.drawTexturedModalRect(k + 7, l + 73 + (i * 18), 0, 238, 162, 18);
+        for (int i = 0; i < slots / 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                this.drawTexturedModalRect(k + 7 + (j * 18), l + 49 + (i * 18), 176, 0, 18, 18);
+            }
         }
     }
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         String playerName = this.creature.getOwner().getName();
-        this.fontRenderer.drawString(playerName, 8, 145, 4210752);
-        String creatureName = this.creature.getName();
-        this.fontRenderer.drawString(creatureName, 8, 7, 4210752);
-        if (creatureInventory.getSizeInventory() - (creature.canBeSaddled() ? 1 : 0) > 27) {
-            String page = (this.creature.invPage + 1)+"/"+this.creature.invPageCount();
-            this.fontRenderer.drawString(page, this.xSize / 2 - this.fontRenderer.getStringWidth(page) / 2, 130, 4210752);
-        }
-    }
-
-    private void addPageButtons() {
-        this.buttonList.add(this.prevButton = new GuiButton(0, 8, 130, 12, 12, "<"));
-        this.buttonList.add(this.nextButton = new GuiButton(1, 170, 130, 12, 12, ">"));
+        this.fontRenderer.drawString(playerName, 8, 160, 4210752);
+        String creatureName = this.creature.getName(); //I18n.format("rift.inventory.gear", creatureTypeName)
+        String gearName = I18n.format("rift.inventory.gear", creatureName);
+        this.fontRenderer.drawString(gearName, 8, 7, 4210752);
+        String invName = I18n.format("rift.inventory.inventory", creatureName);
+        this.fontRenderer.drawString(invName, 8, 39, 4210752);
     }
 
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
@@ -78,19 +73,5 @@ public class RiftCreatureInvMenu extends GuiContainer {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
         this.renderHoveredToolTip(mouseX, mouseY);
-    }
-
-    @Override
-    public void actionPerformed(GuiButton button) {
-        switch (button.id) {
-            case 0:
-                this.creature.prevPage();
-                break;
-            case 1:
-                this.creature.nextPage();
-                break;
-        }
-        this.initGui();
-        this.updateScreen();
     }
 }

@@ -46,7 +46,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     public final EntityAIOwnerHurtTarget attackForOwner = new EntityAIOwnerHurtTarget(this);
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
-    public int invPage = 0;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -214,14 +213,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.dataManager.set(SADDLED, Boolean.valueOf(value));
     }
 
-    public void nextPage() {
-        if (this.invPage + 1 < invPageCount()) this.invPage = this.invPage + 1;
-    }
-
-    public void prevPage() {
-        if (this.invPage - 1 >= 0) this.invPage = this.invPage - 1;
-    }
-
     public boolean isApexPredator() {
         return false;
     }
@@ -232,10 +223,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
 
     public int slotCount() {
         return 0;
-    }
-
-    public int invPageCount() {
-        return (int)Math.ceil((double) slotCount() / 27d);
     }
 
     @Nullable
