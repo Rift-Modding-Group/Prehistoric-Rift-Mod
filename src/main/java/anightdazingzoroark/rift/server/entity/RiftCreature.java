@@ -6,9 +6,9 @@ import anightdazingzoroark.rift.server.entity.ai.RiftAggressiveModeGetTargets;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.RiftChangeInventoryFromMenu;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.SharedMonsterAttributes;
+import anightdazingzoroark.rift.server.message.RiftMessages;
+import anightdazingzoroark.rift.server.message.RiftStartRiding;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
 import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
 import net.minecraft.entity.passive.EntityTameable;
@@ -26,6 +26,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -92,11 +93,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                     this.consumeItemFromStack(player, itemstack);
                     this.heal((float)((ItemFood)itemstack.getItem()).getHealAmount(itemstack) * 3F);
                 }
-                else if (itemstack.isEmpty()) {
+                else if (itemstack.isEmpty() && !this.isSaddled()) {
                     player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                 }
+                else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking()) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
+                }
+                else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
+                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
+                }
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -223,6 +230,62 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
 
     public int slotCount() {
         return 0;
+    }
+
+    public void updatePassenger(Entity passenger) {
+        super.updatePassenger(passenger);
+        passenger.setPosition(riderPos().x, riderPos().y + passenger.height, riderPos().z);
+        ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
+    }
+
+    public Vec3d riderPos() {
+        return new Vec3d(this.posX, this.posY, this.posZ);
+    }
+
+    @Override
+    public boolean canPassengerSteer() {
+        return false;
+    }
+
+    @Override
+    public boolean canBeSteered() {
+        return true;
+    }
+
+    @Override
+    @Nullable
+    public Entity getControllingPassenger() {
+        for (Entity passenger : this.getPassengers()) {
+            if (passenger instanceof EntityPlayer && this.getAttackTarget() != passenger) {
+                EntityPlayer player = (EntityPlayer) passenger;
+                if (this.isTamed() && this.isOwner(player)) {
+                    return player;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void travel(float strafe, float vertical, float forward) {
+        if (this.isSaddled() && this.isBeingRidden() && this.canBeSteered()) {
+            EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();
+            if (controller != null) {
+                this.rotationYaw = controller.rotationYaw;
+                this.prevRotationYaw = this.rotationYaw;
+                this.rotationPitch = controller.rotationPitch * 0.5f;
+                this.setRotation(this.rotationYaw, this.rotationPitch);
+                this.renderYawOffset = this.rotationYaw;
+                strafe = controller.moveStrafing * 0.5f;
+                forward = controller.moveForward;
+                this.fallDistance = 0;
+                this.setAIMoveSpeed(onGround ? (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() : 2);
+                super.travel(strafe, vertical, forward);
+            }
+        }
+        else {
+            super.travel(strafe, vertical, forward);
+        }
     }
 
     @Nullable

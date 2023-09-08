@@ -23,6 +23,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -195,25 +196,49 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                 }
                 switch (this.getTameBehavior()) {
                     case ASSIST:
-                        this.targetTasks.addTask(1, this.hurtByTargetTask);
-                        this.targetTasks.addTask(2, this.defendOwner);
-                        this.targetTasks.addTask(3, this.attackForOwner);
-                        this.targetTasks.removeTask(this.getAggressiveModeTargets);
-                        if (this.getAttackTarget() != null) this.setSitting(false);
+                        if (this.isBeingRidden()) {
+                            this.targetTasks.removeTask(this.hurtByTargetTask);
+                            this.targetTasks.removeTask(this.defendOwner);
+                            this.targetTasks.removeTask(this.attackForOwner);
+                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
+                        }
+                        else {
+                            this.targetTasks.addTask(1, this.hurtByTargetTask);
+                            this.targetTasks.addTask(2, this.defendOwner);
+                            this.targetTasks.addTask(3, this.attackForOwner);
+                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
+                            if (this.getAttackTarget() != null) this.setSitting(false);
+                        }
                         break;
                     case NEUTRAL:
-                        this.targetTasks.addTask(1, this.hurtByTargetTask);
-                        this.targetTasks.removeTask(this.defendOwner);
-                        this.targetTasks.removeTask(this.attackForOwner);
-                        this.targetTasks.removeTask(this.getAggressiveModeTargets);
-                        if (this.getAttackTarget() != null) this.setSitting(false);
+                        if (this.isBeingRidden()) {
+                            this.targetTasks.removeTask(this.hurtByTargetTask);
+                            this.targetTasks.removeTask(this.defendOwner);
+                            this.targetTasks.removeTask(this.attackForOwner);
+                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
+                        }
+                        else {
+                            this.targetTasks.addTask(1, this.hurtByTargetTask);
+                            this.targetTasks.removeTask(this.defendOwner);
+                            this.targetTasks.removeTask(this.attackForOwner);
+                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
+                            if (this.getAttackTarget() != null) this.setSitting(false);
+                        }
                         break;
                     case AGGRESSIVE:
-                        this.targetTasks.addTask(1, this.hurtByTargetTask);
-                        this.targetTasks.removeTask(this.defendOwner);
-                        this.targetTasks.removeTask(this.attackForOwner);
-                        this.targetTasks.addTask(2, this.getAggressiveModeTargets);
-                        if (this.getAttackTarget() != null) this.setSitting(false);
+                        if (this.isBeingRidden()) {
+                            this.targetTasks.removeTask(this.hurtByTargetTask);
+                            this.targetTasks.removeTask(this.defendOwner);
+                            this.targetTasks.removeTask(this.attackForOwner);
+                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
+                        }
+                        else {
+                            this.targetTasks.addTask(1, this.hurtByTargetTask);
+                            this.targetTasks.removeTask(this.defendOwner);
+                            this.targetTasks.removeTask(this.attackForOwner);
+                            this.targetTasks.addTask(2, this.getAggressiveModeTargets);
+                            if (this.getAttackTarget() != null) this.setSitting(false);
+                        }
                         break;
                     case PASSIVE:
                         this.targetTasks.removeTask(this.hurtByTargetTask);
@@ -240,6 +265,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         }
     }
 
+    @Override
     public boolean isFavoriteFood(ItemStack stack) {
         List<String> favoriteFoodList = Arrays.asList(RiftConfig.tyrannosaurusFavoriteFood);
         for (String foodItem : favoriteFoodList) {
@@ -306,6 +332,11 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     @Override
+    public Vec3d riderPos() {
+        return new Vec3d(this.posX, this.posY + 2.25, this.posZ);
+    }
+
+    @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::tyrannosaurusMovement));
         data.addAnimationController(new AnimationController(this, "attacking", 0, this::tyrannosaurusAttack));
@@ -313,7 +344,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusMovement(AnimationEvent<E> event) {
-        if (this.isSitting()) {
+        if (this.isSitting() && !this.isBeingRidden()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.sitting", true));
             return PlayState.CONTINUE;
         }
@@ -328,22 +359,20 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private <E extends IAnimatable> PlayState tyrannosaurusAttack(AnimationEvent<E> event) {
         if (this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", false));
-            return PlayState.CONTINUE;
         }
         else {
             event.getController().clearAnimationCache();
-            return PlayState.CONTINUE;
         }
+        return PlayState.CONTINUE;
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusRoar(AnimationEvent<E> event) {
         if (this.isRoaring()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.roar", false));
-            return PlayState.CONTINUE;
         }
         else {
             event.getController().clearAnimationCache();
-            return PlayState.CONTINUE;
         }
+        return PlayState.CONTINUE;
     }
 }

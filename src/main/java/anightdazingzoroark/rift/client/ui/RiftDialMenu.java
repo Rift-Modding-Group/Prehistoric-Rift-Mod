@@ -7,6 +7,7 @@ import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.RiftChangeCreatureFromMenu;
 import anightdazingzoroark.rift.server.message.RiftCreatureInventoryFromMenu;
 import anightdazingzoroark.rift.server.message.RiftMessages;
+import anightdazingzoroark.rift.server.message.RiftStartRiding;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -225,6 +226,10 @@ public class RiftDialMenu extends GuiScreen {
                 else if (selectedItem == 1) {
                     this.choices = getState();
                     this.radialChoiceMenu = 1;
+                }
+                else if (selectedItem == 2 && !this.creature.isChild() && this.creature.isSaddled()) {
+                    this.mc.player.closeScreen();
+                    RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
                 }
                 else if (selectedItem == 3) {
                     this.choices = getBehavior();

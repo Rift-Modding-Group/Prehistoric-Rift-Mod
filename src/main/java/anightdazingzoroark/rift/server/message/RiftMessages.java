@@ -15,5 +15,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftChangeCreatureFromMenu.Handler.class, RiftChangeCreatureFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftCreatureInventoryFromMenu.Handler.class, RiftCreatureInventoryFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeInventoryFromMenu.Handler.class, RiftChangeInventoryFromMenu.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftStartRiding.Handler.class, RiftStartRiding.class, id++, Side.SERVER);
     }
 }
