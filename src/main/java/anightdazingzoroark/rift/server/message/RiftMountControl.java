@@ -44,13 +44,7 @@ public class RiftMountControl implements IMessage {
             World world = playerEntity.getEntityWorld();
             RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
 
-            switch (message.control) {
-                case 0:
-                    creature.controlAttack();
-                    break;
-                case 1:
-                    break;
-            }
+            creature.controlInput(message.control);
         }
     }
 }

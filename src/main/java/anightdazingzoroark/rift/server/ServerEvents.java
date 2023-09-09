@@ -31,6 +31,7 @@ public class ServerEvents {
             KeyBinding.setKeyBindState(settings.keyBindAttack.getKeyCode(), false);
         }
         else if (player.getRidingEntity() instanceof RiftCreature && !checkInItemWhitelist(player.getHeldItemMainhand().getItem()) && settings.keyBindUseItem.isPressed()) {
+            RiftMessages.WRAPPER.sendToServer(new RiftMountControl((RiftCreature) player.getRidingEntity(), 1));
             KeyBinding.setKeyBindState(settings.keyBindUseItem.getKeyCode(), false);
         }
     }

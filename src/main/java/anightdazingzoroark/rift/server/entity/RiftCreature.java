@@ -48,6 +48,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     public final EntityAIOwnerHurtTarget attackForOwner = new EntityAIOwnerHurtTarget(this);
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
+    private boolean steerable = true;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -243,6 +244,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         return new Vec3d(this.posX, this.posY, this.posZ);
     }
 
+    public void controlInput(int control) {
+        if (control == 0) {
+            controlAttack();
+        }
+    }
+
     public void controlAttack() {
         for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, getControlAttackArea(), null)) {
             if (entityLivingBase != this) {
@@ -261,12 +268,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         }
     }
 
+
+
     public AxisAlignedBB getControlAttackArea() {
-        double xBoxMin = this.posX + Math.cos(this.getLookVec().x);
-        double xBoxMax = this.posX + Math.cos(this.getLookVec().x);
-        double zBoxMin = this.posZ + Math.sin(this.getLookVec().z);
-        double zBoxMax = this.posZ + Math.sin(this.getLookVec().z);
-        return new AxisAlignedBB(xBoxMin, this.posY, zBoxMin, xBoxMax, this.posY + 5.0D, zBoxMax);
+        return this.getEntityBoundingBox().grow(4D, 5.0D, 4D);
     }
 
     @Override
@@ -276,7 +281,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
 
     @Override
     public boolean canBeSteered() {
-        return true;
+        return this.steerable;
+    }
+
+    public void setCanBeSteered(boolean value) {
+        this.steerable = value;
     }
 
     @Override

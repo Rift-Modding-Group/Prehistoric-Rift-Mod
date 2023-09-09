@@ -2,12 +2,18 @@ package anightdazingzoroark.rift.server.entity.creature;
 
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.*;
 import anightdazingzoroark.rift.server.entity.ai.RiftAttack;
 import anightdazingzoroark.rift.server.entity.ai.RiftGetTargets;
 import anightdazingzoroark.rift.server.entity.ai.RiftPickUpItems;
 import anightdazingzoroark.rift.server.entity.ai.RiftTyrannosaurusRoar;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.item.EntityItem;
@@ -21,8 +27,10 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -37,6 +45,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus"));
@@ -85,6 +94,41 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             }
         }
     };
+    private static final Predicate<EntityLivingBase> ROAR_BLACKLIST = new Predicate<EntityLivingBase>() {
+        @Override
+        public boolean apply(@Nullable EntityLivingBase entity) {
+            List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
+            if (!blacklist.isEmpty()) {
+                if (entity instanceof EntityPlayer) {
+                    return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
+                }
+                else {
+                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
+                }
+            }
+            else {
+                return entity.isEntityAlive() && !(entity instanceof RiftEgg);
+            }
+        }
+    };
+    private static final Predicate<EntityLivingBase> ROAR_WHITELIST = new Predicate<EntityLivingBase>() {
+        @Override
+        public boolean apply(@Nullable EntityLivingBase entity) {
+            List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
+
+            if (!blacklist.isEmpty()) {
+                if (entity instanceof EntityPlayer) {
+                    return entity.isEntityAlive() && blacklist.contains("minecraft:player");
+                }
+                else {
+                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
+                }
+            }
+            else {
+                return false;
+            }
+        }
+    };
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROAR = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     public int roarCooldownTicks;
@@ -92,6 +136,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private final EntityAIFollowOwner followOwner = new EntityAIFollowOwner(this, 1.0D, 10.0F, 2.0F);
     private final RiftGetTargets getTargetTask = new RiftGetTargets(this, RiftConfig.tyrannosaurusTargets, true);
     private final EntityAIHurtByTarget hurtByTargetTask = new EntityAIHurtByTarget(this, false, new Class[0]);
+    private final EntityAILookIdle lookAroundTask = new EntityAILookIdle(this);
 
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
@@ -118,8 +163,8 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     protected void initEntityAI() {
+        this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
         this.tasks.addTask(2, new RiftAttack(this, 1.0D, false, 0.5F, 0.5F));
-        this.tasks.addTask(4, new EntityAILookIdle(this));
     }
 
     @Override
@@ -129,6 +174,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         if (!this.isChild()) this.manageApplyWeakness();
         this.manageAttributesByAge();
         this.manageTasksByTameStatus();
+        this.manageTasksByIsRidden();
     }
 
     private void manageCanRoar() {
@@ -141,7 +187,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     private void manageApplyWeakness() {
         Predicate<EntityLivingBase> targetPredicate = RiftConfig.tyrannosaurusRoarTargetsWhitelist ? WEAKNESS_WHITELIST : WEAKNESS_BLACKLIST;
-        for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(), targetPredicate)) {
+        for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEffectCastArea(), targetPredicate)) {
             if (this.isTamed() && !entityLivingBase.getUniqueID().equals(this.getOwnerId())) {
                 entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
             }
@@ -170,7 +216,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private void manageTasksByTameStatus() {
         if (!this.isTamed()) {
             this.targetTasks.addTask(2, this.getTargetTask);
-            this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
             this.targetTasks.addTask(1, this.hurtByTargetTask);
             this.targetTasks.addTask(3, new RiftPickUpItems(this, RiftConfig.tyrannosaurusFavoriteFood, true));
             this.tasks.addTask(3, this.wanderTask);
@@ -251,7 +296,16 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         }
     }
 
-    protected AxisAlignedBB getTargetableArea() {
+    private void manageTasksByIsRidden() {
+        if (this.isBeingRidden()) {
+            this.tasks.removeTask(this.lookAroundTask);
+        }
+        else {
+            this.tasks.addTask(4, this.lookAroundTask);
+        }
+    }
+
+    protected AxisAlignedBB getEffectCastArea() {
         return this.getEntityBoundingBox().grow(16.0D, 16.0D, 16.0D);
     }
 
@@ -288,6 +342,99 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             }
         }
     }
+
+    //stuff below this comment is for roar stuff
+    public void roar(float strength) {
+        Predicate<EntityLivingBase> targetPredicate = RiftConfig.tyrannosaurusRoarTargetsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
+        for (Entity entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea((double)strength * 6d), targetPredicate)) {
+            if (entity != this) {
+                if (this.isTamed() && entity instanceof EntityTameable) {
+                    if (!((EntityTameable) entity).getOwner().equals(this.getOwner())) {
+                        entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
+                        this.roarKnockback(entity, strength);
+                    }
+                }
+                else if (this.isTamed() && entity instanceof EntityPlayer) {
+                    if (!this.getOwner().equals(entity)) {
+                        entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
+                        this.roarKnockback(entity, strength);
+                    }
+                }
+                entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
+                this.roarKnockback(entity, strength);
+            }
+        }
+        this.roarBreakBlocks(strength);
+    }
+
+    private void roarKnockback(Entity target, float strength) {
+        double d0 = this.posX - target.posX;
+        double d1 = this.posZ - target.posZ;
+        double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
+        ((EntityLivingBase)target).knockBack(this, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
+    }
+
+    protected AxisAlignedBB getRoarArea(double targetDistance) {
+        return this.getEntityBoundingBox().grow(targetDistance, 4.0D, targetDistance);
+    }
+
+    private void roarBreakBlocks(float strength) {
+        List<BlockPos> affectedBlockPositions = Lists.<BlockPos>newArrayList();
+        boolean canBreak = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this);
+        if (canBreak) {
+            if (!this.world.isRemote) {
+                Set<BlockPos> set = Sets.<BlockPos>newHashSet();
+                int i = 16;
+                for (int j = 0; j < 16; ++j) {
+                    for (int k = 0; k < 16; ++k) {
+                        for (int l = 0; l < 16; ++l) {
+                            if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
+                                double d0 = (double)((float)j / 15.0F * 2.0F - 1.0F);
+                                double d1 = Math.abs((double)((float)k / 15.0F * 2.0F - 1.0F));
+                                double d2 = (double)((float)l / 15.0F * 2.0F - 1.0F);
+                                double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                                d0 = d0 / d3;
+                                d1 = d1 / d3;
+                                d2 = d2 / d3;
+                                float f = (strength * 4) * (0.7F + this.world.rand.nextFloat() * 0.6F);
+                                double d4 = this.posX;
+                                double d6 = this.posY;
+                                double d8 = this.posZ;
+
+                                for (float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
+                                    BlockPos blockpos = new BlockPos(d4, d6, d8);
+                                    IBlockState iblockstate = this.world.getBlockState(blockpos);
+                                    Block block = iblockstate.getBlock();
+
+                                    if (iblockstate.getMaterial() != Material.AIR) {
+                                        if (RiftUtil.blockWeakerThanWood(block)) {
+                                            f -= 0.24F;
+                                        }
+                                        else {
+                                            f -= (1200F + 0.3F) * 0.3F;
+                                        }
+
+                                        if (f > 0.0F) {
+                                            set.add(blockpos);
+                                        }
+                                    }
+
+                                    d4 += d0 * 0.30000001192092896D;
+                                    d6 += d1 * 0.30000001192092896D;
+                                    d8 += d2 * 0.30000001192092896D;
+                                }
+                            }
+                        }
+                    }
+                }
+                affectedBlockPositions.addAll(set);
+                for (BlockPos blockPos : affectedBlockPositions) {
+                    this.world.destroyBlock(blockPos, false);
+                }
+            }
+        }
+    }
+    //end of roar stuff
 
     @Override
     public boolean canPickUpLoot() {
@@ -337,12 +484,13 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     @Override
-    public AxisAlignedBB getControlAttackArea() {
-        double xBoxMin = this.posX - 5d * Math.cos(this.rotationYaw);
-        double xBoxMax = this.posX + 5d * Math.cos(this.rotationYaw);
-        double zBoxMin = this.posZ - 5d * Math.sin(this.rotationYaw);
-        double zBoxMax = this.posZ + 5d * Math.sin(this.rotationYaw);
-        return new AxisAlignedBB(xBoxMin, this.posY, zBoxMin, xBoxMax, this.posY + 5.0D, zBoxMax);
+    public void controlInput(int control) {
+        if (control == 0) {
+            if (!this.isRoaring() && !this.isAttacking()) controlAttack();
+        }
+        if (control == 1) {
+            if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) this.setRoaring(true);
+        }
     }
 
     @Override
