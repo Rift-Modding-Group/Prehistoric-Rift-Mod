@@ -1,7 +1,6 @@
 package anightdazingzoroark.rift.server.message;
 
-import anightdazingzoroark.rift.RiftInitialize;
-import anightdazingzoroark.rift.server.ServerProxy;
+import anightdazingzoroark.rift.server.entity.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
@@ -10,37 +9,48 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftCreatureInventoryFromMenu implements IMessage {
+public class RiftMountControl implements IMessage {
     private int creatureId;
+    private int control; //0 is for left click, 1 is for right click
 
-    public RiftCreatureInventoryFromMenu() {}
+    public RiftMountControl() {}
 
-    public RiftCreatureInventoryFromMenu(int creatureId) {
-        this.creatureId = creatureId;
+    public RiftMountControl(RiftCreature creature, int control) {
+        this.creatureId = creature.getEntityId();
+        this.control = control;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.creatureId = buf.readInt();
+        this.control = buf.readInt();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.creatureId);
+        buf.writeInt(this.control);
     }
 
-    public static class Handler implements IMessageHandler<RiftCreatureInventoryFromMenu, IMessage> {
+    public static class Handler implements IMessageHandler<RiftMountControl, IMessage> {
         @Override
-        public IMessage onMessage(RiftCreatureInventoryFromMenu message, MessageContext ctx) {
+        public IMessage onMessage(RiftMountControl message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handle(RiftCreatureInventoryFromMenu message, MessageContext ctx) {
+        private void handle(RiftMountControl message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             World world = playerEntity.getEntityWorld();
+            RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
 
-            playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_INVENTORY, world, message.creatureId, 0, 0);
+            switch (message.control) {
+                case 0:
+                    creature.controlAttack();
+                    break;
+                case 1:
+                    break;
+            }
         }
     }
 }

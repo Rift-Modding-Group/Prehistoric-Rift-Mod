@@ -2,6 +2,7 @@ package anightdazingzoroark.rift;
 
 import anightdazingzoroark.rift.RiftConfig;
 import net.minecraft.block.Block;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
@@ -27,6 +28,17 @@ public class RiftUtil {
         NonNullList<ItemStack> blocksInOreDicType = OreDictionary.getOres(oreDicType);
         for (ItemStack item : blocksInOreDicType) {
             if (item.getItem().equals(new ItemStack(block).getItem())) return true;
+        }
+        return false;
+    }
+
+    public static boolean itemInOreDicType(Item item, String oreDicType) {
+        List<Item> itemsInOreDicType = new ArrayList<>();
+        for (ItemStack itemStack : OreDictionary.getOres(oreDicType)) {
+            itemsInOreDicType.add(itemStack.getItem());
+        }
+        for (Item itemToFind : itemsInOreDicType) {
+            if (itemToFind.equals(item)) return true;
         }
         return false;
     }

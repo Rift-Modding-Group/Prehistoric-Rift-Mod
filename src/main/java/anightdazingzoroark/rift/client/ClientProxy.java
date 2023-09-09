@@ -12,6 +12,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -26,6 +27,8 @@ import static anightdazingzoroark.rift.client.renderer.ItemRenderer.registerItem
 public class ClientProxy extends ServerProxy {
     @Mod.Instance(RiftInitialize.MODID)
     public static Object EGG;
+    private int thirdPersonView = 0;
+    private int previousViewType = 0;
 
     @SideOnly(Side.CLIENT)
     @Override
@@ -39,6 +42,7 @@ public class ClientProxy extends ServerProxy {
     public void init(FMLInitializationEvent e) {
         super.init(e);
         registerItemRenderer();
+        MinecraftForge.EVENT_BUS.register(new ClientEvents());
     }
 
     @SideOnly(Side.CLIENT)
@@ -66,5 +70,21 @@ public class ClientProxy extends ServerProxy {
             return new RiftCreatureInvMenu(playerInventory, (RiftCreature) entity);
         }
         return null;
+    }
+
+    public void set3rdPersonView(int view) {
+        thirdPersonView = view;
+    }
+
+    public int get3rdPersonView() {
+        return thirdPersonView;
+    }
+
+    public void setPreviousViewType(int view) {
+        previousViewType = view;
+    }
+
+    public int getPreviousViewType() {
+        return previousViewType;
     }
 }

@@ -337,6 +337,15 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     @Override
+    public AxisAlignedBB getControlAttackArea() {
+        double xBoxMin = this.posX - 5d * Math.cos(this.rotationYaw);
+        double xBoxMax = this.posX + 5d * Math.cos(this.rotationYaw);
+        double zBoxMin = this.posZ - 5d * Math.sin(this.rotationYaw);
+        double zBoxMax = this.posZ + 5d * Math.sin(this.rotationYaw);
+        return new AxisAlignedBB(xBoxMin, this.posY, zBoxMin, xBoxMax, this.posY + 5.0D, zBoxMax);
+    }
+
+    @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::tyrannosaurusMovement));
         data.addAnimationController(new AnimationController(this, "attacking", 0, this::tyrannosaurusAttack));

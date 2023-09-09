@@ -26,6 +26,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -240,6 +241,32 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
 
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY, this.posZ);
+    }
+
+    public void controlAttack() {
+        for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, getControlAttackArea(), null)) {
+            if (entityLivingBase != this) {
+                if (entityLivingBase instanceof EntityTameable) {
+                    if (!((EntityTameable)entityLivingBase).getOwner().equals(this.getOwner())) {
+                        entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                    }
+                }
+                if (entityLivingBase instanceof EntityPlayer) {
+                    if (!this.getOwner().equals(entityLivingBase)) {
+                        entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                    }
+                }
+                entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+            }
+        }
+    }
+
+    public AxisAlignedBB getControlAttackArea() {
+        double xBoxMin = this.posX + Math.cos(this.getLookVec().x);
+        double xBoxMax = this.posX + Math.cos(this.getLookVec().x);
+        double zBoxMin = this.posZ + Math.sin(this.getLookVec().z);
+        double zBoxMax = this.posZ + Math.sin(this.getLookVec().z);
+        return new AxisAlignedBB(xBoxMin, this.posY, zBoxMin, xBoxMax, this.posY + 5.0D, zBoxMax);
     }
 
     @Override

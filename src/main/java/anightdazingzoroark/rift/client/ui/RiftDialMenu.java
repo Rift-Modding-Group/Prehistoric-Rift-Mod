@@ -5,7 +5,7 @@ import anightdazingzoroark.rift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.RiftChangeCreatureFromMenu;
-import anightdazingzoroark.rift.server.message.RiftCreatureInventoryFromMenu;
+import anightdazingzoroark.rift.server.message.RiftOpenInventoryFromMenu;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import anightdazingzoroark.rift.server.message.RiftStartRiding;
 import net.minecraft.client.Minecraft;
@@ -220,7 +220,7 @@ public class RiftDialMenu extends GuiScreen {
         switch (this.radialChoiceMenu) {
             case 0:
                 if (selectedItem == 0) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftCreatureInventoryFromMenu(this.creature.getEntityId()));
+                    RiftMessages.WRAPPER.sendToServer(new RiftOpenInventoryFromMenu(this.creature.getEntityId()));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 1) {

@@ -40,7 +40,9 @@ public class ServerProxy implements IGuiHandler {
         RiftMessages.registerMessages();
     }
 
-    public void init(FMLInitializationEvent event) {}
+    public void init(FMLInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(new ServerEvents());
+    }
 
     public void postInit(FMLPostInitializationEvent event) {}
 
@@ -66,5 +68,17 @@ public class ServerProxy implements IGuiHandler {
     @Override
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         return null;
+    }
+
+    public int get3rdPersonView() {
+        return 0;
+    }
+
+    public void set3rdPersonView(int view) {}
+
+    public void setPreviousViewType(int view) {}
+
+    public int getPreviousViewType() {
+        return 0;
     }
 }
