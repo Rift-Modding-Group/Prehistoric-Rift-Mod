@@ -29,6 +29,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -253,22 +254,27 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     public void controlAttack() {
         for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, getControlAttackArea(), null)) {
             if (entityLivingBase != this) {
-                if (entityLivingBase instanceof EntityTameable) {
-                    if (!((EntityTameable)entityLivingBase).getOwner().equals(this.getOwner())) {
+                if (this.isTamed() && entityLivingBase instanceof EntityPlayer) {
+                    if (!entityLivingBase.getUniqueID().equals(this.getOwnerId())) {
                         entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
                     }
                 }
-                if (entityLivingBase instanceof EntityPlayer) {
-                    if (!this.getOwner().equals(entityLivingBase)) {
+                else if (this.isTamed() && entityLivingBase instanceof EntityTameable) {
+                    if (((EntityTameable) entityLivingBase).isTamed()) {
+                        if (!((EntityTameable) entityLivingBase).getOwner().equals(this.getOwner())) {
+                            entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                        }
+                    }
+                    else {
                         entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
                     }
                 }
-                entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                else {
+                    entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                }
             }
         }
     }
-
-
 
     public AxisAlignedBB getControlAttackArea() {
         return this.getEntityBoundingBox().grow(4D, 5.0D, 4D);
@@ -315,7 +321,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                 strafe = controller.moveStrafing * 0.5f;
                 forward = controller.moveForward;
                 this.fallDistance = 0;
-                this.setAIMoveSpeed(onGround ? (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() : 2);
+                float moveSpeed = (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+                this.setAIMoveSpeed(onGround ? moveSpeed + (controller.isSprinting() ? moveSpeed * 0.3f : 0) : 2);
                 super.travel(strafe, vertical, forward);
             }
         }

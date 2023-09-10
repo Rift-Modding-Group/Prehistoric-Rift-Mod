@@ -4,10 +4,7 @@ import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.*;
-import anightdazingzoroark.rift.server.entity.ai.RiftAttack;
-import anightdazingzoroark.rift.server.entity.ai.RiftGetTargets;
-import anightdazingzoroark.rift.server.entity.ai.RiftPickUpItems;
-import anightdazingzoroark.rift.server.entity.ai.RiftTyrannosaurusRoar;
+import anightdazingzoroark.rift.server.entity.ai.*;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -164,7 +161,8 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
-        this.tasks.addTask(2, new RiftAttack(this, 1.0D, false, 0.5F, 0.5F));
+        this.tasks.addTask(1, new RiftControlledAttack(this, 0.52F, 0.24F));
+        this.tasks.addTask(2, new RiftAttack(this, 1.0D, false, 0.52F, 0.24F));
     }
 
     @Override
@@ -188,11 +186,18 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private void manageApplyWeakness() {
         Predicate<EntityLivingBase> targetPredicate = RiftConfig.tyrannosaurusRoarTargetsWhitelist ? WEAKNESS_WHITELIST : WEAKNESS_BLACKLIST;
         for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEffectCastArea(), targetPredicate)) {
-            if (this.isTamed() && !entityLivingBase.getUniqueID().equals(this.getOwnerId())) {
-                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
+            if (this.isTamed() && entityLivingBase instanceof EntityPlayer) {
+                if (!entityLivingBase.getUniqueID().equals(this.getOwnerId())) {
+                    entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
+                }
             }
             else if (this.isTamed() && entityLivingBase instanceof EntityTameable) {
-                if (!((EntityTameable) entityLivingBase).getOwnerId().equals(this.getOwnerId())) {
+                if (((EntityTameable) entityLivingBase).isTamed()) {
+                    if (!((EntityTameable) entityLivingBase).getOwnerId().equals(this.getOwnerId())) {
+                        entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
+                    }
+                }
+                else {
                     entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
                 }
             }
@@ -480,13 +485,13 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     @Override
     public Vec3d riderPos() {
-        return new Vec3d(this.posX, this.posY + 2.25, this.posZ);
+        return new Vec3d(this.posX, this.posY + 2.125, this.posZ);
     }
 
     @Override
     public void controlInput(int control) {
         if (control == 0) {
-            if (!this.isRoaring() && !this.isAttacking()) controlAttack();
+            if (!this.isRoaring() && !this.isAttacking()) this.setAttacking(true);
         }
         if (control == 1) {
             if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) this.setRoaring(true);

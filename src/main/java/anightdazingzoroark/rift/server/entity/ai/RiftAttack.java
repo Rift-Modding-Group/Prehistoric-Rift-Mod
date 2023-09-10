@@ -21,7 +21,6 @@ public class RiftAttack extends EntityAIBase {
     private double targetX;
     private double targetY;
     private double targetZ;
-    protected final int attackInterval = 20;
     private int failedPathFindingPenalty = 0;
     private boolean canPenalize = false;
 
