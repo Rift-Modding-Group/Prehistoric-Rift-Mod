@@ -31,6 +31,10 @@ public class CreatureContainer extends Container {
                 public boolean isItemValid(ItemStack stack) {
                     return !stack.isEmpty() && stack.getItem() == Items.SADDLE;
                 }
+
+                public boolean canTakeStack(EntityPlayer playerIn) {
+                    return !creature.isBeingRidden();
+                }
             });
         }
 

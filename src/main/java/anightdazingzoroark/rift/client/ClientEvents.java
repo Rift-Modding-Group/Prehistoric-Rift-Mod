@@ -2,7 +2,12 @@ package anightdazingzoroark.rift.client;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.message.RiftMessages;
+import anightdazingzoroark.rift.server.message.RiftOpenInventoryFromMenu;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -22,6 +27,16 @@ public class ClientEvents {
                     RiftInitialize.PROXY.set3rdPersonView(2);
                 }
             }
+        }
+    }
+
+    //open creature inventory while riding
+    @SubscribeEvent
+    public void openInvWhileRiding(GuiOpenEvent event) {
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        if (event.getGui() instanceof GuiInventory && player.isRiding() && player.getRidingEntity() instanceof RiftCreature) {
+            RiftMessages.WRAPPER.sendToServer(new RiftOpenInventoryFromMenu(player.getRidingEntity().getEntityId()));
+            event.setCanceled(true);
         }
     }
 }

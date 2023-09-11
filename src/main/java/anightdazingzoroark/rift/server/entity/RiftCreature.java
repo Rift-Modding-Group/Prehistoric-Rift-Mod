@@ -236,6 +236,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         super.updatePassenger(passenger);
         passenger.setPosition(riderPos().x, riderPos().y + passenger.height, riderPos().z);
         ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
+        if (this.isDead) passenger.dismountRidingEntity();
     }
 
     public Vec3d riderPos() {
