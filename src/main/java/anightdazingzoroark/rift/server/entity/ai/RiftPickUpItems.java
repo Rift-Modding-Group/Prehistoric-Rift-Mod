@@ -39,16 +39,7 @@ public class RiftPickUpItems extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.mob.getHeldItemMainhand().isEmpty()) {
-            return true;
-        }
-        else if (this.mob.getAttackTarget() == null && this.mob.getLastAttackedEntity() == null) {
-            List<EntityItem> list = this.mob.world.getEntitiesWithinAABB(EntityItem.class, this.getTargetableArea(this.mob.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).getAttributeValue()), this.items);
-            return !list.isEmpty();
-        }
-        else {
-            return false;
-        }
+        return this.mob.getHeldItemMainhand().isEmpty() && !this.mob.isTamed() && !this.mob.isBeingRidden() && this.mob.getAttackTarget() == null;
     }
 
     @Override

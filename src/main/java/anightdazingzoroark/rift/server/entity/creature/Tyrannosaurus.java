@@ -5,6 +5,7 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.*;
 import anightdazingzoroark.rift.server.entity.ai.*;
+import anightdazingzoroark.rift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -129,11 +130,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROAR = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     public int roarCooldownTicks;
-    private final EntityAIWander wanderTask = new EntityAIWander(this, 1.0D);
-    private final EntityAIFollowOwner followOwner = new EntityAIFollowOwner(this, 1.0D, 10.0F, 2.0F);
-    private final RiftGetTargets getTargetTask = new RiftGetTargets(this, RiftConfig.tyrannosaurusTargets, true);
-    private final EntityAIHurtByTarget hurtByTargetTask = new EntityAIHurtByTarget(this, false, new Class[0]);
-    private final EntityAILookIdle lookAroundTask = new EntityAILookIdle(this);
 
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
@@ -161,8 +157,17 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
+        this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
+        this.targetTasks.addTask(2, new RiftGetTargets(this, RiftConfig.tyrannosaurusTargets, true));
+        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
+        this.targetTasks.addTask(2, new RiftProtectOwner(this));
+        this.targetTasks.addTask(3, new RiftPickUpItems(this, RiftConfig.tyrannosaurusFavoriteFood, true));
+        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftControlledAttack(this, 0.52F, 0.24F));
         this.tasks.addTask(2, new RiftAttack(this, 1.0D, false, 0.52F, 0.24F));
+        this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(3, new RiftWander(this, 1.0D));
+        this.tasks.addTask(4, new RiftLookAround(this));
     }
 
     @Override
@@ -171,8 +176,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         this.manageCanRoar();
         if (!this.isChild()) this.manageApplyWeakness();
         this.manageAttributesByAge();
-        this.manageTasksByTameStatus();
-        this.manageTasksByIsRidden();
+        this.manageTargetingBySitting();
     }
 
     private void manageCanRoar() {
@@ -218,95 +222,14 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         }
     }
 
-    private void manageTasksByTameStatus() {
-        if (!this.isTamed()) {
-            this.targetTasks.addTask(2, this.getTargetTask);
-            this.targetTasks.addTask(1, this.hurtByTargetTask);
-            this.targetTasks.addTask(3, new RiftPickUpItems(this, RiftConfig.tyrannosaurusFavoriteFood, true));
-            this.tasks.addTask(3, this.wanderTask);
-        }
-        else {
-            if (!this.world.isRemote) {
-                switch (this.getTameStatus()) {
-                    case SIT:
-                        if (this.getAttackTarget() == null) this.setSitting(true);
-                        this.tasks.removeTask(this.wanderTask);
-                        this.tasks.removeTask(this.followOwner);
-                        break;
-                    case STAND:
-                        this.setSitting(false);
-                        this.tasks.removeTask(this.wanderTask);
-                        this.tasks.addTask(3, this.followOwner);
-                        break;
-                    case WANDER:
-                        this.setSitting(false);
-                        this.tasks.addTask(3, this.wanderTask);
-                        this.tasks.removeTask(this.followOwner);
-                        break;
-                }
-                switch (this.getTameBehavior()) {
-                    case ASSIST:
-                        if (this.isBeingRidden()) {
-                            this.targetTasks.removeTask(this.hurtByTargetTask);
-                            this.targetTasks.removeTask(this.defendOwner);
-                            this.targetTasks.removeTask(this.attackForOwner);
-                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
-                        }
-                        else {
-                            this.targetTasks.addTask(1, this.hurtByTargetTask);
-                            this.targetTasks.addTask(2, this.defendOwner);
-                            this.targetTasks.addTask(3, this.attackForOwner);
-                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
-                            if (this.getAttackTarget() != null) this.setSitting(false);
-                        }
-                        break;
-                    case NEUTRAL:
-                        if (this.isBeingRidden()) {
-                            this.targetTasks.removeTask(this.hurtByTargetTask);
-                            this.targetTasks.removeTask(this.defendOwner);
-                            this.targetTasks.removeTask(this.attackForOwner);
-                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
-                        }
-                        else {
-                            this.targetTasks.addTask(1, this.hurtByTargetTask);
-                            this.targetTasks.removeTask(this.defendOwner);
-                            this.targetTasks.removeTask(this.attackForOwner);
-                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
-                            if (this.getAttackTarget() != null) this.setSitting(false);
-                        }
-                        break;
-                    case AGGRESSIVE:
-                        if (this.isBeingRidden()) {
-                            this.targetTasks.removeTask(this.hurtByTargetTask);
-                            this.targetTasks.removeTask(this.defendOwner);
-                            this.targetTasks.removeTask(this.attackForOwner);
-                            this.targetTasks.removeTask(this.getAggressiveModeTargets);
-                        }
-                        else {
-                            this.targetTasks.addTask(1, this.hurtByTargetTask);
-                            this.targetTasks.removeTask(this.defendOwner);
-                            this.targetTasks.removeTask(this.attackForOwner);
-                            this.targetTasks.addTask(2, this.getAggressiveModeTargets);
-                            if (this.getAttackTarget() != null) this.setSitting(false);
-                        }
-                        break;
-                    case PASSIVE:
-                        this.targetTasks.removeTask(this.hurtByTargetTask);
-                        this.targetTasks.removeTask(this.defendOwner);
-                        this.targetTasks.removeTask(this.attackForOwner);
-                        this.targetTasks.removeTask(this.getAggressiveModeTargets);
-                        break;
-                }
+    private void manageTargetingBySitting() {
+        if (!this.world.isRemote) {
+            if (!this.isBeingRidden()) {
+                this.setSitting(this.getTameStatus() == TameStatusType.SIT);
             }
-        }
-    }
-
-    private void manageTasksByIsRidden() {
-        if (this.isBeingRidden()) {
-            this.tasks.removeTask(this.lookAroundTask);
-        }
-        else {
-            this.tasks.addTask(4, this.lookAroundTask);
+            else {
+                this.setSitting(this.getAttackTarget() == null);
+            }
         }
     }
 

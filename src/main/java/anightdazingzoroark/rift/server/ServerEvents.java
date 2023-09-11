@@ -8,6 +8,8 @@ import anightdazingzoroark.rift.server.message.RiftMountControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
@@ -54,8 +56,16 @@ public class ServerEvents {
     public void stopMobDrops(LivingDropsEvent event) {
         if (event.getSource().getTrueSource() instanceof RiftCreature) {
             RiftCreature attacker = (RiftCreature) event.getSource().getTrueSource();
+            Entity attacked = event.getEntity();
             if (!attacker.isTamed()) {
-                event.setCanceled(true);
+                if (attacked instanceof EntityTameable) {
+                    if (!(((EntityTameable) attacked).isTamed())) {
+                        event.setCanceled(true);
+                    }
+                }
+                else if (!(attacked instanceof EntityPlayer)) {
+                    event.setCanceled(true);
+                }
             }
         }
     }

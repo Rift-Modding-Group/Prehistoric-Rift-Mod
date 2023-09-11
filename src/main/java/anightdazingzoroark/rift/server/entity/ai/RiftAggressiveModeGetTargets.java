@@ -1,11 +1,15 @@
 package anightdazingzoroark.rift.server.entity.ai;
 
+import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAITarget;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.ArrayList;
@@ -16,18 +20,20 @@ import java.util.List;
 public class RiftAggressiveModeGetTargets extends EntityAITarget {
     private final int targetChance;
     protected final RiftAggressiveModeGetTargets.Sorter sorter;
+    private final RiftCreature creature;
     protected EntityLivingBase targetEntity;
 
-    public RiftAggressiveModeGetTargets(EntityCreature creature, boolean checkSight) {
+    public RiftAggressiveModeGetTargets(RiftCreature creature, boolean checkSight) {
         this(creature, checkSight, false);
     }
 
-    public RiftAggressiveModeGetTargets(EntityCreature creature, boolean checkSight, boolean onlyNearby) {
+    public RiftAggressiveModeGetTargets(RiftCreature creature, boolean checkSight, boolean onlyNearby) {
         this(creature, 10, checkSight, onlyNearby);
     }
 
-    public RiftAggressiveModeGetTargets(EntityCreature creature, int chance, boolean checkSight, boolean onlyNearby) {
+    public RiftAggressiveModeGetTargets(RiftCreature creature, int chance, boolean checkSight, boolean onlyNearby) {
         super(creature, checkSight, onlyNearby);
+        this.creature = creature;
         this.targetChance = chance;
         this.sorter = new RiftAggressiveModeGetTargets.Sorter(creature);
         this.setMutexBits(1);
@@ -35,36 +41,52 @@ public class RiftAggressiveModeGetTargets extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {
+        if (!this.creature.isTamed()) {
+            return false;
+        }
+        else if (this.creature.isBeingRidden()) {
+            return false;
+        }
+        else if (this.creature.getTameBehavior() != TameBehaviorType.AGGRESSIVE) {
             return false;
         }
         else {
-            List<EntityLivingBase> list = new ArrayList<>();
-            for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), null)) {
-                if (!entity.isRiding()) {
-                    if (entity instanceof EntityPlayer) {
-                        if (!entity.getUniqueID().equals(((EntityTameable) this.taskOwner).getOwnerId())) {
-                            list.add(entity);
-                        }
-                    }
-                    else if (entity instanceof EntityTameable) {
-                        if (!(((EntityTameable) entity).getOwnerId().equals(((EntityTameable) this.taskOwner).getOwnerId())) && ((EntityTameable) entity).isTamed()) {
-                            list.add(entity);
-                        }
-                    }
-                    else {
-                        list.add(entity);
-                    }
-                }
-            }
-
-            if (list.isEmpty()) {
+            if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {
                 return false;
             }
             else {
-                Collections.sort(list, this.sorter);
-                this.targetEntity = list.get(0);
-                return true;
+                List<EntityLivingBase> list = new ArrayList<>();
+                for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), null)) {
+                    if (!entity.isRiding()) {
+                        if (entity instanceof EntityPlayer) {
+                            if (!entity.getUniqueID().equals(this.creature.getOwnerId())) {
+                                list.add(entity);
+                            }
+                        }
+                        else if (entity instanceof EntityTameable) {
+                            if ((((EntityTameable) entity).isTamed())) {
+                                if (!((EntityTameable) entity).getOwner().equals(this.creature.getOwner())) {
+                                    list.add(entity);
+                                }
+                            }
+                            else {
+                                list.add(entity);
+                            }
+                        }
+                        else {
+                            list.add(entity);
+                        }
+                    }
+                }
+
+                if (list.isEmpty()) {
+                    return false;
+                }
+                else {
+                    Collections.sort(list, this.sorter);
+                    this.targetEntity = list.get(0);
+                    return true;
+                }
             }
         }
     }

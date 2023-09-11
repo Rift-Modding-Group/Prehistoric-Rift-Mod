@@ -44,9 +44,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     public final RiftCreatureType creatureType;
     public AnimationFactory factory = new AnimationFactory(this);
-    public final RiftAggressiveModeGetTargets getAggressiveModeTargets = new RiftAggressiveModeGetTargets(this, true);
-    public final EntityAIOwnerHurtByTarget defendOwner =  new EntityAIOwnerHurtByTarget(this);
-    public final EntityAIOwnerHurtTarget attackForOwner = new EntityAIOwnerHurtTarget(this);
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
     private boolean steerable = true;

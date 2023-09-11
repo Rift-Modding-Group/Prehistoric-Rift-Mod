@@ -1,5 +1,6 @@
 package anightdazingzoroark.rift.server.entity.ai;
 
+import anightdazingzoroark.rift.server.entity.RiftCreature;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
@@ -52,7 +53,10 @@ public class RiftGetTargets extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {
+        if (((RiftCreature) this.taskOwner).isTamed()) {
+            return false;
+        }
+        else if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {
             return false;
         }
         else {

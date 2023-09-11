@@ -7,6 +7,7 @@ import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class ClientEvents {
+    //set cam to 3rd person when ridin a creature
     @SubscribeEvent
     public void onEntityMount(EntityMountEvent event) {
         if (event.getEntityBeingMounted() instanceof RiftCreature && event.getWorldObj().isRemote && event.getEntityMounting() == Minecraft.getMinecraft().player) {
