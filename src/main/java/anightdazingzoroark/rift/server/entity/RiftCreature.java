@@ -1,16 +1,14 @@
 package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.ServerProxy;
-import anightdazingzoroark.rift.server.entity.ai.RiftAggressiveModeGetTargets;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.RiftChangeInventoryFromMenu;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import anightdazingzoroark.rift.server.message.RiftStartRiding;
 import net.minecraft.entity.*;
-import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
-import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -42,6 +40,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private int energyMod;
+    private int energyRegenMod;
+    private int energyRegenModDelay;
     public final RiftCreatureType creatureType;
     public AnimationFactory factory = new AnimationFactory(this);
     public boolean isRideable;
@@ -52,6 +54,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         super(worldIn);
         this.creatureType = creatureType;
         this.initInventory();
+        this.energyMod = 0;
+        this.energyRegenMod = 0;
+        this.energyRegenModDelay = 0;
     }
 
     @Override
@@ -62,16 +67,56 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
         this.dataManager.register(SADDLED, Boolean.FALSE);
+        this.dataManager.register(ENERGY, 20);
+    }
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        if (this.isTamed()) updateEnergy();
+    }
+
+    private void updateEnergy() {
+        System.out.println("Energy: "+this.getEnergy());
+        System.out.println("Mod: "+this.energyMod);
+        if (this.getAIMoveSpeed() > 0) {
+            this.energyMod++;
+            this.energyRegenMod = 0;
+            this.energyRegenModDelay = 0;
+            if (this.isBeingRidden()) {
+                if (this.energyMod > this.creatureType.getMaxEnergyMod() * (this.getControllingPassenger().isSprinting() ? 1/4 : 1)) {
+                    this.setEnergy(this.getEnergy() - 1);
+                    this.energyMod = 0;
+                }
+            }
+            else {
+                if (this.energyMod > this.creatureType.getMaxEnergyMod()) {
+                    this.setEnergy(this.getEnergy() - 1);
+                    this.energyMod = 0;
+                }
+            }
+        }
+        else {
+            this.energyMod = 0;
+            if (this.energyRegenModDelay <= 60) {
+                this.energyRegenModDelay++;
+            }
+            else {
+                this.energyRegenMod++;
+            }
+            if (this.energyRegenMod > this.creatureType.getMaxEnergyRegenMod()) {
+                this.setEnergy(this.getEnergy() + 1);
+                this.energyRegenMod = 0;
+            }
+        }
     }
 
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
-
         if (flag) {
             this.applyEnchantments(this, entityIn);
         }
-
         return flag;
     }
 
@@ -132,6 +177,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
             }
             compound.setTag("Items", nbttaglist);
         }
+        compound.setInteger("Energy", this.getEnergy());
     }
 
     @Override
@@ -160,6 +206,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                 this.creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
             }
         }
+        this.setEnergy(compound.getInteger("Energy"));
     }
 
     private void initInventory() {
@@ -203,6 +250,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
 
     public void setTameStatus(TameStatusType tameStatus) {
         this.dataManager.set(STATUS, (byte) tameStatus.ordinal());
+    }
+
+    public int getEnergy() {
+        return RiftUtil.clamp(this.dataManager.get(ENERGY).intValue(), 0, 20);
+    }
+
+    public void setEnergy(int energy) {
+        this.dataManager.set(ENERGY, RiftUtil.clamp(energy, 0, 20));
     }
 
     public TameBehaviorType getTameBehavior() {
@@ -292,6 +347,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.steerable = value;
     }
 
+//    public boolean isMoving() {
+//        System.out.println(Math.sqrt((this.motionX * this.motionX) + (this.motionZ * this.motionZ)));
+//        return Math.sqrt((this.motionX * this.motionX) + (this.motionZ * this.motionZ)) > 0D;
+//    }
+
     @Override
     @Nullable
     public Entity getControllingPassenger() {
@@ -319,8 +379,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                 strafe = controller.moveStrafing * 0.5f;
                 forward = controller.moveForward;
                 this.fallDistance = 0;
-                float moveSpeed = (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
-                this.setAIMoveSpeed(onGround ? moveSpeed + (controller.isSprinting() ? moveSpeed * 0.3f : 0) : 2);
+                float moveSpeed = (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * (this.getEnergy() >= 6 ? 1f : 0.5f);
+                this.setAIMoveSpeed(onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() >= 6 ? moveSpeed * 0.3f : 0) : 2);
                 super.travel(strafe, vertical, forward);
             }
         }

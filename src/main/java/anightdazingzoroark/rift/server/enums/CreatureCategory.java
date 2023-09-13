@@ -1,4 +1,4 @@
-package anightdazingzoroark.rift.server.entity;
+package anightdazingzoroark.rift.server.enums;
 
 public enum CreatureCategory {
     DINOSAUR,

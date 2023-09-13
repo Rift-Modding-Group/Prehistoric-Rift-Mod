@@ -1,12 +1,9 @@
 package anightdazingzoroark.rift.server.items;
 
-import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.creativetab.RiftCreativeTabs;
-import anightdazingzoroark.rift.server.entity.CreatureCategory;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.registries.IForgeRegistry;
