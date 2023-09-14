@@ -77,9 +77,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     }
 
     private void updateEnergy() {
-        System.out.println("Energy: "+this.getEnergy());
-        System.out.println("Mod: "+this.energyMod);
-        if (this.getAIMoveSpeed() > 0) {
+        if (this.isMoving()) {
             this.energyMod++;
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
@@ -275,6 +273,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.dataManager.set(SADDLED, Boolean.valueOf(value));
     }
 
+    public boolean isMoving() {
+        return Math.sqrt((this.motionX * this.motionX) + (this.motionZ * this.motionZ)) > 0;
+    }
+
     public boolean isApexPredator() {
         return false;
     }
@@ -346,11 +348,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     public void setCanBeSteered(boolean value) {
         this.steerable = value;
     }
-
-//    public boolean isMoving() {
-//        System.out.println(Math.sqrt((this.motionX * this.motionX) + (this.motionZ * this.motionZ)));
-//        return Math.sqrt((this.motionX * this.motionX) + (this.motionZ * this.motionZ)) > 0D;
-//    }
 
     @Override
     @Nullable
