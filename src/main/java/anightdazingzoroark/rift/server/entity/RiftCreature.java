@@ -73,7 +73,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        if (this.isTamed()) updateEnergy();
+        if (this.isTamed() && !this.world.isRemote) this.updateEnergy();
+//        if (this.isTamed()) this.updateEnergy();
     }
 
     private void updateEnergy() {
@@ -82,7 +83,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
             if (this.isBeingRidden()) {
-                if (this.energyMod > this.creatureType.getMaxEnergyMod() * (this.getControllingPassenger().isSprinting() ? 1/4 : 1)) {
+                if (this.energyMod > this.creatureType.getMaxEnergyMod() * (this.getControllingPassenger().isSprinting() ? 3/4 : 1)) {
                     this.setEnergy(this.getEnergy() - 1);
                     this.energyMod = 0;
                 }
@@ -274,7 +275,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     }
 
     public boolean isMoving() {
-        return Math.sqrt((this.motionX * this.motionX) + (this.motionZ * this.motionZ)) > 0;
+        return Math.sqrt((this.motionX * this.motionX) + (this.motionY * this.motionY) + (this.motionZ * this.motionZ)) > 0;
     }
 
     public boolean isApexPredator() {
@@ -375,6 +376,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                 this.renderYawOffset = this.rotationYaw;
                 strafe = controller.moveStrafing * 0.5f;
                 forward = controller.moveForward;
+                this.stepHeight = 1.0F;
+                this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1F;
                 this.fallDistance = 0;
                 float moveSpeed = (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * (this.getEnergy() >= 6 ? 1f : 0.5f);
                 this.setAIMoveSpeed(onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() >= 6 ? moveSpeed * 0.3f : 0) : 2);
@@ -382,6 +385,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
             }
         }
         else {
+            this.stepHeight = 0.5F;
+            this.jumpMovementFactor = 0.02F;
             super.travel(strafe, vertical, forward);
         }
     }
