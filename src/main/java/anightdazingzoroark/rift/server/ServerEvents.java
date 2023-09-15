@@ -9,12 +9,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -29,13 +31,42 @@ public class ServerEvents {
         GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
 
-        if (player.getRidingEntity() instanceof RiftCreature && !checkInItemWhitelist(player.getHeldItemMainhand().getItem()) && settings.keyBindAttack.isPressed()) {
-            RiftMessages.WRAPPER.sendToServer(new RiftMountControl((RiftCreature) player.getRidingEntity(), 0));
-            KeyBinding.setKeyBindState(settings.keyBindAttack.getKeyCode(), false);
+        if (player.getRidingEntity() instanceof RiftCreature) {
+            RiftCreature creature = (RiftCreature) player.getRidingEntity();
+            if (!checkInItemWhitelist(player.getHeldItemMainhand().getItem()) && settings.keyBindAttack.isPressed()) {
+                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0));
+                KeyBinding.setKeyBindState(settings.keyBindAttack.getKeyCode(), false);
+            }
+            else if (!checkInItemWhitelist(player.getHeldItemMainhand().getItem()) && settings.keyBindUseItem.isPressed()) {
+                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1));
+                KeyBinding.setKeyBindState(settings.keyBindUseItem.getKeyCode(), false);
+            }
         }
-        else if (player.getRidingEntity() instanceof RiftCreature && !checkInItemWhitelist(player.getHeldItemMainhand().getItem()) && settings.keyBindUseItem.isPressed()) {
-            RiftMessages.WRAPPER.sendToServer(new RiftMountControl((RiftCreature) player.getRidingEntity(), 1));
-            KeyBinding.setKeyBindState(settings.keyBindUseItem.getKeyCode(), false);
+    }
+
+    //for stopping creatures from being able to be controlled in water when they got no energy
+    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
+    public void stopControlledMoveInWater(InputEvent.KeyInputEvent event) {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        EntityPlayer player = Minecraft.getMinecraft().player;
+
+        if (player.getRidingEntity() instanceof RiftCreature) {
+            RiftCreature creature = (RiftCreature) player.getRidingEntity();
+
+            if (creature.isInWater() && creature.getEnergy() == 0) {
+                if (settings.keyBindForward.isKeyDown()) {
+                    KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
+                }
+                else if (settings.keyBindBack.isKeyDown()) {
+                    KeyBinding.setKeyBindState(settings.keyBindBack.getKeyCode(), false);
+                }
+                else if (settings.keyBindLeft.isKeyDown()) {
+                    KeyBinding.setKeyBindState(settings.keyBindLeft.getKeyCode(), false);
+                }
+                else if (settings.keyBindRight.isKeyDown()) {
+                    KeyBinding.setKeyBindState(settings.keyBindRight.getKeyCode(), false);
+                }
+            }
         }
     }
 
@@ -65,6 +96,18 @@ public class ServerEvents {
                 }
                 else if (!(attacked instanceof EntityPlayer)) {
                     event.setCanceled(true);
+                }
+            }
+        }
+    }
+
+    //make it so when mobs detect u as a target, they target the mounted creature instead
+    @SubscribeEvent
+    public void redirectToRiddenCreature(LivingSetAttackTargetEvent event) {
+        if (event.getTarget() instanceof EntityPlayer) {
+            if (event.getTarget().isRiding()) {
+                if (event.getTarget().getRidingEntity() instanceof RiftCreature) {
+                    ((EntityLiving)event.getEntityLiving()).setAttackTarget((RiftCreature)event.getTarget().getRidingEntity());
                 }
             }
         }

@@ -32,6 +32,7 @@ public class RiftControlledAttack extends EntityAIBase  {
     public void resetTask() {
         this.animTime = 0;
         this.attacker.setAttacking(false);
+        this.attacker.setActing(false);
     }
 
     public void updateTask() {

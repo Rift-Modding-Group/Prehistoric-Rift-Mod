@@ -2,6 +2,7 @@ package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.rift.server.enums.CreatureCategory;
+import anightdazingzoroark.rift.server.enums.CreatureDiet;
 import anightdazingzoroark.rift.server.enums.EnergyCategory;
 import anightdazingzoroark.rift.server.enums.EnergyRechargeCategory;
 import net.minecraft.item.Item;
@@ -12,18 +13,20 @@ import java.util.Locale;
 import static anightdazingzoroark.rift.server.items.RiftItems.riftEggItem;
 
 public enum RiftCreatureType {
-    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL);
+    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;
+    private final CreatureDiet creatureDiet;
     private final EnergyCategory energyCategory;
     private final EnergyRechargeCategory energyRechargeCategory;
     public Item eggItem;
     public final String friendlyName;
 
-    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory) {
+    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory) {
         this.creature = creature;
         this.creatureCategory = creatureCategory;
+        this.creatureDiet = creatureDiet;
         this.energyCategory = energyCategory;
         this.energyRechargeCategory = energyRechargeCategory;
         this.friendlyName = this.name().toUpperCase(Locale.ENGLISH).substring(0, 1) + this.name().toLowerCase().substring(1);
@@ -37,6 +40,10 @@ public enum RiftCreatureType {
         return this.creatureCategory;
     }
 
+    public CreatureDiet getCreatureDiet() {
+        return this.creatureDiet;
+    }
+
     public EnergyCategory getEnergyCategory() {
         return this.energyCategory;
     }
@@ -45,7 +52,7 @@ public enum RiftCreatureType {
         return this.energyRechargeCategory;
     }
 
-    public int getMaxEnergyMod() {
+    public int getMaxEnergyModMovement() {
         switch (this.energyCategory) {
             case FAST:
                 return 60;
@@ -59,14 +66,28 @@ public enum RiftCreatureType {
         return 0;
     }
 
-    public int getMaxEnergyRegenMod() {
-        switch (this.energyRechargeCategory) {
+    public int getMaxEnergyModAction() {
+        switch (this.energyCategory) { //all of these r in how many times an action was done
             case FAST:
-                return 60;
+                return 5;
             case NORMAL:
-                return 100;
+                return 8;
             case SLOW:
-                return 160;
+                return 10;
+            case VERY_SLOW:
+                return 12;
+        }
+        return 0;
+    }
+
+    public int getMaxEnergyRegenMod() {
+        switch (this.energyRechargeCategory) { //all of these r in seconds that r converted to ticks
+            case FAST:
+                return 10;
+            case NORMAL:
+                return 40;
+            case SLOW:
+                return 80;
         }
         return 0;
     }

@@ -12,6 +12,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.ContainerHorseChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
@@ -22,28 +23,36 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 
-public class RiftCreature extends EntityTameable implements IAnimatable {
+public abstract class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> ACTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
+    public int energyActionMod;
+    private int energyActionModCountdown;
+    private int eatFromInvCooldown;
+    private int eatFromInvForEnergyCooldown;
+    private boolean informLowEnergy;
+    private boolean informNoEnergy;
     public final RiftCreatureType creatureType;
     public AnimationFactory factory = new AnimationFactory(this);
     public boolean isRideable;
@@ -57,6 +66,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.energyMod = 0;
         this.energyRegenMod = 0;
         this.energyRegenModDelay = 0;
+        this.energyActionMod = 0;
+        this.energyActionModCountdown = 0;
+        this.eatFromInvCooldown = 0;
+        this.eatFromInvForEnergyCooldown = 0;
+        this.informLowEnergy = false;
+        this.informNoEnergy = false;
     }
 
     @Override
@@ -68,36 +83,43 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
         this.dataManager.register(SADDLED, Boolean.FALSE);
         this.dataManager.register(ENERGY, 20);
+        this.dataManager.register(ACTING, Boolean.FALSE);
     }
 
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        if (this.isTamed() && !this.world.isRemote) this.updateEnergy();
-//        if (this.isTamed()) this.updateEnergy();
+        if (this.isTamed() && !this.world.isRemote) {
+            this.updateEnergyMove();
+            this.updateEnergyActions();
+            this.resetEnergyActionMod();
+            this.lowEnergyEffects();
+            this.eatFromInventory();
+            if (this.isBeingRidden()) this.informRiderEnergy();
+        }
     }
 
-    private void updateEnergy() {
+    private void updateEnergyMove() {
         if (this.isMoving()) {
             this.energyMod++;
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
             if (this.isBeingRidden()) {
-                if (this.energyMod > this.creatureType.getMaxEnergyMod() * (this.getControllingPassenger().isSprinting() ? 3/4 : 1)) {
+                if (this.energyMod > this.creatureType.getMaxEnergyModMovement() * (this.getControllingPassenger().isSprinting() ? 3/4 : 1)) {
                     this.setEnergy(this.getEnergy() - 1);
                     this.energyMod = 0;
                 }
             }
             else {
-                if (this.energyMod > this.creatureType.getMaxEnergyMod()) {
+                if (this.energyMod > this.creatureType.getMaxEnergyModMovement()) {
                     this.setEnergy(this.getEnergy() - 1);
                     this.energyMod = 0;
                 }
             }
         }
-        else {
+        else if (!this.isActing()) {
             this.energyMod = 0;
-            if (this.energyRegenModDelay <= 60) {
+            if (this.energyRegenModDelay <= 20) {
                 this.energyRegenModDelay++;
             }
             else {
@@ -107,6 +129,82 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                 this.setEnergy(this.getEnergy() + 1);
                 this.energyRegenMod = 0;
             }
+        }
+        else {
+            this.energyMod = 0;
+            this.energyRegenMod = 0;
+            this.energyRegenModDelay = 0;
+        }
+    }
+
+    public abstract void updateEnergyActions();
+
+    private void resetEnergyActionMod() {
+        if (!this.isActing() && this.energyActionMod > 0) {
+            this.energyActionModCountdown++;
+            if (this.energyActionModCountdown > 60) {
+                this.energyActionMod = 0;
+                this.energyActionModCountdown = 0;
+            }
+        }
+    }
+
+    private void lowEnergyEffects() {
+        if (this.getEnergy() > 0 && this.getEnergy() <= 6) {
+            this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 2));
+        }
+        else if (this.getEnergy() == 0) {
+            this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 255));
+        }
+    }
+
+    private void eatFromInventory() {
+        int minSlot = this.canBeSaddled() ? 1 : 0;
+        if (this.getHealth() < this.getMaxHealth()) {
+            this.eatFromInvCooldown++;
+            for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
+                ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
+                if (this.isFavoriteFood(itemInSlot) && this.eatFromInvCooldown > 60) {
+                    this.heal((float)((ItemFood)itemInSlot.getItem()).getHealAmount(itemInSlot) * 3F);
+                    itemInSlot.setCount(itemInSlot.getCount() - 1);
+                    this.eatFromInvCooldown = 0;
+                }
+            }
+        }
+        else {
+            this.eatFromInvCooldown = 0;
+        }
+
+        if (this.getEnergy() < 20) {
+            this.eatFromInvForEnergyCooldown++;
+            for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
+                ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
+                if (RiftUtil.isEnergyRegenItem(itemInSlot.getItem(), this.creatureType.getCreatureDiet()) && this.eatFromInvForEnergyCooldown > 60) {
+                    this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemInSlot.getItem(), this.creatureType.getCreatureDiet()));
+                    itemInSlot.setCount(itemInSlot.getCount() - 1);
+                    this.eatFromInvForEnergyCooldown = 0;
+                }
+            }
+        }
+        else {
+            this.eatFromInvForEnergyCooldown = 0;
+        }
+    }
+
+    private void informRiderEnergy() {
+        if (!this.informLowEnergy && this.getEnergy() <= 6 && this.getEnergy() > 0) {
+            ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.low_energy", this.getName()), false);
+            this.informLowEnergy = true;
+        }
+        if (this.informLowEnergy && this.getEnergy() > 6) {
+            this.informLowEnergy = false;
+        }
+        if (!this.informNoEnergy && this.getEnergy() == 0) {
+            ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.no_energy", this.getName()), false);
+            this.informNoEnergy = true;
+        }
+        if (this.informNoEnergy && this.getEnergy() > 0) {
+            this.informNoEnergy = false;
         }
     }
 
@@ -152,9 +250,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         return false;
     }
 
-    public boolean isFavoriteFood(ItemStack stack) {
-        return false;
-    }
+    public abstract boolean isFavoriteFood(ItemStack stack);
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
@@ -274,8 +370,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         this.dataManager.set(SADDLED, Boolean.valueOf(value));
     }
 
+    public boolean isActing() {
+        return this.dataManager.get(ACTING);
+    }
+
+    public void setActing(boolean value) {
+        this.dataManager.set(ACTING, Boolean.valueOf(value));
+    }
+
     public boolean isMoving() {
-        return Math.sqrt((this.motionX * this.motionX) + (this.motionY * this.motionY) + (this.motionZ * this.motionZ)) > 0;
+        double fallMotion = !this.onGround ? this.motionY : 0;
+        return Math.sqrt((this.motionX * this.motionX) + (fallMotion * fallMotion) + (this.motionZ * this.motionZ)) > 0;
     }
 
     public boolean isApexPredator() {
@@ -297,36 +402,30 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
         if (this.isDead) passenger.dismountRidingEntity();
     }
 
-    public Vec3d riderPos() {
-        return new Vec3d(this.posX, this.posY, this.posZ);
-    }
+    public abstract Vec3d riderPos();
 
-    public void controlInput(int control) {
-        if (control == 0) {
-            controlAttack();
-        }
-    }
+    public abstract void controlInput(int control);
 
     public void controlAttack() {
         for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, getControlAttackArea(), null)) {
             if (entityLivingBase != this) {
                 if (this.isTamed() && entityLivingBase instanceof EntityPlayer) {
                     if (!entityLivingBase.getUniqueID().equals(this.getOwnerId())) {
-                        entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                        this.attackEntityAsMob(entityLivingBase);
                     }
                 }
                 else if (this.isTamed() && entityLivingBase instanceof EntityTameable) {
                     if (((EntityTameable) entityLivingBase).isTamed()) {
                         if (!((EntityTameable) entityLivingBase).getOwner().equals(this.getOwner())) {
-                            entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                            this.attackEntityAsMob(entityLivingBase);
                         }
                     }
                     else {
-                        entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                        this.attackEntityAsMob(entityLivingBase);
                     }
                 }
                 else {
-                    entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this), (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                    this.attackEntityAsMob(entityLivingBase);
                 }
             }
         }
@@ -379,8 +478,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
                 this.stepHeight = 1.0F;
                 this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1F;
                 this.fallDistance = 0;
-                float moveSpeed = (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * (this.getEnergy() >= 6 ? 1f : 0.5f);
-                this.setAIMoveSpeed(onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() >= 6 ? moveSpeed * 0.3f : 0) : 2);
+                float moveSpeedMod = (this.getEnergy() >= 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
+                float moveSpeed = (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * moveSpeedMod;
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() >= 6 ? moveSpeed * 0.3f : 0) : 2);
                 super.travel(strafe, vertical, forward);
             }
         }
@@ -398,7 +498,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable {
     }
 
     @Override
-    public void registerControllers(AnimationData data) {}
+    public abstract void registerControllers(AnimationData data);
 
     @Override
     public AnimationFactory getFactory() {

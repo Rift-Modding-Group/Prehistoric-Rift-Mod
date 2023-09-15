@@ -94,7 +94,10 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
         this.roarTick = 0;
         this.mob.setRoaring(false);
         this.mob.setCanRoar(false);
-        if (this.mob.isTamed()) this.mob.setCanBeSteered(true);
+        if (this.mob.isTamed()) {
+            this.mob.setCanBeSteered(true);
+            this.mob.setActing(false);
+        }
     }
 
     @Override

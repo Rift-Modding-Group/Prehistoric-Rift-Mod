@@ -82,7 +82,7 @@ public class RiftAttack extends EntityAIBase {
             return false;
         }
         else {
-            return !(entitylivingbase instanceof EntityPlayer) || !((EntityPlayer)entitylivingbase).isSpectator() && !((EntityPlayer)entitylivingbase).isCreative();
+            return !(entitylivingbase instanceof EntityPlayer) || !(((EntityPlayer)entitylivingbase).isSpectator() && ((EntityPlayer)entitylivingbase).isCreative());
         }
     }
 
@@ -92,6 +92,7 @@ public class RiftAttack extends EntityAIBase {
         this.animTime = 0;
     }
 
+    @Override
     public void resetTask() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
@@ -102,6 +103,7 @@ public class RiftAttack extends EntityAIBase {
         this.attacker.getNavigator().clearPath();
         this.animTime = 0;
         this.attacker.setAttacking(false);
+        if (this.attacker.isTamed()) this.attacker.setActing(false);
     }
 
     public void updateTask() {
@@ -151,6 +153,9 @@ public class RiftAttack extends EntityAIBase {
         if (distToEnemySqr <= d0) {
             this.attacker.setAttacking(true);
             this.animTime++;
+            if (this.animTime == 0) {
+                if (this.attacker.isTamed()) this.attacker.setActing(true);
+            }
             if (this.animTime == this.attackAnimTime) {
                 this.attacker.attackEntityAsMob(enemy);
             }

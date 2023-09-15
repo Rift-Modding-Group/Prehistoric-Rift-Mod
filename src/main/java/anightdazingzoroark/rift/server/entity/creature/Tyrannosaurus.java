@@ -177,6 +177,23 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         this.manageTargetingBySitting();
     }
 
+    public void updateEnergyActions() {
+        if (!this.isActing()) {
+            if (this.isAttacking()) {
+                this.setActing(true);
+                this.energyActionMod++;
+                if (this.energyActionMod > this.creatureType.getMaxEnergyModAction()) {
+                    this.setEnergy(this.getEnergy() - 2);
+                    this.energyActionMod = 0;
+                }
+            }
+            if (this.isRoaring()) {
+                this.setActing(true);
+                this.setEnergy(this.getEnergy() - 6);
+            }
+        }
+    }
+
     private void manageCanRoar() {
         this.roarCooldownTicks++;
         if (this.roarCooldownTicks >= 200) {
@@ -286,8 +303,10 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                         this.roarKnockback(entity, strength);
                     }
                 }
-                entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
-                this.roarKnockback(entity, strength);
+                else {
+                    entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
+                    this.roarKnockback(entity, strength);
+                }
             }
         }
         this.roarBreakBlocks(strength);
