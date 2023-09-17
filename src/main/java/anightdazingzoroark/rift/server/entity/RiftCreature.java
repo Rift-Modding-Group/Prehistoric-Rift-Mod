@@ -404,7 +404,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public abstract Vec3d riderPos();
 
-    public abstract void controlInput(int control);
+    public abstract void controlInput(int control, int holdAmount);
 
     public void controlAttack() {
         for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, getControlAttackArea(), null)) {

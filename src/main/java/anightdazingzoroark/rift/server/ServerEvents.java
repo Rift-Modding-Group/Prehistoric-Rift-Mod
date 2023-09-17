@@ -38,12 +38,16 @@ public class ServerEvents {
             RiftCreature creature = (RiftCreature) player.getRidingEntity();
             //detect left click
             if (!checkInItemWhitelist(heldItem) && event.getMouseButton() == 0) {
-                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0));
-                KeyBinding.setKeyBindState(settings.keyBindAttack.getKeyCode(), false);
+                if (event.getTicks() <= 10) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0));
+                    KeyBinding.setKeyBindState(settings.keyBindAttack.getKeyCode(), false);
+                }
             }
             //detect right click
             else if (!checkInItemWhitelist(heldItem) && !isFoodItem(heldItem) && event.getMouseButton() == 1) {
-                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1));
+                if (event.isReleased()) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, event.getTicks()));
+                }
                 KeyBinding.setKeyBindState(settings.keyBindUseItem.getKeyCode(), false);
             }
         }

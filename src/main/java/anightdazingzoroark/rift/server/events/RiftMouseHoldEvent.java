@@ -1,22 +1,30 @@
 package anightdazingzoroark.rift.server.events;
 
+import anightdazingzoroark.rift.server.message.RiftMountControl;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.lwjgl.Sys;
 
 public class RiftMouseHoldEvent extends Event {
     private int ticks;
     private int mouseButton;
+    private boolean released;
 
     public RiftMouseHoldEvent(int ticks) {
-        this(-1, ticks);
+        this(ticks, false);
     }
 
-    public RiftMouseHoldEvent(int mouseButton, int ticks) {
+    public RiftMouseHoldEvent(int ticks, boolean released) {
+        this(-1, ticks, released);
+    }
+
+    public RiftMouseHoldEvent(int mouseButton, int ticks, boolean released) {
         this.mouseButton = mouseButton;
         this.ticks = ticks;
+        this.released = released;
     }
 
     public int getMouseButton() {
@@ -27,9 +35,16 @@ public class RiftMouseHoldEvent extends Event {
         return this.ticks;
     }
 
+    public boolean isReleased() {
+        return this.released;
+    }
+
     public static class Handler {
         private int leftTicks = 0;
         private int rightTicks = 0;
+        private boolean leftIsReleased = false;
+        private boolean rightIsReleased = false;
+
         @SubscribeEvent
         public void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END && Minecraft.getMinecraft().world != null) {
@@ -38,20 +53,27 @@ public class RiftMouseHoldEvent extends Event {
                 boolean rightButtonDown = org.lwjgl.input.Mouse.isButtonDown(1);
 
                 if (leftButtonDown) {
-                    // Left mouse button is being held
-                    MinecraftForge.EVENT_BUS.post(new RiftMouseHoldEvent(0, leftTicks++));
+                    MinecraftForge.EVENT_BUS.post(new RiftMouseHoldEvent(0, leftTicks++, false));
+                    leftIsReleased = false;
                 }
                 else {
-                    leftTicks = 0;
-                    MinecraftForge.EVENT_BUS.post(new RiftMouseHoldEvent(0));
+                    if (!leftIsReleased) {
+                        MinecraftForge.EVENT_BUS.post(new RiftMouseHoldEvent(0, leftTicks, true));
+                        leftTicks = 0;
+                        leftIsReleased = true;
+                    }
                 }
 
                 if (rightButtonDown) {
-                    MinecraftForge.EVENT_BUS.post(new RiftMouseHoldEvent(1, rightTicks++));
+                    MinecraftForge.EVENT_BUS.post(new RiftMouseHoldEvent(1, rightTicks++, false));
+                    rightIsReleased = false;
                 }
                 else {
-                    rightTicks = 0;
-                    MinecraftForge.EVENT_BUS.post(new RiftMouseHoldEvent(0));
+                    if (!rightIsReleased) {
+                        MinecraftForge.EVENT_BUS.post(new RiftMouseHoldEvent(1, rightTicks, true));
+                        rightTicks = 0;
+                        rightIsReleased = true;
+                    }
                 }
             }
         }

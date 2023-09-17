@@ -128,11 +128,13 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROAR = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     public int roarCooldownTicks;
+    public int roarCharge;
 
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
         this.setSize(3.25F, 5F);
         this.roarCooldownTicks = 0;
+        this.roarCharge = 0;
         this.isRideable = true;
     }
 
@@ -189,7 +191,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             }
             if (this.isRoaring()) {
                 this.setActing(true);
-                this.setEnergy(this.getEnergy() - 6);
+                this.setEnergy(this.getEnergy() - (int)(0.03d * (double)this.roarCharge + 6d));
             }
         }
     }
@@ -304,7 +306,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                     }
                 }
                 else {
-                    entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
+                    entity.attackEntityFrom(DamageSource.causeMobDamage(this), 8f * strength / 3f - 2f);
                     this.roarKnockback(entity, strength);
                 }
             }
@@ -429,12 +431,16 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     @Override
-    public void controlInput(int control) {
+    public void controlInput(int control, int holdAmount) {
+        System.out.println(holdAmount);
         if (control == 0) {
             if (!this.isRoaring() && !this.isAttacking()) this.setAttacking(true);
         }
         if (control == 1) {
-            if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) this.setRoaring(true);
+            if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) {
+                this.setRoaring(true);
+                this.roarCharge = holdAmount;
+            }
         }
     }
 
