@@ -3,6 +3,7 @@ package anightdazingzoroark.rift.server;
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import anightdazingzoroark.rift.server.message.RiftMountControl;
 import net.minecraft.client.Minecraft;
@@ -20,24 +21,28 @@ import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ServerEvents {
     //for controlling when u use attacks or abilities while riding creatures
-    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
-    public void whileRidingCreature(InputEvent.MouseInputEvent event) {
+    @SubscribeEvent(receiveCanceled = true)
+    public void mouseTest(RiftMouseHoldEvent event) {
         GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
+        Item heldItem = player.getHeldItemMainhand().getItem();
 
         if (player.getRidingEntity() instanceof RiftCreature) {
             RiftCreature creature = (RiftCreature) player.getRidingEntity();
-            if (!checkInItemWhitelist(player.getHeldItemMainhand().getItem()) && settings.keyBindAttack.isPressed()) {
+            //detect left click
+            if (!checkInItemWhitelist(heldItem) && event.getMouseButton() == 0) {
                 RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0));
                 KeyBinding.setKeyBindState(settings.keyBindAttack.getKeyCode(), false);
             }
-            else if (!checkInItemWhitelist(player.getHeldItemMainhand().getItem()) && settings.keyBindUseItem.isPressed()) {
+            //detect right click
+            else if (!checkInItemWhitelist(heldItem) && !isFoodItem(heldItem) && event.getMouseButton() == 1) {
                 RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1));
                 KeyBinding.setKeyBindState(settings.keyBindUseItem.getKeyCode(), false);
             }
@@ -128,8 +133,12 @@ public class ServerEvents {
             if (RiftUtil.itemInOreDicType(item, oreDicEntry)) return true;
         }
         for (String itemEntry : itemList) {
-            if (Item.getByNameOrId(itemEntry).equals(item) || (item instanceof ItemFood)) return true;
+            if (Item.getByNameOrId(itemEntry).equals(item)) return true;
         }
         return false;
+    }
+
+    private boolean isFoodItem(Item item) {
+        return item instanceof ItemFood;
     }
 }

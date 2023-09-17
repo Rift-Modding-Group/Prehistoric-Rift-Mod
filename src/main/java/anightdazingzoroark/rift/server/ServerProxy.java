@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntities;
+import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
 import anightdazingzoroark.rift.server.inventory.CreatureContainer;
 import anightdazingzoroark.rift.server.items.RiftItems;
 import anightdazingzoroark.rift.server.message.RiftMessages;
@@ -37,11 +38,13 @@ public class ServerProxy implements IGuiHandler {
         RiftItems.registerItems();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
         RiftEntities.registerEntities();
+        RiftEntities.registerSpawn();
         RiftMessages.registerMessages();
     }
 
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ServerEvents());
+        MinecraftForge.EVENT_BUS.register(new RiftMouseHoldEvent.Handler());
     }
 
     public void postInit(FMLPostInitializationEvent event) {}

@@ -124,6 +124,7 @@ dependencies {
         }
     }
     implementation 'software.bernie.geckolib:geckolib-forge-1.12.2:3.0.31'
+//    implementation rfg.deobf('curse.maven:shoulder-surfing-reloaded-243190:4745817')
 }
 
 // Adds Access Transformer files to tasks
