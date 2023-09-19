@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
+import anightdazingzoroark.rift.server.message.RiftManageCanUseRightClick;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import anightdazingzoroark.rift.server.message.RiftMountControl;
 import net.minecraft.client.Minecraft;
@@ -15,13 +16,13 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
+import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
-import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,7 @@ public class ServerEvents {
 
         if (player.getRidingEntity() instanceof RiftCreature) {
             RiftCreature creature = (RiftCreature) player.getRidingEntity();
+//            System.out.println(creature.cannotUseRightClick);
             //detect left click
             if (!checkInItemWhitelist(heldItem) && event.getMouseButton() == 0) {
                 if (event.getTicks() <= 10) {
@@ -44,8 +46,14 @@ public class ServerEvents {
                 }
             }
             //detect right click
+            //also has system that ensures that tamed creatures dont use right click related stuff the moment they're mounted
             else if (!checkInItemWhitelist(heldItem) && !isFoodItem(heldItem) && event.getMouseButton() == 1) {
-                if (event.isReleased()) {
+                if (event.isReleased() && !creature.canUseRightClick()) {
+                    System.out.println("cannot");
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseRightClick(creature, true));
+                }
+                else if (event.isReleased()) {
+                    System.out.println("can");
                     RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, event.getTicks()));
                 }
                 KeyBinding.setKeyBindState(settings.keyBindUseItem.getKeyCode(), false);
@@ -75,6 +83,18 @@ public class ServerEvents {
                 else if (settings.keyBindRight.isKeyDown()) {
                     KeyBinding.setKeyBindState(settings.keyBindRight.getKeyCode(), false);
                 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onStartRiding(EntityMountEvent event) {
+        if (event.isDismounting() && event.getEntityMounting() instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer)event.getEntityMounting();
+            if (event.getEntityBeingMounted() instanceof RiftCreature) {
+                System.out.println("bye");
+                RiftCreature creature = (RiftCreature) event.getEntityBeingMounted();
+                RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseRightClick(creature, false));
             }
         }
     }

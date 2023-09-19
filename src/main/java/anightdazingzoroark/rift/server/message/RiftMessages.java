@@ -17,5 +17,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftChangeInventoryFromMenu.Handler.class, RiftChangeInventoryFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftStartRiding.Handler.class, RiftStartRiding.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftMountControl.Handler.class, RiftMountControl.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftManageCanUseRightClick.Handler.class, RiftManageCanUseRightClick.class, id++, Side.SERVER);
     }
 }

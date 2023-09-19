@@ -30,6 +30,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -44,6 +45,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ACTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CAN_USE_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -53,6 +55,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int eatFromInvForEnergyCooldown;
     private boolean informLowEnergy;
     private boolean informNoEnergy;
+    public boolean cannotUseRightClick;
     public final RiftCreatureType creatureType;
     public AnimationFactory factory = new AnimationFactory(this);
     public boolean isRideable;
@@ -72,6 +75,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.eatFromInvForEnergyCooldown = 0;
         this.informLowEnergy = false;
         this.informNoEnergy = false;
+        this.cannotUseRightClick = true;
     }
 
     @Override
@@ -84,6 +88,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(SADDLED, Boolean.FALSE);
         this.dataManager.register(ENERGY, 20);
         this.dataManager.register(ACTING, Boolean.FALSE);
+        this.dataManager.register(CAN_USE_RIGHT_CLICK, Boolean.FALSE);
     }
 
     @Override
@@ -376,6 +381,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setActing(boolean value) {
         this.dataManager.set(ACTING, Boolean.valueOf(value));
+    }
+
+    public boolean canUseRightClick() {
+        return this.dataManager.get(CAN_USE_RIGHT_CLICK);
+    }
+
+    public void setCanUseRightClick(boolean value) {
+        this.dataManager.set(CAN_USE_RIGHT_CLICK, Boolean.valueOf(value));
     }
 
     public boolean isMoving() {

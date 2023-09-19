@@ -432,7 +432,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     @Override
     public void controlInput(int control, int holdAmount) {
-        System.out.println(holdAmount);
+//        System.out.println(holdAmount);
         if (control == 0) {
             if (!this.isRoaring() && !this.isAttacking()) this.setAttacking(true);
         }

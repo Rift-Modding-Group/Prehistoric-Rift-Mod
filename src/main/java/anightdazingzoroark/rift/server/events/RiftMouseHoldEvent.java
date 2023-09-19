@@ -48,7 +48,6 @@ public class RiftMouseHoldEvent extends Event {
         @SubscribeEvent
         public void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END && Minecraft.getMinecraft().world != null) {
-                // Check the mouse button state at the end of each tick
                 boolean leftButtonDown = org.lwjgl.input.Mouse.isButtonDown(0);
                 boolean rightButtonDown = org.lwjgl.input.Mouse.isButtonDown(1);
 
