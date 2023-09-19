@@ -3,10 +3,14 @@ package anightdazingzoroark.rift;
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.server.enums.CreatureDiet;
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,5 +118,40 @@ public class RiftUtil {
 
     public static int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    public static boolean checkInMountItemWhitelist(Item item) {
+        List<String> oreDicList = new ArrayList<>();
+        List<String> itemList = new ArrayList<>();
+        for (String entry : RiftConfig.mountOverrideWhitelistItems) {
+            if (entry.contains("oreDic:")) {
+                oreDicList.add(entry.replace("oreDic:", ""));
+            }
+            if (entry.contains("item:")) {
+                itemList.add(entry.replace("item:", ""));
+            }
+        }
+        for (String oreDicEntry : oreDicList) {
+            if (RiftUtil.itemInOreDicType(item, oreDicEntry)) return true;
+        }
+        for (String itemEntry : itemList) {
+            if (Item.getByNameOrId(itemEntry).equals(item)) return true;
+        }
+        return false;
+    }
+
+    public static void drawTexturedModalRect(float x, float y, int texX, int texY, int width, int height) {
+        float f = 0.00390625F;
+        float f1 = 0.00390625F;
+        double z = 0.0D;
+
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.pos(x, y + height, z).tex((texX * f), (texY + height) * f1).endVertex();
+        bufferbuilder.pos((x + width), y + height, z).tex((texX + width) * f, (texY + height) * f1).endVertex();
+        bufferbuilder.pos((x + width), y, z).tex((texX + width) * f,(texY * f1)).endVertex();
+        bufferbuilder.pos(x, y, z).tex((texX * f), (texY * f1)).endVertex();
+        tessellator.draw();
     }
 }

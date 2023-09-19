@@ -105,7 +105,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
     public void updateTask() {
         this.roarTick++;
         if (this.roarTick == 10 && this.mob.isEntityAlive()) {
-            this.mob.roar(0.0075f * this.mob.roarCharge + 1.5f);
+            this.mob.roar(0.0015f * this.mob.roarCharge + 1.5f);
         }
         if (this.mob.isTamed()) {
             this.mob.setCanBeSteered(false);

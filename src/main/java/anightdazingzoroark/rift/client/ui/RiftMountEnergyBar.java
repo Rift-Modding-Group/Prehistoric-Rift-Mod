@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift.client.ui;
 
 import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -18,7 +19,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 public class RiftMountEnergyBar {
-    private static final ResourceLocation energyHud = new ResourceLocation(RiftInitialize.MODID, "textures/ui/energy.png");
+    private static final ResourceLocation energyHud = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
 
     private static final int posX = 0;
     private static final int posY = 0;
@@ -53,30 +54,15 @@ public class RiftMountEnergyBar {
         for (int i = 0; i < 10; i++) {
             int halfIcon = i * 2 + 1;
 
-            drawTexturedModalRect(left - i * 8, top, 0, 0, textureXSize, textureYSize);
+            RiftUtil.drawTexturedModalRect(left - i * 8, top, 0, 0, textureXSize, textureYSize);
 
             if (halfIcon < energy) {
-                drawTexturedModalRect(left - i * 8, top, 9, posY, textureXSize, textureYSize);
+                RiftUtil.drawTexturedModalRect(left - i * 8, top, 9, posY, textureXSize, textureYSize);
             }
             else if (halfIcon == energy) {
-                drawTexturedModalRect(left - i * 8, top, 18, posY, textureXSize, textureYSize);
+                RiftUtil.drawTexturedModalRect(left - i * 8, top, 18, posY, textureXSize, textureYSize);
             }
         }
         GlStateManager.disableBlend();
-    }
-
-    private void drawTexturedModalRect(float x, float y, int texX, int texY, int width, int height) {
-        float f = 0.00390625F;
-        float f1 = 0.00390625F;
-        double z = 0.0D;
-
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-        bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.pos(x, y + height, z).tex((texX * f), (texY + height) * f1).endVertex();
-        bufferbuilder.pos((x + width), y + height, z).tex((texX + width) * f, (texY + height) * f1).endVertex();
-        bufferbuilder.pos((x + width), y, z).tex((texX + width) * f,(texY * f1)).endVertex();
-        bufferbuilder.pos(x, y, z).tex((texX * f), (texY * f1)).endVertex();
-        tessellator.draw();
     }
 }

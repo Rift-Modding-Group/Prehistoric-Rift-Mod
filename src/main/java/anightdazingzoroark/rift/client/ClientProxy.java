@@ -2,10 +2,7 @@ package anightdazingzoroark.rift.client;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.renderer.EntityRenderer;
-import anightdazingzoroark.rift.client.ui.RiftCreatureInvMenu;
-import anightdazingzoroark.rift.client.ui.RiftDialMenu;
-import anightdazingzoroark.rift.client.ui.RiftEggMenu;
-import anightdazingzoroark.rift.client.ui.RiftMountEnergyBar;
+import anightdazingzoroark.rift.client.ui.*;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import net.minecraft.entity.Entity;
@@ -37,6 +34,7 @@ public class ClientProxy extends ServerProxy {
         super.preInit(e);
         EntityRenderer.registerRenderers();
         MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());
+        MinecraftForge.EVENT_BUS.register(new RiftRightClickChargeBar());
     }
 
     @SideOnly(Side.CLIENT)

@@ -37,9 +37,8 @@ public class ServerEvents {
 
         if (player.getRidingEntity() instanceof RiftCreature) {
             RiftCreature creature = (RiftCreature) player.getRidingEntity();
-//            System.out.println(creature.cannotUseRightClick);
             //detect left click
-            if (!checkInItemWhitelist(heldItem) && event.getMouseButton() == 0) {
+            if (!RiftUtil.checkInMountItemWhitelist(heldItem) && event.getMouseButton() == 0) {
                 if (event.getTicks() <= 10) {
                     RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0));
                     KeyBinding.setKeyBindState(settings.keyBindAttack.getKeyCode(), false);
@@ -47,13 +46,11 @@ public class ServerEvents {
             }
             //detect right click
             //also has system that ensures that tamed creatures dont use right click related stuff the moment they're mounted
-            else if (!checkInItemWhitelist(heldItem) && !isFoodItem(heldItem) && event.getMouseButton() == 1) {
+            else if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1) {
                 if (event.isReleased() && !creature.canUseRightClick()) {
-                    System.out.println("cannot");
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseRightClick(creature, true));
                 }
                 else if (event.isReleased()) {
-                    System.out.println("can");
                     RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, event.getTicks()));
                 }
                 KeyBinding.setKeyBindState(settings.keyBindUseItem.getKeyCode(), false);
@@ -140,29 +137,5 @@ public class ServerEvents {
                 }
             }
         }
-    }
-
-    private boolean checkInItemWhitelist(Item item) {
-        List<String> oreDicList = new ArrayList<>();
-        List<String> itemList = new ArrayList<>();
-        for (String entry : RiftConfig.mountOverrideWhitelistItems) {
-            if (entry.contains("oreDic:")) {
-                oreDicList.add(entry.replace("oreDic:", ""));
-            }
-            if (entry.contains("item:")) {
-                itemList.add(entry.replace("item:", ""));
-            }
-        }
-        for (String oreDicEntry : oreDicList) {
-            if (RiftUtil.itemInOreDicType(item, oreDicEntry)) return true;
-        }
-        for (String itemEntry : itemList) {
-            if (Item.getByNameOrId(itemEntry).equals(item)) return true;
-        }
-        return false;
-    }
-
-    private boolean isFoodItem(Item item) {
-        return item instanceof ItemFood;
     }
 }

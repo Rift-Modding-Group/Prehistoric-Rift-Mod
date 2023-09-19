@@ -191,7 +191,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             }
             if (this.isRoaring()) {
                 this.setActing(true);
-                this.setEnergy(this.getEnergy() - (int)(0.03d * (double)this.roarCharge + 6d));
+                this.setEnergy(this.getEnergy() - (int)(0.06d * (double)this.roarCharge + 6d));
             }
         }
     }
@@ -432,14 +432,13 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     @Override
     public void controlInput(int control, int holdAmount) {
-//        System.out.println(holdAmount);
         if (control == 0) {
             if (!this.isRoaring() && !this.isAttacking()) this.setAttacking(true);
         }
         if (control == 1) {
             if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) {
                 this.setRoaring(true);
-                this.roarCharge = holdAmount;
+                this.roarCharge = Math.min(holdAmount, 100);
             }
         }
     }
