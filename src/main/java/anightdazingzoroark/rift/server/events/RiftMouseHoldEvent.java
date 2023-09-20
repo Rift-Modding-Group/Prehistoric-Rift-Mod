@@ -1,12 +1,12 @@
 package anightdazingzoroark.rift.server.events;
 
-import anightdazingzoroark.rift.server.message.RiftMountControl;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.Sys;
+
+import org.lwjgl.input.*;
 
 public class RiftMouseHoldEvent extends Event {
     private int ticks;
@@ -48,8 +48,8 @@ public class RiftMouseHoldEvent extends Event {
         @SubscribeEvent
         public void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END && Minecraft.getMinecraft().world != null) {
-                boolean leftButtonDown = org.lwjgl.input.Mouse.isButtonDown(0);
-                boolean rightButtonDown = org.lwjgl.input.Mouse.isButtonDown(1);
+                boolean leftButtonDown = Mouse.isButtonDown(0);
+                boolean rightButtonDown = Mouse.isButtonDown(1);
 
                 if (leftButtonDown) {
                     MinecraftForge.EVENT_BUS.post(new RiftMouseHoldEvent(0, leftTicks++, false));

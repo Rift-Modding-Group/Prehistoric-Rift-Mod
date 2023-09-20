@@ -24,10 +24,10 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ServerEvents {
+    private int rightClickFill = 0;
+    private boolean rCTrigger = true;
+
     //for controlling when u use attacks or abilities while riding creatures
     @SubscribeEvent(receiveCanceled = true)
     public void mouseTest(RiftMouseHoldEvent event) {
@@ -46,12 +46,22 @@ public class ServerEvents {
             }
             //detect right click
             //also has system that ensures that tamed creatures dont use right click related stuff the moment they're mounted
-            else if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1) {
-                if (event.isReleased() && !creature.canUseRightClick()) {
+            else if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1 && creature.getRightClickCooldown() == 0) {
+                if (!event.isReleased()) {
+                    rightClickFill++;
+                    rCTrigger = true;
+                }
+                else if (event.isReleased() && !creature.canUseRightClick()) {
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseRightClick(creature, true));
+                    rightClickFill = 0;
+                }
+                else if (event.isReleased() && rCTrigger) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, rightClickFill));
+                    rightClickFill = 0;
+                    rCTrigger = false;
                 }
                 else if (event.isReleased()) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, event.getTicks()));
+                    rightClickFill = 0;
                 }
                 KeyBinding.setKeyBindState(settings.keyBindUseItem.getKeyCode(), false);
             }

@@ -46,6 +46,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ACTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_USE_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -89,6 +92,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(ENERGY, 20);
         this.dataManager.register(ACTING, Boolean.FALSE);
         this.dataManager.register(CAN_USE_RIGHT_CLICK, Boolean.FALSE);
+        this.dataManager.register(USING_RIGHT_CLICK, Boolean.FALSE);
+        this.dataManager.register(RIGHT_CLICK_USE, 0);
+        this.dataManager.register(RIGHT_CLICK_COOLDOWN, 0);
     }
 
     @Override
@@ -389,6 +395,30 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setCanUseRightClick(boolean value) {
         this.dataManager.set(CAN_USE_RIGHT_CLICK, Boolean.valueOf(value));
+    }
+
+    public boolean isUsingRightClick() {
+        return this.dataManager.get(USING_RIGHT_CLICK);
+    }
+
+    public void setUsingRightClick(boolean value) {
+        this.dataManager.set(USING_RIGHT_CLICK, Boolean.valueOf(value));
+    }
+
+    public int getRightClickUse() {
+        return this.dataManager.get(RIGHT_CLICK_USE).intValue();
+    }
+
+    public void setRightClickUse(int value) {
+        this.dataManager.set(RIGHT_CLICK_USE, value);
+    }
+
+    public int getRightClickCooldown() {
+        return this.dataManager.get(RIGHT_CLICK_COOLDOWN);
+    }
+
+    public void setRightClickCooldown(int value) {
+        this.dataManager.set(RIGHT_CLICK_COOLDOWN, value);
     }
 
     public boolean isMoving() {

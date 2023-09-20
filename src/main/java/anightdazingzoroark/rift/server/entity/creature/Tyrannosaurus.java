@@ -31,6 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -197,10 +198,10 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     private void manageCanRoar() {
-        this.roarCooldownTicks++;
-        if (this.roarCooldownTicks >= 200) {
+        if (this.getRightClickCooldown() >= 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
+        if (this.getRightClickCooldown() < 0) {
             this.setCanRoar(true);
-            this.roarCooldownTicks = 0;
+            this.setRightClickCooldown(0);
         }
     }
 
@@ -396,6 +397,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     public void setRoaring(boolean value) {
         this.dataManager.set(ROARING, Boolean.valueOf(value));
+        this.setUsingRightClick(value);
     }
 
     public boolean isRoaring() {
@@ -439,6 +441,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) {
                 this.setRoaring(true);
                 this.roarCharge = Math.min(holdAmount, 100);
+                this.setRightClickCooldown(holdAmount * 2);
             }
         }
     }

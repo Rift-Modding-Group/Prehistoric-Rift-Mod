@@ -4,31 +4,21 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
-import anightdazingzoroark.rift.server.message.RiftManageCanUseRightClick;
-import anightdazingzoroark.rift.server.message.RiftMessages;
-import anightdazingzoroark.rift.server.message.RiftMountControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.settings.GameSettings;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import org.lwjgl.opengl.GL11;
 
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class RiftRightClickChargeBar {
@@ -36,6 +26,8 @@ public class RiftRightClickChargeBar {
     private static final int textureXSize = 182;
     private static final int textureYSize = 5;
     private int fill = 0;
+    private int lastFill;
+    private boolean mouseUsed = false;
 
     @SubscribeEvent
     public void onPreRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
@@ -49,6 +41,7 @@ public class RiftRightClickChargeBar {
 
                 Minecraft.getMinecraft().getTextureManager().bindTexture(chargeBarHud);
                 renderRightClickChargeHud(resolution.getScaledWidth(), resolution.getScaledHeight());
+                reduceUnusedChargeBar(creature);
                 Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
             }
         }
@@ -68,20 +61,31 @@ public class RiftRightClickChargeBar {
 
     @SubscribeEvent(receiveCanceled = true)
     public void mouseTest(RiftMouseHoldEvent event) {
-        GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
         Item heldItem = player.getHeldItemMainhand().getItem();
 
         if (player.getRidingEntity() instanceof RiftCreature) {
             RiftCreature creature = (RiftCreature) player.getRidingEntity();
-            if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1 && creature.canUseRightClick()) {
+            if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1 && creature.canUseRightClick() ) {
                 if (!event.isReleased()) {
-                    fill++;
+                    if (creature.getRightClickCooldown() == 0) {
+                        fill++;
+                        mouseUsed = true;
+                    }
+                    else {
+                        mouseUsed = false;
+                    }
                 }
                 else {
-                    fill = 0;
+                    mouseUsed = false;
                 }
             }
+        }
+    }
+
+    private void reduceUnusedChargeBar(RiftCreature creature) {
+        if (!mouseUsed) {
+            fill = creature.getRightClickCooldown() / 2;
         }
     }
 
