@@ -47,7 +47,7 @@ public class RiftMouseHoldEvent extends Event {
 
         @SubscribeEvent
         public void onClientTick(TickEvent.ClientTickEvent event) {
-            if (event.phase == TickEvent.Phase.END && Minecraft.getMinecraft().world != null) {
+            if (event.phase == TickEvent.Phase.END && Minecraft.getMinecraft().world != null && Minecraft.getMinecraft().currentScreen == null) {
                 boolean leftButtonDown = Mouse.isButtonDown(0);
                 boolean rightButtonDown = Mouse.isButtonDown(1);
 

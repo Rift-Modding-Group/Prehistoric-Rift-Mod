@@ -267,9 +267,15 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     @Override
     public boolean isFavoriteFood(ItemStack stack) {
-        List<String> favoriteFoodList = Arrays.asList(RiftConfig.tyrannosaurusFavoriteFood);
-        for (String foodItem : favoriteFoodList) {
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(foodItem))) return true;
+        for (String foodItem : RiftConfig.tyrannosaurusFavoriteFood) {
+            int itemIdFirst = foodItem.indexOf(":");
+            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
+            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
+            String itemId = foodItem.substring(0, itemIdSecond);
+            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
+                return (stack.getMetadata() == itemData) || (itemData == 32767);
+            }
         }
         return false;
     }
@@ -355,7 +361,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                                     Block block = iblockstate.getBlock();
 
                                     if (iblockstate.getMaterial() != Material.AIR) {
-                                        if (RiftUtil.blockWeakerThanWood(block)) {
+                                        if (RiftUtil.blockWeakerThanWood(block, iblockstate)) {
                                             f -= 0.24F;
                                         }
                                         else {

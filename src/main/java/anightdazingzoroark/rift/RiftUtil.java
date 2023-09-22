@@ -3,6 +3,7 @@ package anightdazingzoroark.rift;
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.server.enums.CreatureDiet;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -11,6 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
+import scala.Int;
+import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +51,10 @@ public class RiftUtil {
         return false;
     }
 
-    public static boolean blockWeakerThanWood(Block block) {
+    public static boolean blockWeakerThanWood(Block block, IBlockState blockState) {
         List<String> oreDicList = new ArrayList<>();
         List<String> blockList = new ArrayList<>();
+        boolean flag = false;
         for (String entry : RiftConfig.weakerThanWood) {
             if (entry.contains("oreDic:")) {
                 oreDicList.add(entry.replace("oreDic:", ""));
@@ -60,58 +64,46 @@ public class RiftUtil {
             }
         }
         for (String oreDicEntry : oreDicList) {
-            if (blockInOreDicType(block, oreDicEntry)) return true;
+            if (!flag) flag = blockInOreDicType(block, oreDicEntry);
         }
         for (String blockEntry : blockList) {
-            if (Block.getBlockFromName(blockEntry).equals(block)) return true;
+            int blockIdFirst = blockEntry.indexOf(":");
+            int blockIdSecond = blockEntry.indexOf(":", blockIdFirst + 1);
+            int blockData = Integer.parseInt(blockEntry.substring(blockIdSecond + 1));
+            if (!flag) flag = Block.getBlockFromName(blockEntry.substring(0, blockIdSecond)).equals(block) && (blockData == 32767 || block.getMetaFromState(blockState) == blockData);
         }
-        return false;
+        return flag;
     }
 
     public static boolean isEnergyRegenItem(Item item, CreatureDiet diet) {
         List<String> itemList = new ArrayList<>();
-        String itemName = Item.REGISTRY.getNameForObject(item).toString();
-        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) {
-            for (int i = 0; i < RiftConfig.herbivoreRegenEnergyFoods.length; i++) {
-                int first = RiftConfig.herbivoreRegenEnergyFoods[i].indexOf(":");
-                int second = RiftConfig.herbivoreRegenEnergyFoods[i].indexOf(":", first + 1);
-                itemList.add(RiftConfig.herbivoreRegenEnergyFoods[i].substring(0, second));
-            }
+        boolean flag = false;
+        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(RiftConfig.herbivoreRegenEnergyFoods);
+        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(RiftConfig.carnivoreRegenEnergyFoods);
+
+        for (String itemEntry : itemList) {
+            int first = itemEntry.indexOf(":");
+            int second = itemEntry.indexOf(":", first + 1);
+            int third = itemEntry.indexOf(":", second + 1);
+            int itemData = Integer.parseInt(itemEntry.substring(second + 1, third));
+            if (Item.getByNameOrId(itemEntry.substring(0, second)).equals(item) && (itemData == 32767 || itemData == new ItemStack(item).getMetadata())) return true;
         }
-        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) {
-            for (int i = 0; i < RiftConfig.carnivoreRegenEnergyFoods.length; i++) {
-                int first = RiftConfig.carnivoreRegenEnergyFoods[i].indexOf(":");
-                int second = RiftConfig.carnivoreRegenEnergyFoods[i].indexOf(":", first + 1);
-                itemList.add(RiftConfig.carnivoreRegenEnergyFoods[i].substring(0, second));
-            }
-        }
-        return itemList.contains(itemName);
+        return false;
     }
 
     public static int getEnergyRegenItemValue(Item item, CreatureDiet diet) {
         List<String> itemList = new ArrayList<>();
-        List<Integer> valueList = new ArrayList<>();
-        String itemName = Item.REGISTRY.getNameForObject(item).toString();
-        int value;
-        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) {
-            for (int i = 0; i < RiftConfig.herbivoreRegenEnergyFoods.length; i++) {
-                int first = RiftConfig.herbivoreRegenEnergyFoods[i].indexOf(":");
-                int second = RiftConfig.herbivoreRegenEnergyFoods[i].indexOf(":", first + 1);
-                itemList.add(RiftConfig.herbivoreRegenEnergyFoods[i].substring(0, second));
-                valueList.add(Integer.parseInt(RiftConfig.herbivoreRegenEnergyFoods[i].substring(second + 1)));
-            }
-        }
-        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) {
-            for (int i = 0; i < RiftConfig.carnivoreRegenEnergyFoods.length; i++) {
-                int first = RiftConfig.carnivoreRegenEnergyFoods[i].indexOf(":");
-                int second = RiftConfig.carnivoreRegenEnergyFoods[i].indexOf(":", first + 1);
-                itemList.add(RiftConfig.carnivoreRegenEnergyFoods[i].substring(0, second));
-                valueList.add(Integer.parseInt(RiftConfig.carnivoreRegenEnergyFoods[i].substring(second + 1)));
-            }
-        }
+        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(RiftConfig.herbivoreRegenEnergyFoods);
+        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(RiftConfig.carnivoreRegenEnergyFoods);
 
-        for (int i = 0; i < itemList.size(); i++) {
-            if (itemList.get(i).equals(itemName)) return valueList.get(i);
+        for (String itemEntry : itemList) {
+            int first = itemEntry.indexOf(":");
+            int second = itemEntry.indexOf(":", first + 1);
+            int third = itemEntry.indexOf(":", second + 1);
+            int itemData = Integer.parseInt(itemEntry.substring(second + 1, third));
+            if (Item.getByNameOrId(itemEntry.substring(0, second)).equals(item) && (itemData == 32767 || itemData == new ItemStack(item).getMetadata())) {
+                return Integer.parseInt(itemEntry.substring(third + 1));
+            }
         }
         return 0;
     }
@@ -123,6 +115,7 @@ public class RiftUtil {
     public static boolean checkInMountItemWhitelist(Item item) {
         List<String> oreDicList = new ArrayList<>();
         List<String> itemList = new ArrayList<>();
+        boolean flag = false;
         for (String entry : RiftConfig.mountOverrideWhitelistItems) {
             if (entry.contains("oreDic:")) {
                 oreDicList.add(entry.replace("oreDic:", ""));
@@ -132,12 +125,15 @@ public class RiftUtil {
             }
         }
         for (String oreDicEntry : oreDicList) {
-            if (RiftUtil.itemInOreDicType(item, oreDicEntry)) return true;
+            if (!flag) flag = RiftUtil.itemInOreDicType(item, oreDicEntry);
         }
         for (String itemEntry : itemList) {
-            if (Item.getByNameOrId(itemEntry).equals(item)) return true;
+            int itemIdFirst = itemEntry.indexOf(":");
+            int itemIdSecond = itemEntry.indexOf(":", itemIdFirst + 1);
+            int itemData = Integer.parseInt(itemEntry.substring(itemIdSecond + 1));
+            if (!flag) flag = Item.getByNameOrId(itemEntry.substring(0, itemIdSecond)).equals(item) && (itemData == 32767 || itemData == new ItemStack(item).getMetadata());
         }
-        return false;
+        return flag;
     }
 
     public static void drawTexturedModalRect(float x, float y, int texX, int texY, int width, int height) {

@@ -1,5 +1,6 @@
 package anightdazingzoroark.rift.server.entity;
 
+import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.ServerProxy;
@@ -16,6 +17,8 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.ContainerHorseChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemAir;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -238,13 +241,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         ItemStack itemstack = player.getHeldItem(hand);
         if (this.getOwnerId() != null) {
             if (this.getOwnerId().equals(player.getUniqueID())) {
-                if (this.isFavoriteFood(itemstack) && this.isChild() && this.getHealth() == this.getMaxHealth()) {
+                if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isChild() && this.getHealth() == this.getMaxHealth()) {
                     this.consumeItemFromStack(player, itemstack);
                     this.ageUp((int)((float)(-this.getGrowingAge() / 20) * 0.1F), true);
                 }
                 else if (this.isFavoriteFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
                     this.consumeItemFromStack(player, itemstack);
-                    this.heal((float)((ItemFood)itemstack.getItem()).getHealAmount(itemstack) * 3F);
+//                    System.out.println(this.getFavoriteFoodHeal(itemstack));
+                    this.heal((float) this.getFavoriteFoodHeal(itemstack));
                 }
                 else if (itemstack.isEmpty() && !this.isSaddled()) {
                     player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
@@ -262,6 +266,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public abstract boolean isFavoriteFood(ItemStack stack);
+
+    public int getFavoriteFoodHeal(ItemStack stack) {
+        for (String foodItem : RiftConfig.tyrannosaurusFavoriteFood) {
+            int itemIdFirst = foodItem.indexOf(":");
+            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
+            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
+            String itemId = foodItem.substring(0, itemIdSecond);
+            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
+            double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1));
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
+                if (itemData == 32767) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
+                else if (stack.getMetadata() == itemData) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
+            }
+        }
+        return 0;
+    }
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
