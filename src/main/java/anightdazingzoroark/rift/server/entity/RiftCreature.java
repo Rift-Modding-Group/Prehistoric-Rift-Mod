@@ -69,6 +69,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
     private boolean steerable = true;
+    public EntityLivingBase ssrTarget;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -469,10 +470,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public abstract Vec3d riderPos();
 
-    public abstract void controlInput(int control, int holdAmount);
+    public abstract void controlInput(int control, int holdAmount, EntityLivingBase target);
 
     public void controlAttack() {
-        EntityLivingBase target = this.getControlAttackTargets();
+        EntityLivingBase target;
+        if (this.ssrTarget == null) target = this.getControlAttackTargets();
+        else target = this.ssrTarget;
         if (target != null) {
             if (this.isTamed() && target instanceof EntityPlayer) {
                 if (!target.getUniqueID().equals(this.getOwnerId())) {
@@ -500,8 +503,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         Vec3d vec3d = this.getPositionEyes(1.0F);
         Vec3d vec3d1 = this.getLook(1.0F);
         Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
-        System.out.println(vec3d.toString());
-        System.out.println(vec3d2.toString());
         double d1 = dist;
         Entity pointedEntity = null;
         Entity rider = this.getControllingPassenger();

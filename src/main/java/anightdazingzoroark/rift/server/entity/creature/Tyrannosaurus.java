@@ -439,9 +439,17 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
         if (control == 0) {
-            if (!this.isRoaring() && !this.isAttacking()) this.setAttacking(true);
+            if (target == null) {
+                if (!this.isRoaring() && !this.isAttacking()) this.setAttacking(true);
+            }
+            else {
+                if (!this.isRoaring() && !this.isAttacking()) {
+                    this.ssrTarget = target;
+                    this.setAttacking(true);
+                }
+            }
         }
         if (control == 1) {
             if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) {

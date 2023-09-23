@@ -1,5 +1,6 @@
 package anightdazingzoroark.rift;
 
+import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,12 +37,19 @@ public class RiftInitialize {
         File directory = event.getModConfigurationDirectory();
         config = new Configuration(new File(directory.getPath(), "rift.cfg"));
         RiftConfig.readConfig();
+
+        //for mod compats
+        SSRCompat.ssrPreInit();
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         PROXY.init(event);
         GeckoLib.initialize();
+
+        //for mod compats
+        SSRCompat.ssrInit();
+
         logger.info("MOMMY AYUNDA PLEASE BREASTFEED MEEEEEEEEEEEEEEE");
     }
 

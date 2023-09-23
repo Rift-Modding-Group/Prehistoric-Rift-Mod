@@ -20,9 +20,12 @@ import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+
+import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
 
 public class ServerEvents {
     private int rightClickFill = 0;
@@ -31,12 +34,12 @@ public class ServerEvents {
 
     //for controlling when u use attacks or abilities while riding creatures
     @SubscribeEvent(receiveCanceled = true)
-    public void mouseTest(RiftMouseHoldEvent event) {
+    public void mouseUse(RiftMouseHoldEvent event) {
         GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
         Item heldItem = player.getHeldItemMainhand().getItem();
 
-        if (player.getRidingEntity() instanceof RiftCreature) {
+        if (player.getRidingEntity() instanceof RiftCreature && !Loader.isModLoaded(SSRCompat.SSR_MOD_ID)) {
             RiftCreature creature = (RiftCreature) player.getRidingEntity();
             //detect left click
             if (!RiftUtil.checkInMountItemWhitelist(heldItem) && event.getMouseButton() == 0) {
