@@ -1,6 +1,5 @@
 package anightdazingzoroark.rift.server;
 
-import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
@@ -16,6 +15,7 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -27,6 +27,7 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 public class ServerEvents {
     private int rightClickFill = 0;
     private boolean rCTrigger = true;
+    private boolean canTakeFallDamage = true;
 
     //for controlling when u use attacks or abilities while riding creatures
     @SubscribeEvent(receiveCanceled = true)
@@ -99,22 +100,28 @@ public class ServerEvents {
         if (event.isDismounting() && event.getEntityMounting() instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer)event.getEntityMounting();
             if (event.getEntityBeingMounted() instanceof RiftCreature) {
-                System.out.println("bye");
                 RiftCreature creature = (RiftCreature) event.getEntityBeingMounted();
                 RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseRightClick(creature, false));
+                canTakeFallDamage = false;
             }
         }
     }
 
-    //when a tamed creature gets attacked by a wild creature of the same type, the damage they received is halved
     @SubscribeEvent
-    public void reduceDamageTamed(LivingHurtEvent event) {
+    public void reduceDamage(LivingHurtEvent event) {
+        //when a tamed creature gets attacked by a wild creature of the same type, the damage they received is halved
         if (event.getEntity() instanceof RiftCreature && event.getSource().getTrueSource() instanceof RiftCreature) {
             RiftCreature creature = (RiftCreature) event.getEntity();
             RiftCreature attacker = (RiftCreature) event.getSource().getTrueSource();
             if (creature.isTamed() && !attacker.isTamed() && creature.creatureType == attacker.creatureType) {
                 event.setAmount(event.getAmount() / 2);
             }
+        }
+
+        //players shouldn't take any fall damage after dismounting
+        if (event.getSource() == DamageSource.FALL && !canTakeFallDamage) {
+            event.setCanceled(true);
+            canTakeFallDamage = true;
         }
     }
 

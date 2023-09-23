@@ -30,6 +30,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -39,6 +40,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -470,28 +472,70 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public abstract void controlInput(int control, int holdAmount);
 
     public void controlAttack() {
-        for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, getControlAttackArea(), null)) {
-            if (entityLivingBase != this) {
-                if (this.isTamed() && entityLivingBase instanceof EntityPlayer) {
-                    if (!entityLivingBase.getUniqueID().equals(this.getOwnerId())) {
-                        this.attackEntityAsMob(entityLivingBase);
-                    }
+        EntityLivingBase target = this.getControlAttackTargets();
+        if (target != null) {
+            if (this.isTamed() && target instanceof EntityPlayer) {
+                if (!target.getUniqueID().equals(this.getOwnerId())) {
+                    this.attackEntityAsMob(target);
                 }
-                else if (this.isTamed() && entityLivingBase instanceof EntityTameable) {
-                    if (((EntityTameable) entityLivingBase).isTamed()) {
-                        if (!((EntityTameable) entityLivingBase).getOwner().equals(this.getOwner())) {
-                            this.attackEntityAsMob(entityLivingBase);
-                        }
-                    }
-                    else {
-                        this.attackEntityAsMob(entityLivingBase);
+            }
+            else if (this.isTamed() && target instanceof EntityTameable) {
+                if (((EntityTameable) target).isTamed()) {
+                    if (!((EntityTameable) target).getOwner().equals(this.getOwner())) {
+                        this.attackEntityAsMob(target);
                     }
                 }
                 else {
-                    this.attackEntityAsMob(entityLivingBase);
+                    this.attackEntityAsMob(target);
+                }
+            }
+            else {
+                this.attackEntityAsMob(target);
+            }
+        }
+    }
+
+    public EntityLivingBase getControlAttackTargets() {
+        double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX;
+        Vec3d vec3d = this.getPositionEyes(1.0F);
+        Vec3d vec3d1 = this.getLook(1.0F);
+        Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
+        System.out.println(vec3d.toString());
+        System.out.println(vec3d2.toString());
+        double d1 = dist;
+        Entity pointedEntity = null;
+        Entity rider = this.getControllingPassenger();
+        List<Entity> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(1.0D, 1.0D, 1.0D), null);
+        double d2 = d1;
+        for (Entity potentialTarget : list) {
+            AxisAlignedBB axisalignedbb = potentialTarget.getEntityBoundingBox().grow((double) potentialTarget.getCollisionBorderSize() + 2F);
+            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
+
+            if (potentialTarget != this && potentialTarget != rider) {
+                if (axisalignedbb.contains(vec3d)) {
+                    if (d2 >= 0.0D) {
+                        pointedEntity = potentialTarget;
+                        d2 = 0.0D;
+                    }
+                }
+                else if (raytraceresult != null) {
+                    double d3 = vec3d.distanceTo(raytraceresult.hitVec);
+
+                    if (d3 < d2 || d2 == 0.0D) {
+                        if (potentialTarget.getLowestRidingEntity() == rider.getLowestRidingEntity() && !rider.canRiderInteract()) {
+                            if (d2 == 0.0D) {
+                                pointedEntity = potentialTarget;
+                            }
+                        }
+                        else {
+                            pointedEntity = potentialTarget;
+                            d2 = d3;
+                        }
+                    }
                 }
             }
         }
+        return (EntityLivingBase) pointedEntity;
     }
 
     public AxisAlignedBB getControlAttackArea() {
