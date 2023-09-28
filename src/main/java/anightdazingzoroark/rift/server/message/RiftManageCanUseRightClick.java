@@ -2,14 +2,14 @@ package anightdazingzoroark.rift.server.message;
 
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.ilexiconn.llibrary.server.network.AbstractMessage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftManageCanUseRightClick implements IMessage {
+public class RiftManageCanUseRightClick extends AbstractMessage<RiftManageCanUseRightClick> {
     private int creatureId;
     private boolean canUseRightClick;
 
@@ -32,19 +32,14 @@ public class RiftManageCanUseRightClick implements IMessage {
         buf.writeBoolean(this.canUseRightClick);
     }
 
-    public static class Handler implements IMessageHandler<RiftManageCanUseRightClick, IMessage> {
-        @Override
-        public IMessage onMessage(RiftManageCanUseRightClick message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void onClientReceived(Minecraft client, RiftManageCanUseRightClick message, EntityPlayer player, MessageContext messageContext) {}
 
-        private void handle(RiftManageCanUseRightClick message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            World world = playerEntity.getEntityWorld();
-            RiftCreature interacted = (RiftCreature) playerEntity.world.getEntityByID(message.creatureId);
+    @Override
+    public void onServerReceived(MinecraftServer server, RiftManageCanUseRightClick message, EntityPlayer player, MessageContext messageContext) {
+        World world = player.getEntityWorld();
+        RiftCreature interacted = (RiftCreature) player.world.getEntityByID(message.creatureId);
 
-            if (world != null && !world.isRemote) interacted.setCanUseRightClick(message.canUseRightClick);
-        }
+        if (!world.isRemote) interacted.setCanUseRightClick(message.canUseRightClick);
     }
 }

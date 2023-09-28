@@ -2,14 +2,18 @@ package anightdazingzoroark.rift.server.message;
 
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import io.netty.buffer.ByteBuf;
+import net.ilexiconn.llibrary.server.network.AbstractMessage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftMountControl implements IMessage {
+public class RiftMountControl extends AbstractMessage<RiftMountControl> {
     private int creatureId;
     private int control; //0 is for left click, 1 is for right click
     private boolean execute; //execute regardless of tick
@@ -48,19 +52,14 @@ public class RiftMountControl implements IMessage {
         buf.writeInt(this.tick);
     }
 
-    public static class Handler implements IMessageHandler<RiftMountControl, IMessage> {
-        @Override
-        public IMessage onMessage(RiftMountControl message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void onClientReceived(Minecraft client, RiftMountControl message, EntityPlayer player, MessageContext messageContext) {}
 
-        private void handle(RiftMountControl message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            World world = playerEntity.getEntityWorld();
-            RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
+    @Override
+    public void onServerReceived(MinecraftServer server, RiftMountControl message, EntityPlayer player, MessageContext messageContext) {
+        World world = player.getEntityWorld();
+        RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
 
-            creature.controlInput(message.control, message.tick, null);
-        }
+        creature.controlInput(message.control, message.tick, null);
     }
 }

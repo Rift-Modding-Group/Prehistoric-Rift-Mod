@@ -1,15 +1,21 @@
 package anightdazingzoroark.rift.server.message;
 
+import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import io.netty.buffer.ByteBuf;
+import net.ilexiconn.llibrary.server.network.AbstractMessage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftStartRiding implements IMessage {
+public class RiftStartRiding extends AbstractMessage<RiftStartRiding> {
     private int creatureId;
 
     public RiftStartRiding() {}
@@ -28,21 +34,16 @@ public class RiftStartRiding implements IMessage {
         buf.writeInt(creatureId);
     }
 
-    public static class Handler implements IMessageHandler<RiftStartRiding, IMessage> {
-        @Override
-        public IMessage onMessage(RiftStartRiding message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void onClientReceived(Minecraft client, RiftStartRiding message, EntityPlayer player, MessageContext messageContext) {}
 
-        private void handle(RiftStartRiding message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            World world = playerEntity.getEntityWorld();
-            RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
+    @Override
+    public void onServerReceived(MinecraftServer server, RiftStartRiding message, EntityPlayer player, MessageContext messageContext) {
+        World world = player.getEntityWorld();
+        RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
 
-            creature.getNavigator().clearPath();
-            creature.setAttackTarget(null);
-            playerEntity.startRiding(creature);
-        }
+        creature.getNavigator().clearPath();
+        creature.setAttackTarget(null);
+        player.startRiding(creature);
     }
 }

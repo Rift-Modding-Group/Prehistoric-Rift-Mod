@@ -1,22 +1,9 @@
 package anightdazingzoroark.rift.server.message;
 
-import anightdazingzoroark.rift.RiftInitialize;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.ilexiconn.llibrary.server.network.NetworkWrapper;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
 
 public class RiftMessages {
-    private static int id = 0;
-    public static SimpleNetworkWrapper WRAPPER = NetworkRegistry.INSTANCE.newSimpleChannel(RiftInitialize.MODID);
-
-    public RiftMessages() {}
-
-    public static void registerMessages() {
-        WRAPPER.registerMessage(RiftChangeCreatureFromMenu.Handler.class, RiftChangeCreatureFromMenu.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftOpenInventoryFromMenu.Handler.class, RiftOpenInventoryFromMenu.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftChangeInventoryFromMenu.Handler.class, RiftChangeInventoryFromMenu.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftStartRiding.Handler.class, RiftStartRiding.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftMountControl.Handler.class, RiftMountControl.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftManageCanUseRightClick.Handler.class, RiftManageCanUseRightClick.class, id++, Side.SERVER);
-    }
+    @NetworkWrapper({RiftChangeCreatureFromMenu.class, RiftChangeInventoryFromMenu.class, RiftManageCanUseRightClick.class, RiftMountControl.class, RiftOpenInventoryFromMenu.class, RiftStartRiding.class})
+    public static SimpleNetworkWrapper WRAPPER;
 }
