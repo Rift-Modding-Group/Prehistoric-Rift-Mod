@@ -40,6 +40,7 @@ public class RiftEggItem extends Item {
         egg.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
         egg.setOwnerId(player.getUniqueID());
         egg.setGrowingAge(0);
+        egg.enablePersistence();
 
         if (!world.isRemote) {
             world.spawnEntity(egg);

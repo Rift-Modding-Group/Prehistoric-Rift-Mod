@@ -250,8 +250,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 else if (this.isFavoriteFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
                     this.consumeItemFromStack(player, itemstack);
-//                    System.out.println(this.getFavoriteFoodHeal(itemstack));
                     this.heal((float) this.getFavoriteFoodHeal(itemstack));
+                }
+                else if (RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getEnergy() < 20) {
+                    this.consumeItemFromStack(player, itemstack);
+                    this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemstack.getItem(), this.creatureType.getCreatureDiet()));
                 }
                 else if (itemstack.isEmpty() && !this.isSaddled()) {
                     player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);

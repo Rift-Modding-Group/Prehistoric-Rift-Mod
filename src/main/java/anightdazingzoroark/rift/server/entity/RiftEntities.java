@@ -2,6 +2,7 @@ package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
+import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.ResourceLocation;
@@ -14,6 +15,7 @@ import java.util.List;
 public class RiftEntities {
     public static void registerEntities() {
         int id = 0;
+        EntityPropertiesHandler.INSTANCE.registerProperties(RiftEntityProperties.class);
         for (int x = 0; x < RiftCreatureType.values().length; x++) {
             RiftCreatureType creature = RiftCreatureType.values()[x];
             registerEntity(creature.name().toLowerCase(), creature.getCreature(), x++, RiftInitialize.instance, 3670016, 2428687);

@@ -96,6 +96,9 @@ repositories {
         name = 'GeckoLib'
         url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
     }
+    maven {
+        url "https://maven.mcmoddev.com/"
+    }
     mavenLocal() // Must be last for caching to work
 }
 
@@ -124,6 +127,7 @@ dependencies {
         }
     }
     implementation 'software.bernie.geckolib:geckolib-forge-1.12.2:3.0.31'
+    compileOnly "net.ilexiconn:llibrary:1.7.19-1.12.2"
     compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
 }
 
