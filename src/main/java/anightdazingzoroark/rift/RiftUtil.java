@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift;
 
 import anightdazingzoroark.rift.RiftConfig;
+import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.enums.CreatureDiet;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -112,6 +113,10 @@ public class RiftUtil {
         return Math.max(min, Math.min(max, value));
     }
 
+    public static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
     public static boolean checkInMountItemWhitelist(Item item) {
         List<String> oreDicList = new ArrayList<>();
         List<String> itemList = new ArrayList<>();
@@ -149,5 +154,33 @@ public class RiftUtil {
         bufferbuilder.pos((x + width), y, z).tex((texX + width) * f,(texY * f1)).endVertex();
         bufferbuilder.pos(x, y, z).tex((texX * f), (texY * f1)).endVertex();
         tessellator.draw();
+    }
+
+    //note to self: this returns degrees
+    //multiply by 0.017453292 or pi rad over 180 to get degrees
+    public static float getCreatureHeadYaw(RiftCreature creature, float partialTicks) {
+        float f = interpolateRotation(creature.prevRenderYawOffset, creature.renderYawOffset, partialTicks);
+        float f1 = interpolateRotation(creature.prevRotationYawHead, creature.rotationYawHead, partialTicks);
+        float f2 = f1 - f;
+
+        return f2 * (creature.isBeingRidden() ? 1 : -1);
+    }
+
+    public static float getCreatureHeadPitch(RiftCreature creature, float partialTicks) {
+        return creature.prevRotationPitch + (creature.rotationPitch - creature.prevRotationPitch) * partialTicks;
+    }
+
+    protected static float interpolateRotation(float prevYawOffset, float yawOffset, float partialTicks) {
+        float f;
+
+        for (f = yawOffset - prevYawOffset; f < -180.0F; f += 360.0F) {
+            ;
+        }
+
+        while (f >= 180.0F) {
+            f -= 360.0F;
+        }
+
+        return prevYawOffset + partialTicks * f;
     }
 }
