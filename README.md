@@ -1,16 +1,14 @@
-## TemplateDevEnv
+# Prehistoric Rift
+This is a direct port of the since discontinued [Bedrock Version](https://github.com/ANightDazingZoroark/Prehistoric-Rift-Addon). Currently focusing on porting most content from the addon before working on any new features.
 
-Template workspace for modding Minecraft 1.12.2. Licensed under MIT, it is made for public use.
+> A Minecraft Bedrock Addon that aims to add dinosaurs and expand upon gameplay. Always updated to the latest stable version of Bedrock when available.
+>
+> -Original Description on the README.md of the Bedrock version
 
-This template currently utilizies **Gradle 8.1.1** + **[RetroFuturaGradle](https://github.com/GTNewHorizons/RetroFuturaGradle) 1.3.6** + **Forge 14.23.5.2847**.
+Highly recommended that you join the Discord server as well: https://discord.gg/qVWaKRMCRc
 
-With **coremod and mixin support** that is easy to configure.
+The mod is for Minecraft Forge 1.12.2, and requires the following dependencies:
+* [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib)
+* [LLibrary](https://www.curseforge.com/minecraft/mc-mods/llibrary)
 
-### Instructions:
-
-1. Click `use this template` at the top.
-2. Clone the repository you have created with this template.
-3. In the local repository, run the command `gradlew setupDecompWorkspace`
-4. Open the project folder in IDEA.
-5. Right-click in IDEA `build.gradle` of your project, and select `Link Gradle Project`, after completion, hit `Refresh All` in the gradle tab on the right.
-6. Run `gradlew runClient` and `gradlew runServer`, or use the auto-imported run configurations in IntelliJ like `1. Run Client`.
+All the above dependencies require the latest versions of their 1.12.2 versions to work.
