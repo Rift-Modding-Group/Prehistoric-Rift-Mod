@@ -16,7 +16,7 @@ public class TyrannosaurusRenderer extends GeoEntityRenderer<RiftCreature> {
 
     @Override
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
-        float scale = animatable.isChild() ? 0.5f : 3.25f;
+        float scale = ((3.25f - 0.5f) / (24000f)) * (animatable.getAgeInTicks() - 24000f) + 3.25f;
         float headYawRotation = RiftUtil.clamp(RiftUtil.getCreatureHeadYaw(animatable, partialTicks), -12.5f, 12.5f) * 0.017453292F;
         float headPitchRotation = RiftUtil.clamp(RiftUtil.getCreatureHeadPitch(animatable, partialTicks), -12.5f, 12.5f) * 0.017453292F;
 

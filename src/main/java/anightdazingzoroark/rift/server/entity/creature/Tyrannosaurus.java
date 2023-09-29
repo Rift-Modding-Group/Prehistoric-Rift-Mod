@@ -31,7 +31,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -175,7 +174,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageCanRoar();
-        if (!this.isChild()) this.manageApplyWeakness();
+        if (!this.isBaby()) this.manageApplyWeakness();
         this.manageAttributesByAge();
         this.manageTargetingBySitting();
     }
@@ -230,12 +229,14 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     private void manageAttributesByAge() {
-        if (this.isChild()) {
-            this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20D);
+        double maxHealth = (140D/24000D) * (this.getAgeInTicks() - 24000D) + 160D;
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(Math.min(Math.floor(maxHealth), 160D));
+        if (this.isBaby()) {
+//            this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20D);
             this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4D);
         }
         else {
-            this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(160D);
+//            this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(160D);
             this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(35.0D);
         }
     }
@@ -257,12 +258,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     @Override
     public float getRenderSizeModifier() {
-        if (this.isChild()) {
-            return 0.5f;
-        }
-        else {
-            return 3.25f;
-        }
+        return ((3.25f - 0.5f) / (24000f)) * (this.getAgeInTicks() - 24000f) + 3.25f;
     }
 
     @Override
@@ -278,6 +274,40 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             }
         }
         return false;
+    }
+
+    @Override
+    public int getFavoriteFoodHeal(ItemStack stack) {
+        for (String foodItem : RiftConfig.tyrannosaurusFavoriteFood) {
+            int itemIdFirst = foodItem.indexOf(":");
+            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
+            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
+            String itemId = foodItem.substring(0, itemIdSecond);
+            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
+            double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1));
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
+                if (itemData == 32767) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
+                else if (stack.getMetadata() == itemData) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public int getFavoriteFoodGrowth(ItemStack stack) {
+        for (String foodItem : RiftConfig.tyrannosaurusFavoriteFood) {
+            int itemIdFirst = foodItem.indexOf(":");
+            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
+            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
+            String itemId = foodItem.substring(0, itemIdSecond);
+            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
+            double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1)) / 2D;
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
+                if (itemData == 32767) return (int)(24000 * percentage);
+                else if (stack.getMetadata() == itemData) return (int)(24000 * percentage);
+            }
+        }
+        return 0;
     }
 
     @Override

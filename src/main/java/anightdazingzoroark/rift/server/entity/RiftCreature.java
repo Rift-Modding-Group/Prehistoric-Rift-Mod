@@ -32,6 +32,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -54,6 +55,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HAS_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -102,6 +104,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(RIGHT_CLICK_USE, 0);
         this.dataManager.register(RIGHT_CLICK_COOLDOWN, 0);
         this.dataManager.register(HAS_TARGET, Boolean.FALSE);
+        this.dataManager.register(AGE_TICKS, 0);
+    }
+
+    @Override
+    @Nullable
+    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+        livingdata = super.onInitialSpawn(difficulty, livingdata);
+        this.setAgeInDays(1);
+        return livingdata;
     }
 
     @Override
@@ -109,6 +120,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.onLivingUpdate();
         if (!this.world.isRemote) {
             this.setHasTarget(this.getAttackTarget() != null);
+            this.setAgeInTicks(this.getAgeInTicks() + 1);
         }
         if (this.isTamed() && !this.world.isRemote) {
             this.updateEnergyMove();
@@ -248,9 +260,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         ItemStack itemstack = player.getHeldItem(hand);
         if (this.isTamed()) {
             if (this.getOwnerId().equals(player.getUniqueID())) {
-                if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isChild() && this.getHealth() == this.getMaxHealth()) {
+                if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
                     this.consumeItemFromStack(player, itemstack);
-                    this.ageUp((int)((float)(-this.getGrowingAge() / 20) * 0.1F), true);
+                    this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
+                    this.setHealth(this.getMaxHealth());
                 }
                 else if (this.isFavoriteFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
                     this.consumeItemFromStack(player, itemstack);
@@ -277,21 +290,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public abstract boolean isFavoriteFood(ItemStack stack);
 
-    public int getFavoriteFoodHeal(ItemStack stack) {
-        for (String foodItem : RiftConfig.tyrannosaurusFavoriteFood) {
-            int itemIdFirst = foodItem.indexOf(":");
-            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-            String itemId = foodItem.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == 32767) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
-                else if (stack.getMetadata() == itemData) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
-            }
-        }
-        return 0;
-    }
+    public abstract int getFavoriteFoodHeal(ItemStack stack);
+    public abstract int getFavoriteFoodGrowth(ItemStack stack);
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
@@ -315,6 +315,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         compound.setInteger("Energy", this.getEnergy());
         compound.setBoolean("HasTarget", this.hasTarget());
+        compound.setInteger("AgeTicks", this.getAgeInTicks());
     }
 
     @Override
@@ -345,6 +346,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         this.setEnergy(compound.getInteger("Energy"));
         this.setHasTarget(compound.getBoolean("HasTarget"));
+        this.setAgeInTicks(compound.getInteger("AgeTicks"));
     }
 
     private void initInventory() {
@@ -459,6 +461,26 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setHasTarget(boolean value) {
         this.dataManager.set(HAS_TARGET, value);
+    }
+
+    public int getAgeInTicks() {
+        return this.dataManager.get(AGE_TICKS);
+    }
+
+    public int getAgeInDays() {
+        return this.dataManager.get(AGE_TICKS) / 24000;
+    }
+
+    public void setAgeInTicks(int value) {
+        this.dataManager.set(AGE_TICKS, value);
+    }
+
+    public void setAgeInDays(int value) {
+        this.dataManager.set(AGE_TICKS, value * 24000);
+    }
+
+    public boolean isBaby() {
+        return this.getAgeInDays() < 1;
     }
 
     public boolean isMoving() {

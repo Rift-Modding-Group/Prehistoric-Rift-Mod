@@ -133,7 +133,7 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 2 && this.creature.getTameBehavior().name().equals(this.choices.get(i).name())) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 128, 0, 128, 128);
             }
-            else if (this.radialChoiceMenu == 0 && this.creature.isChild() && i == 2) {
+            else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 2) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
             else {
@@ -161,7 +161,7 @@ public class RiftDialMenu extends GuiScreen {
         //text
         for (int i = 0; i < numItems; i++) {
             String radialString = I18n.format("radial.choice."+this.choices.get(i).name().toLowerCase());
-            if (this.radialChoiceMenu == 0 && (this.creature.isChild() || (!this.creature.isChild() && !this.creature.isSaddled())) && i == 2) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled())) && i == 2) radialString = "["+radialString+"]";
 
             float angle1 = ((i / (float) numItems) + 0.25f) * 2 * (float) Math.PI;
             float posX = x + 75 + itemRadius * (float) Math.cos(angle1) - (float)(this.fontRenderer.getStringWidth(radialString) / 2);
@@ -174,7 +174,7 @@ public class RiftDialMenu extends GuiScreen {
         }
 
         //hover text
-        if (this.radialChoiceMenu == 0 && this.creature.isChild() && selectedItem == 2) {
+        if (this.radialChoiceMenu == 0 && this.creature.isBaby() && selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.too_young"), mouseX, mouseY);
         }
         else if (this.radialChoiceMenu == 0 && !this.creature.isSaddled() && selectedItem == 2) {
@@ -227,7 +227,7 @@ public class RiftDialMenu extends GuiScreen {
                     this.choices = getState();
                     this.radialChoiceMenu = 1;
                 }
-                else if (selectedItem == 2 && !this.creature.isChild() && this.creature.isSaddled()) {
+                else if (selectedItem == 2 && !this.creature.isBaby() && this.creature.isSaddled()) {
                     this.mc.player.closeScreen();
                     RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
                 }

@@ -63,7 +63,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
             RiftCreature creature = this.creatureType.invokeClass(this.world);
             if (creature != null) {
                 creature.setHealth(20f);
-                creature.setGrowingAge(-24000);
+                creature.setAgeInDays(0);
                 creature.setTamed(true);
                 creature.setOwnerId(this.getOwnerId());
                 creature.setTameStatus(TameStatusType.SIT);

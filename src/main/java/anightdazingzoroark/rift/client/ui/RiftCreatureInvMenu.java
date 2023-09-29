@@ -43,7 +43,7 @@ public class RiftCreatureInvMenu extends GuiContainer {
         this.drawTexturedModalRect(k, l, 0, 0, this.xSize, this.ySize);
 
         //saddle slot
-        if (this.creature.canBeSaddled() && !this.creature.isChild()) {
+        if (this.creature.canBeSaddled() && !this.creature.isBaby()) {
             this.drawTexturedModalRect(k + 7, l + 17, 212, 0, 18, 18);
         }
 
