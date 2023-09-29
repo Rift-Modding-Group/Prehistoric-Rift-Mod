@@ -18,10 +18,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -128,7 +125,7 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
-    public void reduceDamage(LivingHurtEvent event) {
+    public void attackEvent(LivingHurtEvent event) {
         //when a tamed creature gets attacked by a wild creature of the same type, the damage they received is halved
         if (event.getEntity() instanceof RiftCreature && event.getSource().getTrueSource() instanceof RiftCreature) {
             RiftCreature creature = (RiftCreature) event.getEntity();
@@ -172,9 +169,9 @@ public class ServerEvents {
         }
     }
 
-    //make it so when mobs detect u as a target, they target the mounted creature instead
     @SubscribeEvent
-    public void redirectToRiddenCreature(LivingSetAttackTargetEvent event) {
+    public void onSetTarget(LivingSetAttackTargetEvent event) {
+        //make it so when mobs detect u as a target, they target the mounted creature instead
         if (event.getTarget() instanceof EntityPlayer) {
             if (event.getTarget().isRiding()) {
                 if (event.getTarget().getRidingEntity() instanceof RiftCreature) {

@@ -167,7 +167,7 @@ public class RiftUtil {
     }
 
     public static float getCreatureHeadPitch(RiftCreature creature, float partialTicks) {
-        return creature.prevRotationPitch + (creature.rotationPitch - creature.prevRotationPitch) * partialTicks;
+        return (creature.prevRotationPitch + (creature.rotationPitch - creature.prevRotationPitch) * partialTicks) * -1;
     }
 
     protected static float interpolateRotation(float prevYawOffset, float yawOffset, float partialTicks) {

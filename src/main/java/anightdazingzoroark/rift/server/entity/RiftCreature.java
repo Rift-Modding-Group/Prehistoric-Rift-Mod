@@ -6,9 +6,8 @@ import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
-import anightdazingzoroark.rift.server.message.RiftChangeInventoryFromMenu;
-import anightdazingzoroark.rift.server.message.RiftMessages;
-import anightdazingzoroark.rift.server.message.RiftStartRiding;
+import anightdazingzoroark.rift.server.message.*;
+import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -54,6 +53,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> HAS_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -101,11 +101,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_RIGHT_CLICK, Boolean.FALSE);
         this.dataManager.register(RIGHT_CLICK_USE, 0);
         this.dataManager.register(RIGHT_CLICK_COOLDOWN, 0);
+        this.dataManager.register(HAS_TARGET, Boolean.FALSE);
     }
 
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
+        if (!this.world.isRemote) {
+            this.setHasTarget(this.getAttackTarget() != null);
+        }
         if (this.isTamed() && !this.world.isRemote) {
             this.updateEnergyMove();
             this.updateEnergyActions();
@@ -310,6 +314,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             compound.setTag("Items", nbttaglist);
         }
         compound.setInteger("Energy", this.getEnergy());
+        compound.setBoolean("HasTarget", this.hasTarget());
     }
 
     @Override
@@ -339,6 +344,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         this.setEnergy(compound.getInteger("Energy"));
+        this.setHasTarget(compound.getBoolean("HasTarget"));
     }
 
     private void initInventory() {
@@ -445,6 +451,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setRightClickCooldown(int value) {
         this.dataManager.set(RIGHT_CLICK_COOLDOWN, value);
+    }
+
+    public boolean hasTarget() {
+        return this.dataManager.get(HAS_TARGET);
+    }
+
+    public void setHasTarget(boolean value) {
+        this.dataManager.set(HAS_TARGET, value);
     }
 
     public boolean isMoving() {
