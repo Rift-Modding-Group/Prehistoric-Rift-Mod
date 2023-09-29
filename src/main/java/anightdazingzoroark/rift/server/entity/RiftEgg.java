@@ -45,7 +45,8 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(HATCH_TIME, 300 * 20);
+        this.dataManager.register(HATCH_TIME, 1 * 20);
+//        this.dataManager.register(HATCH_TIME, 300 * 20);
     }
 
     @Override
@@ -61,6 +62,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         if (this.getHatchTime() == 0) {
             RiftCreature creature = this.creatureType.invokeClass(this.world);
             if (creature != null) {
+                creature.setHealth(20f);
                 creature.setGrowingAge(-24000);
                 creature.setTamed(true);
                 creature.setOwnerId(this.getOwnerId());

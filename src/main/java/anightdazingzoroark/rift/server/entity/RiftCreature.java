@@ -246,7 +246,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
-        if (this.getOwnerId() != null) {
+        if (this.isTamed()) {
             if (this.getOwnerId().equals(player.getUniqueID())) {
                 if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isChild() && this.getHealth() == this.getMaxHealth()) {
                     this.consumeItemFromStack(player, itemstack);
