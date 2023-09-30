@@ -132,7 +132,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
-        this.setSize(3.25F, 5F);
+        this.setSize(3.25f, 4f);
         this.roarCooldownTicks = 0;
         this.roarCharge = 0;
         this.isRideable = true;
@@ -148,7 +148,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(160D);
         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20D);
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(35.0D);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
@@ -175,14 +174,12 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         super.onLivingUpdate();
         this.manageCanRoar();
         if (!this.isBaby()) this.manageApplyWeakness();
-        this.manageAttributesByAge();
         this.manageTargetingBySitting();
     }
 
     public void updateEnergyActions() {
         if (!this.isActing()) {
             if (this.isAttacking()) {
-                this.setActing(true);
                 this.energyActionMod++;
                 if (this.energyActionMod > this.creatureType.getMaxEnergyModAction()) {
                     this.setEnergy(this.getEnergy() - 2);
@@ -190,7 +187,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                 }
             }
             if (this.isRoaring()) {
-                this.setActing(true);
                 this.setEnergy(this.getEnergy() - (int)(0.06d * (double)this.roarCharge + 6d));
             }
         }
@@ -228,19 +224,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         }
     }
 
-    private void manageAttributesByAge() {
-        double maxHealth = (140D/24000D) * (this.getAgeInTicks() - 24000D) + 160D;
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(Math.min(Math.floor(maxHealth), 160D));
-        if (this.isBaby()) {
-//            this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20D);
-            this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4D);
-        }
-        else {
-//            this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(160D);
-            this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(35.0D);
-        }
-    }
-
     private void manageTargetingBySitting() {
         if (!this.world.isRemote) {
             if (!this.isBeingRidden()) {
@@ -259,55 +242,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     @Override
     public float getRenderSizeModifier() {
         return ((3.25f - 0.5f) / (24000f)) * (this.getAgeInTicks() - 24000f) + 3.25f;
-    }
-
-    @Override
-    public boolean isFavoriteFood(ItemStack stack) {
-        for (String foodItem : RiftConfig.tyrannosaurusFavoriteFood) {
-            int itemIdFirst = foodItem.indexOf(":");
-            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-            String itemId = foodItem.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                return (stack.getMetadata() == itemData) || (itemData == 32767);
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public int getFavoriteFoodHeal(ItemStack stack) {
-        for (String foodItem : RiftConfig.tyrannosaurusFavoriteFood) {
-            int itemIdFirst = foodItem.indexOf(":");
-            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-            String itemId = foodItem.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == 32767) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
-                else if (stack.getMetadata() == itemData) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
-            }
-        }
-        return 0;
-    }
-
-    @Override
-    public int getFavoriteFoodGrowth(ItemStack stack) {
-        for (String foodItem : RiftConfig.tyrannosaurusFavoriteFood) {
-            int itemIdFirst = foodItem.indexOf(":");
-            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-            String itemId = foodItem.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1)) / 2D;
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == 32767) return (int)(24000 * percentage);
-                else if (stack.getMetadata() == itemData) return (int)(24000 * percentage);
-            }
-        }
-        return 0;
     }
 
     @Override
@@ -434,6 +368,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     public void setRoaring(boolean value) {
         this.dataManager.set(ROARING, Boolean.valueOf(value));
         this.setUsingRightClick(value);
+        this.setActing(value);
     }
 
     public boolean isRoaring() {
@@ -498,11 +433,11 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusMovement(AnimationEvent<E> event) {
-        if (this.isSitting() && !this.isBeingRidden()) {
+        if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.sitting", true));
             return PlayState.CONTINUE;
         }
-        if (event.isMoving()) {
+        if (event.isMoving() || (this.isSitting() && this.hasTarget())) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk", true));
             return PlayState.CONTINUE;
         }

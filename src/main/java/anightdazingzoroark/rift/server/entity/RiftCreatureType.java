@@ -1,5 +1,6 @@
 package anightdazingzoroark.rift.server.entity;
 
+import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.client.renderer.entity.TyrannosaurusRenderer;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.rift.server.enums.CreatureCategory;
@@ -15,23 +16,27 @@ import java.util.Locale;
 import static anightdazingzoroark.rift.server.items.RiftItems.riftEggItem;
 
 public enum RiftCreatureType {
-    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, TyrannosaurusRenderer::new);
+    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, RiftConfig.tyrannosaurusFavoriteFood, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, 160D, TyrannosaurusRenderer::new);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;
     private final CreatureDiet creatureDiet;
+    private final String[] favoriteFood;
     private final EnergyCategory energyCategory;
     private final EnergyRechargeCategory energyRechargeCategory;
+    private final double maxHealth;
     private final IRenderFactory renderFactory;
     public Item eggItem;
     public final String friendlyName;
 
-    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, IRenderFactory renderFactory) {
+    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, String[] favoriteFood, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, double maxHealth, IRenderFactory renderFactory) {
         this.creature = creature;
         this.creatureCategory = creatureCategory;
         this.creatureDiet = creatureDiet;
+        this.favoriteFood = favoriteFood;
         this.energyCategory = energyCategory;
         this.energyRechargeCategory = energyRechargeCategory;
+        this.maxHealth = maxHealth;
         this.friendlyName = this.name().toUpperCase(Locale.ENGLISH).substring(0, 1) + this.name().toLowerCase().substring(1);
         this.renderFactory = renderFactory;
     }
@@ -48,12 +53,24 @@ public enum RiftCreatureType {
         return this.creatureDiet;
     }
 
+    public String[] getFavoriteFood() {
+        return this.favoriteFood;
+    }
+
     public EnergyCategory getEnergyCategory() {
         return this.energyCategory;
     }
 
     public EnergyRechargeCategory getEnergyRechargeCategory() {
         return this.energyRechargeCategory;
+    }
+
+    public double getMaxHealth() {
+        return this.maxHealth;
+    }
+
+    public double getMinHealth() {
+        return Math.floor(this.maxHealth / 8d);
     }
 
     public IRenderFactory getRenderFactory() {

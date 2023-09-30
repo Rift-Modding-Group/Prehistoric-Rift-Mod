@@ -1,29 +1,18 @@
 package anightdazingzoroark.rift.server.entity.ai;
 
 import anightdazingzoroark.rift.RiftConfig;
-import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 public class RiftTyrannosaurusRoar extends EntityAIBase {
     private static final Predicate<EntityLivingBase> ROAR_BLACKLIST = new Predicate<EntityLivingBase>() {
@@ -96,7 +85,6 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
         this.mob.setCanRoar(false);
         if (this.mob.isTamed()) {
             this.mob.setCanBeSteered(true);
-            this.mob.setActing(false);
             this.mob.roarCharge = 0;
         }
     }
