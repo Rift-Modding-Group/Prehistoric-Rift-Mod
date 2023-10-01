@@ -29,6 +29,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -154,6 +155,14 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
 
+    @Override
+    @Nullable
+    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+        livingdata = super.onInitialSpawn(difficulty, livingdata);
+        this.setCanPickUpLoot(true);
+        return livingdata;
+    }
+
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
@@ -241,7 +250,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     @Override
     public float getRenderSizeModifier() {
-        return ((3.25f - 0.5f) / (24000f)) * (this.getAgeInTicks() - 24000f) + 3.25f;
+        return RiftUtil.setModelScale(this, 0.5f, 3.25f);
     }
 
     @Override
@@ -251,7 +260,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             Item item = itemstack.getItem();
             EntityEquipmentSlot entityequipmentslot = getSlotForItemStack(itemstack);
 
-            if (Arrays.asList(RiftConfig.tyrannosaurusFavoriteFood).contains(Item.REGISTRY.getNameForObject(item).toString()) && this.canEquipItem(itemstack)) {
+            if (this.isFavoriteFood(itemstack) && this.canEquipItem(itemstack)) {
                 this.setItemStackToSlot(entityequipmentslot, new ItemStack(Items.AIR));
                 this.onItemPickup(itemEntity, itemstack.getCount());
                 itemEntity.setDead();
@@ -353,11 +362,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         }
     }
     //end of roar stuff
-
-    @Override
-    public boolean canPickUpLoot() {
-        return true;
-    }
 
     @Override
     @Nullable

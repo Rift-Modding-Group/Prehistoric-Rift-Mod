@@ -1,7 +1,9 @@
 package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftConfig;
+import anightdazingzoroark.rift.client.renderer.entity.StegosaurusRenderer;
 import anightdazingzoroark.rift.client.renderer.entity.TyrannosaurusRenderer;
+import anightdazingzoroark.rift.server.entity.creature.Stegosaurus;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.rift.server.enums.CreatureCategory;
 import anightdazingzoroark.rift.server.enums.CreatureDiet;
@@ -16,7 +18,8 @@ import java.util.Locale;
 import static anightdazingzoroark.rift.server.items.RiftItems.riftEggItem;
 
 public enum RiftCreatureType {
-    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, RiftConfig.tyrannosaurusFavoriteFood, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, 160D, TyrannosaurusRenderer::new);
+    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, RiftConfig.tyrannosaurusFavoriteFood, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, 160D, TyrannosaurusRenderer::new, 3670016, 2428687),
+    STEGOSAURUS(Stegosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, RiftConfig.stegosaurusFavoriteFood, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, 100D,StegosaurusRenderer::new, 1731840, 16743424);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;
@@ -26,10 +29,12 @@ public enum RiftCreatureType {
     private final EnergyRechargeCategory energyRechargeCategory;
     private final double maxHealth;
     private final IRenderFactory renderFactory;
+    private final int eggPrimary;
+    private final int eggSecondary;
     public Item eggItem;
     public final String friendlyName;
 
-    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, String[] favoriteFood, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, double maxHealth, IRenderFactory renderFactory) {
+    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, String[] favoriteFood, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, double maxHealth, IRenderFactory renderFactory,  int eggPrimary, int eggSecondary) {
         this.creature = creature;
         this.creatureCategory = creatureCategory;
         this.creatureDiet = creatureDiet;
@@ -39,6 +44,8 @@ public enum RiftCreatureType {
         this.maxHealth = maxHealth;
         this.friendlyName = this.name().toUpperCase(Locale.ENGLISH).substring(0, 1) + this.name().toLowerCase().substring(1);
         this.renderFactory = renderFactory;
+        this.eggPrimary = eggPrimary;
+        this.eggSecondary = eggSecondary;
     }
 
     public Class<? extends RiftCreature> getCreature() {
@@ -75,6 +82,14 @@ public enum RiftCreatureType {
 
     public IRenderFactory getRenderFactory() {
         return this.renderFactory;
+    }
+
+    public int getEggPrimary() {
+        return this.eggPrimary;
+    }
+
+    public int getEggSecondary() {
+        return this.eggSecondary;
     }
 
     public int getMaxEnergyModMovement() {

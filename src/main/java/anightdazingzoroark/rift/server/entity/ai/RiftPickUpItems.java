@@ -32,7 +32,17 @@ public class RiftPickUpItems extends EntityAIBase {
             @Override
             public boolean apply(@Nullable EntityItem entityItem) {
                 String itemName = Item.REGISTRY.getNameForObject(entityItem.getItem().getItem()).toString();
-                return entityItem != null && !entityItem.getItem().isEmpty() && Arrays.asList(items).contains(itemName);
+                for (String itemString : items) {
+                    int itemIdFirst = itemString.indexOf(":");
+                    int itemIdSecond = itemString.indexOf(":", itemIdFirst + 1);
+                    int itemIdThird = itemString.indexOf(":", itemIdSecond + 1);
+                    String itemId = itemString.substring(0, itemIdSecond);
+                    int itemData = Integer.parseInt(itemString.substring(itemIdSecond + 1, itemIdThird));
+                    if (entityItem != null && !entityItem.getItem().isEmpty() && entityItem.getItem().getItem().equals(Item.getByNameOrId(itemId))) {
+                        return (entityItem.getItem().getMetadata() == itemData) || (itemData == 32767);
+                    }
+                }
+                return false;
             }
         };
     }

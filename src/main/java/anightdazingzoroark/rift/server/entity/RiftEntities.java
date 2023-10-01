@@ -14,14 +14,13 @@ import java.util.List;
 
 public class RiftEntities {
     public static void registerEntities() {
-        int id = 0;
         EntityPropertiesHandler.INSTANCE.registerProperties(RiftEntityProperties.class);
         for (int x = 0; x < RiftCreatureType.values().length; x++) {
             RiftCreatureType creature = RiftCreatureType.values()[x];
-            registerEntity(creature.name().toLowerCase(), creature.getCreature(), x++, RiftInitialize.instance, 3670016, 2428687);
-            id = x;
+            registerEntity(creature.name().toLowerCase(), creature.getCreature(), x, RiftInitialize.instance, creature.getEggPrimary(), creature.getEggSecondary());
         }
-        registerEntity("egg", RiftEgg.class, id, RiftInitialize.instance);
+        int miscId = RiftCreatureType.values().length;
+        registerEntity("egg", RiftEgg.class, miscId++, RiftInitialize.instance);
     }
 
     public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {

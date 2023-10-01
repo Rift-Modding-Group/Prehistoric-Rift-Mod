@@ -187,4 +187,8 @@ public class RiftUtil {
 
         return prevYawOffset + partialTicks * f;
     }
+
+    public static float setModelScale(RiftCreature creature, float min, float max) {
+        return clamp(((max - min)/(24000)) * (creature.getAgeInTicks() - 24000f) + max, min, max);
+    }
 }

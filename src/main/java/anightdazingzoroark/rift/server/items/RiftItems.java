@@ -25,6 +25,7 @@ public class RiftItems {
     public static Item FIBER_BAR;
 
     public static Item TYRANNOSAURUS_ARM;
+    public static Item STEGOSAURUS_PLATE;
 
     public static void registerItems() {
         RAW_EXOTIC_MEAT = riftFoodItem("raw_exotic_meat", 4, 0.3f, true);
@@ -35,6 +36,7 @@ public class RiftItems {
         FIBER_BAR = riftFibrousFoodItem("fiber_bar", 2, false);
 
         TYRANNOSAURUS_ARM = riftGenericItem("tyrannosaurus_arm");
+        STEGOSAURUS_PLATE = riftGenericItem("stegosaurus_plate");
 
         registerEggs();
     }

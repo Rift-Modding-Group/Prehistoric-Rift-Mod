@@ -8,6 +8,9 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     public boolean ridingCreature;
     public int rightClickFill;
     public boolean rCTrigger;
+    public boolean isBleeding;
+    public int bleedingStrength;
+    public int ticksUntilStopBleeding;
 
     @Override
     public int getTrackingTime() {
@@ -19,6 +22,10 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.ridingCreature = false;
         this.rightClickFill = 0;
         this.rCTrigger = false;
+
+        this.isBleeding = false;
+        this.bleedingStrength = 0;
+        this.ticksUntilStopBleeding = 0;
     }
 
     @Override
@@ -26,6 +33,10 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         compound.setBoolean("DismountedCreature", ridingCreature);
         compound.setInteger("RightClickFill", rightClickFill);
         compound.setBoolean("RCTrigger", rCTrigger);
+
+        compound.setBoolean("IsBleeding", isBleeding);
+        compound.setInteger("BleedingStrength", bleedingStrength);
+        compound.setInteger("TicksUntilStopBleeding", ticksUntilStopBleeding);
     }
 
     @Override
@@ -33,6 +44,10 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.ridingCreature = compound.getBoolean("DismountedCreature");
         this.rightClickFill = compound.getInteger("RightClickFill");
         this.rCTrigger = compound.getBoolean("RCTrigger");
+
+        this.isBleeding = compound.getBoolean("IsBleeding");
+        this.bleedingStrength = compound.getInteger("BleedingStrength");
+        this.ticksUntilStopBleeding = compound.getInteger("TicksUntilStopBleeding");
     }
 
     @Override
@@ -43,5 +58,11 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     @Override
     public Class<EntityLivingBase> getEntityClass() {
         return EntityLivingBase.class;
+    }
+
+    public void setBleeding(int strength, int ticks) {
+        this.isBleeding = true;
+        this.bleedingStrength = strength;
+        this.ticksUntilStopBleeding = ticks;
     }
 }
