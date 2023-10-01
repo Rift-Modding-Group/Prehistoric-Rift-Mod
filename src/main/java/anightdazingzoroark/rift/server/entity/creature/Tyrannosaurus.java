@@ -144,6 +144,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         super.entityInit();
         this.dataManager.register(CAN_ROAR, Boolean.valueOf(true));
         this.dataManager.register(ROARING, Boolean.valueOf(false));
+        this.setCanPickUpLoot(true);
     }
 
     @Override
@@ -153,14 +154,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(35.0D);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
-    }
-
-    @Override
-    @Nullable
-    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
-        livingdata = super.onInitialSpawn(difficulty, livingdata);
-        this.setCanPickUpLoot(true);
-        return livingdata;
     }
 
     protected void initEntityAI() {
@@ -251,21 +244,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.5f, 3.25f);
-    }
-
-    @Override
-    protected void updateEquipmentIfNeeded(EntityItem itemEntity) {
-        if (!this.isTamed()) {
-            ItemStack itemstack = itemEntity.getItem();
-            Item item = itemstack.getItem();
-            EntityEquipmentSlot entityequipmentslot = getSlotForItemStack(itemstack);
-
-            if (this.isFavoriteFood(itemstack) && this.canEquipItem(itemstack)) {
-                this.setItemStackToSlot(entityequipmentslot, new ItemStack(Items.AIR));
-                this.onItemPickup(itemEntity, itemstack.getCount());
-                itemEntity.setDead();
-            }
-        }
     }
 
     //stuff below this comment is for roar stuff

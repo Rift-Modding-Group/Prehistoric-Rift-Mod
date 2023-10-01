@@ -3,12 +3,12 @@ package anightdazingzoroark.rift.server.entity.creature;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
-import anightdazingzoroark.rift.server.entity.ai.RiftControlledAttack;
-import anightdazingzoroark.rift.server.entity.ai.RiftHurtByTarget;
-import anightdazingzoroark.rift.server.entity.ai.RiftLookAround;
-import anightdazingzoroark.rift.server.entity.ai.RiftWander;
+import anightdazingzoroark.rift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -26,8 +26,14 @@ public class Stegosaurus extends RiftCreature implements IAnimatable {
 
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
-        this.setSize(0.9f, 1.75f);
+        this.setSize(2.125f, 2.5f);
         this.isRideable = true;
+    }
+
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+        this.dataManager.register(STRONG_ATTACKING, Boolean.FALSE);
     }
 
     @Override
@@ -40,7 +46,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable {
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
-        this.tasks.addTask(1, new RiftControlledAttack(this, 0.96F, 0.36F));
+        this.tasks.addTask(1, new RiftAttack(this, 1.0D, false, 0.96F, 0.36F));
         this.tasks.addTask(3, new RiftWander(this, 1.0D));
         this.tasks.addTask(4, new RiftLookAround(this));
     }
@@ -57,6 +63,15 @@ public class Stegosaurus extends RiftCreature implements IAnimatable {
     @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.3f, 2.125f);
+    }
+
+    public boolean isStrongAttacking() {
+        return this.dataManager.get(STRONG_ATTACKING);
+    }
+
+    public void setStrongAttacking(boolean value) {
+        this.dataManager.set(STRONG_ATTACKING, Boolean.valueOf(value));
+        this.setActing(value);
     }
 
     @Override

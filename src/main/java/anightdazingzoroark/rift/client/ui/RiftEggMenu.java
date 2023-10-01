@@ -95,7 +95,7 @@ public class RiftEggMenu extends GuiScreen {
         reset();
         RiftEgg egg = (RiftEgg) ClientProxy.EGG;
         GlStateManager.pushMatrix();
-        String s = I18n.format(I18n.format("item."+egg.creatureType.name().toLowerCase()+"_egg.name"));
+        String s = I18n.format(I18n.format("item."+egg.getCreatureType().name().toLowerCase()+"_egg.name"));
         printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 20, 0, 0, 0);
         GlStateManager.popMatrix();
         {

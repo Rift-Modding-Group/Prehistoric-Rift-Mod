@@ -18,8 +18,8 @@ import java.util.Locale;
 import static anightdazingzoroark.rift.server.items.RiftItems.riftEggItem;
 
 public enum RiftCreatureType {
-    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, RiftConfig.tyrannosaurusFavoriteFood, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, 160D, TyrannosaurusRenderer::new, 3670016, 2428687),
-    STEGOSAURUS(Stegosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, RiftConfig.stegosaurusFavoriteFood, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, 100D,StegosaurusRenderer::new, 1731840, 16743424);
+    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, RiftConfig.tyrannosaurusFavoriteFood, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, 160D, TyrannosaurusRenderer::new, 3670016, 2428687, 450),
+    STEGOSAURUS(Stegosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, RiftConfig.stegosaurusFavoriteFood, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, 100D, StegosaurusRenderer::new, 1731840, 16743424, 300);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;
@@ -31,10 +31,11 @@ public enum RiftCreatureType {
     private final IRenderFactory renderFactory;
     private final int eggPrimary;
     private final int eggSecondary;
+    private final int hatchTime; //in seconds
     public Item eggItem;
     public final String friendlyName;
 
-    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, String[] favoriteFood, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, double maxHealth, IRenderFactory renderFactory,  int eggPrimary, int eggSecondary) {
+    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, String[] favoriteFood, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, double maxHealth, IRenderFactory renderFactory,  int eggPrimary, int eggSecondary, int hatchTime) {
         this.creature = creature;
         this.creatureCategory = creatureCategory;
         this.creatureDiet = creatureDiet;
@@ -46,6 +47,7 @@ public enum RiftCreatureType {
         this.renderFactory = renderFactory;
         this.eggPrimary = eggPrimary;
         this.eggSecondary = eggSecondary;
+        this.hatchTime = hatchTime;
     }
 
     public Class<? extends RiftCreature> getCreature() {
@@ -90,6 +92,10 @@ public enum RiftCreatureType {
 
     public int getEggSecondary() {
         return this.eggSecondary;
+    }
+
+    public int getHatchTime() {
+        return this.hatchTime;
     }
 
     public int getMaxEnergyModMovement() {

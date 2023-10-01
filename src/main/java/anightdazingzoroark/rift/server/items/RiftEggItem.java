@@ -36,11 +36,13 @@ public class RiftEggItem extends Item {
     }
 
     private boolean spawnEgg(World world, EntityPlayer player, RiftCreatureType creature, double x, double y, double z) {
-        RiftEgg egg = new RiftEgg(world, creature);
+        RiftEgg egg = new RiftEgg(world);
         egg.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
+        egg.setCreatureType(creature);
         egg.setOwnerId(player.getUniqueID());
         egg.setGrowingAge(0);
         egg.enablePersistence();
+        egg.setHatchTime(creature.getHatchTime() * 20);
 
         if (!world.isRemote) {
             world.spawnEntity(egg);

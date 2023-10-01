@@ -13,7 +13,7 @@ public class RiftEggModel extends AnimatedGeoModel<RiftEgg> {
 
     @Override
     public ResourceLocation getTextureLocation(RiftEgg object) {
-        String name = object.creatureType.name().toLowerCase();
+        String name = object.getCreatureType().name().toLowerCase();
         return new ResourceLocation(RiftInitialize.MODID, "textures/entities/egg/"+name+"_egg.png");
     }
 

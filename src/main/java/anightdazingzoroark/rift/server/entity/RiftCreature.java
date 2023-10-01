@@ -9,11 +9,13 @@ import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.*;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.*;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.ContainerHorseChest;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.item.Item;
@@ -45,6 +47,7 @@ import java.util.List;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> RANGED_ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
@@ -101,6 +104,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(ATTACKING, Boolean.FALSE);
+        this.dataManager.register(RANGED_ATTACKING, Boolean.FALSE);
         this.dataManager.register(VARIANT, rand.nextInt(4));
         this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
@@ -380,6 +384,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @Override
+    protected void updateEquipmentIfNeeded(EntityItem itemEntity) {
+        if (!this.isTamed() && this.canPickUpLoot()) {
+            ItemStack itemstack = itemEntity.getItem();
+            Item item = itemstack.getItem();
+            EntityEquipmentSlot entityequipmentslot = getSlotForItemStack(itemstack);
+
+            if (this.isFavoriteFood(itemstack) && this.canEquipItem(itemstack)) {
+                this.setItemStackToSlot(entityequipmentslot, new ItemStack(Items.AIR));
+                this.onItemPickup(itemEntity, itemstack.getCount());
+                itemEntity.setDead();
+            }
+        }
+    }
+
+    @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         compound.setInteger("Variant", this.getVariant());
@@ -473,6 +492,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setAttacking(boolean value) {
         this.dataManager.set(ATTACKING, Boolean.valueOf(value));
+        this.setActing(value);
+    }
+
+    public boolean isRangedAttacking() {
+        return this.dataManager.get(RANGED_ATTACKING);
+    }
+
+    public void setRangedAttacking(boolean value) {
+        this.dataManager.set(RANGED_ATTACKING, Boolean.valueOf(value));
         this.setActing(value);
     }
 
