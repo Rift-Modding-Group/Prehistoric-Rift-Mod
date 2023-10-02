@@ -6,9 +6,6 @@ import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIHurtByTarget;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -45,8 +42,9 @@ public class Stegosaurus extends RiftCreature implements IAnimatable {
     }
 
     protected void initEntityAI() {
-        this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
+//        this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.tasks.addTask(1, new RiftAttack(this, 1.0D, false, 0.96F, 0.36F));
+        this.tasks.addTask(2, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
         this.tasks.addTask(3, new RiftWander(this, 1.0D));
         this.tasks.addTask(4, new RiftLookAround(this));
     }
@@ -59,6 +57,11 @@ public class Stegosaurus extends RiftCreature implements IAnimatable {
     }
 
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
+
+    @Override
+    public boolean canDoHerding() {
+        return !this.isTamed();
+    }
 
     @Override
     public float getRenderSizeModifier() {

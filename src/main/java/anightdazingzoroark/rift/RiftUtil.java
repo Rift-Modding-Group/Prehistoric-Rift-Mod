@@ -18,6 +18,7 @@ import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class RiftUtil {
     public static String[] removeElementFromArray(String[] array, String element) {
@@ -190,5 +191,9 @@ public class RiftUtil {
 
     public static float setModelScale(RiftCreature creature, float min, float max) {
         return clamp(((max - min)/(24000)) * (creature.getAgeInTicks() - 24000f) + max, min, max);
+    }
+
+    public static int randomInRange(int min, int max) {
+        return new Random().nextInt(max - min + 1) + min;
     }
 }

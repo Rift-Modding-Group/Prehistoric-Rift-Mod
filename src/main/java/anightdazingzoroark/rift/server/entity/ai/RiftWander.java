@@ -15,6 +15,9 @@ public class RiftWander extends EntityAIWander {
 
     @Override
     public boolean shouldExecute() {
-        return (!this.creature.isTamed() || (this.creature.isTamed() && this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden())) && super.shouldExecute();
+        if (this.creature.isTamed() && this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden()) return super.shouldExecute();
+        else if (this.creature.canDoHerding() && this.creature.isHerdLeader()) return super.shouldExecute();
+        else if (!this.creature.canDoHerding()) return super.shouldExecute();
+        return false;
     }
 }

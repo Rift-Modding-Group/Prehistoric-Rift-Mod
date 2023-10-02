@@ -7,8 +7,10 @@ import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.*;
+import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,13 +39,15 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
-import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -61,6 +65,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> HAS_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> JUST_SPAWNED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> HERD_LEADER_ID = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -79,6 +84,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public EntityLivingBase ssrTarget;
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
+    private int herdCheckCountdown;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -98,6 +104,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.informNoEnergy = false;
         this.cannotUseRightClick = true;
         this.heal((float)maxCreatureHealth);
+        this.herdCheckCountdown = 0;
     }
 
     @Override
@@ -118,6 +125,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(HAS_TARGET, Boolean.FALSE);
         this.dataManager.register(AGE_TICKS, 0);
         this.dataManager.register(JUST_SPAWNED, true);
+        this.dataManager.register(HERD_LEADER_ID, this.getEntityId());
     }
 
     @Override
@@ -145,6 +153,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setHasTarget(this.getAttackTarget() != null);
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributesByAge();
+            if (this.canDoHerding()) this.manageHerding();
         }
         if (this.isTamed() && !this.world.isRemote) {
             this.updateEnergyMove();
@@ -158,7 +167,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public void setScaleForAge(boolean child) {
-        float scale = Math.min((0.75f/24000f) * (this.getAgeInTicks() - 24000f) + 1f, 1f);
+        float scale = RiftUtil.clamp(Math.min((0.75f/24000f) * (this.getAgeInTicks() - 24000f) + 1f, 1f), 0.25f, 1f);
         this.setScale(scale);
     }
 
@@ -422,6 +431,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setBoolean("HasTarget", this.hasTarget());
         compound.setInteger("AgeTicks", this.getAgeInTicks());
         compound.setBoolean("JustSpawned", this.justSpawned());
+//        if (this.canDoHerding()) compound.setInteger("HerdLeaderId", this.getHerdLeaderId());
+//        if (this.canDoHerding()) compound.setInteger("HerdSize", this.getHerdSize());
     }
 
     @Override
@@ -454,6 +465,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setHasTarget(compound.getBoolean("HasTarget"));
         this.setAgeInTicks(compound.getInteger("AgeTicks"));
         this.setJustSpawned(compound.getBoolean("JustSpawned"));
+//        if (this.canDoHerding()) this.setHerdLeader(compound.getInteger("HerdLeaderId"));
+//        if (this.canDoHerding()) this.setHerdSize(compound.getInteger("HerdSize"));
     }
 
     private void initInventory() {
@@ -470,13 +483,69 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    protected void setCreatureSize(float width, float height) {
-    }
+    protected void setCreatureSize(float width, float height) {}
 
     public void refreshInventory() {
         ItemStack saddle = this.creatureInventory.getStackInSlot(0);
         if (!this.world.isRemote) this.setSaddled(saddle.getItem() == Items.SADDLE && !saddle.isEmpty());
     }
+
+    //herdin stuff starts here
+    public boolean canDoHerding() {
+        return false;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return (RiftCreature) this.world.getEntityByID(this.getHerdLeaderId());
+    }
+
+    public int getHerdLeaderId() {
+        return this.dataManager.get(HERD_LEADER_ID).intValue();
+    }
+
+    public boolean isHerdLeader() {
+        return this.getEntityId() == this.getHerdLeaderId();
+    }
+
+    public void setHerdLeader(int value) {
+        this.dataManager.set(HERD_LEADER_ID, value);
+    }
+
+    private void manageHerding() {
+        this.herdCheckCountdown--;
+        if (this.herdCheckCountdown <= 0) {
+            //add members to herd
+            List<RiftCreature> potentialHerders = this.world.getEntitiesWithinAABB(this.getClass(), this.getHerdBoundingBox(), new Predicate<RiftCreature>() {
+                @Override
+                public boolean apply(@Nullable RiftCreature input) {
+                    return !input.isTamed();
+                }
+            });
+            int herdLeaderId = Collections.min(potentialHerders.stream().map(RiftCreature::getEntityId).collect(Collectors.toList()));
+            this.setHerdLeader(herdLeaderId);
+            System.out.println("No. "+this.getEntityId()+" herd leader: "+this.getHerdLeader());
+            this.herdCheckCountdown = RiftUtil.randomInRange(10, 15) * 20;
+        }
+    }
+
+    public double getHerdDist() {
+        return 24D;
+    }
+
+    public double getDoubleHerdDist() {
+        return this.getHerdDist() * this.getHerdDist();
+    }
+
+    public boolean isNearHerdLeader() {
+        return this.getDistanceSq(this.getHerdLeader()) <= this.getDoubleHerdDist();
+    }
+
+    public AxisAlignedBB getHerdBoundingBox() {
+        return this.getEntityBoundingBox().grow(this.getHerdDist() * 2, this.getHerdDist() * 2, this.getHerdDist() * 2);
+    }
+
+    //herdin stuff stops here
+
 
     public int getVariant() {
         return this.dataManager.get(VARIANT).intValue();
