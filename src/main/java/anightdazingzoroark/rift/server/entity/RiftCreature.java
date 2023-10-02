@@ -523,7 +523,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             });
             int herdLeaderId = Collections.min(potentialHerders.stream().map(RiftCreature::getEntityId).collect(Collectors.toList()));
             this.setHerdLeader(herdLeaderId);
-            System.out.println("No. "+this.getEntityId()+" herd leader: "+this.getHerdLeader());
             this.herdCheckCountdown = RiftUtil.randomInRange(10, 15) * 20;
         }
     }

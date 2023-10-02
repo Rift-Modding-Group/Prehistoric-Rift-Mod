@@ -38,15 +38,17 @@ public class Stegosaurus extends RiftCreature implements IAnimatable {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.175D);
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(30.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
 
     protected void initEntityAI() {
 //        this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.tasks.addTask(1, new RiftAttack(this, 1.0D, false, 0.96F, 0.36F));
-        this.tasks.addTask(2, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
-        this.tasks.addTask(3, new RiftWander(this, 1.0D));
-        this.tasks.addTask(4, new RiftLookAround(this));
+        this.tasks.addTask(2, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(3, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
+        this.tasks.addTask(4, new RiftWander(this, 1.0D));
+        this.tasks.addTask(5, new RiftLookAround(this));
     }
 
     @Override
