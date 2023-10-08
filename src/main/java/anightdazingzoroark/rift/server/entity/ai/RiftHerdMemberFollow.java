@@ -36,12 +36,17 @@ public class RiftHerdMemberFollow extends EntityAIBase {
         else if (this.creature.isHerdLeader()) {
             return false;
         }
-        else if (this.creature.getDistanceSq(this.creature.getHerdLeader()) < this.minDistDoubled) {
-            return false;
+        else if (this.creature.getHerdLeader() != null) {
+            if (this.creature.getDistanceSq(this.creature.getHerdLeader()) < this.minDistDoubled) {
+                return false;
+            }
+            else {
+                this.herdLeader = this.creature.getHerdLeader();
+                return true;
+            }
         }
         else {
-            this.herdLeader = this.creature.getHerdLeader();
-            return true;
+            return false;
         }
     }
 

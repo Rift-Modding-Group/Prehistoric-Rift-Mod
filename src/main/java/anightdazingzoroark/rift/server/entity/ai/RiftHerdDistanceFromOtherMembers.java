@@ -44,7 +44,7 @@ public class RiftHerdDistanceFromOtherMembers extends EntityAIBase {
             });
             Vec3d vec3d;
             for (RiftCreature herdMember : otherMembers) {
-                if (!herdMember.isHerdLeader() && herdMember.getHerdLeader().equals(this.creature.getHerdLeader()) && !herdMember.equals(this.creature)) {
+                if (!herdMember.isHerdLeader() && herdMember.getHerdLeader() == this.creature.getHerdLeader() && herdMember != this.creature) {
                     this.memberToAvoid = herdMember;
                     break;
                 }

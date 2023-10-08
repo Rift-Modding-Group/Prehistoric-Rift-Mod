@@ -137,6 +137,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         this.roarCooldownTicks = 0;
         this.roarCharge = 0;
         this.isRideable = true;
+        this.attackWidth = 4.875f;
     }
 
     @Override
@@ -165,7 +166,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         this.targetTasks.addTask(3, new RiftPickUpItems(this, RiftConfig.tyrannosaurusFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftControlledAttack(this, 0.52F, 0.24F));
-        this.tasks.addTask(2, new RiftAttack(this, 1.0D, false, 0.52F, 0.24F));
+        this.tasks.addTask(2, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
         this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(3, new RiftWander(this, 1.0D));
         this.tasks.addTask(4, new RiftLookAround(this));

@@ -8,6 +8,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -52,15 +53,20 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
     };
     protected final Tyrannosaurus mob;
     private int roarTick;
+    private int revengeTimerOld;
 
     public RiftTyrannosaurusRoar(Tyrannosaurus mob) {
         this.mob = mob;
+        this.revengeTimerOld = this.mob.getRevengeTimer();
         this.roarTick = 0;
     }
 
     @Override
     public boolean shouldExecute() {
         if (!this.mob.isTamed()) {
+//            int i = this.mob.getRevengeTimer();
+//            EntityLivingBase entitylivingbase = this.mob.getRevengeTarget();
+//            return i != this.revengeTimerOld && entitylivingbase != null && entitylivingbase instanceof EntityLivingBase && new Random().nextInt(4) == 0 && this.mob.canRoar();
             return this.mob.hurtTime > 0 && new Random().nextInt(4) == 0 && this.mob.canRoar();
         }
         else {
@@ -75,7 +81,10 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
 
     @Override
     public void startExecuting() {
-        if (!this.mob.isTamed()) this.mob.setRoaring(true);
+        if (!this.mob.isTamed()) {
+            this.mob.setRoaring(true);
+            this.revengeTimerOld = this.mob.getRevengeTimer();
+        }
     }
 
     @Override

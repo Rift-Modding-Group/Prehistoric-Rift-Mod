@@ -85,6 +85,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
     private int herdCheckCountdown;
+    public float attackWidth;
+    public float rangedWidth;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);

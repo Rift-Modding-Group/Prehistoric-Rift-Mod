@@ -14,21 +14,21 @@ public class RiftAttack extends EntityAIBase {
     protected int attackAnimLength;
     protected int attackAnimTime;
     protected int animTime;
+    protected float reach;
     double speedTowardsTarget;
-    boolean longMemory;
     Path path;
     private int delayCounter;
     private double targetX;
     private double targetY;
     private double targetZ;
     private int failedPathFindingPenalty = 0;
+    private int attackCooldown;
     private boolean canPenalize = false;
 
-    public RiftAttack(RiftCreature creature, double speedIn, boolean useLongMemory, float attackAnimLength, float attackAnimTime) {
+    public RiftAttack(RiftCreature creature, double speedIn, float attackAnimLength, float attackAnimTime) {
         this.attacker = creature;
         this.world = creature.world;
         this.speedTowardsTarget = speedIn;
-        this.longMemory = useLongMemory;
         //attackAnimLength and attackAnimTime are in seconds, will convert to ticks automatically here
         this.attackAnimLength = (int)(attackAnimLength * 20);
         this.attackAnimTime = (int)(attackAnimTime * 20);
@@ -75,9 +75,6 @@ public class RiftAttack extends EntityAIBase {
         else if (!entitylivingbase.isEntityAlive()) {
             return false;
         }
-        else if (!this.longMemory) {
-            return !this.attacker.getNavigator().noPath();
-        }
         else if (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(entitylivingbase))) {
             return false;
         }
@@ -90,6 +87,7 @@ public class RiftAttack extends EntityAIBase {
         this.attacker.getNavigator().setPath(this.path, this.speedTowardsTarget);
         this.delayCounter = 0;
         this.animTime = 0;
+        this.attackCooldown = 0;
     }
 
     @Override
@@ -109,13 +107,13 @@ public class RiftAttack extends EntityAIBase {
     public void updateTask() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
         this.attacker.getLookHelper().setLookPositionWithEntity(entitylivingbase, 30.0F, 30.0F);
-        double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
+        this.targetX = entitylivingbase.posX;
+        this.targetY = entitylivingbase.getEntityBoundingBox().minY;
+        this.targetZ = entitylivingbase.posZ;
+        double d0 = this.attacker.getDistanceSq(this.targetX, this.targetY, this.targetZ);
         --this.delayCounter;
 
-        if ((this.longMemory || this.attacker.getEntitySenses().canSee(entitylivingbase)) && this.delayCounter <= 0 && (this.targetX == 0.0D && this.targetY == 0.0D && this.targetZ == 0.0D || entitylivingbase.getDistanceSq(this.targetX, this.targetY, this.targetZ) >= 1.0D || this.attacker.getRNG().nextFloat() < 0.05F)) {
-            this.targetX = entitylivingbase.posX;
-            this.targetY = entitylivingbase.getEntityBoundingBox().minY;
-            this.targetZ = entitylivingbase.posZ;
+        if (this.attacker.getEntitySenses().canSee(entitylivingbase) && this.delayCounter <= 0) {
             this.delayCounter = 4 + this.attacker.getRNG().nextInt(7);
 
             if (this.canPenalize) {
@@ -139,34 +137,42 @@ public class RiftAttack extends EntityAIBase {
                 this.delayCounter += 5;
             }
 
-            if (!this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget)) {
-                this.delayCounter += 15;
+            if (d0 >= this.getAttackReachSqr(entitylivingbase)) {
+                if (!this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget)) {
+                    this.delayCounter += 15;
+                }
+            }
+            else {
+                this.path = null;
+                this.attacker.getNavigator().clearPath();
             }
         }
-
         this.checkAndPerformAttack(entitylivingbase, d0);
     }
 
     protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
         double d0 = this.getAttackReachSqr(enemy);
 
-        if (distToEnemySqr <= d0) {
-            this.attacker.setAttacking(true);
-            this.animTime++;
-            if (this.animTime == 0) {
-                if (this.attacker.isTamed()) this.attacker.setActing(true);
-            }
-            if (this.animTime == this.attackAnimTime) {
-                this.attacker.attackEntityAsMob(enemy);
-            }
-            if (this.animTime > this.attackAnimLength) {
-                this.animTime = 0;
-                this.attacker.setAttacking(false);
+        if (--this.attackCooldown <= 0) {
+            if (distToEnemySqr <= d0) {
+                this.attacker.setAttacking(true);
+                this.animTime++;
+                if (this.animTime == 0) {
+                    if (this.attacker.isTamed()) this.attacker.setActing(true);
+                }
+                if (this.animTime == this.attackAnimTime) {
+                    this.attacker.attackEntityAsMob(enemy);
+                }
+                if (this.animTime > this.attackAnimLength) {
+                    this.animTime = 0;
+                    this.attacker.setAttacking(false);
+                    this.attackCooldown = 20;
+                }
             }
         }
     }
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
-        return (double)(this.attacker.width * 2.0F * this.attacker.width * 2.0F + attackTarget.width);
+        return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
     }
 }
