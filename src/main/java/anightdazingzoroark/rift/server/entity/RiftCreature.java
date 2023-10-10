@@ -164,6 +164,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.lowEnergyEffects();
             this.eatFromInventory();
             if (this.isBeingRidden()) this.informRiderEnergy();
+            this.manageTargetingBySitting();
         }
     }
 
@@ -279,6 +280,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         if (this.informNoEnergy && this.getEnergy() > 0) {
             this.informNoEnergy = false;
+        }
+    }
+
+    private void manageTargetingBySitting() {
+        if (!this.isBeingRidden()) {
+            this.setSitting(this.getTameStatus() == TameStatusType.SIT);
+        }
+        else {
+            this.setSitting(this.getAttackTarget() == null);
         }
     }
 

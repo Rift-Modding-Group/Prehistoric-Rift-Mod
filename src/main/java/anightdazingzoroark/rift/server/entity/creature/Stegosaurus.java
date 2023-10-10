@@ -4,11 +4,16 @@ import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
+import anightdazingzoroark.rift.server.entity.projectile.ThrownStegoPlate;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -18,7 +23,7 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
-public class Stegosaurus extends RiftCreature implements IAnimatable {
+public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob {
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
 
     public Stegosaurus(World worldIn) {
@@ -52,6 +57,20 @@ public class Stegosaurus extends RiftCreature implements IAnimatable {
         this.tasks.addTask(4, new RiftWander(this, 1.0D));
         this.tasks.addTask(5, new RiftLookAround(this));
     }
+
+    public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
+        ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this);
+        double d0 = target.posX - this.posX;
+        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - thrownStegoPlate.posY;
+        double d2 = target.posZ - this.posZ;
+        double d3 = (double) MathHelper.sqrt(d0 * d0 + d2 * d2);
+        thrownStegoPlate.setVariant(this.getVariant());
+        thrownStegoPlate.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 5F);
+        this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+        this.world.spawnEntity(thrownStegoPlate);
+    }
+
+    public void setSwingingArms(boolean swingingArms) {}
 
     @Override
     public void updateEnergyActions() {}

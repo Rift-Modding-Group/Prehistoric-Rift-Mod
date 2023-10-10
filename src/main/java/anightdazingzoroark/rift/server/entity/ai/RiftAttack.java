@@ -9,12 +9,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class RiftAttack extends EntityAIBase {
-    World world;
     protected RiftCreature attacker;
     protected int attackAnimLength;
     protected int attackAnimTime;
     protected int animTime;
-    protected float reach;
     double speedTowardsTarget;
     Path path;
     private int delayCounter;
@@ -27,7 +25,6 @@ public class RiftAttack extends EntityAIBase {
 
     public RiftAttack(RiftCreature creature, double speedIn, float attackAnimLength, float attackAnimTime) {
         this.attacker = creature;
-        this.world = creature.world;
         this.speedTowardsTarget = speedIn;
         //attackAnimLength and attackAnimTime are in seconds, will convert to ticks automatically here
         this.attackAnimLength = (int)(attackAnimLength * 20);

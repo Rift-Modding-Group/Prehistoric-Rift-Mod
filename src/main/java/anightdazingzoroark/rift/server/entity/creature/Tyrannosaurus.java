@@ -177,7 +177,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         super.onLivingUpdate();
         this.manageCanRoar();
         if (!this.isBaby()) this.manageApplyWeakness();
-        this.manageTargetingBySitting();
     }
 
     public void updateEnergyActions() {
@@ -223,17 +222,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             }
             else if (!this.isTamed()) {
                 entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
-            }
-        }
-    }
-
-    private void manageTargetingBySitting() {
-        if (!this.world.isRemote) {
-            if (!this.isBeingRidden()) {
-                this.setSitting(this.getTameStatus() == TameStatusType.SIT);
-            }
-            else {
-                this.setSitting(this.getAttackTarget() == null);
             }
         }
     }

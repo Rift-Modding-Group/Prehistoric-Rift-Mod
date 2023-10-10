@@ -2,6 +2,7 @@ package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
+import anightdazingzoroark.rift.server.entity.projectile.ThrownStegoPlate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
@@ -14,13 +15,16 @@ import java.util.List;
 
 public class RiftEntities {
     public static void registerEntities() {
+        //creatures
         EntityPropertiesHandler.INSTANCE.registerProperties(RiftEntityProperties.class);
         for (int x = 0; x < RiftCreatureType.values().length; x++) {
             RiftCreatureType creature = RiftCreatureType.values()[x];
             registerEntity(creature.name().toLowerCase(), creature.getCreature(), x, RiftInitialize.instance, creature.getEggPrimary(), creature.getEggSecondary());
         }
+        //everything else
         int miscId = RiftCreatureType.values().length;
         registerEntity("egg", RiftEgg.class, miscId++, RiftInitialize.instance);
+        registerEntity("thrown_stegosaurus_plate", ThrownStegoPlate.class, miscId++, RiftInitialize.instance);
     }
 
     public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {
