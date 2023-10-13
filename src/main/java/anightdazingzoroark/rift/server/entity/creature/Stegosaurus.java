@@ -123,13 +123,11 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     private <E extends IAnimatable> PlayState stegosaurusAttack(AnimationEvent<E> event) {
         if (this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.attack", false));
-            return PlayState.CONTINUE;
         }
-        if (this.isRangedAttacking()) {
+        else if (this.isRangedAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.plate_fling", false));
-            return PlayState.CONTINUE;
         }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
+        else event.getController().clearAnimationCache();
+        return PlayState.CONTINUE;
     }
 }

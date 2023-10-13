@@ -60,7 +60,7 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
             if (entity.attackEntityFrom(damagesource, (float) i)) {
                 if (entity instanceof EntityLivingBase) {
                     EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
-                    if (!this.world.isRemote) entitylivingbase.setArrowCountInEntity(entitylivingbase.getArrowCountInEntity() + 1);
+//                    if (!this.world.isRemote) entitylivingbase.setArrowCountInEntity(entitylivingbase.getArrowCountInEntity() + 1);
                     this.arrowHit(entitylivingbase);
                 }
                 this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));

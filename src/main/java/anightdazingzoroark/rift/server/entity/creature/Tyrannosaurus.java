@@ -82,13 +82,9 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                 else if (entity instanceof RiftCreature) {
                     return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
                 }
-                else {
-                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS) && !(entity instanceof RiftEgg);
-                }
+                else return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS) && !(entity instanceof RiftEgg);
             }
-            else {
-                return false;
-            }
+            else return false;
         }
     };
     private static final Predicate<EntityLivingBase> ROAR_BLACKLIST = new Predicate<EntityLivingBase>() {
@@ -96,16 +92,10 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         public boolean apply(@Nullable EntityLivingBase entity) {
             List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
             if (!blacklist.isEmpty()) {
-                if (entity instanceof EntityPlayer) {
-                    return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
-                }
-                else {
-                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
-                }
+                if (entity instanceof EntityPlayer) return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
+                else return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
             }
-            else {
-                return entity.isEntityAlive() && !(entity instanceof RiftEgg);
-            }
+            else return entity.isEntityAlive() && !(entity instanceof RiftEgg);
         }
     };
     private static final Predicate<EntityLivingBase> ROAR_WHITELIST = new Predicate<EntityLivingBase>() {
@@ -114,16 +104,10 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
 
             if (!blacklist.isEmpty()) {
-                if (entity instanceof EntityPlayer) {
-                    return entity.isEntityAlive() && blacklist.contains("minecraft:player");
-                }
-                else {
-                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
-                }
+                if (entity instanceof EntityPlayer) return entity.isEntityAlive() && blacklist.contains("minecraft:player");
+                else return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
             }
-            else {
-                return false;
-            }
+            else return false;
         }
     };
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);

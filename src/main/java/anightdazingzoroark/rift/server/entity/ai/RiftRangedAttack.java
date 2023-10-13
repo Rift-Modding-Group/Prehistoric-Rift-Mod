@@ -35,6 +35,7 @@ public class RiftRangedAttack extends EntityAIBase {
     @Override
     public boolean shouldExecute() {
         if (this.attacker.getAttackTarget() == null) return false;
+        else if (!this.attacker.getAttackTarget().isEntityAlive()) return false;
         else {
             EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
@@ -95,7 +96,7 @@ public class RiftRangedAttack extends EntityAIBase {
             if (flag) {
                 if (--this.attackCooldown <= 0) {
                     this.attacker.setRangedAttacking(true);
-                    this.attacker.removeSpeed();
+                    if (!this.canMoveWhenShooting) this.attacker.removeSpeed();
                     this.animTime++;
                     if (this.animTime == this.shootAnimTime) ((IRangedAttackMob)(this.attacker)).attackEntityWithRangedAttack(entitylivingbase, 1F);
                     if (this.animTime > this.shootAnimLength) {

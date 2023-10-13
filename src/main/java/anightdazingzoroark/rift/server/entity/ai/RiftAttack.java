@@ -93,17 +93,11 @@ public class RiftAttack extends EntityAIBase {
         if (this.attacker.getEntitySenses().canSee(entitylivingbase) && this.delayCounter <= 0) {
             this.delayCounter = 4 + this.attacker.getRNG().nextInt(7);
 
-            if (d0 > 1024.0D) {
-                this.delayCounter += 10;
-            }
-            else if (d0 > 256.0D) {
-                this.delayCounter += 5;
-            }
+            if (d0 > 1024.0D) this.delayCounter += 10;
+            else if (d0 > 256.0D) this.delayCounter += 5;
 
             if (d0 >= this.getAttackReachSqr(entitylivingbase)) {
-                if (!this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget)) {
-                    this.delayCounter += 15;
-                }
+                if (!this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget)) this.delayCounter += 15;
             }
             else {
                 this.path = null;
