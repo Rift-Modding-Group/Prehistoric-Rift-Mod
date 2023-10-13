@@ -50,9 +50,7 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
             float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
             int i = MathHelper.ceil((double) f * this.getDamage());
 
-            if (this.getIsCritical()) {
-                i += this.rand.nextInt(i / 2 + 2);
-            }
+            if (this.getIsCritical()) i += this.rand.nextInt(i / 2 + 2);
 
             DamageSource damagesource;
 
@@ -65,7 +63,6 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
                     if (!this.world.isRemote) entitylivingbase.setArrowCountInEntity(entitylivingbase.getArrowCountInEntity() + 1);
                     this.arrowHit(entitylivingbase);
                 }
-
                 this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
             }
             else {

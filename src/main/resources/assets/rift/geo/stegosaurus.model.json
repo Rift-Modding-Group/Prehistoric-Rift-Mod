@@ -33,7 +33,7 @@
 				{
 					"name": "bodyFront",
 					"parent": "bodyBack",
-					"pivot": [0, 0, -3],
+					"pivot": [0, 18, 1],
 					"cubes": [
 						{"origin": [-3.5, 7.5, -12], "size": [7, 12, 12], "uv": [32, 15]},
 						{"origin": [-3, 18.6, -5], "size": [1, 4, 4], "inflate": -0.125, "pivot": [-2.5, 20.6, -3], "rotation": [-45, 0, 0], "uv": [20, 79]},

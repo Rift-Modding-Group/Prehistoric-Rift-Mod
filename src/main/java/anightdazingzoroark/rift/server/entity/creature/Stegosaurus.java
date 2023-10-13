@@ -29,6 +29,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
         this.setSize(2.125f, 2.5f);
+        this.speed = 0.175f;
         this.isRideable = true;
         this.attackWidth = 7.5f;
         this.rangedWidth = 12f;
@@ -43,7 +44,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.175D);
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(30.0D);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
@@ -51,11 +51,12 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
-        this.tasks.addTask(1, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
-        this.tasks.addTask(2, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(3, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
-        this.tasks.addTask(4, new RiftWander(this, 1.0D));
-        this.tasks.addTask(5, new RiftLookAround(this));
+        this.tasks.addTask(1, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
+        this.tasks.addTask(2, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
+        this.tasks.addTask(3, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(4, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
+        this.tasks.addTask(5, new RiftWander(this, 1.0D));
+        this.tasks.addTask(6, new RiftLookAround(this));
     }
 
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
@@ -122,10 +123,13 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     private <E extends IAnimatable> PlayState stegosaurusAttack(AnimationEvent<E> event) {
         if (this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.attack", false));
+            return PlayState.CONTINUE;
         }
-        else {
-            event.getController().clearAnimationCache();
+        if (this.isRangedAttacking()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.plate_fling", false));
+            return PlayState.CONTINUE;
         }
-        return PlayState.CONTINUE;
+        event.getController().clearAnimationCache();
+        return PlayState.STOP;
     }
 }

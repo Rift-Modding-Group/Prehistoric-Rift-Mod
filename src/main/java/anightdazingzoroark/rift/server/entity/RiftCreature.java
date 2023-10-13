@@ -84,6 +84,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public EntityLivingBase ssrTarget;
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
+    public double speed;
     private int herdCheckCountdown;
     public float attackWidth;
     public float rangedWidth;
@@ -93,6 +94,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.creatureType = creatureType;
         this.minCreatureHealth = creatureType.getMinHealth();
         this.maxCreatureHealth = creatureType.getMaxHealth();
+        this.setSpeed(0f);
         this.setScaleForAge(false);
         this.initInventory();
         this.energyMod = 0;
@@ -154,7 +156,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (!this.world.isRemote) {
             this.setHasTarget(this.getAttackTarget() != null);
             this.setAgeInTicks(this.getAgeInTicks() + 1);
-            this.manageAttributesByAge();
+            this.manageAttributes();
             if (this.canDoHerding()) this.manageHerding();
         }
         if (this.isTamed() && !this.world.isRemote) {
@@ -339,11 +341,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return false;
     }
 
-    public void manageAttributesByAge() {
+    public void manageAttributes() {
         double healthValue = ((this.maxCreatureHealth - this.minCreatureHealth)/24000D) * (this.getAgeInTicks() - 24000D) + this.maxCreatureHealth;
         this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(RiftUtil.clamp(Math.floor(healthValue), this.minCreatureHealth, this.maxCreatureHealth));
         if (this.justSpawned()) {
             this.heal((float) this.maxCreatureHealth);
+            this.setSpeed(this.speed);
             this.setJustSpawned(false);
         }
     }
@@ -598,6 +601,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setEnergy(int energy) {
         this.dataManager.set(ENERGY, RiftUtil.clamp(energy, 0, 20));
+    }
+
+    private void setSpeed(double value) {
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(value);
+    }
+
+    public void resetSpeed() {
+        this.setSpeed(this.speed);
+    }
+
+    public void removeSpeed() {
+        this.setSpeed(0D);
     }
 
     public TameBehaviorType getTameBehavior() {

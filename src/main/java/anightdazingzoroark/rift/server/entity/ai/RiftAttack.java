@@ -2,6 +2,7 @@ package anightdazingzoroark.rift.server.entity.ai;
 
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.Path;
@@ -21,7 +22,6 @@ public class RiftAttack extends EntityAIBase {
     private double targetZ;
     private int failedPathFindingPenalty = 0;
     private int attackCooldown;
-    private boolean canPenalize = false;
 
     public RiftAttack(RiftCreature creature, double speedIn, float attackAnimLength, float attackAnimTime) {
         this.attacker = creature;
@@ -35,30 +35,16 @@ public class RiftAttack extends EntityAIBase {
     public boolean shouldExecute() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
-        if (entitylivingbase == null) {
-            return false;
-        }
-        else if (!entitylivingbase.isEntityAlive()) {
-            return false;
-        }
+        if (entitylivingbase == null) return false;
+        else if (!entitylivingbase.isEntityAlive()) return false;
         else {
-            if (canPenalize) {
-                if (--this.delayCounter <= 0) {
-                    this.path = this.attacker.getNavigator().getPathToEntityLiving(entitylivingbase);
-                    this.delayCounter = 4 + this.attacker.getRNG().nextInt(7);
-                    return this.path != null;
-                }
-                else {
-                    return true;
-                }
-            }
             this.path = this.attacker.getNavigator().getPathToEntityLiving(entitylivingbase);
+            double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
 
-            if (this.path != null) {
-                return true;
-            }
+            if (this.path != null) return true;
             else {
-                return this.getAttackReachSqr(entitylivingbase) >= this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
+                if (this.attacker instanceof IRangedAttackMob) return this.getAttackReachSqr(entitylivingbase) >= 0 && this.getRangedAttackReachSqr(entitylivingbase) < d0;
+                return this.getAttackReachSqr(entitylivingbase) >= d0;
             }
         }
     }
@@ -66,15 +52,9 @@ public class RiftAttack extends EntityAIBase {
     public boolean shouldContinueExecuting() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
-        if (entitylivingbase == null) {
-            return false;
-        }
-        else if (!entitylivingbase.isEntityAlive()) {
-            return false;
-        }
-        else if (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(entitylivingbase))) {
-            return false;
-        }
+        if (entitylivingbase == null) return false;
+        else if (!entitylivingbase.isEntityAlive()) return false;
+        else if (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(entitylivingbase))) return false;
         else {
             return !(entitylivingbase instanceof EntityPlayer) || !(((EntityPlayer)entitylivingbase).isSpectator() && ((EntityPlayer)entitylivingbase).isCreative());
         }
@@ -113,20 +93,6 @@ public class RiftAttack extends EntityAIBase {
         if (this.attacker.getEntitySenses().canSee(entitylivingbase) && this.delayCounter <= 0) {
             this.delayCounter = 4 + this.attacker.getRNG().nextInt(7);
 
-            if (this.canPenalize) {
-                this.delayCounter += failedPathFindingPenalty;
-                if (this.attacker.getNavigator().getPath() != null) {
-                    net.minecraft.pathfinding.PathPoint finalPathPoint = this.attacker.getNavigator().getPath().getFinalPathPoint();
-                    if (finalPathPoint != null && entitylivingbase.getDistanceSq(finalPathPoint.x, finalPathPoint.y, finalPathPoint.z) < 1)
-                        failedPathFindingPenalty = 0;
-                    else
-                        failedPathFindingPenalty += 10;
-                }
-                else {
-                    failedPathFindingPenalty += 10;
-                }
-            }
-
             if (d0 > 1024.0D) {
                 this.delayCounter += 10;
             }
@@ -154,12 +120,7 @@ public class RiftAttack extends EntityAIBase {
             if (distToEnemySqr <= d0) {
                 this.attacker.setAttacking(true);
                 this.animTime++;
-                if (this.animTime == 0) {
-                    if (this.attacker.isTamed()) this.attacker.setActing(true);
-                }
-                if (this.animTime == this.attackAnimTime) {
-                    this.attacker.attackEntityAsMob(enemy);
-                }
+                if (this.animTime == this.attackAnimTime) this.attacker.attackEntityAsMob(enemy);
                 if (this.animTime > this.attackAnimLength) {
                     this.animTime = 0;
                     this.attacker.setAttacking(false);
@@ -171,5 +132,10 @@ public class RiftAttack extends EntityAIBase {
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
         return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
+    }
+
+    protected double getRangedAttackReachSqr(EntityLivingBase attackTarget) {
+        if (this.attacker instanceof IRangedAttackMob) return (double)(this.attacker.rangedWidth * this.attacker.rangedWidth + attackTarget.width);
+        return 0;
     }
 }

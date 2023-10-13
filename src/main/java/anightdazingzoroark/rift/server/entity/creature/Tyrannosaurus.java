@@ -134,6 +134,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
         this.setSize(3.25f, 4f);
+        this.speed = 0.20D;
         this.roarCooldownTicks = 0;
         this.roarCharge = 0;
         this.isRideable = true;
@@ -151,7 +152,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20D);
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(35.0D);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
