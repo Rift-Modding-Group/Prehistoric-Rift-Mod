@@ -54,6 +54,7 @@ public class RiftRangedAttack extends EntityAIBase {
 
     public void resetTask() {
         this.seeTime = 0;
+        this.attacker.resetSpeed();
     }
 
     public void updateTask() {

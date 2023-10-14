@@ -200,12 +200,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         else if (!this.isActing()) {
             this.energyMod = 0;
-            if (this.energyRegenModDelay <= 20) {
-                this.energyRegenModDelay++;
-            }
-            else {
-                this.energyRegenMod++;
-            }
+            if (this.energyRegenModDelay <= 20) this.energyRegenModDelay++;
+            else this.energyRegenMod++;
             if (this.energyRegenMod > this.creatureType.getMaxEnergyRegenMod()) {
                 this.setEnergy(this.getEnergy() + 1);
                 this.energyRegenMod = 0;
@@ -231,12 +227,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void lowEnergyEffects() {
-        if (this.getEnergy() > 0 && this.getEnergy() <= 6) {
-            this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 2));
-        }
-        else if (this.getEnergy() == 0) {
-            this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 255));
-        }
+        if (this.getEnergy() > 0 && this.getEnergy() <= 6) this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 2));
+        else if (this.getEnergy() == 0) this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 255));
     }
 
     private void eatFromInventory() {
@@ -267,9 +259,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
         }
-        else {
-            this.eatFromInvForEnergyCooldown = 0;
-        }
+        else this.eatFromInvForEnergyCooldown = 0;
     }
 
     private void informRiderEnergy() {
@@ -290,20 +280,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void manageTargetingBySitting() {
-        if (!this.isBeingRidden()) {
-            this.setSitting(this.getTameStatus() == TameStatusType.SIT);
-        }
-        else {
-            this.setSitting(this.getAttackTarget() == null);
-        }
+        if (!this.isBeingRidden()) this.setSitting(this.getTameStatus() == TameStatusType.SIT);
+        else this.setSitting(this.getAttackTarget() == null);
     }
 
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
-        if (flag) {
-            this.applyEnchantments(this, entityIn);
-        }
+        if (flag) this.applyEnchantments(this, entityIn);
         return flag;
     }
 
@@ -374,9 +358,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
             String itemId = foodItem.substring(0, itemIdSecond);
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                return (stack.getMetadata() == itemData) || (itemData == 32767);
-            }
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == 32767);
         }
         return false;
     }
@@ -404,9 +386,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
             String itemId = foodItem.substring(0, itemIdSecond);
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                return (stack.getMetadata() == itemData) || (itemData == 32767);
-            }
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == 32767);
         }
         return false;
     }
@@ -492,6 +472,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setBoolean("HasTarget", this.hasTarget());
         compound.setInteger("AgeTicks", this.getAgeInTicks());
         compound.setBoolean("JustSpawned", this.justSpawned());
+        compound.setInteger("TameProgress", this.getTameProgress());
 //        if (this.canDoHerding()) compound.setInteger("HerdLeaderId", this.getHerdLeaderId());
 //        if (this.canDoHerding()) compound.setInteger("HerdSize", this.getHerdSize());
     }
@@ -526,6 +507,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setHasTarget(compound.getBoolean("HasTarget"));
         this.setAgeInTicks(compound.getInteger("AgeTicks"));
         this.setJustSpawned(compound.getBoolean("JustSpawned"));
+        this.setTameProgress(compound.getInteger("TameProgress"));
 //        if (this.canDoHerding()) this.setHerdLeader(compound.getInteger("HerdLeaderId"));
 //        if (this.canDoHerding()) this.setHerdSize(compound.getInteger("HerdSize"));
     }
@@ -537,9 +519,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.creatureInventory != null) {
             for (int i = 0; i < inventorySize; ++i) {
                 ItemStack itemStack = this.creatureInventory.getStackInSlot(i);
-                if (!itemStack.isEmpty()) {
-                    this.creatureInventory.setInventorySlotContents(i, itemStack.copy());
-                }
+                if (!itemStack.isEmpty()) this.creatureInventory.setInventorySlotContents(i, itemStack.copy());
             }
         }
     }
@@ -783,7 +763,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void updatePassenger(Entity passenger) {
         super.updatePassenger(passenger);
+
+        this.rotationYaw = passenger.rotationYaw;
+        this.prevRotationYaw = this.rotationYaw;
+        this.rotationPitch = passenger.rotationPitch * 0.5f;
+        this.setRotation(this.rotationYaw, this.rotationPitch);
+        this.renderYawOffset = this.rotationYaw;
+
         passenger.setPosition(riderPos().x, riderPos().y + passenger.height, riderPos().z);
+
         ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
         if (this.isDead) passenger.dismountRidingEntity();
     }

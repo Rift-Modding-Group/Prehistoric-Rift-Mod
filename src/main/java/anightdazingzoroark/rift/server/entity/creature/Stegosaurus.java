@@ -81,7 +81,9 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public void updateEnergyActions() {}
 
     public Vec3d riderPos() {
-        return new Vec3d(this.posX, this.posY + 2.125, this.posZ);
+        float xOffset = (float)(this.posX + (-1) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
+        float zOffset = (float)(this.posZ + (-1) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        return new Vec3d(xOffset, this.posY + 0.6, zOffset);
     }
 
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
