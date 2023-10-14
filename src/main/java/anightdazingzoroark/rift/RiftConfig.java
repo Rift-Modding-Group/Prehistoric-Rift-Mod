@@ -12,11 +12,13 @@ public class RiftConfig {
     public static String[] carnivoreRegenEnergyFoods = {"rift:raw_fibrous_meat:0:2", "rift:cooked_fibrous_meat:0:4"};
 
     public static String[] tyrannosaurusFavoriteFood = {"minecraft:beef:0:0.05", "minecraft:cooked_beef:0:0.075", "minecraft:porkchop:0:0.05", "minecraft:cooked_porkchop:0:0.075", "minecraft:chicken:0:0.05", "minecraft:cooked_chicken:0:0.075", "minecraft:mutton:0:0.05", "minecraft:cooked_mutton:0:0.075", "minecraft:rabbit:0:0.05", "minecraft:cooked_rabbit:0:0.075", "minecraft:rotten_flesh:0:0.075", "rift:raw_exotic_meat:0:0.05", "rift:cooked_exotic_meat:0:0.075", "rift:raw_fibrous_meat:0:0", "rift:cooked_fibrous_meat:0:0"};
+    public static String[] tyrannosaurusBreedingFood = {"rift:basic_carnivore_meal:0:0", "rift:advanced_carnivore_meal:0:0"};
     public static String[] tyrannosaurusTargets = {"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:llama"};
     public static boolean tyrannosaurusRoarTargetsWhitelist = false;
     public static String[] tyrannosaurusRoarTargetBlacklist = {"rift:tyrannosaurus"};
 
     public static String[] stegosaurusFavoriteFood = {"minecraft:apple:0:0.025", "minecraft:wheat:0:0.05", "minecraft:carrot:0:0.05", "minecraft:potato:0:0.05", "minecraft:beetroot:0:0.05"};
+    public static String[] stegosaurusTamingFood = {"rift:basic_herbivore_meal:0:0.10", "rift:advanced_herbivore_meal:0:33"};
     public static boolean stegosaurusCanInflictBleed = true;
 
     public static void readConfig() {
@@ -44,11 +46,13 @@ public class RiftConfig {
         carnivoreRegenEnergyFoods = config.getStringList("List of food items that can regenerate energy of carnivores", "Misc", new String[]{"rift:raw_fibrous_meat:0:2", "rift:cooked_fibrous_meat:0:4"}, "List of food items that can regenerate the energy of a carnivore. To add items add \"<insert item's identifier here>:<insert data id here>:<insert amount of energy you want the item to regenerate>\"");
 
         tyrannosaurusFavoriteFood = config.getStringList("Tyrannosaurus Favorite Food", "Tyrannosaurus", new String[]{"minecraft:beef:0:0.05", "minecraft:cooked_beef:0:0.075", "minecraft:porkchop:0:0.05", "minecraft:cooked_porkchop:0:0.075", "minecraft:chicken:0:0.05", "minecraft:cooked_chicken:0:0.075", "minecraft:mutton:0:0.05", "minecraft:cooked_mutton:0:0.075", "minecraft:rabbit:0:0.05", "minecraft:cooked_rabbit:0:0.075", "minecraft:rotten_flesh:0:0.075", "rift:raw_exotic_meat:0:0.05", "rift:cooked_exotic_meat:0:0.075", "rift:raw_fibrous_meat:0:0", "rift:cooked_fibrous_meat:0:0"}, "List of foods Tyrannosauruses will eat (when tamed) or pick up when on the ground. To add items add \"<insert item's identifier here>:<insert data id here>:<insert percentage of health that will be healed upon consumption here>\"");
+        tyrannosaurusBreedingFood = config.getStringList("Tyrannosaurus Breeding Food", "Tyrannosaurus", new String[]{"rift:basic_carnivore_meal:0:0", "rift:advanced_carnivore_meal:0:0"}, "List of foods Tyrannosauruses need to be fed in order to breed. To add items add \"<insert item's identifier here>:<insert data id here>:0\"");
         tyrannosaurusTargets = config.getStringList("Tyrannosaurus Targets", "Tyrannosaurus", new String[]{"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:llama"}, "Identifiers of mobs that the Tyrannosaurus will actively hunt");
         tyrannosaurusRoarTargetsWhitelist = config.getBoolean("Use Tyrannosaurus roar blacklist as a whitelist", "Tyrannosaurus", false, "Turn the blacklist of mobs affected by the Tyrannosaurus' roar into a whitelist of affected mobs");
         tyrannosaurusRoarTargetBlacklist = config.getStringList("Mobs unaffected by Tyrannosaurus roar", "Tyrannosaurus", new String[]{"rift:tyrannosaurus"}, "Mobs within this list are immune to this mobs knockback roar");
 
         stegosaurusFavoriteFood = config.getStringList("Stegosaurus Favorite Food", "Stegosaurus", new String[]{"minecraft:apple:0:0.025", "minecraft:wheat:0:0.05", "minecraft:carrot:0:0.05", "minecraft:potato:0:0.05", "minecraft:beetroot:0:0.05"}, "List of foods Stegosauruses will eat. To add items add \"<insert item's identifier here>:<insert data id here>:<insert percentage of health that will be healed upon consumption here>\"");
+        stegosaurusTamingFood = config.getStringList("Stegosaurus Taming Food", "Stegosaurus", new String[]{"rift:basic_herbivore_meal:0:0.10", "rift:advanced_herbivore_meal:0:33"}, "List of foods Stegosauruses must be fed to be tamed (if wild) or bred (if tamed). To add items add \"<insert item's identifier here>:<insert data id here>:<percentage of tame progress to fill up before taming>\"");
         stegosaurusCanInflictBleed = config.getBoolean("Stegosaurus Can Inflict Bleed", "Stegosaurus", true, "Whether or not Stegosauruses can inflict bleed using their strong attack");
     }
 }

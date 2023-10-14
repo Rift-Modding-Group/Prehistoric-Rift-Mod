@@ -51,8 +51,12 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
+        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
+        this.targetTasks.addTask(2, new RiftProtectOwner(this));
+        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
         this.tasks.addTask(2, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
+        this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(3, new RiftHerdDistanceFromOtherMembers(this, 3D));
         this.tasks.addTask(4, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
         this.tasks.addTask(5, new RiftWander(this, 1.0D));
@@ -85,6 +89,21 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
+    }
+
+    @Override
+    public boolean isTameableByFeeding() {
+        return true;
+    }
+
+    @Override
+    public boolean canBeSaddled() {
+        return true;
+    }
+
+    @Override
+    public int slotCount() {
+        return 27;
     }
 
     @Override

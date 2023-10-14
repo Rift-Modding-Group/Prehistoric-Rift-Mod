@@ -36,6 +36,8 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
@@ -66,6 +68,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> JUST_SPAWNED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> HERD_LEADER_ID = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> TAME_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -130,6 +133,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(AGE_TICKS, 0);
         this.dataManager.register(JUST_SPAWNED, true);
         this.dataManager.register(HERD_LEADER_ID, this.getEntityId());
+        this.dataManager.register(TAME_PROGRESS, 0);
     }
 
     @Override
@@ -338,6 +342,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 return true;
             }
         }
+        else {
+            if (this.isTamingFood(itemstack) && !itemstack.isEmpty() && this.isTameableByFeeding()) {
+                if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
+                    if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("tame_progress.finished", new TextComponentString(this.getName())), false);
+                    this.setTameProgress(0);
+                    this.setTamed(true);
+                    this.setOwnerId(player.getUniqueID());
+                    if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
+                }
+                else this.setTameProgress(this.getTameProgress() + this.getTamingFoodAdd(itemstack));
+            }
+        }
         return false;
     }
 
@@ -376,6 +392,36 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
                 if (itemData == 32767) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
                 else if (stack.getMetadata() == itemData) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
+            }
+        }
+        return 0;
+    }
+
+    public boolean isTamingFood(ItemStack stack) {
+        for (String foodItem : this.creatureType.getTamingFood()) {
+            int itemIdFirst = foodItem.indexOf(":");
+            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
+            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
+            String itemId = foodItem.substring(0, itemIdSecond);
+            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
+                return (stack.getMetadata() == itemData) || (itemData == 32767);
+            }
+        }
+        return false;
+    }
+
+    public int getTamingFoodAdd(ItemStack stack) {
+        for (String foodItem : this.creatureType.getTamingFood()) {
+            int itemIdFirst = foodItem.indexOf(":");
+            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
+            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
+            String itemId = foodItem.substring(0, itemIdSecond);
+            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
+            int adder = (int)(Double.parseDouble(foodItem.substring(itemIdThird + 1)) * 100);
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
+                if (itemData == 32767) return adder;
+                else if (stack.getMetadata() == itemData) return adder;
             }
         }
         return 0;
@@ -603,6 +649,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(ENERGY, RiftUtil.clamp(energy, 0, 20));
     }
 
+    public int getTameProgress() {
+        return RiftUtil.clamp(this.dataManager.get(TAME_PROGRESS), 0, 100);
+    }
+
+    public void setTameProgress(int value) {
+        this.dataManager.set(TAME_PROGRESS, RiftUtil.clamp(value, 0, 100));
+    }
+
     private void setSpeed(double value) {
         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(value);
     }
@@ -712,6 +766,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isApexPredator() {
+        return false;
+    }
+
+    public boolean isTameableByFeeding() {
         return false;
     }
 

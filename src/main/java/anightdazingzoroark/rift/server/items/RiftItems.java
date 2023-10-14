@@ -23,6 +23,10 @@ public class RiftItems {
     public static Item RAW_FIBROUS_MEAT;
     public static Item COOKED_FIBROUS_MEAT;
     public static Item FIBER_BAR;
+    public static Item BASIC_HERBIVORE_MEAL;
+    public static Item BASIC_CARNIVORE_MEAL;
+    public static Item ADVANCED_HERBIVORE_MEAL;
+    public static Item ADVANCED_CARNIVORE_MEAL;
 
     public static Item TYRANNOSAURUS_ARM;
     public static Item STEGOSAURUS_PLATE;
@@ -32,6 +36,10 @@ public class RiftItems {
         COOKED_EXOTIC_MEAT = riftFoodItem("cooked_exotic_meat", 8, 0.6f, true);
         RAW_FIBROUS_MEAT = riftFoodItem("raw_fibrous_meat", 1, 0.45f, true);
         COOKED_FIBROUS_MEAT = riftFibrousFoodItem("cooked_fibrous_meat", 2, true);
+        BASIC_HERBIVORE_MEAL = riftGenericItem("basic_herbivore_meal");
+        BASIC_CARNIVORE_MEAL = riftGenericItem("basic_carnivore_meal");
+        ADVANCED_HERBIVORE_MEAL = riftGenericItem("advanced_herbivore_meal");
+        ADVANCED_CARNIVORE_MEAL = riftGenericItem("advanced_carnivore_meal");
 
         FIBER_BAR = riftFibrousFoodItem("fiber_bar", 2, false);
 

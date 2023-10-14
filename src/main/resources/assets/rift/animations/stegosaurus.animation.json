@@ -80,7 +80,7 @@
 				}
 			}
 		},
-		"animation.stegosaurus.sit": {
+		"animation.stegosaurus.sitting": {
 			"loop": true,
 			"bones": {
 				"bodyBack": {
