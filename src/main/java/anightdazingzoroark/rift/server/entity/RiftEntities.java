@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.server.entity.creature.Stegosaurus;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.rift.server.entity.projectile.ThrownStegoPlate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
@@ -15,8 +16,8 @@ import java.util.List;
 
 public class RiftEntities {
     public static void registerEntities() {
-        //creatures
         EntityPropertiesHandler.INSTANCE.registerProperties(RiftEntityProperties.class);
+        //creatures
         for (int x = 0; x < RiftCreatureType.values().length; x++) {
             RiftCreatureType creature = RiftCreatureType.values()[x];
             registerEntity(creature.name().toLowerCase(), creature.getCreature(), x, RiftInitialize.instance, creature.getEggPrimary(), creature.getEggSecondary());
@@ -38,13 +39,25 @@ public class RiftEntities {
     public static void registerSpawn() {
         //tyrannosaurus
         for (Biome biome : Biome.REGISTRY) {
-            if (biome != null && BiomeDictionary.hasType(biome, BiomeDictionary.Type.PLAINS)) {
-                List<Biome.SpawnListEntry> spawnList = biome.getSpawnableList(EnumCreatureType.CREATURE);
-                spawnList.add(new Biome.SpawnListEntry(Tyrannosaurus.class, 15, 1, 1));
+            if (biome != null) {
+                //regular plains
+                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.PLAINS) && !BiomeDictionary.hasType(biome, BiomeDictionary.Type.SAVANNA)) {
+                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(Tyrannosaurus.class, 15, 1, 1));
+                }
+                //mountains
+                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.MOUNTAIN)) {
+                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(Tyrannosaurus.class, 20, 1, 1));
+                }
             }
-            if (biome != null && BiomeDictionary.hasType(biome, BiomeDictionary.Type.MOUNTAIN)) {
-                List<Biome.SpawnListEntry> spawnList = biome.getSpawnableList(EnumCreatureType.CREATURE);
-                spawnList.add(new Biome.SpawnListEntry(Tyrannosaurus.class, 25, 1, 1));
+        }
+
+        //stegosaurus
+        for (Biome biome : Biome.REGISTRY) {
+            if (biome != null) {
+                //regular plains
+                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.PLAINS) && !BiomeDictionary.hasType(biome, BiomeDictionary.Type.SAVANNA)) {
+                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(Stegosaurus.class, 20, 4, 6));
+                }
             }
         }
     }

@@ -16,6 +16,20 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
 
     @Override
     public boolean shouldExecute() {
-        return (!this.creature.isTamed() || (this.creature.isTamed() && this.creature.getTameBehavior() != TameBehaviorType.PASSIVE && !this.creature.isBeingRidden())) && super.shouldExecute();
+        if (!this.creature.isTamed()) {
+            if (this.creature.getRevengeTarget() instanceof RiftCreature) {
+                if (((RiftCreature)this.creature.getRevengeTarget()).creatureType == this.creature.creatureType) {
+                    this.creature.setRevengeTarget(null);
+                    return false;
+                }
+                else return super.shouldExecute();
+            }
+            else return super.shouldExecute();
+        }
+        else {
+            if (this.creature.getTameBehavior() != TameBehaviorType.PASSIVE && !this.creature.isBeingRidden()) super.shouldExecute();
+            else return false;
+        }
+        return false;
     }
 }

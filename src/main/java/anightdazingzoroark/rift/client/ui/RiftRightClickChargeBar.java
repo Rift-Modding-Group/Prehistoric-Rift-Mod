@@ -26,7 +26,6 @@ public class RiftRightClickChargeBar {
     private static final int textureXSize = 182;
     private static final int textureYSize = 5;
     private int fill = 0;
-    private int lastFill;
     private boolean mouseUsed = false;
 
     @SubscribeEvent
@@ -51,9 +50,7 @@ public class RiftRightClickChargeBar {
     public static void overlayEvent(RenderGameOverlayEvent event) {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
         World world = player.world;
-        if (event.getType() != RenderGameOverlayEvent.ElementType.EXPERIENCE) {
-            return;
-        }
+        if (event.getType() != RenderGameOverlayEvent.ElementType.EXPERIENCE) return;
         if (world != null) {
             if (player.getRidingEntity() instanceof RiftCreature) event.setCanceled(true);
         }
@@ -72,21 +69,15 @@ public class RiftRightClickChargeBar {
                         fill++;
                         mouseUsed = true;
                     }
-                    else {
-                        mouseUsed = false;
-                    }
+                    else mouseUsed = false;
                 }
-                else {
-                    mouseUsed = false;
-                }
+                else mouseUsed = false;
             }
         }
     }
 
     private void reduceUnusedChargeBar(RiftCreature creature) {
-        if (!mouseUsed) {
-            fill = creature.getRightClickCooldown() / 2;
-        }
+        if (!mouseUsed) fill = creature.getRightClickCooldown() / 2;
     }
 
     private void renderRightClickChargeHud(int xSize, int ySize) {
