@@ -37,15 +37,14 @@ public class SSRServerEvents {
                 //detect left click
                 if (!RiftUtil.checkInMountItemWhitelist(heldItem) && event.getMouseButton() == 0) {
                     if (event.getTicks() <= 10) {
-                        if (SSRCompatUtils.getEntities(8D) != null) {
-                            if (SSRCompatUtils.getEntities(8D).entityHit instanceof EntityLivingBase) {
-                                int targetId = SSRCompatUtils.getEntities(8D).entityHit.getEntityId();
+                        Entity toBeAttacked = SSRCompatUtils.getEntities(creature.attackWidth * (64D/39D)).entityHit;
+                        if (toBeAttacked != null) {
+                            if (toBeAttacked instanceof EntityLivingBase) {
+                                int targetId = toBeAttacked.getEntityId();
                                 SSRCompatMessages.SSR_COMPAT_WRAPPER.sendToServer(new SSRMountControl(creature, targetId, 0));
                             }
                         }
-                        else {
-                            SSRCompatMessages.SSR_COMPAT_WRAPPER.sendToServer(new SSRMountControl(creature, -1, 0));
-                        }
+                        else SSRCompatMessages.SSR_COMPAT_WRAPPER.sendToServer(new SSRMountControl(creature, -1, 0));
                     }
                 }
                 //detect right click
@@ -64,9 +63,7 @@ public class SSRServerEvents {
                             properties.rightClickFill = 0;
                             properties.rCTrigger = true;
                         }
-                        else if (event.isReleased()) {
-                            properties.rightClickFill = 0;
-                        }
+                        else if (event.isReleased()) properties.rightClickFill = 0;
                     }
                 }
             }

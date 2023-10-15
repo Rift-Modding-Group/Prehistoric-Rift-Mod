@@ -16,41 +16,6 @@ import java.util.List;
 import java.util.Random;
 
 public class RiftTyrannosaurusRoar extends EntityAIBase {
-    private static final Predicate<EntityLivingBase> ROAR_BLACKLIST = new Predicate<EntityLivingBase>() {
-        @Override
-        public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
-            if (!blacklist.isEmpty()) {
-                if (entity instanceof EntityPlayer) {
-                    return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
-                }
-                else {
-                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
-                }
-            }
-            else {
-                return entity.isEntityAlive() && !(entity instanceof RiftEgg);
-            }
-        }
-    };
-    private static final Predicate<EntityLivingBase> ROAR_WHITELIST = new Predicate<EntityLivingBase>() {
-        @Override
-        public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
-
-            if (!blacklist.isEmpty()) {
-                if (entity instanceof EntityPlayer) {
-                    return entity.isEntityAlive() && blacklist.contains("minecraft:player");
-                }
-                else {
-                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
-                }
-            }
-            else {
-                return false;
-            }
-        }
-    };
     protected final Tyrannosaurus mob;
     private int roarTick;
     private int revengeTimerOld;
@@ -69,9 +34,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
 //            return i != this.revengeTimerOld && entitylivingbase != null && entitylivingbase instanceof EntityLivingBase && new Random().nextInt(4) == 0 && this.mob.canRoar();
             return !this.mob.isActing() && this.mob.hurtTime > 0 && new Random().nextInt(4) == 0 && this.mob.canRoar();
         }
-        else {
-            return this.mob.canRoar() && this.mob.isRoaring();
-        }
+        else return this.mob.canRoar() && this.mob.isRoaring();
     }
 
     @Override
@@ -85,6 +48,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
             this.mob.setRoaring(true);
             this.revengeTimerOld = this.mob.getRevengeTimer();
         }
+        this.mob.removeSpeed();
     }
 
     @Override
@@ -92,6 +56,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
         this.roarTick = 0;
         this.mob.setRoaring(false);
         this.mob.setCanRoar(false);
+        this.mob.resetSpeed();
         if (this.mob.isTamed()) {
             this.mob.setCanBeSteered(true);
             this.mob.roarCharge = 0;
@@ -103,9 +68,8 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
         this.roarTick++;
         if (this.roarTick == 10 && this.mob.isEntityAlive()) {
             this.mob.roar(0.015f * this.mob.roarCharge + 1.5f);
+            if (this.mob.isTamed()) this.mob.setEnergy(this.mob.getEnergy() - (int)(0.06d * (double)this.mob.roarCharge + 6d));
         }
-        if (this.mob.isTamed()) {
-            this.mob.setCanBeSteered(false);
-        }
+        if (this.mob.isTamed()) this.mob.setCanBeSteered(false);
     }
 }

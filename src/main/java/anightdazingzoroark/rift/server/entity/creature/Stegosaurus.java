@@ -55,6 +55,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
+        this.tasks.addTask(1, new RiftControlledAttack(this, 0.96F, 0.36F));
         this.tasks.addTask(2, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
         this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(3, new RiftHerdDistanceFromOtherMembers(this, 3D));
@@ -77,16 +78,25 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     public void setSwingingArms(boolean swingingArms) {}
 
-    @Override
-    public void updateEnergyActions() {}
-
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-1) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-1) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY + 0.6, zOffset);
     }
 
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
+    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+        if (control == 0) {
+            if (target == null) {
+                if (!this.isAttacking()) this.setAttacking(true);
+            }
+            else {
+                if (!this.isAttacking()) {
+                    this.ssrTarget = target;
+                    this.setAttacking(true);
+                }
+            }
+        }
+    }
 
     @Override
     public boolean canDoHerding() {
@@ -144,6 +154,9 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     private <E extends IAnimatable> PlayState stegosaurusAttack(AnimationEvent<E> event) {
         if (this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.attack", false));
+        }
+        else if (this.isStrongAttacking()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.strong_attack", false));
         }
         else if (this.isRangedAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.plate_fling", false));

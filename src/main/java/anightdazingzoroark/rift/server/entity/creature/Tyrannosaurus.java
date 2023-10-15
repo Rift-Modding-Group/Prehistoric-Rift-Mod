@@ -32,6 +32,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -161,21 +162,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         super.onLivingUpdate();
         this.manageCanRoar();
         if (!this.isBaby()) this.manageApplyWeakness();
-    }
-
-    public void updateEnergyActions() {
-        if (!this.isActing()) {
-            if (this.isAttacking()) {
-                this.energyActionMod++;
-                if (this.energyActionMod > this.creatureType.getMaxEnergyModAction()) {
-                    this.setEnergy(this.getEnergy() - 2);
-                    this.energyActionMod = 0;
-                }
-            }
-            if (this.isRoaring()) {
-                this.setEnergy(this.getEnergy() - (int)(0.06d * (double)this.roarCharge + 6d));
-            }
-        }
     }
 
     private void manageCanRoar() {
@@ -360,22 +346,27 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     @Override
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {
-        if (control == 0) {
-            if (target == null) {
-                if (!this.isRoaring() && !this.isAttacking()) this.setAttacking(true);
-            }
-            else {
-                if (!this.isRoaring() && !this.isAttacking()) {
-                    this.ssrTarget = target;
-                    this.setAttacking(true);
+        if (!this.world.isRemote) {
+            System.out.println(target);
+            if (control == 0) {
+                if (target == null) {
+                    if (!this.isAttacking() && !this.isRoaring()) {
+                        this.setAttacking(true);
+                    }
+                }
+                else {
+                    if (!this.isAttacking() && !this.isRoaring()) {
+                        this.ssrTarget = target;
+                        this.setAttacking(true);
+                    }
                 }
             }
-        }
-        if (control == 1) {
-            if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) {
-                this.setRoaring(true);
-                this.roarCharge = Math.min(holdAmount, 100);
-                this.setRightClickCooldown(holdAmount * 2);
+            if (control == 1) {
+                if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) {
+                    this.setRoaring(true);
+                    this.roarCharge = Math.min(holdAmount, 100);
+                    this.setRightClickCooldown(holdAmount * 2);
+                }
             }
         }
     }

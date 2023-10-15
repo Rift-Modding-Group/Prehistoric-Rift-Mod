@@ -181,7 +181,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void updateEnergyMove() {
-        if (this.isMoving()) {
+        if (this.isMoving() && !this.isActing()) {
             this.energyMod++;
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
@@ -205,16 +205,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.energyRegenMod > this.creatureType.getMaxEnergyRegenMod()) {
                 this.setEnergy(this.getEnergy() + 1);
                 this.energyRegenMod = 0;
+                this.energyActionMod = 0;
             }
-        }
-        else {
-            this.energyMod = 0;
-            this.energyRegenMod = 0;
-            this.energyRegenModDelay = 0;
         }
     }
 
-    public abstract void updateEnergyActions();
+    private void updateEnergyActions() {
+        if (this.energyActionMod >= this.creatureType.getMaxEnergyModAction()) {
+            this.setEnergy(this.getEnergy() - 2);
+            this.energyActionMod = 0;
+        }
+    }
 
     private void resetEnergyActionMod() {
         if (!this.isActing() && this.energyActionMod > 0) {
@@ -238,15 +239,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
                 if (this.isFavoriteFood(itemInSlot) && this.eatFromInvCooldown > 60) {
-                    this.heal((float)((ItemFood)itemInSlot.getItem()).getHealAmount(itemInSlot) * 3F);
+                    this.heal((float) this.getFavoriteFoodHeal(itemInSlot));
                     itemInSlot.setCount(itemInSlot.getCount() - 1);
                     this.eatFromInvCooldown = 0;
                 }
             }
         }
-        else {
-            this.eatFromInvCooldown = 0;
-        }
+        else this.eatFromInvCooldown = 0;
 
         if (this.getEnergy() < 20) {
             this.eatFromInvForEnergyCooldown++;
@@ -274,9 +273,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.no_energy", this.getName()), false);
             this.informNoEnergy = true;
         }
-        if (this.informNoEnergy && this.getEnergy() > 0) {
-            this.informNoEnergy = false;
-        }
+        if (this.informNoEnergy && this.getEnergy() > 0) this.informNoEnergy = false;
     }
 
     private void manageTargetingBySitting() {
@@ -786,23 +783,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else target = this.ssrTarget;
         if (target != null) {
             if (this.isTamed() && target instanceof EntityPlayer) {
-                if (!target.getUniqueID().equals(this.getOwnerId())) {
-                    this.attackEntityAsMob(target);
-                }
+                if (!target.getUniqueID().equals(this.getOwnerId())) this.attackEntityAsMob(target);
             }
             else if (this.isTamed() && target instanceof EntityTameable) {
                 if (((EntityTameable) target).isTamed()) {
-                    if (!((EntityTameable) target).getOwner().equals(this.getOwner())) {
-                        this.attackEntityAsMob(target);
-                    }
+                    if (!((EntityTameable) target).getOwner().equals(this.getOwner())) this.attackEntityAsMob(target);
                 }
-                else {
-                    this.attackEntityAsMob(target);
-                }
+                else this.attackEntityAsMob(target);
             }
-            else {
-                this.attackEntityAsMob(target);
-            }
+            else this.attackEntityAsMob(target);
         }
     }
 

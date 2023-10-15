@@ -65,6 +65,7 @@ public class RiftAttack extends EntityAIBase {
         this.delayCounter = 0;
         this.animTime = 0;
         this.attackCooldown = 0;
+        if (this.attacker.isTamed()) this.attacker.energyActionMod++;
     }
 
     @Override

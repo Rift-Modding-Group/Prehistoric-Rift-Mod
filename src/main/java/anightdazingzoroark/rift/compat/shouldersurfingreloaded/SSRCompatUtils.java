@@ -59,9 +59,7 @@ public class SSRCompatUtils {
             }
         }
 
-        if (entityResult == null) {
-            return null;
-        }
+//        if (entityResult == null) return null;
 
         return new RayTraceResult(entityResult, entityHitVec);
     }

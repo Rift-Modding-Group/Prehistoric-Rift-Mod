@@ -50,6 +50,7 @@ public class RiftRangedAttack extends EntityAIBase {
     public void startExecuting() {
         this.attackCooldown = 20;
         this.animTime = 0;
+        if (this.attacker.isTamed()) this.attacker.energyActionMod++;
     }
 
     public void resetTask() {

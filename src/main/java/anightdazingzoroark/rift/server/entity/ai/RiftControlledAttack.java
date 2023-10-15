@@ -27,6 +27,7 @@ public class RiftControlledAttack extends EntityAIBase  {
 
     public void startExecuting() {
         this.animTime = 0;
+        if (this.attacker.isTamed()) this.attacker.energyActionMod++;
     }
 
     public void resetTask() {
