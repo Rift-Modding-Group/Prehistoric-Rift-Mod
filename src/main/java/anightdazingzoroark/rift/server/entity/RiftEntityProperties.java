@@ -7,7 +7,6 @@ import net.minecraft.nbt.NBTTagCompound;
 public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     public boolean ridingCreature;
     public int leftClickFill;
-    public boolean lCTrigger;
     public int rightClickFill;
     public boolean rCTrigger;
     public boolean isBleeding;
@@ -22,8 +21,8 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     @Override
     public void init() {
         this.ridingCreature = false;
+
         this.leftClickFill = 0;
-        this.lCTrigger = false;
         this.rightClickFill = 0;
         this.rCTrigger = false;
 
@@ -35,8 +34,8 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     @Override
     public void saveNBTData(NBTTagCompound compound) {
         compound.setBoolean("DismountedCreature", ridingCreature);
+
         compound.setInteger("LeftClickFill", leftClickFill);
-        compound.setBoolean("LCTrigger", lCTrigger);
         compound.setInteger("RightClickFill", rightClickFill);
         compound.setBoolean("RCTrigger", rCTrigger);
 
@@ -48,8 +47,8 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     @Override
     public void loadNBTData(NBTTagCompound compound) {
         this.ridingCreature = compound.getBoolean("DismountedCreature");
+
         this.leftClickFill = compound.getInteger("LeftClickFill");
-        this.lCTrigger = compound.getBoolean("LCTrigger");
         this.rightClickFill = compound.getInteger("RightClickFill");
         this.rCTrigger = compound.getBoolean("RCTrigger");
 

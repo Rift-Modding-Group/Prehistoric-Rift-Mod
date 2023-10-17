@@ -57,10 +57,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
         this.mob.setRoaring(false);
         this.mob.setCanRoar(false);
         this.mob.resetSpeed();
-        if (this.mob.isTamed()) {
-            this.mob.setCanBeSteered(true);
-            this.mob.roarCharge = 0;
-        }
+        if (this.mob.isTamed()) this.mob.roarCharge = 0;
     }
 
     @Override
@@ -70,6 +67,5 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
             this.mob.roar(0.015f * this.mob.roarCharge + 1.5f);
             if (this.mob.isTamed()) this.mob.setEnergy(this.mob.getEnergy() - (int)(0.06d * (double)this.mob.roarCharge + 6d));
         }
-        if (this.mob.isTamed()) this.mob.setCanBeSteered(false);
     }
 }

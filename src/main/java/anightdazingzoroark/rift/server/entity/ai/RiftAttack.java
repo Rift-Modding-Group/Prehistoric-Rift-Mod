@@ -79,7 +79,6 @@ public class RiftAttack extends EntityAIBase {
         this.attacker.getNavigator().clearPath();
         this.animTime = 0;
         this.attacker.setAttacking(false);
-        if (this.attacker.isTamed()) this.attacker.setActing(false);
     }
 
     public void updateTask() {

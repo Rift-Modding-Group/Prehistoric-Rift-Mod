@@ -5,17 +5,22 @@ import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
 import anightdazingzoroark.rift.server.entity.projectile.ThrownStegoPlate;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -25,6 +30,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 
 public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob {
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
+    public int strongAttackCharge;
 
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
@@ -33,6 +39,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.isRideable = true;
         this.attackWidth = 7.5f;
         this.rangedWidth = 12f;
+        this.strongAttackCharge = 0;
     }
 
     @Override
@@ -56,12 +63,23 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
         this.tasks.addTask(1, new RiftControlledAttack(this, 0.96F, 0.36F));
+        this.tasks.addTask(1, new RiftStegosaurusControlledStrongAttack(this, 0.72F, 0.12F));
         this.tasks.addTask(2, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
         this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(3, new RiftHerdDistanceFromOtherMembers(this, 3D));
         this.tasks.addTask(4, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
         this.tasks.addTask(5, new RiftWander(this, 1.0D));
         this.tasks.addTask(6, new RiftLookAround(this));
+    }
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        this.manageCanStrongAttack();
+    }
+
+    private void manageCanStrongAttack() {
+        if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);
     }
 
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
@@ -87,15 +105,61 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {
         if (control == 0) {
             if (target == null) {
-                if (!this.isAttacking()) this.setAttacking(true);
+                if (!this.isActing()) {
+                    if (holdAmount <= 10)  this.setAttacking(true);
+                    else {
+                        this.setIsStrongAttacking(true);
+                        this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
+                        this.setLeftClickCooldown(holdAmount * 2);
+                    }
+                }
             }
             else {
-                if (!this.isAttacking()) {
+                if (!this.isActing()) {
                     this.ssrTarget = target;
-                    this.setAttacking(true);
+                    if (holdAmount <= 10) this.setAttacking(true);
+                    else {
+                        this.setIsStrongAttacking(true);
+                        this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
+                        this.setLeftClickCooldown(holdAmount * 2);
+                    }
                 }
             }
         }
+    }
+
+    @Override
+    public boolean hasLeftClickChargeBar() {
+        return true;
+    }
+
+    @Override
+    public boolean hasRightClickChargeBar() {
+        return true;
+    }
+
+    public void strongControlAttack() {
+        EntityLivingBase target;
+        if (this.ssrTarget == null) target = this.getControlAttackTargets();
+        else target = this.ssrTarget;
+        if (target != null) {
+            if (this.isTamed() && target instanceof EntityPlayer) {
+                if (!target.getUniqueID().equals(this.getOwnerId())) this.attackEntityAsMobStrong(target);
+            }
+            else if (this.isTamed() && target instanceof EntityTameable) {
+                if (((EntityTameable) target).isTamed()) {
+                    if (!((EntityTameable) target).getOwner().equals(this.getOwner())) this.attackEntityAsMobStrong(target);
+                }
+                else this.attackEntityAsMobStrong(target);
+            }
+            else this.attackEntityAsMobStrong(target);
+        }
+    }
+
+    private boolean attackEntityAsMobStrong(Entity entityIn) {
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), ((float) this.strongAttackCharge - 100f)/3f + 30f + (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+        if (flag) this.applyEnchantments(this, entityIn);
+        return flag;
     }
 
     @Override
@@ -127,8 +191,9 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return this.dataManager.get(STRONG_ATTACKING);
     }
 
-    public void setStrongAttacking(boolean value) {
-        this.dataManager.set(STRONG_ATTACKING, Boolean.valueOf(value));
+    public void setIsStrongAttacking(boolean value) {
+        this.dataManager.set(STRONG_ATTACKING, value);
+        this.setUsingLeftClick(true);
         this.setActing(value);
     }
 

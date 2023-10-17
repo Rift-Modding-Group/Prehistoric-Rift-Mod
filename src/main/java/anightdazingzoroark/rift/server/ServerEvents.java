@@ -4,7 +4,7 @@ import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
-import anightdazingzoroark.rift.server.message.RiftManageCanUseRightClick;
+import anightdazingzoroark.rift.server.message.RiftManageCanUseClick;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import anightdazingzoroark.rift.server.message.RiftMountControl;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
@@ -52,7 +52,7 @@ public class ServerEvents {
                         properties.rCTrigger = true;
                     }
                     else if (event.isReleased() && !creature.canUseRightClick()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseRightClick(creature, true));
+                        RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, true));
                         properties.rightClickFill = 0;
                     }
                     else if (event.isReleased() && properties.rCTrigger) {
@@ -118,7 +118,7 @@ public class ServerEvents {
             RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
             if (event.getEntityBeingMounted() instanceof RiftCreature) {
                 RiftCreature creature = (RiftCreature) event.getEntityBeingMounted();
-                RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseRightClick(creature, false));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, false));
                 if (properties != null) properties.ridingCreature = true;
             }
         }

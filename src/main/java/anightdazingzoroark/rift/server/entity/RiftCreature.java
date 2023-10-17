@@ -60,10 +60,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ACTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CAN_USE_LEFT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_LEFT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> LEFT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> LEFT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CAN_USE_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+
     private static final DataParameter<Boolean> HAS_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> JUST_SPAWNED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -125,6 +130,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(SADDLED, Boolean.FALSE);
         this.dataManager.register(ENERGY, 20);
         this.dataManager.register(ACTING, Boolean.FALSE);
+        this.dataManager.register(CAN_USE_LEFT_CLICK, Boolean.TRUE);
+        this.dataManager.register(USING_LEFT_CLICK, Boolean.FALSE);
+        this.dataManager.register(LEFT_CLICK_USE, 0);
+        this.dataManager.register(LEFT_CLICK_COOLDOWN, 0);
         this.dataManager.register(CAN_USE_RIGHT_CLICK, Boolean.FALSE);
         this.dataManager.register(USING_RIGHT_CLICK, Boolean.FALSE);
         this.dataManager.register(RIGHT_CLICK_USE, 0);
@@ -669,6 +678,38 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(ACTING, Boolean.valueOf(value));
     }
 
+    public boolean canUseLeftClick() {
+        return this.dataManager.get(CAN_USE_LEFT_CLICK);
+    }
+
+    public void setCanUseLeftClick(boolean value) {
+        this.dataManager.set(CAN_USE_LEFT_CLICK, Boolean.valueOf(value));
+    }
+
+    public boolean isUsingLeftClick() {
+        return this.dataManager.get(USING_LEFT_CLICK);
+    }
+
+    public void setUsingLeftClick(boolean value) {
+        this.dataManager.set(USING_LEFT_CLICK, Boolean.valueOf(value));
+    }
+
+    public int getLeftClickUse() {
+        return this.dataManager.get(LEFT_CLICK_USE).intValue();
+    }
+
+    public void setLeftClickUse(int value) {
+        this.dataManager.set(LEFT_CLICK_USE, value);
+    }
+
+    public int getLeftClickCooldown() {
+        return Math.max(0, this.dataManager.get(LEFT_CLICK_COOLDOWN));
+    }
+
+    public void setLeftClickCooldown(int value) {
+        this.dataManager.set(LEFT_CLICK_COOLDOWN, Math.max(0, value));
+    }
+
     public boolean canUseRightClick() {
         return this.dataManager.get(CAN_USE_RIGHT_CLICK);
     }
@@ -776,6 +817,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public abstract Vec3d riderPos();
 
     public abstract void controlInput(int control, int holdAmount, EntityLivingBase target);
+
+    public abstract boolean hasLeftClickChargeBar();
+
+    public abstract boolean hasRightClickChargeBar();
 
     public void controlAttack() {
         EntityLivingBase target;

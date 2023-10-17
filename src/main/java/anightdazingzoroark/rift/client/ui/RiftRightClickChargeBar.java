@@ -34,14 +34,16 @@ public class RiftRightClickChargeBar {
         Entity entity = player.getRidingEntity();
 
         if (entity instanceof RiftCreature) {
-            if (event.getType() == RenderGameOverlayEvent.ElementType.AIR) {
-                RiftCreature creature = (RiftCreature) entity;
-                ScaledResolution resolution = event.getResolution();
+            if (((RiftCreature)entity).hasRightClickChargeBar()) {
+                if (event.getType() == RenderGameOverlayEvent.ElementType.AIR) {
+                    RiftCreature creature = (RiftCreature) entity;
+                    ScaledResolution resolution = event.getResolution();
 
-                Minecraft.getMinecraft().getTextureManager().bindTexture(chargeBarHud);
-                renderRightClickChargeHud(resolution.getScaledWidth(), resolution.getScaledHeight());
-                reduceUnusedChargeBar(creature);
-                Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
+                    Minecraft.getMinecraft().getTextureManager().bindTexture(chargeBarHud);
+                    renderRightClickChargeHud(creature, resolution.getScaledWidth(), resolution.getScaledHeight());
+                    reduceUnusedChargeBar(creature);
+                    Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
+                }
             }
         }
     }
@@ -80,11 +82,11 @@ public class RiftRightClickChargeBar {
         if (!mouseUsed) fill = creature.getRightClickCooldown() / 2;
     }
 
-    private void renderRightClickChargeHud(int xSize, int ySize) {
+    private void renderRightClickChargeHud(RiftCreature creature, int xSize, int ySize) {
         GlStateManager.enableBlend();
         GlStateManager.color(1.0f, 1.0f, 1.0f);
         int left = xSize / 2 - 91;
-        int top = ySize - 32 + 3;
+        int top = ySize - 32 + (creature.hasLeftClickChargeBar() ? 1 : 3);
         float fillUpBar = (float)textureXSize / 100f * fill;
         RiftUtil.drawTexturedModalRect(left, top, 0, 9, textureXSize, textureYSize);
         RiftUtil.drawTexturedModalRect(left, top, 0, 14, Math.min((int)fillUpBar, textureXSize), textureYSize);

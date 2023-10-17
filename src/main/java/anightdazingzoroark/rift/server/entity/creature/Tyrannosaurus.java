@@ -165,11 +165,8 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     private void manageCanRoar() {
-        if (this.getRightClickCooldown() >= 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
-        if (this.getRightClickCooldown() < 0) {
-            this.setCanRoar(true);
-            this.setRightClickCooldown(0);
-        }
+        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
+        if (this.getRightClickCooldown() == 0) this.setCanRoar(true);
     }
 
     private void manageApplyWeakness() {
@@ -211,7 +208,13 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         for (Entity entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea((double)strength * 6d), targetPredicate)) {
             if (entity != this) {
                 if (this.isTamed() && entity instanceof EntityTameable) {
-                    if (!((EntityTameable) entity).getOwner().equals(this.getOwner())) {
+                    if (((EntityTameable) entity).isTamed()) {
+                        if (!((EntityTameable) entity).getOwner().equals(this.getOwner())) {
+                            entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
+                            this.roarKnockback(entity, strength);
+                        }
+                    }
+                    else {
                         entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
                         this.roarKnockback(entity, strength);
                     }
@@ -358,12 +361,22 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             }
         }
         if (control == 1) {
-            if (this.canRoar() && !this.isRoaring() && !this.isAttacking()) {
+            if (this.canRoar() && !this.isActing()) {
                 this.setRoaring(true);
                 this.roarCharge = Math.min(holdAmount, 100);
                 this.setRightClickCooldown(holdAmount * 2);
             }
         }
+    }
+
+    @Override
+    public boolean hasLeftClickChargeBar() {
+        return false;
+    }
+
+    @Override
+    public boolean hasRightClickChargeBar() {
+        return true;
     }
 
     @Override

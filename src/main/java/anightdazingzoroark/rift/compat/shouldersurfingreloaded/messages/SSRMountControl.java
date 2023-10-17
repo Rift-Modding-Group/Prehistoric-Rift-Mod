@@ -69,7 +69,7 @@ public class SSRMountControl implements IMessage {
             if (message.targetId == -1) target = null;
             else target = (EntityLivingBase)world.getEntityByID(message.targetId);
 
-            creature.controlInput(message.control, message.tick, target);
+            if (!world.isRemote) creature.controlInput(message.control, message.tick, target);
         }
     }
 }
