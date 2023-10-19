@@ -18,7 +18,7 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
     public boolean shouldExecute() {
         if (!this.creature.isTamed()) {
             if (this.creature.getRevengeTarget() instanceof RiftCreature) {
-                if (((RiftCreature)this.creature.getRevengeTarget()).creatureType == this.creature.creatureType) {
+                if (((RiftCreature)this.creature.getRevengeTarget()).creatureType == this.creature.creatureType && !((RiftCreature)this.creature.getRevengeTarget()).isTamed()) {
                     this.creature.setRevengeTarget(null);
                     return false;
                 }

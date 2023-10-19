@@ -21,8 +21,6 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemAir;
-import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -36,7 +34,6 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
@@ -49,7 +46,6 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -841,7 +837,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public EntityLivingBase getControlAttackTargets() {
-        double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX;
+        double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + (double)this.attackWidth;
         Vec3d vec3d = this.getPositionEyes(1.0F);
         Vec3d vec3d1 = this.getLook(1.0F);
         Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);

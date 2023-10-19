@@ -2,6 +2,7 @@ package anightdazingzoroark.rift;
 
 import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
 import anightdazingzoroark.rift.server.ServerProxy;
+import anightdazingzoroark.rift.server.commands.RiftBleedCommand;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -10,6 +11,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.logging.log4j.Logger;
 import software.bernie.geckolib3.GeckoLib;
@@ -61,5 +63,10 @@ public class RiftInitialize {
         if (config.hasChanged()) {
             config.save();
         }
+    }
+
+    @Mod.EventHandler
+    public void serverLoad(FMLServerStartingEvent event) {
+        event.registerServerCommand(new RiftBleedCommand());
     }
 }

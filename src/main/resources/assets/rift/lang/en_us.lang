@@ -1,13 +1,17 @@
 entity.tyrannosaurus.name=Tyrannosaurus
 
 item.raw_exotic_meat.name=Raw Exotic Meat
+item.raw_fibrous_meat.name=Raw Fibrous Meat
 item.cooked_exotic_meat.name=Cooked Exotic Meat
+item.cooked_fibrous_meat.name=Cooked Fibrous Meat
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
+item.stegosaurus_plate.name=Stegosaurus Plate
 
 itemGroup.rift_items=Prehistoric Rift Items
 
 item.tyrannosaurus_egg.name=Tyrannosaurus Egg
+item.stegosaurus_egg.name=Stegosaurus Egg
 
 radial.choice.ride=Ride
 radial.choice.state=State
@@ -28,3 +32,5 @@ rift.egg.minutes=minute(s)
 rift.egg.seconds=second(s)
 
 rift.notify.egg_hatched=Your Egg has hatched!
+
+riftcommands.bleed.usage=/riftbleed [player|entity] [seconds] [strength]

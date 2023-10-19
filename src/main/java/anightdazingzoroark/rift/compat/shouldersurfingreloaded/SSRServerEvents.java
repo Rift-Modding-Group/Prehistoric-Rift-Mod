@@ -38,7 +38,6 @@ public class SSRServerEvents {
                     Entity toBeAttacked = SSRCompatUtils.getEntities(creature.attackWidth * (64D/39D)).entityHit;
                     if (creature.hasLeftClickChargeBar()) {
                         if (creature.getLeftClickCooldown() == 0) {
-                            System.out.println("hello");
                             if (!event.isReleased()) properties.leftClickFill++;
                             else {
                                 if (toBeAttacked != null) {
@@ -87,7 +86,16 @@ public class SSRServerEvents {
             else {
                 //detect left click
                 if (!RiftUtil.checkInMountItemWhitelist(heldItem) && event.getMouseButton() == 0) {
-                    if (event.getTicks() <= 10) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0));
+                    if (creature.hasLeftClickChargeBar()) {
+                        if (!event.isReleased()) properties.leftClickFill++;
+                        else {
+                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0, properties.leftClickFill));
+                            properties.leftClickFill = 0;
+                        }
+                    }
+                    else {
+                        if (event.getTicks() <= 10) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0));
+                    }
                 }
                 //detect right click
                 else if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1) {

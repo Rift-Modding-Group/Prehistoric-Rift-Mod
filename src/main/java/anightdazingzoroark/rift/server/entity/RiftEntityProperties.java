@@ -27,7 +27,7 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.rCTrigger = false;
 
         this.isBleeding = false;
-        this.bleedingStrength = 0;
+        this.bleedingStrength = -1;
         this.ticksUntilStopBleeding = 0;
     }
 
@@ -71,5 +71,11 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.isBleeding = true;
         this.bleedingStrength = strength;
         this.ticksUntilStopBleeding = ticks;
+    }
+
+    public void resetBleeding() {
+        this.isBleeding = false;
+        this.bleedingStrength = -1;
+        this.ticksUntilStopBleeding = 0;
     }
 }

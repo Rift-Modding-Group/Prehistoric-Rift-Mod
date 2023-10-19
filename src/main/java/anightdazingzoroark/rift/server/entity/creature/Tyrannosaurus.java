@@ -274,16 +274,10 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                                     Block block = iblockstate.getBlock();
 
                                     if (iblockstate.getMaterial() != Material.AIR) {
-                                        if (RiftUtil.blockWeakerThanWood(block, iblockstate)) {
-                                            f -= 0.24F;
-                                        }
-                                        else {
-                                            f -= (1200F + 0.3F) * 0.3F;
-                                        }
+                                        if (RiftUtil.blockWeakerThanWood(block, iblockstate)) f -= 0.24F;
+                                        else f -= (1200F + 0.3F) * 0.3F;
 
-                                        if (f > 0.0F) {
-                                            set.add(blockpos);
-                                        }
+                                        if (f > 0.0F) set.add(blockpos);
                                     }
 
                                     d4 += d0 * 0.30000001192092896D;
@@ -295,9 +289,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                     }
                 }
                 affectedBlockPositions.addAll(set);
-                for (BlockPos blockPos : affectedBlockPositions) {
-                    this.world.destroyBlock(blockPos, false);
-                }
+                for (BlockPos blockPos : affectedBlockPositions) this.world.destroyBlock(blockPos, false);
             }
         }
     }

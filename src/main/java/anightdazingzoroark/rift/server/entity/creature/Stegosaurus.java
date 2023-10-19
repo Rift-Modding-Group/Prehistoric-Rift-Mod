@@ -103,7 +103,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
 
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {
-        if (control == 0) {
+        if (control == 0 && this.getLeftClickCooldown() == 0) {
             if (target == null) {
                 if (!this.isActing()) {
                     if (holdAmount <= 10)  this.setAttacking(true);
