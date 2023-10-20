@@ -1,10 +1,14 @@
 package anightdazingzoroark.rift.client;
 
 import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.client.particle.RiftBleedParticle;
+import anightdazingzoroark.rift.client.particle.RiftParticleSpawner;
 import anightdazingzoroark.rift.client.renderer.EntityRenderer;
 import anightdazingzoroark.rift.client.ui.*;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -27,6 +31,7 @@ public class ClientProxy extends ServerProxy {
     public static Object EGG;
     private int thirdPersonView = 0;
     private int previousViewType = 0;
+    private RiftParticleSpawner particleSpawner;
 
     @SideOnly(Side.CLIENT)
     @Override
@@ -44,12 +49,23 @@ public class ClientProxy extends ServerProxy {
         super.init(e);
         registerItemRenderer();
         MinecraftForge.EVENT_BUS.register(new ClientEvents());
+        this.particleSpawner = new RiftParticleSpawner();
     }
 
     @SideOnly(Side.CLIENT)
     @Override
     public void postInit(FMLPostInitializationEvent e) {
         super.postInit(e);
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void spawnParticle(String name, double x, double y, double z, double motX, double motY, double motZ) {
+        World world = Minecraft.getMinecraft().world;
+        Particle particle = null;
+        if (world == null) return;
+        if (name.equals("bleed")) particle = new RiftBleedParticle(world, x, y, z, motX, motY, motZ);
+        if (particle != null) particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
     }
 
     @SubscribeEvent

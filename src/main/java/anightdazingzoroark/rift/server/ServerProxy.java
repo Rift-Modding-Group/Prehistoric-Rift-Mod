@@ -1,20 +1,17 @@
 package anightdazingzoroark.rift.server;
 
-import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntities;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
 import anightdazingzoroark.rift.server.inventory.CreatureContainer;
 import anightdazingzoroark.rift.server.items.RiftItems;
-import anightdazingzoroark.rift.server.message.RiftMessages;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -25,7 +22,6 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import javax.annotation.Nullable;
-import java.io.File;
 
 @Mod.EventBusSubscriber
 public class ServerProxy implements IGuiHandler {
@@ -47,6 +43,8 @@ public class ServerProxy implements IGuiHandler {
     }
 
     public void postInit(FMLPostInitializationEvent event) {}
+
+    public void spawnParticle(String name, double x, double y, double z, double motX, double motY, double motZ) {}
 
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {}

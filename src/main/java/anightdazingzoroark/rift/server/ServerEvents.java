@@ -19,11 +19,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -31,8 +28,6 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-
-import java.util.List;
 
 public class ServerEvents {
     //for controlling when u use attacks or abilities while riding creatures
@@ -195,6 +190,7 @@ public class ServerEvents {
             }
         }
     }
+
     @SubscribeEvent
     public void forEachTick(TickEvent.WorldTickEvent event) {
         if (event.world != null && !event.world.isRemote && !event.world.loadedEntityList.isEmpty()) {
@@ -204,9 +200,11 @@ public class ServerEvents {
                     RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entityliving, RiftEntityProperties.class);
                     double fallMotion = !entityliving.onGround ? entityliving.motionY : 0;
                     boolean isMoving =  Math.sqrt((entityliving.motionX * entityliving.motionX) + (fallMotion * fallMotion) + (entityliving.motionZ * entityliving.motionZ)) > 0;
+                    //manage bleeding
                     if (properties.isBleeding) {
-                        if (isMoving) entityliving.attackEntityFrom(DamageSource.causeMobDamage(entityliving), (float) properties.bleedingStrength + 1F);
-                        else entityliving.attackEntityFrom(DamageSource.causeMobDamage(entityliving), (float)(properties.bleedingStrength + 1) * 2F);
+                        if (isMoving) entityliving.attackEntityFrom(DamageSource.GENERIC, (float) properties.bleedingStrength + 1F);
+                        else entityliving.attackEntityFrom(DamageSource.GENERIC, (float)(properties.bleedingStrength + 1) * 2F);
+
                         properties.ticksUntilStopBleeding--;
                     }
                     if (properties.ticksUntilStopBleeding <= 0) properties.resetBleeding();

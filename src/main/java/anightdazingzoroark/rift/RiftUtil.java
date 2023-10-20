@@ -196,4 +196,8 @@ public class RiftUtil {
     public static int randomInRange(int min, int max) {
         return new Random().nextInt(max - min + 1) + min;
     }
+
+    public static double randomInRange(double min, double max) {
+        return min + new Random().nextDouble() * (max - min);
+    }
 }

@@ -34,6 +34,7 @@ public class RiftBleedCommand extends CommandBase {
             if (target instanceof EntityLivingBase) {
                 RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
                 properties.setBleeding(0, Integer.parseInt(args[1]) * 20);
+                notifyCommandListener(sender, this, "riftcommands.bleed.successful", new Object[] {target.getDisplayName()});
             }
             else throw new WrongUsageException("riftcommands.bleed.cannot_bleed", new Object[0]);
         }
@@ -42,6 +43,7 @@ public class RiftBleedCommand extends CommandBase {
             if (target instanceof EntityLivingBase) {
                 RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
                 properties.setBleeding(Integer.parseInt(args[2]), Integer.parseInt(args[1]) * 20);
+                notifyCommandListener(sender, this, "riftcommands.bleed.successful", new Object[] {target.getDisplayName()});
             }
             else throw new WrongUsageException("riftcommands.bleed.cannot_bleed", new Object[0]);
         }

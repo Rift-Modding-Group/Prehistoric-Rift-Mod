@@ -3,8 +3,10 @@ package anightdazingzoroark.rift.server.entity.creature;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
+import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.entity.ai.*;
 import anightdazingzoroark.rift.server.entity.projectile.ThrownStegoPlate;
+import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
@@ -158,7 +160,11 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     private boolean attackEntityAsMobStrong(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), ((float) this.strongAttackCharge - 100f)/3f + 30f + (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
-        if (flag) this.applyEnchantments(this, entityIn);
+        if (flag) {
+            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entityIn, RiftEntityProperties.class);
+            this.applyEnchantments(this, entityIn);
+            properties.setBleeding(0, 200);
+        }
         return flag;
     }
 
