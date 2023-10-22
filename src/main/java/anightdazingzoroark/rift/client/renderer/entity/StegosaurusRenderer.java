@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
+import software.bernie.geckolib3.resource.GeckoLibCache;
 
 public class StegosaurusRenderer extends GeoEntityRenderer<RiftCreature> {
     public StegosaurusRenderer(RenderManager renderManager) {
@@ -23,6 +24,9 @@ public class StegosaurusRenderer extends GeoEntityRenderer<RiftCreature> {
 //        if (!animatable.isActing() && !animatable.hasTarget() && !animatable.isBeingRidden() && headPitchRotation != 0.017453292f) {
 //            headPitchRotation = ((headPitchRotation > 0 ? (float)Math.floor(headPitchRotation) : (float)Math.ceil(headPitchRotation))/0.017453292F + (headPitchRotation > 0 ? -1f : 1f)) * 0.017453292F;
 //        }
+
+        //variables
+        GeckoLibCache.getInstance().parser.setValue("use_plate_fling", RiftUtil.clamp(0.15D * (double)animatable.getRightClickUse(), 0D, 15D));
 
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());

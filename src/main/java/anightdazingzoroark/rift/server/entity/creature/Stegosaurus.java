@@ -13,7 +13,6 @@ import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -22,10 +21,11 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.lwjgl.Sys;
+
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.ILoopType;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -78,10 +78,15 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageCanStrongAttack();
+        this.manageCanControlledPlateFling();
     }
 
     private void manageCanStrongAttack() {
         if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);
+    }
+
+    private void manageCanControlledPlateFling() {
+        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
     }
 
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
@@ -127,6 +132,9 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
                     }
                 }
             }
+        }
+        if (control == 1 && this.getRightClickCooldown() == 0) {
+            this.setRightClickCooldown(holdAmount * 2);
         }
     }
 
@@ -207,6 +215,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::stegosaurusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::stegosaurusAttack));
+        data.addAnimationController(new AnimationController(this, "controlled_plate_fling", 0, this::stegosaurusControlledPlateFling));
     }
 
     private <E extends IAnimatable> PlayState stegosaurusMovement(AnimationEvent<E> event) {
@@ -233,6 +242,15 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.plate_fling", false));
         }
         else event.getController().clearAnimationCache();
+        return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState stegosaurusControlledPlateFling(AnimationEvent<E> event) {
+        if (this.getRightClickCooldown() == 0) {
+            if (this.getRightClickUse() > 0 && this.getRightClickUse() < 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.use_plate_fling_p1", false));
+            else if (this.getRightClickUse() >= 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.use_plate_fling_p1_hold", true));
+        }
+        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.use_plate_fling_p2", false));
         return PlayState.CONTINUE;
     }
 }

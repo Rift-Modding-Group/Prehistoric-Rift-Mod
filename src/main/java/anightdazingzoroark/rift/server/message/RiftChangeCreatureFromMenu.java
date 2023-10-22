@@ -61,7 +61,6 @@ public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatu
 
     @Override
     public void onServerReceived(MinecraftServer server, RiftChangeCreatureFromMenu message, EntityPlayer player, MessageContext messageContext) {
-        World world = player.getEntityWorld();
         RiftCreature interacted = (RiftCreature) player.world.getEntityByID(message.creatureId);
 
         if (!interacted.getTameBehavior().equals(message.tameBehavior)) this.sendTameBehaviorMessage(message.tameBehavior, interacted);

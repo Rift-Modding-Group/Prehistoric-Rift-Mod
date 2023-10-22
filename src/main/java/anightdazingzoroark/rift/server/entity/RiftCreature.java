@@ -92,6 +92,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int herdCheckCountdown;
     public float attackWidth;
     public float rangedWidth;
+    private int tickUse;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -113,6 +114,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.cannotUseRightClick = true;
         this.heal((float)maxCreatureHealth);
         this.herdCheckCountdown = 0;
+        this.tickUse = 0;
     }
 
     @Override
@@ -166,6 +168,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setHasTarget(this.getAttackTarget() != null);
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();
+            this.resetClickUse();
             if (this.canDoHerding()) this.manageHerding();
         }
         if (this.isTamed() && !this.world.isRemote) {
@@ -353,6 +356,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    private void resetClickUse() {
+        if (this.tickUse >= 1) {
+            this.setLeftClickUse(0);
+            this.setRightClickUse(0);
+        }
+        this.tickUse++;
+    }
+
     public boolean isFavoriteFood(ItemStack stack) {
         for (String foodItem : this.creatureType.getFavoriteFood()) {
             int itemIdFirst = foodItem.indexOf(":");
@@ -475,8 +486,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setInteger("AgeTicks", this.getAgeInTicks());
         compound.setBoolean("JustSpawned", this.justSpawned());
         compound.setInteger("TameProgress", this.getTameProgress());
-//        if (this.canDoHerding()) compound.setInteger("HerdLeaderId", this.getHerdLeaderId());
-//        if (this.canDoHerding()) compound.setInteger("HerdSize", this.getHerdSize());
     }
 
     @Override
@@ -696,6 +705,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setLeftClickUse(int value) {
         this.dataManager.set(LEFT_CLICK_USE, value);
+        this.tickUse = 0;
     }
 
     public int getLeftClickCooldown() {
@@ -728,6 +738,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setRightClickUse(int value) {
         this.dataManager.set(RIGHT_CLICK_USE, value);
+        this.tickUse = 0;
     }
 
     public int getRightClickCooldown() {

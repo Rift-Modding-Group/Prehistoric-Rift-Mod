@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
+import anightdazingzoroark.rift.server.message.RiftIncrementClickUse;
 import anightdazingzoroark.rift.server.message.RiftManageCanUseClick;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import anightdazingzoroark.rift.server.message.RiftMountControl;
@@ -43,7 +44,10 @@ public class ServerEvents {
             //detect left click
             if (!RiftUtil.checkInMountItemWhitelist(heldItem) && event.getMouseButton() == 0) {
                 if (creature.hasLeftClickChargeBar()) {
-                    if (!event.isReleased()) properties.leftClickFill++;
+                    if (!event.isReleased()) {
+                        properties.leftClickFill++;
+                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(creature, 0));
+                    }
                     else {
                         RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0, properties.leftClickFill));
                         properties.leftClickFill = 0;
@@ -56,22 +60,23 @@ public class ServerEvents {
             //detect right click
             //also has system that ensures that tamed creatures dont use right click related stuff the moment they're mounted
             else if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1) {
-                if (creature.getRightClickCooldown() == 0) {
-                    if (!event.isReleased()) {
-                        properties.rightClickFill++;
-                        properties.rCTrigger = true;
-                    }
-                    else if (event.isReleased() && !creature.canUseRightClick()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, true));
-                        properties.rightClickFill = 0;
-                    }
-                    else if (event.isReleased() && properties.rCTrigger) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, properties.rightClickFill));
-                        properties.rightClickFill = 0;
-                        properties.rCTrigger = false;
-                    }
-                    else if (event.isReleased()) {
-                        properties.rightClickFill = 0;
+                //dont trigger immediately after riding
+                if (!properties.rCTrigger && event.isReleased()) properties.rCTrigger = true;
+
+                if (properties.rCTrigger) {
+                    if (creature.getRightClickCooldown() == 0) {
+                        if (!event.isReleased()) {
+                            properties.rightClickFill++;
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(creature, 1));
+                        }
+                        else if (event.isReleased() && !creature.canUseRightClick()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, true));
+                            properties.rightClickFill = 0;
+                        }
+                        else if (event.isReleased()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, properties.rightClickFill));
+                            properties.rightClickFill = 0;
+                        }
                     }
                 }
             }
@@ -125,11 +130,14 @@ public class ServerEvents {
     public void onStartRiding(EntityMountEvent event) {
         if (event.isDismounting() && event.getEntityMounting() instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer)event.getEntityMounting();
-            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
+            RiftEntityProperties playerProperties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
             if (event.getEntityBeingMounted() instanceof RiftCreature) {
                 RiftCreature creature = (RiftCreature) event.getEntityBeingMounted();
+                RiftEntityProperties creatureProperties = EntityPropertiesHandler.INSTANCE.getProperties(creature, RiftEntityProperties.class);
+
                 RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, false));
-                if (properties != null) properties.ridingCreature = true;
+                if (playerProperties != null) playerProperties.ridingCreature = true;
+                creatureProperties.rCTrigger = false;
             }
         }
     }
@@ -192,24 +200,20 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
-    public void forEachTick(TickEvent.WorldTickEvent event) {
-        if (event.world != null && !event.world.isRemote && !event.world.loadedEntityList.isEmpty()) {
-            for (Entity entity : event.world.loadedEntityList) {
-                if (entity instanceof EntityLivingBase) {
-                    EntityLivingBase entityliving = (EntityLivingBase) entity;
-                    RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entityliving, RiftEntityProperties.class);
-                    double fallMotion = !entityliving.onGround ? entityliving.motionY : 0;
-                    boolean isMoving =  Math.sqrt((entityliving.motionX * entityliving.motionX) + (fallMotion * fallMotion) + (entityliving.motionZ * entityliving.motionZ)) > 0;
-                    //manage bleeding
-                    if (properties.isBleeding) {
-                        if (isMoving) entityliving.attackEntityFrom(DamageSource.GENERIC, (float) properties.bleedingStrength + 1F);
-                        else entityliving.attackEntityFrom(DamageSource.GENERIC, (float)(properties.bleedingStrength + 1) * 2F);
+    public void forEachEntityTick(LivingEvent.LivingUpdateEvent event) {
+        EntityLivingBase entity = event.getEntityLiving();
+        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
+        if (!entity.world.isRemote) {
+            double fallMotion = !entity.onGround ? entity.motionY : 0;
+            boolean isMoving =  Math.sqrt((entity.motionX * entity.motionX) + (fallMotion * fallMotion) + (entity.motionZ * entity.motionZ)) > 0;
+            //manage bleeding
+            if (properties.isBleeding) {
+                if (isMoving) entity.attackEntityFrom(DamageSource.GENERIC, (float)properties.bleedingStrength + 1F);
+                else entity.attackEntityFrom(DamageSource.GENERIC, (float)(properties.bleedingStrength + 1) * 2F);
 
-                        properties.ticksUntilStopBleeding--;
-                    }
-                    if (properties.ticksUntilStopBleeding <= 0) properties.resetBleeding();
-                }
+                properties.ticksUntilStopBleeding--;
             }
+            if (properties.ticksUntilStopBleeding <= 0) properties.resetBleeding();
         }
     }
 }

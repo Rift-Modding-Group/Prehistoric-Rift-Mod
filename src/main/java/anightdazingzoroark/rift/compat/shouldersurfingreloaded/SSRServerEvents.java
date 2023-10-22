@@ -6,6 +6,7 @@ import anightdazingzoroark.rift.compat.shouldersurfingreloaded.messages.SSRMount
 import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
+import anightdazingzoroark.rift.server.message.RiftIncrementClickUse;
 import anightdazingzoroark.rift.server.message.RiftManageCanUseClick;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import anightdazingzoroark.rift.server.message.RiftMountControl;
@@ -38,15 +39,18 @@ public class SSRServerEvents {
                     Entity toBeAttacked = SSRCompatUtils.getEntities(creature.attackWidth * (64D/39D)).entityHit;
                     if (creature.hasLeftClickChargeBar()) {
                         if (creature.getLeftClickCooldown() == 0) {
-                            if (!event.isReleased()) properties.leftClickFill++;
+                            if (!event.isReleased()) {
+                                properties.leftClickFill++;
+                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(creature, 0));
+                            }
                             else {
                                 if (toBeAttacked != null) {
                                     if (toBeAttacked instanceof EntityLivingBase) {
                                         int targetId = toBeAttacked.getEntityId();
-                                        SSRCompatMessages.SSR_COMPAT_WRAPPER.sendToServer(new SSRMountControl(creature, targetId, 0, properties.leftClickFill));
+                                        SSRCompatMessages.SSR_COMPAT_WRAPPER.sendToServer(new SSRMountControl(creature, targetId, 0, RiftUtil.clamp(properties.leftClickFill, 0, 100)));
                                     }
                                 }
-                                else SSRCompatMessages.SSR_COMPAT_WRAPPER.sendToServer(new SSRMountControl(creature, -1, 0, properties.leftClickFill));
+                                else SSRCompatMessages.SSR_COMPAT_WRAPPER.sendToServer(new SSRMountControl(creature, -1, 0, RiftUtil.clamp(properties.leftClickFill, 0, 100)));
                                 properties.leftClickFill = 0;
                             }
                         }
@@ -65,21 +69,24 @@ public class SSRServerEvents {
                 }
                 //detect right click
                 else if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1) {
-                    if (creature.getRightClickCooldown() == 0) {
-                        if (!event.isReleased()) {
-                            properties.rightClickFill++;
-                            properties.rCTrigger = true;
+                    //dont trigger immediately after riding
+                    if (!properties.rCTrigger && event.isReleased()) properties.rCTrigger = true;
+
+                    if (properties.rCTrigger) {
+                        if (creature.getRightClickCooldown() == 0) {
+                            if (!event.isReleased()) {
+                                properties.rightClickFill++;
+                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(creature, 1));
+                            }
+                            else if (event.isReleased() && !creature.canUseRightClick()) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, true));
+                                properties.rightClickFill = 0;
+                            }
+                            else if (event.isReleased()) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, RiftUtil.clamp(properties.rightClickFill, 0, 100)));
+                                properties.rightClickFill = 0;
+                            }
                         }
-                        else if (event.isReleased() && !creature.canUseRightClick()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, true));
-                            properties.rightClickFill = 0;
-                        }
-                        else if (event.isReleased() && properties.rCTrigger) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, properties.rightClickFill));
-                            properties.rightClickFill = 0;
-                            properties.rCTrigger = true;
-                        }
-                        else if (event.isReleased()) properties.rightClickFill = 0;
                     }
                 }
             }
@@ -87,9 +94,12 @@ public class SSRServerEvents {
                 //detect left click
                 if (!RiftUtil.checkInMountItemWhitelist(heldItem) && event.getMouseButton() == 0) {
                     if (creature.hasLeftClickChargeBar()) {
-                        if (!event.isReleased()) properties.leftClickFill++;
+                        if (!event.isReleased()) {
+                            properties.leftClickFill++;
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(creature, 0));
+                        }
                         else {
-                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0, properties.leftClickFill));
+                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0, RiftUtil.clamp(properties.leftClickFill, 0, 100)));
                             properties.leftClickFill = 0;
                         }
                     }
@@ -99,22 +109,23 @@ public class SSRServerEvents {
                 }
                 //detect right click
                 else if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1) {
-                    if (creature.getRightClickCooldown() == 0) {
-                        if (!event.isReleased()) {
-                            properties.rightClickFill++;
-                            properties.rCTrigger = true;
-                        }
-                        else if (event.isReleased() && !creature.canUseRightClick()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, true));
-                            properties.rightClickFill = 0;
-                        }
-                        else if (event.isReleased() && properties.rCTrigger) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, properties.rightClickFill));
-                            properties.rightClickFill = 0;
-                            properties.rCTrigger = true;
-                        }
-                        else if (event.isReleased()) {
-                            properties.rightClickFill = 0;
+                    //dont trigger immediately after riding
+                    if (!properties.rCTrigger && event.isReleased()) properties.rCTrigger = true;
+
+                    if (properties.rCTrigger) {
+                        if (creature.getRightClickCooldown() == 0) {
+                            if (!event.isReleased()) {
+                                properties.rightClickFill++;
+                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(creature, 1));
+                            }
+                            else if (event.isReleased() && !creature.canUseRightClick()) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, true));
+                                properties.rightClickFill = 0;
+                            }
+                            else if (event.isReleased()) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, RiftUtil.clamp(properties.rightClickFill, 0, 100)));
+                                properties.rightClickFill = 0;
+                            }
                         }
                     }
                 }

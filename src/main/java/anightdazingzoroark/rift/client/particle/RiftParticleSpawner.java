@@ -33,6 +33,7 @@ public class RiftParticleSpawner {
     public Particle spawnEffectParticle(Particle particle) {
         if (particle != null) {
             Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+            Minecraft.getMinecraft().effectRenderer.renderParticles(Minecraft.getMinecraft().getRenderViewEntity(), 100);
             return particle;
         }
         return null;
