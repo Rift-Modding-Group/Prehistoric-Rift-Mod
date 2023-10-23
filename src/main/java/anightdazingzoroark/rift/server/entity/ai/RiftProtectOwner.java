@@ -1,6 +1,6 @@
 package anightdazingzoroark.rift.server.entity.ai;
 
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
 import net.minecraft.entity.passive.EntityTameable;

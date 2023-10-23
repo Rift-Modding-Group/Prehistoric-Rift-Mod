@@ -6,7 +6,7 @@ import anightdazingzoroark.rift.client.particle.RiftParticleSpawner;
 import anightdazingzoroark.rift.client.renderer.EntityRenderer;
 import anightdazingzoroark.rift.client.ui.*;
 import anightdazingzoroark.rift.server.ServerProxy;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.Entity;

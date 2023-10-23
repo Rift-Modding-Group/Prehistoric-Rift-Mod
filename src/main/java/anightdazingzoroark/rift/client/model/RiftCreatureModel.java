@@ -1,7 +1,7 @@
 package anightdazingzoroark.rift.client.model;
 
 import anightdazingzoroark.rift.RiftInitialize;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import net.minecraft.util.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 

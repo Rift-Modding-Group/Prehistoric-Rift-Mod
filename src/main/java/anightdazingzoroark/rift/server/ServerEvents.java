@@ -1,7 +1,7 @@
 package anightdazingzoroark.rift.server;
 
 import anightdazingzoroark.rift.RiftUtil;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
 import anightdazingzoroark.rift.server.message.RiftIncrementClickUse;
@@ -28,13 +28,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class ServerEvents {
     //for controlling when u use attacks or abilities while riding creatures
     @SubscribeEvent(receiveCanceled = true)
     public void mouseUse(RiftMouseHoldEvent event) {
-        GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
         Item heldItem = player.getHeldItemMainhand().getItem();
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
@@ -150,6 +148,14 @@ public class ServerEvents {
             RiftCreature attacker = (RiftCreature) event.getSource().getTrueSource();
             if (creature.isTamed() && !attacker.isTamed() && creature.creatureType == attacker.creatureType) {
                 event.setAmount(event.getAmount() / 2);
+            }
+        }
+        //tamed creatures cannot hurt their owners
+        if (event.getEntity() instanceof EntityPlayer && event.getSource().getTrueSource() instanceof RiftCreature) {
+            EntityPlayer player = (EntityPlayer) event.getEntity();
+            RiftCreature attacker = (RiftCreature) event.getSource().getTrueSource();
+            if (attacker.isTamed()) {
+                if (attacker.getOwner() == player) event.setCanceled(true);
             }
         }
     }

@@ -9,9 +9,4 @@ public class ThrownStegoPlateRenderer extends GeoProjectilesRenderer<ThrownStego
     public ThrownStegoPlateRenderer(RenderManager renderManager) {
         super(renderManager, new ThrownStegoPlateModel());
     }
-
-    @Override
-    public void doRender(ThrownStegoPlate entity, double x, double y, double z, float entityYaw, float partialTicks) {
-        super.doRender(entity, x, y, z, entityYaw, partialTicks);
-    }
 }

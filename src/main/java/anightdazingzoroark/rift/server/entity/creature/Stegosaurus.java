@@ -1,7 +1,6 @@
 package anightdazingzoroark.rift.server.entity.creature;
 
 import anightdazingzoroark.rift.RiftUtil;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.entity.ai.*;
@@ -25,7 +24,6 @@ import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.builder.ILoopType;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -66,6 +64,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.tasks.addTask(1, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
         this.tasks.addTask(1, new RiftControlledAttack(this, 0.96F, 0.36F));
         this.tasks.addTask(1, new RiftStegosaurusControlledStrongAttack(this, 0.72F, 0.12F));
+//        this.tasks.addTask(1, new RiftControlledRangedAttack(this, 1.52F, 1.04F));
         this.tasks.addTask(2, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
         this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(3, new RiftHerdDistanceFromOtherMembers(this, 3D));
@@ -134,7 +133,11 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
             }
         }
         if (control == 1 && this.getRightClickCooldown() == 0) {
-            this.setRightClickCooldown(holdAmount * 2);
+            if (!this.isActing()) {
+                this.controlRangedAttack();
+                this.setRightClickCooldown(holdAmount * 2);
+                this.setEnergy(this.getEnergy() - (int)(0.09D * (double)holdAmount + 1D));
+            }
         }
     }
 
@@ -165,6 +168,14 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
             else this.attackEntityAsMobStrong(target);
         }
     }
+
+    @Override
+    public void controlRangedAttack() {
+        ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this, (EntityPlayer)this.getControllingPassenger());
+        thrownStegoPlate.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, 1.5F, 1.0F);
+        this.world.spawnEntity(thrownStegoPlate);
+    }
+
 
     private boolean attackEntityAsMobStrong(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), ((float) this.strongAttackCharge - 100f)/3f + 30f + (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());

@@ -1,13 +1,12 @@
 package anightdazingzoroark.rift.server.entity.ai;
 
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.Sys;
 
 import javax.annotation.Nullable;
 import java.util.List;

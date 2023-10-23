@@ -1,7 +1,7 @@
 package anightdazingzoroark.rift.server;
 
 import anightdazingzoroark.rift.RiftInitialize;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntities;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
 import anightdazingzoroark.rift.server.inventory.CreatureContainer;

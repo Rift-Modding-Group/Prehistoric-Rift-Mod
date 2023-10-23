@@ -3,7 +3,7 @@ package anightdazingzoroark.rift.compat.shouldersurfingreloaded;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.compat.shouldersurfingreloaded.messages.SSRCompatMessages;
 import anightdazingzoroark.rift.compat.shouldersurfingreloaded.messages.SSRMountControl;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
 import anightdazingzoroark.rift.server.message.RiftIncrementClickUse;
@@ -13,7 +13,6 @@ import anightdazingzoroark.rift.server.message.RiftMountControl;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,12 +20,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.lwjgl.Sys;
 
 public class SSRServerEvents {
     @SubscribeEvent(receiveCanceled = true)
     public void mouseUse(RiftMouseHoldEvent event) {
-        GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
         Item heldItem = player.getHeldItemMainhand().getItem();
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);

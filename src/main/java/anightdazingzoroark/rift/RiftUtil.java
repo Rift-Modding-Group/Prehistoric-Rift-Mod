@@ -1,7 +1,6 @@
 package anightdazingzoroark.rift;
 
-import anightdazingzoroark.rift.RiftConfig;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.enums.CreatureDiet;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -13,7 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
-import scala.Int;
 import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;

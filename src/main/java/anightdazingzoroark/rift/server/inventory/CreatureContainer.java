@@ -1,6 +1,6 @@
 package anightdazingzoroark.rift.server.inventory;
 
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.message.RiftChangeInventoryFromMenu;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import net.minecraft.entity.player.EntityPlayer;

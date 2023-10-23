@@ -1,16 +1,14 @@
-package anightdazingzoroark.rift.server.entity;
+package anightdazingzoroark.rift.server.entity.creature;
 
-import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.ServerProxy;
+import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.*;
 import com.google.common.base.Predicate;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.*;
-import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -888,9 +886,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return (EntityLivingBase) pointedEntity;
     }
 
-    public AxisAlignedBB getControlAttackArea() {
-        return this.getEntityBoundingBox().grow(4D, 5.0D, 4D);
-    }
+    public void controlRangedAttack() {}
 
     @Override
     public boolean canPassengerSteer() {

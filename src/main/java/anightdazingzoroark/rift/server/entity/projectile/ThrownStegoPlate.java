@@ -1,8 +1,9 @@
 package anightdazingzoroark.rift.server.entity.projectile;
 
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -37,6 +38,12 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
         this.setDamage(4D);
     }
 
+    public ThrownStegoPlate(World world, EntityLivingBase shooter, EntityPlayer rider) {
+        super(world, rider.posX, rider.posY + rider.getEyeHeight() - 0.1, rider.posZ);
+        this.shootingEntity = shooter;
+        this.setDamage(4D);
+    }
+
     @Override
     protected void entityInit() {
         super.entityInit();
@@ -60,7 +67,6 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
             if (entity.attackEntityFrom(damagesource, (float) i)) {
                 if (entity instanceof EntityLivingBase) {
                     EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
-//                    if (!this.world.isRemote) entitylivingbase.setArrowCountInEntity(entitylivingbase.getArrowCountInEntity() + 1);
                     this.arrowHit(entitylivingbase);
                 }
                 this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
@@ -76,9 +82,18 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
                 }
             }
         }
-        else {
-            super.onHit(raytraceResultIn);
-        }
+        else super.onHit(raytraceResultIn);
+    }
+
+    public void shoot(Entity shooter, float rotationPitchIn, float rotationYawIn, float pitchOffset, float velocity, float inaccuracy) {
+        float f = -MathHelper.sin(rotationYawIn * 0.017453292F) * MathHelper.cos(rotationPitchIn * 0.017453292F);
+        float f1 = -MathHelper.sin((rotationPitchIn + pitchOffset) * 0.017453292F);
+        float f2 = MathHelper.cos(rotationYawIn * 0.017453292F) * MathHelper.cos(rotationPitchIn * 0.017453292F);
+        this.shoot((double)f, (double)f1, (double)f2, velocity, inaccuracy);
+        this.motionX += shooter.motionX;
+        this.motionZ += shooter.motionZ;
+
+        if (!shooter.onGround) this.motionY += shooter.motionY;
     }
 
     public int getVariant() {

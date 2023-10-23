@@ -1,6 +1,6 @@
 package anightdazingzoroark.rift.client.ui;
 
-import anightdazingzoroark.rift.server.entity.*;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;

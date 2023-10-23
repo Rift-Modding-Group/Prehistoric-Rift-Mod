@@ -2,7 +2,7 @@ package anightdazingzoroark.rift.client.renderer.entity;
 
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.model.RiftCreatureModel;
-import anightdazingzoroark.rift.server.entity.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;

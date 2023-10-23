@@ -3,6 +3,7 @@ package anightdazingzoroark.rift.server.entity;
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.client.renderer.entity.StegosaurusRenderer;
 import anightdazingzoroark.rift.client.renderer.entity.TyrannosaurusRenderer;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.entity.creature.Stegosaurus;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.rift.server.enums.CreatureCategory;
