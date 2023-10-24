@@ -14,12 +14,14 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private EntityPlayer rider;
     public AnimationFactory factory = new AnimationFactory(this);
 
     public ThrownStegoPlate(World worldIn) {
@@ -41,6 +43,7 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
     public ThrownStegoPlate(World world, EntityLivingBase shooter, EntityPlayer rider) {
         super(world, rider.posX, rider.posY + rider.getEyeHeight() - 0.1, rider.posZ);
         this.shootingEntity = shooter;
+        this.rider = rider;
         this.setDamage(4D);
     }
 
@@ -53,32 +56,34 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
     protected void onHit(RayTraceResult raytraceResultIn) {
         Entity entity = raytraceResultIn.entityHit;
 
-        if (entity != null) {
-            float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-            int i = MathHelper.ceil((double) f * this.getDamage());
+        if (!this.world.isRemote) {
+            if (entity != null && entity != this.rider) {
+                float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+                int i = MathHelper.ceil((double) f * this.getDamage());
 
-            if (this.getIsCritical()) i += this.rand.nextInt(i / 2 + 2);
+                if (this.getIsCritical()) i += this.rand.nextInt(i / 2 + 2);
 
-            DamageSource damagesource;
+                DamageSource damagesource;
 
-            if (this.shootingEntity == null) damagesource = DamageSource.causeArrowDamage(this, this);
-            else damagesource = DamageSource.causeArrowDamage(this, this.shootingEntity);
+                if (this.shootingEntity == null) damagesource = DamageSource.causeArrowDamage(this, this);
+                else damagesource = DamageSource.causeArrowDamage(this, this.shootingEntity);
 
-            if (entity.attackEntityFrom(damagesource, (float) i)) {
-                if (entity instanceof EntityLivingBase) {
-                    EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
-                    this.arrowHit(entitylivingbase);
+                if (entity.attackEntityFrom(damagesource, (float) i)) {
+                    if (entity instanceof EntityLivingBase) {
+                        EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
+                        this.arrowHit(entitylivingbase);
+                    }
+                    this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 }
-                this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
-            }
-            else {
-                this.motionX *= -0.10000000149011612D;
-                this.motionY *= -0.10000000149011612D;
-                this.motionZ *= -0.10000000149011612D;
-                this.rotationYaw += 180.0F;
-                this.prevRotationYaw += 180.0F;
-                if (!this.world.isRemote && this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ < 0.0010000000474974513D) {
-                    this.setDead();
+                else {
+                    this.motionX *= -0.10000000149011612D;
+                    this.motionY *= -0.10000000149011612D;
+                    this.motionZ *= -0.10000000149011612D;
+                    this.rotationYaw += 180.0F;
+                    this.prevRotationYaw += 180.0F;
+                    if (this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ < 0.0010000000474974513D) {
+                        this.setDead();
+                    }
                 }
             }
         }

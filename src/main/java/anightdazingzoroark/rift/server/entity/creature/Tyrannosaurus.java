@@ -24,6 +24,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -143,11 +144,12 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, RiftConfig.tyrannosaurusFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(1, new RiftControlledAttack(this, 0.52F, 0.24F));
-        this.tasks.addTask(2, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
-        this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(3, new RiftWander(this, 1.0D));
-        this.tasks.addTask(4, new RiftLookAround(this));
+        this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
+        this.tasks.addTask(3, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
+        this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(4, new RiftWander(this, 1.0D));
+        this.tasks.addTask(5, new RiftLookAround(this));
     }
 
     @Override
@@ -335,22 +337,28 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     @Override
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {
         if (control == 0) {
-            if (target == null) {
-                if (!this.isActing()) this.setAttacking(true);
-            }
-            else {
-                if (!this.isActing()) {
-                    this.ssrTarget = target;
-                    this.setAttacking(true);
+            if (this.getEnergy() > 0) {
+                if (target == null) {
+                    if (!this.isActing()) this.setAttacking(true);
+                }
+                else {
+                    if (!this.isActing()) {
+                        this.ssrTarget = target;
+                        this.setAttacking(true);
+                    }
                 }
             }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.insufficient_energy", this.getName()), false);
         }
         if (control == 1) {
-            if (this.canRoar() && !this.isActing()) {
-                this.setRoaring(true);
-                this.roarCharge = Math.min(holdAmount, 100);
-                this.setRightClickCooldown(holdAmount * 2);
+            if (this.getEnergy() >= 6) {
+                if (this.canRoar() && !this.isActing()) {
+                    this.setRoaring(true);
+                    this.roarCharge = Math.min(holdAmount, 100);
+                    this.setRightClickCooldown(holdAmount * 2);
+                }
             }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.insufficient_energy", this.getName()), false);
         }
     }
 

@@ -19,6 +19,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import software.bernie.geckolib3.core.IAnimatable;
@@ -35,7 +36,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
         this.setSize(2.125f, 2.5f);
-        this.speed = 0.175f;
+        this.speed = 0.175D;
         this.isRideable = true;
         this.attackWidth = 7.5f;
         this.rangedWidth = 12f;
@@ -61,16 +62,16 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(1, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
-        this.tasks.addTask(1, new RiftControlledAttack(this, 0.96F, 0.36F));
-        this.tasks.addTask(1, new RiftStegosaurusControlledStrongAttack(this, 0.72F, 0.12F));
-//        this.tasks.addTask(1, new RiftControlledRangedAttack(this, 1.52F, 1.04F));
-        this.tasks.addTask(2, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
-        this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(3, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(4, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
-        this.tasks.addTask(5, new RiftWander(this, 1.0D));
-        this.tasks.addTask(6, new RiftLookAround(this));
+        this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(2, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
+        this.tasks.addTask(2, new RiftControlledAttack(this, 0.96F, 0.36F));
+        this.tasks.addTask(2, new RiftStegosaurusControlledStrongAttack(this, 0.72F, 0.12F));
+        this.tasks.addTask(3, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
+        this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(4, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(5, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
+        this.tasks.addTask(6, new RiftWander(this, 1.0D));
+        this.tasks.addTask(7, new RiftLookAround(this));
     }
 
     @Override
@@ -109,35 +110,45 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
 
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {
-        if (control == 0 && this.getLeftClickCooldown() == 0) {
-            if (target == null) {
-                if (!this.isActing()) {
-                    if (holdAmount <= 10)  this.setAttacking(true);
+        if (control == 0) {
+            if (this.getEnergy() > 0) {
+                if (this.getLeftClickCooldown() == 0) {
+                    if (target == null) {
+                        if (!this.isActing()) {
+                            if (holdAmount <= 10)  this.setAttacking(true);
+                            else {
+                                this.setIsStrongAttacking(true);
+                                this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
+                                this.setLeftClickCooldown(holdAmount * 2);
+                            }
+                        }
+                    }
                     else {
-                        this.setIsStrongAttacking(true);
-                        this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
-                        this.setLeftClickCooldown(holdAmount * 2);
+                        if (!this.isActing()) {
+                            this.ssrTarget = target;
+                            if (holdAmount <= 10) this.setAttacking(true);
+                            else {
+                                this.setIsStrongAttacking(true);
+                                this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
+                                this.setLeftClickCooldown(holdAmount * 2);
+                            }
+                        }
                     }
                 }
             }
-            else {
-                if (!this.isActing()) {
-                    this.ssrTarget = target;
-                    if (holdAmount <= 10) this.setAttacking(true);
-                    else {
-                        this.setIsStrongAttacking(true);
-                        this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
-                        this.setLeftClickCooldown(holdAmount * 2);
-                    }
-                }
-            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.insufficient_energy", this.getName()), false);
         }
-        if (control == 1 && this.getRightClickCooldown() == 0) {
-            if (!this.isActing()) {
-                this.controlRangedAttack();
-                this.setRightClickCooldown(holdAmount * 2);
-                this.setEnergy(this.getEnergy() - (int)(0.09D * (double)holdAmount + 1D));
+        if (control == 1) {
+            if (this.getEnergy() > 6) {
+                if (this.getRightClickCooldown() == 0) {
+                    if (!this.isActing()) {
+                        this.controlRangedAttack();
+                        this.setRightClickCooldown(holdAmount * 2);
+                        this.setEnergy(this.getEnergy() - (int)(0.09D * (double)holdAmount + 1D));
+                    }
+                }
             }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.insufficient_energy", this.getName()), false);
         }
     }
 

@@ -9,4 +9,9 @@ public class ThrownStegoPlateRenderer extends GeoProjectilesRenderer<ThrownStego
     public ThrownStegoPlateRenderer(RenderManager renderManager) {
         super(renderManager, new ThrownStegoPlateModel());
     }
+
+    @Override
+    public void renderEarly(ThrownStegoPlate animatable, float ticks, float red, float green, float blue, float partialTicks) {
+        super.renderEarly(animatable, ticks, red, green, blue, partialTicks);
+    }
 }

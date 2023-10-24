@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
+import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.message.*;
@@ -313,6 +314,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.consumeItemFromStack(player, itemstack);
                     this.heal((float) this.getFavoriteFoodHeal(itemstack));
                 }
+                else if (this.isTamingFood(itemstack) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getTameStatus() != TameStatusType.SIT) {
+                    this.consumeItemFromStack(player, itemstack);
+                    this.setInLove(player);
+                }
                 else if (RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getEnergy() < 20) {
                     this.consumeItemFromStack(player, itemstack);
                     this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemstack.getItem(), this.creatureType.getCreatureDiet()));
@@ -517,8 +522,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setAgeInTicks(compound.getInteger("AgeTicks"));
         this.setJustSpawned(compound.getBoolean("JustSpawned"));
         this.setTameProgress(compound.getInteger("TameProgress"));
-//        if (this.canDoHerding()) this.setHerdLeader(compound.getInteger("HerdLeaderId"));
-//        if (this.canDoHerding()) this.setHerdSize(compound.getInteger("HerdSize"));
     }
 
     private void initInventory() {
@@ -931,9 +934,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.stepHeight = 1.0F;
                 this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1F;
                 this.fallDistance = 0;
-                float moveSpeedMod = (this.getEnergy() >= 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
-                float moveSpeed = (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * moveSpeedMod;
-                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() >= 6 ? moveSpeed * 0.3f : 0) : 2);
+                float moveSpeedMod = (this.getEnergy() > 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
+                float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
+                float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
                 super.travel(strafe, vertical, forward);
             }
         }
@@ -947,7 +951,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Nullable
     @Override
     public EntityAgeable createChild(EntityAgeable ageable) {
-        return null;
+        RiftEgg egg = new RiftEgg(this.world);
+        egg.setCreatureType(this.creatureType);
+        egg.setOwnerId(this.getOwnerId());
+        egg.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
+        egg.enablePersistence();
+        egg.setHatchTime(this.creatureType.getHatchTime() * 20);
+        return egg;
     }
 
     @Override
