@@ -3,6 +3,8 @@ package anightdazingzoroark.rift.server.entity.ai;
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
+import anightdazingzoroark.rift.server.enums.TameBehaviorType;
+import anightdazingzoroark.rift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
@@ -34,7 +36,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
 //            return i != this.revengeTimerOld && entitylivingbase != null && entitylivingbase instanceof EntityLivingBase && new Random().nextInt(4) == 0 && this.mob.canRoar();
             return !this.mob.isActing() && this.mob.hurtTime > 0 && new Random().nextInt(4) == 0 && this.mob.canRoar();
         }
-        else return this.mob.canRoar() && this.mob.isRoaring();
+        else return  !this.mob.isActing() && this.mob.hurtTime > 0 && new Random().nextInt(4) == 0 && this.mob.canRoar() && this.mob.getTameStatus() != TameStatusType.SIT && this.mob.getTameBehavior() != TameBehaviorType.PASSIVE;
     }
 
     @Override
@@ -44,10 +46,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
 
     @Override
     public void startExecuting() {
-        if (!this.mob.isTamed()) {
-            this.mob.setRoaring(true);
-            this.revengeTimerOld = this.mob.getRevengeTimer();
-        }
+        this.mob.setRoaring(true);
         this.mob.removeSpeed();
     }
 

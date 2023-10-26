@@ -7,6 +7,7 @@ import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
+import anightdazingzoroark.rift.server.items.RiftItems;
 import anightdazingzoroark.rift.server.message.*;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.*;
@@ -37,6 +38,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -309,7 +311,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
                     this.showGrowthParticles();
                 }
-                else if (this.isFavoriteFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
+                else if (this.isFavoriteFood(itemstack) && !RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getHealth() < this.getMaxHealth()) {
                     this.consumeItemFromStack(player, itemstack);
                     this.heal((float) this.getFavoriteFoodHeal(itemstack));
                 }
@@ -334,7 +336,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else {
-            if (this.isTamingFood(itemstack) && !itemstack.isEmpty() && this.isTameableByFeeding()) {
+            if (this.isTamingFood(itemstack) && !itemstack.isEmpty() && (this.isTameableByFeeding() || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("tame_progress.finished", new TextComponentString(this.getName())), false);
                     this.setTameProgress(0);
@@ -411,7 +413,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 else if (stack.getMetadata() == itemData) return adder;
             }
         }
-        return 0;
+        return !stack.isEmpty() && stack.getItem() == RiftItems.CREATIVE_MEAL ? 100 : 0;
     }
 
     public int getFavoriteFoodGrowth(ItemStack stack) {

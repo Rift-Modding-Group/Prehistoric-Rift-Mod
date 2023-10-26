@@ -27,6 +27,7 @@ public class RiftItems {
     public static Item BASIC_CARNIVORE_MEAL;
     public static Item ADVANCED_HERBIVORE_MEAL;
     public static Item ADVANCED_CARNIVORE_MEAL;
+    public static Item CREATIVE_MEAL;
 
     public static Item TYRANNOSAURUS_ARM;
     public static Item STEGOSAURUS_PLATE;
@@ -40,6 +41,7 @@ public class RiftItems {
         BASIC_CARNIVORE_MEAL = riftGenericItem("basic_carnivore_meal");
         ADVANCED_HERBIVORE_MEAL = riftGenericItem("advanced_herbivore_meal");
         ADVANCED_CARNIVORE_MEAL = riftGenericItem("advanced_carnivore_meal");
+        CREATIVE_MEAL = riftGenericItem("creative_meal");
 
         FIBER_BAR = riftFibrousFoodItem("fiber_bar", 2, false);
 

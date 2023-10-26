@@ -41,6 +41,8 @@ public class RiftIncrementClickUse extends AbstractMessage<RiftIncrementClickUse
         RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
 
         if (message.mouse == 0) creature.setLeftClickUse(creature.getLeftClickUse() + 1);
-        else creature.setRightClickUse(creature.getRightClickUse() + 1);
+        else if (message.mouse == 1) {
+            if (creature.getEnergy() > 6) creature.setRightClickUse(creature.getRightClickUse() + 1);
+        }
     }
 }

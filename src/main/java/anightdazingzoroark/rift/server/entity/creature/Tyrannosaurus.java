@@ -145,6 +145,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         this.targetTasks.addTask(3, new RiftPickUpItems(this, RiftConfig.tyrannosaurusFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(2, new RiftResetAnimatedPose(this, 1.68F, 1));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
         this.tasks.addTask(3, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
         this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
@@ -351,10 +352,12 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.insufficient_energy", this.getName()), false);
         }
         if (control == 1) {
-            if (this.getEnergy() >= 6) {
+            if (this.getEnergy() > 6) {
                 if (this.canRoar() && !this.isActing()) {
-                    this.setRoaring(true);
-                    this.roarCharge = Math.min(holdAmount, 100);
+                    this.setActing(true);
+                    this.setCanRoar(false);
+                    this.roar(0.015f * Math.min(holdAmount, 100) + 1.5f);
+                    this.setEnergy(this.getEnergy() - (int)(0.06d * (double)Math.min(holdAmount, 100) + 6d));
                     this.setRightClickCooldown(holdAmount * 2);
                 }
             }
@@ -375,8 +378,10 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::tyrannosaurusMovement));
+//        data.addAnimationController(new AnimationController(this, "look", 0, this::tyrannosaurusLook));
         data.addAnimationController(new AnimationController(this, "attacking", 0, this::tyrannosaurusAttack));
         data.addAnimationController(new AnimationController(this, "roaring", 0, this::tyrannosaurusRoar));
+        data.addAnimationController(new AnimationController(this, "controlled_roar", 0, this::tyrannosaurusControlledRoar));
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusMovement(AnimationEvent<E> event) {
@@ -390,6 +395,11 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
+    }
+
+    private <E extends IAnimatable> PlayState tyrannosaurusLook(AnimationEvent<E> event) {
+        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.look", true));
+        return PlayState.CONTINUE;
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusAttack(AnimationEvent<E> event) {
@@ -409,6 +419,15 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         else {
             event.getController().clearAnimationCache();
         }
+        return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState tyrannosaurusControlledRoar(AnimationEvent<E> event) {
+        if (this.getRightClickCooldown() == 0) {
+            if (this.getRightClickUse() > 0 && this.getRightClickUse() < 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.use_roar_p1", false));
+            else if (this.getRightClickUse() >= 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.use_roar_p1_hold", true));
+        }
+        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.use_roar_p2", false));
         return PlayState.CONTINUE;
     }
 }
