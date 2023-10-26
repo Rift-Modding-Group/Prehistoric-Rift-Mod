@@ -37,6 +37,6 @@ public class RiftControlledRangedAttack extends EntityAIBase {
 
     public void updateTask() {
         this.animTime++;
-        if (this.animTime == this.shootAnimTime) this.attacker.controlRangedAttack();
+        if (this.animTime == this.shootAnimTime) this.attacker.controlRangedAttack(0);
     }
 }

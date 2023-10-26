@@ -167,7 +167,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setHasTarget(this.getAttackTarget() != null);
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();
-            this.resetClickUse();
             if (this.canDoHerding()) this.manageHerding();
         }
         if (this.isTamed() && !this.world.isRemote) {
@@ -357,14 +356,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setSpeed(this.speed);
             this.setJustSpawned(false);
         }
-    }
-
-    private void resetClickUse() {
-        if (this.tickUse >= 1) {
-            this.setLeftClickUse(0);
-            this.setRightClickUse(0);
-        }
-        this.tickUse++;
     }
 
     public boolean isFavoriteFood(ItemStack stack) {
@@ -889,7 +880,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return (EntityLivingBase) pointedEntity;
     }
 
-    public void controlRangedAttack() {}
+    public void controlRangedAttack(double strength) {}
 
     @Override
     public boolean canPassengerSteer() {

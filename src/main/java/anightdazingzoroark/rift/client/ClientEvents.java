@@ -44,26 +44,4 @@ public class ClientEvents {
             event.setCanceled(true);
         }
     }
-
-    //show bleed particles
-//    @SubscribeEvent
-//    public void onPostRenderLiving(RenderLivingEvent.Post event) {
-//    }
-
-    @SubscribeEvent
-    public void forEachTick(LivingEvent.LivingUpdateEvent event) {
-        EntityLivingBase entity = event.getEntityLiving();
-        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
-        if (entity.world.isRemote) {
-            if (properties.isBleeding) {
-                double motionY = RiftUtil.randomInRange(-0.75D, -0.25D);
-                double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
-                double f1 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) + entity.getEntityBoundingBox().minY;
-                double f2 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxZ - entity.getEntityBoundingBox().minZ) + entity.getEntityBoundingBox().minZ;
-
-                RiftInitialize.PROXY.spawnParticle("bleed", f, f1, f2, 0D, motionY, 0D);
-
-            }
-        }
-    }
 }

@@ -44,7 +44,6 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
         super(world, rider.posX, rider.posY + rider.getEyeHeight() - 0.1, rider.posZ);
         this.shootingEntity = shooter;
         this.rider = rider;
-        this.setDamage(4D);
     }
 
     @Override

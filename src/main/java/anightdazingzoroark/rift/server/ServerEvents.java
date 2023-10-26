@@ -1,5 +1,6 @@
 package anightdazingzoroark.rift.server;
 
+import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
@@ -216,6 +217,13 @@ public class ServerEvents {
             if (properties.isBleeding) {
                 if (isMoving) entity.attackEntityFrom(DamageSource.GENERIC, (float)properties.bleedingStrength + 1F);
                 else entity.attackEntityFrom(DamageSource.GENERIC, (float)(properties.bleedingStrength + 1) * 2F);
+
+                double motionY = RiftUtil.randomInRange(-0.75D, -0.25D);
+                double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
+                double f1 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) + entity.getEntityBoundingBox().minY;
+                double f2 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxZ - entity.getEntityBoundingBox().minZ) + entity.getEntityBoundingBox().minZ;
+
+                RiftInitialize.PROXY.spawnParticle("bleed", f, f1, f2, 0D, motionY, 0D);
 
                 properties.ticksUntilStopBleeding--;
             }

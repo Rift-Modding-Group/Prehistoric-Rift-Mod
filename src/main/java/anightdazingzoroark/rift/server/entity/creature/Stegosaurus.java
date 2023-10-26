@@ -63,6 +63,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(2, new RiftResetAnimatedPose(this, 0.56F, 1));
         this.tasks.addTask(2, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.96F, 0.36F));
         this.tasks.addTask(2, new RiftStegosaurusControlledStrongAttack(this, 0.72F, 0.12F));
@@ -142,7 +143,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
             if (this.getEnergy() > 6) {
                 if (this.getRightClickCooldown() == 0) {
                     if (!this.isActing()) {
-                        this.controlRangedAttack();
+                        this.setActing(true);
+                        this.controlRangedAttack(holdAmount);
                         this.setRightClickCooldown(holdAmount * 2);
                         this.setEnergy(this.getEnergy() - (int)(0.09D * (double)holdAmount + 1D));
                     }
@@ -181,8 +183,9 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
 
     @Override
-    public void controlRangedAttack() {
+    public void controlRangedAttack(double strength) {
         ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this, (EntityPlayer)this.getControllingPassenger());
+        thrownStegoPlate.setDamage(strength >= 80 ? 8D : 4D);
         thrownStegoPlate.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, 1.5F, 1.0F);
         this.world.spawnEntity(thrownStegoPlate);
     }
