@@ -28,6 +28,8 @@ radial.choice.aggressive=Aggressive
 radial.choice.passive=Passive
 radial.choice.turret=Turret Mode
 
+reminder.not_egg_owner=You don't own this egg!
+
 rift.egg.time=Time
 rift.egg.minutes=minute(s)
 rift.egg.seconds=second(s)
@@ -35,3 +37,21 @@ rift.egg.seconds=second(s)
 rift.notify.egg_hatched=Your Egg has hatched!
 
 riftcommands.bleed.usage=/riftbleed [player|entity] [seconds] [strength]
+riftcommands.bleed.successful=Applied bleed on %s
+
+sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus growls
+sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus hurts
+sounds.subtitle.tyrannosaurus_death=Tyrannosaurus dies
+sounds.subtitle.tyrannosaurus_roar=Tyrannosaurus roars
+
+sounds.subtitle.stegosaurus_idle=Stegosaurus grunts
+sounds.subtitle.stegosaurus_hurt=Stegosaurus hurts
+sounds.subtitle.stegosaurus_death=Stegosaurus dies
+
+tamebehavior.assist=%s is currently assisting
+tamebehavior.neutral=%s is currently neutral
+tamebehavior.aggressive=%s is currently aggressive
+tamebehavior.passive=%s is currently passive
+tamestatus.stand=%s is currently following
+tamestatus.sit=%s is currently sitting
+tamestatus.wander=%s is currently wandering

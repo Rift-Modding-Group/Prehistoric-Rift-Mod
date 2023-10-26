@@ -3,6 +3,7 @@ package anightdazingzoroark.rift.server.entity.creature;
 import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
+import anightdazingzoroark.rift.client.RiftSounds;
 import anightdazingzoroark.rift.server.entity.*;
 import anightdazingzoroark.rift.server.entity.ai.*;
 import com.google.common.base.Predicate;
@@ -11,6 +12,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.audio.Sound;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,6 +23,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -429,5 +432,17 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         }
         else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.use_roar_p2", false));
         return PlayState.CONTINUE;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.TYRANNOSAURUS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound() {
+        return RiftSounds.TYRANNOSAURUS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.TYRANNOSAURUS_DEATH;
     }
 }

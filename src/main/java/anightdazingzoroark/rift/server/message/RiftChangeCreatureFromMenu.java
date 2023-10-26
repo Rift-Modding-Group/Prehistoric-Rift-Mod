@@ -67,7 +67,7 @@ public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatu
     }
 
     private void sendTameStatusMessage(TameStatusType tameStatus, RiftCreature creature) {
-        String tameStatusName = "tame_status."+tameStatus.name().toLowerCase();
+        String tameStatusName = "tamestatus."+tameStatus.name().toLowerCase();
         ITextComponent itextcomponent = new TextComponentString(creature.getName());
         if (creature.getOwner() instanceof EntityPlayer) {
             ((EntityPlayer) creature.getOwner()).sendStatusMessage(new TextComponentTranslation(tameStatusName, itextcomponent), false);
@@ -75,10 +75,10 @@ public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatu
     }
 
     private void sendTameBehaviorMessage(TameBehaviorType tameBehavior, RiftCreature creature) {
-        String tameStatusName = "tame_status."+tameBehavior.name().toLowerCase();
+        String tameBehaviorName = "tamebehavior."+tameBehavior.name().toLowerCase();
         ITextComponent itextcomponent = new TextComponentString(creature.getName());
         if (creature.getOwner() instanceof EntityPlayer) {
-            ((EntityPlayer) creature.getOwner()).sendStatusMessage(new TextComponentTranslation(tameStatusName, itextcomponent), false);
+            ((EntityPlayer) creature.getOwner()).sendStatusMessage(new TextComponentTranslation(tameBehaviorName, itextcomponent), false);
         }
     }
 }

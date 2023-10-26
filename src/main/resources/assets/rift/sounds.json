@@ -1,0 +1,52 @@
+{
+  "rift.tyrannosaurus.idle": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/tyrannosaurus/tyrannosaurus_idle"
+    ],
+    "subtitle": "sounds.subtitle.tyrannosaurus_idle"
+  },
+  "rift.tyrannosaurus.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/tyrannosaurus/tyrannosaurus_hurt"
+    ],
+    "subtitle": "sounds.subtitle.tyrannosaurus_hurt"
+  },
+  "rift.tyrannosaurus.death": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/tyrannosaurus/tyrannosaurus_death"
+    ],
+    "subtitle": "sounds.subtitle.tyrannosaurus_death"
+  },
+  "rift.tyrannosaurus.roar": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/tyrannosaurus/tyrannosaurus_roar"
+    ],
+    "subtitle": "sounds.subtitle.tyrannosaurus_roar"
+  },
+
+  "rift.stegosaurus.idle": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/stegosaurus/stegosaurus_idle"
+    ],
+    "subtitle": "sounds.subtitle.stegosaurus_idle"
+  },
+  "rift.stegosaurus.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/stegosaurus/stegosaurus_hurt"
+    ],
+    "subtitle": "sounds.subtitle.stegosaurus_idle"
+  },
+  "rift.stegosaurus.death": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/stegosaurus/stegosaurus_death"
+    ],
+    "subtitle": "sounds.subtitle.stegosaurus_idle"
+  }
+}

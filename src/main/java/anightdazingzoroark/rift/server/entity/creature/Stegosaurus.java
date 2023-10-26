@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift.server.entity.creature;
 
 import anightdazingzoroark.rift.RiftUtil;
+import anightdazingzoroark.rift.client.RiftSounds;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.entity.ai.*;
@@ -17,6 +18,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -277,5 +279,17 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         }
         else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.use_plate_fling_p2", false));
         return PlayState.CONTINUE;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.STEGOSAURUS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound() {
+        return RiftSounds.STEGOSAURUS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.STEGOSAURUS_DEATH;
     }
 }
