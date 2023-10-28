@@ -146,7 +146,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
                 if (this.getRightClickCooldown() == 0) {
                     if (!this.isActing()) {
                         this.setActing(true);
-                        this.controlRangedAttack(holdAmount);
+                        this.controlRangedAttack(RiftUtil.clamp(holdAmount, 0, 100));
                         this.setRightClickCooldown(holdAmount * 2);
                         this.setEnergy(this.getEnergy() - (int)(0.09D * (double)holdAmount + 1D));
                     }
@@ -187,8 +187,10 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     public void controlRangedAttack(double strength) {
         ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this, (EntityPlayer)this.getControllingPassenger());
-        thrownStegoPlate.setDamage(strength >= 80 ? 8D : 4D);
-        thrownStegoPlate.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, 1.5F, 1.0F);
+        thrownStegoPlate.setDamage(strength * 0.04D + 4D);
+        thrownStegoPlate.setIsCritical(strength >= 50);
+        float velocity = (float) strength * 0.015f + 1.5f;
+        thrownStegoPlate.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, velocity, 1.0F);
         this.world.spawnEntity(thrownStegoPlate);
     }
 

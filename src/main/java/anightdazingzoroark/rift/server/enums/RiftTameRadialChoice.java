@@ -4,6 +4,7 @@ public enum RiftTameRadialChoice {
     INVENTORY,
     STATE,
     RIDE,
+    OPTIONS,
     BEHAVIOR,
     BACK,
     STAND,
@@ -13,5 +14,8 @@ public enum RiftTameRadialChoice {
     NEUTRAL,
     AGGRESSIVE,
     PASSIVE,
-    TURRET;
+    TURRET,
+    CHANGE_NAME,
+    SET_HOME,
+    UNCLAIM;
 }

@@ -27,8 +27,19 @@ radial.choice.neutral=Neutral
 radial.choice.aggressive=Aggressive
 radial.choice.passive=Passive
 radial.choice.turret=Turret Mode
+radial.choice.change_name=Change Name
+radial.choice.set_home=Set Home
+radial.choice.unclaim=Unclaim
+radial.note.need_saddle=This creature needs a saddle to be ridden!
+radial.note.too_young=This creature is too young to be saddled!
 
+radial.popup_choice.reset_name=Are you sure you want to clear this creature's home position?
+
+reminder.insufficient_energy=%s does not have enough energy to use this!
+reminder.low_energy=%s is low on energy!
+reminder.no_energy=%s is out of energy! It needs to rest in order to regenerate!
 reminder.not_egg_owner=You don't own this egg!
+reminder.taming_finished=You have successfully tamed a %s!
 
 rift.egg.time=Time
 rift.egg.minutes=minute(s)
@@ -55,3 +66,4 @@ tamebehavior.passive=%s is currently passive
 tamestatus.stand=%s is currently following
 tamestatus.sit=%s is currently sitting
 tamestatus.wander=%s is currently wandering
+tameupdate.set_home=%s's home position has been set to (%s, %s, %s)

@@ -16,6 +16,9 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("rift.tyrannosaurus.death")
     public static final SoundEvent TYRANNOSAURUS_DEATH = createSoundEvent("rift.tyrannosaurus.death");
 
+    @GameRegistry.ObjectHolder("rift.tyrannosaurus.roar")
+    public static final SoundEvent TYRANNOSAURUS_ROAR = createSoundEvent("rift.tyrannosaurus.roar");
+
     @GameRegistry.ObjectHolder("rift.stegosaurus.idle")
     public static final SoundEvent STEGOSAURUS_IDLE = createSoundEvent("rift.stegosaurus.idle");
 

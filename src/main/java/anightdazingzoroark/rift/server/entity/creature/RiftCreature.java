@@ -32,13 +32,13 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
-import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -71,6 +71,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> JUST_SPAWNED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> HERD_LEADER_ID = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> TAME_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> HAS_HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -94,6 +95,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float attackWidth;
     public float rangedWidth;
     private int tickUse;
+    private BlockPos homePosition;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -142,6 +144,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(JUST_SPAWNED, true);
         this.dataManager.register(HERD_LEADER_ID, this.getEntityId());
         this.dataManager.register(TAME_PROGRESS, 0);
+        this.dataManager.register(HAS_HOME_POS, Boolean.FALSE);
     }
 
     @Override
@@ -161,6 +164,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
+
         //disable default growth system
         if (this.world.isRemote) this.setScaleForAge(false);
         if (this.getGrowingAge() < 0) this.setGrowingAge(0);
@@ -271,14 +275,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private void informRiderEnergy() {
         if (!this.informLowEnergy && this.getEnergy() <= 6 && this.getEnergy() > 0) {
-            ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.low_energy", this.getName()), false);
+            ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.low_energy", this.getName()), false);
             this.informLowEnergy = true;
         }
         if (this.informLowEnergy && this.getEnergy() > 6) {
             this.informLowEnergy = false;
         }
         if (!this.informNoEnergy && this.getEnergy() == 0) {
-            ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.no_energy", this.getName()), false);
+            ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.no_energy", this.getName()), false);
             this.informNoEnergy = true;
         }
         if (this.informNoEnergy && this.getEnergy() > 0) this.informNoEnergy = false;
@@ -338,7 +342,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else {
             if (this.isTamingFood(itemstack) && !itemstack.isEmpty() && (this.isTameableByFeeding() || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
-                    if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("tame_progress.finished", new TextComponentString(this.getName())), false);
+                    if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished", new TextComponentString(this.getName())), false);
                     this.setTameProgress(0);
                     this.setTamed(true);
                     this.setOwnerId(player.getUniqueID());
@@ -482,6 +486,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setInteger("AgeTicks", this.getAgeInTicks());
         compound.setBoolean("JustSpawned", this.justSpawned());
         compound.setInteger("TameProgress", this.getTameProgress());
+        compound.setBoolean("HasHomePos", this.getHasHomePos());
+        if (this.homePosition != null && this.getHasHomePos()) {
+            compound.setInteger("HomePosX", this.homePosition.getX());
+            compound.setInteger("HomePosY", this.homePosition.getY());
+            compound.setInteger("HomePosZ", this.homePosition.getZ());
+        }
     }
 
     @Override
@@ -515,6 +525,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setAgeInTicks(compound.getInteger("AgeTicks"));
         this.setJustSpawned(compound.getBoolean("JustSpawned"));
         this.setTameProgress(compound.getInteger("TameProgress"));
+        if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
     }
 
     private void initInventory() {
@@ -773,6 +784,29 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setJustSpawned(boolean value) {
         this.dataManager.set(JUST_SPAWNED, value);
+    }
+
+    public void setHomePos() {
+        this.dataManager.set(HAS_HOME_POS, true);
+        this.homePosition = new BlockPos(this);
+    }
+
+    public void setHomePos(int x, int y, int z) {
+        this.dataManager.set(HAS_HOME_POS, true);
+        this.homePosition = new BlockPos(x, y, z);
+    }
+
+    public void clearHomePos() {
+        this.dataManager.set(HAS_HOME_POS, false);
+        this.homePosition = null;
+    }
+
+    public boolean getHasHomePos() {
+        return this.dataManager.get(HAS_HOME_POS);
+    }
+
+    public BlockPos getHomePos() {
+        return this.homePosition;
     }
 
     public boolean isBaby() {

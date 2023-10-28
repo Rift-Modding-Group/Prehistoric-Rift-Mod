@@ -28,6 +28,7 @@ public class ServerProxy implements IGuiHandler {
     public static final int GUI_EGG = 0;
     public static final int GUI_DIAL = 1;
     public static final int GUI_CREATURE_INVENTORY = 2;
+    public static final int GUI_MENU_FROM_RADIAL = 3;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
@@ -60,6 +61,9 @@ public class ServerProxy implements IGuiHandler {
             if (entity instanceof RiftCreature) {
                 return new CreatureContainer((RiftCreature) entity, player);
             }
+        }
+        else if (id == GUI_MENU_FROM_RADIAL) {
+            return new CreatureContainer((RiftCreature) entity, player);
         }
         return null;
     }

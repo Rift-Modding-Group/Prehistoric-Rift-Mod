@@ -1,13 +1,12 @@
 package anightdazingzoroark.rift.client.ui;
 
+import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.rift.server.enums.PopupFromRadial;
 import anightdazingzoroark.rift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
-import anightdazingzoroark.rift.server.message.RiftChangeCreatureFromMenu;
-import anightdazingzoroark.rift.server.message.RiftOpenInventoryFromMenu;
-import anightdazingzoroark.rift.server.message.RiftMessages;
-import anightdazingzoroark.rift.server.message.RiftStartRiding;
+import anightdazingzoroark.rift.server.message.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -130,7 +129,7 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 1 && this.creature.getTameStatus().name().equals(this.choices.get(i).name())) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 128, 0, 128, 128);
             }
-            else if (this.radialChoiceMenu == 2 && this.creature.getTameBehavior().name().equals(this.choices.get(i).name())) {
+            else if (this.radialChoiceMenu == 3 && this.creature.getTameBehavior().name().equals(this.choices.get(i).name())) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 128, 0, 128, 128);
             }
             else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 2) {
@@ -218,6 +217,14 @@ public class RiftDialMenu extends GuiScreen {
     protected void mouseReleased(int mouseX, int mouseY, int state) {
         super.mouseReleased(mouseX, mouseY, state);
         switch (this.radialChoiceMenu) {
+            /**
+             * how menu works:
+             * menu is for when radialChoiceMenu == 0
+             * state choices is for when radialChoiceMenu == 1
+             * options choices is for when radialChoiceMenu == 2
+             * behavior choices is for when radialChoiceMenu == 3
+             * choices (clockwise from bottom) r inventory, state, ride, options, behavior
+             */
             case 0:
                 if (selectedItem == 0) {
                     RiftMessages.WRAPPER.sendToServer(new RiftOpenInventoryFromMenu(this.creature.getEntityId()));
@@ -232,8 +239,12 @@ public class RiftDialMenu extends GuiScreen {
                     RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
                 }
                 else if (selectedItem == 3) {
-                    this.choices = getBehavior();
+                    this.choices = getOptions();
                     this.radialChoiceMenu = 2;
+                }
+                else if (selectedItem == 4) {
+                    this.choices = getBehavior();
+                    this.radialChoiceMenu = 3;
                 }
                 break;
             case 1:
@@ -259,6 +270,17 @@ public class RiftDialMenu extends GuiScreen {
                     this.choices = getMain();
                     this.radialChoiceMenu = 0;
                 }
+                else if (selectedItem == 2) {
+                    ClientProxy.popupFromRadial = PopupFromRadial.SET_HOME;
+                    RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature, !this.creature.getHasHomePos()));
+                    this.mc.player.closeScreen();
+                }
+                break;
+            case 3:
+                if (selectedItem == 0) {
+                    this.choices = getMain();
+                    this.radialChoiceMenu = 0;
+                }
                 else if (selectedItem == 1) {
                     RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.ASSIST));
                     this.mc.player.closeScreen();
@@ -280,11 +302,11 @@ public class RiftDialMenu extends GuiScreen {
     }
 
     private static List<RiftTameRadialChoice> getMain() {
-        return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.RIDE, RiftTameRadialChoice.BEHAVIOR);
+        return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.RIDE, RiftTameRadialChoice.OPTIONS, RiftTameRadialChoice.BEHAVIOR);
     }
 
     private static List<RiftTameRadialChoice> getMainUnrideable() {
-        return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.BEHAVIOR);
+        return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.OPTIONS, RiftTameRadialChoice.BEHAVIOR);
     }
 
     private static List<RiftTameRadialChoice> getState() {
@@ -301,5 +323,9 @@ public class RiftDialMenu extends GuiScreen {
 
     private static List<RiftTameRadialChoice> getBehaviorTurretOnly() {
         return Arrays.asList(RiftTameRadialChoice.BACK,RiftTameRadialChoice.PASSIVE, RiftTameRadialChoice.TURRET);
+    }
+
+    private static List<RiftTameRadialChoice> getOptions() {
+        return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.CHANGE_NAME, RiftTameRadialChoice.SET_HOME, RiftTameRadialChoice.UNCLAIM);
     }
 }

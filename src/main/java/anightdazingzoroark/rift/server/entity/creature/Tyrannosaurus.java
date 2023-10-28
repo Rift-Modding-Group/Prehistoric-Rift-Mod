@@ -352,7 +352,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                     }
                 }
             }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.insufficient_energy", this.getName()), false);
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
         }
         if (control == 1) {
             if (this.getEnergy() > 6) {
@@ -362,9 +362,10 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                     this.roar(0.015f * Math.min(holdAmount, 100) + 1.5f);
                     this.setEnergy(this.getEnergy() - (int)(0.06d * (double)Math.min(holdAmount, 100) + 6d));
                     this.setRightClickCooldown(holdAmount * 2);
+                    this.playSound(RiftSounds.TYRANNOSAURUS_ROAR, 2, 1);
                 }
             }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.insufficient_energy", this.getName()), false);
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
         }
     }
 

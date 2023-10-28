@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift.server.entity.ai;
 
 import anightdazingzoroark.rift.RiftConfig;
+import anightdazingzoroark.rift.client.RiftSounds;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
@@ -65,6 +66,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
         if (this.roarTick == 10 && this.mob.isEntityAlive()) {
             this.mob.roar(0.015f * this.mob.roarCharge + 1.5f);
             if (this.mob.isTamed()) this.mob.setEnergy(this.mob.getEnergy() - (int)(0.06d * (double)this.mob.roarCharge + 6d));
+            this.mob.playSound(RiftSounds.TYRANNOSAURUS_ROAR, 2, 1);
         }
     }
 }
