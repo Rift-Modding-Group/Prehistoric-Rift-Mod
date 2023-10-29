@@ -2,9 +2,11 @@ package anightdazingzoroark.rift.server.entity.creature;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
+import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
+import anightdazingzoroark.rift.server.enums.PopupFromRadial;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.items.RiftItems;
@@ -65,13 +67,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-
     private static final DataParameter<Boolean> HAS_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> JUST_SPAWNED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> HERD_LEADER_ID = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> TAME_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HAS_HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -145,6 +147,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(HERD_LEADER_ID, this.getEntityId());
         this.dataManager.register(TAME_PROGRESS, 0);
         this.dataManager.register(HAS_HOME_POS, Boolean.FALSE);
+        this.dataManager.register(UNCLAIM_TIMER, 0);
     }
 
     @Override
@@ -176,6 +179,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.canDoHerding()) this.manageHerding();
         }
         if (this.isTamed() && !this.world.isRemote) {
+            if (this.getOwner() == null) this.manageUnclaimed();
             this.updateEnergyMove();
             this.updateEnergyActions();
             this.resetEnergyActionMod();
@@ -190,6 +194,23 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setScaleForAge(boolean child) {
         float scale = RiftUtil.clamp(Math.min((0.75f/24000f) * (this.getAgeInTicks() - 24000f) + 1f, 1f), 0.25f, 1f);
         this.setScale(scale);
+    }
+
+    private void manageUnclaimed() {
+        this.setUnclaimTimer(this.getUnclaimTimer() + 1);
+        if (this.getUnclaimTimer() >= 24000) {
+            this.setTamed(false);
+            this.setTameStatus(TameStatusType.WANDER);
+            this.clearHomePos();
+            this.setUnclaimTimer(0);
+            for (int i = 0; i < this.creatureInventory.getSizeInventory(); i++) {
+                ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
+                EntityItem entityItem = new EntityItem(this.world, this.posX, this.posY + this.getEyeHeight(), this.posZ, itemInSlot);
+                if (itemInSlot.getItem() == Items.SADDLE) this.setSaddled(false);
+                this.world.spawnEntity(entityItem);
+                this.creatureInventory.setInventorySlotContents(i, new ItemStack(Items.AIR));
+            }
+        }
     }
 
     private void updateEnergyMove() {
@@ -308,39 +329,52 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
+        System.out.println(this.getOwnerId());
+        System.out.println(player.getUniqueID());
         if (this.isTamed()) {
-            if (this.getOwnerId().equals(player.getUniqueID())) {
-                if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
-                    this.consumeItemFromStack(player, itemstack);
-                    this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
-                    this.showGrowthParticles();
+            try {
+                if (this.getOwnerId().equals(player.getUniqueID())) {
+                    if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
+                        this.consumeItemFromStack(player, itemstack);
+                        this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
+                        this.showGrowthParticles();
+                    }
+                    else if (this.isFavoriteFood(itemstack) && !RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getHealth() < this.getMaxHealth()) {
+                        this.consumeItemFromStack(player, itemstack);
+                        this.heal((float) this.getFavoriteFoodHeal(itemstack));
+                    }
+                    else if (this.isTamingFood(itemstack) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getTameStatus() != TameStatusType.SIT) {
+                        this.consumeItemFromStack(player, itemstack);
+                        this.setInLove(player);
+                    }
+                    else if (RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getEnergy() < 20) {
+                        this.consumeItemFromStack(player, itemstack);
+                        this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemstack.getItem(), this.creatureType.getCreatureDiet()));
+                    }
+                    else if (itemstack.isEmpty() && !this.isSaddled()) {
+                        player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
+                    }
+                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
+                    }
+                    else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
+                        player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
+                    }
                 }
-                else if (this.isFavoriteFood(itemstack) && !RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getHealth() < this.getMaxHealth()) {
-                    this.consumeItemFromStack(player, itemstack);
-                    this.heal((float) this.getFavoriteFoodHeal(itemstack));
-                }
-                else if (this.isTamingFood(itemstack) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getTameStatus() != TameStatusType.SIT) {
-                    this.consumeItemFromStack(player, itemstack);
-                    this.setInLove(player);
-                }
-                else if (RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getEnergy() < 20) {
-                    this.consumeItemFromStack(player, itemstack);
-                    this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemstack.getItem(), this.creatureType.getCreatureDiet()));
-                }
-                else if (itemstack.isEmpty() && !this.isSaddled()) {
-                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
-                }
-                else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking()) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
-                }
-                else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
-                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
-                }
-                return true;
             }
+            catch (Exception e) {
+                if (this.getOwnerId() == null) {
+                    ClientProxy.popupFromRadial = PopupFromRadial.CLAIM;
+                    RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this));
+                }
+                else {
+                    player.sendStatusMessage(new TextComponentTranslation("reminder.not_creature_owner", this.getOwner().getName()), false);
+                }
+            }
+            return true;
         }
         else {
-            if (this.isTamingFood(itemstack) && !itemstack.isEmpty() && (this.isTameableByFeeding() || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
+            if (!itemstack.isEmpty() && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished", new TextComponentString(this.getName())), false);
                     this.setTameProgress(0);
@@ -492,6 +526,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             compound.setInteger("HomePosY", this.homePosition.getY());
             compound.setInteger("HomePosZ", this.homePosition.getZ());
         }
+        compound.setInteger("UnclaimTimer", this.getUnclaimTimer());
     }
 
     @Override
@@ -526,6 +561,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setJustSpawned(compound.getBoolean("JustSpawned"));
         this.setTameProgress(compound.getInteger("TameProgress"));
         if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
+        this.setUnclaimTimer(compound.getInteger("UnclaimTimer"));
     }
 
     private void initInventory() {
@@ -776,6 +812,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setAgeInDays(int value) {
         this.dataManager.set(AGE_TICKS, value * 24000);
+    }
+
+    public int getUnclaimTimer() {
+        return this.dataManager.get(UNCLAIM_TIMER);
+    }
+
+    public void setUnclaimTimer(int value) {
+        this.dataManager.set(UNCLAIM_TIMER, value);
     }
 
     public boolean justSpawned() {

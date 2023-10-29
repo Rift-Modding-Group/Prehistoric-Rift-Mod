@@ -73,8 +73,9 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(4, new RiftHerdDistanceFromOtherMembers(this, 3D));
         this.tasks.addTask(5, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
-        this.tasks.addTask(6, new RiftWander(this, 1.0D));
-        this.tasks.addTask(7, new RiftLookAround(this));
+        this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(7, new RiftWander(this, 1.0D));
+        this.tasks.addTask(8, new RiftLookAround(this));
     }
 
     @Override

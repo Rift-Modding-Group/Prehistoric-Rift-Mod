@@ -159,7 +159,13 @@ public class RiftDialMenu extends GuiScreen {
 
         //text
         for (int i = 0; i < numItems; i++) {
-            String radialString = I18n.format("radial.choice."+this.choices.get(i).name().toLowerCase());
+            String radialString;
+            if (i == 2 && this.radialChoiceMenu == 2) {
+                if (creature.getHasHomePos()) radialString = I18n.format("radial.choice.reset_home");
+                else radialString = I18n.format("radial.choice.set_home");
+            }
+            else radialString = I18n.format("radial.choice."+this.choices.get(i).name().toLowerCase());
+
             if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled())) && i == 2) radialString = "["+radialString+"]";
 
             float angle1 = ((i / (float) numItems) + 0.25f) * 2 * (float) Math.PI;
@@ -273,6 +279,11 @@ public class RiftDialMenu extends GuiScreen {
                 else if (selectedItem == 2) {
                     ClientProxy.popupFromRadial = PopupFromRadial.SET_HOME;
                     RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature, !this.creature.getHasHomePos()));
+                    this.mc.player.closeScreen();
+                }
+                else if (selectedItem == 3) {
+                    ClientProxy.popupFromRadial = PopupFromRadial.UNCLAIM;
+                    RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
                     this.mc.player.closeScreen();
                 }
                 break;

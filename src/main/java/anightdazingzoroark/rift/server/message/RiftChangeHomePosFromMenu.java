@@ -1,5 +1,7 @@
 package anightdazingzoroark.rift.server.message;
 
+import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
@@ -7,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftChangeHomePosFromMenu extends AbstractMessage<RiftChangeHomePosFromMenu> {
@@ -40,13 +43,11 @@ public class RiftChangeHomePosFromMenu extends AbstractMessage<RiftChangeHomePos
     @Override
     public void onServerReceived(MinecraftServer server, RiftChangeHomePosFromMenu message, EntityPlayer player, MessageContext messageContext) {
         RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
+        World world = player.world;
         if (message.setHome) {
             creature.setHomePos();
             player.sendStatusMessage(new TextComponentTranslation("tameupdate.set_home", creature.getName(), creature.getHomePos().getX(), creature.getHomePos().getY(), creature.getHomePos().getZ()), false);
         }
-        else {
-            RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(creature));
-//            creature.clearHomePos();
-        }
+        else player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_RADIAL, world, message.creatureId, 0, 0);
     }
 }

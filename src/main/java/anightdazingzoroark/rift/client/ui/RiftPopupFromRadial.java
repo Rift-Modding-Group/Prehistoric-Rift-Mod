@@ -2,10 +2,13 @@ package anightdazingzoroark.rift.client.ui;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.ClientProxy;
-import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.enums.PopupFromRadial;
 import anightdazingzoroark.rift.server.inventory.DummyContainer;
+import anightdazingzoroark.rift.server.message.RiftClearHomePosFromPopup;
+import anightdazingzoroark.rift.server.message.RiftMessages;
+import anightdazingzoroark.rift.server.message.RiftManageClaimCreature;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -37,8 +40,13 @@ public class RiftPopupFromRadial extends GuiContainer {
 
     @Override
     public void initGui() {
+        buttonList.clear();
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
+        if (this.popupFromRadial == PopupFromRadial.SET_HOME || this.popupFromRadial == PopupFromRadial.UNCLAIM || this.popupFromRadial == PopupFromRadial.CLAIM) {
+            this.buttonList.add(new GuiButton(0, 170, 150, 60, 20, I18n.format("radial.popup_button.yes")));
+            this.buttonList.add(new GuiButton(1, 250, 150, 60, 20, I18n.format("radial.popup_button.no")));
+        }
         super.initGui();
     }
 
@@ -62,31 +70,49 @@ public class RiftPopupFromRadial extends GuiContainer {
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.disableLighting();
-//        this.drawGuiContainerForegroundLayer(p_73863_1_, p_73863_2_);
         GlStateManager.enableLighting();
         GlStateManager.popMatrix();
         GlStateManager.enableLighting();
         GlStateManager.enableDepth();
         RenderHelper.enableStandardItemLighting();
-//        if (!renderText.isEmpty()) {
-//            this.drawHoveringText(Lists.newArrayList(renderText), p_73863_1_, p_73863_2_, fontRenderer);
-//        }
+    }
+
+    @Override
+    public void actionPerformed(GuiButton button) {
+        if (this.popupFromRadial == PopupFromRadial.SET_HOME) {
+            if (button.id == 0) {
+                RiftMessages.WRAPPER.sendToServer(new RiftClearHomePosFromPopup(this.creature));
+            }
+        }
+        else if (this.popupFromRadial == PopupFromRadial.UNCLAIM) {
+            if (button.id == 0) {
+                RiftMessages.WRAPPER.sendToServer(new RiftManageClaimCreature(this.creature, false));
+            }
+        }
+        else if (this.popupFromRadial == PopupFromRadial.CLAIM) {
+            if (button.id == 0) {
+                RiftMessages.WRAPPER.sendToServer(new RiftManageClaimCreature(this.creature, true));
+            }
+        }
+        this.mc.player.closeScreen();
     }
 
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         reset();
         GlStateManager.pushMatrix();
-        if (this.popupFromRadial == PopupFromRadial.SET_HOME) {
-            GlStateManager.scale(1f, 1f, 1f);
-            String s = I18n.format(I18n.format("radial.popup_choice.reset_name"));
-            printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 50, 0, 0, 0);
-        }
+        String s = I18n.format(I18n.format("radial.popup_choice."+this.popupFromRadial.name().toLowerCase()));
+        printFormattedStringXY(s, (-116 + this.xGui)/ 2, 50, 116, 0, 0, 0);
         GlStateManager.popMatrix();
     }
 
     public void printStringXY(String str0, int x0, int y0, int r, int g, int b) {
         int col = (r << 16) | (g << 8) | b;
         this.fontRenderer.drawString(str0, x0, y0, col);
+    }
+
+    public void printFormattedStringXY(String str0, int x0, int y0, int xStrSize, int r, int g, int b) {
+        int col = (r << 16) | (g << 8) | b;
+        this.fontRenderer.drawSplitString(str0, x0, y0, xStrSize, col);
     }
 
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
