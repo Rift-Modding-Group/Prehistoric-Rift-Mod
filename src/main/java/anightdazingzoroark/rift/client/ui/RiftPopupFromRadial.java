@@ -5,24 +5,30 @@ import anightdazingzoroark.rift.client.ClientProxy;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.enums.PopupFromRadial;
 import anightdazingzoroark.rift.server.inventory.DummyContainer;
+import anightdazingzoroark.rift.server.message.RiftChangeCreatureName;
 import anightdazingzoroark.rift.server.message.RiftClearHomePosFromPopup;
 import anightdazingzoroark.rift.server.message.RiftMessages;
 import anightdazingzoroark.rift.server.message.RiftManageClaimCreature;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.io.IOException;
 
 import static net.minecraftforge.fml.common.StartupQuery.reset;
 
 @SideOnly(Side.CLIENT)
 public class RiftPopupFromRadial extends GuiContainer {
     private RiftCreature creature;
+    private GuiTextField textField;
     protected int xSize = 176;
     protected int ySize = 96;
     public final int xGui = 176;
@@ -44,8 +50,15 @@ public class RiftPopupFromRadial extends GuiContainer {
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
         if (this.popupFromRadial == PopupFromRadial.SET_HOME || this.popupFromRadial == PopupFromRadial.UNCLAIM || this.popupFromRadial == PopupFromRadial.CLAIM) {
-            this.buttonList.add(new GuiButton(0, (this.xGui / 2) - 60/2 - 30, 150, 60, 20, I18n.format("radial.popup_button.yes")));
-            this.buttonList.add(new GuiButton(1, (this.xGui / 2) - 60/2 + 30, 150, 60, 20, I18n.format("radial.popup_button.no")));
+            this.buttonList.add(new GuiButton(0, (-60 + this.xGui)/2 + 100, 150, 60, 20, I18n.format("radial.popup_button.yes")));
+            this.buttonList.add(new GuiButton(1, (-60 + this.xGui)/2 + 180, 150, 60, 20, I18n.format("radial.popup_button.no")));
+        }
+        else if (this.popupFromRadial == PopupFromRadial.CHANGE_NAME) {
+            this.textField = new GuiTextField(0, fontRenderer, (-120 + this.xGui)/2 + 140, 120, 120, 20);
+            this.textField.setMaxStringLength(20);
+            this.textField.setFocused(true);
+            this.buttonList.add(new GuiButton(0, (-60 + this.xGui)/2 + 100, 150, 60, 20, I18n.format("radial.popup_button.confirm")));
+            this.buttonList.add(new GuiButton(1, (-60 + this.xGui)/2 + 180, 150, 60, 20, I18n.format("radial.popup_button.cancel")));
         }
         super.initGui();
     }
@@ -62,6 +75,7 @@ public class RiftPopupFromRadial extends GuiContainer {
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
         super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        if (this.textField != null) this.textField.drawTextBox();
         RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.pushMatrix();
         GlStateManager.translate((float) k, (float) l, 0.0F);
@@ -94,6 +108,11 @@ public class RiftPopupFromRadial extends GuiContainer {
                 RiftMessages.WRAPPER.sendToServer(new RiftManageClaimCreature(this.creature, true));
             }
         }
+        else if (this.popupFromRadial == PopupFromRadial.CHANGE_NAME) {
+            if (button.id == 0) {
+                RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureName(this.creature, this.textField.getText()));
+            }
+        }
         this.mc.player.closeScreen();
     }
 
@@ -121,5 +140,16 @@ public class RiftPopupFromRadial extends GuiContainer {
         int k = (this.width - this.xSize) / 2;
         int l = (this.height - this.ySize) / 2;
         drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, (176F), (96F));
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) {
+        if (keyCode == 1) this.mc.player.closeScreen();
+        if (this.textField != null) this.textField.textboxKeyTyped(typedChar, keyCode);
+    }
+
+    @Override
+    public void updateScreen() {
+        if (this.textField != null) this.textField.updateCursorCounter();
     }
 }

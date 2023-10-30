@@ -276,6 +276,11 @@ public class RiftDialMenu extends GuiScreen {
                     this.choices = getMain();
                     this.radialChoiceMenu = 0;
                 }
+                else if (selectedItem == 1) {
+                    ClientProxy.popupFromRadial = PopupFromRadial.CHANGE_NAME;
+                    RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
+                    this.mc.player.closeScreen();
+                }
                 else if (selectedItem == 2) {
                     ClientProxy.popupFromRadial = PopupFromRadial.SET_HOME;
                     RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature, !this.creature.getHasHomePos()));

@@ -38,8 +38,11 @@ radial.note.too_young=This creature is too young to be saddled!
 radial.popup_choice.set_home=Are you sure you want to clear this creature's home position?
 radial.popup_choice.unclaim=Are you sure you want to unclaim this creature? It can be then claimed by anyone else, and if it remains unclaimed within 1 day, it becomes wild again.
 radial.popup_choice.claim=Are you sure you want to claim this creature?
+radial.popup_choice.change_name=Change this creature's name.
 radial.popup_button.yes=Yes
 radial.popup_button.no=No
+radial.popup_button.confirm=Confirm
+radial.popup_button.cancel=Cancel
 
 reminder.insufficient_energy=%s does not have enough energy to use this!
 reminder.low_energy=%s is low on energy!
