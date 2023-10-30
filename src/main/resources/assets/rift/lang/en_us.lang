@@ -36,7 +36,7 @@ radial.note.need_saddle=This creature needs a saddle to be ridden!
 radial.note.too_young=This creature is too young to be saddled!
 
 radial.popup_choice.set_home=Are you sure you want to clear this creature's home position?
-radial.popup_choice.unclaim=Are you sure you want to unclaim this creature?
+radial.popup_choice.unclaim=Are you sure you want to unclaim this creature? It can be then claimed by anyone else, and if it remains unclaimed within 1 day, it becomes wild again.
 radial.popup_choice.claim=Are you sure you want to claim this creature?
 radial.popup_button.yes=Yes
 radial.popup_button.no=No

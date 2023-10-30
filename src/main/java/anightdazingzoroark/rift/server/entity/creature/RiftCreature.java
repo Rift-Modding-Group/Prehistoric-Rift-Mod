@@ -73,6 +73,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> HERD_LEADER_ID = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> TAME_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HAS_HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> UNCLAIMED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private int energyMod;
     private int energyRegenMod;
@@ -147,6 +148,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(HERD_LEADER_ID, this.getEntityId());
         this.dataManager.register(TAME_PROGRESS, 0);
         this.dataManager.register(HAS_HOME_POS, Boolean.FALSE);
+        this.dataManager.register(UNCLAIMED, Boolean.FALSE);
         this.dataManager.register(UNCLAIM_TIMER, 0);
     }
 
@@ -179,7 +181,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.canDoHerding()) this.manageHerding();
         }
         if (this.isTamed() && !this.world.isRemote) {
-            if (this.getOwner() == null) this.manageUnclaimed();
+            if (this.isUnclaimed()) this.manageUnclaimed();
             this.updateEnergyMove();
             this.updateEnergyActions();
             this.resetEnergyActionMod();
@@ -526,6 +528,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             compound.setInteger("HomePosY", this.homePosition.getY());
             compound.setInteger("HomePosZ", this.homePosition.getZ());
         }
+        compound.setBoolean("Unclaimed", this.isUnclaimed());
         compound.setInteger("UnclaimTimer", this.getUnclaimTimer());
     }
 
@@ -561,7 +564,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setJustSpawned(compound.getBoolean("JustSpawned"));
         this.setTameProgress(compound.getInteger("TameProgress"));
         if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
+        this.setUnclaimed(compound.getBoolean("Unclaimed"));
         this.setUnclaimTimer(compound.getInteger("UnclaimTimer"));
+        if (this.isUnclaimed()) this.setTamed(true);
     }
 
     private void initInventory() {
@@ -812,6 +817,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setAgeInDays(int value) {
         this.dataManager.set(AGE_TICKS, value * 24000);
+    }
+
+    public boolean isUnclaimed() {
+        return this.dataManager.get(UNCLAIMED);
+    }
+
+    public void setUnclaimed(boolean value) {
+        this.dataManager.set(UNCLAIMED, value);
     }
 
     public int getUnclaimTimer() {

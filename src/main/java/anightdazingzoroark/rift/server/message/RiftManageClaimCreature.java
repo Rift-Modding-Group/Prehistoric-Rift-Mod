@@ -42,12 +42,14 @@ public class RiftManageClaimCreature extends AbstractMessage<RiftManageClaimCrea
         RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
         if (message.claim) {
             creature.setOwnerId(player.getUniqueID());
+            creature.setUnclaimed(false);
             player.sendStatusMessage(new TextComponentTranslation("reminder.claim_creature", creature.getName()), false);
         }
         else {
             creature.setTameStatus(TameStatusType.SIT);
             creature.setTameBehavior(TameBehaviorType.PASSIVE);
             creature.setOwnerId(null);
+            creature.setUnclaimed(true);
             player.sendStatusMessage(new TextComponentTranslation("reminder.unclaim_creature", creature.getName()), false);
         }
     }

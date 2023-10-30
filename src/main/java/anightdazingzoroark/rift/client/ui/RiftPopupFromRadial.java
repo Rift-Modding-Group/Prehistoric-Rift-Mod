@@ -44,8 +44,8 @@ public class RiftPopupFromRadial extends GuiContainer {
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
         if (this.popupFromRadial == PopupFromRadial.SET_HOME || this.popupFromRadial == PopupFromRadial.UNCLAIM || this.popupFromRadial == PopupFromRadial.CLAIM) {
-            this.buttonList.add(new GuiButton(0, 170, 150, 60, 20, I18n.format("radial.popup_button.yes")));
-            this.buttonList.add(new GuiButton(1, 250, 150, 60, 20, I18n.format("radial.popup_button.no")));
+            this.buttonList.add(new GuiButton(0, (this.xGui / 2) - 60/2 - 30, 150, 60, 20, I18n.format("radial.popup_button.yes")));
+            this.buttonList.add(new GuiButton(1, (this.xGui / 2) - 60/2 + 30, 150, 60, 20, I18n.format("radial.popup_button.no")));
         }
         super.initGui();
     }
@@ -101,7 +101,7 @@ public class RiftPopupFromRadial extends GuiContainer {
         reset();
         GlStateManager.pushMatrix();
         String s = I18n.format(I18n.format("radial.popup_choice."+this.popupFromRadial.name().toLowerCase()));
-        printFormattedStringXY(s, (-116 + this.xGui)/ 2, 50, 116, 0, 0, 0);
+        printFormattedStringXY(s, (-148 + this.xGui)/ 2, 50, 148, 0, 0, 0);
         GlStateManager.popMatrix();
     }
 
