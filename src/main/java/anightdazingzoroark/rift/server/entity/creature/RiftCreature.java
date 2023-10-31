@@ -12,6 +12,9 @@ import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.items.RiftItems;
 import anightdazingzoroark.rift.server.message.*;
 import com.google.common.base.Predicate;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
@@ -23,20 +26,21 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGlassBottle;
+import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
@@ -99,6 +103,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float rangedWidth;
     private int tickUse;
     private BlockPos homePosition;
+    private boolean isFloating;
+    private double lastYd;
+    private double waterLevel;
+    private double yFloatPos;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -121,6 +129,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.heal((float)maxCreatureHealth);
         this.herdCheckCountdown = 0;
         this.tickUse = 0;
+        this.isFloating = false;
+        this.lastYd = 0D;
+        this.yFloatPos = 0D;
     }
 
     @Override
@@ -179,6 +190,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();
             if (this.canDoHerding()) this.manageHerding();
+            this.controlWaterMovement();
+//            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+//            this.checkInWater();
         }
         if (this.isTamed() && !this.world.isRemote) {
             if (this.isUnclaimed()) this.manageUnclaimed();
@@ -352,6 +366,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else if (RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getEnergy() < 20) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemstack.getItem(), this.creatureType.getCreatureDiet()));
+                    }
+                    else if (itemstack.getItem() instanceof ItemPotion) {
+                        for (PotionEffect effect : PotionUtils.getEffectsFromStack(itemstack)) {
+                            this.addPotionEffect(new PotionEffect(effect));
+                        }
+                        this.consumeItemFromStack(player, itemstack);
+                        if (itemstack.isEmpty()) player.setHeldItem(hand, new ItemStack(Items.GLASS_BOTTLE));
+                        else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.GLASS_BOTTLE))) player.dropItem(new ItemStack(Items.GLASS_BOTTLE), false);
+                    }
+                    else if (itemstack.getItem() == Items.MILK_BUCKET && !this.getActivePotionEffects().isEmpty()) {
+                        this.curePotionEffects(itemstack);
+                        this.consumeItemFromStack(player, itemstack);
+                        if (itemstack.isEmpty()) player.setHeldItem(hand, new ItemStack(Items.BUCKET));
+                        else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.BUCKET))) player.dropItem(new ItemStack(Items.BUCKET), false);
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
@@ -1030,6 +1058,62 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.jumpMovementFactor = 0.02F;
             super.travel(strafe, vertical, forward);
         }
+    }
+
+    private void controlWaterMovement() {
+        if (!this.isFloating && this.isInWater()) {
+            this.yFloatPos = this.getHighestWaterLevel();
+            if (this.posY <= this.yFloatPos) this.isFloating = true;
+        }
+        else if (this.isFloating && this.isInWater()) {
+            if (this.posY < this.yFloatPos) {
+                this.motionY = 0.1;
+                this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+            }
+            else {
+                this.setPosition(this.posX, this.yFloatPos, this.posZ);
+            }
+        }
+        else if (this.isFloating && !this.isInWater()) this.isFloating = false;
+    }
+
+    public float getHighestWaterLevel() {
+        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
+        int i = MathHelper.floor(axisalignedbb.minX);
+        int j = MathHelper.ceil(axisalignedbb.maxX);
+        int k = MathHelper.floor(axisalignedbb.minY);   // Start from the bottom
+        int l = 256;  // Maximum possible height in Minecraft
+        int i1 = MathHelper.floor(axisalignedbb.minZ);
+        int j1 = MathHelper.ceil(axisalignedbb.maxZ);
+        BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+
+        try {
+            for (int k1 = k; k1 < l; ++k1) {
+                for (int l1 = i; l1 < j; ++l1) {
+                    for (int i2 = i1; i2 < j1; ++i2) {
+                        blockpos$pooledmutableblockpos.setPos(l1, k1, i2);
+                        IBlockState iblockstate = this.world.getBlockState(blockpos$pooledmutableblockpos);
+
+                        if (iblockstate.getMaterial() == Material.WATER) {
+                            // Check if the block above is not water
+                            IBlockState iblockstateAbove = this.world.getBlockState(blockpos$pooledmutableblockpos.up());
+                            if (iblockstateAbove.getMaterial() != Material.WATER) {
+                                return (float) k1;
+                            }
+                        }
+                    }
+                }
+            }
+            return (float) l;
+        }
+        finally {
+            blockpos$pooledmutableblockpos.release();
+        }
+    }
+
+    protected void updateFallState(double y, boolean onGroundIn, IBlockState state, BlockPos pos) {
+        super.updateFallState(y, onGroundIn, state, pos);
+        this.lastYd = this.motionY;
     }
 
     @Nullable
