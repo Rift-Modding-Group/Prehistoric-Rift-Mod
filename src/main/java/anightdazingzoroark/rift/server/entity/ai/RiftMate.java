@@ -49,8 +49,10 @@ public class RiftMate extends EntityAIBase {
         this.creature.getLookHelper().setLookPositionWithEntity(this.targetMate, 10.0F, (float)this.creature.getVerticalFaceSpeed());
         this.creature.getNavigator().tryMoveToEntityLiving(this.targetMate, 1D);
         ++this.spawnBabyDelay;
+        System.out.println(this.spawnBabyDelay);
+        System.out.println(this.creature.getDistanceSq(this.targetMate));
 
-        if (this.spawnBabyDelay >= 80 && this.creature.getDistanceSq(this.targetMate) <= 16.0D) {
+        if (this.spawnBabyDelay >= 20 && this.creature.getDistanceSq(this.targetMate) <= 24.0D) {
             this.spawnEgg();
         }
     }

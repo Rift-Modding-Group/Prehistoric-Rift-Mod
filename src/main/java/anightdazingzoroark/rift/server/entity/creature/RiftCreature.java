@@ -45,6 +45,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -86,6 +87,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int energyActionModCountdown;
     private int eatFromInvCooldown;
     private int eatFromInvForEnergyCooldown;
+    private int eatFromInvForGrowthCooldown;
     private boolean informLowEnergy;
     private boolean informNoEnergy;
     public boolean cannotUseRightClick;
@@ -103,7 +105,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float rangedWidth;
     private int tickUse;
     private BlockPos homePosition;
-    private boolean isFloating;
+    public boolean isFloating;
     private double lastYd;
     private double waterLevel;
     private double yFloatPos;
@@ -123,6 +125,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.energyActionModCountdown = 0;
         this.eatFromInvCooldown = 0;
         this.eatFromInvForEnergyCooldown = 0;
+        this.eatFromInvForGrowthCooldown = 0;
         this.informLowEnergy = false;
         this.informNoEnergy = false;
         this.cannotUseRightClick = true;
@@ -191,18 +194,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageAttributes();
             if (this.canDoHerding()) this.manageHerding();
             this.controlWaterMovement();
-//            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-//            this.checkInWater();
-        }
-        if (this.isTamed() && !this.world.isRemote) {
-            if (this.isUnclaimed()) this.manageUnclaimed();
-            this.updateEnergyMove();
-            this.updateEnergyActions();
-            this.resetEnergyActionMod();
-            this.lowEnergyEffects();
-            this.eatFromInventory();
-            if (this.isBeingRidden()) this.informRiderEnergy();
-            this.manageTargetingBySitting();
+            if (this.isTamed()) {
+                if (this.isUnclaimed()) this.manageUnclaimed();
+                this.updateEnergyMove();
+                this.updateEnergyActions();
+                this.resetEnergyActionMod();
+                this.lowEnergyEffects();
+                this.eatFromInventory();
+                if (this.isBeingRidden()) this.informRiderEnergy();
+                this.manageTargetingBySitting();
+            }
         }
     }
 
@@ -235,7 +236,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
             if (this.isBeingRidden()) {
-                if (this.energyMod > this.creatureType.getMaxEnergyModMovement() * (this.getControllingPassenger().isSprinting() ? 3/4 : 1)) {
+                if (this.energyMod > (int)((double)this.creatureType.getMaxEnergyModMovement() * (this.getControllingPassenger().isSprinting() ? 0.75D : 1D))) {
                     this.setEnergy(this.getEnergy() - 1);
                     this.energyMod = 0;
                 }
@@ -247,7 +248,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
         }
-        else if (!this.isActing()) {
+        else if (!this.isMoving() && !this.isActing()) {
             this.energyMod = 0;
             if (this.energyRegenModDelay <= 20) this.energyRegenModDelay++;
             else this.energyRegenMod++;
@@ -287,7 +288,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.eatFromInvCooldown++;
             for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
-                if (this.isFavoriteFood(itemInSlot) && this.eatFromInvCooldown > 60) {
+                if (this.isFavoriteFood(itemInSlot) && this.eatFromInvCooldown > 60  && !RiftUtil.isEnergyRegenItem(itemInSlot.getItem(), this.creatureType.getCreatureDiet())) {
                     this.heal((float) this.getFavoriteFoodHeal(itemInSlot));
                     itemInSlot.setCount(itemInSlot.getCount() - 1);
                     this.eatFromInvCooldown = 0;
@@ -308,6 +309,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else this.eatFromInvForEnergyCooldown = 0;
+
+        if (this.isBaby() && this.getHealth() == this.getMaxHealth()) {
+            this.eatFromInvForGrowthCooldown++;
+            for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
+                ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
+                if (this.isFavoriteFood(itemInSlot) && this.eatFromInvForGrowthCooldown > 60  && !RiftUtil.isEnergyRegenItem(itemInSlot.getItem(), this.creatureType.getCreatureDiet())) {
+                    this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemInSlot));
+                    itemInSlot.setCount(itemInSlot.getCount() - 1);
+                    this.eatFromInvForGrowthCooldown = 0;
+                }
+            }
+        }
+        else this.eatFromInvForGrowthCooldown = 0;
     }
 
     private void informRiderEnergy() {
@@ -345,8 +359,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
-        System.out.println(this.getOwnerId());
-        System.out.println(player.getUniqueID());
         if (this.isTamed()) {
             try {
                 if (this.getOwnerId().equals(player.getUniqueID())) {
@@ -406,6 +418,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else {
             if (!itemstack.isEmpty() && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
+                    net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player);
                     if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished", new TextComponentString(this.getName())), false);
                     this.setTameProgress(0);
                     this.setTamed(true);
@@ -1050,14 +1063,34 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
+
+                if (this.isFloating && forward > 0) {
+                    BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F) * 2, this.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F) * 2);
+                    BlockPos above = ahead.up();
+                    if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                        this.setPosition(this.posX, this.posY + 1.0, this.posZ);
+                    }
+                }
+
                 super.travel(strafe, vertical, forward);
             }
         }
         else {
             this.stepHeight = 0.5F;
             this.jumpMovementFactor = 0.02F;
+            if (this.isFloating && forward > 0) {
+                BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F) * 2, this.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F) * 2);
+                BlockPos above = ahead.up();
+                if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                    this.setPosition(this.posX, this.posY + 1.0, this.posZ);
+                }
+            }
             super.travel(strafe, vertical, forward);
         }
+    }
+
+    public boolean isEntityInsideOpaqueBlock() {
+        return !this.isFloating && super.isEntityInsideOpaqueBlock();
     }
 
     private void controlWaterMovement() {
@@ -1071,18 +1104,23 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
             }
             else {
+                this.motionY = 0;
                 this.setPosition(this.posX, this.yFloatPos, this.posZ);
+                this.stepHeight = 3;
+                this.fallDistance = 0;
             }
         }
-        else if (this.isFloating && !this.isInWater()) this.isFloating = false;
+        else if (this.isFloating && !this.isInWater()) {
+            this.isFloating = false;
+        }
     }
 
     public float getHighestWaterLevel() {
         AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
         int i = MathHelper.floor(axisalignedbb.minX);
         int j = MathHelper.ceil(axisalignedbb.maxX);
-        int k = MathHelper.floor(axisalignedbb.minY);   // Start from the bottom
-        int l = 256;  // Maximum possible height in Minecraft
+        int k = MathHelper.floor(axisalignedbb.minY);
+        int l = 256;
         int i1 = MathHelper.floor(axisalignedbb.minZ);
         int j1 = MathHelper.ceil(axisalignedbb.maxZ);
         BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();

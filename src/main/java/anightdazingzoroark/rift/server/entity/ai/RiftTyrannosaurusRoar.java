@@ -37,7 +37,7 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
 //            return i != this.revengeTimerOld && entitylivingbase != null && entitylivingbase instanceof EntityLivingBase && new Random().nextInt(4) == 0 && this.mob.canRoar();
             return !this.mob.isActing() && this.mob.hurtTime > 0 && new Random().nextInt(4) == 0 && this.mob.canRoar();
         }
-        else return  !this.mob.isActing() && this.mob.hurtTime > 0 && new Random().nextInt(4) == 0 && this.mob.canRoar() && this.mob.getTameStatus() != TameStatusType.SIT && this.mob.getTameBehavior() != TameBehaviorType.PASSIVE;
+        else return this.mob.getPassengers().isEmpty() && !this.mob.isActing() && this.mob.hurtTime > 0 && new Random().nextInt(4) == 0 && this.mob.canRoar() && this.mob.getTameStatus() != TameStatusType.SIT && this.mob.getTameBehavior() != TameBehaviorType.PASSIVE;
     }
 
     @Override
