@@ -1,0 +1,23 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X#X",
+    "#A#",
+    "X#X"
+  ],
+  "key": {
+    "#": {
+      "type": "forge:ore_dict",
+      "ore": "herbivoreMealIng"
+    },
+    "X": {
+      "item": "minecraft:gold_ingot"
+    },
+    "A": {
+      "item": "rift:basic_herbivore_meal"
+    }
+  },
+  "result": {
+    "item": "rift:advanced_herbivore_meal"
+  }
+}

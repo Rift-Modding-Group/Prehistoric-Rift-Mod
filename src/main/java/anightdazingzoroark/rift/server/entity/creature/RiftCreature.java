@@ -21,6 +21,7 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ContainerHorseChest;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
@@ -290,6 +291,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
                 if (this.isFavoriteFood(itemInSlot) && this.eatFromInvCooldown > 60  && !RiftUtil.isEnergyRegenItem(itemInSlot.getItem(), this.creatureType.getCreatureDiet())) {
                     this.heal((float) this.getFavoriteFoodHeal(itemInSlot));
+                    this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                    this.spawnItemCrackParticles(itemInSlot.getItem());
                     itemInSlot.setCount(itemInSlot.getCount() - 1);
                     this.eatFromInvCooldown = 0;
                 }
@@ -303,6 +306,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
                 if (RiftUtil.isEnergyRegenItem(itemInSlot.getItem(), this.creatureType.getCreatureDiet()) && this.eatFromInvForEnergyCooldown > 60) {
                     this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemInSlot.getItem(), this.creatureType.getCreatureDiet()));
+                    this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                    this.spawnItemCrackParticles(itemInSlot.getItem());
                     itemInSlot.setCount(itemInSlot.getCount() - 1);
                     this.eatFromInvForEnergyCooldown = 0;
                 }
@@ -316,6 +321,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
                 if (this.isFavoriteFood(itemInSlot) && this.eatFromInvForGrowthCooldown > 60  && !RiftUtil.isEnergyRegenItem(itemInSlot.getItem(), this.creatureType.getCreatureDiet())) {
                     this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemInSlot));
+                    this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                    this.spawnItemCrackParticles(itemInSlot.getItem());
                     itemInSlot.setCount(itemInSlot.getCount() - 1);
                     this.eatFromInvForGrowthCooldown = 0;
                 }
@@ -366,18 +373,26 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         this.consumeItemFromStack(player, itemstack);
                         this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
                         this.showGrowthParticles();
+                        this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                        this.spawnItemCrackParticles(itemstack.getItem());
                     }
                     else if (this.isFavoriteFood(itemstack) && !RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getHealth() < this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.heal((float) this.getFavoriteFoodHeal(itemstack));
+                        this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                        this.spawnItemCrackParticles(itemstack.getItem());
                     }
-                    else if (this.isTamingFood(itemstack) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getTameStatus() != TameStatusType.SIT) {
+                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getTameStatus() != TameStatusType.SIT) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setInLove(player);
+                        this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                        this.spawnItemCrackParticles(itemstack.getItem());
                     }
                     else if (RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getEnergy() < 20) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemstack.getItem(), this.creatureType.getCreatureDiet()));
+                        this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                        this.spawnItemCrackParticles(itemstack.getItem());
                     }
                     else if (itemstack.getItem() instanceof ItemPotion) {
                         for (PotionEffect effect : PotionUtils.getEffectsFromStack(itemstack)) {
@@ -425,7 +440,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setOwnerId(player.getUniqueID());
                     if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
                 }
-                else this.setTameProgress(this.getTameProgress() + this.getTamingFoodAdd(itemstack));
+                else {
+                    this.setTameProgress(this.getTameProgress() + this.getTamingFoodAdd(itemstack));
+                    this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                    this.spawnItemCrackParticles(itemstack.getItem());
+                }
+                return true;
             }
         }
         return false;
@@ -521,6 +541,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         float f1 = (float) (getRNG().nextFloat() * (this.getEntityBoundingBox().maxY - this.getEntityBoundingBox().minY) + this.getEntityBoundingBox().minY);
         float f2 = (float) (getRNG().nextFloat() * (this.getEntityBoundingBox().maxZ - this.getEntityBoundingBox().minZ) + this.getEntityBoundingBox().minZ);
         if (world.isRemote) this.world.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, f, f1, f2, motionX, motionY, motionZ);
+    }
+
+    public void spawnItemCrackParticles(Item item) {
+        for (int i = 0; i < 15; i++) {
+            double motionX = getRNG().nextGaussian() * 0.07D;
+            double motionY = getRNG().nextGaussian() * 0.07D;
+            double motionZ = getRNG().nextGaussian() * 0.07D;
+            float f = (float) (getRNG().nextFloat() * (this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX) + this.getEntityBoundingBox().minX);
+            float f1 = (float) (getRNG().nextFloat() * (this.getEntityBoundingBox().maxY - this.getEntityBoundingBox().minY) + this.getEntityBoundingBox().minY);
+            float f2 = (float) (getRNG().nextFloat() * (this.getEntityBoundingBox().maxZ - this.getEntityBoundingBox().minZ) + this.getEntityBoundingBox().minZ);
+            if (world.isRemote) {
+                this.world.spawnParticle(EnumParticleTypes.ITEM_CRACK, f, f1, f2, motionX, motionY, motionZ, Item.getIdFromItem(item));
+            }
+        }
     }
 
     @Override

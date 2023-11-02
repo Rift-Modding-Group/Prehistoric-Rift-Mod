@@ -1,0 +1,15 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:wheat"
+    }
+  },
+  "result": {
+    "item": "rift:fiber_bar"
+  }
+}

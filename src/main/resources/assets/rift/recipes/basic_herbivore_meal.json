@@ -1,0 +1,21 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X#X",
+    "###",
+    "X#X"
+  ],
+  "key": {
+    "#": {
+      "type": "forge:ore_dict",
+      "ore": "herbivoreMealIng"
+    },
+    "X": {
+      "type": "forge:ore_dict",
+      "ore": "treeLeaves"
+    }
+  },
+  "result": {
+    "item": "rift:basic_herbivore_meal"
+  }
+}

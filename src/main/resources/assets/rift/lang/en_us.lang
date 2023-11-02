@@ -6,6 +6,12 @@ item.raw_exotic_meat.name=Raw Exotic Meat
 item.raw_fibrous_meat.name=Raw Fibrous Meat
 item.cooked_exotic_meat.name=Cooked Exotic Meat
 item.cooked_fibrous_meat.name=Cooked Fibrous Meat
+item.fiber_bar.name=Fiber Bar
+item.basic_herbivore_meal.name=Basic Herbivore Meal
+item.basic_carnivore_meal.name=Basic Carnivore Meal
+item.advanced_herbivore_meal.name=Advanced Herbivore Meal
+item.advanced_carnivore_meal.name=Advanced Carnivore Meal
+item.creative_meal.name=Creative Meal
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 item.stegosaurus_plate.name=Stegosaurus Plate

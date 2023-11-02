@@ -1,5 +1,6 @@
 package anightdazingzoroark.rift.server.entity.creature;
 
+import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.RiftSounds;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
@@ -18,12 +19,14 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -31,13 +34,17 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
+import javax.annotation.Nullable;
+
 public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob {
+    public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public int strongAttackCharge;
 
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
         this.setSize(2.125f, 2.5f);
+        this.experienceValue = 20;
         this.speed = 0.175D;
         this.isRideable = true;
         this.attackWidth = 7.5f;
@@ -204,6 +211,12 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
             properties.setBleeding(0, 200);
         }
         return flag;
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
     }
 
     @Override
