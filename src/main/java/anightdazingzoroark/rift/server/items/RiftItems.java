@@ -42,9 +42,9 @@ public class RiftItems {
         COOKED_FIBROUS_MEAT = riftFibrousFoodItem("cooked_fibrous_meat", 2, true);
         BASIC_HERBIVORE_MEAL = riftGenericItem("basic_herbivore_meal");
         BASIC_CARNIVORE_MEAL = riftGenericItem("basic_carnivore_meal");
-        ADVANCED_HERBIVORE_MEAL = riftGenericItem("advanced_herbivore_meal");
-        ADVANCED_CARNIVORE_MEAL = riftGenericItem("advanced_carnivore_meal");
-        CREATIVE_MEAL = riftGenericItem("creative_meal");
+        ADVANCED_HERBIVORE_MEAL = riftGlintedItem("advanced_herbivore_meal");
+        ADVANCED_CARNIVORE_MEAL = riftGlintedItem("advanced_carnivore_meal");
+        CREATIVE_MEAL = riftGlintedItem("creative_meal");
 
         FIBER_BAR = riftFibrousFoodItem("fiber_bar", 2, false);
 
@@ -69,6 +69,9 @@ public class RiftItems {
         OreDictionary.registerOre("carnivoreMealIng", Items.CHICKEN);
         OreDictionary.registerOre("carnivoreMealIng", Items.BEEF);
         OreDictionary.registerOre("carnivoreMealIng", RiftItems.RAW_EXOTIC_MEAT);
+
+        //for wooden door stuff
+
     }
 
     public static Item riftUnstackableItem(String registryName) {
@@ -88,6 +91,11 @@ public class RiftItems {
 
     public static Item riftGenericItem(String registryName) {
         final Item item = new Item();
+        return registerItem(item, registryName);
+    }
+
+    public static Item riftGlintedItem(String registryName) {
+        final RiftGlintedItem item = new RiftGlintedItem();
         return registerItem(item, registryName);
     }
 

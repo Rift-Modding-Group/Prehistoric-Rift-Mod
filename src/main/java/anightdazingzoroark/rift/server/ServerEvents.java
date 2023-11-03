@@ -215,8 +215,8 @@ public class ServerEvents {
             boolean isMoving =  Math.sqrt((entity.motionX * entity.motionX) + (fallMotion * fallMotion) + (entity.motionZ * entity.motionZ)) > 0;
             //manage bleeding
             if (properties.isBleeding) {
-                if (isMoving) entity.attackEntityFrom(DamageSource.GENERIC, (float)properties.bleedingStrength + 1F);
-                else entity.attackEntityFrom(DamageSource.GENERIC, (float)(properties.bleedingStrength + 1) * 2F);
+                if (isMoving) entity.attackEntityFrom(RiftDamage.RIFT_BLEED, (float)properties.bleedingStrength + 1F);
+                else entity.attackEntityFrom(RiftDamage.RIFT_BLEED, (float)(properties.bleedingStrength + 1) * 2F);
 
                 double motionY = RiftUtil.randomInRange(-0.75D, -0.25D);
                 double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
@@ -229,5 +229,13 @@ public class ServerEvents {
             }
             if (properties.ticksUntilStopBleeding <= 0) properties.resetBleeding();
         }
+    }
+
+    @SubscribeEvent
+    public void onEntityDeath(LivingDeathEvent event) {
+        EntityLivingBase entity = event.getEntityLiving();
+        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
+        //for remove bleed
+        properties.resetBleeding();
     }
 }

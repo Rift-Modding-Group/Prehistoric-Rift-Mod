@@ -56,9 +56,9 @@ public class RiftCreatureInvMenu extends GuiContainer {
         String playerName = this.creature.getOwner().getName();
         this.fontRenderer.drawString(playerName, 8, 160, 4210752);
         String creatureName = this.creature.getName(); //I18n.format("rift.inventory.gear", creatureTypeName)
-        String gearName = I18n.format("rift.inventory.gear", creatureName);
+        String gearName = I18n.format("inventory.gear", creatureName);
         this.fontRenderer.drawString(gearName, 8, 7, 4210752);
-        String invName = I18n.format("rift.inventory.inventory", creatureName);
+        String invName = I18n.format("inventory.inventory", creatureName);
         this.fontRenderer.drawString(invName, 8, 39, 4210752);
     }
 
