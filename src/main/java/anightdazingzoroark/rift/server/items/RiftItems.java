@@ -2,6 +2,8 @@ package anightdazingzoroark.rift.server.items;
 
 import anightdazingzoroark.rift.client.creativetab.RiftCreativeTabs;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
+import anightdazingzoroark.rift.server.entity.projectile.RiftProjectiles;
+import anightdazingzoroark.rift.server.entity.projectile.ThrownStegoPlateAnimator;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -14,8 +16,6 @@ import net.minecraftforge.registries.IForgeRegistry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static anightdazingzoroark.rift.server.entity.RiftCreatureType.registerEggs;
 
 public class RiftItems {
     public static final List<Item> ITEMS = new ArrayList<>();
@@ -51,7 +51,10 @@ public class RiftItems {
         TYRANNOSAURUS_ARM = riftGenericItem("tyrannosaurus_arm");
         STEGOSAURUS_PLATE = riftGenericItem("stegosaurus_plate");
 
-        registerEggs();
+        RiftCreatureType.registerEggs();
+
+        //dont ask why this is here
+        RiftProjectiles.registerProjectiles();
     }
 
     public static void registerOreDicTags() {
@@ -69,9 +72,6 @@ public class RiftItems {
         OreDictionary.registerOre("carnivoreMealIng", Items.CHICKEN);
         OreDictionary.registerOre("carnivoreMealIng", Items.BEEF);
         OreDictionary.registerOre("carnivoreMealIng", RiftItems.RAW_EXOTIC_MEAT);
-
-        //for wooden door stuff
-
     }
 
     public static Item riftUnstackableItem(String registryName) {

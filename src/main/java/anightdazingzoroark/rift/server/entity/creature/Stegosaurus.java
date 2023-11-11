@@ -197,6 +197,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this, (EntityPlayer)this.getControllingPassenger());
         thrownStegoPlate.setDamage(strength * 0.04D + 4D);
         thrownStegoPlate.setIsCritical(strength >= 50);
+        thrownStegoPlate.setVariant(this.getVariant());
         float velocity = (float) strength * 0.015f + 1.5f;
         thrownStegoPlate.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, velocity, 1.0F);
         this.world.spawnEntity(thrownStegoPlate);

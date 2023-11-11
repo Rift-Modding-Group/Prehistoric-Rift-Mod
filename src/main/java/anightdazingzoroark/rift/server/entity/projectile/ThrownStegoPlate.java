@@ -6,7 +6,9 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -19,10 +21,9 @@ import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
-public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
+public class ThrownStegoPlate extends EntityArrow {
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private EntityPlayer rider;
-    public AnimationFactory factory = new AnimationFactory(this);
 
     public ThrownStegoPlate(World worldIn) {
         super(worldIn);
@@ -50,6 +51,37 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(VARIANT, 0);
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setInteger("Variant", this.getVariant());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.setVariant(compound.getInteger("Variant"));
+    }
+
+    public ItemStack getItemToRender() {
+        ItemStack itemForm;
+        switch (this.getVariant()) {
+            default:
+                itemForm = new ItemStack(RiftProjectiles.THROWN_STEGOSAURUS_PLATE_ONE);
+                break;
+            case 1:
+                itemForm = new ItemStack(RiftProjectiles.THROWN_STEGOSAURUS_PLATE_TWO);
+                break;
+            case 2:
+                itemForm = new ItemStack(RiftProjectiles.THROWN_STEGOSAURUS_PLATE_THREE);
+                break;
+            case 3:
+                itemForm = new ItemStack(RiftProjectiles.THROWN_STEGOSAURUS_PLATE_FOUR);
+                break;
+        }
+        return itemForm;
     }
 
     protected void onHit(RayTraceResult raytraceResultIn) {
@@ -111,13 +143,5 @@ public class ThrownStegoPlate extends EntityArrow implements IAnimatable {
     @Override
     protected ItemStack getArrowStack() {
         return null;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {}
-
-    @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
     }
 }
