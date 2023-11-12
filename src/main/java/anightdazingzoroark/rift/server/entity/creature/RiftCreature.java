@@ -669,7 +669,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public RiftCreature getHerdLeader() {
-        return (RiftCreature) this.world.getEntityByID(this.getHerdLeaderId());
+        RiftCreature leader = (RiftCreature) this.world.getEntityByID(this.getHerdLeaderId());
+        if (leader != null) return leader;
+        return this;
     }
 
     public int getHerdLeaderId() {
