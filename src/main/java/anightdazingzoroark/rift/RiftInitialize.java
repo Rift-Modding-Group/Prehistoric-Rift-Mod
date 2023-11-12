@@ -22,7 +22,7 @@ import java.io.File;
 public class RiftInitialize {
     public static final String MODID = "rift";
     public static final String MODNAME = "Prehistoric Rift";
-    public static final String MODVERSION= "0.0.2";
+    public static final String MODVERSION= "0.0.1";
     @SidedProxy(clientSide = "anightdazingzoroark.rift.client.ClientProxy", serverSide = "anightdazingzoroark.rift.server.ServerProxy")
     public static ServerProxy PROXY;
     @Mod.Instance(MODID)
