@@ -23,7 +23,7 @@ import static anightdazingzoroark.rift.server.items.RiftItems.riftEggItem;
 public enum RiftCreatureType {
     TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, RiftConfig.tyrannosaurusFavoriteFood, RiftConfig.tyrannosaurusBreedingFood, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, 160D, TyrannosaurusRenderer::new, 3670016, 2428687, 450, 1),
     STEGOSAURUS(Stegosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, RiftConfig.stegosaurusFavoriteFood, RiftConfig.stegosaurusTamingFood, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, 100D, StegosaurusRenderer::new, 1731840, 16743424, 300, 1),
-    DODO(Dodo.class, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, RiftConfig.dodoBreedingFood, null, null, 6D, DodoRenderer::new, 7828853, 6184028, 150, 0.25f);
+    DODO(Dodo.class, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, RiftConfig.dodoBreedingFood, null, null, 6D, DodoRenderer::new, 7828853, 6184028, 90, 0.25f);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;

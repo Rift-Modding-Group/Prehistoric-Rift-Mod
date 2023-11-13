@@ -1,12 +1,15 @@
 package anightdazingzoroark.rift.server.entity.creature;
 
+import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -14,7 +17,11 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
+import javax.annotation.Nullable;
+
 public class Dodo extends RiftCreature {
+    public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dodo"));
+
     public Dodo(World worldIn) {
         super(worldIn, RiftCreatureType.DODO);
         this.setSize(0.75f, 0.75f);
@@ -45,6 +52,12 @@ public class Dodo extends RiftCreature {
     }
 
     public void fall(float distance, float damageMultiplier) {}
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
+    }
 
     @Override
     public boolean canDoHerding() {

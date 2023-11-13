@@ -2,6 +2,7 @@ death.attack.rift_bleed=%s bled to death
 
 entity.tyrannosaurus.name=Tyrannosaurus
 entity.stegosaurus.name=Stegosaurus
+entity.dodo.name=Dodo
 entity.egg.name=Egg
 
 inventory.gear=%s Gear
@@ -9,8 +10,10 @@ inventory.inventory=%s Inventory
 
 item.raw_exotic_meat.name=Raw Exotic Meat
 item.raw_fibrous_meat.name=Raw Fibrous Meat
+item.raw_dodo_meat.name=Raw Dodo Meat
 item.cooked_exotic_meat.name=Cooked Exotic Meat
 item.cooked_fibrous_meat.name=Cooked Fibrous Meat
+item.cooked_dodo_meat.name=Cooked Dodo Meat
 item.fiber_bar.name=Fiber Bar
 item.basic_herbivore_meal.name=Basic Herbivore Meal
 item.basic_carnivore_meal.name=Basic Carnivore Meal
@@ -20,11 +23,13 @@ item.creative_meal.name=Creative Meal
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 item.stegosaurus_plate.name=Stegosaurus Plate
+item.dodo_beak.name=Dodo Beak
 
 itemGroup.rift_items=Prehistoric Rift Items
 
 item.tyrannosaurus_egg.name=Tyrannosaurus Egg
 item.stegosaurus_egg.name=Stegosaurus Egg
+item.dodo_egg.name=Dodo Egg
 
 radial.choice.ride=Ride
 radial.choice.state=State
@@ -82,6 +87,10 @@ sounds.subtitle.tyrannosaurus_roar=Tyrannosaurus roars
 sounds.subtitle.stegosaurus_idle=Stegosaurus grunts
 sounds.subtitle.stegosaurus_hurt=Stegosaurus hurts
 sounds.subtitle.stegosaurus_death=Stegosaurus dies
+
+sounds.subtitle.dodo_idle=Dodo cackles
+sounds.subtitle.dodo_hurt=Dodo hurts
+sounds.subtitle.dodo_death=Dodo dies
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral
