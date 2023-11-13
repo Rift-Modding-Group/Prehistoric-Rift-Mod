@@ -1,13 +1,28 @@
 package anightdazingzoroark.rift.client.renderer.entity;
 
+import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.model.RiftEggModel;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
+import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
+import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
+import software.bernie.geckolib3.resource.GeckoLibCache;
 
 public class RiftEggRenderer extends GeoEntityRenderer<RiftEgg> {
     public RiftEggRenderer(RenderManager renderManager) {
         super(renderManager, new RiftEggModel());
         this.shadowSize = 0.5f;
+    }
+
+    @Override
+    public void render(GeoModel model, RiftEgg animatable, float partialTicks, float red, float green, float blue, float alpha) {
+        float scale = animatable.getCreatureType().getEggScale();
+
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(scale, scale, scale);
+        super.render(model, animatable, partialTicks, red, green, blue, alpha);
+        GlStateManager.popMatrix();
     }
 }

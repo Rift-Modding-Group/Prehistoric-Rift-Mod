@@ -89,7 +89,7 @@ public class RiftMate extends EntityAIBase {
             this.creature.resetInLove();
             this.targetMate.resetInLove();
             egg.setCreatureType(this.creature.creatureType);
-            egg.setOwnerId(this.creature.getOwnerId());
+            if (this.creature.isTamed()) egg.setOwnerId(this.creature.getOwnerId());
             egg.setLocationAndAngles(this.creature.posX, this.creature.posY, this.creature.posZ, 0.0F, 0.0F);
             egg.enablePersistence();
             egg.setHatchTime(this.creature.creatureType.getHatchTime() * 20);

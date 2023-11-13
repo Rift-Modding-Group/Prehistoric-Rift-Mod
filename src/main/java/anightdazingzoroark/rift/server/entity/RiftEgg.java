@@ -60,10 +60,14 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
             RiftCreature creature = this.getCreatureType().invokeClass(this.world);
             creature.setHealth((float) this.getCreatureType().getMinHealth());
             creature.setAgeInDays(0);
-            creature.setTamed(true);
-            creature.setOwnerId(this.getOwnerId());
-            creature.setTameStatus(TameStatusType.SIT);
-            creature.setTameBehavior(TameBehaviorType.PASSIVE);
+
+            if (this.getOwnerId() != null) {
+                creature.setTamed(true);
+                creature.setOwnerId(this.getOwnerId());
+                creature.setTameStatus(TameStatusType.SIT);
+                creature.setTameBehavior(TameBehaviorType.PASSIVE);
+            }
+
             creature.setLocationAndAngles(Math.floor(this.posX), Math.floor(this.posY) + 1, Math.floor(this.posZ), this.world.rand.nextFloat() * 360.0F, 0.0F);
             if (!this.world.isRemote) {
                 List<EntityPlayer> nearby = world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB(this.posX - 50.0, this.posY - 50.0, this.posZ - 50.0, this.posX + 50.0, this.posY + 50.0, this.posZ + 50.0));
@@ -78,21 +82,36 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
 
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
-        if (this.getOwnerId().equals(player.getUniqueID())) {
-            if (player.isSneaking()) {
+        if (player.isSneaking()) {
+            if (this.getCreatureType() == RiftCreatureType.DODO) {
                 ItemStack eggStack = new ItemStack(this.getCreatureType().eggItem);
                 if (!player.capabilities.isCreativeMode) player.inventory.addItemStackToInventory(eggStack);
                 this.setDead();
             }
             else {
-                ClientProxy.EGG = this;
-                player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, (int) posX, (int) posY, (int) posZ);
+                if (this.getOwnerId().equals(player.getUniqueID())) {
+                    ItemStack eggStack = new ItemStack(this.getCreatureType().eggItem);
+                    if (!player.capabilities.isCreativeMode) player.inventory.addItemStackToInventory(eggStack);
+                    return true;
+                }
+                else {
+                    ITextComponent itextcomponent = new TextComponentString(this.getOwner().getName());
+                    player.sendStatusMessage(new TextComponentTranslation("reminder.not_egg_owner", itextcomponent), false);
+                }
             }
             return true;
         }
         else {
-            ITextComponent itextcomponent = new TextComponentString(this.getOwner().getName());
-            player.sendStatusMessage(new TextComponentTranslation("reminder.not_egg_owner", itextcomponent), false);
+            try {
+                if (this.getOwnerId().equals(player.getUniqueID())) {
+                    ClientProxy.EGG = this;
+                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, (int) posX, (int) posY, (int) posZ);
+                    return true;
+                }
+            }
+            catch (Exception e) {
+                return true;
+            }
         }
         return false;
     }

@@ -431,7 +431,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             return true;
         }
         else {
-            if (!itemstack.isEmpty() && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
+            if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
+                System.out.println("no cunny");
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player);
                     if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished", new TextComponentString(this.getName())), false);
@@ -445,6 +446,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                     this.spawnItemCrackParticles(itemstack.getItem());
                 }
+                return true;
+            }
+            else if (!itemstack.isEmpty() && (this.creatureType == RiftCreatureType.DODO) && (this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
+                System.out.println("cunny");
+                this.consumeItemFromStack(player, itemstack);
+                this.setInLove(player);
+                this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                this.spawnItemCrackParticles(itemstack.getItem());
                 return true;
             }
         }
