@@ -1,5 +1,6 @@
 package anightdazingzoroark.rift;
 
+import anightdazingzoroark.rift.config.GeneralConfig;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.enums.CreatureDiet;
 import net.minecraft.block.Block;
@@ -55,7 +56,7 @@ public class RiftUtil {
         List<String> oreDicList = new ArrayList<>();
         List<String> blockList = new ArrayList<>();
         boolean flag = false;
-        for (String entry : RiftConfig.weakerThanWood) {
+        for (String entry : GeneralConfig.weakerThanWood) {
             if (entry.contains("oreDic:")) {
                 oreDicList.add(entry.replace("oreDic:", ""));
             }
@@ -78,8 +79,8 @@ public class RiftUtil {
     public static boolean isEnergyRegenItem(Item item, CreatureDiet diet) {
         List<String> itemList = new ArrayList<>();
         boolean flag = false;
-        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(RiftConfig.herbivoreRegenEnergyFoods);
-        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(RiftConfig.carnivoreRegenEnergyFoods);
+        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
 
         for (String itemEntry : itemList) {
             int first = itemEntry.indexOf(":");
@@ -93,8 +94,8 @@ public class RiftUtil {
 
     public static int getEnergyRegenItemValue(Item item, CreatureDiet diet) {
         List<String> itemList = new ArrayList<>();
-        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(RiftConfig.herbivoreRegenEnergyFoods);
-        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(RiftConfig.carnivoreRegenEnergyFoods);
+        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
 
         for (String itemEntry : itemList) {
             int first = itemEntry.indexOf(":");
@@ -124,7 +125,7 @@ public class RiftUtil {
         List<String> oreDicList = new ArrayList<>();
         List<String> itemList = new ArrayList<>();
         boolean flag = false;
-        for (String entry : RiftConfig.mountOverrideWhitelistItems) {
+        for (String entry : GeneralConfig.mountOverrideWhitelistItems) {
             if (entry.contains("oreDic:")) {
                 oreDicList.add(entry.replace("oreDic:", ""));
             }

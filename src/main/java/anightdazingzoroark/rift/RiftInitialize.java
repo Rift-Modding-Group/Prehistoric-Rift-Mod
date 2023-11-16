@@ -1,10 +1,9 @@
 package anightdazingzoroark.rift;
 
 import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
+import anightdazingzoroark.rift.config.RiftConfigList;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.commands.RiftBleedCommand;
-import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -12,7 +11,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import software.bernie.geckolib3.GeckoLib;
 
@@ -22,13 +21,12 @@ import java.io.File;
 public class RiftInitialize {
     public static final String MODID = "rift";
     public static final String MODNAME = "Prehistoric Rift";
-    public static final String MODVERSION= "0.0.1";
+    public static final String MODVERSION= "0.0.2";
     @SidedProxy(clientSide = "anightdazingzoroark.rift.client.ClientProxy", serverSide = "anightdazingzoroark.rift.server.ServerProxy")
     public static ServerProxy PROXY;
     @Mod.Instance(MODID)
     public static RiftInitialize instance;
     public static Logger logger;
-    public static Configuration config;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -37,8 +35,9 @@ public class RiftInitialize {
 
         //for config
         File directory = event.getModConfigurationDirectory();
-        config = new Configuration(new File(directory.getPath(), "rift.cfg"));
-        RiftConfig.readConfig();
+        for (RiftConfigList configVal : RiftConfigList.values()) {
+            configVal.loadConfig(directory);
+        }
 
         //for mod compats
         SSRCompat.ssrPreInit();
@@ -60,8 +59,11 @@ public class RiftInitialize {
         PROXY.postInit(event);
 
         //for config
-        if (config.hasChanged()) {
-            config.save();
+        for (RiftConfigList configVal : RiftConfigList.values()) {
+            Configuration cfg = configVal.getConfigInstance().config;
+            if (cfg.hasChanged()) {
+                cfg.save();
+            }
         }
     }
 

@@ -1,9 +1,10 @@
 package anightdazingzoroark.rift.server.entity.creature;
 
-import anightdazingzoroark.rift.RiftConfig;
+import anightdazingzoroark.rift.config.GeneralConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.RiftSounds;
+import anightdazingzoroark.rift.config.TyrannosaurusConfig;
 import anightdazingzoroark.rift.server.entity.*;
 import anightdazingzoroark.rift.server.entity.ai.*;
 import com.google.common.base.Predicate;
@@ -12,7 +13,6 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.audio.Sound;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -47,7 +47,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private static final Predicate<EntityLivingBase> WEAKNESS_BLACKLIST = new Predicate<EntityLivingBase>() {
         @Override
         public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = Arrays.asList(RiftConfig.apexAffectedBlacklist);
+            List<String> blacklist = Arrays.asList(GeneralConfig.apexAffectedBlacklist);
             if (!blacklist.isEmpty()) {
                 if (entity instanceof EntityPlayer) {
                     return entity.isEntityAlive() && !blacklist.contains("minecraft:player") && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
@@ -72,7 +72,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private static final Predicate<EntityLivingBase> WEAKNESS_WHITELIST = new Predicate<EntityLivingBase>() {
         @Override
         public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = Arrays.asList(RiftConfig.apexAffectedBlacklist);
+            List<String> blacklist = Arrays.asList(GeneralConfig.apexAffectedBlacklist);
             if (!blacklist.isEmpty()) {
                 if (entity instanceof EntityPlayer) {
                     return entity.isEntityAlive() && blacklist.contains("minecraft:player") && entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
@@ -88,7 +88,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private static final Predicate<EntityLivingBase> ROAR_BLACKLIST = new Predicate<EntityLivingBase>() {
         @Override
         public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
+            List<String> blacklist = Arrays.asList(TyrannosaurusConfig.tyrannosaurusRoarTargetBlacklist);
             if (!blacklist.isEmpty()) {
                 if (entity instanceof EntityPlayer) return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
                 else return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
@@ -99,7 +99,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     private static final Predicate<EntityLivingBase> ROAR_WHITELIST = new Predicate<EntityLivingBase>() {
         @Override
         public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = Arrays.asList(RiftConfig.tyrannosaurusRoarTargetBlacklist);
+            List<String> blacklist = Arrays.asList(TyrannosaurusConfig.tyrannosaurusRoarTargetBlacklist);
 
             if (!blacklist.isEmpty()) {
                 if (entity instanceof EntityPlayer) return entity.isEntityAlive() && blacklist.contains("minecraft:player");
@@ -143,10 +143,10 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, RiftConfig.tyrannosaurusTargets, true));
+        this.targetTasks.addTask(2, new RiftGetTargets(this, TyrannosaurusConfig.tyrannosaurusTargets, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
-        this.targetTasks.addTask(3, new RiftPickUpItems(this, RiftConfig.tyrannosaurusFavoriteFood, true));
+        this.targetTasks.addTask(3, new RiftPickUpItems(this, TyrannosaurusConfig.tyrannosaurusFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftResetAnimatedPose(this, 1.68F, 1));
@@ -171,7 +171,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     }
 
     private void manageApplyWeakness() {
-        Predicate<EntityLivingBase> targetPredicate = RiftConfig.tyrannosaurusRoarTargetsWhitelist ? WEAKNESS_WHITELIST : WEAKNESS_BLACKLIST;
+        Predicate<EntityLivingBase> targetPredicate = GeneralConfig.apexAffectedWhitelist ? WEAKNESS_WHITELIST : WEAKNESS_BLACKLIST;
         for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEffectCastArea(), targetPredicate)) {
             if (this.isTamed() && entityLivingBase instanceof EntityPlayer) {
                 if (!entityLivingBase.getUniqueID().equals(this.getOwnerId())) {
@@ -205,7 +205,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     //stuff below this comment is for roar stuff
     public void roar(float strength) {
-        Predicate<EntityLivingBase> targetPredicate = RiftConfig.tyrannosaurusRoarTargetsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
+        Predicate<EntityLivingBase> targetPredicate = TyrannosaurusConfig.tyrannosaurusRoarTargetsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
         for (Entity entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea((double)strength * 6d), targetPredicate)) {
             if (entity != this) {
                 if (this.isTamed() && entity instanceof EntityTameable) {

@@ -1,21 +1,11 @@
 package anightdazingzoroark.rift.server.entity.ai;
 
-import anightdazingzoroark.rift.RiftConfig;
 import anightdazingzoroark.rift.client.RiftSounds;
-import anightdazingzoroark.rift.server.entity.RiftEgg;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
 import anightdazingzoroark.rift.server.enums.TameStatusType;
-import com.google.common.base.Predicate;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
 
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 public class RiftTyrannosaurusRoar extends EntityAIBase {
