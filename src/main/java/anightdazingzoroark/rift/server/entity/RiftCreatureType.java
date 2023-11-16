@@ -23,15 +23,15 @@ import java.util.Locale;
 import static anightdazingzoroark.rift.server.items.RiftItems.riftEggItem;
 
 public enum RiftCreatureType {
-    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, TyrannosaurusConfig.tyrannosaurusFavoriteFood, TyrannosaurusConfig.tyrannosaurusBreedingFood, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, 160D, TyrannosaurusRenderer::new, 3670016, 2428687, 450, 1),
-    STEGOSAURUS(Stegosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, StegosaurusConfig.stegosaurusFavoriteFood, StegosaurusConfig.stegosaurusTamingFood, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, 100D, StegosaurusRenderer::new, 1731840, 16743424, 300, 1),
-    DODO(Dodo.class, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, DodoConfig.dodoBreedingFood, null, null, 6D, DodoRenderer::new, 7828853, 6184028, 90, 0.25f);
+    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, 160D, TyrannosaurusRenderer::new, 3670016, 2428687, 450, 1),
+    STEGOSAURUS(Stegosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, 100D, StegosaurusRenderer::new, 1731840, 16743424, 300, 1),
+    DODO(Dodo.class, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, null, 6D, DodoRenderer::new, 7828853, 6184028, 90, 0.25f);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;
     private final CreatureDiet creatureDiet;
-    private final String[] favoriteFood;
-    private final String[] tamingFood;
+    private String[] favoriteFood;
+    private String[] tamingFood;
     private final EnergyCategory energyCategory;
     private final EnergyRechargeCategory energyRechargeCategory;
     private final double maxHealth;
@@ -43,12 +43,10 @@ public enum RiftCreatureType {
     public Item eggItem;
     public final String friendlyName;
 
-    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, String[] favoriteFood, String[] tamingFood, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, double maxHealth, IRenderFactory renderFactory,  int eggPrimary, int eggSecondary, int hatchTime, float eggScale) {
+    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, double maxHealth, IRenderFactory renderFactory,  int eggPrimary, int eggSecondary, int hatchTime, float eggScale) {
         this.creature = creature;
         this.creatureCategory = creatureCategory;
         this.creatureDiet = creatureDiet;
-        this.favoriteFood = favoriteFood;
-        this.tamingFood = tamingFood;
         this.energyCategory = energyCategory;
         this.energyRechargeCategory = energyRechargeCategory;
         this.maxHealth = maxHealth;
@@ -72,8 +70,16 @@ public enum RiftCreatureType {
         return this.creatureDiet;
     }
 
+    public void setFavoriteFood(String[] input) {
+        this.favoriteFood = input;
+    }
+
     public String[] getFavoriteFood() {
         return this.favoriteFood;
+    }
+
+    public void setTamingFood(String[] input) {
+        this.tamingFood = input;
     }
 
     public String[] getTamingFood() {

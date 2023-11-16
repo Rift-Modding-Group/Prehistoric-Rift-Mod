@@ -2,6 +2,7 @@ package anightdazingzoroark.rift.server.entity.creature;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
+import anightdazingzoroark.rift.config.DodoConfig;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
@@ -25,6 +26,7 @@ public class Dodo extends RiftCreature {
     public Dodo(World worldIn) {
         super(worldIn, RiftCreatureType.DODO);
         this.setSize(0.75f, 0.75f);
+        this.creatureType.setTamingFood(DodoConfig.dodoBreedingFood);
         this.experienceValue = 3;
         this.speed = 0.25D;
         this.isRideable = false;

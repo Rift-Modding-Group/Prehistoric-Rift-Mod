@@ -3,6 +3,8 @@ package anightdazingzoroark.rift.server.entity.creature;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.RiftSounds;
+import anightdazingzoroark.rift.config.StegosaurusConfig;
+import anightdazingzoroark.rift.config.TyrannosaurusConfig;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.entity.ai.*;
@@ -44,6 +46,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
         this.setSize(2.125f, 2.5f);
+        this.creatureType.setFavoriteFood(StegosaurusConfig.stegosaurusFavoriteFood);
+        this.creatureType.setTamingFood(StegosaurusConfig.stegosaurusTamingFood);
         this.experienceValue = 20;
         this.speed = 0.175D;
         this.isRideable = true;

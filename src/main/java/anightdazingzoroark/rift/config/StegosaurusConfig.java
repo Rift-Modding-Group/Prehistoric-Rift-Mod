@@ -1,8 +1,6 @@
 package anightdazingzoroark.rift.config;
 
-import anightdazingzoroark.rift.RiftInitialize;
 import net.minecraftforge.common.config.Configuration;
-import org.apache.logging.log4j.Level;
 
 public class StegosaurusConfig extends RiftConfig {
     public static String[] stegosaurusFavoriteFood = {"minecraft:apple:0:0.025", "minecraft:wheat:0:0.05", "minecraft:carrot:0:0.05", "minecraft:potato:0:0.05", "minecraft:beetroot:0:0.05"};
