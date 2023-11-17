@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.config.RiftConfigList;
 import anightdazingzoroark.rift.server.entity.creature.Stegosaurus;
 import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.rift.server.entity.projectile.ThrownStegoPlate;
@@ -12,6 +13,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class RiftEntities {
@@ -37,26 +39,74 @@ public class RiftEntities {
     }
 
     public static void registerSpawn() {
-        //tyrannosaurus
-        for (Biome biome : Biome.REGISTRY) {
-            if (biome != null) {
-                //regular plains
-                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.PLAINS) && !BiomeDictionary.hasType(biome, BiomeDictionary.Type.SAVANNA)) {
-                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(Tyrannosaurus.class, 15, 1, 1));
-                }
-                //mountains
-                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.MOUNTAIN)) {
-                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(Tyrannosaurus.class, 20, 1, 1));
-                }
-            }
-        }
+        for (int x = 0; x < RiftConfigList.values().length; x++) {
+            if (x > 0) {
+                Class creatureClass = RiftConfigList.values()[x].getCreatureClass();
+                for (int y = 0; y < RiftConfigList.values()[x].getConfigInstance().spawnPlaces.length; y++) {
+                    String entry = RiftConfigList.values()[x].getConfigInstance().spawnPlaces[y];
+                    int partOne = entry.indexOf(":");
 
-        //stegosaurus
-        for (Biome biome : Biome.REGISTRY) {
-            if (biome != null) {
-                //regular plains
-                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.PLAINS) && !BiomeDictionary.hasType(biome, BiomeDictionary.Type.SAVANNA)) {
-                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(Stegosaurus.class, 20, 4, 6));
+                    if (!entry.substring(0, 1).equals("-")) {
+                        String spawnerType = entry.substring(0, partOne);
+                        int partTwo = entry.indexOf(":", partOne + 1);
+                        int partThree = entry.indexOf(":", partTwo + 1);
+                        int partFour = entry.indexOf(":", partThree + 1);
+
+                        if (spawnerType.equals("biome")) {
+                            int partFive = entry.indexOf(":", partFour + 1);
+                            String biomeIdentifier = entry.substring(partOne + 1, partThree);
+                            int spawnWeight = Integer.parseInt(entry.substring(partThree + 1, partFour));
+                            int minCount = Integer.parseInt(entry.substring(partFour + 1, partFive));
+                            int maxCount = Integer.parseInt(entry.substring(partFive + 1));
+                            for (Biome biome : Biome.REGISTRY) {
+                                if (biome.getRegistryName().equals(biomeIdentifier)) {
+                                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(creatureClass, spawnWeight, minCount, maxCount));
+                                }
+                            }
+                        }
+                        else if (spawnerType.equals("tag")) {
+                            String biomeTag = entry.substring(partOne + 1, partTwo);
+                            int spawnWeight = Integer.parseInt(entry.substring(partTwo + 1, partThree));
+                            int minCount = Integer.parseInt(entry.substring(partThree + 1, partFour));
+                            int maxCount = Integer.parseInt(entry.substring(partFour + 1));
+                            for (Biome biome : Biome.REGISTRY) {
+                                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(biomeTag))) {
+                                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(creatureClass, spawnWeight, minCount, maxCount));
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        String spawnerType = entry.substring(1, partOne);
+                        if (spawnerType.equals("biome")) {
+                            String biomeIdentifier = entry.substring(partOne + 1);
+                            for (Biome biome : Biome.REGISTRY) {
+                                if (biome.getRegistryName().equals(biomeIdentifier)) {
+                                    Iterator<Biome.SpawnListEntry> iterator = biome.getSpawnableList(EnumCreatureType.CREATURE).iterator();
+                                    while(iterator.hasNext()) {
+                                        Biome.SpawnListEntry toRemove = iterator.next();
+                                        if (toRemove.entityClass.equals(creatureClass)) {
+                                            iterator.remove();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if (spawnerType.equals("tag")) {
+                            String biomeTag = entry.substring(partOne + 1);
+                            for (Biome biome : Biome.REGISTRY) {
+                                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(biomeTag))) {
+                                    Iterator<Biome.SpawnListEntry> iterator = biome.getSpawnableList(EnumCreatureType.CREATURE).iterator();
+                                    while(iterator.hasNext()) {
+                                        Biome.SpawnListEntry toRemove = iterator.next();
+                                        if (toRemove.entityClass.equals(creatureClass)) {
+                                            iterator.remove();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

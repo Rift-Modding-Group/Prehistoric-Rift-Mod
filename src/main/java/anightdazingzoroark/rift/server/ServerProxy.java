@@ -38,7 +38,6 @@ public class ServerProxy implements IGuiHandler {
         RiftRecipes.registerSmelting();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
         RiftEntities.registerEntities();
-        RiftEntities.registerSpawn();
     }
 
     public void init(FMLInitializationEvent event) {

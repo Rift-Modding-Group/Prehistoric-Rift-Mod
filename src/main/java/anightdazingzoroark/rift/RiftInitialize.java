@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
 import anightdazingzoroark.rift.config.RiftConfigList;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.commands.RiftBleedCommand;
+import anightdazingzoroark.rift.server.entity.RiftEntities;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -38,6 +39,8 @@ public class RiftInitialize {
         for (RiftConfigList configVal : RiftConfigList.values()) {
             configVal.loadConfig(directory);
         }
+
+        RiftEntities.registerSpawn();
 
         //for mod compats
         SSRCompat.ssrPreInit();
