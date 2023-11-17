@@ -3,6 +3,8 @@ package anightdazingzoroark.rift.server.entity.creature;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.ClientProxy;
+import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
+import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompatUtils;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
@@ -12,9 +14,12 @@ import anightdazingzoroark.rift.server.enums.TameStatusType;
 import anightdazingzoroark.rift.server.items.RiftItems;
 import anightdazingzoroark.rift.server.message.*;
 import com.google.common.base.Predicate;
+import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
@@ -46,6 +51,9 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -205,6 +213,40 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.eatFromInventory();
                 if (this.isBeingRidden()) this.informRiderEnergy();
                 this.manageTargetingBySitting();
+            }
+        }
+        if (this.world.isRemote) {
+            this.setControls();
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void setControls() {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        if (this.isBeingRidden()) {
+            if (this.getControllingPassenger().equals(player)) {
+                if (settings.keyBindAttack.isKeyDown()) {
+                    if (ShoulderInstance.getInstance().doShoulderSurfing()) {
+                        Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                        if (this.hasLeftClickChargeBar()) {}
+                        else {
+                            if (toBeAttacked != null) {
+                                int targetId = toBeAttacked.getEntityId();
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
+                            }
+                        }
+                    }
+                    else {
+                        if (this.hasLeftClickChargeBar()) {}
+                        else {
+                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
+                        }
+                    }
+                }
+                else if (settings.keyBindUseItem.isKeyDown()) {
+
+                }
             }
         }
     }

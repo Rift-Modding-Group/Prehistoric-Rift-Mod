@@ -96,6 +96,7 @@ public class RiftItems {
 
     public static Item riftDodoMeatItem(String registryName, int amount, float saturation, boolean isCooked, boolean isWolfFood) {
         final RiftDodoMeatItem item = new RiftDodoMeatItem(amount, saturation, isCooked, isWolfFood);
+        item.setAlwaysEdible();
         return registerItem(item, registryName);
     }
 
