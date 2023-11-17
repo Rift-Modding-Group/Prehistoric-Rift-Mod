@@ -28,6 +28,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("rift.stegosaurus.death")
     public static final SoundEvent STEGOSAURUS_DEATH = createSoundEvent("rift.stegosaurus.death");
 
+    @GameRegistry.ObjectHolder("rift.dodo.idle")
+    public static final SoundEvent DODO_IDLE = createSoundEvent("rift.dodo.idle");
+
+    @GameRegistry.ObjectHolder("rift.dodo.hurt")
+    public static final SoundEvent DODO_HURT = createSoundEvent("rift.dodo.hurt");
+
+    @GameRegistry.ObjectHolder("rift.dodo.death")
+    public static final SoundEvent DODO_DEATH = createSoundEvent("rift.dodo.death");
+
     private static SoundEvent createSoundEvent(String soundName) {
         ResourceLocation soundID = new ResourceLocation(RiftInitialize.MODID, soundName);
         return new SoundEvent(soundID).setRegistryName(soundID);

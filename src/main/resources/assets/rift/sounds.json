@@ -40,13 +40,35 @@
     "sounds": [
       "rift:entities/stegosaurus/stegosaurus_hurt"
     ],
-    "subtitle": "sounds.subtitle.stegosaurus_idle"
+    "subtitle": "sounds.subtitle.stegosaurus_hurt"
   },
   "rift.stegosaurus.death": {
     "category": "neutral",
     "sounds": [
       "rift:entities/stegosaurus/stegosaurus_death"
     ],
-    "subtitle": "sounds.subtitle.stegosaurus_idle"
+    "subtitle": "sounds.subtitle.stegosaurus_death"
+  },
+
+  "rift.dodo.idle": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/dodo/dodo_idle"
+    ],
+    "subtitle": "sounds.subtitle.dodo_idle"
+  },
+  "rift.dodo.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/dodo/dodo_hurt"
+    ],
+    "subtitle": "sounds.subtitle.dodo_hurt"
+  },
+  "rift.dodo.death": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/dodo/dodo_death"
+    ],
+    "subtitle": "sounds.subtitle.dodo_death"
   }
 }

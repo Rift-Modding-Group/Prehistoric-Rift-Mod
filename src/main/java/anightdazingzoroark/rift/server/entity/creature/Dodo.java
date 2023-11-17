@@ -2,12 +2,14 @@ package anightdazingzoroark.rift.server.entity.creature;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
+import anightdazingzoroark.rift.client.RiftSounds;
 import anightdazingzoroark.rift.config.DodoConfig;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -105,5 +107,17 @@ public class Dodo extends RiftCreature {
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.DODO_IDLE;
+    }
+
+    protected SoundEvent getHurtSound() {
+        return RiftSounds.DODO_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.DODO_DEATH;
     }
 }
