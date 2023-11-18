@@ -41,12 +41,14 @@ public class RiftManageCanUseClick extends AbstractMessage<RiftManageCanUseClick
 
     @Override
     public void onServerReceived(MinecraftServer server, RiftManageCanUseClick message, EntityPlayer player, MessageContext messageContext) {
-        World world = player.getEntityWorld();
+        World world = player.world;
         RiftCreature interacted = (RiftCreature) player.world.getEntityByID(message.creatureId);
 
         if (!world.isRemote) {
             if (message.mouse == 0) interacted.setCanUseLeftClick(message.canUseClick);
-            else interacted.setCanUseRightClick(message.canUseClick);
+            else if (message.mouse == 1) {
+                interacted.setCanUseRightClick(message.canUseClick);
+            }
         }
     }
 }

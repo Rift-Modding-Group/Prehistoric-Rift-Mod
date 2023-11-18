@@ -229,23 +229,43 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 if (settings.keyBindAttack.isKeyDown()) {
                     if (ShoulderInstance.getInstance().doShoulderSurfing()) {
                         Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                        if (this.hasLeftClickChargeBar()) {}
+                        if (this.hasLeftClickChargeBar()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(this, 0));
+                        }
                         else {
                             if (toBeAttacked != null) {
                                 int targetId = toBeAttacked.getEntityId();
                                 RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
                             }
+                            else {
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
+                            }
                         }
                     }
                     else {
-                        if (this.hasLeftClickChargeBar()) {}
+                        if (this.hasLeftClickChargeBar()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(this, 0));
+                        }
                         else {
                             RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
                         }
                     }
                 }
-                else if (settings.keyBindUseItem.isKeyDown()) {
-
+                else if (settings.keyBindUseItem.isKeyDown() && this.canUseRightClick()) {
+                    if (this.hasRightClickChargeBar()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(this, 1));
+                    }
+                }
+                else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(this, 1, true));
+                }
+                else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()) {
+//                    if (this.hasLeftClickChargeBar()) {
+//                        if (this.getLeftClickUse() > 0)
+//                    }
+                    if (this.hasRightClickChargeBar()) {
+                        if (this.getRightClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
+                    }
                 }
             }
         }
@@ -894,7 +914,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void setCanUseRightClick(boolean value) {
-        this.dataManager.set(CAN_USE_RIGHT_CLICK, Boolean.valueOf(value));
+        this.dataManager.set(CAN_USE_RIGHT_CLICK, value);
     }
 
     public boolean isUsingRightClick() {
