@@ -4,11 +4,8 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
-import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
-import anightdazingzoroark.rift.server.message.RiftIncrementClickUse;
 import anightdazingzoroark.rift.server.message.RiftManageCanUseClick;
 import anightdazingzoroark.rift.server.message.RiftMessages;
-import anightdazingzoroark.rift.server.message.RiftMountControl;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
@@ -18,86 +15,13 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemFood;
-import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
-import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
-
 public class ServerEvents {
-    //for controlling when u use attacks or abilities while riding creatures
-//    @SubscribeEvent(receiveCanceled = true)
-//    public void mouseUse(RiftMouseHoldEvent event) {
-//        EntityPlayer player = Minecraft.getMinecraft().player;
-//        Item heldItem = player.getHeldItemMainhand().getItem();
-//        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
-//
-//        if (player.getRidingEntity() instanceof RiftCreature && !Loader.isModLoaded(SSRCompat.SSR_MOD_ID)) {
-//            RiftCreature creature = (RiftCreature) player.getRidingEntity();
-//            //detect left click
-//            if (!RiftUtil.checkInMountItemWhitelist(heldItem) && event.getMouseButton() == 0) {
-//                if (creature.hasLeftClickChargeBar()) {
-//                    if (!event.isReleased()) {
-//                        properties.leftClickFill++;
-//                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(creature, 0));
-//                    }
-//                    else {
-//                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0, properties.leftClickFill));
-//                        properties.leftClickFill = 0;
-//                    }
-//                }
-//                else {
-//                    if (event.getTicks() <= 10) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 0));
-//                }
-//            }
-//            //detect right click
-//            //also has system that ensures that tamed creatures dont use right click related stuff the moment they're mounted
-//            else if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && event.getMouseButton() == 1) {
-//                //dont trigger immediately after riding
-//                if (!properties.rCTrigger && event.isReleased()) properties.rCTrigger = true;
-//
-//                if (properties.rCTrigger) {
-//                    if (creature.getRightClickCooldown() == 0) {
-//                        if (!event.isReleased()) {
-//                            properties.rightClickFill++;
-//                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(creature, 1));
-//                        }
-//                        else if (event.isReleased() && !creature.canUseRightClick()) {
-//                            RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, true));
-//                            properties.rightClickFill = 0;
-//                        }
-//                        else if (event.isReleased()) {
-//                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(creature, 1, properties.rightClickFill));
-//                            properties.rightClickFill = 0;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    //for stopping default mouse actions when riding
-//    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
-//    public void stopDefaultMouseActions(InputEvent.MouseInputEvent event) {
-//        GameSettings settings = Minecraft.getMinecraft().gameSettings;
-//        EntityPlayer player = Minecraft.getMinecraft().player;
-//        Item heldItem = player.getHeldItemMainhand().getItem();
-//
-//        if (player.getRidingEntity() instanceof RiftCreature) {
-//            if (!RiftUtil.checkInMountItemWhitelist(heldItem) && settings.keyBindAttack.isPressed()) {
-//                KeyBinding.setKeyBindState(settings.keyBindAttack.getKeyCode(), false);
-//            }
-//            else if (!RiftUtil.checkInMountItemWhitelist(heldItem) && !(heldItem instanceof ItemFood) && settings.keyBindUseItem.isPressed()) {
-//                KeyBinding.setKeyBindState(settings.keyBindUseItem.getKeyCode(), false);
-//            }
-//        }
-//    }
 
     //for stopping creatures from being able to be controlled in water when they got no energy
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)

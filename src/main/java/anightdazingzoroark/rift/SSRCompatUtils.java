@@ -1,4 +1,4 @@
-package anightdazingzoroark.rift.compat.shouldersurfingreloaded;
+package anightdazingzoroark.rift;
 
 import com.teamderpy.shouldersurfing.client.ShoulderHelper;
 import net.minecraft.client.Minecraft;

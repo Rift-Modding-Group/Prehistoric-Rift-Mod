@@ -3,8 +3,7 @@ package anightdazingzoroark.rift.server.entity.creature;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.ClientProxy;
-import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompat;
-import anightdazingzoroark.rift.compat.shouldersurfingreloaded.SSRCompatUtils;
+import anightdazingzoroark.rift.SSRCompatUtils;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.RiftEgg;
@@ -15,7 +14,6 @@ import anightdazingzoroark.rift.server.items.RiftItems;
 import anightdazingzoroark.rift.server.message.*;
 import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -32,7 +30,6 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGlassBottle;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -40,7 +37,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.DamageSource;
@@ -51,16 +47,13 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -260,9 +253,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(this, 1, true));
                 }
                 else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()) {
-//                    if (this.hasLeftClickChargeBar()) {
-//                        if (this.getLeftClickUse() > 0)
-//                    }
+                    Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                    if (this.hasLeftClickChargeBar()) {
+                        if (this.getLeftClickUse() > 0) {
+                            if (toBeAttacked != null) {
+                                int targetId = toBeAttacked.getEntityId();
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0, this.getLeftClickUse()));
+                            }
+                            else {
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0, this.getLeftClickUse()));
+                            }
+                        }
+                    }
                     if (this.hasRightClickChargeBar()) {
                         if (this.getRightClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
                     }

@@ -150,6 +150,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
                         }
                     }
                 }
+                this.setLeftClickUse(0);
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("rift.notify.insufficient_energy", this.getName()), false);
         }
