@@ -9,6 +9,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -31,6 +32,7 @@ public class RiftLeftClickChargeBar {
     public void onPreRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
         Entity entity = player.getRidingEntity();
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
 
         if (entity instanceof RiftCreature) {
             if (((RiftCreature)entity).hasLeftClickChargeBar()) {
@@ -40,7 +42,7 @@ public class RiftLeftClickChargeBar {
 
                     Minecraft.getMinecraft().getTextureManager().bindTexture(chargeBarHud);
                     renderLeftClickChargeHud(creature, resolution.getScaledWidth(), resolution.getScaledHeight());
-                    reduceUnusedChargeBar(creature);
+                    reduceUnusedChargeBar(creature, settings.keyBindAttack.isKeyDown());
                     Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
                 }
             }
@@ -57,28 +59,9 @@ public class RiftLeftClickChargeBar {
         }
     }
 
-    @SubscribeEvent(receiveCanceled = true)
-    public void mouseTest(RiftMouseHoldEvent event) {
-        EntityPlayer player = Minecraft.getMinecraft().player;
-        Item heldItem = player.getHeldItemMainhand().getItem();
-
-        if (player.getRidingEntity() instanceof RiftCreature) {
-            RiftCreature creature = (RiftCreature) player.getRidingEntity();
-            if (!RiftUtil.checkInMountItemWhitelist(heldItem) && event.getMouseButton() == 0 && creature.canUseLeftClick() ) {
-                if (!event.isReleased()) {
-                    if (creature.getLeftClickCooldown() == 0) {
-                        fill++;
-                        mouseUsed = true;
-                    }
-                    else mouseUsed = false;
-                }
-                else mouseUsed = false;
-            }
-        }
-    }
-
-    private void reduceUnusedChargeBar(RiftCreature creature) {
-        if (!mouseUsed) fill = creature.getLeftClickCooldown() / 2;
+    private void reduceUnusedChargeBar(RiftCreature creature, boolean usingLeftClick) {
+        if (usingLeftClick) fill = creature.getLeftClickUse();
+        else fill = creature.getLeftClickCooldown() / 2;
     }
 
     private void renderLeftClickChargeHud(RiftCreature creature, int xSize, int ySize) {

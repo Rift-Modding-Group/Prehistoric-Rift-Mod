@@ -17,11 +17,44 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 public class ServerEvents {
+    //prevent players from attackin while ridin
+    @SubscribeEvent
+    public void noAttackWhileRiding(AttackEntityEvent event) {
+        if (event.getEntityPlayer().isRiding()) {
+            if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    //prevent players from breaking blocks while ridin
+    @SubscribeEvent
+    public void noBlockBreakWhileRiding(PlayerInteractEvent.LeftClickBlock event) {
+        if (event.getEntityPlayer().isRiding()) {
+            if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature) {
+                event.setUseBlock(null);
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    //prevent players from placin blocks while ridin
+    @SubscribeEvent
+    public void noBlockPlaceWhileRiding(BlockEvent.PlaceEvent event) {
+        if (event.getPlayer().isRiding()) {
+            if (event.getPlayer().getRidingEntity() instanceof RiftCreature) {
+                event.setCanceled(true);
+            }
+        }
+    }
 
     //for stopping creatures from being able to be controlled in water when they got no energy
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
@@ -152,6 +185,18 @@ public class ServerEvents {
                 properties.ticksUntilStopBleeding--;
             }
             if (properties.ticksUntilStopBleeding <= 0) properties.resetBleeding();
+        }
+        else {
+            //manage swing disable when riding creature
+            if (entity instanceof EntityPlayer && entity.isRiding()) {
+                if (entity.getRidingEntity() instanceof RiftCreature) {
+                    if (entity.isSwingInProgress) {
+                        entity.swingProgressInt = 0;
+                        entity.isSwingInProgress = false;
+                        entity.swingingHand = null;
+                    }
+                }
+            }
         }
     }
 

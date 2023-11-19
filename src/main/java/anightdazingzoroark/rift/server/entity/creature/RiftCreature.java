@@ -29,9 +29,7 @@ import net.minecraft.inventory.ContainerHorseChest;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemPotion;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
@@ -244,7 +242,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                     }
                 }
-                else if (settings.keyBindUseItem.isKeyDown() && this.canUseRightClick()) {
+                else if (settings.keyBindUseItem.isKeyDown() && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
                     if (this.hasRightClickChargeBar()) {
                         RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(this, 1));
                     }
