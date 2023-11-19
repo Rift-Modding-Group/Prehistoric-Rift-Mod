@@ -28,7 +28,7 @@ public class Dodo extends RiftCreature {
     public Dodo(World worldIn) {
         super(worldIn, RiftCreatureType.DODO);
         this.setSize(0.75f, 0.75f);
-        this.creatureType.setTamingFood(DodoConfig.dodoBreedingFood);
+        this.tamingFood = DodoConfig.dodoBreedingFood;
         this.experienceValue = 3;
         this.speed = 0.25D;
         this.isRideable = false;

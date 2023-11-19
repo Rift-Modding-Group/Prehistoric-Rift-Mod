@@ -1,10 +1,7 @@
 package anightdazingzoroark.rift.config;
 
 import anightdazingzoroark.rift.RiftInitialize;
-import anightdazingzoroark.rift.server.entity.creature.Dodo;
-import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.rift.server.entity.creature.Stegosaurus;
-import anightdazingzoroark.rift.server.entity.creature.Tyrannosaurus;
+import anightdazingzoroark.rift.server.entity.creature.*;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Level;
 
@@ -15,7 +12,8 @@ public enum RiftConfigList {
     GENERAL(null, GeneralConfig.class),
     TYRANNOSAURUS(Tyrannosaurus.class, TyrannosaurusConfig.class),
     STEGOSAURUS(Stegosaurus.class, StegosaurusConfig.class),
-    DODO(Dodo.class, DodoConfig.class);
+    DODO(Dodo.class, DodoConfig.class),
+    TRICERATOPS(Triceratops.class, TriceratopsConfig.class);
 
     private final Class<? extends RiftCreature> creatureClass;
     private final Class<? extends RiftConfig> configClass;

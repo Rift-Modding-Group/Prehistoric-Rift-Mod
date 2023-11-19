@@ -46,8 +46,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
         this.setSize(2.125f, 2.5f);
-        this.creatureType.setFavoriteFood(StegosaurusConfig.stegosaurusFavoriteFood);
-        this.creatureType.setTamingFood(StegosaurusConfig.stegosaurusTamingFood);
+        this.favoriteFood = StegosaurusConfig.stegosaurusFavoriteFood;
+        this.tamingFood = StegosaurusConfig.stegosaurusTamingFood;
         this.experienceValue = 20;
         this.speed = 0.175D;
         this.isRideable = true;
@@ -214,7 +214,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         if (flag) {
             RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entityIn, RiftEntityProperties.class);
             this.applyEnchantments(this, entityIn);
-            properties.setBleeding(0, 200);
+            if (StegosaurusConfig.stegosaurusCanInflictBleed) properties.setBleeding(0, 200);
         }
         return flag;
     }
@@ -256,7 +256,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     public void setIsStrongAttacking(boolean value) {
         this.dataManager.set(STRONG_ATTACKING, value);
-        this.setUsingLeftClick(true);
+        this.setUsingLeftClick(value);
         this.setActing(value);
     }
 

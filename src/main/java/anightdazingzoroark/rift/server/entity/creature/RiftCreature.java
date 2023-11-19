@@ -110,6 +110,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private double lastYd;
     private double waterLevel;
     private double yFloatPos;
+    public String[] favoriteFood;
+    public String[] tamingFood;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -532,7 +534,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isFavoriteFood(ItemStack stack) {
-        for (String foodItem : this.creatureType.getFavoriteFood()) {
+        for (String foodItem : this.favoriteFood) {
             int itemIdFirst = foodItem.indexOf(":");
             int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
@@ -544,7 +546,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public int getFavoriteFoodHeal(ItemStack stack) {
-        for (String foodItem : this.creatureType.getFavoriteFood()) {
+        for (String foodItem : this.favoriteFood) {
             int itemIdFirst = foodItem.indexOf(":");
             int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
@@ -560,7 +562,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isTamingFood(ItemStack stack) {
-        for (String foodItem : this.creatureType.getTamingFood()) {
+        for (String foodItem : this.tamingFood) {
             int itemIdFirst = foodItem.indexOf(":");
             int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
@@ -572,7 +574,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public int getTamingFoodAdd(ItemStack stack) {
-        for (String foodItem : this.creatureType.getTamingFood()) {
+        for (String foodItem : this.tamingFood) {
             int itemIdFirst = foodItem.indexOf(":");
             int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
@@ -588,7 +590,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public int getFavoriteFoodGrowth(ItemStack stack) {
-        for (String foodItem : this.creatureType.getFavoriteFood()) {
+        for (String foodItem : this.favoriteFood) {
             int itemIdFirst = foodItem.indexOf(":");
             int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
@@ -1077,6 +1079,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             else this.attackEntityAsMob(target);
         }
+        this.ssrTarget = null;
     }
 
     public EntityLivingBase getControlAttackTargets() {
