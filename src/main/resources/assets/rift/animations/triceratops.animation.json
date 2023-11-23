@@ -85,12 +85,12 @@
 			}
 		},
 		"animation.triceratops.charge_start": {
-			"animation_length": 0.52,
+			"animation_length": 0.12,
 			"bones": {
 				"neck": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.52": [25, 0, 0]
+						"0.12": [25, 0, 0]
 					}
 				}
 			}
@@ -157,12 +157,12 @@
 			}
 		},
 		"animation.triceratops.charge_end": {
-			"animation_length": 0.52,
+			"animation_length": 0.12,
 			"bones": {
 				"neck": {
 					"rotation": {
 						"0.0": [25, 0, 0],
-						"0.52": [0, 0, 0]
+						"0.12": [0, 0, 0]
 					}
 				}
 			}

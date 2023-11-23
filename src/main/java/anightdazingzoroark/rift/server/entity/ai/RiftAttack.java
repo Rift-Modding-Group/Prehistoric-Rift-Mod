@@ -1,6 +1,7 @@
 package anightdazingzoroark.rift.server.entity.ai;
 
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.rift.server.entity.creatureinterface.IChargingMob;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -42,7 +43,12 @@ public class RiftAttack extends EntityAIBase {
 
             if (this.path != null) return true;
             else {
-                if (this.attacker instanceof IRangedAttackMob) return this.getAttackReachSqr(entitylivingbase) >= 0 && this.getRangedAttackReachSqr(entitylivingbase) < d0;
+                if (this.attacker instanceof IRangedAttackMob) {
+                    return this.getAttackReachSqr(entitylivingbase) >= 0 && this.getRangedAttackReachSqr(entitylivingbase) < d0 && this.attacker.isRangedAttacking();
+                }
+                else if (this.attacker instanceof IChargingMob) {
+                    return this.getAttackReachSqr(entitylivingbase) >= 0 && this.getChargeReachSqr(entitylivingbase) < d0 && !this.attacker.isStartCharging() && !this.attacker.isCharging() && !this.attacker.isEndCharging();
+                }
                 return this.getAttackReachSqr(entitylivingbase) >= d0;
             }
         }
@@ -129,6 +135,11 @@ public class RiftAttack extends EntityAIBase {
 
     protected double getRangedAttackReachSqr(EntityLivingBase attackTarget) {
         if (this.attacker instanceof IRangedAttackMob) return (double)(this.attacker.rangedWidth * this.attacker.rangedWidth + attackTarget.width);
+        return 0;
+    }
+
+    protected double getChargeReachSqr(EntityLivingBase attackTarget) {
+        if (this.attacker instanceof IChargingMob) return (double)(this.attacker.chargeWidth * this.attacker.chargeWidth + attackTarget.width);
         return 0;
     }
 }

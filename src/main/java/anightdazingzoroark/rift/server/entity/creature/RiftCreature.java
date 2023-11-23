@@ -59,6 +59,10 @@ import java.util.stream.Collectors;
 public abstract class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> RANGED_ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> LOWER_HEAD = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> START_CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> END_CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
@@ -104,6 +108,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int herdCheckCountdown;
     public float attackWidth;
     public float rangedWidth;
+    public float chargeWidth;
     private int tickUse;
     private BlockPos homePosition;
     public boolean isFloating;
@@ -112,6 +117,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private double yFloatPos;
     public String[] favoriteFood;
     public String[] tamingFood;
+    public int chargeCooldown;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -138,6 +144,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.isFloating = false;
         this.lastYd = 0D;
         this.yFloatPos = 0D;
+        this.chargeCooldown = 0;
     }
 
     @Override
@@ -145,6 +152,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.entityInit();
         this.dataManager.register(ATTACKING, Boolean.FALSE);
         this.dataManager.register(RANGED_ATTACKING, Boolean.FALSE);
+        this.dataManager.register(LOWER_HEAD, Boolean.FALSE);
+        this.dataManager.register(START_CHARGING, Boolean.FALSE);
+        this.dataManager.register(CHARGING, Boolean.FALSE);
+        this.dataManager.register(END_CHARGING, Boolean.FALSE);
         this.dataManager.register(VARIANT, rand.nextInt(4));
         this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
@@ -817,6 +828,38 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setRangedAttacking(boolean value) {
         this.dataManager.set(RANGED_ATTACKING, Boolean.valueOf(value));
         this.setActing(value);
+    }
+
+    public boolean isLoweringHead() {
+        return this.dataManager.get(LOWER_HEAD);
+    }
+
+    public void setLowerHead(boolean value) {
+        this.dataManager.set(LOWER_HEAD, value);
+    }
+
+    public boolean isStartCharging() {
+        return this.dataManager.get(START_CHARGING);
+    }
+
+    public void setStartCharging(boolean value) {
+        this.dataManager.set(START_CHARGING, value);
+    }
+
+    public boolean isCharging() {
+        return this.dataManager.get(CHARGING);
+    }
+
+    public void setIsCharging(boolean value) {
+        this.dataManager.set(CHARGING, value);
+    }
+
+    public boolean isEndCharging() {
+        return this.dataManager.get(END_CHARGING);
+    }
+
+    public void setEndCharging(boolean value) {
+        this.dataManager.set(END_CHARGING, value);
     }
 
     public TameStatusType getTameStatus() {

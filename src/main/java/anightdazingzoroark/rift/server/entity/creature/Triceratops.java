@@ -3,6 +3,7 @@ package anightdazingzoroark.rift.server.entity.creature;
 import anightdazingzoroark.rift.config.TriceratopsConfig;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
+import anightdazingzoroark.rift.server.entity.creatureinterface.IChargingMob;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,22 +20,16 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
-public class Triceratops extends RiftCreature {
-    private static final DataParameter<Boolean> CHARGING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
+public class Triceratops extends RiftCreature implements IChargingMob {
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
-        this.setSize(1.25f, 2f);
+        this.setSize(2f, 2f);
         this.favoriteFood = TriceratopsConfig.triceratopsFavoriteFood;
         this.tamingFood = TriceratopsConfig.triceratopsTamingFood;
         this.experienceValue = 20;
         this.speed = 0.15D;
         this.attackWidth = 4.875f;
-    }
-
-    @Override
-    protected void entityInit() {
-        super.entityInit();
-        this.dataManager.register(CHARGING, Boolean.FALSE);
+        this.chargeWidth = 12f;
     }
 
     @Override
@@ -52,6 +47,7 @@ public class Triceratops extends RiftCreature {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.72F, 0.48F));
+        this.tasks.addTask(2, new RiftChargeAttack(this, 1.75f, 0.24f, 4f, 5f));
         this.tasks.addTask(3, new RiftAttack(this, 1.0D, 0.72F, 0.48F));
         this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(4, new RiftHerdDistanceFromOtherMembers(this, 3D));
@@ -114,16 +110,6 @@ public class Triceratops extends RiftCreature {
     @Override
     public int slotCount() {
         return 27;
-    }
-
-    public boolean isCharging() {
-        return this.dataManager.get(CHARGING);
-    }
-
-    public void setIsCharging(boolean value) {
-        this.dataManager.set(CHARGING, value);
-        this.setUsingLeftClick(value);
-        this.setActing(value);
     }
 
     @Override
