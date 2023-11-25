@@ -116,6 +116,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::triceratopsMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::triceratopsAttack));
+        data.addAnimationController(new AnimationController(this, "charge", 0, this::triceratopsCharge));
     }
 
     private <E extends IAnimatable> PlayState triceratopsMovement(AnimationEvent<E> event) {
@@ -127,15 +128,35 @@ public class Triceratops extends RiftCreature implements IChargingMob {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.walk", true));
             return PlayState.CONTINUE;
         }
-        event.getController().clearAnimationCache();
         return PlayState.STOP;
     }
 
     private <E extends IAnimatable> PlayState triceratopsAttack(AnimationEvent<E> event) {
         if (this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.attack", false));
+            return PlayState.CONTINUE;
         }
         else event.getController().clearAnimationCache();
-        return PlayState.CONTINUE;
+        return PlayState.STOP;
+    }
+
+    private <E extends IAnimatable> PlayState triceratopsCharge(AnimationEvent<E> event) {
+        if (this.isLoweringHead()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_start", false));
+            return PlayState.CONTINUE;
+        }
+        else if (this.isStartCharging()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_charging", false));
+            return PlayState.CONTINUE;
+        }
+        else if (this.isCharging()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charging", false));
+            return PlayState.CONTINUE;
+        }
+        else if (this.isEndCharging()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_end", false));
+            return PlayState.CONTINUE;
+        }
+        return PlayState.STOP;
     }
 }
