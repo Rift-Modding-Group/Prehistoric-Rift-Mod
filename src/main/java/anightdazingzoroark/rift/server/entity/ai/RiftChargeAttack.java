@@ -145,21 +145,22 @@ public class RiftChargeAttack extends EntityAIBase {
 
                 if (breakBlocksFlag || !chargedIntoEntities.isEmpty() || this.atSpotToChargeTo()) {
                     if (!chargedIntoEntities.isEmpty()) for (EntityLivingBase entity : chargedIntoEntities) this.attacker.attackEntityAsMob(entity);
+                    System.out.println("hit mob test finished");
 
                     boolean canBreak = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.attacker.world, this.attacker);
                     if (breakBlocksFlag && canBreak) {
                         List<BlockPos> toBreak = new ArrayList<>();
                         for (int x = MathHelper.floor(chargerHitbox.minX); x < MathHelper.ceil(chargerHitbox.maxX); x++) {
                             for (int y = MathHelper.floor(chargerHitbox.minY); y < MathHelper.ceil(chargerHitbox.maxY); y++) {
-                                for (int z = MathHelper.floor(chargerHitbox.minZ); x < MathHelper.ceil(chargerHitbox.maxZ); z++) {
+                                for (int z = MathHelper.floor(chargerHitbox.minZ); z < MathHelper.ceil(chargerHitbox.maxZ); z++) {
                                     BlockPos blockpos = new BlockPos(x, y, z);
                                     IBlockState iblockstate = this.attacker.world.getBlockState(blockpos);
                                     Block block = iblockstate.getBlock();
 
-                                    if (RiftUtil.blockWeakerThanWood(block, iblockstate)) toBreak.add(blockpos);
-//                                    if (iblockstate.getMaterial() != Material.AIR && y >= this.attacker.posY) {
-//                                        if (RiftUtil.blockWeakerThanWood(block, iblockstate)) toBreak.add(blockpos);
-//                                    }
+//                                    if (RiftUtil.blockWeakerThanWood(block, iblockstate)) toBreak.add(blockpos);
+                                    if (iblockstate.getMaterial() != Material.AIR && y >= this.attacker.posY) {
+                                        if (RiftUtil.blockWeakerThanWood(block, iblockstate)) toBreak.add(blockpos);
+                                    }
                                 }
                             }
                         }
