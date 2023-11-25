@@ -60,6 +60,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> RANGED_ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOWER_HEAD = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CAN_CHARGE = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> START_CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> END_CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -153,6 +154,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(ATTACKING, Boolean.FALSE);
         this.dataManager.register(RANGED_ATTACKING, Boolean.FALSE);
         this.dataManager.register(LOWER_HEAD, Boolean.FALSE);
+        this.dataManager.register(CAN_CHARGE, Boolean.TRUE);
         this.dataManager.register(START_CHARGING, Boolean.FALSE);
         this.dataManager.register(CHARGING, Boolean.FALSE);
         this.dataManager.register(END_CHARGING, Boolean.FALSE);
@@ -836,6 +838,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setLowerHead(boolean value) {
         this.dataManager.set(LOWER_HEAD, value);
+    }
+
+    public boolean canCharge() {
+        return this.dataManager.get(CAN_CHARGE);
+    }
+
+    public void setCanCharge(boolean value) {
+        this.dataManager.set(CAN_CHARGE, value);
     }
 
     public boolean isStartCharging() {

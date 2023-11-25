@@ -47,7 +47,7 @@ public class RiftAttack extends EntityAIBase {
                     return this.getAttackReachSqr(entitylivingbase) >= 0 && this.getRangedAttackReachSqr(entitylivingbase) < d0 && this.attacker.isRangedAttacking();
                 }
                 else if (this.attacker instanceof IChargingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= 0 && this.getChargeReachSqr(entitylivingbase) < d0 && !this.attacker.isStartCharging() && !this.attacker.isCharging() && !this.attacker.isEndCharging();
+                    return this.getAttackReachSqr(entitylivingbase) >= 0 && this.getChargeReachSqr(entitylivingbase) < d0 && this.attacker.isLoweringHead() && !this.attacker.isStartCharging() && !this.attacker.isCharging() && !this.attacker.isEndCharging();
                 }
                 return this.getAttackReachSqr(entitylivingbase) >= d0;
             }

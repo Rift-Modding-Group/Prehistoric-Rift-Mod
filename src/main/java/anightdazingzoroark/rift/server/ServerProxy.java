@@ -3,7 +3,6 @@ package anightdazingzoroark.rift.server;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.entity.RiftEntities;
-import anightdazingzoroark.rift.server.events.RiftMouseHoldEvent;
 import anightdazingzoroark.rift.server.inventory.CreatureContainer;
 import anightdazingzoroark.rift.server.items.RiftItems;
 import anightdazingzoroark.rift.server.recipes.RiftRecipes;
@@ -42,7 +41,6 @@ public class ServerProxy implements IGuiHandler {
 
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ServerEvents());
-        MinecraftForge.EVENT_BUS.register(new RiftMouseHoldEvent.Handler());
     }
 
     public void postInit(FMLPostInitializationEvent event) {}

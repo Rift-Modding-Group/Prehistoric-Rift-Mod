@@ -7,9 +7,6 @@ import anightdazingzoroark.rift.server.entity.creatureinterface.IChargingMob;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -29,7 +26,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         this.experienceValue = 20;
         this.speed = 0.15D;
         this.attackWidth = 4.875f;
-        this.chargeWidth = 12f;
+        this.chargeWidth = 20f;
     }
 
     @Override
@@ -55,6 +52,17 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(7, new RiftWander(this, 1.0D));
         this.tasks.addTask(8, new RiftLookAround(this));
+    }
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        this.manageCanCharge();
+    }
+
+    private void manageCanCharge() {
+        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
+        if (this.getRightClickCooldown() == 0) this.setCanCharge(true);
     }
 
     @Override
@@ -124,7 +132,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.sitting", true));
             return PlayState.CONTINUE;
         }
-        if (event.isMoving() || (this.isSitting() && this.hasTarget())) {
+        if (event.isMoving() || (this.isSitting() && this.hasTarget()) && !this.isCharging()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.walk", true));
             return PlayState.CONTINUE;
         }
@@ -142,19 +150,19 @@ public class Triceratops extends RiftCreature implements IChargingMob {
 
     private <E extends IAnimatable> PlayState triceratopsCharge(AnimationEvent<E> event) {
         if (this.isLoweringHead()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_start", false));
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_start", true));
             return PlayState.CONTINUE;
         }
         else if (this.isStartCharging()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_charging", false));
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_charging", true));
             return PlayState.CONTINUE;
         }
         else if (this.isCharging()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charging", false));
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charging", true));
             return PlayState.CONTINUE;
         }
         else if (this.isEndCharging()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_end", false));
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_end", true));
             return PlayState.CONTINUE;
         }
         return PlayState.STOP;
