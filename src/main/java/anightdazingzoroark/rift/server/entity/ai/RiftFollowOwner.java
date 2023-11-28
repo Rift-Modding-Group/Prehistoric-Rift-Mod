@@ -24,13 +24,13 @@ public class RiftFollowOwner extends EntityAIFollowOwner {
         if (this.tameable.getTameStatus() != TameStatusType.STAND) {
             return false;
         }
-        else if (this.tameable.isStartCharging() || this.tameable.isCharging() || this.tameable.isLoweringHead() || this.tameable.isEndCharging()) {
+        else if (this.tameable.isUtilizingCharging()) {
             return false;
         }
         return super.shouldExecute();
     }
 
     public boolean shouldContinueExecuting() {
-        return this.tameable.getTameStatus() != TameStatusType.STAND && !this.tameable.isStartCharging() && !this.tameable.isCharging() && !this.tameable.isLoweringHead() && !this.tameable.isEndCharging() && super.shouldContinueExecuting();
+        return this.tameable.getTameStatus() != TameStatusType.STAND && !this.tameable.isUtilizingCharging() && super.shouldContinueExecuting();
     }
 }

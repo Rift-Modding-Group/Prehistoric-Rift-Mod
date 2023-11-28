@@ -2,7 +2,6 @@ package anightdazingzoroark.rift.server.entity.ai;
 
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.rift.server.entity.creatureinterface.IChargingMob;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -13,65 +12,50 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class RiftChargeAttack extends EntityAIBase {
-    protected final RiftCreature attacker;
+public class RiftControlledCharge extends EntityAIBase {
+    protected RiftCreature attacker;
     protected final double chargeBoost;
     protected final int initAnimLength;
     protected final int chargeTime;
-    protected final int cooldownTime;
-    private int animTick;
-    private BlockPos finalChargePos;
-    private Vec3d chargeVector;
+    protected int animTick;
     private boolean endFlag;
+    private int cooldownTime;
 
-    public RiftChargeAttack(RiftCreature attacker, double chargeBoost, float initAnimLength, float chargeTime, float cooldownTime) {
+    public RiftControlledCharge(RiftCreature attacker, float chargeBoost, float initAnimLength, float chargeTime) {
         this.attacker = attacker;
         this.chargeBoost = chargeBoost;
         this.initAnimLength = (int)(initAnimLength * 20);
         this.chargeTime = (int)(chargeTime * 20);
-        this.cooldownTime = (int)(cooldownTime * 20);
     }
 
     @Override
     public boolean shouldExecute() {
-        EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
-
-        if (!this.attacker.canCharge()) return false;
-        else if (this.attacker.isBeingRidden()) return false;
-        else if (entitylivingbase == null) return false;
-        else if (!entitylivingbase.isEntityAlive()) return false;
-        else {
-            double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
-            return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr();
+        if (this.attacker.isBeingRidden()) {
+            return this.attacker.forcedChargePower > 0 && this.attacker.getRightClickCooldown() == 0 && this.attacker.getRightClickUse() > 0;
         }
+        return false;
     }
 
     public void startExecuting() {
         this.attacker.removeSpeed();
-        EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
-        this.finalChargePos = new BlockPos(entitylivingbase.posX, entitylivingbase.posY, entitylivingbase.posZ);
-        Vec3d chargerVec = this.attacker.getPositionVector();
-        Vec3d targetVec = entitylivingbase.getPositionVector();
-        this.chargeVector = targetVec.subtract(chargerVec).normalize();
-        this.endFlag = false;
-
+        this.attacker.setCanBeSteered(false);
         this.animTick = 0;
         this.attacker.setLowerHead(true);
-        this.attacker.setActing(true);
+        this.cooldownTime = this.attacker.forcedChargePower * 2;
     }
 
     public boolean shouldContinueExecuting() {
-        return !this.endFlag && !this.attacker.isBeingRidden();
+        return !this.endFlag || this.attacker.isBeingRidden();
     }
 
     public void resetTask() {
-        this.chargeVector = null;
+        this.attacker.forcedChargePower = 0;
+        this.attacker.setCanBeSteered(true);
         this.attacker.resetSpeed();
         this.attacker.setActing(false);
         this.attacker.setLowerHead(false);
@@ -84,29 +68,20 @@ public class RiftChargeAttack extends EntityAIBase {
         if (this.animTick >= this.initAnimLength && this.attacker.isLoweringHead()) {
             this.attacker.setLowerHead(false);
             this.attacker.setStartCharging(true);
-            this.animTick = 0;
-            this.forceLook();
         }
-        else if (this.attacker.isLoweringHead()) {
-            this.animTick++;
-            this.forceLook();
-        }
+        else if (this.attacker.isLoweringHead()) this.animTick++;
 
         if (this.animTick >= this.chargeTime && this.attacker.isStartCharging()) {
             this.attacker.setStartCharging(false);
             this.attacker.setIsCharging(true);
             this.animTick = 0;
-            this.forceLook();
         }
-        else if (this.attacker.isStartCharging()) {
-            this.animTick++;
-            this.forceLook();
-        }
+        else if (this.attacker.isStartCharging()) this.animTick++;
 
         if (this.attacker.isCharging()) {
-            this.forceLook();
-            this.attacker.motionX = this.chargeVector.x * this.chargeBoost;
-            this.attacker.motionZ = this.chargeVector.z * this.chargeBoost;
+            this.attacker.forcedChargePower--;
+            this.attacker.motionX = this.attacker.getLookVec().x * this.chargeBoost;
+            this.attacker.motionZ = this.attacker.getLookVec().z * this.chargeBoost;
 
             //stop if it hits a mob
             AxisAlignedBB chargerHitbox = this.attacker.getEntityBoundingBox().grow(1D);
@@ -151,7 +126,7 @@ public class RiftChargeAttack extends EntityAIBase {
                 }
             }
 
-            if (breakBlocksFlag || !chargedIntoEntities.isEmpty() || this.atSpotToChargeTo()) {
+            if (breakBlocksFlag || !chargedIntoEntities.isEmpty() || this.attacker.forcedChargePower == 0) {
                 if (!chargedIntoEntities.isEmpty()) for (EntityLivingBase entity : chargedIntoEntities) this.attacker.attackEntityAsMob(entity);
 
                 boolean canBreak = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.attacker.world, this.attacker);
@@ -176,51 +151,17 @@ public class RiftChargeAttack extends EntityAIBase {
                 this.attacker.setIsCharging(false);
                 this.attacker.setEndCharging(true);
             }
+
         }
 
         if (this.animTick >= this.initAnimLength && this.attacker.isEndCharging()) {
+            this.attacker.setRightClickUse(0);
             this.attacker.setEndCharging(false);
             this.attacker.setRightClickCooldown(this.cooldownTime);
-            this.attacker.setEnergy(this.attacker.getEnergy() - 6);
+            this.attacker.setEnergy(this.attacker.getEnergy() - (int)(0.06d * (double)Math.min(this.cooldownTime/2, 100) + 6d));
             this.attacker.setCanCharge(false);
             this.endFlag = true;
         }
         else if (this.attacker.isEndCharging()) this.animTick++;
-    }
-
-    protected double getAttackReachSqr(EntityLivingBase attackTarget) {
-        return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
-    }
-
-    protected double getChargeAttackReachSqr() {
-        if (this.attacker instanceof IChargingMob) return (double)(this.attacker.chargeWidth * this.attacker.chargeWidth);
-        return 0;
-    }
-
-    protected boolean atSpotToChargeTo() {
-        AxisAlignedBB chargerHitbox = this.attacker.getEntityBoundingBox().grow(0.125, 0.125, 0.125);
-        double centerX = (chargerHitbox.minX + chargerHitbox.maxX) / 2.0;
-        double centerZ = (chargerHitbox.minZ + chargerHitbox.maxZ) / 2.0;
-        double distanceX = Math.abs(centerX - this.finalChargePos.getX());
-        double distanceZ = Math.abs(centerZ - this.finalChargePos.getZ());
-        return distanceX <= 1.5D && distanceZ <= 1.5D;
-    }
-
-    private void forceLook() {
-        Vec3d entityPos = this.attacker.getPositionVector().add(0, this.attacker.getEyeHeight(), 0);
-        Vec3d targetPosVec = new Vec3d(this.finalChargePos.getX() + 0.5, this.finalChargePos.getY(), this.finalChargePos.getZ() + 0.5);
-        Vec3d direction = targetPosVec.subtract(entityPos);
-
-        double yaw = Math.atan2(direction.z, direction.x);
-        yaw = Math.toDegrees(yaw) - 90;
-
-        double distance = Math.sqrt(direction.x * direction.x + direction.z * direction.z);
-        double pitch = -Math.toDegrees(Math.atan2(direction.y, distance));
-
-//        this.attacker.prevRotationYaw = (float) yaw;
-//        this.attacker.prevRotationPitch = (float) pitch;
-//        this.attacker.rotationYaw = (float) yaw;
-//        this.attacker.rotationPitch = (float) pitch;
-        this.attacker.setPositionAndRotation(this.attacker.posX, this.attacker.posY, this.attacker.posZ, (float) yaw, (float) pitch);
     }
 }

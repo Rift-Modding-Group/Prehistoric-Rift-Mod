@@ -119,6 +119,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public String[] favoriteFood;
     public String[] tamingFood;
     public int chargeCooldown;
+    public int forcedChargePower;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -870,6 +871,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setEndCharging(boolean value) {
         this.dataManager.set(END_CHARGING, value);
+    }
+
+    public boolean isUtilizingCharging() {
+        return this.isLoweringHead() || this.isStartCharging() || this.isCharging() || this.isEndCharging();
     }
 
     public TameStatusType getTameStatus() {

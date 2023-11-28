@@ -18,6 +18,9 @@ public class TriceratopsRenderer extends GeoEntityRenderer<RiftCreature> {
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
         float scale = RiftUtil.setModelScale(animatable, 0.3f, 1.75f);
 
+        //variables
+
+
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());
         model.getBone("headSaddle").get().setHidden(!animatable.isSaddled());

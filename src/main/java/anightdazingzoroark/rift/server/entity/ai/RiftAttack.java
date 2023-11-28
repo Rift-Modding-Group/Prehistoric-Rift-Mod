@@ -44,10 +44,10 @@ public class RiftAttack extends EntityAIBase {
             if (this.path != null) return true;
             else {
                 if (this.attacker instanceof IRangedAttackMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= 0 && this.getRangedAttackReachSqr(entitylivingbase) < d0 && this.attacker.isRangedAttacking();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking();
                 }
                 else if (this.attacker instanceof IChargingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= 0 && this.getChargeReachSqr(entitylivingbase) < d0 && this.attacker.isLoweringHead() && !this.attacker.isStartCharging() && !this.attacker.isCharging() && !this.attacker.isEndCharging();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isUtilizingCharging();
                 }
                 return this.getAttackReachSqr(entitylivingbase) >= d0;
             }
@@ -57,7 +57,8 @@ public class RiftAttack extends EntityAIBase {
     public boolean shouldContinueExecuting() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
-        if (entitylivingbase == null) return false;
+        if (this.attacker.isUtilizingCharging()) return false;
+        else if (entitylivingbase == null) return false;
         else if (!entitylivingbase.isEntityAlive()) return false;
         else if (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(entitylivingbase))) return false;
         else {
