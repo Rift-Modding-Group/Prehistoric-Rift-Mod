@@ -1,6 +1,8 @@
 package anightdazingzoroark.rift.server.entity.creature;
 
 import anightdazingzoroark.rift.RiftInitialize;
+import anightdazingzoroark.rift.client.RiftSounds;
+import anightdazingzoroark.rift.config.StegosaurusConfig;
 import anightdazingzoroark.rift.config.TriceratopsConfig;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
@@ -9,6 +11,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -27,6 +30,8 @@ public class Triceratops extends RiftCreature implements IChargingMob {
 
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
+        this.minCreatureHealth = TriceratopsConfig.getMinHealth();
+        this.maxCreatureHealth = TriceratopsConfig.getMaxHealth();
         this.setSize(2f, 2f);
         this.favoriteFood = TriceratopsConfig.triceratopsFavoriteFood;
         this.tamingFood = TriceratopsConfig.triceratopsTamingFood;
@@ -39,7 +44,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(25.0D);
+        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(TriceratopsConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
@@ -222,5 +227,17 @@ public class Triceratops extends RiftCreature implements IChargingMob {
             }
         }
         return PlayState.STOP;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.TRICERATOPS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound() {
+        return RiftSounds.TRICERATOPS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.TRICERATOPS_DEATH;
     }
 }

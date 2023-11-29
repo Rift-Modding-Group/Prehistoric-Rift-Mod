@@ -11,7 +11,7 @@ public class GeneralConfig  extends RiftConfig {
     public static String[] carnivoreRegenEnergyFoods = {"rift:raw_fibrous_meat:0:2", "rift:cooked_fibrous_meat:0:4"};
 
     public GeneralConfig(Configuration config) {
-        super(config, null);
+        super(config, null, 1, 0);
     }
 
     @Override
@@ -22,6 +22,5 @@ public class GeneralConfig  extends RiftConfig {
         mountOverrideWhitelistItems = config.getStringList("List of items that can still be used while riding", "General", new String[]{"item:minecraft:bow:32767", "item:minecraft:shield:32767"}, "When riding a creature you can't use almost anything to make room for the controls of the creature being ridden. Items or Ore Dictionary tags in this list can still be used however. To add Ore Dictionary tags add \"oreDic:<insert tag name here>\", while to add items add \"item:<insert item's identifier here>:<insert data id here>\". Food items can still be eaten while riding hence their exclusion");
         herbivoreRegenEnergyFoods = config.getStringList("List of food items that can regenerate energy of herbivores", "General", new String[]{"rift:fiber_bar:0:4"}, "List of food items that can regenerate the energy of a herbivore. To add items add \"<insert item's identifier here>:<insert data id here>:<insert amount of energy you want the item to regenerate>\"");
         carnivoreRegenEnergyFoods = config.getStringList("List of food items that can regenerate energy of carnivores", "General", new String[]{"rift:raw_fibrous_meat:0:2", "rift:cooked_fibrous_meat:0:4"}, "List of food items that can regenerate the energy of a carnivore. To add items add \"<insert item's identifier here>:<insert data id here>:<insert amount of energy you want the item to regenerate>\"");
-
     }
 }

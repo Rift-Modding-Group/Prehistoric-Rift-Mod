@@ -7,7 +7,7 @@ public class TriceratopsConfig extends RiftConfig {
     public static String[] triceratopsTamingFood = {"rift:basic_herbivore_meal:0:0.10", "rift:advanced_herbivore_meal:0:33"};
 
     public TriceratopsConfig(Configuration config) {
-        super(config, new String[]{"biome:minecraft:plains:20:4:6"});
+        super(config, new String[]{"biome:minecraft:plains:20:4:6"}, 80, 25);
     }
 
     @Override

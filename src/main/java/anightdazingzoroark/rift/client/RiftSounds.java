@@ -37,6 +37,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("rift.dodo.death")
     public static final SoundEvent DODO_DEATH = createSoundEvent("rift.dodo.death");
 
+    @GameRegistry.ObjectHolder("rift.triceratops.idle")
+    public static final SoundEvent TRICERATOPS_IDLE = createSoundEvent("rift.triceratops.idle");
+
+    @GameRegistry.ObjectHolder("rift.triceratops.hurt")
+    public static final SoundEvent TRICERATOPS_HURT = createSoundEvent("rift.triceratops.hurt");
+
+    @GameRegistry.ObjectHolder("rift.triceratops.death")
+    public static final SoundEvent TRICERATOPS_DEATH = createSoundEvent("rift.triceratops.death");
+
     private static SoundEvent createSoundEvent(String soundName) {
         ResourceLocation soundID = new ResourceLocation(RiftInitialize.MODID, soundName);
         return new SoundEvent(soundID).setRegistryName(soundID);

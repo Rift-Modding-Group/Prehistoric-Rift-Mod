@@ -124,8 +124,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
         this.creatureType = creatureType;
-        this.minCreatureHealth = creatureType.getMinHealth();
-        this.maxCreatureHealth = creatureType.getMaxHealth();
         this.setSpeed(0f);
         this.setScaleForAge(false);
         this.initInventory();

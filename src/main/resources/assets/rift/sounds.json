@@ -70,5 +70,27 @@
       "rift:entities/dodo/dodo_death"
     ],
     "subtitle": "sounds.subtitle.dodo_death"
+  },
+
+  "rift.triceratops.idle": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/triceratops/triceratops_idle"
+    ],
+    "subtitle": "sounds.subtitle.triceratops_idle"
+  },
+  "rift.triceratops.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/triceratops/triceratops_hurt"
+    ],
+    "subtitle": "sounds.subtitle.triceratops_hurt"
+  },
+  "rift.triceratops.death": {
+    "category": "neutral",
+    "sounds": [
+      "rift:entities/dodo/triceratops_death"
+    ],
+    "subtitle": "sounds.subtitle.triceratops_death"
   }
 }

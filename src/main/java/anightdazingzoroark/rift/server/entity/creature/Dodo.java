@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.RiftSounds;
 import anightdazingzoroark.rift.config.DodoConfig;
+import anightdazingzoroark.rift.config.RiftConfig;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
@@ -27,6 +28,8 @@ public class Dodo extends RiftCreature {
 
     public Dodo(World worldIn) {
         super(worldIn, RiftCreatureType.DODO);
+        this.minCreatureHealth = DodoConfig.getMinHealth();
+        this.maxCreatureHealth = DodoConfig.getMaxHealth();
         this.setSize(0.75f, 0.75f);
         this.tamingFood = DodoConfig.dodoBreedingFood;
         this.experienceValue = 3;

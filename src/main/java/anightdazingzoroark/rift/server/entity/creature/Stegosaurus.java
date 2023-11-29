@@ -4,7 +4,6 @@ import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.RiftSounds;
 import anightdazingzoroark.rift.config.StegosaurusConfig;
-import anightdazingzoroark.rift.config.TyrannosaurusConfig;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.rift.server.entity.ai.*;
@@ -45,6 +44,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
+        this.minCreatureHealth = StegosaurusConfig.getMinHealth();
+        this.maxCreatureHealth = StegosaurusConfig.getMaxHealth();
         this.setSize(2.125f, 2.5f);
         this.favoriteFood = StegosaurusConfig.stegosaurusFavoriteFood;
         this.tamingFood = StegosaurusConfig.stegosaurusTamingFood;
@@ -65,7 +66,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(30.0D);
+        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(StegosaurusConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }

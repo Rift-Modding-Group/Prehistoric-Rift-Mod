@@ -4,6 +4,7 @@ import anightdazingzoroark.rift.config.GeneralConfig;
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.RiftUtil;
 import anightdazingzoroark.rift.client.RiftSounds;
+import anightdazingzoroark.rift.config.TriceratopsConfig;
 import anightdazingzoroark.rift.config.TyrannosaurusConfig;
 import anightdazingzoroark.rift.server.entity.*;
 import anightdazingzoroark.rift.server.entity.ai.*;
@@ -115,6 +116,8 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
+        this.minCreatureHealth = TyrannosaurusConfig.getMinHealth();
+        this.maxCreatureHealth = TyrannosaurusConfig.getMaxHealth();
         this.setSize(3.25f, 4f);
         this.favoriteFood = TyrannosaurusConfig.tyrannosaurusFavoriteFood;
         this.tamingFood = TyrannosaurusConfig.tyrannosaurusBreedingFood;
@@ -137,7 +140,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(35.0D);
+        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(TyrannosaurusConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }

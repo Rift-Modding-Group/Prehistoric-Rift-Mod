@@ -8,7 +8,7 @@ public class StegosaurusConfig extends RiftConfig {
     public static boolean stegosaurusCanInflictBleed = true;
 
     public StegosaurusConfig(Configuration config) {
-        super(config, new String[]{"biome:minecraft:plains:20:4:6"});
+        super(config, new String[]{"biome:minecraft:plains:20:4:6"}, 100, 30);
     }
 
     @Override

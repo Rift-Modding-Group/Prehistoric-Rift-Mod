@@ -10,7 +10,7 @@ public class TyrannosaurusConfig extends RiftConfig {
     public static String[] tyrannosaurusRoarTargetBlacklist = {"rift:tyrannosaurus"};
 
     public TyrannosaurusConfig(Configuration config) {
-        super(config, new String[]{"biome:minecraft:plains:15:1:1", "biome:minecraft:extreme_hills:20:1:1"});
+        super(config, new String[]{"biome:minecraft:plains:15:1:1", "biome:minecraft:extreme_hills:20:1:1"}, 160, 35);
     }
 
     @Override

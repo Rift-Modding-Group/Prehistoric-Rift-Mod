@@ -2,6 +2,8 @@ package anightdazingzoroark.rift.server.entity;
 
 import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.client.ClientProxy;
+import anightdazingzoroark.rift.config.RiftConfig;
+import anightdazingzoroark.rift.config.RiftCreatureToConfig;
 import anightdazingzoroark.rift.server.ServerProxy;
 import anightdazingzoroark.rift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.rift.server.enums.TameBehaviorType;
@@ -58,7 +60,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         this.setHatchTime(this.getHatchTime() - 1);
         if (this.getHatchTime() == 0) {
             RiftCreature creature = this.getCreatureType().invokeClass(this.world);
-            creature.setHealth((float) this.getCreatureType().getMinHealth());
+            creature.setHealth((float) RiftCreatureToConfig.creatureToConfig(this.getCreatureType()).getConfigInstance().getMinHealth());
             creature.setAgeInDays(0);
 
             if (this.getOwnerId() != null) {
