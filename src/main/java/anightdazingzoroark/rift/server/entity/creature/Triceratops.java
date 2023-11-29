@@ -1,5 +1,6 @@
 package anightdazingzoroark.rift.server.entity.creature;
 
+import anightdazingzoroark.rift.RiftInitialize;
 import anightdazingzoroark.rift.config.TriceratopsConfig;
 import anightdazingzoroark.rift.server.entity.RiftCreatureType;
 import anightdazingzoroark.rift.server.entity.ai.*;
@@ -7,9 +8,11 @@ import anightdazingzoroark.rift.server.entity.creatureinterface.IChargingMob;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -17,7 +20,11 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
+import javax.annotation.Nullable;
+
 public class Triceratops extends RiftCreature implements IChargingMob {
+    public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/triceratops"));
+
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
         this.setSize(2f, 2f);
@@ -94,11 +101,16 @@ public class Triceratops extends RiftCreature implements IChargingMob {
                 if (this.getRightClickCooldown() == 0) {
                     if (!this.isActing()) {
                         this.setActing(true);
-                        this.forcedChargePower = holdAmount;
+                        this.forcedChargePower = this.chargeCooldown = holdAmount;
                     }
                 }
+                else this.setRightClickUse(0);
             }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+            else {
+                ((EntityPlayer) this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+                this.setRightClickUse(0);
+                this.setRightClickCooldown(0);
+            }
         }
     }
 
@@ -132,6 +144,13 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         return 27;
     }
 
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
+    }
+
     @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::triceratopsMovement));
@@ -145,7 +164,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.sitting", true));
             return PlayState.CONTINUE;
         }
-        if (event.isMoving() || (this.isSitting() && this.hasTarget()) && !this.isCharging()) {
+        if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isCharging()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.walk", true));
             return PlayState.CONTINUE;
         }
@@ -186,12 +205,12 @@ public class Triceratops extends RiftCreature implements IChargingMob {
     private <E extends IAnimatable> PlayState triceratopsControlledCharge(AnimationEvent<E> event) {
         if (this.isBeingRidden()) {
             if (this.getRightClickCooldown() == 0) {
-                if (this.getRightClickUse() > 0) {
+                if (this.getRightClickUse() > 0 && this.getEnergy() > 6) {
                     if (this.isLoweringHead()) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_start", true));
                         return PlayState.CONTINUE;
                     }
-                    else if (this.isStartCharging()) {
+                    else if (this.isStartCharging() && this.getEnergy() > 6) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_charging", true));
                         return PlayState.CONTINUE;
                     }

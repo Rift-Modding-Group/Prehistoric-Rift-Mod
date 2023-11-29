@@ -36,6 +36,7 @@ public class RiftItems {
     public static Item TYRANNOSAURUS_ARM;
     public static Item STEGOSAURUS_PLATE;
     public static Item DODO_BEAK;
+    public static Item TRICERATOPS_HORN;
 
     public static void registerItems() {
         RAW_EXOTIC_MEAT = riftFoodItem("raw_exotic_meat", 4, 0.3f, true);
@@ -55,6 +56,7 @@ public class RiftItems {
         TYRANNOSAURUS_ARM = riftGenericItem("tyrannosaurus_arm");
         STEGOSAURUS_PLATE = riftGenericItem("stegosaurus_plate");
         DODO_BEAK = riftGenericItem("dodo_beak");
+        TRICERATOPS_HORN = riftGenericItem("triceratops_horn");
 
         RiftCreatureType.registerEggs();
 

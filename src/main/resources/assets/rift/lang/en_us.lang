@@ -3,6 +3,7 @@ death.attack.rift_bleed=%s bled to death
 entity.tyrannosaurus.name=Tyrannosaurus
 entity.stegosaurus.name=Stegosaurus
 entity.dodo.name=Dodo
+entity.triceratops.name=Triceratops
 entity.egg.name=Egg
 
 inventory.gear=%s Gear
@@ -24,12 +25,14 @@ item.creative_meal.name=Creative Meal
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 item.stegosaurus_plate.name=Stegosaurus Plate
 item.dodo_beak.name=Dodo Beak
+item.triceratops_horn.name=Triceratops Horn
 
 itemGroup.rift_items=Prehistoric Rift Items
 
 item.tyrannosaurus_egg.name=Tyrannosaurus Egg
 item.stegosaurus_egg.name=Stegosaurus Egg
 item.dodo_egg.name=Dodo Egg
+item.triceratops_egg.name=Triceratops Egg
 
 radial.choice.ride=Ride
 radial.choice.state=State

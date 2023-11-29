@@ -306,7 +306,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     public void setRoaring(boolean value) {
         this.dataManager.set(ROARING, Boolean.valueOf(value));
-        this.setUsingRightClick(value);
         this.setActing(value);
     }
 

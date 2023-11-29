@@ -233,7 +233,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (this.isBeingRidden()) {
             if (this.getControllingPassenger().equals(player)) {
-                if (settings.keyBindAttack.isKeyDown()) {
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingClick(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingClick(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown()));
+                if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
                     if (ShoulderInstance.getInstance().doShoulderSurfing()) {
                         Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                         if (this.hasLeftClickChargeBar()) {
@@ -258,7 +260,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                     }
                 }
-                else if (settings.keyBindUseItem.isKeyDown() && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
+                else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.getRightClickCooldown() == 0 && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
                     if (this.hasRightClickChargeBar()) {
                         RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(this, 1));
                     }
@@ -1101,11 +1103,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void updatePassenger(Entity passenger) {
         super.updatePassenger(passenger);
 
-        this.rotationYaw = passenger.rotationYaw;
-        this.prevRotationYaw = this.rotationYaw;
-        this.rotationPitch = passenger.rotationPitch * 0.5f;
-        this.setRotation(this.rotationYaw, this.rotationPitch);
-        this.renderYawOffset = this.rotationYaw;
+        if (this.canBeSteered()) {
+            this.rotationYaw = passenger.rotationYaw;
+            this.prevRotationYaw = this.rotationYaw;
+            this.rotationPitch = passenger.rotationPitch * 0.5f;
+            this.setRotation(this.rotationYaw, this.rotationPitch);
+            this.renderYawOffset = this.rotationYaw;
+        }
 
         passenger.setPosition(riderPos().x, riderPos().y + passenger.height, riderPos().z);
 

@@ -36,7 +36,7 @@ public class RiftControlledCharge extends EntityAIBase {
     @Override
     public boolean shouldExecute() {
         if (this.attacker.isBeingRidden()) {
-            return this.attacker.forcedChargePower > 0 && this.attacker.getRightClickCooldown() == 0 && this.attacker.getRightClickUse() > 0;
+            return this.attacker.getRightClickCooldown() == 0 && this.attacker.getRightClickUse() > 0;
         }
         return false;
     }
@@ -46,15 +46,17 @@ public class RiftControlledCharge extends EntityAIBase {
         this.attacker.setCanBeSteered(false);
         this.animTick = 0;
         this.attacker.setLowerHead(true);
-        this.cooldownTime = this.attacker.forcedChargePower * 2;
+        this.endFlag = false;
     }
 
     public boolean shouldContinueExecuting() {
-        return !this.endFlag || this.attacker.isBeingRidden();
+        return !this.endFlag && this.attacker.isBeingRidden();
     }
 
     public void resetTask() {
         this.attacker.forcedChargePower = 0;
+        this.attacker.chargeCooldown = 0;
+        this.attacker.setRightClickUse(0);
         this.attacker.setCanBeSteered(true);
         this.attacker.resetSpeed();
         this.attacker.setActing(false);
@@ -71,12 +73,11 @@ public class RiftControlledCharge extends EntityAIBase {
         }
         else if (this.attacker.isLoweringHead()) this.animTick++;
 
-        if (this.animTick >= this.chargeTime && this.attacker.isStartCharging()) {
+        if (!this.attacker.isUsingRightClick() && this.attacker.isStartCharging()) {
             this.attacker.setStartCharging(false);
             this.attacker.setIsCharging(true);
             this.animTick = 0;
         }
-        else if (this.attacker.isStartCharging()) this.animTick++;
 
         if (this.attacker.isCharging()) {
             this.attacker.forcedChargePower--;
@@ -84,7 +85,7 @@ public class RiftControlledCharge extends EntityAIBase {
             this.attacker.motionZ = this.attacker.getLookVec().z * this.chargeBoost;
 
             //stop if it hits a mob
-            AxisAlignedBB chargerHitbox = this.attacker.getEntityBoundingBox().grow(1D);
+            AxisAlignedBB chargerHitbox = this.attacker.getEntityBoundingBox().grow(1D, 2D, 1D);
             List<EntityLivingBase> chargedIntoEntities = this.attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, chargerHitbox, null);
             chargedIntoEntities.remove(this.attacker);
             if (this.attacker.isTamed()) {
@@ -151,15 +152,16 @@ public class RiftControlledCharge extends EntityAIBase {
                 this.attacker.setIsCharging(false);
                 this.attacker.setEndCharging(true);
             }
-
         }
 
         if (this.animTick >= this.initAnimLength && this.attacker.isEndCharging()) {
             this.attacker.setRightClickUse(0);
             this.attacker.setEndCharging(false);
-            this.attacker.setRightClickCooldown(this.cooldownTime);
-            this.attacker.setEnergy(this.attacker.getEnergy() - (int)(0.06d * (double)Math.min(this.cooldownTime/2, 100) + 6d));
+            System.out.println(this.attacker.chargeCooldown * 2);
+            this.attacker.setRightClickCooldown(this.attacker.chargeCooldown * 2);
+            this.attacker.forcedChargePower = 0;
             this.attacker.setCanCharge(false);
+            this.attacker.setEnergy(this.attacker.getEnergy() - (int)(0.06d * (double)Math.min(this.attacker.chargeCooldown/2, 100) + 6d));
             this.endFlag = true;
         }
         else if (this.attacker.isEndCharging()) this.animTick++;

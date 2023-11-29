@@ -57,7 +57,7 @@ public class RiftRightClickChargeBar {
     }
 
     private void reduceUnusedChargeBar(RiftCreature creature, boolean usingRightClick) {
-        if (usingRightClick) fill = creature.getRightClickUse();
+        if (usingRightClick && creature.getRightClickCooldown() == 0) fill = creature.getRightClickUse();
         else fill = creature.getRightClickCooldown() / 2;
     }
 
