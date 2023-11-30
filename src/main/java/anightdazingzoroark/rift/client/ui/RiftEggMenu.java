@@ -76,7 +76,8 @@ public class RiftEggMenu extends GuiScreen {
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.disableLighting();
-        this.drawGuiContainerForegroundLayer(p_73863_1_, p_73863_2_);
+        this.drawGuiContainerForegroundLayer();
+//        GlStateManager.translate(0, -120, 0);
         GlStateManager.enableLighting();
         GlStateManager.popMatrix();
         GlStateManager.enableLighting();
@@ -87,7 +88,7 @@ public class RiftEggMenu extends GuiScreen {
         }
     }
 
-    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+    protected void drawGuiContainerForegroundLayer() {
         reset();
         RiftEgg egg = (RiftEgg) ClientProxy.EGG;
         GlStateManager.pushMatrix();
@@ -115,7 +116,7 @@ public class RiftEggMenu extends GuiScreen {
         int l = (this.height - this.ySize) / 2;
         drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, (176F), (166F));
         GlStateManager.pushMatrix();
-        renderEgg((RiftEgg) ClientProxy.EGG, k + 90, l + 50, 50, 0, 0);
+        renderEgg((RiftEgg) ClientProxy.EGG, k + 90, l + 120, 70, 0, 0);
         GlStateManager.popMatrix();
     }
 
