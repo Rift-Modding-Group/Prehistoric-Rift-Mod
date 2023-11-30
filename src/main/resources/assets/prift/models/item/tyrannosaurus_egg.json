@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "rift:items/tyrannosaurus_egg"
+    "layer0": "prift:items/tyrannosaurus_egg"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "rift:items/triceratops_horn"
+    "layer0": "prift:items/triceratops_horn"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "rift:items/creative_meal"
+    "layer0": "prift:items/creative_meal"
   }
 }

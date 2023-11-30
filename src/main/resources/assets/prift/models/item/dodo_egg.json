@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "rift:items/dodo_egg"
+    "layer0": "prift:items/dodo_egg"
   }
 }
