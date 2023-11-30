@@ -95,6 +95,10 @@ sounds.subtitle.dodo_idle=Dodo cackles
 sounds.subtitle.dodo_hurt=Dodo hurts
 sounds.subtitle.dodo_death=Dodo dies
 
+sounds.subtitle.triceratops_idle=Triceratops grunts
+sounds.subtitle.triceratops_hurt=Triceratops hurts
+sounds.subtitle.triceratops_death=Triceratops dies
+
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral
 tamebehavior.aggressive=%s is currently aggressive
