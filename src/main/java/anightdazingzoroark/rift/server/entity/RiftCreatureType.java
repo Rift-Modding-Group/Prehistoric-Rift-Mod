@@ -5,6 +5,7 @@ import anightdazingzoroark.rift.config.DodoConfig;
 import anightdazingzoroark.rift.client.renderer.entity.DodoRenderer;
 import anightdazingzoroark.rift.client.renderer.entity.StegosaurusRenderer;
 import anightdazingzoroark.rift.client.renderer.entity.TyrannosaurusRenderer;
+import anightdazingzoroark.rift.config.GeneralConfig;
 import anightdazingzoroark.rift.config.StegosaurusConfig;
 import anightdazingzoroark.rift.config.TyrannosaurusConfig;
 import anightdazingzoroark.rift.server.entity.creature.*;
@@ -86,7 +87,7 @@ public enum RiftCreatureType {
     }
 
     public int getHatchTime() {
-        return this.hatchTime;
+        return GeneralConfig.quickEggHatch ? 5 : this.hatchTime;
     }
 
     public float getEggScale() {

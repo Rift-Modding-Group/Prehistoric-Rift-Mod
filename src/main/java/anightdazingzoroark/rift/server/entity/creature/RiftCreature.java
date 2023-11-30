@@ -451,12 +451,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
+                        System.out.println(this.getAgeInTicks());
                         this.showGrowthParticles();
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
                     else if (this.isFavoriteFood(itemstack) && !RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getHealth() < this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
+                        System.out.println(this.getFavoriteFoodHeal(itemstack));
                         this.heal((float) this.getFavoriteFoodHeal(itemstack));
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
@@ -568,8 +570,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
             double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1));
             if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == 32767) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
-                else if (stack.getMetadata() == itemData) return (int)(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage);
+                if (itemData == 32767) return (int) (Math.ceil(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage));
+                else if (stack.getMetadata() == itemData) {
+                    return (int) (Math.ceil(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage));
+                }
             }
         }
         return 0;
