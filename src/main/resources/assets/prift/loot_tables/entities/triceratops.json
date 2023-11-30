@@ -1,12 +1,12 @@
 {
   "pools": [
     {
-      "name": "rift:triceratops",
+      "name": "prift:triceratops",
       "rolls": 1,
       "entries": [
         {
           "type": "item",
-          "name": "rift:raw_exotic_meat",
+          "name": "prift:raw_exotic_meat",
           "weight": 1,
           "functions": [
             {
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "name": "rift:triceratops",
+      "name": "prift:triceratops",
       "rolls": 1,
       "entries": [
         {
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "name": "rift:triceratops",
+      "name": "prift:triceratops",
       "rolls": 1,
       "entries": [
         {
@@ -94,7 +94,7 @@
       ]
     },
     {
-      "name": "rift:triceratops",
+      "name": "prift:triceratops",
       "rolls": 1,
       "conditions": [
         {
@@ -106,7 +106,7 @@
       "entries": [
         {
           "type": "item",
-          "name": "rift:triceratops_horn",
+          "name": "prift:triceratops_horn",
           "weight": 1,
           "functions": [
             {

@@ -1,12 +1,12 @@
 {
   "pools": [
     {
-      "name": "rift:stegosaurus",
+      "name": "prift:stegosaurus",
       "rolls": 1,
       "entries": [
         {
           "type": "item",
-          "name": "rift:raw_exotic_meat",
+          "name": "prift:raw_exotic_meat",
           "weight": 1,
           "functions": [
             {
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "name": "rift:stegosaurus",
+      "name": "prift:stegosaurus",
       "rolls": 1,
       "entries": [
         {
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "name": "rift:stegosaurus",
+      "name": "prift:stegosaurus",
       "rolls": 1,
       "entries": [
         {
@@ -94,7 +94,7 @@
       ]
     },
     {
-      "name": "rift:stegosaurus",
+      "name": "prift:stegosaurus",
       "rolls": 1,
       "conditions": [
         {
@@ -106,7 +106,7 @@
       "entries": [
         {
           "type": "item",
-          "name": "rift:stegosaurus_plate",
+          "name": "prift:stegosaurus_plate",
           "weight": 1,
           "functions": [
             {

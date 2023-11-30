@@ -14,10 +14,10 @@
       "item": "minecraft:gold_ingot"
     },
     "A": {
-      "item": "rift:basic_carnivore_meal"
+      "item": "prift:basic_carnivore_meal"
     }
   },
   "result": {
-    "item": "rift:advanced_carnivore_meal"
+    "item": "prift:advanced_carnivore_meal"
   }
 }

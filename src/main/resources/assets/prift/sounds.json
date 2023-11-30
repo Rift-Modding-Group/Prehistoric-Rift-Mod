@@ -1,95 +1,95 @@
 {
-  "rift.tyrannosaurus.idle": {
+  "prift.tyrannosaurus.idle": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/tyrannosaurus/tyrannosaurus_idle"
+      "prift:entities/tyrannosaurus/tyrannosaurus_idle"
     ],
     "subtitle": "sounds.subtitle.tyrannosaurus_idle"
   },
-  "rift.tyrannosaurus.hurt": {
+  "prift.tyrannosaurus.hurt": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/tyrannosaurus/tyrannosaurus_hurt"
+      "prift:entities/tyrannosaurus/tyrannosaurus_hurt"
     ],
     "subtitle": "sounds.subtitle.tyrannosaurus_hurt"
   },
-  "rift.tyrannosaurus.death": {
+  "prift.tyrannosaurus.death": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/tyrannosaurus/tyrannosaurus_death"
+      "prift:entities/tyrannosaurus/tyrannosaurus_death"
     ],
     "subtitle": "sounds.subtitle.tyrannosaurus_death"
   },
-  "rift.tyrannosaurus.roar": {
+  "prift.tyrannosaurus.roar": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/tyrannosaurus/tyrannosaurus_roar"
+      "prift:entities/tyrannosaurus/tyrannosaurus_roar"
     ],
     "subtitle": "sounds.subtitle.tyrannosaurus_roar"
   },
 
-  "rift.stegosaurus.idle": {
+  "prift.stegosaurus.idle": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/stegosaurus/stegosaurus_idle"
+      "prift:entities/stegosaurus/stegosaurus_idle"
     ],
     "subtitle": "sounds.subtitle.stegosaurus_idle"
   },
-  "rift.stegosaurus.hurt": {
+  "prift.stegosaurus.hurt": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/stegosaurus/stegosaurus_hurt"
+      "prift:entities/stegosaurus/stegosaurus_hurt"
     ],
     "subtitle": "sounds.subtitle.stegosaurus_hurt"
   },
-  "rift.stegosaurus.death": {
+  "prift.stegosaurus.death": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/stegosaurus/stegosaurus_death"
+      "prift:entities/stegosaurus/stegosaurus_death"
     ],
     "subtitle": "sounds.subtitle.stegosaurus_death"
   },
 
-  "rift.dodo.idle": {
+  "prift.dodo.idle": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/dodo/dodo_idle"
+      "prift:entities/dodo/dodo_idle"
     ],
     "subtitle": "sounds.subtitle.dodo_idle"
   },
-  "rift.dodo.hurt": {
+  "prift.dodo.hurt": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/dodo/dodo_hurt"
+      "prift:entities/dodo/dodo_hurt"
     ],
     "subtitle": "sounds.subtitle.dodo_hurt"
   },
-  "rift.dodo.death": {
+  "prift.dodo.death": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/dodo/dodo_death"
+      "prift:entities/dodo/dodo_death"
     ],
     "subtitle": "sounds.subtitle.dodo_death"
   },
 
-  "rift.triceratops.idle": {
+  "prift.triceratops.idle": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/triceratops/triceratops_idle"
+      "prift:entities/triceratops/triceratops_idle"
     ],
     "subtitle": "sounds.subtitle.triceratops_idle"
   },
-  "rift.triceratops.hurt": {
+  "prift.triceratops.hurt": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/triceratops/triceratops_hurt"
+      "prift:entities/triceratops/triceratops_hurt"
     ],
     "subtitle": "sounds.subtitle.triceratops_hurt"
   },
-  "rift.triceratops.death": {
+  "prift.triceratops.death": {
     "category": "neutral",
     "sounds": [
-      "rift:entities/dodo/triceratops_death"
+      "prift:entities/dodo/triceratops_death"
     ],
     "subtitle": "sounds.subtitle.triceratops_death"
   }
