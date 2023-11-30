@@ -18,7 +18,7 @@ import java.io.File;
 
 @Mod(modid = RiftInitialize.MODID, name = RiftInitialize.MODNAME, version = RiftInitialize.MODVERSION, dependencies = "required-after:forge@[11.16.0.1865,);required-after:llibrary@[1.7.19,);required-after:geckolib3@[3.0.19,)")
 public class RiftInitialize {
-    public static final String MODID = "rift";
+    public static final String MODID = "prift";
     public static final String SSR_MOD_ID = "shouldersurfing";
     public static final String MODNAME = "Prehistoric Rift";
     public static final String MODVERSION= "0.0.3";
