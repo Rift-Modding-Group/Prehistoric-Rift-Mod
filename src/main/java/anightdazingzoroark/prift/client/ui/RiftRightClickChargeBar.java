@@ -39,7 +39,7 @@ public class RiftRightClickChargeBar {
 
                     Minecraft.getMinecraft().getTextureManager().bindTexture(chargeBarHud);
                     renderRightClickChargeHud(creature, resolution.getScaledWidth(), resolution.getScaledHeight());
-                    reduceUnusedChargeBar(creature, settings.keyBindUseItem.isKeyDown());
+                    reduceUnusedChargeBar(creature, creature.isUsingRightClick());
                     Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
                 }
             }
@@ -57,7 +57,7 @@ public class RiftRightClickChargeBar {
     }
 
     private void reduceUnusedChargeBar(RiftCreature creature, boolean usingRightClick) {
-        if (usingRightClick && creature.getRightClickCooldown() == 0) fill = creature.getRightClickUse();
+        if (usingRightClick) fill = creature.getRightClickUse();
         else fill = creature.getRightClickCooldown() / 2;
     }
 

@@ -1,9 +1,6 @@
 package anightdazingzoroark.prift.server.entity;
 
-import anightdazingzoroark.prift.client.renderer.entity.TriceratopsRenderer;
-import anightdazingzoroark.prift.client.renderer.entity.DodoRenderer;
-import anightdazingzoroark.prift.client.renderer.entity.StegosaurusRenderer;
-import anightdazingzoroark.prift.client.renderer.entity.TyrannosaurusRenderer;
+import anightdazingzoroark.prift.client.renderer.entity.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
@@ -22,7 +19,8 @@ public enum RiftCreatureType {
     TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, TyrannosaurusRenderer::new, 3670016, 2428687, 450, 1),
     STEGOSAURUS(Stegosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, StegosaurusRenderer::new, 1731840, 16743424, 300, 1),
     DODO(Dodo.class, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, null, DodoRenderer::new, 7828853, 6184028, 90, 0.25f),
-    TRICERATOPS(Triceratops.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, TriceratopsRenderer::new, 935177, 3631923, 300, 1);
+    TRICERATOPS(Triceratops.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, TriceratopsRenderer::new, 935177, 3631923, 300, 1),
+    UTAHRAPTOR(Utahraptor.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.FAST, UtahraptorRenderer::new, 5855577, 10439936, 180, 0.25f);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;

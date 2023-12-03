@@ -39,7 +39,7 @@ public class RiftLeftClickChargeBar {
 
                     Minecraft.getMinecraft().getTextureManager().bindTexture(chargeBarHud);
                     renderLeftClickChargeHud(creature, resolution.getScaledWidth(), resolution.getScaledHeight());
-                    reduceUnusedChargeBar(creature, settings.keyBindAttack.isKeyDown());
+                    reduceUnusedChargeBar(creature, creature.isUsingLeftClick());
                     Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
                 }
             }
@@ -57,7 +57,7 @@ public class RiftLeftClickChargeBar {
     }
 
     private void reduceUnusedChargeBar(RiftCreature creature, boolean usingLeftClick) {
-        if (usingLeftClick && creature.getLeftClickCooldown() == 0) fill = creature.getLeftClickUse();
+        if (usingLeftClick) fill = creature.getLeftClickUse();
         else fill = creature.getLeftClickCooldown() / 2;
     }
 
