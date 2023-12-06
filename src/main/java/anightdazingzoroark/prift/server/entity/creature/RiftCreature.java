@@ -64,6 +64,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> START_CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> END_CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> LEAPING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
@@ -110,6 +111,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float attackWidth;
     public float rangedWidth;
     public float chargeWidth;
+    public float leapWidth;
     private int tickUse;
     private BlockPos homePosition;
     public boolean isFloating;
@@ -157,6 +159,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(START_CHARGING, Boolean.FALSE);
         this.dataManager.register(CHARGING, Boolean.FALSE);
         this.dataManager.register(END_CHARGING, Boolean.FALSE);
+        this.dataManager.register(LEAPING, Boolean.FALSE);
         this.dataManager.register(VARIANT, rand.nextInt(4));
         this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
@@ -877,6 +880,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(END_CHARGING, value);
     }
 
+    public boolean isLeaping() {
+        return this.dataManager.get(LEAPING);
+    }
+
+    public void setLeaping(boolean value) {
+        this.dataManager.set(LEAPING, value);
+    }
+
     public boolean isUtilizingCharging() {
         return this.isLoweringHead() || this.isStartCharging() || this.isCharging() || this.isEndCharging();
     }
@@ -1084,10 +1095,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean isMoving() {
         double fallMotion = !this.onGround ? this.motionY : 0;
         return Math.sqrt((this.motionX * this.motionX) + (fallMotion * fallMotion) + (this.motionZ * this.motionZ)) > 0;
-    }
-
-    public boolean isApexPredator() {
-        return false;
     }
 
     public boolean isTameableByFeeding() {

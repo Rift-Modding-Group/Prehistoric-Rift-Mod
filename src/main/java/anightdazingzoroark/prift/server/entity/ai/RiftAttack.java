@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureinterface.IChargingMob;
+import anightdazingzoroark.prift.server.entity.creatureinterface.ILeapingMob;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -49,6 +50,9 @@ public class RiftAttack extends EntityAIBase {
                 else if (this.attacker instanceof IChargingMob) {
                     return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isUtilizingCharging();
                 }
+                else if (this.attacker instanceof ILeapingMob) {
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isLeaping();
+                }
                 return this.getAttackReachSqr(entitylivingbase) >= d0;
             }
         }
@@ -58,6 +62,7 @@ public class RiftAttack extends EntityAIBase {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
         if (this.attacker.isUtilizingCharging()) return false;
+        else if (this.attacker.isLeaping()) return false;
         else if (entitylivingbase == null) return false;
         else if (!entitylivingbase.isEntityAlive()) return false;
         else if (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(entitylivingbase))) return false;
@@ -141,6 +146,11 @@ public class RiftAttack extends EntityAIBase {
 
     protected double getChargeReachSqr(EntityLivingBase attackTarget) {
         if (this.attacker instanceof IChargingMob) return (double)(this.attacker.chargeWidth * this.attacker.chargeWidth + attackTarget.width);
+        return 0;
+    }
+
+    protected double getLeapReachSqr(EntityLivingBase attackTarget) {
+        if (this.attacker instanceof IChargingMob) return (double)(this.attacker.leapWidth * this.attacker.leapWidth + attackTarget.width);
         return 0;
     }
 }

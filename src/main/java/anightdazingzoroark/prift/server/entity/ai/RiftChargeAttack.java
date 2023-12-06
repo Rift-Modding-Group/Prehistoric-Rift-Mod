@@ -48,7 +48,7 @@ public class RiftChargeAttack extends EntityAIBase {
         else if (!entitylivingbase.isEntityAlive()) return false;
         else {
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
-            return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr();
+            return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr(entitylivingbase);
         }
     }
 
@@ -192,8 +192,8 @@ public class RiftChargeAttack extends EntityAIBase {
         return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
     }
 
-    protected double getChargeAttackReachSqr() {
-        if (this.attacker instanceof IChargingMob) return (double)(this.attacker.chargeWidth * this.attacker.chargeWidth);
+    protected double getChargeAttackReachSqr(EntityLivingBase attackTarget) {
+        if (this.attacker instanceof IChargingMob) return (double)(this.attacker.chargeWidth * this.attacker.chargeWidth + attackTarget.width);
         return 0;
     }
 

@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.TyrannosaurusConfig;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureinterface.IApexPredator;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -42,7 +43,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-public class Tyrannosaurus extends RiftCreature implements IAnimatable {
+public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPredator {
     public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus"));
     private static final Predicate<EntityLivingBase> WEAKNESS_BLACKLIST = new Predicate<EntityLivingBase>() {
         @Override
@@ -53,7 +54,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                     return entity.isEntityAlive() && !blacklist.contains("minecraft:player") && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
                 }
                 else if (entity instanceof RiftCreature) {
-                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                    return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof IApexPredator) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
                 }
                 else {
                     return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS) && !(entity instanceof RiftEgg);
@@ -61,7 +62,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
             }
             else {
                 if (entity instanceof RiftCreature) {
-                    return entity.isEntityAlive() && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                    return entity.isEntityAlive() && !(entity instanceof IApexPredator) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
                 }
                 else {
                     return entity.isEntityAlive() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS) && !(entity instanceof RiftEgg);
@@ -78,7 +79,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
                     return entity.isEntityAlive() && blacklist.contains("minecraft:player") && entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
                 }
                 else if (entity instanceof RiftCreature) {
-                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !((RiftCreature) entity).isApexPredator() && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
+                    return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof IApexPredator) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS);
                 }
                 else return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !entity.getActivePotionEffects().contains(MobEffects.WEAKNESS) && !(entity instanceof RiftEgg);
             }
@@ -166,7 +167,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageCanRoar();
-        if (!this.isBaby()) this.manageApplyWeakness();
+        if (!this.isBaby()) this.manageApplyApexEffect();
     }
 
     private void manageCanRoar() {
@@ -174,7 +175,8 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         if (this.getRightClickCooldown() == 0) this.setCanRoar(true);
     }
 
-    private void manageApplyWeakness() {
+    @Override
+    public void manageApplyApexEffect() {
         Predicate<EntityLivingBase> targetPredicate = GeneralConfig.apexAffectedWhitelist ? WEAKNESS_WHITELIST : WEAKNESS_BLACKLIST;
         for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEffectCastArea(), targetPredicate)) {
             if (this.isTamed() && entityLivingBase instanceof EntityPlayer) {
@@ -198,7 +200,8 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
         }
     }
 
-    protected AxisAlignedBB getEffectCastArea() {
+    @Override
+    public AxisAlignedBB getEffectCastArea() {
         return this.getEntityBoundingBox().grow(16.0D, 16.0D, 16.0D);
     }
 
@@ -321,11 +324,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable {
 
     public boolean canRoar() {
         return this.dataManager.get(CAN_ROAR);
-    }
-
-    @Override
-    public boolean isApexPredator() {
-        return true;
     }
 
     @Override
