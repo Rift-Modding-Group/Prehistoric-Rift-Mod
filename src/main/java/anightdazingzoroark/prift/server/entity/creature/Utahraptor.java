@@ -5,8 +5,16 @@ import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureinterface.ILeapingMob;
+import anightdazingzoroark.prift.server.entity.creatureinterface.IPackHunter;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.init.MobEffects;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathNavigateClimber;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -16,7 +24,12 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
-public class Utahraptor extends RiftCreature implements ILeapingMob {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter {
+    private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Utahraptor.class, DataSerializers.BOOLEAN);
+
     public Utahraptor(World worldIn) {
         super(worldIn, RiftCreatureType.UTAHRAPTOR);
         this.minCreatureHealth = UtahraptorConfig.getMinHealth();
@@ -34,6 +47,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob {
     @Override
     protected void entityInit() {
         super.entityInit();
+        this.dataManager.register(PACK_BUFFING, Boolean.valueOf(false));
         this.setCanPickUpLoot(true);
     }
 
@@ -53,18 +67,25 @@ public class Utahraptor extends RiftCreature implements ILeapingMob {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.28F, 0.28F));
-        this.tasks.addTask(3, new RiftLeapAttack(this, 0.75f, 160));
+        this.tasks.addTask(3, new RiftLeapAttack(this, 1.5f, 160));
         this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(7, new RiftWander(this, 1.0D));
-        this.tasks.addTask(8, new RiftLookAround(this));
+        this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 1D));
+        this.tasks.addTask(8, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
+        this.tasks.addTask(9, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(10, new RiftWander(this, 1.0D));
+        this.tasks.addTask(11, new RiftLookAround(this));
     }
 
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageCanLeap();
+        if (!this.world.isRemote) {
+            System.out.println(this.collidedHorizontally);
+            this.setClimbing(this.collidedHorizontally);
+        }
     }
 
     private void manageCanLeap() {
@@ -72,6 +93,32 @@ public class Utahraptor extends RiftCreature implements ILeapingMob {
     }
 
     public void fall(float distance, float damageMultiplier) {}
+
+    protected PathNavigate createNavigator(World worldIn)
+    {
+        return new PathNavigateClimber(this, worldIn);
+    }
+
+    @Override
+    public boolean canDoHerding() {
+        return !this.isTamed();
+    }
+
+    public void setPackBuffing(boolean value) {
+        this.dataManager.set(PACK_BUFFING, Boolean.valueOf(value));
+        this.setActing(value);
+    }
+
+    public boolean isPackBuffing() {
+        return this.dataManager.get(PACK_BUFFING);
+    }
+
+    public List<PotionEffect> packBuffEffect() {
+        List<PotionEffect> packBuffEffects = new ArrayList<>();
+        packBuffEffects.add(new PotionEffect(MobEffects.SPEED, 90 * 20, 2));
+        packBuffEffects.add(new PotionEffect(MobEffects.STRENGTH, 90 * 20, 2));
+        return packBuffEffects;
+    }
 
     @Override
     public Vec3d riderPos() {

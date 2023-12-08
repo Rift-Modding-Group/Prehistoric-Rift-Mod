@@ -34,6 +34,7 @@ public class RiftLeapAttack extends EntityAIBase {
         else if (entitylivingbase == null) return false;
         else if (!entitylivingbase.isEntityAlive()) return false;
         else if (!this.attacker.canEntityBeSeen(entitylivingbase)) return false;
+        else if (entitylivingbase.posY - this.attacker.posY > this.leapHeight) return false;
         else {
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
             return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase);
@@ -44,16 +45,17 @@ public class RiftLeapAttack extends EntityAIBase {
     public void startExecuting() {
         this.target = this.attacker.getAttackTarget();
         if (this.target != null) {
+            //gravity constant in minecraft is 0.08D
+            double g = 0.08D;
             double dx = this.target.posX - this.attacker.posX;
-            double dy = this.target.posY - this.attacker.posY;
             double dz = this.target.posZ - this.attacker.posZ;
-            double distance = MathHelper.sqrt(dx * dx + dz * dz);
-            double dMotion = MathHelper.sqrt(dx * dx + dz * dz + dy * dy);
 
-            double horizontalStrength = distance / dMotion;
-            this.attacker.motionX = (dx / distance) * horizontalStrength;
-            this.attacker.motionZ = (dz / distance) * horizontalStrength;
-            this.attacker.motionY = dy / dMotion + Math.sqrt(this.leapHeight);
+            double velY = Math.sqrt(2 * g * this.leapHeight);
+            double totalTime = velY / g;
+
+            this.attacker.motionX = dx / totalTime;
+            this.attacker.motionZ = dz / totalTime;
+            this.attacker.motionY = velY;
         }
         this.leapAttackFlag = false;
     }
@@ -71,7 +73,7 @@ public class RiftLeapAttack extends EntityAIBase {
     public void updateTask() {
         this.attacker.setLeaping(!this.attacker.onGround);
         if (!this.leapAttackFlag) {
-            AxisAlignedBB leapHithbox = this.attacker.getEntityBoundingBox().grow(0.5D);
+            AxisAlignedBB leapHithbox = this.attacker.getEntityBoundingBox().grow(0.75D);
             List<EntityLivingBase> leapedEntities = this.attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, leapHithbox, null);
             if (leapedEntities.contains(this.target)) {
                 this.attacker.attackEntityAsMob(this.target);

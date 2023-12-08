@@ -87,6 +87,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> HAS_HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> UNCLAIMED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -183,6 +184,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(HAS_HOME_POS, Boolean.FALSE);
         this.dataManager.register(UNCLAIMED, Boolean.FALSE);
         this.dataManager.register(UNCLAIM_TIMER, 0);
+        this.dataManager.register(CLIMBING, false);
     }
 
     @Override
@@ -750,6 +752,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    @Override
+    public boolean isOnLadder() {
+        return this.isClimbing();
+    }
+
     protected void setCreatureSize(float width, float height) {}
 
     public void refreshInventory() {
@@ -1056,6 +1063,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setUnclaimTimer(int value) {
         this.dataManager.set(UNCLAIM_TIMER, value);
+    }
+
+    public boolean isClimbing() {
+        return this.dataManager.get(CLIMBING);
+    }
+
+    public void setClimbing(boolean value) {
+        this.dataManager.set(CLIMBING, value);
     }
 
     public boolean justSpawned() {
