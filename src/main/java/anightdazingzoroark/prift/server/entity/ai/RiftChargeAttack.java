@@ -58,6 +58,8 @@ public class RiftChargeAttack extends EntityAIBase {
         this.finalChargePos = new BlockPos(entitylivingbase.posX, entitylivingbase.posY, entitylivingbase.posZ);
         Vec3d chargerVec = this.attacker.getPositionVector();
         Vec3d targetVec = entitylivingbase.getPositionVector();
+//        this.attacker.faceEntity(entitylivingbase, 30.0F, 30.0F);
+        this.forceLook();
         this.chargeVector = targetVec.subtract(chargerVec).normalize();
         this.endFlag = false;
 
@@ -85,26 +87,26 @@ public class RiftChargeAttack extends EntityAIBase {
             this.attacker.setLowerHead(false);
             this.attacker.setStartCharging(true);
             this.animTick = 0;
-            this.forceLook();
+//            this.forceLook();
         }
         else if (this.attacker.isLoweringHead()) {
             this.animTick++;
-            this.forceLook();
+//            this.forceLook();
         }
 
         if (this.animTick >= this.chargeTime && this.attacker.isStartCharging()) {
             this.attacker.setStartCharging(false);
             this.attacker.setIsCharging(true);
             this.animTick = 0;
-            this.forceLook();
+//            this.forceLook();
         }
         else if (this.attacker.isStartCharging()) {
             this.animTick++;
-            this.forceLook();
+//            this.forceLook();
         }
 
         if (this.attacker.isCharging()) {
-            this.forceLook();
+//            this.forceLook();
             this.attacker.motionX = this.chargeVector.x * this.chargeBoost;
             this.attacker.motionZ = this.chargeVector.z * this.chargeBoost;
 
@@ -211,16 +213,20 @@ public class RiftChargeAttack extends EntityAIBase {
         Vec3d targetPosVec = new Vec3d(this.finalChargePos.getX() + 0.5, this.finalChargePos.getY(), this.finalChargePos.getZ() + 0.5);
         Vec3d direction = targetPosVec.subtract(entityPos);
 
-        double yaw = Math.atan2(direction.z, direction.x);
-        yaw = Math.toDegrees(yaw) - 90;
+        double d3 = (double)MathHelper.sqrt(direction.x * direction.x + direction.z * direction.z);
+        float f = (float)(MathHelper.atan2(direction.z, direction.x) * (180D / Math.PI)) - 90.0F;
+        float f1 = (float)(-(MathHelper.atan2(direction.y, d3) * (180D / Math.PI)));
+        this.attacker.rotationPitch = this.updateRotation(this.attacker.rotationPitch, f1);
+        this.attacker.rotationYaw = this.updateRotation(this.attacker.rotationYaw, f);
+    }
 
-        double distance = Math.sqrt(direction.x * direction.x + direction.z * direction.z);
-        double pitch = -Math.toDegrees(Math.atan2(direction.y, distance));
+    private float updateRotation(float angle, float targetAngle) {
+        float f = MathHelper.wrapDegrees(targetAngle - angle);
 
-//        this.attacker.prevRotationYaw = (float) yaw;
-//        this.attacker.prevRotationPitch = (float) pitch;
-//        this.attacker.rotationYaw = (float) yaw;
-//        this.attacker.rotationPitch = (float) pitch;
-        this.attacker.setPositionAndRotation(this.attacker.posX, this.attacker.posY, this.attacker.posZ, (float) yaw, (float) pitch);
+        if (f > 180) f = f - 360;
+
+        if (f < -180) f = f + 360;
+
+        return angle + f;
     }
 }

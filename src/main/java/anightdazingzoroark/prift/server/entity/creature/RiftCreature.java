@@ -122,6 +122,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public String[] tamingFood;
     public int chargeCooldown;
     public int forcedChargePower;
+    public int leapCooldown;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);

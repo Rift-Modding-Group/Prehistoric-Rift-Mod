@@ -53,12 +53,22 @@ public class Utahraptor extends RiftCreature implements ILeapingMob {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.28F, 0.28F));
-        this.tasks.addTask(3, new RiftLeapAttack(this, 1.5f));
+        this.tasks.addTask(3, new RiftLeapAttack(this, 0.75f, 160));
         this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(7, new RiftWander(this, 1.0D));
         this.tasks.addTask(8, new RiftLookAround(this));
+    }
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        this.manageCanLeap();
+    }
+
+    private void manageCanLeap() {
+        if (this.leapCooldown > 0) this.leapCooldown--;
     }
 
     public void fall(float distance, float damageMultiplier) {}
