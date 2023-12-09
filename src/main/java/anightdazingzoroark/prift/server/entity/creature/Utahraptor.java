@@ -29,6 +29,7 @@ import java.util.List;
 
 public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter {
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Utahraptor.class, DataSerializers.BOOLEAN);
+    private int packBuffCooldown;
 
     public Utahraptor(World worldIn) {
         super(worldIn, RiftCreatureType.UTAHRAPTOR);
@@ -42,6 +43,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.isRideable = true;
         this.attackWidth = 2f;
         this.leapWidth = 16f;
+        this.packBuffCooldown = 0;
     }
 
     @Override
@@ -66,22 +68,24 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.targetTasks.addTask(3, new RiftPickUpItems(this, UtahraptorConfig.utahraptorFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftControlledAttack(this, 0.28F, 0.28F));
-        this.tasks.addTask(3, new RiftLeapAttack(this, 1.5f, 160));
-        this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
-        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 1D));
-        this.tasks.addTask(8, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
-        this.tasks.addTask(9, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(10, new RiftWander(this, 1.0D));
-        this.tasks.addTask(11, new RiftLookAround(this));
+        this.tasks.addTask(2, new RiftPackBuff(this, 1.68f, 90f));
+        this.tasks.addTask(3, new RiftControlledAttack(this, 0.28F, 0.28F));
+        this.tasks.addTask(4, new RiftLeapAttack(this, 1.5f, 160));
+        this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 1D));
+        this.tasks.addTask(9, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
+        this.tasks.addTask(10, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(11, new RiftWander(this, 1.0D));
+        this.tasks.addTask(12, new RiftLookAround(this));
     }
 
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageCanLeap();
+        this.manageCanPackBuff();
         if (!this.world.isRemote) {
             System.out.println(this.collidedHorizontally);
             this.setClimbing(this.collidedHorizontally);
@@ -90,6 +94,10 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     private void manageCanLeap() {
         if (this.leapCooldown > 0) this.leapCooldown--;
+    }
+
+    private void manageCanPackBuff() {
+        if (this.packBuffCooldown > 0) this.packBuffCooldown--;
     }
 
     public void fall(float distance, float damageMultiplier) {}
@@ -111,6 +119,14 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     public boolean isPackBuffing() {
         return this.dataManager.get(PACK_BUFFING);
+    }
+
+    public void setPackBuffCooldown(int value) {
+        this.packBuffCooldown = value;
+    }
+
+    public int getPackBuffCooldown() {
+        return this.packBuffCooldown;
     }
 
     public List<PotionEffect> packBuffEffect() {
@@ -147,6 +163,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::utahraptorMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::utahraptorAttack));
+        data.addAnimationController(new AnimationController(this, "pack_buff", 0, this::utahraptorPackBuff));
     }
 
     private <E extends IAnimatable> PlayState utahraptorMovement(AnimationEvent<E> event) {
@@ -169,6 +186,16 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     private <E extends IAnimatable> PlayState utahraptorAttack(AnimationEvent<E> event) {
         if (this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.attack", false));
+        }
+        else {
+            event.getController().clearAnimationCache();
+        }
+        return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState utahraptorPackBuff(AnimationEvent<E> event) {
+        if (this.isPackBuffing()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.pack_buffing", false));
         }
         else {
             event.getController().clearAnimationCache();

@@ -45,13 +45,13 @@ public class RiftAttack extends EntityAIBase {
             if (this.path != null) return true;
             else {
                 if (this.attacker instanceof IRangedAttackMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof IChargingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isUtilizingCharging();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isUtilizingCharging() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof ILeapingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isLeaping();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isLeaping() && !this.attacker.isActing();
                 }
                 return this.getAttackReachSqr(entitylivingbase) >= d0;
             }

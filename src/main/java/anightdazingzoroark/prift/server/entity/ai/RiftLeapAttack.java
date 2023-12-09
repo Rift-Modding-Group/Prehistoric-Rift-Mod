@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureinterface.IChargingMob;
 import anightdazingzoroark.prift.server.entity.creatureinterface.ILeapingMob;
+import anightdazingzoroark.prift.server.entity.creatureinterface.IPackHunter;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -37,6 +38,9 @@ public class RiftLeapAttack extends EntityAIBase {
         else if (entitylivingbase.posY - this.attacker.posY > this.leapHeight) return false;
         else {
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
+            if (this.attacker instanceof IPackHunter) {
+                return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && !((IPackHunter)this.attacker).isPackBuffing();
+            }
             return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase);
         }
     }

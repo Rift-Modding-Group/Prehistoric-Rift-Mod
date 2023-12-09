@@ -119,7 +119,7 @@
 				}
 			}
 		},
-		"animation.utahraptor.calling": {
+		"animation.utahraptor.pack_buffing": {
 			"animation_length": 1.68,
 			"bones": {
 				"hips": {
