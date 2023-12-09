@@ -129,6 +129,11 @@ public class Triceratops extends RiftCreature implements IChargingMob {
     }
 
     @Override
+    public boolean hasSpacebarChargeBar() {
+        return false;
+    }
+
+    @Override
     public boolean canDoHerding() {
         return !this.isTamed();
     }

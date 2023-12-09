@@ -521,10 +521,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player);
+                    this.spawnHeartParticles();
                     if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished", new TextComponentString(this.getName())), false);
                     this.setTameProgress(0);
                     this.setTamed(true);
                     this.setOwnerId(player.getUniqueID());
+                    this.setAttackTarget(null);
                     if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
                 }
                 else {
@@ -647,8 +649,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             float f = (float) (getRNG().nextFloat() * (this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX) + this.getEntityBoundingBox().minX);
             float f1 = (float) (getRNG().nextFloat() * (this.getEntityBoundingBox().maxY - this.getEntityBoundingBox().minY) + this.getEntityBoundingBox().minY);
             float f2 = (float) (getRNG().nextFloat() * (this.getEntityBoundingBox().maxZ - this.getEntityBoundingBox().minZ) + this.getEntityBoundingBox().minZ);
-            if (world.isRemote) {
+            if (this.world.isRemote) {
                 this.world.spawnParticle(EnumParticleTypes.ITEM_CRACK, f, f1, f2, motionX, motionY, motionZ, Item.getIdFromItem(item));
+            }
+        }
+    }
+
+    public void spawnHeartParticles() {
+        EnumParticleTypes enumparticletypes = EnumParticleTypes.HEART;
+        for (int i = 0; i < 7; ++i) {
+            double d0 = this.rand.nextGaussian() * 0.02D;
+            double d1 = this.rand.nextGaussian() * 0.02D;
+            double d2 = this.rand.nextGaussian() * 0.02D;
+            if (this.world.isRemote) {
+                this.world.spawnParticle(enumparticletypes, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, d0, d1, d2);
             }
         }
     }
@@ -936,6 +950,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setSpeed(0D);
     }
 
+    public boolean canMove() {
+        return this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getBaseValue() > 0D;
+    }
+
     public TameBehaviorType getTameBehavior() {
         return TameBehaviorType.values()[this.dataManager.get(BEHAVIOR).byteValue()];
     }
@@ -1149,6 +1167,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public abstract boolean hasLeftClickChargeBar();
 
     public abstract boolean hasRightClickChargeBar();
+
+    public abstract boolean hasSpacebarChargeBar();
 
     public void controlAttack() {
         EntityLivingBase target;

@@ -7,7 +7,9 @@ import anightdazingzoroark.prift.server.entity.creatureinterface.IPackHunter;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 import java.util.List;
 
@@ -39,9 +41,9 @@ public class RiftLeapAttack extends EntityAIBase {
         else {
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
             if (this.attacker instanceof IPackHunter) {
-                return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && !((IPackHunter)this.attacker).isPackBuffing();
+                return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && !((IPackHunter)this.attacker).isPackBuffing() && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
             }
-            return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase);
+            return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
         }
     }
 
@@ -93,5 +95,38 @@ public class RiftLeapAttack extends EntityAIBase {
     protected double getLeapAttackReachSqr(EntityLivingBase attackTarget) {
         if (this.attacker instanceof ILeapingMob) return (double)(this.attacker.leapWidth * this.attacker.leapWidth + attackTarget.width);
         return 0;
+    }
+
+    protected boolean canLeapToArea(EntityLivingBase entitylivingbase) {
+        //gravity constant in minecraft is 0.08D
+        double g = 0.08D;
+        double dx = entitylivingbase.posX - this.attacker.posX;
+        double dy = entitylivingbase.posY - this.attacker.posY;
+        double dz = entitylivingbase.posZ - this.attacker.posZ;
+        double velY = Math.sqrt(2 * g * this.leapHeight);
+        double totalTime = velY / g;
+
+        for (int i = 0; i <= this.attacker.leapWidth; i++) {
+            double fraction = (double) i / this.attacker.leapWidth;
+            double time = fraction * totalTime;
+            double xToCheck = this.attacker.posX + dx * fraction;
+            double zToCheck = this.attacker.posZ + dz * fraction;
+            double yToCheck = this.attacker.posY + velY * time - 0.5 * g * time * time;
+            BlockPos posToCheck = new BlockPos(xToCheck, yToCheck, zToCheck);
+            if (!areBlocksClear(this.attacker.world, posToCheck)) return false;
+        }
+
+        return true;
+    }
+
+    private boolean areBlocksClear(World world, BlockPos pos) {
+        // Check the block at the given coordinates and its adjacent blocks.
+        // Here, 'isAirBlock' is used as an example to check if a block is not solid.
+        return world.isAirBlock(pos)
+                && world.isAirBlock(pos.up())
+                && world.isAirBlock(pos.north())
+                && world.isAirBlock(pos.south())
+                && world.isAirBlock(pos.east())
+                && world.isAirBlock(pos.west());
     }
 }

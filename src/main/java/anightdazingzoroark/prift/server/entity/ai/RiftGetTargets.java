@@ -19,22 +19,24 @@ public class RiftGetTargets extends EntityAITarget {
     private List<String> targetList;
     protected final RiftGetTargets.Sorter sorter;
     protected final Predicate <? super EntityLivingBase > targetEntitySelector;
+    protected final boolean alertOthers;
     protected EntityLivingBase targetEntity;
 
-    public RiftGetTargets(EntityCreature creature, String[] targetList, boolean checkSight) {
-        this(creature, targetList, checkSight, false);
+    public RiftGetTargets(EntityCreature creature, String[] targetList, boolean alertOthers, boolean checkSight) {
+        this(creature, targetList, checkSight, alertOthers, false);
     }
 
-    public RiftGetTargets(EntityCreature creature, String[] targetList, boolean checkSight, boolean onlyNearby) {
-        this(creature, targetList, 10, checkSight, onlyNearby, (Predicate)null);
+    public RiftGetTargets(EntityCreature creature, String[] targetList, boolean alertOthers, boolean checkSight, boolean onlyNearby) {
+        this(creature, targetList, alertOthers, 10, checkSight, onlyNearby, (Predicate)null);
     }
 
-    public RiftGetTargets(EntityCreature creature, String[] targetList, int chance, boolean checkSight, boolean onlyNearby, @Nullable final Predicate <? super EntityLivingBase > targetSelector) {
+    public RiftGetTargets(EntityCreature creature, String[] targetList, boolean alertOthers, int chance, boolean checkSight, boolean onlyNearby, @Nullable final Predicate <? super EntityLivingBase > targetSelector) {
         super(creature, checkSight, onlyNearby);
         this.targetList = Arrays.asList(targetList);
         this.targetChance = chance;
         this.sorter = new RiftGetTargets.Sorter(creature);
         this.setMutexBits(1);
+        this.alertOthers = alertOthers;
         this.targetEntitySelector = new Predicate<EntityLivingBase>() {
             public boolean apply(@Nullable EntityLivingBase p_apply_1_)
             {
@@ -53,12 +55,9 @@ public class RiftGetTargets extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        if (((RiftCreature) this.taskOwner).isTamed()) {
-            return false;
-        }
-        else if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {
-            return false;
-        }
+        if (((RiftCreature) this.taskOwner).isTamed()) return false;
+        else if (((RiftCreature) this.taskOwner).canDoHerding() && !((RiftCreature) this.taskOwner).isHerdLeader()) return false;
+//        else if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) return false;
         else {
             List<EntityLivingBase> list = new ArrayList<>();
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
@@ -93,6 +92,15 @@ public class RiftGetTargets extends EntityAITarget {
 
     public void startExecuting() {
         this.taskOwner.setAttackTarget(this.targetEntity);
+        if (this.alertOthers) {
+            List<RiftCreature> allyList = this.taskOwner.world.getEntitiesWithinAABB(((RiftCreature)this.taskOwner).getClass(), ((RiftCreature)this.taskOwner).getHerdBoundingBox(), new Predicate<RiftCreature>() {
+                @Override
+                public boolean apply(@Nullable RiftCreature input) {
+                    return !input.isTamed();
+                }
+            });
+            for (RiftCreature ally : allyList) ally.setAttackTarget(this.targetEntity);
+        }
         super.startExecuting();
     }
 

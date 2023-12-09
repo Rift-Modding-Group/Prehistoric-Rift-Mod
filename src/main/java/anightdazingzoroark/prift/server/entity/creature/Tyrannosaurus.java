@@ -148,7 +148,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, TyrannosaurusConfig.tyrannosaurusTargets, true));
+        this.targetTasks.addTask(2, new RiftGetTargets(this, TyrannosaurusConfig.tyrannosaurusTargets, false, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, TyrannosaurusConfig.tyrannosaurusFavoriteFood, true));
@@ -380,6 +380,11 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     @Override
     public boolean hasRightClickChargeBar() {
         return true;
+    }
+
+    @Override
+    public boolean hasSpacebarChargeBar() {
+        return false;
     }
 
     @Override

@@ -89,6 +89,11 @@ public class Dodo extends RiftCreature {
     }
 
     @Override
+    public boolean hasSpacebarChargeBar() {
+        return false;
+    }
+
+    @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.5f, 0.75f);
     }
