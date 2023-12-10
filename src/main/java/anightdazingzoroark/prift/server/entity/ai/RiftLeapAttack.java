@@ -55,12 +55,14 @@ public class RiftLeapAttack extends EntityAIBase {
             double g = 0.08D;
             double dx = this.target.posX - this.attacker.posX;
             double dz = this.target.posZ - this.attacker.posZ;
+            double dist = Math.sqrt(dx * dx + dz * dz);
 
             double velY = Math.sqrt(2 * g * this.leapHeight);
             double totalTime = velY / g;
+            double velXY = dist / totalTime;
 
-            this.attacker.motionX = dx / totalTime;
-            this.attacker.motionZ = dz / totalTime;
+            this.attacker.motionX = velXY * Math.sin(-Math.toRadians(this.attacker.rotationYaw));
+            this.attacker.motionZ = velXY * Math.cos(Math.toRadians(this.attacker.rotationYaw));
             this.attacker.motionY = velY;
         }
         this.leapAttackFlag = false;

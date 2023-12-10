@@ -6,6 +6,9 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureinterface.ILeapingMob;
 import anightdazingzoroark.prift.server.entity.creatureinterface.IPackHunter;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,6 +19,8 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNavigateClimber;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -72,7 +77,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftPackBuff(this, 1.68f, 90f));
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.28F, 0.28F));
-        this.tasks.addTask(4, new RiftLeapAttack(this, 1.5f, 160));
+        this.tasks.addTask(4, new RiftLeapAttack(this, 6f, 160));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
@@ -102,9 +107,51 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     public void fall(float distance, float damageMultiplier) {}
 
-    protected PathNavigate createNavigator(World worldIn)
-    {
+    protected PathNavigate createNavigator(World worldIn) {
         return new PathNavigateClimber(this, worldIn);
+    }
+
+    @Override
+    public EntityLivingBase getControlAttackTargets() {
+        double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + (double)this.attackWidth;
+        double distLeap = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + (double)this.leapWidth;
+        Vec3d vec3d = this.getPositionEyes(1.0F);
+        Vec3d vec3d1 = this.getLook(1.0F);
+        Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
+        double d1 = dist;
+        Entity pointedEntity = null;
+        Entity rider = this.getControllingPassenger();
+        List<Entity> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(1.0D, 1.0D, 1.0D), null);
+        double d2 = d1;
+        for (Entity potentialTarget : list) {
+            AxisAlignedBB axisalignedbb = potentialTarget.getEntityBoundingBox().grow((double) potentialTarget.getCollisionBorderSize() + 2F);
+            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
+
+            if (potentialTarget != this && potentialTarget != rider) {
+                if (axisalignedbb.contains(vec3d)) {
+                    if (d2 >= 0.0D) {
+                        pointedEntity = potentialTarget;
+                        d2 = 0.0D;
+                    }
+                }
+                else if (raytraceresult != null) {
+                    double d3 = vec3d.distanceTo(raytraceresult.hitVec);
+
+                    if (d3 < d2 || d2 == 0.0D) {
+                        if (potentialTarget.getLowestRidingEntity() == rider.getLowestRidingEntity() && !rider.canRiderInteract()) {
+                            if (d2 == 0.0D) {
+                                pointedEntity = potentialTarget;
+                            }
+                        }
+                        else {
+                            pointedEntity = potentialTarget;
+                            d2 = d3;
+                        }
+                    }
+                }
+            }
+        }
+        return (EntityLivingBase) pointedEntity;
     }
 
     @Override
@@ -153,9 +200,9 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     @Override
     public Vec3d riderPos() {
-        float xOffset = (float)(this.posX + (1.25) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
-        float zOffset = (float)(this.posZ + (1.25) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
-        return new Vec3d(this.posX, this.posY - 0.75, this.posZ);
+        float xOffset = (float)(this.posX + (0.05) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
+        float zOffset = (float)(this.posZ + (0.05) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        return new Vec3d(xOffset, this.posY - 0.75, zOffset);
     }
 
     @Override
@@ -173,6 +220,27 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
+        if (control == 2) {
+            final float leapHeight = Math.min(6f, 0.1f * holdAmount + 1);
+            final float g = 0.08f;
+            if (this.getEnergy() > 6) {
+                if (this.isMoving()) {
+                    double dx = (16 * Math.sin(-Math.toRadians(this.rotationYaw)));
+                    double dz = (16 * Math.cos(Math.toRadians(this.rotationYaw)));
+
+                    double velY = Math.sqrt(2 * g * leapHeight);
+                    double totalTime = velY / g;
+
+                    this.motionX = dx / totalTime;
+                    this.motionZ = dz / totalTime;
+                    this.motionY = velY;
+                }
+                else this.motionY = Math.sqrt(2 * g * leapHeight);
+                this.setEnergy(this.getEnergy() - Math.min(6, (int)(0.1D * holdAmount + 1D)));
+            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+            this.setSpacebarUse(0);
         }
     }
 

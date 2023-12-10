@@ -79,6 +79,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> USING_SPACEBAR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> SPACEBAR_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> SPACEBAR_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HAS_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> JUST_SPAWNED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -176,6 +179,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_RIGHT_CLICK, Boolean.FALSE);
         this.dataManager.register(RIGHT_CLICK_USE, 0);
         this.dataManager.register(RIGHT_CLICK_COOLDOWN, 0);
+        this.dataManager.register(USING_SPACEBAR, false);
+        this.dataManager.register(SPACEBAR_USE, 0);
+        this.dataManager.register(SPACEBAR_COOLDOWN, 0);
         this.dataManager.register(HAS_TARGET, Boolean.FALSE);
         this.dataManager.register(AGE_TICKS, 0);
         this.dataManager.register(JUST_SPAWNED, true);
@@ -237,13 +243,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (this.isBeingRidden()) {
             if (this.getControllingPassenger().equals(player)) {
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingClick(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()));
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingClick(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 2, settings.keyBindJump.isKeyDown()));
+
                 if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
                     if (ShoulderInstance.getInstance().doShoulderSurfing()) {
                         Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                         if (this.hasLeftClickChargeBar()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(this, 0));
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
                         }
                         else {
                             if (toBeAttacked != null) {
@@ -257,7 +265,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else {
                         if (this.hasLeftClickChargeBar()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(this, 0));
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
                         }
                         else {
                             RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
@@ -266,11 +274,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.getRightClickCooldown() == 0 && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
                     if (this.hasRightClickChargeBar()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementClickUse(this, 1));
+                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
                     }
                 }
                 else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(this, 1, true));
+                }
+                else if (settings.keyBindJump.isKeyDown() && this.getSpacebarCooldown() == 0) {
+                    if (this.hasSpacebarChargeBar()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 2));
+                    }
                 }
                 else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()) {
                     Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
@@ -287,6 +300,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     if (this.hasRightClickChargeBar()) {
                         if (this.getRightClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
+                    }
+                    if (this.hasSpacebarChargeBar()) {
+                        if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 2, this.getSpacebarUse()));
                     }
                 }
             }
@@ -1041,6 +1057,30 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setRightClickCooldown(int value) {
         this.dataManager.set(RIGHT_CLICK_COOLDOWN, value);
+    }
+
+    public boolean isUsingSpacebar() {
+        return this.dataManager.get(USING_SPACEBAR);
+    }
+
+    public void setUsingSpacebar(boolean value) {
+        this.dataManager.set(USING_SPACEBAR, value);
+    }
+
+    public int getSpacebarUse() {
+        return this.dataManager.get(SPACEBAR_USE);
+    }
+
+    public void setSpacebarUse(int value) {
+        this.dataManager.set(SPACEBAR_USE, value);
+    }
+
+    public int getSpacebarCooldown() {
+        return this.dataManager.get(SPACEBAR_COOLDOWN);
+    }
+
+    public void setSpacebarCooldown(int value) {
+        this.dataManager.set(SPACEBAR_COOLDOWN, value);
     }
 
     public boolean hasTarget() {

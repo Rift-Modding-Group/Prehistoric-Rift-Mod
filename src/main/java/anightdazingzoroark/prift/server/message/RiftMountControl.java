@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class RiftMountControl extends AbstractMessage<RiftMountControl> {
     private int creatureId;
     private int targetId;
-    private int control; //0 is for left click, 1 is for right click
+    private int control; //0 is for left click, 1 is for right click, 2 is for spacebar
     private boolean execute; //execute regardless of tick
     private int tick; //tick num
 
