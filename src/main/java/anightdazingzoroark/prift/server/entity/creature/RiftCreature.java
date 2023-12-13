@@ -1212,7 +1212,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void controlAttack() {
         EntityLivingBase target;
-        if (this.ssrTarget == null) target = this.getControlAttackTargets();
+        if (this.ssrTarget == null) target = this.getControlAttackTargets(this.attackWidth);
         else target = this.ssrTarget;
         if (target != null) {
             if (this.isTamed() && target instanceof EntityPlayer) {
@@ -1229,8 +1229,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.ssrTarget = null;
     }
 
-    public EntityLivingBase getControlAttackTargets() {
-        double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + (double)this.attackWidth;
+    public EntityLivingBase getControlAttackTargets(double attackDetectWidth) {
+        double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + attackDetectWidth;
         Vec3d vec3d = this.getPositionEyes(1.0F);
         Vec3d vec3d1 = this.getLook(1.0F);
         Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);

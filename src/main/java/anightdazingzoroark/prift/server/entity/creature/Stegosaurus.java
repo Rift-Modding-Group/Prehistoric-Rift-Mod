@@ -187,7 +187,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     public void strongControlAttack() {
         EntityLivingBase target;
-        if (this.ssrTarget == null) target = this.getControlAttackTargets();
+        if (this.ssrTarget == null) target = this.getControlAttackTargets(this.attackWidth);
         else target = this.ssrTarget;
         if (target != null) {
             if (this.isTamed() && target instanceof EntityPlayer) {

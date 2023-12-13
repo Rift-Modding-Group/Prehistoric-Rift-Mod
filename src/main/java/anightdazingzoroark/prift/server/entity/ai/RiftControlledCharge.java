@@ -157,7 +157,6 @@ public class RiftControlledCharge extends EntityAIBase {
         if (this.animTick >= this.initAnimLength && this.attacker.isEndCharging()) {
             this.attacker.setRightClickUse(0);
             this.attacker.setEndCharging(false);
-            System.out.println(this.attacker.chargeCooldown * 2);
             this.attacker.setRightClickCooldown(this.attacker.chargeCooldown * 2);
             this.attacker.forcedChargePower = 0;
             this.attacker.setCanCharge(false);

@@ -64,6 +64,7 @@ public class RiftLeapAttack extends EntityAIBase {
             this.attacker.motionX = velXY * Math.sin(-Math.toRadians(this.attacker.rotationYaw));
             this.attacker.motionZ = velXY * Math.cos(Math.toRadians(this.attacker.rotationYaw));
             this.attacker.motionY = velY;
+            this.attacker.setActing(true);
         }
         this.leapAttackFlag = false;
     }
@@ -75,6 +76,7 @@ public class RiftLeapAttack extends EntityAIBase {
 
     public void resetTask() {
         this.attacker.setLeaping(false);
+        this.attacker.setActing(false);
         this.attacker.leapCooldown = cooldown;
     }
 
