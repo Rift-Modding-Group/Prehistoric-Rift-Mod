@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureinterface.IPackHunter;
 import com.google.common.base.Predicate;
@@ -10,10 +11,10 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class RiftPackBuff extends EntityAIBase {
-    protected RiftCreature attacker;
+    protected final RiftCreature attacker;
     private int animTick;
-    protected int animTime;
-    protected int cooldown;
+    protected final int animTime;
+    protected final int cooldown;
     private List<RiftCreature> packMembers;
 
     public RiftPackBuff(RiftCreature attackerIn, float animTimeIn, float cooldownIn) {
@@ -52,6 +53,7 @@ public class RiftPackBuff extends EntityAIBase {
         for (PotionEffect effect : ((IPackHunter)this.attacker).packBuffEffect()) {
             this.attacker.addPotionEffect(effect);
         }
+        this.attacker.playSound(RiftSounds.UTAHRAPTOR_CALL, 2, 1);
     }
 
     public boolean shouldContinueExecuting() {

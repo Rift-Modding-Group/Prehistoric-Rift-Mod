@@ -89,8 +89,37 @@
   "prift.triceratops.death": {
     "category": "neutral",
     "sounds": [
-      "prift:entities/dodo/triceratops_death"
+      "prift:entities/triceratops/triceratops_death"
     ],
     "subtitle": "sounds.subtitle.triceratops_death"
+  },
+
+  "prift.utahraptor.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/utahraptor/utahraptor_idle"
+    ],
+    "subtitle": "sounds.subtitle.utahraptor_idle"
+  },
+  "prift.utahraptor.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/utahraptor/utahraptor_hurt"
+    ],
+    "subtitle": "sounds.subtitle.utahraptor_hurt"
+  },
+  "prift.utahraptor.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/utahraptor/utahraptor_death"
+    ],
+    "subtitle": "sounds.subtitle.utahraptor_death"
+  },
+  "prift.utahraptor.call": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/utahraptor/utahraptor_call"
+    ],
+    "subtitle": "sounds.subtitle.utahraptor_call"
   }
 }

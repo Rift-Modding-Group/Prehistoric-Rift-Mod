@@ -23,7 +23,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 
 public class Dodo extends RiftCreature {
-    public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dodo"));
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dodo"));
 
     public Dodo(World worldIn) {
         super(worldIn, RiftCreatureType.DODO);
@@ -60,12 +60,6 @@ public class Dodo extends RiftCreature {
     public void fall(float distance, float damageMultiplier) {}
 
     @Override
-    @Nullable
-    protected ResourceLocation getLootTable() {
-        return LOOT;
-    }
-
-    @Override
     public boolean canDoHerding() {
         return true;
     }
@@ -96,6 +90,12 @@ public class Dodo extends RiftCreature {
     @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.5f, 0.75f);
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
     }
 
     @Override

@@ -36,6 +36,7 @@ public class RiftChargeAttack extends EntityAIBase {
         this.initAnimLength = (int)(initAnimLength * 20);
         this.chargeTime = (int)(chargeTime * 20);
         this.cooldownTime = (int)(cooldownTime * 20);
+        this.setMutexBits(3);
     }
 
     @Override

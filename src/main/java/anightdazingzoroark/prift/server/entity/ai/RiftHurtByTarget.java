@@ -10,7 +10,6 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
 
     public RiftHurtByTarget(EntityCreature creatureIn, boolean entityCallsForHelpIn) {
         super(creatureIn, entityCallsForHelpIn);
-        this.setMutexBits(1);
         this.creature = (RiftCreature) creatureIn;
     }
 

@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPredator {
-    public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus"));
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus"));
     private static final Predicate<EntityLivingBase> WEAKNESS_BLACKLIST = new Predicate<EntityLivingBase>() {
         @Override
         public boolean apply(@Nullable EntityLivingBase entity) {
@@ -303,12 +303,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     }
     //end of roar stuff
 
-    @Override
-    @Nullable
-    protected ResourceLocation getLootTable() {
-        return LOOT;
-    }
-
     public void setRoaring(boolean value) {
         this.dataManager.set(ROARING, Boolean.valueOf(value));
         this.setActing(value);
@@ -388,6 +382,12 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     }
 
     @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
+    }
+
+    @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::tyrannosaurusMovement));
 //        data.addAnimationController(new AnimationController(this, "look", 0, this::tyrannosaurusLook));
@@ -447,7 +447,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         return RiftSounds.TYRANNOSAURUS_IDLE;
     }
 
-    protected SoundEvent getHurtSound() {
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
         return RiftSounds.TYRANNOSAURUS_HURT;
     }
 

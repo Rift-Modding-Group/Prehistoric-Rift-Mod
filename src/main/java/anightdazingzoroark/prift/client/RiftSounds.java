@@ -46,6 +46,18 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.triceratops.death")
     public static final SoundEvent TRICERATOPS_DEATH = createSoundEvent("prift.triceratops.death");
 
+    @GameRegistry.ObjectHolder("prift.utahraptor.idle")
+    public static final SoundEvent UTAHRAPTOR_IDLE = createSoundEvent("prift.utahraptor.idle");
+
+    @GameRegistry.ObjectHolder("prift.utahraptor.hurt")
+    public static final SoundEvent UTAHRAPTOR_HURT = createSoundEvent("prift.utahraptor.hurt");
+
+    @GameRegistry.ObjectHolder("prift.utahraptor.death")
+    public static final SoundEvent UTAHRAPTOR_DEATH = createSoundEvent("prift.utahraptor.death");
+
+    @GameRegistry.ObjectHolder("prift.utahraptor.call")
+    public static final SoundEvent UTAHRAPTOR_CALL = createSoundEvent("prift.utahraptor.call");
+
     private static SoundEvent createSoundEvent(String soundName) {
         ResourceLocation soundID = new ResourceLocation(RiftInitialize.MODID, soundName);
         return new SoundEvent(soundID).setRegistryName(soundID);

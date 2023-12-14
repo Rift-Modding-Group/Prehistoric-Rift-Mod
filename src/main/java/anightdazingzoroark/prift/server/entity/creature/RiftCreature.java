@@ -40,11 +40,13 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.*;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -127,6 +129,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public int chargeCooldown;
     public int forcedChargePower;
     public int leapCooldown;
+    public float maxRightClickCooldown;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -152,6 +155,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.lastYd = 0D;
         this.yFloatPos = 0D;
         this.chargeCooldown = 0;
+        this.maxRightClickCooldown = 100f;
     }
 
     @Override
@@ -456,6 +460,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean attackEntityAsMob(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
         if (flag) this.applyEnchantments(this, entityIn);
+        this.setLastAttackedEntity(entityIn);
         return flag;
     }
 
@@ -851,6 +856,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //herdin stuff stops here
 
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        System.out.println(this.creatureType.toString().toLowerCase());
+        return LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/"+this.creatureType.toString().toLowerCase()));
+    }
 
     public int getVariant() {
         return this.dataManager.get(VARIANT).intValue();
@@ -924,6 +935,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setLeaping(boolean value) {
         this.dataManager.set(LEAPING, value);
+        this.setActing(value);
     }
 
     public boolean isUtilizingCharging() {

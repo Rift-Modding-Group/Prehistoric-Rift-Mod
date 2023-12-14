@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.server.entity.creatureinterface.IChargingMob;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
@@ -25,7 +26,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 
 public class Triceratops extends RiftCreature implements IChargingMob {
-    public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/triceratops"));
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/triceratops"));
 
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
@@ -153,7 +154,6 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         return 27;
     }
 
-
     @Override
     @Nullable
     protected ResourceLocation getLootTable() {
@@ -237,7 +237,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         return RiftSounds.TRICERATOPS_IDLE;
     }
 
-    protected SoundEvent getHurtSound() {
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
         return RiftSounds.TRICERATOPS_HURT;
     }
 

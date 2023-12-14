@@ -1,9 +1,10 @@
-death.attack.rift_bleed=%s bled to death
+death.attack.prift_bleed=%s bled to death
 
 entity.tyrannosaurus.name=Tyrannosaurus
 entity.stegosaurus.name=Stegosaurus
 entity.dodo.name=Dodo
 entity.triceratops.name=Triceratops
+entity.utahraptor.name=Utahraptor
 entity.egg.name=Egg
 
 inventory.gear=%s Gear
@@ -26,13 +27,15 @@ item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 item.stegosaurus_plate.name=Stegosaurus Plate
 item.dodo_beak.name=Dodo Beak
 item.triceratops_horn.name=Triceratops Horn
+item.utahraptor_claw.name=Utahraptor Claw
 
-itemGroup.rift_items=Prehistoric Rift Items
+itemGroup.prift_items=Prehistoric Rift Items
 
 item.tyrannosaurus_egg.name=Tyrannosaurus Egg
 item.stegosaurus_egg.name=Stegosaurus Egg
 item.dodo_egg.name=Dodo Egg
 item.triceratops_egg.name=Triceratops Egg
+item.utahraptor_egg.name=Utahraptor Egg
 
 radial.choice.ride=Ride
 radial.choice.state=State
@@ -73,14 +76,14 @@ reminder.not_creature_owner=This creature is owned by %s!
 reminder.claim_creature=You have claimed %s!
 reminder.unclaim_creature=You have unclaimed %s!
 
-rift.egg.time=Time
-rift.egg.minutes=minute(s)
-rift.egg.seconds=second(s)
+prift.egg.time=Time
+prift.egg.minutes=minute(s)
+prift.egg.seconds=second(s)
 
-rift.notify.egg_hatched=Your Egg has hatched!
+prift.notify.egg_hatched=Your Egg has hatched!
 
-riftcommands.bleed.usage=/riftbleed [player|entity] [seconds] [strength]
-riftcommands.bleed.successful=Applied bleed on %s
+priftcommands.bleed.usage=/riftbleed [player|entity] [seconds] [strength]
+priftcommands.bleed.successful=Applied bleed on %s
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus growls
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus hurts
@@ -98,6 +101,11 @@ sounds.subtitle.dodo_death=Dodo dies
 sounds.subtitle.triceratops_idle=Triceratops grunts
 sounds.subtitle.triceratops_hurt=Triceratops hurts
 sounds.subtitle.triceratops_death=Triceratops dies
+
+sounds.subtitle.utahraptor_idle=Utahraptor grunts
+sounds.subtitle.utahraptor_hurt=Utahraptor hurts
+sounds.subtitle.utahraptor_death=Utahraptor dies
+sounds.subtitle.utahraptor_call=Utahraptor calls
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral

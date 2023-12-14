@@ -44,6 +44,7 @@ public class RiftPickUpItems extends EntityAIBase {
                 return false;
             }
         };
+        this.setMutexBits(1);
     }
 
     @Override

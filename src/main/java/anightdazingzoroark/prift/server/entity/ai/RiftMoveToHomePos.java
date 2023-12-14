@@ -17,6 +17,7 @@ public class RiftMoveToHomePos extends EntityAIBase {
     public RiftMoveToHomePos(RiftCreature creature, double speedIn) {
         this.creature = creature;
         this.speed = speedIn;
+        this.setMutexBits(1);
     }
 
     @Override

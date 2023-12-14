@@ -38,7 +38,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 
 public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob {
-    public static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public int strongAttackCharge;
 
@@ -226,12 +226,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
 
     @Override
-    @Nullable
-    protected ResourceLocation getLootTable() {
-        return LOOT;
-    }
-
-    @Override
     public boolean canDoHerding() {
         return !this.isTamed();
     }
@@ -264,6 +258,12 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.dataManager.set(STRONG_ATTACKING, value);
         this.setUsingLeftClick(value);
         this.setActing(value);
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
     }
 
     @Override
@@ -313,7 +313,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return RiftSounds.STEGOSAURUS_IDLE;
     }
 
-    protected SoundEvent getHurtSound() {
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
         return RiftSounds.STEGOSAURUS_HURT;
     }
 

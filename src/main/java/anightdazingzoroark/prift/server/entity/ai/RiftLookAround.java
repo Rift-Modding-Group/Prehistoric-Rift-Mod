@@ -10,6 +10,7 @@ public class RiftLookAround extends EntityAILookIdle {
     public RiftLookAround(EntityLiving entitylivingIn) {
         super(entitylivingIn);
         this.creature = (RiftCreature) entitylivingIn;
+        this.setMutexBits(2);
     }
 
     @Override

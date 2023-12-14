@@ -65,8 +65,8 @@ public class RiftRightClickChargeBar {
         GlStateManager.enableBlend();
         GlStateManager.color(1.0f, 1.0f, 1.0f);
         int left = xSize / 2 - 91;
-        int top = ySize - 32 + (creature.hasLeftClickChargeBar() ? 1 : 3);
-        float fillUpBar = (float)textureXSize / 100f * fill;
+        int top = ySize - 32 + (creature.hasLeftClickChargeBar() || creature.hasSpacebarChargeBar() ? 1 : 3);
+        float fillUpBar = (float)textureXSize / creature.maxRightClickCooldown * fill;
         RiftUtil.drawTexturedModalRect(left, top, 0, 9, textureXSize, textureYSize);
         RiftUtil.drawTexturedModalRect(left, top, 0, 14, Math.min((int)fillUpBar, textureXSize), textureYSize);
         GlStateManager.disableBlend();

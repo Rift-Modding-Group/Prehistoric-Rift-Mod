@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -21,11 +23,15 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNavigateClimber;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -39,6 +45,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/utahraptor"));
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Utahraptor.class, DataSerializers.BOOLEAN);
     private int packBuffCooldown;
     private boolean contLeapAttackFlag;
@@ -58,6 +65,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.leapWidth = 16f;
         this.packBuffCooldown = 0;
         this.contLeapAttackFlag = true;
+        this.maxRightClickCooldown = 1800f;
     }
 
     @Override
@@ -84,6 +92,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftPackBuff(this, 1.68f, 90f));
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.28F, 0.28F));
+        this.tasks.addTask(3, new RiftControlledPackBuff(this, 1.68f));
         this.tasks.addTask(4, new RiftLeapAttack(this, 6f, 160));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
@@ -102,7 +111,6 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         if (!this.world.isRemote) {
             this.setClimbing(this.collidedHorizontally);
             if (this.onGround && this.isLeaping() && this.isActing()) {
-                this.setActing(false);
                 this.setLeaping(false);
                 this.contLeapAttackFlag = true;
             }
@@ -126,6 +134,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     private void manageCanPackBuff() {
         if (this.packBuffCooldown > 0) this.packBuffCooldown--;
+        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
     }
 
     public void fall(float distance, float damageMultiplier) {}
@@ -137,7 +146,6 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     private void leapToControlledTargetLoc() {
         if (!this.world.isRemote) {
             this.setLeaping(true);
-            this.setActing(true);
             UUID ownerID =  this.getOwnerId();
             List<EntityLivingBase> potTargetListL = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.leapWidth), new Predicate<EntityLivingBase>() {
                 @Override
@@ -165,10 +173,12 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
                 double velY = Math.sqrt(2 * g * 6f);
                 double totalTime = velY / g;
-                double velXY = dist / totalTime;
+                double velXZ = dist * 2 / totalTime;
 
-                this.motionX = velXY * Math.sin(-Math.toRadians(this.rotationYaw));
-                this.motionZ = velXY * Math.cos(Math.toRadians(this.rotationYaw));
+                double angleToTarget = Math.atan2(dz, dx);
+
+                this.motionX = velXZ * Math.cos(angleToTarget);
+                this.motionZ = velXZ * Math.sin(angleToTarget);
                 this.motionY = velY;
             }
             else this.setAttacking(true);
@@ -262,6 +272,24 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
         }
+        if (control == 1) {
+            if (!this.isActing()) {
+                UUID ownerID =  this.getOwnerId();
+                List<Utahraptor> tamedPackList = this.world.getEntitiesWithinAABB(Utahraptor.class, this.getHerdBoundingBox(), new Predicate<RiftCreature>() {
+                    @Override
+                    public boolean apply(@Nullable RiftCreature input) {
+                        if (input.isTamed()) {
+                            return ownerID.equals(input.getOwnerId());
+                        }
+                        return false;
+                    }
+                });
+                tamedPackList.remove(this);
+                if (tamedPackList.size() >= 2) this.setPackBuffing(true);
+                else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_pack_members", this.getName()), false);
+                this.setRightClickUse(0);
+            }
+        }
         if (control == 2) {
             final float leapHeight = Math.min(6f, 0.25f * holdAmount + 1);
             final float g = 0.08f;
@@ -273,8 +301,8 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
                     double velY = Math.sqrt(2 * g * leapHeight);
                     double totalTime = velY / g;
 
-                    this.motionX = dx / totalTime;
-                    this.motionZ = dz / totalTime;
+                    this.motionX = this.motionX + dx / totalTime;
+                    this.motionZ = this.motionZ + dz / totalTime;
                     this.motionY = velY;
                 }
                 else this.motionY = Math.sqrt(2 * g * leapHeight);
@@ -292,7 +320,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return false;
+        return true;
     }
 
     @Override
@@ -303,6 +331,12 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.3f, 1f);
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
     }
 
     @Override
@@ -347,5 +381,17 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
             event.getController().clearAnimationCache();
         }
         return PlayState.CONTINUE;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.UTAHRAPTOR_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.UTAHRAPTOR_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.UTAHRAPTOR_DEATH;
     }
 }

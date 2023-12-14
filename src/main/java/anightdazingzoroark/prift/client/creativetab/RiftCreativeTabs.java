@@ -17,7 +17,7 @@ public class RiftCreativeTabs {
 
         @Override
         public String getTranslationKey() {
-            return "itemGroup.rift_items";
+            return "itemGroup.prift_items";
         }
     };
 }

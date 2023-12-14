@@ -25,6 +25,7 @@ public class RiftLeapAttack extends EntityAIBase {
         this.attacker = attacker;
         this.leapHeight = leapHeight;
         this.cooldown = cooldown;
+        this.setMutexBits(3);
     }
 
     @Override
@@ -59,10 +60,12 @@ public class RiftLeapAttack extends EntityAIBase {
 
             double velY = Math.sqrt(2 * g * this.leapHeight);
             double totalTime = velY / g;
-            double velXY = dist / totalTime;
+            double velXZ = dist * 2 / totalTime;
 
-            this.attacker.motionX = velXY * Math.sin(-Math.toRadians(this.attacker.rotationYaw));
-            this.attacker.motionZ = velXY * Math.cos(Math.toRadians(this.attacker.rotationYaw));
+            double angleToTarget = Math.atan2(dz, dx);
+
+            this.attacker.motionX = velXZ * Math.cos(angleToTarget);
+            this.attacker.motionZ = velXZ * Math.sin(angleToTarget);
             this.attacker.motionY = velY;
             this.attacker.setActing(true);
         }
@@ -76,7 +79,6 @@ public class RiftLeapAttack extends EntityAIBase {
 
     public void resetTask() {
         this.attacker.setLeaping(false);
-        this.attacker.setActing(false);
         this.attacker.leapCooldown = cooldown;
     }
 
@@ -105,7 +107,6 @@ public class RiftLeapAttack extends EntityAIBase {
         //gravity constant in minecraft is 0.08D
         double g = 0.08D;
         double dx = entitylivingbase.posX - this.attacker.posX;
-        double dy = entitylivingbase.posY - this.attacker.posY;
         double dz = entitylivingbase.posZ - this.attacker.posZ;
         double velY = Math.sqrt(2 * g * this.leapHeight);
         double totalTime = velY / g;
