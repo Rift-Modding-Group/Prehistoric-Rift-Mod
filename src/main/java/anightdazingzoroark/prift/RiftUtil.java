@@ -8,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -17,6 +18,7 @@ import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public class RiftUtil {
@@ -160,34 +162,6 @@ public class RiftUtil {
         tessellator.draw();
     }
 
-    //note to self: this returns degrees
-    //multiply by 0.017453292 or pi rad over 180 to get degrees
-    public static float getCreatureHeadYaw(RiftCreature creature, float partialTicks) {
-        float f = interpolateRotation(creature.prevRenderYawOffset, creature.renderYawOffset, partialTicks);
-        float f1 = interpolateRotation(creature.prevRotationYawHead, creature.rotationYawHead, partialTicks);
-        float f2 = f1 - f;
-
-        return f2 * (creature.isBeingRidden() ? 1 : -1);
-    }
-
-    public static float getCreatureHeadPitch(RiftCreature creature, float partialTicks) {
-        return (creature.prevRotationPitch + (creature.rotationPitch - creature.prevRotationPitch) * partialTicks) * -1;
-    }
-
-    protected static float interpolateRotation(float prevYawOffset, float yawOffset, float partialTicks) {
-        float f;
-
-        for (f = yawOffset - prevYawOffset; f < -180.0F; f += 360.0F) {
-            ;
-        }
-
-        while (f >= 180.0F) {
-            f -= 360.0F;
-        }
-
-        return prevYawOffset + partialTicks * f;
-    }
-
     public static float setModelScale(RiftCreature creature, float min, float max) {
         return clamp(((max - min)/(24000)) * (creature.getAgeInTicks() - 24000f) + max, min, max);
     }
@@ -198,5 +172,18 @@ public class RiftUtil {
 
     public static double randomInRange(double min, double max) {
         return min + new Random().nextDouble() * (max - min);
+    }
+
+    public static EntityLivingBase findClosestEntity(EntityLivingBase baseEntity, List<EntityLivingBase> entities) {
+        if (baseEntity == null || entities == null || entities.isEmpty()) return null;
+
+        Optional<EntityLivingBase> closest = entities.stream()
+                .min((entity1, entity2) -> {
+                    double dist1 = baseEntity.getDistanceSq(entity1);
+                    double dist2 = baseEntity.getDistanceSq(entity2);
+                    return Double.compare(dist1, dist2);
+                });
+
+        return closest.orElse(null);
     }
 }

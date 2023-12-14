@@ -164,7 +164,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
             potTargetListL.remove(this.getControllingPassenger());
 
             if (!potTargetListL.isEmpty()) {
-                this.contLeapTarget = potTargetListL.get(0);
+                this.contLeapTarget = RiftUtil.findClosestEntity(this, potTargetListL);
 
                 double g = 0.08D;
                 double dx = this.contLeapTarget.posX - this.posX;

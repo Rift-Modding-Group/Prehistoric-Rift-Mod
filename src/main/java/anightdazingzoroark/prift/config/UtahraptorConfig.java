@@ -12,7 +12,7 @@ public class UtahraptorConfig extends RiftConfig {
     public static String[] utahraptorTargets = {"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:llama", "minecraft:villager", "prift:stegosaurus", "prift:dodo", "prift:triceratops"};
 
     public UtahraptorConfig(Configuration config) {
-        super(config, new String[]{"tag:plains:10:2:4", "tag:forest:10:2:4", "tag:jungle:10:2:4", "-tag:savanna", "-tag:cold"});
+        super(config, new String[]{"tag:plains:10:2:4", "tag:forest:15:2:4", "tag:jungle:15:2:4", "-tag:savanna", "-tag:cold"});
         maxHealth = initMaxHealth = 30;
         damage = initDamage = 6;
     }
