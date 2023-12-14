@@ -31,7 +31,7 @@ public class RiftDialMenu extends GuiScreen {
     private int selectedItem = -1;
     private RiftCreature creature;
     private List<RiftTameRadialChoice> choices;
-    private int radialChoiceMenu; //0 is main, 1 is state, 2 is behavior
+    private int radialChoiceMenu; //0 is main, 1 is state, 2 is options, 3 is behaviors
 
     public RiftDialMenu(RiftCreature creature)  {
         super();
@@ -135,6 +135,12 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 2) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
+            else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 4) {
+                drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+            }
+            else if (this.radialChoiceMenu == 2 && this.creature.isBaby() && i == 3) {
+                drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+            }
             else {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
             }
@@ -167,6 +173,8 @@ public class RiftDialMenu extends GuiScreen {
             else radialString = I18n.format("radial.choice."+this.choices.get(i).name().toLowerCase());
 
             if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled())) && i == 2) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 4) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 2 && this.creature.isBaby() && i == 3) radialString = "["+radialString+"]";
 
             float angle1 = ((i / (float) numItems) + 0.25f) * 2 * (float) Math.PI;
             float posX = x + 75 + itemRadius * (float) Math.cos(angle1) - (float)(this.fontRenderer.getStringWidth(radialString) / 2);
@@ -180,10 +188,16 @@ public class RiftDialMenu extends GuiScreen {
 
         //hover text
         if (this.radialChoiceMenu == 0 && this.creature.isBaby() && selectedItem == 2) {
-            this.drawHoveringText(I18n.format("radial.note.too_young"), mouseX, mouseY);
+            this.drawHoveringText(I18n.format("radial.note.too_young_saddle"), mouseX, mouseY);
         }
         else if (this.radialChoiceMenu == 0 && !this.creature.isSaddled() && selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.need_saddle"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && selectedItem == 4) {
+            this.drawHoveringText(I18n.format("radial.note.too_young_behavior"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 2 && this.creature.isBaby() && selectedItem == 3) {
+            this.drawHoveringText(I18n.format("radial.note.too_young_unclaim"), mouseX, mouseY);
         }
 
         RenderHelper.disableStandardItemLighting();
@@ -248,7 +262,7 @@ public class RiftDialMenu extends GuiScreen {
                     this.choices = getOptions();
                     this.radialChoiceMenu = 2;
                 }
-                else if (selectedItem == 4) {
+                else if (selectedItem == 4 && !this.creature.isBaby()) {
                     this.choices = getBehavior();
                     this.radialChoiceMenu = 3;
                 }
@@ -286,7 +300,7 @@ public class RiftDialMenu extends GuiScreen {
                     RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature, !this.creature.getHasHomePos()));
                     this.mc.player.closeScreen();
                 }
-                else if (selectedItem == 3) {
+                else if (selectedItem == 3 && !this.creature.isBaby()) {
                     ClientProxy.popupFromRadial = PopupFromRadial.UNCLAIM;
                     RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
                     this.mc.player.closeScreen();

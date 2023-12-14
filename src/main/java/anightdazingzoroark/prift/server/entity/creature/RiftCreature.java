@@ -541,6 +541,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else {
             if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
+                    this.consumeItemFromStack(player, itemstack);
                     net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player);
                     this.spawnHeartParticles();
                     if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished", new TextComponentString(this.getName())), false);
@@ -551,6 +552,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
                 }
                 else {
+                    this.consumeItemFromStack(player, itemstack);
                     this.setTameProgress(this.getTameProgress() + this.getTamingFoodAdd(itemstack));
                     this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                     this.spawnItemCrackParticles(itemstack.getItem());

@@ -92,6 +92,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
                 if (this.getOwnerId().equals(player.getUniqueID())) {
                     ItemStack eggStack = new ItemStack(this.getCreatureType().eggItem);
                     if (!player.capabilities.isCreativeMode) player.inventory.addItemStackToInventory(eggStack);
+                    this.setDead();
                     return true;
                 }
                 else {

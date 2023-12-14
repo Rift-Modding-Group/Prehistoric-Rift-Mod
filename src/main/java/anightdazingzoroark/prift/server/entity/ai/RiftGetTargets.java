@@ -40,12 +40,8 @@ public class RiftGetTargets extends EntityAITarget {
         this.targetEntitySelector = new Predicate<EntityLivingBase>() {
             public boolean apply(@Nullable EntityLivingBase p_apply_1_)
             {
-                if (p_apply_1_ == null) {
-                    return false;
-                }
-                else if (targetSelector != null && !targetSelector.apply(p_apply_1_)) {
-                    return false;
-                }
+                if (p_apply_1_ == null) return false;
+                else if (targetSelector != null && !targetSelector.apply(p_apply_1_)) return false;
                 else {
                     return !EntitySelectors.NOT_SPECTATING.apply(p_apply_1_) ? false : RiftGetTargets.this.isSuitableTarget(p_apply_1_, false);
                 }
@@ -64,7 +60,8 @@ public class RiftGetTargets extends EntityAITarget {
                 if (!entity.isRiding()) {
                     if (entity instanceof EntityPlayer) {
                         if (this.targetList.contains("minecraft:player")) {
-                            list.add(entity);
+                            EntityPlayer player = (EntityPlayer) entity;
+                            if (!player.isSneaking() || !((RiftCreature) this.taskOwner).isTamingFood(player.getHeldItemMainhand())) list.add(entity);
                         }
                     }
                     else {
