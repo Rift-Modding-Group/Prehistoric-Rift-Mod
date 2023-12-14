@@ -128,8 +128,8 @@ dependencies {
     }
     implementation 'software.bernie.geckolib:geckolib-forge-1.12.2:3.0.31'
     compileOnly "net.ilexiconn:llibrary:1.7.19-1.12.2"
-//    compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
-    compileOnly files('libs/ShoulderSurfing-1.12.2-2.6.jar')
+    compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
+//    compileOnly files('libs/ShoulderSurfing-1.12.2-2.6.jar')
 }
 
 // Adds Access Transformer files to tasks

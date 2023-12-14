@@ -47,6 +47,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -252,18 +253,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 2, settings.keyBindJump.isKeyDown()));
 
                 if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
-                    if (ShoulderInstance.getInstance().doShoulderSurfing()) {
-                        Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                        if (this.hasLeftClickChargeBar()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                        }
-                        else {
-                            if (toBeAttacked != null) {
-                                int targetId = toBeAttacked.getEntityId();
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
+                    if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) {
+                        if (ShoulderInstance.getInstance().doShoulderSurfing()) {
+                            Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                            if (this.hasLeftClickChargeBar()) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
                             }
                             else {
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
+                                if (toBeAttacked != null) {
+                                    int targetId = toBeAttacked.getEntityId();
+                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
+                                }
+                                else {
+                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
+                                }
                             }
                         }
                     }
@@ -290,7 +293,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
                 else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()) {
-                    Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                    Entity toBeAttacked = null;
+                    if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                     if (this.hasLeftClickChargeBar()) {
                         if (this.getLeftClickUse() > 0) {
                             if (toBeAttacked != null) {
