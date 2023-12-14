@@ -478,7 +478,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
-                        System.out.println(this.getAgeInTicks());
                         this.showGrowthParticles();
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());

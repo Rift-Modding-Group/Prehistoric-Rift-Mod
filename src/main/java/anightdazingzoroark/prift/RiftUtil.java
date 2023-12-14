@@ -14,12 +14,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
-import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Arrays;
 
 public class RiftUtil {
     public static String[] removeElementFromArray(String[] array, String element) {
@@ -79,17 +79,20 @@ public class RiftUtil {
     }
 
     public static boolean isEnergyRegenItem(Item item, CreatureDiet diet) {
-        List<String> itemList = new ArrayList<>();
-        boolean flag = false;
+        List itemList = new ArrayList<>();
+        System.out.println(item);
         if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
         else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
 
-        for (String itemEntry : itemList) {
-            int first = itemEntry.indexOf(":");
-            int second = itemEntry.indexOf(":", first + 1);
-            int third = itemEntry.indexOf(":", second + 1);
-            int itemData = Integer.parseInt(itemEntry.substring(second + 1, third));
-            if (Item.getByNameOrId(itemEntry.substring(0, second)).equals(item) && (itemData == 32767 || itemData == new ItemStack(item).getMetadata())) return true;
+        for (Object itemEntry : itemList) {
+            if (itemEntry instanceof String) {
+                String itemEntryStr = (String) itemEntry;
+                int first = itemEntryStr.indexOf(":");
+                int second = itemEntryStr.indexOf(":", first + 1);
+                int third = itemEntryStr.indexOf(":", second + 1);
+                int itemData = Integer.parseInt(itemEntryStr.substring(second + 1, third));
+                if (Item.getByNameOrId(itemEntryStr.substring(0, second)).equals(item) && (itemData == 32767 || itemData == new ItemStack(item).getMetadata())) return true;
+            }
         }
         return false;
     }
