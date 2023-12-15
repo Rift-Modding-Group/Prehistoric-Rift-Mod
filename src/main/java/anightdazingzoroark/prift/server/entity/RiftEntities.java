@@ -37,7 +37,7 @@ public class RiftEntities {
 
     public static void registerSpawn() {
         for (int x = 0; x < RiftConfigList.values().length; x++) {
-            if (x > 0) {
+            if (x > 0 && RiftConfigList.values()[x].getConfigInstance().canSpawn) {
                 Class creatureClass = RiftConfigList.values()[x].getCreatureClass();
                 for (int y = 0; y < RiftConfigList.values()[x].getConfigInstance().spawnPlaces.length; y++) {
                     String entry = RiftConfigList.values()[x].getConfigInstance().spawnPlaces[y];
