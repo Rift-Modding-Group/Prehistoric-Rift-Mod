@@ -3,8 +3,11 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.config.ApatosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -70,7 +73,9 @@ public class Apatosaurus extends RiftCreature {
 
     @Override
     public Vec3d riderPos() {
-        return null;
+        float xOffset = (float)(this.posX + (1) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
+        float zOffset = (float)(this.posZ + (1) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        return new Vec3d(xOffset, this.posY + 1.25, zOffset);
     }
 
     @Override
@@ -93,6 +98,12 @@ public class Apatosaurus extends RiftCreature {
         return false;
     }
 
+    @Override
+    public void refreshInventory() {
+        ItemStack saddle = this.creatureInventory.getStackInSlot(0);
+        if (!this.world.isRemote) this.setSaddled(saddle.getItem() == RiftItems.APATOSAURUS_PLATFORM && !saddle.isEmpty());
+    }
+
     public int getWeapon() {
         return this.dataManager.get(WEAPON);
     }
@@ -112,7 +123,7 @@ public class Apatosaurus extends RiftCreature {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.sitting", true));
             return PlayState.CONTINUE;
         }
-        if (event.isMoving() || (this.isSitting() && this.hasTarget()) && !this.isAttacking()) {
+        if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.walk", true));
             return PlayState.CONTINUE;
         }

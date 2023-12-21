@@ -39,6 +39,8 @@ public class RiftItems {
     public static Item TRICERATOPS_HORN;
     public static Item UTAHRAPTOR_CLAW;
 
+    public static Item APATOSAURUS_PLATFORM;
+
     public static void registerItems() {
         RAW_EXOTIC_MEAT = riftFoodItem("raw_exotic_meat", 4, 0.3f, true);
         COOKED_EXOTIC_MEAT = riftFoodItem("cooked_exotic_meat", 8, 0.6f, true);
@@ -46,19 +48,21 @@ public class RiftItems {
         COOKED_FIBROUS_MEAT = riftFibrousFoodItem("cooked_fibrous_meat", 2, true);
         RAW_DODO_MEAT = riftDodoMeatItem("raw_dodo_meat", 4, 0.3f, false, true);
         COOKED_DODO_MEAT = riftDodoMeatItem("cooked_dodo_meat", 8, 0.6f, true, true);
-        BASIC_HERBIVORE_MEAL = riftGenericItem("basic_herbivore_meal");
-        BASIC_CARNIVORE_MEAL = riftGenericItem("basic_carnivore_meal");
+        BASIC_HERBIVORE_MEAL = riftGenericItem("basic_herbivore_meal", true);
+        BASIC_CARNIVORE_MEAL = riftGenericItem("basic_carnivore_meal", true);
         ADVANCED_HERBIVORE_MEAL = riftGlintedItem("advanced_herbivore_meal");
         ADVANCED_CARNIVORE_MEAL = riftGlintedItem("advanced_carnivore_meal");
         CREATIVE_MEAL = riftGlintedItem("creative_meal");
 
         FIBER_BAR = riftFibrousFoodItem("fiber_bar", 2, false);
 
-        TYRANNOSAURUS_ARM = riftGenericItem("tyrannosaurus_arm");
-        STEGOSAURUS_PLATE = riftGenericItem("stegosaurus_plate");
-        DODO_BEAK = riftGenericItem("dodo_beak");
-        TRICERATOPS_HORN = riftGenericItem("triceratops_horn");
-        UTAHRAPTOR_CLAW = riftGenericItem("utahraptor_claw");
+        TYRANNOSAURUS_ARM = riftGenericItem("tyrannosaurus_arm", true);
+        STEGOSAURUS_PLATE = riftGenericItem("stegosaurus_plate", true);
+        DODO_BEAK = riftGenericItem("dodo_beak", true);
+        TRICERATOPS_HORN = riftGenericItem("triceratops_horn", true);
+        UTAHRAPTOR_CLAW = riftGenericItem("utahraptor_claw", true);
+
+        APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
 
         RiftCreatureType.registerEggs();
 
@@ -104,8 +108,9 @@ public class RiftItems {
         return registerItem(item, registryName);
     }
 
-    public static Item riftGenericItem(String registryName) {
+    public static Item riftGenericItem(String registryName, boolean stackable) {
         final Item item = new Item();
+        if (!stackable) item.setMaxStackSize(1);
         return registerItem(item, registryName);
     }
 

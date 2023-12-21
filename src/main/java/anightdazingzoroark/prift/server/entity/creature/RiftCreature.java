@@ -333,7 +333,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             for (int i = 0; i < this.creatureInventory.getSizeInventory(); i++) {
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
                 EntityItem entityItem = new EntityItem(this.world, this.posX, this.posY + this.getEyeHeight(), this.posZ, itemInSlot);
-                if (itemInSlot.getItem() == Items.SADDLE) this.setSaddled(false);
+                if (this instanceof Apatosaurus) {
+                    if (itemInSlot.getItem() == RiftItems.APATOSAURUS_PLATFORM) this.setSaddled(false);
+                }
+                else {
+                    if (itemInSlot.getItem() == Items.SADDLE) this.setSaddled(false);
+                }
                 this.world.spawnEntity(entityItem);
                 this.creatureInventory.setInventorySlotContents(i, new ItemStack(Items.AIR));
             }

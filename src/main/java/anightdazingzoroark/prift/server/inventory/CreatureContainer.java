@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.inventory;
 
+import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftChangeInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,7 +31,8 @@ public class CreatureContainer extends Container {
             this.addSlotToContainer(new Slot(creature.creatureInventory, 0, 8, 18) {
                 @Override
                 public boolean isItemValid(ItemStack stack) {
-                    return !stack.isEmpty() && stack.getItem() == Items.SADDLE;
+                    if (creature instanceof Apatosaurus) return !stack.isEmpty() && stack.getItem() == RiftItems.APATOSAURUS_PLATFORM;
+                    else return !stack.isEmpty() && stack.getItem() == Items.SADDLE;
                 }
 
                 public boolean canTakeStack(EntityPlayer playerIn) {
