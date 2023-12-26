@@ -80,7 +80,6 @@ public class RiftUtil {
 
     public static boolean isEnergyRegenItem(Item item, CreatureDiet diet) {
         List itemList = new ArrayList<>();
-        System.out.println(item);
         if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
         else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
 

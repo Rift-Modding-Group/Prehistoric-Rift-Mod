@@ -269,6 +269,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                                 }
                             }
                         }
+                        else {
+                            if (this.hasLeftClickChargeBar()) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                            }
+                            else {
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
+                            }
+                        }
                     }
                     else {
                         if (this.hasLeftClickChargeBar()) {
@@ -866,12 +874,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //herdin stuff stops here
 
-    @Override
-    @Nullable
-    protected ResourceLocation getLootTable() {
-        System.out.println(this.creatureType.toString().toLowerCase());
-        return LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/"+this.creatureType.toString().toLowerCase()));
-    }
+//    @Override
+//    @Nullable
+//    protected ResourceLocation getLootTable() {
+//        System.out.println(this.creatureType.toString().toLowerCase());
+//        return LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/"+this.creatureType.toString().toLowerCase()));
+//    }
 
     public int getVariant() {
         return this.dataManager.get(VARIANT).intValue();

@@ -21,8 +21,15 @@ public class RiftEntities {
             RiftCreatureType creature = RiftCreatureType.values()[x];
             registerEntity(creature.name().toLowerCase(), creature.getCreature(), x, RiftInitialize.instance, creature.getEggPrimary(), creature.getEggSecondary());
         }
+        //weapons
+        for (int x = RiftCreatureType.values().length; x < RiftLargeWeaponType.values().length + RiftCreatureType.values().length; x++) {
+            if (x == RiftCreatureType.values().length) continue;
+            int id = x - RiftCreatureType.values().length;
+            RiftLargeWeaponType weaponType = RiftLargeWeaponType.values()[id];
+            registerEntity(weaponType.name().toLowerCase(), weaponType.getWeaponClass(), x, RiftInitialize.instance);
+        }
         //everything else
-        int miscId = RiftCreatureType.values().length;
+        int miscId = RiftLargeWeaponType.values().length + RiftCreatureType.values().length - 1;
         registerEntity("egg", RiftEgg.class, miscId++, RiftInitialize.instance);
         registerEntity("thrown_stegosaurus_plate", ThrownStegoPlate.class, miscId++, RiftInitialize.instance);
     }

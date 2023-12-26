@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.items;
 
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectiles;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -40,6 +41,12 @@ public class RiftItems {
     public static Item UTAHRAPTOR_CLAW;
 
     public static Item APATOSAURUS_PLATFORM;
+    public static Item CANNON;
+    public static Item MORTAR;
+    public static Item CATAPULT;
+
+    public static Item WRENCH;
+    public static Item COMMAND_CONSOLE;
 
     public static void registerItems() {
         RAW_EXOTIC_MEAT = riftFoodItem("raw_exotic_meat", 4, 0.3f, true);
@@ -63,6 +70,12 @@ public class RiftItems {
         UTAHRAPTOR_CLAW = riftGenericItem("utahraptor_claw", true);
 
         APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
+        CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);
+        MORTAR = riftLargeWeaponItem("mortar", RiftLargeWeaponType.MORTAR);
+        CATAPULT = riftLargeWeaponItem("catapult", RiftLargeWeaponType.CATAPULT);
+
+        WRENCH = riftGenericItem("wrench", false);
+        COMMAND_CONSOLE = riftGenericItem("command_console", false);
 
         RiftCreatureType.registerEggs();
 
@@ -85,11 +98,6 @@ public class RiftItems {
         OreDictionary.registerOre("carnivoreMealIng", Items.CHICKEN);
         OreDictionary.registerOre("carnivoreMealIng", Items.BEEF);
         OreDictionary.registerOre("carnivoreMealIng", RiftItems.RAW_EXOTIC_MEAT);
-    }
-
-    public static Item riftUnstackableItem(String registryName) {
-        final Item item = new Item().setMaxStackSize(1);
-        return registerItem(item, registryName);
     }
 
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {
@@ -121,6 +129,11 @@ public class RiftItems {
 
     public static Item riftEggItem(String registryName, RiftCreatureType creature) {
         final Item item = new RiftEggItem(creature);
+        return registerItem(item, registryName);
+    }
+
+    public static Item riftLargeWeaponItem(String registryName, RiftLargeWeaponType weaponType) {
+        final RiftLargeWeaponItem item = new RiftLargeWeaponItem(weaponType);
         return registerItem(item, registryName);
     }
 

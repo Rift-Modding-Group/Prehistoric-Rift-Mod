@@ -2,17 +2,24 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.config.ApatosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -39,7 +46,7 @@ public class Apatosaurus extends RiftCreature {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(WEAPON, (byte)0);
+        this.dataManager.register(WEAPON, (byte)RiftLargeWeaponType.NONE.ordinal());
     }
 
     @Override
@@ -59,6 +66,18 @@ public class Apatosaurus extends RiftCreature {
         this.tasks.addTask(5, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(6, new RiftWander(this, 1.0D));
         this.tasks.addTask(7, new RiftLookAround(this));
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setByte("Weapon", (byte) this.getWeapon().ordinal());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        if (compound.hasKey("Weapon")) this.setWeapon(RiftLargeWeaponType.values()[compound.getByte("Weapon")]);
     }
 
     @Override
@@ -84,6 +103,48 @@ public class Apatosaurus extends RiftCreature {
     }
 
     @Override
+    public boolean processInteract(EntityPlayer player, EnumHand hand) {
+        ItemStack itemstack = player.getHeldItem(hand);
+        if (this.isTamed()) {
+            if (itemstack.getItem() instanceof RiftLargeWeaponItem && this.getWeapon().equals(RiftLargeWeaponType.NONE)) {
+                if (itemstack.getItem().equals(RiftItems.CANNON)) {
+                    this.setWeapon(RiftLargeWeaponType.CANNON);
+                    this.consumeItemFromStack(player, itemstack);
+                    return true;
+                }
+                else if (itemstack.getItem().equals(RiftItems.MORTAR)) {
+                    this.setWeapon(RiftLargeWeaponType.MORTAR);
+                    this.consumeItemFromStack(player, itemstack);
+                    return true;
+                }
+                else if (itemstack.getItem().equals(RiftItems.CATAPULT)) {
+                    this.setWeapon(RiftLargeWeaponType.CATAPULT);
+                    this.consumeItemFromStack(player, itemstack);
+                    return true;
+                }
+            }
+            else if (itemstack.getItem().equals(RiftItems.WRENCH) && !this.getWeapon().equals(RiftLargeWeaponType.NONE)) {
+                if (!player.capabilities.isCreativeMode) {
+                    switch (this.getWeapon()) {
+                        case CANNON:
+                            player.inventory.addItemStackToInventory(new ItemStack(RiftItems.CANNON));
+                            break;
+                        case MORTAR:
+                            player.inventory.addItemStackToInventory(new ItemStack(RiftItems.MORTAR));
+                            break;
+                        case CATAPULT:
+                            player.inventory.addItemStackToInventory(new ItemStack(RiftItems.CATAPULT));
+                            break;
+                    }
+                }
+                this.setWeapon(RiftLargeWeaponType.NONE);
+                return true;
+            }
+        }
+        return super.processInteract(player, hand);
+    }
+
+    @Override
     public boolean hasLeftClickChargeBar() {
         return false;
     }
@@ -104,18 +165,19 @@ public class Apatosaurus extends RiftCreature {
         if (!this.world.isRemote) this.setSaddled(saddle.getItem() == RiftItems.APATOSAURUS_PLATFORM && !saddle.isEmpty());
     }
 
-    public int getWeapon() {
-        return this.dataManager.get(WEAPON);
+    public RiftLargeWeaponType getWeapon() {
+        return RiftLargeWeaponType.values()[this.dataManager.get(WEAPON).byteValue()];
     }
 
-    public void setWeapon(int value) {
-        this.dataManager.set(WEAPON, (byte)value);
+    public void setWeapon(RiftLargeWeaponType value) {
+        this.dataManager.set(WEAPON, (byte) value.ordinal());
     }
 
     @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::apatosaurusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::apatosaurusAttack));
+        data.addAnimationController(new AnimationController(this, "weaponResize", 0, this::apatosaurusWeaponSize));
     }
 
     private <E extends IAnimatable> PlayState apatosaurusMovement(AnimationEvent<E> event) {
@@ -138,6 +200,11 @@ public class Apatosaurus extends RiftCreature {
         else {
             event.getController().clearAnimationCache();
         }
+        return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState apatosaurusWeaponSize(AnimationEvent<E> event) {
+        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.weapon_size_change", true));
         return PlayState.CONTINUE;
     }
 }
