@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.Entity;
@@ -85,6 +86,10 @@ public class ClientProxy extends ServerProxy {
             return new RiftCreatureInvMenu(playerInventory, (RiftCreature) entity);
         }
         else if (id == GUI_MENU_FROM_RADIAL) return new RiftPopupFromRadial((RiftCreature) entity);
+        else if (id == GUI_WEAPON_INVENTORY) {
+            IInventory playerInventory = player.inventory;
+            return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);
+        }
         return null;
     }
 

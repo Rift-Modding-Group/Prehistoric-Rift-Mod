@@ -45,6 +45,10 @@ public class RiftItems {
     public static Item MORTAR;
     public static Item CATAPULT;
 
+    public static Item CANNONBALL;
+    public static Item MORTAR_SHELL;
+    public static Item CATAPULT_BOULDER;
+
     public static Item WRENCH;
     public static Item COMMAND_CONSOLE;
 
@@ -73,6 +77,10 @@ public class RiftItems {
         CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);
         MORTAR = riftLargeWeaponItem("mortar", RiftLargeWeaponType.MORTAR);
         CATAPULT = riftLargeWeaponItem("catapult", RiftLargeWeaponType.CATAPULT);
+
+        CANNONBALL = riftGenericItem("cannonball", false);
+        MORTAR_SHELL = riftGenericItem("mortar_shell", false);
+        CATAPULT_BOULDER = riftGenericItem("catapult_boulder", false);
 
         WRENCH = riftGenericItem("wrench", false);
         COMMAND_CONSOLE = riftGenericItem("command_console", false);

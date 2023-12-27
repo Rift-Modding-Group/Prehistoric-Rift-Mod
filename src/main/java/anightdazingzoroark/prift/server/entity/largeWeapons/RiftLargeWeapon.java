@@ -1,42 +1,48 @@
 package anightdazingzoroark.prift.server.entity.largeWeapons;
 
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
-import anightdazingzoroark.prift.server.message.RiftChangeInventoryFromMenu;
+import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerHorseChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatable {
-    private static final DataParameter<Float> DAMAGE = EntityDataManager.<Float>createKey(RiftLargeWeapon.class, DataSerializers.FLOAT);
     public RiftLargeWeaponInventory weaponInventory;
     public final RiftLargeWeaponType weaponType;
     private final int slotCount = 5;
     private AnimationFactory factory = new AnimationFactory(this);
+    public final Item weaponItem;
+    public final Item ammoItem;
 
-    public RiftLargeWeapon(World worldIn, RiftLargeWeaponType weaponType) {
+    public RiftLargeWeapon(World worldIn, RiftLargeWeaponType weaponType, Item weaponItem, Item ammoItem) {
         super(worldIn);
         this.initInventory();
         this.weaponType = weaponType;
+        this.weaponItem = weaponItem;
+        this.ammoItem = ammoItem;
     }
 
     @Override
-    protected void entityInit() {
-        this.dataManager.register(DAMAGE, 0.0F);
+    public boolean processInteract(EntityPlayer player, EnumHand hand) {
+        if (!player.isSneaking()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
+        else RiftMessages.WRAPPER.sendToServer(new RiftOpenWeaponInventory(this));
+        return false;
     }
 
     private void initInventory() {
@@ -63,8 +69,7 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
                 int inventorySize = this.slotCount;
                 if (j < inventorySize) this.weaponInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
             }
-        }
-        else {
+        } else {
             NBTTagList nbtTagList = compound.getTagList("Items", 10);
             this.initInventory();
             for (int i = 0; i < nbtTagList.tagCount(); ++i) {
@@ -90,38 +95,37 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
         }
         compound.setTag("Items", nbttaglist);
     }
-//    public boolean attackEntityFrom(DamageSource source, float amount)
-//    {
-//        if (this.isEntityInvulnerable(source)) return false;
-//        else if (!this.world.isRemote && !this.isDead)
-//        {
-//            if (source instanceof EntityDamageSourceIndirect && source.getTrueSource() != null && this.isPassenger(source.getTrueSource())) return false;
-//            else {
-//                this.setDamage(this.getDamage() + amount * 10.0F);
-//                this.markVelocityChanged();
-//                boolean flag = source.getTrueSource() instanceof EntityPlayer && ((EntityPlayer)source.getTrueSource()).capabilities.isCreativeMode;
-//
-//                if (flag || this.getDamage() > 40.0F) {
-//                    if (!flag && this.world.getGameRules().getBoolean("doEntityDrops")) {
-//                        this.dropItemWithOffset(this.weaponType.getItem(), 1, 0.0F);
-//                    }
-//
-//                    this.setDead();
-//                }
-//
-//                return true;
-//            }
-//        }
-//        else return true;
-//    }
 
-    public float getDamage() {
-        return this.dataManager.get(DAMAGE);
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        if (this.isEntityInvulnerable(source)) return false;
+        else if (!this.world.isRemote && !this.isDead) {
+            if (source instanceof EntityDamageSourceIndirect && source.getTrueSource() != null && this.isPassenger(source.getTrueSource())) return false;
+            else {
+                if (this.world.getGameRules().getBoolean("doEntityDrops")) {
+                    if (!source.isCreativePlayer()) this.dropItemWithOffset(this.weaponItem, 1, 0.0F);
+                }
+                this.setDead();
+                return true;
+            }
+        }
+        return true;
+    }
+    public void updatePassenger(Entity passenger) {
+        super.updatePassenger(passenger);
+
+        this.rotationYaw = passenger.rotationYaw;
+        this.prevRotationYaw = this.rotationYaw;
+        this.rotationPitch = passenger.rotationPitch * 0.5f;
+        this.setRotation(this.rotationYaw, this.rotationPitch);
+        this.renderYawOffset = this.rotationYaw;
+
+        passenger.setPosition(riderPos().x, riderPos().y, riderPos().z);
+        ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
+        if (this.isDead) passenger.dismountRidingEntity();
     }
 
-    public void setDamage(float damage) {
-        this.dataManager.set(DAMAGE, damage);
-    }
+    public abstract Vec3d riderPos();
+
     @Override
     public abstract void registerControllers(AnimationData data);
 
@@ -136,7 +140,7 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
             this.addInventoryChangeListener(new RiftLargeWeapon.RiftWeaponInvListener(weapon));
         }
 
-        public void setInventoryFromData(RiftChangeInventoryFromMenu.RiftCreatureInvData data) {
+        public void setInventoryFromData(RiftChangeWeaponInvFromMenu.RiftWeaponInvData data) {
             ItemStack[] contents = data.getInventoryContents();
 
             if (contents.length != getSizeInventory()) {

@@ -2,8 +2,10 @@ package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenInventoryFromMenu;
+import anightdazingzoroark.prift.server.message.RiftOpenWeaponInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,6 +38,10 @@ public class ClientEvents {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (event.getGui() instanceof GuiInventory && player.isRiding() && player.getRidingEntity() instanceof RiftCreature) {
             RiftMessages.WRAPPER.sendToServer(new RiftOpenInventoryFromMenu(player.getRidingEntity().getEntityId()));
+            event.setCanceled(true);
+        }
+        if (event.getGui() instanceof GuiInventory && player.isRiding() && player.getRidingEntity() instanceof RiftLargeWeapon) {
+            RiftMessages.WRAPPER.sendToServer(new RiftOpenWeaponInventory((RiftLargeWeapon)player.getRidingEntity()));
             event.setCanceled(true);
         }
     }

@@ -12,19 +12,17 @@ import net.minecraft.world.World;
 import java.util.function.Function;
 
 public enum RiftLargeWeaponType {
-    NONE(null, null, null),
-    CANNON(RiftCannon.class, RiftCannon::new, RiftItems.CANNON),
-    MORTAR(RiftMortar.class, RiftMortar::new, RiftItems.MORTAR),
-    CATAPULT(RiftCatapult.class, RiftCatapult::new, RiftItems.CATAPULT);
+    NONE(null, null),
+    CANNON(RiftCannon.class, RiftCannon::new),
+    MORTAR(RiftMortar.class, RiftMortar::new),
+    CATAPULT(RiftCatapult.class, RiftCatapult::new);
 
     private final Class<? extends RiftLargeWeapon> weaponClass;
     private final Function<World, RiftLargeWeapon> weaponConstructor;
-    private final RiftLargeWeaponItem item;
 
-    RiftLargeWeaponType(Class<? extends RiftLargeWeapon> weaponClass, Function<World, RiftLargeWeapon> weaponConstructor, Item item) {
+    RiftLargeWeaponType(Class<? extends RiftLargeWeapon> weaponClass, Function<World, RiftLargeWeapon> weaponConstructor) {
         this.weaponClass = weaponClass;
         this.weaponConstructor = weaponConstructor;
-        this.item = (RiftLargeWeaponItem) item;
     }
 
     public Class<? extends RiftLargeWeapon> getWeaponClass() {
@@ -33,9 +31,5 @@ public enum RiftLargeWeaponType {
 
     public Function<World, RiftLargeWeapon> getConstructor() {
         return this.weaponConstructor;
-    }
-
-    public RiftLargeWeaponItem getItem() {
-        return this.item;
     }
 }

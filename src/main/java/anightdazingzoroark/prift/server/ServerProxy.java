@@ -3,7 +3,9 @@ package anightdazingzoroark.prift.server;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.inventory.CreatureContainer;
+import anightdazingzoroark.prift.server.inventory.WeaponContainer;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.recipes.RiftRecipes;
 import net.minecraft.block.Block;
@@ -29,6 +31,7 @@ public class ServerProxy implements IGuiHandler {
     public static final int GUI_DIAL = 1;
     public static final int GUI_CREATURE_INVENTORY = 2;
     public static final int GUI_MENU_FROM_RADIAL = 3;
+    public static final int GUI_WEAPON_INVENTORY = 4;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
@@ -64,6 +67,11 @@ public class ServerProxy implements IGuiHandler {
         }
         else if (id == GUI_MENU_FROM_RADIAL) {
             return new CreatureContainer((RiftCreature) entity, player);
+        }
+        else if (id == GUI_WEAPON_INVENTORY) {
+            if (entity instanceof RiftLargeWeapon) {
+                return new WeaponContainer((RiftLargeWeapon) entity, player);
+            }
         }
         return null;
     }

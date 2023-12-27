@@ -17,7 +17,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 public class ThrownStegoPlate extends EntityArrow {
-    private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(ThrownStegoPlate.class, DataSerializers.VARINT);
     private EntityPlayer rider;
 
     public ThrownStegoPlate(World worldIn) {

@@ -1,31 +1,31 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftStartRiding extends AbstractMessage<RiftStartRiding> {
-    private int creatureId;
+    private int entityId;
 
     public RiftStartRiding() {}
 
-    public RiftStartRiding(RiftCreature creature) {
-        this.creatureId = creature.getEntityId();
+    public RiftStartRiding(EntityLiving entity) {
+        this.entityId = entity.getEntityId();
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.creatureId = buf.readInt();
+        this.entityId = buf.readInt();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeInt(creatureId);
+        buf.writeInt(entityId);
     }
 
     @Override
@@ -34,10 +34,10 @@ public class RiftStartRiding extends AbstractMessage<RiftStartRiding> {
     @Override
     public void onServerReceived(MinecraftServer server, RiftStartRiding message, EntityPlayer player, MessageContext messageContext) {
         World world = player.getEntityWorld();
-        RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
+        EntityLiving entity = (EntityLiving)world.getEntityByID(message.entityId);
 
-        creature.getNavigator().clearPath();
-        creature.setAttackTarget(null);
-        player.startRiding(creature);
+        entity.getNavigator().clearPath();
+        entity.setAttackTarget(null);
+        player.startRiding(entity);
     }
 }

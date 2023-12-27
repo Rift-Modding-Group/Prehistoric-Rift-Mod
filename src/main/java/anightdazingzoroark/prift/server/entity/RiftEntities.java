@@ -26,7 +26,7 @@ public class RiftEntities {
             if (x == RiftCreatureType.values().length) continue;
             int id = x - RiftCreatureType.values().length;
             RiftLargeWeaponType weaponType = RiftLargeWeaponType.values()[id];
-            registerEntity(weaponType.name().toLowerCase(), weaponType.getWeaponClass(), x, RiftInitialize.instance);
+            registerEntity(weaponType.name().toLowerCase()+"_entity", weaponType.getWeaponClass(), x, RiftInitialize.instance);
         }
         //everything else
         int miscId = RiftLargeWeaponType.values().length + RiftCreatureType.values().length - 1;

@@ -18,6 +18,7 @@ public class CreatureContainer extends Container {
     private final EntityPlayer player;
     private final int slots;
     private final int rows;
+
     public CreatureContainer(final RiftCreature creature, EntityPlayer player) {
         this.creatureInventory = creature.creatureInventory;
         this.creature = creature;
@@ -88,12 +89,8 @@ public class CreatureContainer extends Container {
             else if (this.creatureInventory.getSizeInventory() <= 1 || !this.mergeItemStack(itemStack1, 1, this.creatureInventory.getSizeInventory(), false)) {
                 return ItemStack.EMPTY;
             }
-            else if (itemStack1.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
-            }
-            else {
-                slot.onSlotChanged();
-            }
+            else if (itemStack1.isEmpty()) slot.putStack(ItemStack.EMPTY);
+            else slot.onSlotChanged();
         }
         return itemStack;
     }
