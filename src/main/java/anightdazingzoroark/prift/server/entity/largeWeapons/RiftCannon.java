@@ -1,11 +1,22 @@
 package anightdazingzoroark.prift.server.entity.largeWeapons;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import anightdazingzoroark.prift.server.message.RiftLaunchLWeaponProjectile;
+import anightdazingzoroark.prift.server.message.RiftManageUtilizingControl;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
@@ -14,6 +25,36 @@ public class RiftCannon extends RiftLargeWeapon {
     public RiftCannon(World worldIn) {
         super(worldIn, RiftLargeWeaponType.CANNON, RiftItems.CANNON, RiftItems.CANNONBALL);
         this.setSize(1f, 1f);
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void setControls() {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+
+        if (settings.keyBindAttack.isKeyDown() && !this.isUsingLeftClick()) {
+            boolean flag = false;
+            int indexToRemove = -1;
+            for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
+                if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
+                    if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
+                        flag = true;
+                        indexToRemove = x;
+                        break;
+                    }
+                }
+            }
+            if (flag) RiftMessages.WRAPPER.sendToServer(new RiftLaunchLWeaponProjectile(this, indexToRemove));
+        }
+        RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, settings.keyBindAttack.isKeyDown()));
+    }
+
+    @Override
+    public void launchProjectile(EntityPlayer player, int indexToRemove) {
+        RiftCannonball cannonball = new RiftCannonball(this.world, this, player, player.posX, player.posY + player.getEyeHeight() - 0.1, player.posZ);
+        cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);
+        this.world.spawnEntity(cannonball);
+        this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
     }
 
     public Vec3d riderPos() {

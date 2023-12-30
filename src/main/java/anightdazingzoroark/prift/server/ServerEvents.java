@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseClick;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
@@ -18,6 +19,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -29,6 +31,7 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 public class ServerEvents {
     //make people join le discord
+    //might make this configurable
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         TextComponentString message = new TextComponentString("Click here to join the Discord server for this mod to hang out and receive updates! We beg you!");
@@ -94,6 +97,8 @@ public class ServerEvents {
         }
     }
 
+    //i forgor what tf this does :skull:
+    //probably best if it doesnt get deleted
     @SubscribeEvent
     public void onStartRiding(EntityMountEvent event) {
         if (event.isDismounting() && event.getEntityMounting() instanceof EntityPlayer) {
@@ -145,6 +150,7 @@ public class ServerEvents {
     }
 
     //to reduce potential lag, mobs killed by wild creatures will not drop items
+    //might make this configurable idk
     @SubscribeEvent
     public void stopMobDrops(LivingDropsEvent event) {
         if (event.getSource().getTrueSource() instanceof RiftCreature) {
@@ -212,11 +218,23 @@ public class ServerEvents {
         }
     }
 
+    //stop bleeding upon death
     @SubscribeEvent
     public void onEntityDeath(LivingDeathEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
-        //for remove bleed
         properties.resetBleeding();
+    }
+
+    //manage cannon impacting stuff
+    @SubscribeEvent
+    public void manageProjectileImpacting(ProjectileImpactEvent event) {
+        Entity hitEntity = event.getRayTraceResult().entityHit;
+        if (event.getEntity() instanceof RiftCannonball) {
+            RiftCannonball cannonball = (RiftCannonball) event.getEntity();
+            if (hitEntity == cannonball.getFirer() || hitEntity == cannonball.shootingEntity) {
+                event.setCanceled(true);
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.largeWeapons;
 
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -13,16 +14,24 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatable {
+    private static final DataParameter<Boolean> USING_LEFT_CLICK = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.BOOLEAN);
     public RiftLargeWeaponInventory weaponInventory;
     public final RiftLargeWeaponType weaponType;
     private final int slotCount = 5;
@@ -37,6 +46,21 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
         this.weaponItem = weaponItem;
         this.ammoItem = ammoItem;
     }
+
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+        this.dataManager.register(USING_LEFT_CLICK, Boolean.FALSE);
+    }
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        if (this.world.isRemote) this.setControls();
+    }
+
+    @SideOnly(Side.CLIENT)
+    public abstract void setControls();
 
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
@@ -96,6 +120,8 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
         compound.setTag("Items", nbttaglist);
     }
 
+    public abstract void launchProjectile(EntityPlayer player, int indexToRemove);
+
     public boolean attackEntityFrom(DamageSource source, float amount) {
         if (this.isEntityInvulnerable(source)) return false;
         else if (!this.world.isRemote && !this.isDead) {
@@ -122,6 +148,14 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
         passenger.setPosition(riderPos().x, riderPos().y, riderPos().z);
         ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
         if (this.isDead) passenger.dismountRidingEntity();
+    }
+
+    public boolean isUsingLeftClick() {
+        return this.dataManager.get(USING_LEFT_CLICK);
+    }
+
+    public void setUsingLeftClick(boolean value) {
+        this.dataManager.set(USING_LEFT_CLICK, value);
     }
 
     public abstract Vec3d riderPos();
