@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseClick;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -24,10 +25,14 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServerEvents {
     //make people join le discord
@@ -228,13 +233,25 @@ public class ServerEvents {
 
     //manage cannon impacting stuff
     @SubscribeEvent
-    public void manageProjectileImpacting(ProjectileImpactEvent event) {
-        Entity hitEntity = event.getRayTraceResult().entityHit;
-        if (event.getEntity() instanceof RiftCannonball) {
-            RiftCannonball cannonball = (RiftCannonball) event.getEntity();
-            if (hitEntity == cannonball.getFirer() || hitEntity == cannonball.shootingEntity) {
-                event.setCanceled(true);
+    public void manageProjectileExplosion(ExplosionEvent.Detonate event) {
+        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCannon) {
+            RiftCannon cannon = (RiftCannon) event.getExplosion().getExplosivePlacedBy();
+            EntityPlayer user = (EntityPlayer) cannon.getControllingPassenger();
+            //remove cannon and user
+            event.getAffectedEntities().remove(cannon);
+            event.getAffectedEntities().remove(user);
+            //remove creatures tamed to user
+            List<EntityTameable> tamedEntities = new ArrayList<>();
+            for (Entity entity : event.getAffectedEntities()) {
+                if (entity instanceof EntityTameable) {
+                    if ((((EntityTameable) entity).isTamed())) {
+                        if (!((EntityTameable) entity).getOwner().equals(user)) {
+                            tamedEntities.add((EntityTameable) entity);
+                        }
+                    }
+                }
             }
+            event.getAffectedEntities().removeAll(tamedEntities);
         }
     }
 }

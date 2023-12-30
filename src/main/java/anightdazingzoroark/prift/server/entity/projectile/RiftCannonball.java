@@ -16,9 +16,9 @@ public class RiftCannonball extends EntityArrow {
         super(worldIn);
     }
 
-    public RiftCannonball(World world, EntityLivingBase firer, EntityPlayer user, double x, double y, double z) {
+    public RiftCannonball(World world, EntityLivingBase firer, EntityPlayer user) {
         this(world);
-        this.setPosition(x, y, z);
+        this.setPosition(user.posX, user.posY + user.getEyeHeight() - 0.1, user.posZ);
         this.shootingEntity = user;
         this.firer = firer;
     }
@@ -35,22 +35,12 @@ public class RiftCannonball extends EntityArrow {
     }
 
     protected void onHit(RayTraceResult raytraceResultIn) {
-//        Entity entity = raytraceResultIn.entityHit;
-
         if (!this.world.isRemote) {
-//            if (entity != null && entity != this.cannon) {
-//                result.entityHit.attackEntityFrom(DamageSource., 6.0F);
-//                this.applyEnchantments(this.shootingEntity, result.entityHit);
-//            }
             boolean flag = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this.firer);
-            this.world.newExplosion((Entity)null, this.posX, this.posY, this.posZ, 6f, false, flag);
+            this.world.newExplosion(this.firer, this.posX, this.posY, this.posZ, 6f, false, flag);
             this.setDead();
         }
         else super.onHit(raytraceResultIn);
-    }
-
-    public EntityLivingBase getFirer() {
-        return this.firer;
     }
 
     @Override

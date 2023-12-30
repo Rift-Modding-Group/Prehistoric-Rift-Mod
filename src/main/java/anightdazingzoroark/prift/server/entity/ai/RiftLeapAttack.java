@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureinterface.IChargingMob;
 import anightdazingzoroark.prift.server.entity.creatureinterface.ILeapingMob;
@@ -52,14 +53,12 @@ public class RiftLeapAttack extends EntityAIBase {
     public void startExecuting() {
         this.target = this.attacker.getAttackTarget();
         if (this.target != null) {
-            //gravity constant in minecraft is 0.08D
-            double g = 0.08D;
             double dx = this.target.posX - this.attacker.posX;
             double dz = this.target.posZ - this.attacker.posZ;
             double dist = Math.sqrt(dx * dx + dz * dz);
 
-            double velY = Math.sqrt(2 * g * this.leapHeight);
-            double totalTime = velY / g;
+            double velY = Math.sqrt(2 * RiftUtil.gravity * this.leapHeight);
+            double totalTime = velY / RiftUtil.gravity;
             double velXZ = dist * 2 / totalTime;
 
             double angleToTarget = Math.atan2(dz, dx);

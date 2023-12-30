@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.config.RiftConfigList;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
+import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.Entity;
@@ -34,6 +35,7 @@ public class RiftEntities {
         registerEntity("egg", RiftEgg.class, miscId++, RiftInitialize.instance);
         registerEntity("thrown_stegosaurus_plate", ThrownStegoPlate.class, miscId++, RiftInitialize.instance);
         registerEntity("cannonball_projectile", RiftCannonball.class, miscId++, RiftInitialize.instance);
+        registerEntity("mortar_shell_projectile", RiftMortarShell.class, miscId++, RiftInitialize.instance);
     }
 
     public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {

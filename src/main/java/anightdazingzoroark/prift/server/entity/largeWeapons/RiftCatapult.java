@@ -19,7 +19,6 @@ public class RiftCatapult extends RiftLargeWeapon {
     }
 
     @SideOnly(Side.CLIENT)
-    @Override
     public void setControls() {}
 
     @Override

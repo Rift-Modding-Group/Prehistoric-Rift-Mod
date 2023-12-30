@@ -22,6 +22,8 @@ import java.util.Random;
 import java.util.Arrays;
 
 public class RiftUtil {
+    public static final double gravity = 0.08D;
+
     public static String[] removeElementFromArray(String[] array, String element) {
         int size = array.length;
         for(int i = 0; i < size; i++) {
