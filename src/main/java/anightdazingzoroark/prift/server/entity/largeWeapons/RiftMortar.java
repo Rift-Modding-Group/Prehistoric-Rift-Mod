@@ -33,35 +33,8 @@ public class RiftMortar extends RiftLargeWeapon {
         this.setSize(1f, 2f);
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
-    public void setControls() {
-        GameSettings settings = Minecraft.getMinecraft().gameSettings;
-        EntityPlayer player = Minecraft.getMinecraft().player;
-
-        if (this.isBeingRidden()) {
-            if (this.getPassengers().get(0).equals(player)) {
-                if (settings.keyBindAttack.isKeyDown() && !this.isUsingLeftClick()) {
-                    boolean flag = false;
-                    int indexToRemove = -1;
-                    for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
-                        if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
-                            if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
-                                flag = true;
-                                indexToRemove = x;
-                                break;
-                            }
-                        }
-                    }
-                    if (flag) RiftMessages.WRAPPER.sendToServer(new RiftLaunchLWeaponProjectile(this, indexToRemove));
-                }
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, settings.keyBindAttack.isKeyDown()));
-            }
-        }
-    }
-
-    @Override
-    public void launchProjectile(EntityPlayer player, int indexToRemove) {
+    public void launchProjectile(EntityPlayer player) {
         //get nearest entity first
         //should be in the front
         AxisAlignedBB detectionBox = new AxisAlignedBB(this.posX - 16, this.posY, this.posZ - 16, this.posX + 16, this.posY + 16, this.posZ + 16);
@@ -120,7 +93,7 @@ public class RiftMortar extends RiftLargeWeapon {
         RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, player);
         mortarShell.shoot(this, pointedEntity);
         this.world.spawnEntity(mortarShell);
-        this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
+//        this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
     }
 
     public Vec3d riderPos() {

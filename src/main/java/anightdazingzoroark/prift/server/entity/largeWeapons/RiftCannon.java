@@ -28,42 +28,25 @@ public class RiftCannon extends RiftLargeWeapon {
         this.setSize(1f, 1f);
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
-    public void setControls() {
-        GameSettings settings = Minecraft.getMinecraft().gameSettings;
-        EntityPlayer player = Minecraft.getMinecraft().player;
-
-        if (this.isBeingRidden()) {
-            if (this.getPassengers().get(0).equals(player)) {
-                if (settings.keyBindAttack.isKeyDown() && !this.isUsingLeftClick()) {
-                    boolean flag = false;
-                    int indexToRemove = -1;
-                    for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
-                        if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
-                            if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
-                                flag = true;
-                                indexToRemove = x;
-                                break;
-                            }
-                        }
-                    }
-                    if (flag) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftLaunchLWeaponProjectile(this, indexToRemove));
-                        this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
-                    }
+    public void launchProjectile(EntityPlayer player) {
+        boolean flag = false;
+        int indexToRemove = -1;
+        for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
+            if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
+                if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
+                    flag = true;
+                    indexToRemove = x;
+                    break;
                 }
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, settings.keyBindAttack.isKeyDown()));
             }
         }
-    }
-
-    @Override
-    public void launchProjectile(EntityPlayer player, int indexToRemove) {
-        RiftCannonball cannonball = new RiftCannonball(this.world, this, player);
-        cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);
-        this.world.spawnEntity(cannonball);
-        this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
+        if (flag) {
+            RiftCannonball cannonball = new RiftCannonball(this.world, this, player);
+            cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);
+            this.world.spawnEntity(cannonball);
+            this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
+        }
     }
 
     public Vec3d riderPos() {

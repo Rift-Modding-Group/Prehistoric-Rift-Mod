@@ -22,7 +22,7 @@ public class RiftCatapult extends RiftLargeWeapon {
     public void setControls() {}
 
     @Override
-    public void launchProjectile(EntityPlayer player, int indexToRemove) {}
+    public void launchProjectile(EntityPlayer player) {}
 
     public Vec3d riderPos() {
         return null;

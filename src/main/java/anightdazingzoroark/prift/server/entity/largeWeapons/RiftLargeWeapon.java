@@ -3,6 +3,8 @@ package anightdazingzoroark.prift.server.entity.largeWeapons;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -60,7 +62,19 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
     }
 
     @SideOnly(Side.CLIENT)
-    public abstract void setControls();
+    public void setControls() {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        EntityPlayer player = Minecraft.getMinecraft().player;
+
+        if (this.isBeingRidden()) {
+            if (this.getPassengers().get(0).equals(player)) {
+                if (settings.keyBindAttack.isKeyDown() && !this.isUsingLeftClick()) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftLaunchLWeaponProjectile(this));
+                }
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, settings.keyBindAttack.isKeyDown()));
+            }
+        }
+    }
 
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
@@ -120,7 +134,7 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
         compound.setTag("Items", nbttaglist);
     }
 
-    public abstract void launchProjectile(EntityPlayer player, int indexToRemove);
+    public abstract void launchProjectile(EntityPlayer player);
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
         if (this.isEntityInvulnerable(source)) return false;
@@ -152,6 +166,11 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
 
     @Override
     public boolean shouldRiderSit() {
+        return false;
+    }
+
+    @Override
+    public boolean canBePushed() {
         return false;
     }
 
