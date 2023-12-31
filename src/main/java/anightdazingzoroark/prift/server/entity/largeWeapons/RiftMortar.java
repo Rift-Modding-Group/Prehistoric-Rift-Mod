@@ -9,11 +9,13 @@ import anightdazingzoroark.prift.server.message.RiftMessages;
 import com.google.common.base.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -61,9 +63,17 @@ public class RiftMortar extends RiftLargeWeapon {
     @Override
     public void launchProjectile(EntityPlayer player, int indexToRemove) {
         //get nearest entity first
-        UUID userId = this.getPassengers().get(0).getUniqueID();
+        //should be in the front
         AxisAlignedBB detectionBox = new AxisAlignedBB(this.posX - 16, this.posY, this.posZ - 16, this.posX + 16, this.posY + 16, this.posZ + 16);
-        List<EntityLivingBase> entityList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, detectionBox, new Predicate<EntityLivingBase>() {
+        double dist = detectionBox.maxX - detectionBox.minX;
+        Vec3d vec3d = this.getPositionEyes(1.0F);
+        Vec3d vec3d1 = this.getLook(1.0F);
+        Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
+        double d1 = dist;
+        EntityLivingBase pointedEntity = null;
+        EntityPlayer rider = (EntityPlayer)this.getPassengers().get(0);
+        UUID userId = rider.getUniqueID();
+        List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, detectionBox.expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
             @Override
             public boolean apply(@Nullable EntityLivingBase input) {
                 if (input instanceof EntityTameable) {
@@ -76,16 +86,41 @@ public class RiftMortar extends RiftLargeWeapon {
                 return true;
             }
         });
-        entityList.remove(this);
-        entityList.remove(this.getPassengers().get(0));
+        double d2 = d1;
+        for (EntityLivingBase potentialTarget : list) {
+            AxisAlignedBB axisalignedbb = potentialTarget.getEntityBoundingBox().grow((double) potentialTarget.getCollisionBorderSize() + 2F);
+            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
+
+            if (potentialTarget != this && potentialTarget != rider) {
+                if (axisalignedbb.contains(vec3d)) {
+                    if (d2 >= 0.0D) {
+                        pointedEntity = potentialTarget;
+                        d2 = 0.0D;
+                    }
+                }
+                else if (raytraceresult != null) {
+                    double d3 = vec3d.distanceTo(raytraceresult.hitVec);
+
+                    if (d3 < d2 || d2 == 0.0D) {
+                        if (potentialTarget.getLowestRidingEntity() == rider.getLowestRidingEntity() && !rider.canRiderInteract()) {
+                            if (d2 == 0.0D) {
+                                pointedEntity = potentialTarget;
+                            }
+                        }
+                        else {
+                            pointedEntity = potentialTarget;
+                            d2 = d3;
+                        }
+                    }
+                }
+            }
+        }
 
         //firing logic
-        if (!entityList.isEmpty()) {
-            RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, player);
-            mortarShell.shoot(this, entityList.get(0));
-            this.world.spawnEntity(mortarShell);
-            this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
-        }
+        RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, player);
+        mortarShell.shoot(this, pointedEntity);
+        this.world.spawnEntity(mortarShell);
+        this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
     }
 
     public Vec3d riderPos() {

@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import anightdazingzoroark.prift.server.message.RiftChangeWeaponInvFromMenu;
 import anightdazingzoroark.prift.server.message.RiftLaunchLWeaponProjectile;
 import anightdazingzoroark.prift.server.message.RiftManageUtilizingControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -47,7 +48,10 @@ public class RiftCannon extends RiftLargeWeapon {
                             }
                         }
                     }
-                    if (flag) RiftMessages.WRAPPER.sendToServer(new RiftLaunchLWeaponProjectile(this, indexToRemove));
+                    if (flag) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftLaunchLWeaponProjectile(this, indexToRemove));
+                        this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
+                    }
                 }
                 RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, settings.keyBindAttack.isKeyDown()));
             }
@@ -56,12 +60,10 @@ public class RiftCannon extends RiftLargeWeapon {
 
     @Override
     public void launchProjectile(EntityPlayer player, int indexToRemove) {
-        if (!this.world.isRemote) {
-            RiftCannonball cannonball = new RiftCannonball(this.world, this, player);
-            cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);
-            this.world.spawnEntity(cannonball);
-            this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
-        }
+        RiftCannonball cannonball = new RiftCannonball(this.world, this, player);
+        cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);
+        this.world.spawnEntity(cannonball);
+        this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
     }
 
     public Vec3d riderPos() {

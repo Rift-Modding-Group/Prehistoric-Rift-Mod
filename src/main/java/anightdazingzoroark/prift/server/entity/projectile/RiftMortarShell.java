@@ -31,7 +31,7 @@ public class RiftMortarShell extends EntityArrow {
 
             double velY = Math.sqrt(2 * RiftUtil.gravity * 16);
             double totalTime = velY / RiftUtil.gravity;
-            double velXZ = dist * 2 / totalTime;
+            double velXZ = dist / totalTime;
 
             double angleToTarget = Math.atan2(dz, dx);
 
@@ -47,7 +47,7 @@ public class RiftMortarShell extends EntityArrow {
 
             double velY = Math.sqrt(2 * RiftUtil.gravity * 16);
             double totalTime = velY / RiftUtil.gravity;
-            double velXZ = dist * 2 / totalTime;
+            double velXZ = dist / totalTime;
 
             double angleToTarget = Math.atan2(dz, dx);
 

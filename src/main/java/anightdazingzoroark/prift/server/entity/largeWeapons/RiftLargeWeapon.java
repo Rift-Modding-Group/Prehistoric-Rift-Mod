@@ -150,6 +150,11 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
         if (this.isDead) passenger.dismountRidingEntity();
     }
 
+    @Override
+    public boolean shouldRiderSit() {
+        return false;
+    }
+
     public boolean isUsingLeftClick() {
         return this.dataManager.get(USING_LEFT_CLICK);
     }

@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseClick;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -49,7 +50,7 @@ public class ServerEvents {
     @SubscribeEvent
     public void noAttackWhileRiding(AttackEntityEvent event) {
         if (event.getEntityPlayer().isRiding()) {
-            if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature) {
+            if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature || event.getEntityPlayer().getRidingEntity() instanceof RiftLargeWeapon) {
                 event.setCanceled(true);
             }
         }
@@ -59,7 +60,7 @@ public class ServerEvents {
     @SubscribeEvent
     public void noBlockBreakWhileRiding(PlayerInteractEvent.LeftClickBlock event) {
         if (event.getEntityPlayer().isRiding()) {
-            if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature) {
+            if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature || event.getEntityPlayer().getRidingEntity() instanceof RiftLargeWeapon) {
                 event.setUseBlock(null);
                 event.setCanceled(true);
             }
@@ -70,7 +71,7 @@ public class ServerEvents {
     @SubscribeEvent
     public void noBlockPlaceWhileRiding(BlockEvent.PlaceEvent event) {
         if (event.getPlayer().isRiding()) {
-            if (event.getPlayer().getRidingEntity() instanceof RiftCreature) {
+            if (event.getPlayer().getRidingEntity() instanceof RiftCreature || event.getPlayer().getRidingEntity() instanceof RiftLargeWeapon) {
                 event.setCanceled(true);
             }
         }
