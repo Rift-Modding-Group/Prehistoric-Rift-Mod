@@ -29,19 +29,20 @@ public class RiftCannon extends RiftLargeWeapon {
     }
 
     @Override
-    public void launchProjectile(EntityPlayer player) {
-        boolean flag = false;
+    public void launchProjectile(EntityPlayer player, int charge) {
+        boolean flag1 = false;
+        boolean flag2 = player.isCreative();
         int indexToRemove = -1;
         for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
             if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
                 if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
-                    flag = true;
+                    flag1 = true;
                     indexToRemove = x;
                     break;
                 }
             }
         }
-        if (flag) {
+        if (flag1 || flag2) {
             RiftCannonball cannonball = new RiftCannonball(this.world, this, player);
             cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);
             this.world.spawnEntity(cannonball);

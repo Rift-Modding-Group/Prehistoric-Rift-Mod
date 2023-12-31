@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.largeWeapons;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftLaunchLWeaponProjectile;
@@ -34,10 +36,10 @@ public class RiftMortar extends RiftLargeWeapon {
     }
 
     @Override
-    public void launchProjectile(EntityPlayer player) {
+    public void launchProjectile(EntityPlayer player, int charge) {
         //get nearest entity first
         //should be in the front
-        AxisAlignedBB detectionBox = new AxisAlignedBB(this.posX - 16, this.posY, this.posZ - 16, this.posX + 16, this.posY + 16, this.posZ + 16);
+        AxisAlignedBB detectionBox = new AxisAlignedBB(this.posX - 16, 0, this.posZ - 16, this.posX + 16, this.posY + 16, this.posZ + 16);
         double dist = detectionBox.maxX - detectionBox.minX;
         Vec3d vec3d = this.getPositionEyes(1.0F);
         Vec3d vec3d1 = this.getLook(1.0F);
@@ -88,12 +90,27 @@ public class RiftMortar extends RiftLargeWeapon {
                 }
             }
         }
+        System.out.println(pointedEntity);
 
         //firing logic
-        RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, player);
-        mortarShell.shoot(this, pointedEntity);
-        this.world.spawnEntity(mortarShell);
-//        this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
+        boolean flag1 = false;
+        boolean flag2 = player.isCreative();
+        int indexToRemove = -1;
+        for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
+            if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
+                if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
+                    flag1 = true;
+                    indexToRemove = x;
+                    break;
+                }
+            }
+        }
+        if (flag1 || flag2) {
+            RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, player);
+            mortarShell.shoot(this, pointedEntity);
+            this.world.spawnEntity(mortarShell);
+            this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
+        }
     }
 
     public Vec3d riderPos() {

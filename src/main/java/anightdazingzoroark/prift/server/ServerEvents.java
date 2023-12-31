@@ -2,9 +2,11 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseClick;
@@ -18,6 +20,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
@@ -37,13 +41,14 @@ import java.util.List;
 
 public class ServerEvents {
     //make people join le discord
-    //might make this configurable
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        TextComponentString message = new TextComponentString("Click here to join the Discord server for this mod to hang out and receive updates! We beg you!");
-        message.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/qVWaKRMCRc"));
-        message.getStyle().setUnderlined(true);
-        event.player.sendMessage(message);
+        if (GeneralConfig.showDiscordMessage) {
+            TextComponentString message = new TextComponentString("Click here to join the Discord server for this mod to hang out and receive updates! We beg you!");
+            message.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/qVWaKRMCRc"));
+            message.getStyle().setUnderlined(true);
+            event.player.sendMessage(message);
+        }
     }
 
     //prevent players from attackin while ridin
@@ -156,20 +161,21 @@ public class ServerEvents {
     }
 
     //to reduce potential lag, mobs killed by wild creatures will not drop items
-    //might make this configurable idk
     @SubscribeEvent
     public void stopMobDrops(LivingDropsEvent event) {
-        if (event.getSource().getTrueSource() instanceof RiftCreature) {
-            RiftCreature attacker = (RiftCreature) event.getSource().getTrueSource();
-            Entity attacked = event.getEntity();
-            if (!attacker.isTamed()) {
-                if (attacked instanceof EntityTameable) {
-                    if (!(((EntityTameable) attacked).isTamed())) {
+        if (!GeneralConfig.canDropFromCreatureKill) {
+            if (event.getSource().getTrueSource() instanceof RiftCreature) {
+                RiftCreature attacker = (RiftCreature) event.getSource().getTrueSource();
+                Entity attacked = event.getEntity();
+                if (!attacker.isTamed()) {
+                    if (attacked instanceof EntityTameable) {
+                        if (!(((EntityTameable) attacked).isTamed())) {
+                            event.setCanceled(true);
+                        }
+                    }
+                    else if (!(attacked instanceof EntityPlayer)) {
                         event.setCanceled(true);
                     }
-                }
-                else if (!(attacked instanceof EntityPlayer)) {
-                    event.setCanceled(true);
                 }
             }
         }
@@ -184,6 +190,11 @@ public class ServerEvents {
                     ((EntityLiving)event.getEntityLiving()).setAttackTarget((RiftCreature)event.getTarget().getRidingEntity());
                 }
             }
+        }
+        //make it so when a player uses a large weapon on a mob, the mob will go after its operator
+        if (event.getTarget() instanceof RiftLargeWeapon) {
+            RiftLargeWeapon weapon = (RiftLargeWeapon) event.getTarget();
+            ((EntityLiving)event.getEntityLiving()).setAttackTarget((EntityLivingBase) weapon.getPassengers().get(0));
         }
     }
 
@@ -235,6 +246,7 @@ public class ServerEvents {
     //manage cannon impacting stuff
     @SubscribeEvent
     public void manageProjectileExplosion(ExplosionEvent.Detonate event) {
+        //manage cannon explosion stuff
         if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCannon) {
             RiftCannon cannon = (RiftCannon) event.getExplosion().getExplosivePlacedBy();
             EntityPlayer user = (EntityPlayer) cannon.getControllingPassenger();
@@ -253,6 +265,32 @@ public class ServerEvents {
                 }
             }
             event.getAffectedEntities().removeAll(tamedEntities);
+        }
+        //manage catapult explosion stuff
+        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCatapult) {
+            RiftCatapult catapult = (RiftCatapult) event.getExplosion().getExplosivePlacedBy();
+            EntityPlayer user = (EntityPlayer) catapult.getControllingPassenger();
+            //remove catapult and user
+            event.getAffectedEntities().remove(catapult);
+            event.getAffectedEntities().remove(user);
+            //remove creatures tamed to user
+            List<EntityTameable> tamedEntities = new ArrayList<>();
+            for (Entity entity : event.getAffectedEntities()) {
+                if (entity instanceof EntityTameable) {
+                    if ((((EntityTameable) entity).isTamed())) {
+                        if (!((EntityTameable) entity).getOwner().equals(user)) {
+                            tamedEntities.add((EntityTameable) entity);
+                        }
+                    }
+                }
+            }
+            event.getAffectedEntities().removeAll(tamedEntities);
+            //make all affected entities get slowness 255 for 5 seconds when hit
+            for (Entity entity : event.getAffectedEntities()) {
+                if (entity instanceof EntityLivingBase) {
+                    ((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 255));
+                }
+            }
         }
     }
 }

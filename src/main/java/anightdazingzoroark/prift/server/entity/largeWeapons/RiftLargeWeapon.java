@@ -134,7 +134,7 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
         compound.setTag("Items", nbttaglist);
     }
 
-    public abstract void launchProjectile(EntityPlayer player);
+    public abstract void launchProjectile(EntityPlayer player, int charge);
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
         if (this.isEntityInvulnerable(source)) return false;
