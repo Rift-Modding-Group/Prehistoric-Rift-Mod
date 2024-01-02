@@ -1,12 +1,12 @@
 package anightdazingzoroark.prift.client.renderer;
 
-import anightdazingzoroark.prift.client.renderer.entity.ThrownStegoPlateAnimatorRenderer;
-import anightdazingzoroark.prift.client.renderer.entity.RiftEggRenderer;
-import anightdazingzoroark.prift.client.renderer.entity.RiftLargeWeaponRenderer;
-import anightdazingzoroark.prift.client.renderer.entity.ProjectileRenderer;
+import anightdazingzoroark.prift.client.renderer.entity.*;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectiles;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import net.minecraft.client.Minecraft;
@@ -22,7 +22,9 @@ public class EntityRenderer {
 
         //everythin else
         RenderingRegistry.registerEntityRenderingHandler(RiftEgg.class, RiftEggRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(RiftLargeWeapon.class, RiftLargeWeaponRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftCannon.class, RiftLargeWeaponRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftMortar.class, RiftLargeWeaponRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftCatapult.class, RiftCatapultRenderer::new);
 
         //projectiles
         RenderingRegistry.registerEntityRenderingHandler(ThrownStegoPlate.class, new IRenderFactory<ThrownStegoPlate>() {

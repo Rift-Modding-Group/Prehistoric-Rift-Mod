@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.model;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import net.minecraft.util.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
@@ -19,7 +20,8 @@ public class RiftLargeWeaponModel extends AnimatedGeoModel<RiftLargeWeapon> {
     }
 
     @Override
-    public ResourceLocation getAnimationFileLocation(RiftLargeWeapon animatable) {
+    public ResourceLocation getAnimationFileLocation(RiftLargeWeapon object) {
+        if (object instanceof RiftCatapult) return new ResourceLocation(RiftInitialize.MODID, "animations/catapult.animation.json");
         return null;
     }
 }

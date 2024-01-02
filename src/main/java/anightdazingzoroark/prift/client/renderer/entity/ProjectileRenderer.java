@@ -15,7 +15,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ProjectileRenderer<T extends Entity> extends Render<T> {
-
     private final RenderItem itemRenderer;
     private final Item itemToRender;
 

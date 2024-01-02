@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
@@ -41,6 +42,6 @@ public class RiftLaunchLWeaponProjectile extends AbstractMessage<RiftLaunchLWeap
     @Override
     public void onServerReceived(MinecraftServer server, RiftLaunchLWeaponProjectile message, EntityPlayer player, MessageContext messageContext) {
         RiftLargeWeapon weapon = (RiftLargeWeapon)player.world.getEntityByID(message.weaponId);
-        weapon.launchProjectile(player, message.charge);
+        weapon.launchProjectile(player, Math.min(message.charge, 100));
     }
 }

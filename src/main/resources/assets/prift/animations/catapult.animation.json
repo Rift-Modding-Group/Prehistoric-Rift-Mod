@@ -1,0 +1,29 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.catapult.charging": {
+			"loop": true,
+			"animation_length": 0.52,
+			"bones": {
+				"rightCatapultGearOne": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.52": [-360, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.catapult.launching": {
+			"animation_length": 0.36,
+			"bones": {
+				"catapultHand": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.12": [90, 0, 0],
+						"0.36": [0, 0, 0]
+					}
+				}
+			}
+		}
+	}
+}
