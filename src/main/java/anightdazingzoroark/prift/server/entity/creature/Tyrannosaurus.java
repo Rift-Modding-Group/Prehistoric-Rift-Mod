@@ -7,7 +7,7 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.TyrannosaurusConfig;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
-import anightdazingzoroark.prift.server.entity.creatureinterface.IApexPredator;
+import anightdazingzoroark.prift.server.entity.interfaces.IApexPredator;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
+import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -9,7 +10,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class RiftCatapultBoulder extends EntityArrow {
+public class RiftCatapultBoulder extends EntityArrow implements IRiftProjectile {
     private EntityLivingBase firer = null;
     private float power;
 
@@ -51,5 +52,10 @@ public class RiftCatapultBoulder extends EntityArrow {
     @Override
     protected ItemStack getArrowStack() {
         return null;
+    }
+
+    @Override
+    public ItemStack getItemToRender() {
+        return new ItemStack(RiftProjectiles.CATAPULT_BOULDER);
     }
 }

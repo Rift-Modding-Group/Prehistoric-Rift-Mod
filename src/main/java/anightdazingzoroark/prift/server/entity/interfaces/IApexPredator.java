@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.entity.creatureinterface;
+package anightdazingzoroark.prift.server.entity.interfaces;
 
 import net.minecraft.util.math.AxisAlignedBB;
 

@@ -5,7 +5,7 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
-import anightdazingzoroark.prift.server.entity.creatureinterface.IChargingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;

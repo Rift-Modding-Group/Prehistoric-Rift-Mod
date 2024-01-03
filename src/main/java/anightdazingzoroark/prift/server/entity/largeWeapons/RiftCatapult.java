@@ -145,8 +145,8 @@ public class RiftCatapult extends RiftLargeWeapon {
     }
 
     public Vec3d riderPos() {
-        float xOffset = (float)(this.posX + (-1.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
-        float zOffset = (float)(this.posZ + (-1.5) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        float xOffset = (float)(this.posX + (-1.5) * Math.cos((this.rotationYaw + 120) * Math.PI / 180));
+        float zOffset = (float)(this.posZ + (-1.5) * Math.sin((this.rotationYaw + 120) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY, zOffset);
     }
 

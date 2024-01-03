@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -9,7 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class RiftMortarShell extends EntityArrow {
+public class RiftMortarShell extends EntityArrow implements IRiftProjectile {
     private EntityLivingBase firer = null;
 
     public RiftMortarShell(World worldIn) {
@@ -63,5 +64,10 @@ public class RiftMortarShell extends EntityArrow {
     @Override
     protected ItemStack getArrowStack() {
         return null;
+    }
+
+    @Override
+    public ItemStack getItemToRender() {
+        return new ItemStack(RiftProjectiles.MORTAR_SHELL);
     }
 }

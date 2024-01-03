@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,7 +17,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class ThrownStegoPlate extends EntityArrow {
+public class ThrownStegoPlate extends EntityArrow implements IRiftProjectile {
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(ThrownStegoPlate.class, DataSerializers.VARINT);
     private EntityPlayer rider;
 

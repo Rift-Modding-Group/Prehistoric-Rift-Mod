@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
+import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
@@ -34,8 +35,8 @@ public class ProjectileRenderer<T extends Entity> extends Render<T> {
         GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
         this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
-        if (entity instanceof ThrownStegoPlate) {
-            this.itemRenderer.renderItem(((ThrownStegoPlate)entity).getItemToRender(), ItemCameraTransforms.TransformType.GROUND);
+        if (entity instanceof IRiftProjectile) {
+            this.itemRenderer.renderItem(((IRiftProjectile)entity).getItemToRender(), ItemCameraTransforms.TransformType.GROUND);
         }
 
         GlStateManager.disableRescaleNormal();

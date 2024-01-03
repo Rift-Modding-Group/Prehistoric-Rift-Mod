@@ -1,8 +1,8 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureinterface.IChargingMob;
-import anightdazingzoroark.prift.server.entity.creatureinterface.ILeapingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;

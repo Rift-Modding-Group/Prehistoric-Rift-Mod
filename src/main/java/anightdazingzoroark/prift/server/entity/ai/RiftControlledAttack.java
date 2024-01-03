@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureinterface.ILeapingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
 import net.minecraft.entity.ai.EntityAIBase;
 
 public class RiftControlledAttack extends EntityAIBase  {

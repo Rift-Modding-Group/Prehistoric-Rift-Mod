@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureinterface.IPackHunter;
+import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.potion.PotionEffect;

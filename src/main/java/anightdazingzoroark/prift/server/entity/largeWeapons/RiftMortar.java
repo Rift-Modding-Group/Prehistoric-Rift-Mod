@@ -90,7 +90,6 @@ public class RiftMortar extends RiftLargeWeapon {
                 }
             }
         }
-        System.out.println(pointedEntity);
 
         //firing logic
         boolean flag1 = false;

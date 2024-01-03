@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
@@ -23,7 +24,6 @@ public class RiftLeftClickChargeBar {
     private static final int textureXSize = 182;
     private static final int textureYSize = 5;
     private int fill = 0;
-    private boolean mouseUsed = false;
 
     @SubscribeEvent
     public void onPreRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
@@ -44,6 +44,17 @@ public class RiftLeftClickChargeBar {
                 }
             }
         }
+        if (entity instanceof RiftCatapult) {
+            if (event.getType() == RenderGameOverlayEvent.ElementType.AIR) {
+                RiftCatapult catapult = (RiftCatapult) entity;
+                ScaledResolution resolution = event.getResolution();
+
+                Minecraft.getMinecraft().getTextureManager().bindTexture(chargeBarHud);
+                renderLeftClickChargeHud(catapult, resolution.getScaledWidth(), resolution.getScaledHeight());
+                reduceUnusedChargeBar(catapult, catapult.isUsingLeftClick());
+                Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -53,6 +64,7 @@ public class RiftLeftClickChargeBar {
         if (event.getType() != RenderGameOverlayEvent.ElementType.EXPERIENCE) return;
         if (world != null) {
             if (player.getRidingEntity() instanceof RiftCreature) event.setCanceled(true);
+            if (player.getRidingEntity() instanceof RiftCatapult) event.setCanceled(true);
         }
     }
 
@@ -61,11 +73,27 @@ public class RiftLeftClickChargeBar {
         else fill = creature.getLeftClickCooldown() / 2;
     }
 
+    private void reduceUnusedChargeBar(RiftCatapult catapult, boolean usingLeftClick) {
+        if (usingLeftClick) fill = catapult.getLeftClickUse();
+        else fill = catapult.getLeftClickCooldown() / 2;
+    }
+
     private void renderLeftClickChargeHud(RiftCreature creature, int xSize, int ySize) {
         GlStateManager.enableBlend();
         GlStateManager.color(1.0f, 1.0f, 1.0f);
         int left = xSize / 2 - 91;
         int top = ySize - 32 + (creature.hasRightClickChargeBar() ? 5 : 3);
+        float fillUpBar = (float)textureXSize / 100f * fill;
+        RiftUtil.drawTexturedModalRect(left, top, 0, 19, textureXSize, textureYSize);
+        RiftUtil.drawTexturedModalRect(left, top, 0, 24, Math.min((int)fillUpBar, textureXSize), textureYSize);
+        GlStateManager.disableBlend();
+    }
+
+    private void renderLeftClickChargeHud(RiftCatapult catapult, int xSize, int ySize) {
+        GlStateManager.enableBlend();
+        GlStateManager.color(1.0f, 1.0f, 1.0f);
+        int left = xSize / 2 - 91;
+        int top = ySize - 29;
         float fillUpBar = (float)textureXSize / 100f * fill;
         RiftUtil.drawTexturedModalRect(left, top, 0, 19, textureXSize, textureYSize);
         RiftUtil.drawTexturedModalRect(left, top, 0, 24, Math.min((int)fillUpBar, textureXSize), textureYSize);

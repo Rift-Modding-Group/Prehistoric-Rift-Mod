@@ -1,6 +1,5 @@
-package anightdazingzoroark.prift.server.entity.creatureinterface;
+package anightdazingzoroark.prift.server.entity.interfaces;
 
-import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 
 import java.util.List;
