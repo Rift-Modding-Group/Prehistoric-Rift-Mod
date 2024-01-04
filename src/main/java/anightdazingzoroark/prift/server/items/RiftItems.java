@@ -39,6 +39,7 @@ public class RiftItems {
     public static Item DODO_BEAK;
     public static Item TRICERATOPS_HORN;
     public static Item UTAHRAPTOR_CLAW;
+    public static Item APATOSAURUS_VERTEBRAE;
 
     public static Item APATOSAURUS_PLATFORM;
     public static Item CANNON;
@@ -72,6 +73,7 @@ public class RiftItems {
         DODO_BEAK = riftGenericItem("dodo_beak", true);
         TRICERATOPS_HORN = riftGenericItem("triceratops_horn", true);
         UTAHRAPTOR_CLAW = riftGenericItem("utahraptor_claw", true);
+        APATOSAURUS_VERTEBRAE = riftGenericItem("apatosaurus_vertebrae", true);
 
         APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
         CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);

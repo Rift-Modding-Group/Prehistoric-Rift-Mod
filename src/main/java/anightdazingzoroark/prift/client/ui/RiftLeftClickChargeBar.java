@@ -2,8 +2,11 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
@@ -44,14 +47,14 @@ public class RiftLeftClickChargeBar {
                 }
             }
         }
-        if (entity instanceof RiftCatapult) {
+        if (entity instanceof RiftLargeWeapon) {
             if (event.getType() == RenderGameOverlayEvent.ElementType.AIR) {
-                RiftCatapult catapult = (RiftCatapult) entity;
+                RiftLargeWeapon weapon = (RiftLargeWeapon) entity;
                 ScaledResolution resolution = event.getResolution();
 
                 Minecraft.getMinecraft().getTextureManager().bindTexture(chargeBarHud);
-                renderLeftClickChargeHud(catapult, resolution.getScaledWidth(), resolution.getScaledHeight());
-                reduceUnusedChargeBar(catapult, catapult.isUsingLeftClick());
+                renderLeftClickChargeHud(weapon, resolution.getScaledWidth(), resolution.getScaledHeight());
+                reduceUnusedChargeBar(weapon, weapon.isUsingLeftClick());
                 Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
             }
         }
@@ -68,33 +71,69 @@ public class RiftLeftClickChargeBar {
         }
     }
 
+    //manage charge bar for creatures
     private void reduceUnusedChargeBar(RiftCreature creature, boolean usingLeftClick) {
-        if (usingLeftClick) fill = creature.getLeftClickUse();
-        else fill = creature.getLeftClickCooldown() / 2;
+        if (creature instanceof Apatosaurus) {
+            Apatosaurus apatosaurus = (Apatosaurus) creature;
+            if (apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
+                if (usingLeftClick && apatosaurus.getLeftClickCooldown() == 0) fill = apatosaurus.getLeftClickUse();
+                else fill = apatosaurus.getLeftClickCooldown() / 2;
+            }
+            else {
+                if (usingLeftClick && apatosaurus.getLeftClickCooldown() == 0) fill = apatosaurus.getLeftClickUse();
+                else fill = apatosaurus.getLeftClickCooldown();
+            }
+        }
+        else {
+            if (usingLeftClick) fill = creature.getLeftClickUse();
+            else fill = creature.getLeftClickCooldown() / 2;
+        }
     }
 
-    private void reduceUnusedChargeBar(RiftCatapult catapult, boolean usingLeftClick) {
-        if (usingLeftClick) fill = catapult.getLeftClickUse();
-        else fill = catapult.getLeftClickCooldown() / 2;
+    //manage charge bar for weapons
+    private void reduceUnusedChargeBar(RiftLargeWeapon weapon, boolean usingLeftClick) {
+        if (weapon instanceof RiftCatapult) {
+            RiftCatapult catapult = (RiftCatapult) weapon;
+            if (usingLeftClick) fill = catapult.getLeftClickUse();
+            else fill = weapon.getLeftClickCooldown() / 2;
+        }
+        else fill = weapon.getLeftClickCooldown();
     }
 
+    //render charge bar for creatures
     private void renderLeftClickChargeHud(RiftCreature creature, int xSize, int ySize) {
         GlStateManager.enableBlend();
         GlStateManager.color(1.0f, 1.0f, 1.0f);
         int left = xSize / 2 - 91;
         int top = ySize - 32 + (creature.hasRightClickChargeBar() ? 5 : 3);
-        float fillUpBar = (float)textureXSize / 100f * fill;
+
+        float fillUpBar;
+        if (creature instanceof Apatosaurus) {
+            Apatosaurus apatosaurus = (Apatosaurus) creature;
+            switch (apatosaurus.getWeapon()) {
+                case CANNON:
+                case MORTAR:
+                    fillUpBar = (float)textureXSize / 30f * fill;
+                    break;
+                default:
+                    fillUpBar = (float)textureXSize / 100f * fill;
+                    break;
+            }
+        }
+        else fillUpBar = (float)textureXSize / 100f * fill;
+
         RiftUtil.drawTexturedModalRect(left, top, 0, 19, textureXSize, textureYSize);
         RiftUtil.drawTexturedModalRect(left, top, 0, 24, Math.min((int)fillUpBar, textureXSize), textureYSize);
         GlStateManager.disableBlend();
     }
 
-    private void renderLeftClickChargeHud(RiftCatapult catapult, int xSize, int ySize) {
+    //render charge bar for weapons
+    private void renderLeftClickChargeHud(RiftLargeWeapon weapon, int xSize, int ySize) {
         GlStateManager.enableBlend();
         GlStateManager.color(1.0f, 1.0f, 1.0f);
         int left = xSize / 2 - 91;
         int top = ySize - 29;
-        float fillUpBar = (float)textureXSize / 100f * fill;
+        float fillUpBar = (float)textureXSize / (weapon.maxCooldown()) * fill;
         RiftUtil.drawTexturedModalRect(left, top, 0, 19, textureXSize, textureYSize);
         RiftUtil.drawTexturedModalRect(left, top, 0, 24, Math.min((int)fillUpBar, textureXSize), textureYSize);
         GlStateManager.disableBlend();

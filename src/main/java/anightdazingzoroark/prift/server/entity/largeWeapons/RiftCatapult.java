@@ -32,7 +32,6 @@ import javax.annotation.Nullable;
 
 public class RiftCatapult extends RiftLargeWeapon {
     private static final DataParameter<Integer> LEFT_CLICK_USE = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> LEFT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> LAUNCHING = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOADED = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.BOOLEAN);
@@ -48,7 +47,6 @@ public class RiftCatapult extends RiftLargeWeapon {
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(LEFT_CLICK_USE, 0);
-        this.dataManager.register(LEFT_CLICK_COOLDOWN, 0);
         this.dataManager.register(LAUNCHING, false);
         this.dataManager.register(CHARGING, false);
         this.dataManager.register(LOADED, false);
@@ -59,7 +57,6 @@ public class RiftCatapult extends RiftLargeWeapon {
         super.onLivingUpdate();
         this.catapultLogic();
         this.catapultIsLoaded();
-        this.catapultCooldown();
     }
 
     @SideOnly(Side.CLIENT)
@@ -110,10 +107,6 @@ public class RiftCatapult extends RiftLargeWeapon {
         this.setLoaded(flag1 || flag2);
     }
 
-    private void catapultCooldown() {
-        if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);
-    }
-
     @Override
     public void launchProjectile(EntityPlayer player, int charge) {
         if (!this.world.isRemote) {
@@ -158,14 +151,6 @@ public class RiftCatapult extends RiftLargeWeapon {
         this.dataManager.set(LEFT_CLICK_USE, value);
     }
 
-    public int getLeftClickCooldown() {
-        return Math.max(0, this.dataManager.get(LEFT_CLICK_COOLDOWN));
-    }
-
-    public void setLeftClickCooldown(int value) {
-        this.dataManager.set(LEFT_CLICK_COOLDOWN, Math.max(0, value));
-    }
-
     public boolean isLaunching() {
         return this.dataManager.get(LAUNCHING);
     }
@@ -188,6 +173,11 @@ public class RiftCatapult extends RiftLargeWeapon {
 
     public void setLoaded(boolean value) {
         this.dataManager.set(LOADED, value);
+    }
+
+    @Override
+    public int maxCooldown() {
+        return 100;
     }
 
     @Override

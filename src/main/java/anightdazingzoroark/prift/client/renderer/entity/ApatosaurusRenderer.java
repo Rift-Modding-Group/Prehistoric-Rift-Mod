@@ -35,6 +35,8 @@ public class ApatosaurusRenderer extends GeoEntityRenderer<RiftCreature> {
         model.getBone("rightMortar").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.MORTAR));
         model.getBone("leftCatapult").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT));
         model.getBone("rightCatapult").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT));
+        model.getBone("leftCatapultBoulder").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT) || !apatosaurus.isLoaded());
+        model.getBone("rightCatapultBoulder").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT) || !apatosaurus.isLoaded());
 
 
         GlStateManager.pushMatrix();

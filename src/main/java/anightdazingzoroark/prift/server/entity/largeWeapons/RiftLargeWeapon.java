@@ -34,6 +34,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatable {
     private static final DataParameter<Boolean> USING_LEFT_CLICK = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> LEFT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.VARINT);
     public RiftLargeWeaponInventory weaponInventory;
     public final RiftLargeWeaponType weaponType;
     private final int slotCount = 5;
@@ -53,12 +54,14 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(USING_LEFT_CLICK, Boolean.FALSE);
+        this.dataManager.register(LEFT_CLICK_COOLDOWN, 0);
     }
 
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
         if (this.world.isRemote) this.setControls();
+        this.weaponCooldown();
     }
 
     @SideOnly(Side.CLIENT)
@@ -68,12 +71,16 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
 
         if (this.isBeingRidden()) {
             if (this.getPassengers().get(0).equals(player)) {
-                if (settings.keyBindAttack.isKeyDown() && !this.isUsingLeftClick()) {
+                if (settings.keyBindAttack.isKeyDown() && !this.isUsingLeftClick() && this.getLeftClickCooldown() == 0) {
                     RiftMessages.WRAPPER.sendToServer(new RiftLaunchLWeaponProjectile(this));
                 }
                 RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, settings.keyBindAttack.isKeyDown()));
             }
         }
+    }
+
+    private void weaponCooldown() {
+        if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);
     }
 
     @Override
@@ -180,6 +187,18 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
 
     public void setUsingLeftClick(boolean value) {
         this.dataManager.set(USING_LEFT_CLICK, value);
+    }
+
+    public int getLeftClickCooldown() {
+        return Math.max(0, this.dataManager.get(LEFT_CLICK_COOLDOWN));
+    }
+
+    public void setLeftClickCooldown(int value) {
+        this.dataManager.set(LEFT_CLICK_COOLDOWN, Math.max(0, value));
+    }
+
+    public int maxCooldown() {
+        return 30;
     }
 
     public abstract Vec3d riderPos();

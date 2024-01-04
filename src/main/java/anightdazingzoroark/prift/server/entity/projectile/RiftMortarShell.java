@@ -44,7 +44,6 @@ public class RiftMortarShell extends EntityArrow implements IRiftProjectile {
         double velXZ = dist / totalTime / 2;
 
         double angleToTarget = Math.atan2(dz, dx);
-        System.out.println(Math.toDegrees(angleToTarget));
 
         this.motionX = velXZ * Math.cos(angleToTarget);
         this.motionZ = velXZ * Math.sin(angleToTarget);

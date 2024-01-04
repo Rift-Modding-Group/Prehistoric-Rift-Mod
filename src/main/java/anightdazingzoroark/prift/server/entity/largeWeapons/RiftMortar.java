@@ -109,6 +109,7 @@ public class RiftMortar extends RiftLargeWeapon {
             mortarShell.shoot(this, pointedEntity);
             this.world.spawnEntity(mortarShell);
             this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
+            this.setLeftClickCooldown(this.maxCooldown());
         }
     }
 

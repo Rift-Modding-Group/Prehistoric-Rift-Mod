@@ -47,6 +47,7 @@ public class RiftCannon extends RiftLargeWeapon {
             cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);
             this.world.spawnEntity(cannonball);
             this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
+            this.setLeftClickCooldown(this.maxCooldown());
         }
     }
 
