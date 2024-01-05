@@ -22,11 +22,14 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemFood;
+import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -46,6 +49,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -94,8 +98,9 @@ public class Apatosaurus extends RiftCreature {
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(2, new RiftApatosaurusControlledTailWhip(this, 0.6F, 0.4F));
         this.tasks.addTask(2, new RiftControlledAttack(this, 3F, 3F));
-        this.tasks.addTask(3, new RiftAttack(this, 1.0D, 3F, 3F));
+        this.tasks.addTask(3, new RiftApatosaurusAttack(this, 1.0D, 3F, 3F));
         this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(5, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(6, new RiftWander(this, 1.0D));
@@ -158,6 +163,9 @@ public class Apatosaurus extends RiftCreature {
                             RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
                         }
                     }
+                }
+                else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1));
                 }
                 else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(this, 1, true));
@@ -280,6 +288,12 @@ public class Apatosaurus extends RiftCreature {
             }
             this.setLeftClickUse(0);
         }
+        else if (control == 1) {
+            if (this.getEnergy() > 0) {
+                if (!this.isActing()) this.setTailWhipping(true);
+            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
     }
 
     private void manageCannonFiring() {
@@ -398,6 +412,35 @@ public class Apatosaurus extends RiftCreature {
         return super.processInteract(player, hand);
     }
 
+    public void useWhipAttack() {
+        System.out.println("whip");
+        AxisAlignedBB area = this.getEntityBoundingBox().grow(4D, 4D, 4D);
+        List<EntityLivingBase> list = new ArrayList<>();
+        for (EntityLivingBase entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, area, null)) {
+            if (!entity.isRiding()) {
+                if (entity instanceof EntityPlayer) {
+                    if (!entity.getUniqueID().equals(this.getOwnerId())) list.add(entity);
+                }
+                else if (entity instanceof EntityTameable) {
+                    if ((((EntityTameable) entity).isTamed())) {
+                        if (!((EntityTameable) entity).getOwner().equals(this.getOwner())) list.add(entity);
+                    }
+                    else list.add(entity);
+                }
+                else list.add(entity);
+            }
+        }
+        list.remove(this);
+
+        for (EntityLivingBase entity : list) {
+            double d0 = this.posX - entity.posX;
+            double d1 = this.posZ - entity.posZ;
+            double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
+            entity.knockBack(this, 1, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
+            entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
+        }
+    }
+
     @Override
     public boolean hasLeftClickChargeBar() {
         return !this.getWeapon().equals(RiftLargeWeaponType.NONE);
@@ -449,6 +492,15 @@ public class Apatosaurus extends RiftCreature {
 
     public void setLoaded(boolean value) {
         this.dataManager.set(LOADED, value);
+        this.setActing(value);
+    }
+
+    public boolean isTailWhipping() {
+        return this.dataManager.get(TAIL_WHIPPING);
+    }
+
+    public void setTailWhipping(boolean value) {
+        this.dataManager.set(TAIL_WHIPPING, value);
     }
 
     @Override
@@ -482,11 +534,14 @@ public class Apatosaurus extends RiftCreature {
     private <E extends IAnimatable> PlayState apatosaurusAttack(AnimationEvent<E> event) {
         if (this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.stomp", false));
+            return PlayState.CONTINUE;
         }
-        else {
-            event.getController().clearAnimationCache();
+        else if (this.isTailWhipping()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.tail_whip", false));
+            return PlayState.CONTINUE;
         }
-        return PlayState.CONTINUE;
+        event.getController().clearAnimationCache();
+        return PlayState.STOP;
     }
 
     private <E extends IAnimatable> PlayState apatosaurusWeaponSize(AnimationEvent<E> event) {

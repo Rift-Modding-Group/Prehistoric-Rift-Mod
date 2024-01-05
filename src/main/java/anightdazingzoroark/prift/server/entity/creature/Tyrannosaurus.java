@@ -214,7 +214,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     //stuff below this comment is for roar stuff
     public void roar(float strength) {
         Predicate<EntityLivingBase> targetPredicate = TyrannosaurusConfig.tyrannosaurusRoarTargetsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
-        for (Entity entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea((double)strength * 6d), targetPredicate)) {
+        for (EntityLivingBase entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea((double)strength * 6d), targetPredicate)) {
             if (entity != this) {
                 if (this.isTamed() && entity instanceof EntityTameable) {
                     if (((EntityTameable) entity).isTamed()) {
@@ -243,11 +243,11 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         this.roarBreakBlocks(strength);
     }
 
-    private void roarKnockback(Entity target, float strength) {
+    private void roarKnockback(EntityLivingBase target, float strength) {
         double d0 = this.posX - target.posX;
         double d1 = this.posZ - target.posZ;
         double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
-        ((EntityLivingBase)target).knockBack(this, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
+        target.knockBack(this, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
     }
 
     protected AxisAlignedBB getRoarArea(double targetDistance) {

@@ -22,7 +22,7 @@ public class RiftAttack extends EntityAIBase {
     private double targetY;
     private double targetZ;
     private int failedPathFindingPenalty = 0;
-    private int attackCooldown;
+    protected int attackCooldown;
 
     public RiftAttack(RiftCreature creature, double speedIn, float attackAnimLength, float attackAnimTime) {
         this.attacker = creature;
@@ -71,6 +71,7 @@ public class RiftAttack extends EntityAIBase {
         }
     }
 
+    @Override
     public void startExecuting() {
         this.attacker.getNavigator().setPath(this.path, this.speedTowardsTarget);
         this.delayCounter = 0;
@@ -127,7 +128,7 @@ public class RiftAttack extends EntityAIBase {
             if (this.animTime == this.attackAnimTime) {
                 if (distToEnemySqr <= d0) this.attacker.attackEntityAsMob(enemy);
             }
-            if (this.animTime > this.attackAnimLength) {
+            if (this.animTime > this.attackAnimLength + 1) {
                 this.animTime = 0;
                 this.attacker.setAttacking(false);
                 this.attackCooldown = 20;
