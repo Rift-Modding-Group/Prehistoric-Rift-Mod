@@ -32,8 +32,7 @@ public class CreatureContainer extends Container {
             this.addSlotToContainer(new Slot(creature.creatureInventory, 0, 8, 18) {
                 @Override
                 public boolean isItemValid(ItemStack stack) {
-                    if (creature instanceof Apatosaurus) return !stack.isEmpty() && stack.getItem() == RiftItems.APATOSAURUS_PLATFORM;
-                    else return !stack.isEmpty() && stack.getItem() == Items.SADDLE;
+                    return !stack.isEmpty() && creature.saddleItemEqual(stack);
                 }
 
                 public boolean canTakeStack(EntityPlayer playerIn) {

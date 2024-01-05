@@ -55,6 +55,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.attackWidth = 7.5f;
         this.rangedWidth = 12f;
         this.strongAttackCharge = 0;
+        this.saddleItem = StegosaurusConfig.stegosaurusSaddleItem;
     }
 
     @Override

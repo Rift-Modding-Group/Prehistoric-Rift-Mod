@@ -38,7 +38,7 @@ public class RiftPickUpItems extends EntityAIBase {
                     String itemId = itemString.substring(0, itemIdSecond);
                     int itemData = Integer.parseInt(itemString.substring(itemIdSecond + 1, itemIdThird));
                     if (entityItem != null && !entityItem.getItem().isEmpty() && entityItem.getItem().getItem().equals(Item.getByNameOrId(itemId))) {
-                        return (entityItem.getItem().getMetadata() == itemData) || (itemData == 32767);
+                        return (entityItem.getItem().getMetadata() == itemData) || (itemData == -1);
                     }
                 }
                 return false;

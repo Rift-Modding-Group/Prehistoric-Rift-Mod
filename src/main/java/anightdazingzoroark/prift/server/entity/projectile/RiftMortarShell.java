@@ -24,20 +24,11 @@ public class RiftMortarShell extends EntityArrow implements IRiftProjectile {
         this.firer = firer;
     }
 
-    public void shoot(Entity shooter, Entity target) {
-        double dx, dz, velY;
-
-        if (target != null) {
-            dx = target.posX - shooter.posX;
-            dz = target.posZ - shooter.posZ;
-            velY = Math.sqrt(2 * RiftUtil.gravity * (16 + target.posY));
-        }
-        else {
-            double angleYawRad = Math.toRadians(shooter.rotationYaw);
-            dx = Math.sin(angleYawRad) * -16;
-            dz = Math.cos(angleYawRad) * 16;
-            velY = Math.sqrt(2 * RiftUtil.gravity * 16);
-        }
+    public void shoot(Entity shooter, int launchDist) {
+        double angleYawRad = Math.toRadians(shooter.rotationYaw);
+        double dx = Math.sin(angleYawRad) * -launchDist;
+        double dz = Math.cos(angleYawRad) * launchDist;
+        double velY = Math.sqrt(2 * RiftUtil.gravity * launchDist);
 
         double dist = Math.sqrt(dx * dx + dz * dz);
         double totalTime = velY / RiftUtil.gravity;
@@ -53,7 +44,6 @@ public class RiftMortarShell extends EntityArrow implements IRiftProjectile {
     protected void onHit(RayTraceResult raytraceResultIn) {
         if (!this.world.isRemote) {
             boolean flag = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this.firer);
-            System.out.println(flag);
             this.world.newExplosion(this.firer, this.posX, this.posY, this.posZ, 6f, false, flag);
             this.setDead();
         }

@@ -75,7 +75,7 @@ public class RiftUtil {
             int blockIdFirst = blockEntry.indexOf(":");
             int blockIdSecond = blockEntry.indexOf(":", blockIdFirst + 1);
             int blockData = Integer.parseInt(blockEntry.substring(blockIdSecond + 1));
-            if (!flag) flag = Block.getBlockFromName(blockEntry.substring(0, blockIdSecond)).equals(block) && (blockData == 32767 || block.getMetaFromState(blockState) == blockData);
+            if (!flag) flag = Block.getBlockFromName(blockEntry.substring(0, blockIdSecond)).equals(block) && (blockData == -1 || block.getMetaFromState(blockState) == blockData);
         }
         return flag;
     }
@@ -92,7 +92,7 @@ public class RiftUtil {
                 int second = itemEntryStr.indexOf(":", first + 1);
                 int third = itemEntryStr.indexOf(":", second + 1);
                 int itemData = Integer.parseInt(itemEntryStr.substring(second + 1, third));
-                if (Item.getByNameOrId(itemEntryStr.substring(0, second)).equals(item) && (itemData == 32767 || itemData == new ItemStack(item).getMetadata())) return true;
+                if (Item.getByNameOrId(itemEntryStr.substring(0, second)).equals(item) && (itemData == -1 || itemData == new ItemStack(item).getMetadata())) return true;
             }
         }
         return false;
@@ -108,7 +108,7 @@ public class RiftUtil {
             int second = itemEntry.indexOf(":", first + 1);
             int third = itemEntry.indexOf(":", second + 1);
             int itemData = Integer.parseInt(itemEntry.substring(second + 1, third));
-            if (Item.getByNameOrId(itemEntry.substring(0, second)).equals(item) && (itemData == 32767 || itemData == new ItemStack(item).getMetadata())) {
+            if (Item.getByNameOrId(itemEntry.substring(0, second)).equals(item) && (itemData == -1 || itemData == new ItemStack(item).getMetadata())) {
                 return Integer.parseInt(itemEntry.substring(third + 1));
             }
         }
@@ -146,7 +146,7 @@ public class RiftUtil {
             int itemIdFirst = itemEntry.indexOf(":");
             int itemIdSecond = itemEntry.indexOf(":", itemIdFirst + 1);
             int itemData = Integer.parseInt(itemEntry.substring(itemIdSecond + 1));
-            if (!flag) flag = Item.getByNameOrId(itemEntry.substring(0, itemIdSecond)).equals(item) && (itemData == 32767 || itemData == new ItemStack(item).getMetadata());
+            if (!flag) flag = Item.getByNameOrId(itemEntry.substring(0, itemIdSecond)).equals(item) && (itemData == -1 || itemData == new ItemStack(item).getMetadata());
         }
         return flag;
     }

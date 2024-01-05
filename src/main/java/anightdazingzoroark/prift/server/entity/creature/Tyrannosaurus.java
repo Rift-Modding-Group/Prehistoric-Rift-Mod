@@ -127,6 +127,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         this.roarCharge = 0;
         this.isRideable = true;
         this.attackWidth = 4.875f;
+        this.saddleItem = TyrannosaurusConfig.tyrannosaurusSaddleItem;
     }
 
     @Override

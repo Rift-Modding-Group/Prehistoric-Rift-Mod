@@ -62,6 +62,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.packBuffCooldown = 0;
         this.contLeapAttackFlag = true;
         this.maxRightClickCooldown = 1800f;
+        this.saddleItem = UtahraptorConfig.utahraptorSaddleItem;
     }
 
     @Override

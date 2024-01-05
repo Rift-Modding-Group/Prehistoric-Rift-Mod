@@ -31,7 +31,6 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 
 public class RiftCatapult extends RiftLargeWeapon {
-    private static final DataParameter<Integer> LEFT_CLICK_USE = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> LAUNCHING = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOADED = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.BOOLEAN);
@@ -46,7 +45,6 @@ public class RiftCatapult extends RiftLargeWeapon {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(LEFT_CLICK_USE, 0);
         this.dataManager.register(LAUNCHING, false);
         this.dataManager.register(CHARGING, false);
         this.dataManager.register(LOADED, false);
@@ -141,14 +139,6 @@ public class RiftCatapult extends RiftLargeWeapon {
         float xOffset = (float)(this.posX + (-1.5) * Math.cos((this.rotationYaw + 120) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-1.5) * Math.sin((this.rotationYaw + 120) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY, zOffset);
-    }
-
-    public int getLeftClickUse() {
-        return this.dataManager.get(LEFT_CLICK_USE).intValue();
-    }
-
-    public void setLeftClickUse(int value) {
-        this.dataManager.set(LEFT_CLICK_USE, value);
     }
 
     public boolean isLaunching() {

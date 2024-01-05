@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
@@ -62,6 +63,10 @@ public class RiftIncrementControlUse extends AbstractMessage<RiftIncrementContro
         else if (entity instanceof RiftCatapult) {
             RiftCatapult catapult = (RiftCatapult) entity;
             catapult.setLeftClickUse(catapult.getLeftClickUse() + 1);
+        }
+        else if (entity instanceof RiftMortar) {
+            RiftMortar mortar = (RiftMortar) entity;
+            mortar.setLeftClickUse(mortar.getLeftClickUse() + 1);
         }
     }
 }

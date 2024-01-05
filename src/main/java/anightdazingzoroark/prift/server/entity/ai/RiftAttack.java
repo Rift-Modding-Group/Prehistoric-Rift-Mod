@@ -122,15 +122,15 @@ public class RiftAttack extends EntityAIBase {
         double d0 = this.getAttackReachSqr(enemy);
 
         if (--this.attackCooldown <= 0) {
-            if (distToEnemySqr <= d0) {
-                this.attacker.setAttacking(true);
-                this.animTime++;
-                if (this.animTime == this.attackAnimTime) this.attacker.attackEntityAsMob(enemy);
-                if (this.animTime > this.attackAnimLength) {
-                    this.animTime = 0;
-                    this.attacker.setAttacking(false);
-                    this.attackCooldown = 20;
-                }
+            if (distToEnemySqr <= d0) this.attacker.setAttacking(true);
+            this.animTime++;
+            if (this.animTime == this.attackAnimTime) {
+                if (distToEnemySqr <= d0) this.attacker.attackEntityAsMob(enemy);
+            }
+            if (this.animTime > this.attackAnimLength) {
+                this.animTime = 0;
+                this.attacker.setAttacking(false);
+                this.attackCooldown = 20;
             }
         }
     }

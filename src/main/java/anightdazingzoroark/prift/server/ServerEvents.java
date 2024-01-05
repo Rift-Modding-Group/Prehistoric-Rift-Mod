@@ -3,11 +3,13 @@ package anightdazingzoroark.prift.server;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseClick;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -249,7 +251,7 @@ public class ServerEvents {
         //manage cannon explosion stuff
         if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCannon) {
             RiftCannon cannon = (RiftCannon) event.getExplosion().getExplosivePlacedBy();
-            EntityPlayer user = (EntityPlayer) cannon.getControllingPassenger();
+            EntityPlayer user = (EntityPlayer) cannon.getPassengers().get(0);
             //remove cannon and user
             event.getAffectedEntities().remove(cannon);
             event.getAffectedEntities().remove(user);
@@ -269,7 +271,7 @@ public class ServerEvents {
         //manage catapult explosion stuff
         if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCatapult) {
             RiftCatapult catapult = (RiftCatapult) event.getExplosion().getExplosivePlacedBy();
-            EntityPlayer user = (EntityPlayer) catapult.getControllingPassenger();
+            EntityPlayer user = (EntityPlayer) catapult.getPassengers().get(0);
             //remove catapult and user
             event.getAffectedEntities().remove(catapult);
             event.getAffectedEntities().remove(user);
@@ -291,6 +293,46 @@ public class ServerEvents {
                     ((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 255));
                 }
             }
+        }
+        //manage mortar explosion stuff
+        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftMortar) {
+            RiftMortar mortar = (RiftMortar) event.getExplosion().getExplosivePlacedBy();
+            EntityPlayer user = (EntityPlayer) mortar.getPassengers().get(0);
+            //remove catapult and user
+            event.getAffectedEntities().remove(mortar);
+            event.getAffectedEntities().remove(user);
+            //remove creatures tamed to user
+            List<EntityTameable> tamedEntities = new ArrayList<>();
+            for (Entity entity : event.getAffectedEntities()) {
+                if (entity instanceof EntityTameable) {
+                    if ((((EntityTameable) entity).isTamed())) {
+                        if (!((EntityTameable) entity).getOwner().equals(user)) {
+                            tamedEntities.add((EntityTameable) entity);
+                        }
+                    }
+                }
+            }
+            event.getAffectedEntities().removeAll(tamedEntities);
+        }
+        //manage explosions from apato weapons
+        if (event.getExplosion().getExplosivePlacedBy() instanceof Apatosaurus) {
+            Apatosaurus apatosaurus = (Apatosaurus) event.getExplosion().getExplosivePlacedBy();
+            EntityPlayer user = (EntityPlayer) apatosaurus.getControllingPassenger();
+            //remove catapult and user
+            event.getAffectedEntities().remove(apatosaurus);
+            event.getAffectedEntities().remove(user);
+            //remove creatures tamed to user
+            List<EntityTameable> tamedEntities = new ArrayList<>();
+            for (Entity entity : event.getAffectedEntities()) {
+                if (entity instanceof EntityTameable) {
+                    if ((((EntityTameable) entity).isTamed())) {
+                        if (!((EntityTameable) entity).getOwner().equals(user)) {
+                            tamedEntities.add((EntityTameable) entity);
+                        }
+                    }
+                }
+            }
+            event.getAffectedEntities().removeAll(tamedEntities);
         }
     }
 }

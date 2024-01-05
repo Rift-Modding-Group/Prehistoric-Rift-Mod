@@ -39,6 +39,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         this.speed = 0.15D;
         this.attackWidth = 4.875f;
         this.chargeWidth = 20f;
+        this.saddleItem = TriceratopsConfig.triceratopsSaddleItem;
     }
 
     @Override

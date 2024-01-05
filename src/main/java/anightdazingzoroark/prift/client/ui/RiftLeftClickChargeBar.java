@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
@@ -20,6 +21,8 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
+
+import java.util.Objects;
 
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class RiftLeftClickChargeBar {
@@ -95,7 +98,12 @@ public class RiftLeftClickChargeBar {
         if (weapon instanceof RiftCatapult) {
             RiftCatapult catapult = (RiftCatapult) weapon;
             if (usingLeftClick) fill = catapult.getLeftClickUse();
-            else fill = weapon.getLeftClickCooldown() / 2;
+            else fill = catapult.getLeftClickCooldown() / 2;
+        }
+        else if (weapon instanceof RiftMortar) {
+            RiftMortar mortar = (RiftMortar) weapon;
+            if (usingLeftClick) fill = mortar.getLeftClickUse();
+            else fill = mortar.getLeftClickCooldown() / 2;
         }
         else fill = weapon.getLeftClickCooldown();
     }
@@ -110,14 +118,11 @@ public class RiftLeftClickChargeBar {
         float fillUpBar;
         if (creature instanceof Apatosaurus) {
             Apatosaurus apatosaurus = (Apatosaurus) creature;
-            switch (apatosaurus.getWeapon()) {
-                case CANNON:
-                case MORTAR:
-                    fillUpBar = (float)textureXSize / 30f * fill;
-                    break;
-                default:
-                    fillUpBar = (float)textureXSize / 100f * fill;
-                    break;
+            if (apatosaurus.getWeapon().equals(RiftLargeWeaponType.CANNON)) {
+                fillUpBar = (float) textureXSize / 30f * fill;
+            }
+            else {
+                fillUpBar = (float) textureXSize / 100f * fill;
             }
         }
         else fillUpBar = (float)textureXSize / 100f * fill;

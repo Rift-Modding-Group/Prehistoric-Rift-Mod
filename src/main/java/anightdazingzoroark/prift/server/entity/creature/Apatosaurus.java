@@ -7,11 +7,9 @@ import anightdazingzoroark.prift.config.ApatosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.ai.*;
-import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
 import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
 import anightdazingzoroark.prift.server.message.*;
@@ -24,9 +22,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemFood;
-import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -43,7 +38,6 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.Sys;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -61,6 +55,7 @@ public class Apatosaurus extends RiftCreature {
     private static final DataParameter<Boolean> LAUNCHING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOADED = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> TAIL_WHIPPING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private int launchTick;
 
     public Apatosaurus(World worldIn) {
@@ -75,6 +70,7 @@ public class Apatosaurus extends RiftCreature {
         this.isRideable = true;
         this.attackWidth = 4.5f;
         this.launchTick = 0;
+        this.saddleItem = ApatosaurusConfig.apatosaurusSaddleItem;
     }
 
     @Override
@@ -84,6 +80,7 @@ public class Apatosaurus extends RiftCreature {
         this.dataManager.register(LAUNCHING, false);
         this.dataManager.register(CHARGING, false);
         this.dataManager.register(LOADED, false);
+        this.dataManager.register(TAIL_WHIPPING, false);
     }
 
     @Override
@@ -259,7 +256,7 @@ public class Apatosaurus extends RiftCreature {
                             this.manageCannonFiring();
                             break;
                         case MORTAR:
-                            this.manageMortarFiring();
+                            this.manageMortarFiring(holdAmount);
                             break;
                         case CATAPULT:
                             this.manageCatapultFiring(holdAmount);
@@ -308,62 +305,9 @@ public class Apatosaurus extends RiftCreature {
         }
     }
 
-    private void manageMortarFiring() {
-        //get nearest entity first
-        //should be in the front
-        AxisAlignedBB detectionBox = new AxisAlignedBB(this.posX - 16, 0, this.posZ - 16, this.posX + 16, this.posY + 16, this.posZ + 16);
-        double dist = detectionBox.maxX - detectionBox.minX;
-        Vec3d vec3d = this.getPositionEyes(1.0F);
-        Vec3d vec3d1 = this.getLook(1.0F);
-        Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
-        double d1 = dist;
-        EntityLivingBase pointedEntity = null;
+    private void manageMortarFiring(int holdAmount) {
         EntityPlayer rider = (EntityPlayer)this.getControllingPassenger();
-        UUID userId = rider.getUniqueID();
-        List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, detectionBox.expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
-            @Override
-            public boolean apply(@Nullable EntityLivingBase input) {
-                if (input instanceof EntityTameable) {
-                    EntityTameable inpTameable = (EntityTameable)input;
-                    if (inpTameable.isTamed()) {
-                        return !userId.equals(inpTameable.getOwnerId());
-                    }
-                    else return true;
-                }
-                return true;
-            }
-        });
-        double d2 = d1;
-        for (EntityLivingBase potentialTarget : list) {
-            AxisAlignedBB axisalignedbb = potentialTarget.getEntityBoundingBox().grow((double) potentialTarget.getCollisionBorderSize() + 2F);
-            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
-
-            if (potentialTarget != this && potentialTarget != rider) {
-                if (axisalignedbb.contains(vec3d)) {
-                    if (d2 >= 0.0D) {
-                        pointedEntity = potentialTarget;
-                        d2 = 0.0D;
-                    }
-                }
-                else if (raytraceresult != null) {
-                    double d3 = vec3d.distanceTo(raytraceresult.hitVec);
-
-                    if (d3 < d2 || d2 == 0.0D) {
-                        if (potentialTarget.getLowestRidingEntity() == rider.getLowestRidingEntity() && !rider.canRiderInteract()) {
-                            if (d2 == 0.0D) {
-                                pointedEntity = potentialTarget;
-                            }
-                        }
-                        else {
-                            pointedEntity = potentialTarget;
-                            d2 = d3;
-                        }
-                    }
-                }
-            }
-        }
-
-        //firing logic
+        int launchDist = RiftUtil.clamp((int)(0.1D * holdAmount) + 6, 6, 16);
         boolean flag1 = false;
         boolean flag2 = rider.isCreative();
         int indexToRemove = -1;
@@ -378,7 +322,7 @@ public class Apatosaurus extends RiftCreature {
         }
         if (flag1 || flag2) {
             RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, rider);
-            mortarShell.shoot(this, pointedEntity);
+            mortarShell.shoot(this, launchDist);
             this.world.spawnEntity(mortarShell);
             this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
             this.setLeftClickCooldown(30);

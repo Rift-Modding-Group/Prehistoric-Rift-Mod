@@ -131,6 +131,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public int forcedChargePower;
     public int leapCooldown;
     public float maxRightClickCooldown;
+    public String saddleItem;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -345,7 +346,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (itemInSlot.getItem() == RiftItems.APATOSAURUS_PLATFORM) this.setSaddled(false);
                 }
                 else {
-                    if (itemInSlot.getItem() == Items.SADDLE) this.setSaddled(false);
+                    if (this.saddleItemEqual(itemInSlot)) this.setSaddled(false);
                 }
                 this.world.spawnEntity(entityItem);
                 this.creatureInventory.setInventorySlotContents(i, new ItemStack(Items.AIR));
@@ -501,7 +502,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (this.isFavoriteFood(itemstack) && !RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getHealth() < this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
-                        System.out.println(this.getFavoriteFoodHeal(itemstack));
                         this.heal((float) this.getFavoriteFoodHeal(itemstack));
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
@@ -603,7 +603,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
             String itemId = foodItem.substring(0, itemIdSecond);
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == 32767);
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == -1);
         }
         return false;
     }
@@ -617,7 +617,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
             double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1));
             if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == 32767) return (int) (Math.ceil(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage));
+                if (itemData == -1) return (int) (Math.ceil(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage));
                 else if (stack.getMetadata() == itemData) {
                     return (int) (Math.ceil(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage));
                 }
@@ -633,7 +633,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
             String itemId = foodItem.substring(0, itemIdSecond);
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == 32767);
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == -1);
         }
         return false;
     }
@@ -647,7 +647,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
             int adder = (int)(Double.parseDouble(foodItem.substring(itemIdThird + 1)) * 100);
             if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == 32767) return adder;
+                if (itemData == -1) return adder;
                 else if (stack.getMetadata() == itemData) return adder;
             }
         }
@@ -663,7 +663,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
             double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1)) / 2D;
             if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == 32767) return (int)(24000 * percentage);
+                if (itemData == -1) return (int)(24000 * percentage);
                 else if (stack.getMetadata() == itemData) return (int)(24000 * percentage);
             }
         }
@@ -706,11 +706,29 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    public Item getSaddleItem() {
+        int itemIdFirst = this.saddleItem.indexOf(":");
+        int itemIdSecond = this.saddleItem.indexOf(":", itemIdFirst + 1);
+        String itemId = this.saddleItem.substring(0, itemIdSecond);
+        return Item.getByNameOrId(itemId);
+    }
+
+    public int getSaddleItemData() {
+        int itemIdFirst = this.saddleItem.indexOf(":");
+        int itemIdSecond = this.saddleItem.indexOf(":", itemIdFirst + 1);
+        return Integer.parseInt(this.saddleItem.substring(itemIdSecond + 1));
+    }
+
+    public boolean saddleItemEqual(ItemStack itemStack) {
+        int itemStackId = itemStack.getMetadata();
+        if (this.getSaddleItemData() == -1) return itemStack.getItem().equals(this.getSaddleItem());
+        else return this.getSaddleItemData() == itemStackId && itemStack.getItem().equals(this.getSaddleItem());
+    }
+
     @Override
     protected void updateEquipmentIfNeeded(EntityItem itemEntity) {
         if (!this.isTamed() && this.canPickUpLoot()) {
             ItemStack itemstack = itemEntity.getItem();
-            Item item = itemstack.getItem();
             EntityEquipmentSlot entityequipmentslot = getSlotForItemStack(itemstack);
 
             if (this.isFavoriteFood(itemstack) && this.canEquipItem(itemstack)) {
@@ -814,7 +832,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void refreshInventory() {
         ItemStack saddle = this.creatureInventory.getStackInSlot(0);
-        if (!this.world.isRemote) this.setSaddled(saddle.getItem() == Items.SADDLE && !saddle.isEmpty());
+        if (!this.world.isRemote) this.setSaddled(this.saddleItemEqual(saddle) && !saddle.isEmpty());
     }
 
     //herdin stuff starts here
@@ -873,13 +891,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //herdin stuff stops here
-
-//    @Override
-//    @Nullable
-//    protected ResourceLocation getLootTable() {
-//        System.out.println(this.creatureType.toString().toLowerCase());
-//        return LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/"+this.creatureType.toString().toLowerCase()));
-//    }
 
     public int getVariant() {
         return this.dataManager.get(VARIANT).intValue();

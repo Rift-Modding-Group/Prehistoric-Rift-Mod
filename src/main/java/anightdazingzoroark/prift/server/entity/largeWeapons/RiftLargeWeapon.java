@@ -34,6 +34,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatable {
     private static final DataParameter<Boolean> USING_LEFT_CLICK = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> LEFT_CLICK_USE = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEFT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.VARINT);
     public RiftLargeWeaponInventory weaponInventory;
     public final RiftLargeWeaponType weaponType;
@@ -54,6 +55,7 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(USING_LEFT_CLICK, Boolean.FALSE);
+        this.dataManager.register(LEFT_CLICK_USE, 0);
         this.dataManager.register(LEFT_CLICK_COOLDOWN, 0);
     }
 
@@ -187,6 +189,14 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
 
     public void setUsingLeftClick(boolean value) {
         this.dataManager.set(USING_LEFT_CLICK, value);
+    }
+
+    public int getLeftClickUse() {
+        return this.dataManager.get(LEFT_CLICK_USE);
+    }
+
+    public void setLeftClickUse(int value) {
+        this.dataManager.set(LEFT_CLICK_USE, value);
     }
 
     public int getLeftClickCooldown() {
