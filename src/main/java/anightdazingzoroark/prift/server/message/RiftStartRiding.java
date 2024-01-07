@@ -38,6 +38,6 @@ public class RiftStartRiding extends AbstractMessage<RiftStartRiding> {
 
         entity.getNavigator().clearPath();
         entity.setAttackTarget(null);
-        player.startRiding(entity);
+        player.startRiding(entity, true);
     }
 }

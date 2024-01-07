@@ -18,6 +18,7 @@ import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityTameable;
@@ -33,7 +34,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -51,7 +51,6 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class Apatosaurus extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/apatosaurus"));
@@ -60,7 +59,10 @@ public class Apatosaurus extends RiftCreature {
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOADED = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> TAIL_WHIPPING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
+    private EntityLivingBase passengerOne;
+    private EntityLivingBase passengerTwo;
     private int launchTick;
+    public boolean dismount = false;
 
     public Apatosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.APATOSAURUS);
@@ -125,24 +127,35 @@ public class Apatosaurus extends RiftCreature {
         GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (this.isBeingRidden()) {
-            if (this.getControllingPassenger().equals(player)) {
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()));
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown()));
+            if (this.getControllingPassenger() != null) {
+                if (this.getControllingPassenger().equals(player)) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()));
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown()));
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 2, settings.keyBindJump.isKeyDown()));
 
-                if (settings.keyBindAttack.isKeyDown() && !this.isActing()) {
-                    if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) {
-                        if (ShoulderInstance.getInstance().doShoulderSurfing()) {
-                            Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                            if (player.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) {
-                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                            }
-                            else {
-                                if (toBeAttacked != null) {
-                                    int targetId = toBeAttacked.getEntityId();
-                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
+                    if (settings.keyBindAttack.isKeyDown() && !this.isActing()) {
+                        if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) {
+                            if (ShoulderInstance.getInstance().doShoulderSurfing()) {
+                                Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                                if (player.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) {
+                                    RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
                                 }
                                 else {
-                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
+                                    if (toBeAttacked != null) {
+                                        int targetId = toBeAttacked.getEntityId();
+                                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
+                                    }
+                                    else {
+                                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
+                                    }
+                                }
+                            }
+                            else {
+                                if (player.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) {
+                                    if (this.getLeftClickCooldown() == 0) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                                }
+                                else {
+                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
                                 }
                             }
                         }
@@ -155,34 +168,32 @@ public class Apatosaurus extends RiftCreature {
                             }
                         }
                     }
-                    else {
-                        if (player.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) {
-                            if (this.getLeftClickCooldown() == 0) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                        }
-                        else {
-                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
-                        }
+                    else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1));
                     }
-                }
-                else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1));
-                }
-                else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(this, 1, true));
-                }
-                else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()) {
-                    Entity toBeAttacked = null;
-                    if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                    if (this.hasLeftClickChargeBar()) {
-                        if (this.getLeftClickUse() > 0) {
-                            if (toBeAttacked != null) {
-                                int targetId = toBeAttacked.getEntityId();
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0, this.getLeftClickUse()));
-                            }
-                            else {
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0, this.getLeftClickUse()));
+                    else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
+                    }
+                    else if (this.isUsingSpacebar() && this.canUseSpacebar()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 2, false));
+                        RiftMessages.WRAPPER.sendToServer(new RiftApatosaurusManagePassengers(this));
+                        this.addPassengersFromSpacebar();
+                    }
+                    else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindJump.isKeyDown()) {
+                        Entity toBeAttacked = null;
+                        if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                        if (this.hasLeftClickChargeBar()) {
+                            if (this.getLeftClickUse() > 0) {
+                                if (toBeAttacked != null) {
+                                    int targetId = toBeAttacked.getEntityId();
+                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0, this.getLeftClickUse()));
+                                }
+                                else {
+                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0, this.getLeftClickUse()));
+                                }
                             }
                         }
+                        if (!this.canUseSpacebar()) RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 2, true));
                     }
                 }
             }
@@ -246,11 +257,46 @@ public class Apatosaurus extends RiftCreature {
         return 54;
     }
 
+    public void updatePassenger(Entity passenger) {
+        if (this.isPassenger(passenger)) {
+            if (passenger.equals(this.getControllingPassenger()) && passenger.equals(this.getOwner())) super.updatePassenger(passenger);
+            else {
+                if (this.passengerOne == null) this.passengerOne = (EntityLivingBase) passenger;
+                else if (this.passengerTwo == null) this.passengerTwo = (EntityLivingBase) passenger;
+                if (this.passengerOne != null) {
+                    if (this.passengerOne.equals(passenger)) {
+                        passenger.setPosition(passengerPosOne().x, passengerPosOne().y + passenger.height, passengerPosOne().z);
+                        ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
+                    }
+                }
+                if (this.passengerTwo != null) {
+                    if (this.passengerTwo.equals(passenger)) {
+                        passenger.setPosition(passengerPosTwo().x, passengerPosTwo().y + passenger.height, passengerPosTwo().z);
+                        ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
+                    }
+                }
+            }
+            if (this.isDead) passenger.dismountRidingEntity();
+        }
+    }
+
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (1) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (1) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY + 1.25, zOffset);
+    }
+
+    public Vec3d passengerPosOne() {
+        float seatOneX = (float)(this.posX + (-0.375) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
+        float seatOneZ = (float)(this.posZ + (-0.375) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        return new Vec3d(seatOneX, this.posY + 2.25, seatOneZ);
+    }
+
+    public Vec3d passengerPosTwo() {
+        float seatTwoX = (float)(this.posX + (-2.375) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
+        float seatTwoZ = (float)(this.posZ + (-2.375) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        return new Vec3d(seatTwoX, this.posY + 2.25, seatTwoZ);
     }
 
     @Override
@@ -413,7 +459,6 @@ public class Apatosaurus extends RiftCreature {
     }
 
     public void useWhipAttack() {
-        System.out.println("whip");
         AxisAlignedBB area = this.getEntityBoundingBox().grow(4D, 4D, 4D);
         List<EntityLivingBase> list = new ArrayList<>();
         for (EntityLivingBase entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, area, null)) {
@@ -438,6 +483,46 @@ public class Apatosaurus extends RiftCreature {
             double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
             entity.knockBack(this, 1, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
             entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
+        }
+    }
+
+    public void addPassengersFromSpacebar() {
+        AxisAlignedBB area = this.getEntityBoundingBox().grow(4D, 4D, 4D);
+        int passengerSize = this.getPassengers().size();
+        if (passengerSize == 1) {
+            System.out.println("start placing passengers");
+            for (EntityLivingBase entity : world.getEntitiesWithinAABB(EntityLivingBase.class, area, new Predicate<EntityLivingBase>() {
+                @Override
+                public boolean apply(@Nullable EntityLivingBase input) {
+                    return !input.isRiding();
+                }
+            })) {
+                for (int i = 0; i < 3 - passengerSize; i++) if (entity != null && !entity.equals(this)) entity.startRiding(this, true);
+            }
+            this.dismount = true;
+        }
+        else if (passengerSize > 1) {
+            if (this.dismount) {
+                for (Entity entity : this.getPassengers()) {
+                    if (!entity.equals(this.getControllingPassenger()) && !(entity instanceof EntityPlayer)) {
+                        entity.dismountRidingEntity();
+                    }
+                }
+                this.setPassengerOne(null);
+                this.setPassengerTwo(null);
+                this.dismount = false;
+            }
+            else {
+                for (EntityLivingBase entity : world.getEntitiesWithinAABB(EntityLivingBase.class, area, new Predicate<EntityLivingBase>() {
+                    @Override
+                    public boolean apply(@Nullable EntityLivingBase input) {
+                        return !input.isRiding();
+                    }
+                })) {
+                    for (int i = 0; i < 3 - passengerSize; i++) if (entity != null && !entity.equals(this)) entity.startRiding(this, true);
+                }
+                this.dismount = true;
+            }
         }
     }
 
@@ -501,6 +586,22 @@ public class Apatosaurus extends RiftCreature {
 
     public void setTailWhipping(boolean value) {
         this.dataManager.set(TAIL_WHIPPING, value);
+    }
+
+    public EntityLivingBase getPassengerOne() {
+        return this.passengerOne;
+    }
+
+    public void setPassengerOne(EntityLivingBase entity) {
+        this.passengerOne = entity;
+    }
+
+    public EntityLivingBase getPassengerTwo() {
+        return this.passengerOne;
+    }
+
+    public void setPassengerTwo(EntityLivingBase entity) {
+        this.passengerTwo = entity;
     }
 
     @Override

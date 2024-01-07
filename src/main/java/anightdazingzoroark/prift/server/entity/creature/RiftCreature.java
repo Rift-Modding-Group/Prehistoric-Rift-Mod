@@ -40,13 +40,11 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.*;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -82,6 +80,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> CAN_USE_SPACEBAR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_SPACEBAR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> SPACEBAR_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> SPACEBAR_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -185,6 +184,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_RIGHT_CLICK, Boolean.FALSE);
         this.dataManager.register(RIGHT_CLICK_USE, 0);
         this.dataManager.register(RIGHT_CLICK_COOLDOWN, 0);
+        this.dataManager.register(CAN_USE_SPACEBAR, true);
         this.dataManager.register(USING_SPACEBAR, false);
         this.dataManager.register(SPACEBAR_USE, 0);
         this.dataManager.register(SPACEBAR_COOLDOWN, 0);
@@ -294,7 +294,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
                 else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(this, 1, true));
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
                 }
                 else if (settings.keyBindJump.isKeyDown() && this.getSpacebarCooldown() == 0) {
                     if (this.hasSpacebarChargeBar()) {
@@ -1100,6 +1100,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(RIGHT_CLICK_COOLDOWN, value);
     }
 
+    public boolean canUseSpacebar() {
+        return this.dataManager.get(CAN_USE_SPACEBAR);
+    }
+
+    public void setCanUseSpacebar(boolean value) {
+        this.dataManager.set(CAN_USE_SPACEBAR, value);
+    }
+
     public boolean isUsingSpacebar() {
         return this.dataManager.get(USING_SPACEBAR);
     }
@@ -1225,8 +1233,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void updatePassenger(Entity passenger) {
-        super.updatePassenger(passenger);
-
         if (this.canBeSteered()) {
             this.rotationYaw = passenger.rotationYaw;
             this.prevRotationYaw = this.rotationYaw;

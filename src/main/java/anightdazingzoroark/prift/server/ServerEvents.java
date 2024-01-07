@@ -10,8 +10,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
-import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
-import anightdazingzoroark.prift.server.message.RiftManageCanUseClick;
+import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
@@ -27,7 +26,6 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -121,7 +119,7 @@ public class ServerEvents {
                 RiftCreature creature = (RiftCreature) event.getEntityBeingMounted();
                 RiftEntityProperties creatureProperties = EntityPropertiesHandler.INSTANCE.getProperties(creature, RiftEntityProperties.class);
 
-                RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseClick(creature, 1, false));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(creature, 1, false));
                 if (playerProperties != null) playerProperties.ridingCreature = true;
                 creatureProperties.rCTrigger = false;
             }
