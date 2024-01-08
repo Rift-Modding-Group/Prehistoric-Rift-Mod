@@ -360,7 +360,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
             if (this.isBeingRidden()) {
-                if (this.energyMod > (int)((double)this.creatureType.getMaxEnergyModMovement() * (this.getControllingPassenger().isSprinting() ? 0.75D : 1D))) {
+                boolean isSprinting = this.getControllingPassenger() != null ? this.getControllingPassenger().isSprinting() : false;
+                if (this.energyMod > (int)((double)this.creatureType.getMaxEnergyModMovement() * (isSprinting ? 0.75D : 1D))) {
                     this.setEnergy(this.getEnergy() - 1);
                     this.energyMod = 0;
                 }

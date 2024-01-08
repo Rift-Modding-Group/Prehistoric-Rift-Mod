@@ -17,10 +17,7 @@ import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemFood;
@@ -50,6 +47,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Apatosaurus extends RiftCreature {
@@ -115,6 +113,15 @@ public class Apatosaurus extends RiftCreature {
         this.manageWeaponCooldown();
         this.manageLoaded();
         this.manageCatapultAnims();
+        this.manageBreakBlock();
+        //passenger stuff
+        if (this.getPassengers().size() == 1) this.dismount = false;
+    }
+
+    private void manageBreakBlock() {
+        if (ApatosaurusConfig.apatosaurusCanBreakBlocks && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this)) {
+
+        }
     }
 
     private void manageWeaponCooldown() {
@@ -261,8 +268,8 @@ public class Apatosaurus extends RiftCreature {
         if (this.isPassenger(passenger)) {
             if (passenger.equals(this.getControllingPassenger()) && passenger.equals(this.getOwner())) super.updatePassenger(passenger);
             else {
-                if (this.passengerOne == null) this.passengerOne = (EntityLivingBase) passenger;
-                else if (this.passengerTwo == null) this.passengerTwo = (EntityLivingBase) passenger;
+                if (this.passengerTwo == null) this.passengerTwo = (EntityLivingBase) passenger;
+                else if (this.passengerOne == null) this.passengerOne = (EntityLivingBase) passenger;
                 if (this.passengerOne != null) {
                     if (this.passengerOne.equals(passenger)) {
                         passenger.setPosition(passengerPosOne().x, passengerPosOne().y + passenger.height, passengerPosOne().z);
@@ -277,6 +284,20 @@ public class Apatosaurus extends RiftCreature {
                 }
             }
             if (this.isDead) passenger.dismountRidingEntity();
+            if (passenger.isDead) {
+                if (this.passengerOne != null) {
+                    if (this.passengerOne.equals(passenger)) {
+                        passenger.dismountRidingEntity();
+                        this.setPassengerOne(null);
+                    }
+                }
+                if (this.passengerTwo != null) {
+                    if (this.passengerTwo.equals(passenger)) {
+                        passenger.dismountRidingEntity();
+                        this.setPassengerTwo(null);
+                    }
+                }
+            }
         }
     }
 
@@ -288,14 +309,14 @@ public class Apatosaurus extends RiftCreature {
     }
 
     public Vec3d passengerPosOne() {
-        float seatOneX = (float)(this.posX + (-0.375) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
-        float seatOneZ = (float)(this.posZ + (-0.375) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        float seatOneX = (float)(this.posX + (-0.25) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
+        float seatOneZ = (float)(this.posZ + (-0.25) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(seatOneX, this.posY + 2.25, seatOneZ);
     }
 
     public Vec3d passengerPosTwo() {
-        float seatTwoX = (float)(this.posX + (-2.375) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
-        float seatTwoZ = (float)(this.posZ + (-2.375) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        float seatTwoX = (float)(this.posX + (-2) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
+        float seatTwoZ = (float)(this.posZ + (-2) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(seatTwoX, this.posY + 2.25, seatTwoZ);
     }
 
@@ -490,16 +511,21 @@ public class Apatosaurus extends RiftCreature {
         AxisAlignedBB area = this.getEntityBoundingBox().grow(4D, 4D, 4D);
         int passengerSize = this.getPassengers().size();
         if (passengerSize == 1) {
-            System.out.println("start placing passengers");
             for (EntityLivingBase entity : world.getEntitiesWithinAABB(EntityLivingBase.class, area, new Predicate<EntityLivingBase>() {
                 @Override
                 public boolean apply(@Nullable EntityLivingBase input) {
                     return !input.isRiding();
                 }
             })) {
-                for (int i = 0; i < 3 - passengerSize; i++) if (entity != null && !entity.equals(this)) entity.startRiding(this, true);
+                for (int i = 0; i < 3 - passengerSize; i++) {
+                    List<String> blackList = Arrays.asList(ApatosaurusConfig.apatosaurusPassengerBlacklist);
+                    boolean canAccept = ApatosaurusConfig.apatosaurusPassengerWhitelist == blackList.contains(EntityList.getKey(entity).toString());
+                    if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
+                        entity.startRiding(this, true);
+                        this.dismount = true;
+                    }
+                }
             }
-            this.dismount = true;
         }
         else if (passengerSize > 1) {
             if (this.dismount) {
@@ -519,9 +545,15 @@ public class Apatosaurus extends RiftCreature {
                         return !input.isRiding();
                     }
                 })) {
-                    for (int i = 0; i < 3 - passengerSize; i++) if (entity != null && !entity.equals(this)) entity.startRiding(this, true);
+                    for (int i = 0; i < 3 - passengerSize; i++) {
+                        List<String> blackList = Arrays.asList(ApatosaurusConfig.apatosaurusPassengerBlacklist);
+                        boolean canAccept = ApatosaurusConfig.apatosaurusPassengerWhitelist == blackList.contains(EntityList.getKey(entity).toString());
+                        if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
+                            entity.startRiding(this, true);
+                            this.dismount = true;
+                        }
+                    }
                 }
-                this.dismount = true;
             }
         }
     }
