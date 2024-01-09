@@ -5,7 +5,12 @@ entity.stegosaurus.name=Stegosaurus
 entity.dodo.name=Dodo
 entity.triceratops.name=Triceratops
 entity.utahraptor.name=Utahraptor
+entity.apatosaurus.name=Apatosaurus
 entity.egg.name=Egg
+
+entity.cannon_entity.name=Cannon
+entity.mortar_entity.name=Mortar
+entity.catapult_entity.name=Catapult
 
 inventory.gear=%s Gear
 inventory.inventory=%s Inventory
@@ -28,6 +33,7 @@ item.stegosaurus_plate.name=Stegosaurus Plate
 item.dodo_beak.name=Dodo Beak
 item.triceratops_horn.name=Triceratops Horn
 item.utahraptor_claw.name=Utahraptor Claw
+item.apatosaurus_vertebrae.name=Apatosaurus Vertebrae
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -36,6 +42,17 @@ item.stegosaurus_egg.name=Stegosaurus Egg
 item.dodo_egg.name=Dodo Egg
 item.triceratops_egg.name=Triceratops Egg
 item.utahraptor_egg.name=Utahraptor Egg
+item.apatosaurus_egg.name=Apatosaurus Egg
+
+item.apatosaurus_platform.name=Apatosaurus Platform
+item.cannon.name=Cannon
+item.mortar.name=Mortar
+item.catapult.name=Catapult
+item.cannonball.name=Cannonball
+item.mortar_shell.name=Mortar Shell
+item.catapult_boulder.name=Catapult Boulder
+item.wrench.name=Wrench
+item.command_console.name=Command Console
 
 radial.choice.ride=Ride
 radial.choice.state=State
@@ -109,6 +126,10 @@ sounds.subtitle.utahraptor_idle=Utahraptor grunts
 sounds.subtitle.utahraptor_hurt=Utahraptor hurts
 sounds.subtitle.utahraptor_death=Utahraptor dies
 sounds.subtitle.utahraptor_call=Utahraptor calls
+
+sounds.subtitle.apatosaurus_idle=Apatosaurus grunts
+sounds.subtitle.apatosaurus_hurt=Apatosaurus hurts
+sounds.subtitle.apatosaurus_death=Apatosaurus dies
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral

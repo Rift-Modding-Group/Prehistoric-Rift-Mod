@@ -1,0 +1,22 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    " # ",
+    "#I#",
+    "#R#"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:gunpowder"
+    },
+    "#": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "item": "prift:mortar_shell"
+  }
+}

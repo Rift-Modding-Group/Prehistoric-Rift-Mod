@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.SSRCompatUtils;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.ApatosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
@@ -30,6 +31,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -702,5 +704,17 @@ public class Apatosaurus extends RiftCreature {
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.APATOSAURUS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.APATOSAURUS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.APATOSAURUS_DEATH;
     }
 }

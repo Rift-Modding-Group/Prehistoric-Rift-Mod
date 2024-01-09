@@ -1,0 +1,33 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "#PP",
+    "X A",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "type": "forge:ore_dict",
+      "ore": "plankWood"
+    },
+    "X": {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    },
+    "#": {
+      "item": "minecraft:stone_slab",
+      "data": 3
+    },
+    "P": {
+      "type": "forge:ore_dict",
+      "ore": "slabWood"
+    },
+    "A": {
+      "type": "forge:ore_dict",
+      "ore": "logWood"
+    }
+  },
+  "result": {
+    "item": "prift:catapult"
+  }
+}

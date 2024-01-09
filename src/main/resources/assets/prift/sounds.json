@@ -121,5 +121,27 @@
       "prift:entities/utahraptor/utahraptor_call"
     ],
     "subtitle": "sounds.subtitle.utahraptor_call"
+  },
+
+  "prift.apatosaurus.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/apatosaurus/apatosaurus_idle"
+    ],
+    "subtitle": "sounds.subtitle.apatosaurus_idle"
+  },
+  "prift.apatosaurus.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/apatosaurus/apatosaurus_hurt"
+    ],
+    "subtitle": "sounds.subtitle.apatosaurus_hurt"
+  },
+  "prift.apatosaurus.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/apatosaurus/apatosaurus_death"
+    ],
+    "subtitle": "sounds.subtitle.apatosaurus_death"
   }
 }

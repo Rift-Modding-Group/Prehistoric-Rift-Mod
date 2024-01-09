@@ -1,0 +1,23 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X X",
+    "###",
+    "I I"
+  ],
+  "key": {
+    "#": {
+      "type": "forge:ore_dict",
+      "ore": "slabWood"
+    },
+    "X": {
+      "item": "minecraft:saddle"
+    },
+    "I": {
+      "item": "minecraft:string"
+    }
+  },
+  "result": {
+    "item": "prift:apatosaurus_platform"
+  }
+}

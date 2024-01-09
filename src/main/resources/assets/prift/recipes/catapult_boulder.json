@@ -1,0 +1,19 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "I#I",
+    "#I#",
+    "I#I"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:iron_ingot"
+    },
+    "I": {
+      "item": "minecraft:cobblestone"
+    }
+  },
+  "result": {
+    "item": "prift:catapult_boulder"
+  }
+}
