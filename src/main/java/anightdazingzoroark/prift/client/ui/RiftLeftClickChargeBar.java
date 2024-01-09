@@ -78,14 +78,8 @@ public class RiftLeftClickChargeBar {
     private void reduceUnusedChargeBar(RiftCreature creature, boolean usingLeftClick) {
         if (creature instanceof Apatosaurus) {
             Apatosaurus apatosaurus = (Apatosaurus) creature;
-            if (apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
-                if (usingLeftClick && apatosaurus.getLeftClickCooldown() == 0) fill = apatosaurus.getLeftClickUse();
-                else fill = apatosaurus.getLeftClickCooldown() / 2;
-            }
-            else {
-                if (usingLeftClick && apatosaurus.getLeftClickCooldown() == 0) fill = apatosaurus.getLeftClickUse();
-                else fill = apatosaurus.getLeftClickCooldown();
-            }
+            if (usingLeftClick && apatosaurus.getLeftClickCooldown() == 0) fill = apatosaurus.getLeftClickUse();
+            else fill = apatosaurus.getLeftClickCooldown() / 2;
         }
         else {
             if (usingLeftClick) fill = creature.getLeftClickUse();

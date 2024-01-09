@@ -241,6 +241,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.world.isRemote) {
             this.setControls();
         }
+        System.out.println("lc use: "+this.getLeftClickUse());
+        System.out.println("lc cooldown: "+this.getLeftClickCooldown());
     }
 
     @SideOnly(Side.CLIENT)

@@ -15,7 +15,10 @@ import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.*;
@@ -33,6 +36,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -113,8 +117,8 @@ public class Apatosaurus extends RiftCreature {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageWeaponCooldown();
+        if (!this.world.isRemote) this.manageCatapultAnims();
         this.manageLoaded();
-        this.manageCatapultAnims();
         this.manageBreakBlock();
         //passenger stuff
         if (this.getPassengers().size() == 1) this.dismount = false;
@@ -122,7 +126,21 @@ public class Apatosaurus extends RiftCreature {
 
     private void manageBreakBlock() {
         if (ApatosaurusConfig.apatosaurusCanBreakBlocks && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this)) {
-
+            for (int x = (int)this.getEntityBoundingBox().minX - 2; x <= (int)this.getEntityBoundingBox().maxX + 2; x++) {
+                for (int y = (int)this.getEntityBoundingBox().minY; y <= (int)this.getEntityBoundingBox().maxY + 4 && y <= 256; y++) {
+                    for (int z = (int)this.getEntityBoundingBox().minZ - 2; z <= (int)this.getEntityBoundingBox().maxZ + 2; z++) {
+                        IBlockState state = world.getBlockState(new BlockPos(x, y, z));
+                        Block block = state.getBlock();
+                        if (RiftUtil.blockWeakerThanWood(block, state)) {
+                            this.motionX *= 0.6D;
+                            this.motionZ *= 0.6D;
+                            if (!this.world.isRemote) {
+                                this.world.destroyBlock(new BlockPos(x, y, z), false);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -147,7 +165,7 @@ public class Apatosaurus extends RiftCreature {
                             if (ShoulderInstance.getInstance().doShoulderSurfing()) {
                                 Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                                 if (player.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) {
-                                    RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                                    if (this.getLeftClickCooldown() == 0) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
                                 }
                                 else {
                                     if (toBeAttacked != null) {
@@ -235,7 +253,7 @@ public class Apatosaurus extends RiftCreature {
 
                 if (this.isLaunching()) {
                     this.launchTick++;
-                    if (this.launchTick > 7) {
+                    if (this.launchTick > 8) {
                         this.setLaunching(false);
                         this.launchTick = 0;
                     }
@@ -408,7 +426,7 @@ public class Apatosaurus extends RiftCreature {
             mortarShell.shoot(this, launchDist);
             this.world.spawnEntity(mortarShell);
             this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
-            this.setLeftClickCooldown(30);
+            this.setLeftClickCooldown(Math.max(holdAmount * 2, 60));
         }
     }
 

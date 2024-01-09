@@ -46,27 +46,29 @@ public class RiftIncrementControlUse extends AbstractMessage<RiftIncrementContro
     public void onServerReceived(MinecraftServer server, RiftIncrementControlUse message, EntityPlayer player, MessageContext messageContext) {
         EntityLivingBase entity = (EntityLivingBase) player.world.getEntityByID(message.entityId);
 
-        if (entity instanceof RiftCreature) {
-            RiftCreature creature = (RiftCreature) entity;
-            switch (message.control) {
-                case 0:
-                    creature.setLeftClickUse(creature.getLeftClickUse() + 1);
-                    break;
-                case 1:
-                    if (creature.getEnergy() > 6) creature.setRightClickUse(creature.getRightClickUse() + 1);
-                    break;
-                case 2:
-                    if (creature.getEnergy() > 6) creature.setSpacebarUse(creature.getSpacebarUse() + 1);
-                    break;
+        if (!player.world.isRemote) {
+            if (entity instanceof RiftCreature) {
+                RiftCreature creature = (RiftCreature) entity;
+                switch (message.control) {
+                    case 0:
+                        creature.setLeftClickUse(creature.getLeftClickUse() + 1);
+                        break;
+                    case 1:
+                        if (creature.getEnergy() > 6) creature.setRightClickUse(creature.getRightClickUse() + 1);
+                        break;
+                    case 2:
+                        if (creature.getEnergy() > 6) creature.setSpacebarUse(creature.getSpacebarUse() + 1);
+                        break;
+                }
             }
-        }
-        else if (entity instanceof RiftCatapult) {
-            RiftCatapult catapult = (RiftCatapult) entity;
-            catapult.setLeftClickUse(catapult.getLeftClickUse() + 1);
-        }
-        else if (entity instanceof RiftMortar) {
-            RiftMortar mortar = (RiftMortar) entity;
-            mortar.setLeftClickUse(mortar.getLeftClickUse() + 1);
+            else if (entity instanceof RiftCatapult) {
+                RiftCatapult catapult = (RiftCatapult) entity;
+                catapult.setLeftClickUse(catapult.getLeftClickUse() + 1);
+            }
+            else if (entity instanceof RiftMortar) {
+                RiftMortar mortar = (RiftMortar) entity;
+                mortar.setLeftClickUse(mortar.getLeftClickUse() + 1);
+            }
         }
     }
 }
