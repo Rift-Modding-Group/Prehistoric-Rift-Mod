@@ -12,7 +12,7 @@ public class ApatosaurusConfig extends RiftConfig {
     public static String apatosaurusSaddleItem = "prift:apatosaurus_platform:0";
     public static boolean apatosaurusPassengerWhitelist = false;
     public static String[] apatosaurusPassengerBlacklist = {"minecraft:ender_dragon", "minecraft:wither", "prift:tyrannosaurus", "prift:apatosaurus"};
-    public static boolean apatosaurusCanBreakBlocks = true;
+//    public static boolean apatosaurusCanBreakBlocks = true;
 
     public ApatosaurusConfig(Configuration config) {
         super(config, new String[]{"tag:plains:7:1:3", "-tag:savanna"});
@@ -31,7 +31,7 @@ public class ApatosaurusConfig extends RiftConfig {
         apatosaurusSaddleItem = config.getString("Apatosaurus Saddle Item", "General", "prift:apatosaurus_platform:0", "Item that counts as a saddle for this creature. To add an item add \"<insert item's identifier here>:<insert data id here>\"");
         apatosaurusPassengerWhitelist = config.getBoolean("Use Apatosaurus passenger blacklist as a whitelist", "General", false, "Turn the blacklist of mobs that can be made to forcefully ride an Apatosaurus (with a platform) into a whitelist");
         apatosaurusPassengerBlacklist = config.getStringList("Mobs that not can be passengers for the Apatosaurus", "General", new String[]{"minecraft:ender_dragon", "minecraft:wither", "prift:tyrannosaurus", "prift:apatosaurus"}, "Mobs within this list cannot be passengers on the back of an Apatosaurus (with a platform)");
-        apatosaurusCanBreakBlocks = config.getBoolean("Apatosaurus can break blocks", "General", true, "If true, this mob can break blocks weaker than wood just by walking through them.");
+//        apatosaurusCanBreakBlocks = config.getBoolean("Apatosaurus can break blocks", "General", true, "If true, this mob can break blocks weaker than wood just by walking through them.");
     }
 
     public static double getMaxHealth() {

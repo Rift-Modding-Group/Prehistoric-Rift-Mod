@@ -11,7 +11,7 @@ public class TyrannosaurusConfig extends RiftConfig {
     public static String[] tyrannosaurusBreedingFood = {"prift:basic_carnivore_meal:0:0", "prift:advanced_carnivore_meal:0:0"};
     public static String[] tyrannosaurusTargets = {"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:llama", "minecraft:villager", "prift:stegosaurus", "prift:dodo", "prift:triceratops", "prift:apatosaurus"};
     public static boolean tyrannosaurusRoarTargetsWhitelist = false;
-    public static String[] tyrannosaurusRoarTargetBlacklist = {"prift:tyrannosaurus"};
+    public static String[] tyrannosaurusRoarTargetBlacklist = {"prift:tyrannosaurus", "prift:apatosaurus"};
     public static String tyrannosaurusSaddleItem = "minecraft:saddle:0";
 
     public TyrannosaurusConfig(Configuration config) {
@@ -30,7 +30,7 @@ public class TyrannosaurusConfig extends RiftConfig {
         tyrannosaurusBreedingFood = config.getStringList("Tyrannosaurus Breeding Food", "General", new String[]{"prift:basic_carnivore_meal:0:0", "prift:advanced_carnivore_meal:0:0"}, "List of foods Tyrannosauruses need to be fed in order to breed. To add items add \"<insert item's identifier here>:<insert data id here>:0\"");
         tyrannosaurusTargets = config.getStringList("Tyrannosaurus Targets", "General", new String[]{"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:llama", "minecraft:villager", "prift:stegosaurus", "prift:dodo", "prift:triceratops", "prift:apatosaurus"}, "Identifiers of mobs that the Tyrannosaurus will actively hunt");
         tyrannosaurusRoarTargetsWhitelist = config.getBoolean("Use Tyrannosaurus roar blacklist as a whitelist", "General", false, "Turn the blacklist of mobs affected by the Tyrannosaurus' roar into a whitelist of affected mobs");
-        tyrannosaurusRoarTargetBlacklist = config.getStringList("Mobs unaffected by Tyrannosaurus roar", "General", new String[]{"prift:tyrannosaurus"}, "Mobs within this list are immune to this mobs knockback roar");
+        tyrannosaurusRoarTargetBlacklist = config.getStringList("Mobs unaffected by Tyrannosaurus roar", "General", new String[]{"prift:tyrannosaurus", "prift:apatosaurus"}, "Mobs within this list are immune to this mobs knockback roar");
         tyrannosaurusSaddleItem = config.getString("Tyrannosaurus Saddle Item", "General", "minecraft:saddle:0", "Item that counts as a saddle for this creature. To add an item add \"<insert item's identifier here>:<insert data id here>\"");
     }
 

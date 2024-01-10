@@ -118,31 +118,32 @@ public class Apatosaurus extends RiftCreature {
         super.onLivingUpdate();
         this.manageWeaponCooldown();
         if (!this.world.isRemote) this.manageCatapultAnims();
-        this.manageLoaded();
-        this.manageBreakBlock();
         //passenger stuff
         if (this.getPassengers().size() == 1) this.dismount = false;
     }
 
-    private void manageBreakBlock() {
-        if (ApatosaurusConfig.apatosaurusCanBreakBlocks && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this)) {
-            for (int x = (int)this.getEntityBoundingBox().minX - 2; x <= (int)this.getEntityBoundingBox().maxX + 2; x++) {
-                for (int y = (int)this.getEntityBoundingBox().minY; y <= (int)this.getEntityBoundingBox().maxY + 4 && y <= 256; y++) {
-                    for (int z = (int)this.getEntityBoundingBox().minZ - 2; z <= (int)this.getEntityBoundingBox().maxZ + 2; z++) {
-                        IBlockState state = world.getBlockState(new BlockPos(x, y, z));
-                        Block block = state.getBlock();
-                        if (RiftUtil.blockWeakerThanWood(block, state)) {
-                            this.motionX *= 0.6D;
-                            this.motionZ *= 0.6D;
-                            if (!this.world.isRemote) {
-                                this.world.destroyBlock(new BlockPos(x, y, z), false);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+     //this will be repurposed in the next update so that most mobs will break blocks
+     //using their forced attack, or can clear up paths when in search of a target
+     //utilizin their attacks
+//    private void manageBreakBlock() {
+//        if (ApatosaurusConfig.apatosaurusCanBreakBlocks && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this)) {
+//            for (int x = (int)this.getEntityBoundingBox().minX - 2; x <= (int)this.getEntityBoundingBox().maxX + 2; x++) {
+//                for (int y = (int)this.getEntityBoundingBox().minY; y <= (int)this.getEntityBoundingBox().maxY + 4 && y <= 256; y++) {
+//                    for (int z = (int)this.getEntityBoundingBox().minZ - 2; z <= (int)this.getEntityBoundingBox().maxZ + 2; z++) {
+//                        IBlockState state = world.getBlockState(new BlockPos(x, y, z));
+//                        Block block = state.getBlock();
+//                        if (RiftUtil.blockWeakerThanWood(block, state)) {
+//                            this.motionX *= 0.6D;
+//                            this.motionZ *= 0.6D;
+//                            if (!this.world.isRemote) {
+//                                this.world.destroyBlock(new BlockPos(x, y, z), false);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private void manageWeaponCooldown() {
         if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);
@@ -227,10 +228,12 @@ public class Apatosaurus extends RiftCreature {
         }
     }
 
-    private void manageLoaded() {
+    //i have no fucking idea why but this breaks the apato's ability to use catapults
+    //just wtf
+    public void manageLoaded() {
         if (this.getWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
             boolean flag1 = false;
-            boolean flag2 = this.isBeingRidden() ? (this.getControllingPassenger() instanceof EntityPlayer ? ((EntityPlayer)this.getControllingPassenger()).isCreative() : false) : false;
+            boolean flag2 = this.isBeingRidden() && (this.getControllingPassenger() instanceof EntityPlayer && ((EntityPlayer) this.getControllingPassenger()).isCreative());
             for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
                 if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
                     if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.CATAPULT_BOULDER)) {
