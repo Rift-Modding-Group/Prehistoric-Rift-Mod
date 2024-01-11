@@ -21,7 +21,8 @@ public enum RiftCreatureType {
     DODO(Dodo.class, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, null, DodoRenderer::new, 7828853, 6184028, 90, 0.25f),
     TRICERATOPS(Triceratops.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, TriceratopsRenderer::new, 935177, 3631923, 300, 1),
     UTAHRAPTOR(Utahraptor.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.FAST, UtahraptorRenderer::new, 5855577, 10439936, 180, 0.25f),
-    APATOSAURUS(Apatosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.VERY_SLOW, EnergyRechargeCategory.SLOW, ApatosaurusRenderer::new, 3160621, 16748800, 450, 1);
+    APATOSAURUS(Apatosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.VERY_SLOW, EnergyRechargeCategory.SLOW, ApatosaurusRenderer::new, 3160621, 16748800, 450, 1),
+    PARASAUROLOPHUS(Parasaurolophus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.NORMAL, ParasaurolophusRenderer::new, 10055190, 8920579, 300, 1);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;

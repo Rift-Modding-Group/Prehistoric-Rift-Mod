@@ -103,6 +103,9 @@ public class Apatosaurus extends RiftCreature {
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
+        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
+        this.targetTasks.addTask(2, new RiftProtectOwner(this));
+        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftApatosaurusControlledTailWhip(this, 0.6F, 0.4F));
         this.tasks.addTask(2, new RiftControlledAttack(this, 3F, 3F));

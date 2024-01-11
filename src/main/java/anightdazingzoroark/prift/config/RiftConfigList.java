@@ -15,7 +15,8 @@ public enum RiftConfigList {
     DODO(Dodo.class, DodoConfig.class),
     TRICERATOPS(Triceratops.class, TriceratopsConfig.class),
     UTAHRAPTOR(Utahraptor.class, UtahraptorConfig.class),
-    APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class);
+    APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class),
+    PARASAUROLOPHUS(Parasaurolophus.class, ParasaurolophusConfig.class);
 
     private final Class<? extends RiftCreature> creatureClass;
     private final Class<? extends RiftConfig> configClass;
