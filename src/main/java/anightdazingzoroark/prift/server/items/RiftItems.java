@@ -108,6 +108,14 @@ public class RiftItems {
         OreDictionary.registerOre("carnivoreMealIng", Items.CHICKEN);
         OreDictionary.registerOre("carnivoreMealIng", Items.BEEF);
         OreDictionary.registerOre("carnivoreMealIng", RiftItems.RAW_EXOTIC_MEAT);
+
+        //to other lists
+        OreDictionary.registerOre("listAllmeat", RiftItems.RAW_EXOTIC_MEAT);
+        OreDictionary.registerOre("listAllmeat", RiftItems.COOKED_EXOTIC_MEAT);
+        OreDictionary.registerOre("listAllmeat", RiftItems.RAW_DODO_MEAT);
+        OreDictionary.registerOre("listAllmeat", RiftItems.COOKED_DODO_MEAT);
+        OreDictionary.registerOre("listAllmeat", RiftItems.RAW_FIBROUS_MEAT);
+        OreDictionary.registerOre("listAllmeat", RiftItems.COOKED_FIBROUS_MEAT);
     }
 
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {

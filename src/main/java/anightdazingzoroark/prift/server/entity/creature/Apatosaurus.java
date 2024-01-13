@@ -682,7 +682,7 @@ public class Apatosaurus extends RiftCreature {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.sitting", true));
             return PlayState.CONTINUE;
         }
-        if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
+        if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking() && !this.isTailWhipping()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.walk", true));
             return PlayState.CONTINUE;
         }

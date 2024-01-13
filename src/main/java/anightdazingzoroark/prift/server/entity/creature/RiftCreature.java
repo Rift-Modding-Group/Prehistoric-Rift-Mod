@@ -852,7 +852,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isHerdLeader() {
-        return this.getEntityId() == this.getHerdLeaderId();
+        return this.getEntityId() == this.getHerdLeaderId() && this.getHerdMembers(false).size() > 1;
     }
 
     public void setHerdLeader(int value) {
@@ -889,6 +889,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public AxisAlignedBB getHerdBoundingBox() {
         return this.getEntityBoundingBox().grow(this.getHerdDist() * 2, this.getHerdDist() * 2, this.getHerdDist() * 2);
+    }
+
+    public List<RiftCreature> getHerdMembers(boolean includeLeader) {
+        RiftCreature thisHerdLeader = this.getHerdLeader();
+        List<RiftCreature> herders = this.world.getEntitiesWithinAABB(this.getClass(), this.getHerdBoundingBox(), new Predicate<RiftCreature>() {
+            @Override
+            public boolean apply(@Nullable RiftCreature input) {
+                return !input.isTamed() && input.getHerdLeader().equals(thisHerdLeader);
+            }
+        });
+        if (!includeLeader) herders.remove(thisHerdLeader);
+        return herders;
     }
 
     //herdin stuff stops here
