@@ -556,17 +556,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             return true;
         }
         else {
-            if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
+            if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     this.consumeItemFromStack(player, itemstack);
-                    net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player);
                     this.spawnHeartParticles();
                     if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished", new TextComponentString(this.getName())), false);
                     this.setTameProgress(0);
-                    this.setTamed(true);
-                    this.setOwnerId(player.getUniqueID());
+                    this.setTamedBy(player);
                     this.setAttackTarget(null);
                     if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
+                    this.world.setEntityState(this, (byte)7);
                 }
                 else {
                     this.consumeItemFromStack(player, itemstack);
@@ -1013,6 +1012,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void resetSpeed() {
+        System.out.println("reset speed");
         this.setSpeed(this.speed);
     }
 

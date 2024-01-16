@@ -51,9 +51,9 @@ public class RiftGetTargets extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        if (((RiftCreature) this.taskOwner).isTamed()) return false;
-        else if (((RiftCreature) this.taskOwner).canDoHerding() && !((RiftCreature) this.taskOwner).isHerdLeader()) return false;
-//        else if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) return false;
+        RiftCreature creature = (RiftCreature) this.taskOwner;
+        if (creature.isTamed()) return false;
+        else if (creature.canDoHerding() && !creature.isHerdLeader() && !creature.getHerdLeader().equals(creature)) return false;
         else {
             List<EntityLivingBase> list = new ArrayList<>();
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
@@ -61,7 +61,7 @@ public class RiftGetTargets extends EntityAITarget {
                     if (entity instanceof EntityPlayer) {
                         if (this.targetList.contains("minecraft:player")) {
                             EntityPlayer player = (EntityPlayer) entity;
-                            if (!player.isSneaking() || !((RiftCreature) this.taskOwner).isTamingFood(player.getHeldItemMainhand())) list.add(entity);
+                            if (!player.isSneaking() || !creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
                         }
                     }
                     else {
@@ -72,9 +72,7 @@ public class RiftGetTargets extends EntityAITarget {
                 }
             }
 
-            if (list.isEmpty()) {
-                return false;
-            }
+            if (list.isEmpty()) return false;
             else {
                 Collections.sort(list, this.sorter);
                 this.targetEntity = list.get(0);

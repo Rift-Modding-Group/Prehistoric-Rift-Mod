@@ -37,7 +37,7 @@ public class RiftHerdMemberFollow extends EntityAIBase {
             return false;
         }
         else if (this.creature.getHerdLeader() != null) {
-            if (this.creature.getDistanceSq(this.creature.getHerdLeader()) < this.minDistDoubled) {
+            if (this.creature.getDistanceSq(this.creature.getHerdLeader()) <= this.minDistDoubled) {
                 return false;
             }
             else {
@@ -52,7 +52,7 @@ public class RiftHerdMemberFollow extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return !this.creature.isHerdLeader() && !this.pathfinder.noPath() && this.creature.getDistance(this.creature.getHerdLeader()) > this.maxDistDoubled;
+        return !this.creature.isHerdLeader() && !this.pathfinder.noPath() && this.creature.getDistance(this.creature.getHerdLeader()) <= this.minDistDoubled;
     }
 
     public void startExecuting() {

@@ -17,13 +17,12 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
     private final int hornAnimLength = 20;
     protected int hornAnimTime;
     protected EntityLivingBase target;
-    protected PathNavigate pathfinder;
     private BlockPos targetPos;
+    private boolean flag;
 
     public RiftParasaurolophusAlertHerd(Parasaurolophus parasaur) {
         this.parasaur = parasaur;
-        this.pathfinder = parasaur.getNavigator();
-        this.setMutexBits(3);
+        this.setMutexBits(1);
     }
 
     @Override
@@ -32,8 +31,7 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
 
         if (entitylivingbase == null) return false;
         else if (!entitylivingbase.isEntityAlive()) return false;
-        else if (this.parasaur.isTamed()) return false;
-        else return true;
+        else return !this.parasaur.isTamed() && this.parasaur.getDistance(entitylivingbase) <= 16D;
     }
 
     @Override
@@ -41,18 +39,26 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
         this.target = this.parasaur.getAttackTarget();
         this.hornAnimTime = 0;
         this.targetPos = null;
+        this.parasaur.getNavigator().clearPath();
+        this.flag = true;
     }
 
     @Override
     public void resetTask() {
-        super.resetTask();
         this.parasaur.setCanUseHorn(true);
+        this.parasaur.setAttackTarget(null);
+        if (this.parasaur.isHerdLeader()) {
+            for (RiftCreature herdMem : this.parasaur.getHerdMembers(true)) {
+                ((Parasaurolophus)herdMem).setFleeing(false);
+            }
+        }
+        else if (this.parasaur.getHerdLeader().equals(this.parasaur)) this.parasaur.setFleeing(false);
         System.out.println("end");
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.parasaur.getDistance(this.target) <= 16D && this.target.isEntityAlive() && this.target != null;
+        return flag;
     }
 
     @Override
@@ -66,7 +72,7 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
                     herdMem.removeSpeed();
                 }
             }
-            else {
+            else if (this.parasaur.getHerdLeader().equals(this.parasaur)) {
                 this.parasaur.setUsingHorn(true);
                 this.parasaur.removeSpeed();
             }
@@ -79,16 +85,34 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
                 if (this.parasaur.isHerdLeader()) {
                     for (RiftCreature herdMem : this.parasaur.getHerdMembers(true)) {
                         herdMem.resetSpeed();
+                        ((Parasaurolophus)herdMem).setFleeing(true);
                     }
                 }
-                else this.parasaur.resetSpeed();
+                else if (this.parasaur.getHerdLeader().equals(this.parasaur)) {
+                    this.parasaur.resetSpeed();
+                    this.parasaur.setFleeing(true);
+                }
             }
         }
         if (!this.parasaur.canUseHorn() && !this.parasaur.isUsingHorn()) {
             if (this.targetPos == null) this.targetPos = this.getValidSpot();
-            if (this.targetPos != null) {
-                this.pathfinder.tryMoveToXYZ(this.targetPos.getX(), this.targetPos.getY(), this.targetPos.getZ(), 2.25);
+            if (this.targetPos != null && this.parasaur.getNavigator().noPath()) {
+                if (this.parasaur.isHerdLeader()) {
+                    for (RiftCreature herdMem : this.parasaur.getHerdMembers(true)) {
+                        for (int x = 0; x < 15; x++) {
+                            herdMem.getNavigator().tryMoveToXYZ(this.targetPos.getX(), this.targetPos.getY(), this.targetPos.getZ(), 2.25);
+                            if (!herdMem.getNavigator().noPath()) break;
+                        }
+                    }
+                }
+                else if (this.parasaur.getHerdLeader().equals(this.parasaur)) {
+                    for (int x = 0; x < 15; x++) {
+                        this.parasaur.getNavigator().tryMoveToXYZ(this.targetPos.getX(), this.targetPos.getY(), this.targetPos.getZ(), 2.25);
+                        if (!this.parasaur.getNavigator().noPath()) break;
+                    }
+                }
             }
+            if (this.targetPos != null && this.parasaur.getNavigator().noPath()) this.flag = false;
         }
     }
 
@@ -97,16 +121,13 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
         Random random = new Random();
 
         for (int i = 0; i < 10; i++) {
-            double angle = random.nextDouble() * 2 * Math.PI; // Random angle
+            double angle = random.nextDouble() * 2 * Math.PI;
             double xOffset = 16 * Math.cos(angle);
             double zOffset = 16 * Math.sin(angle);
 
             BlockPos newPos = new BlockPos(targetPos.x + xOffset, targetPos.y, targetPos.z + zOffset);
 
-            // Check if newPos is a valid position (not inside a block, etc.)
-            if (this.isPositionValid(newPos)) {
-                return newPos;
-            }
+            if (this.isPositionValid(newPos)) return newPos;
         }
         return null;
     }
@@ -118,11 +139,12 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
             return false;
         }
         int height = Math.round(this.parasaur.height);
-        for (int i = 1; i <= height; i++) {
-            BlockPos abovePos = pos.up(i);
-            IBlockState aboveState = world.getBlockState(abovePos);
-            if (aboveState.getMaterial().isSolid()) {
-                return false;
+        int width = Math.round(this.parasaur.width);
+        for (int x = (int)(width/2f - 1f); x <= (int)(width/2f + 1f); x++) {
+            for (int z = (int)(width/2f - 1f); z <= (int)(width/2f + 1f); z++) {
+                for (int y = 0; y <= height; y++) {
+                    if (world.getBlockState(pos.add(x, y, z)).getMaterial().isSolid()) return false;
+                }
             }
         }
         return true;

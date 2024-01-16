@@ -38,6 +38,7 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ServerEvents {
     //make people join le discord
@@ -48,6 +49,15 @@ public class ServerEvents {
             message.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/qVWaKRMCRc"));
             message.getStyle().setUnderlined(true);
             event.player.sendMessage(message);
+        }
+    }
+
+    //give anything (thats not a player or weapon) that spawns a uuid
+    @SubscribeEvent
+    public void giveUUID(LivingSpawnEvent event) {
+        if (!(event.getEntityLiving() instanceof EntityPlayer) || !(event.getEntityLiving() instanceof RiftLargeWeapon)) {
+            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(event.getEntityLiving(), RiftEntityProperties.class);
+            if (properties.getUUID().equals("")) properties.setUUID(UUID.randomUUID());
         }
     }
 

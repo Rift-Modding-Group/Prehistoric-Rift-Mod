@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.config.ParasaurolophusConfig;
-import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
@@ -21,6 +20,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 public class Parasaurolophus extends RiftCreature {
     private static final DataParameter<Boolean> USING_HORN = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_USE_HORN = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> FLEEING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
 
     public Parasaurolophus(World worldIn) {
         super(worldIn, RiftCreatureType.PARASAUROLOPHUS);
@@ -40,6 +40,7 @@ public class Parasaurolophus extends RiftCreature {
         super.entityInit();
         this.dataManager.register(USING_HORN, false);
         this.dataManager.register(CAN_USE_HORN, true);
+        this.dataManager.register(FLEEING, false);
     }
 
     @Override
@@ -71,9 +72,7 @@ public class Parasaurolophus extends RiftCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
-
-    }
+    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
 
     @Override
     public boolean hasLeftClickChargeBar() {
@@ -124,6 +123,14 @@ public class Parasaurolophus extends RiftCreature {
 
     public void setCanUseHorn(boolean value) {
         this.dataManager.set(CAN_USE_HORN, value);
+    }
+
+    public boolean isFleeing() {
+        return this.dataManager.get(FLEEING);
+    }
+
+    public void setFleeing(boolean value) {
+        this.dataManager.set(FLEEING, value);
     }
 
     @Override
