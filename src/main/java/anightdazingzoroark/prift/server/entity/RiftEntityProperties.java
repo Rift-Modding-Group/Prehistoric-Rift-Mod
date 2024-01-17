@@ -17,7 +17,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     public boolean isBleeding;
     public int bleedingStrength;
     public int ticksUntilStopBleeding;
-    private String entityUUID;
 
     @Override
     public int getTrackingTime() {
@@ -35,8 +34,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.isBleeding = false;
         this.bleedingStrength = -1;
         this.ticksUntilStopBleeding = 0;
-
-        this.entityUUID = "";
     }
 
     @Override
@@ -50,8 +47,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         compound.setBoolean("IsBleeding", this.isBleeding);
         compound.setInteger("BleedingStrength", this.bleedingStrength);
         compound.setInteger("TicksUntilStopBleeding", this.ticksUntilStopBleeding);
-
-        compound.setString("EntityUUID", this.entityUUID);
     }
 
     @Override
@@ -65,8 +60,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.isBleeding = compound.getBoolean("IsBleeding");
         this.bleedingStrength = compound.getInteger("BleedingStrength");
         this.ticksUntilStopBleeding = compound.getInteger("TicksUntilStopBleeding");
-
-        this.entityUUID = compound.getString("EntityUUID");
     }
 
     @Override
@@ -89,24 +82,5 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.isBleeding = false;
         this.bleedingStrength = -1;
         this.ticksUntilStopBleeding = 0;
-    }
-
-    public void setUUID(UUID uuid) {
-        this.entityUUID = uuid.toString();
-    }
-
-    public UUID getUUID() {
-        return UUID.fromString(this.entityUUID);
-    }
-
-    public EntityLivingBase getEntityFromUUID(World world, UUID uuid) {
-        if (!world.isRemote) {
-            List<EntityLivingBase> entities = world.getEntities(EntityLivingBase.class, null);
-            for (EntityLivingBase entity : entities) {
-                RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
-                if (properties.getUUID().equals(uuid)) return entity;
-            }
-        }
-        return null;
     }
 }

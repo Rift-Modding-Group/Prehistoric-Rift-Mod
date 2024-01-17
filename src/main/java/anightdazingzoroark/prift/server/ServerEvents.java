@@ -52,15 +52,6 @@ public class ServerEvents {
         }
     }
 
-    //give anything (thats not a player or weapon) that spawns a uuid
-    @SubscribeEvent
-    public void giveUUID(LivingSpawnEvent event) {
-        if (!(event.getEntityLiving() instanceof EntityPlayer) || !(event.getEntityLiving() instanceof RiftLargeWeapon)) {
-            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(event.getEntityLiving(), RiftEntityProperties.class);
-            if (properties.getUUID().equals("")) properties.setUUID(UUID.randomUUID());
-        }
-    }
-
     //prevent players from attackin while ridin
     @SubscribeEvent
     public void noAttackWhileRiding(AttackEntityEvent event) {
