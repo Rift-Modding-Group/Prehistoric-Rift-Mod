@@ -35,7 +35,6 @@ public class RiftPackBuff extends EntityAIBase {
                 }
             });
             this.packMembers.remove(this.attacker);
-            System.out.println(this.attacker.isHerdLeader());
             return this.attacker.isHerdLeader() && this.packMembers.size() >= 2 && ((IPackHunter)this.attacker).getPackBuffCooldown() == 0;
         }
     }

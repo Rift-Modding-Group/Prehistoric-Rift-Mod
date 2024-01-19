@@ -9,10 +9,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
@@ -22,6 +25,10 @@ import java.util.*;
 
 public class RiftUtil {
     public static final double gravity = 0.08D;
+
+    public static boolean entityAtLocation(EntityLivingBase entityLivingBase, BlockPos pos, double radius) {
+        return entityLivingBase.getEntityBoundingBox().grow(radius).contains(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
+    }
 
     public static RiftCreature getCreatureFromUUID(World world, UUID uuid) {
         if (uuid == null) return null;
@@ -36,6 +43,16 @@ public class RiftUtil {
             }
         }
         return null;
+    }
+
+    public static boolean blockExposedToSky(World world, BlockPos pos) {
+        for (int y = pos.getY() + 1; y < 256; y++) {
+            BlockPos aboveBlockPos = new BlockPos(pos.getX(), y, pos.getZ());
+            if (!world.isAirBlock(aboveBlockPos)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static String[] removeElementFromArray(String[] array, String element) {

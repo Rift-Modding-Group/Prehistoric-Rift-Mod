@@ -244,6 +244,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setControls();
         }
         if (this.canDoHerding()) this.manageHerding();
+//        System.out.println(this.getName()+" "+this.getHerdLeaderId());
     }
 
     @SideOnly(Side.CLIENT)
@@ -863,7 +864,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isHerdLeader() {
-        return this.getUUID() == this.getHerdLeaderId() && this.getHerdMembers(false).size() > 1;
+        return this.getUUID().equals(this.getHerdLeaderId()) && !this.getHerdMembers(false).isEmpty();
+    }
+
+    public boolean isHerdMember() {
+        return this.getHerdMembers(true).size() > 1;
     }
 
     public void setHerdLeader(RiftCreature creature) {
@@ -884,6 +889,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     return !input.isTamed();
                 }
             });
+//            if (potentialHerders.size() > 1 && this.getHerdLeader().equals(this)) {
+//                int herdLeaderId = Collections.min(potentialHerders.stream().map(RiftCreature::getEntityId).collect(Collectors.toList()));
+//                this.setHerdLeader((RiftCreature) this.world.getEntityByID(herdLeaderId));
+//            }
             int herdLeaderId = Collections.min(potentialHerders.stream().map(RiftCreature::getEntityId).collect(Collectors.toList()));
             this.setHerdLeader((RiftCreature) this.world.getEntityByID(herdLeaderId));
             this.herdCheckCountdown = RiftUtil.randomInRange(10, 15) * 20;
