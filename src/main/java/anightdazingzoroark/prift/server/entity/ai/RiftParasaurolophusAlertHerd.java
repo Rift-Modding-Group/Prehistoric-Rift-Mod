@@ -100,7 +100,14 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
         }
         if (!this.parasaur.canUseHorn() && !this.parasaur.isUsingHorn()) {
             if (this.parasaur.isHerdLeader()) {
-                System.out.println("moving as herd");
+                if (this.targetPos == null) this.targetPos = this.getValidSpot();
+                if (this.targetPos != null) {
+                    System.out.println("moving as herd");
+                    for (RiftCreature herdMem : this.parasaur.getHerdMembers(true)) {
+                        herdMem.getMoveHelper().setMoveTo(this.targetPos.getX(), this.targetPos.getY(), this.targetPos.getZ(), 2.25D);
+                    }
+                    if (RiftUtil.entityAtLocation(this.parasaur, targetPos, 2)) this.flag = false;
+                }
             }
             //for single ones
             else if (this.parasaur.getHerdMembers(false).isEmpty()) {
@@ -108,7 +115,6 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
                 if (this.targetPos != null) {
                     System.out.println(this.targetPos);
                     this.parasaur.getMoveHelper().setMoveTo(this.targetPos.getX(), this.targetPos.getY(), this.targetPos.getZ(), 2.25D);
-//                    this.moveFlag = false;
                     if (RiftUtil.entityAtLocation(this.parasaur, targetPos, 2)) this.flag = false;
                     System.out.println("moving as single");
                 }
@@ -143,7 +149,7 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
         for (int x = (int)(width/2f - 1f); x <= (int)(width/2f + 1f); x++) {
             for (int z = (int)(width/2f - 1f); z <= (int)(width/2f + 1f); z++) {
                 for (int y = -height; y <= height; y++) {
-                    if (RiftUtil.blockExposedToSky(world, pos.add(x, y, z))) return true;
+                    if (!world.getBlockState(pos.add(x, y, z)).getMaterial().isSolid()) return true;
                 }
             }
         }
