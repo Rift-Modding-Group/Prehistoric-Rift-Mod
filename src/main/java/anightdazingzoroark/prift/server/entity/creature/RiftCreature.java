@@ -244,7 +244,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setControls();
         }
         if (this.canDoHerding()) this.manageHerding();
-//        System.out.println(this.getName()+" "+this.getHerdLeaderId());
     }
 
     @SideOnly(Side.CLIENT)
@@ -296,6 +295,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (this.hasRightClickChargeBar()) {
                         RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
                     }
+                    else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, 0));
                 }
                 else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));

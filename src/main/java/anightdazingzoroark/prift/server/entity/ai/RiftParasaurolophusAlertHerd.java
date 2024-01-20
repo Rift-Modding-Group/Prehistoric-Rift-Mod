@@ -50,7 +50,6 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
 
     @Override
     public void resetTask() {
-        System.out.println("endin");
         this.parasaur.setCanUseHorn(true);
         this.parasaur.setAttackTarget(null);
     }
@@ -63,10 +62,8 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
     @Override
     public void updateTask() {
         if (this.parasaur.canUseHorn() && !this.parasaur.isUsingHorn()) {
-            System.out.println("honk");
             //for herd leaders
             if (this.parasaur.isHerdLeader()) {
-                System.out.println("leader");
                 this.parasaur.setUsingHorn(true);
                 for (RiftCreature herdMem : this.parasaur.getHerdMembers(true)) {
                     herdMem.removeSpeed();
@@ -74,7 +71,6 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
             }
             //for single ones
             else if (this.parasaur.getHerdMembers(false).isEmpty()) {
-                System.out.println("single");
                 this.parasaur.setUsingHorn(true);
                 this.parasaur.removeSpeed();
             }
@@ -102,7 +98,6 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
             if (this.parasaur.isHerdLeader()) {
                 if (this.targetPos == null) this.targetPos = this.getValidSpot();
                 if (this.targetPos != null) {
-                    System.out.println("moving as herd");
                     for (RiftCreature herdMem : this.parasaur.getHerdMembers(true)) {
                         herdMem.getMoveHelper().setMoveTo(this.targetPos.getX(), this.targetPos.getY(), this.targetPos.getZ(), 2.25D);
                     }
@@ -113,10 +108,8 @@ public class RiftParasaurolophusAlertHerd extends EntityAIBase {
             else if (this.parasaur.getHerdMembers(false).isEmpty()) {
                 if (this.targetPos == null) this.targetPos = this.getValidSpot();
                 if (this.targetPos != null) {
-                    System.out.println(this.targetPos);
                     this.parasaur.getMoveHelper().setMoveTo(this.targetPos.getX(), this.targetPos.getY(), this.targetPos.getZ(), 2.25D);
                     if (RiftUtil.entityAtLocation(this.parasaur, targetPos, 2)) this.flag = false;
-                    System.out.println("moving as single");
                 }
             }
         }
