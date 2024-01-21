@@ -19,7 +19,7 @@ public class RiftAttack extends EntityAIBase {
     protected int attackAnimTime;
     protected int animTime;
     double speedTowardsTarget;
-    Path path;
+    private Path path;
     private int delayCounter;
     private double targetX;
     private double targetY;

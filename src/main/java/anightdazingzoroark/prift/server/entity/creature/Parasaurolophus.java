@@ -11,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -30,8 +31,8 @@ import java.util.List;
 import java.util.Random;
 
 public class Parasaurolophus extends RiftCreature {
-    private static final DataParameter<Boolean> USING_HORN = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> CAN_USE_HORN = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> BLOWING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CAN_BLOW = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
 
     public Parasaurolophus(World worldIn) {
         super(worldIn, RiftCreatureType.PARASAUROLOPHUS);
@@ -49,8 +50,8 @@ public class Parasaurolophus extends RiftCreature {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(USING_HORN, false);
-        this.dataManager.register(CAN_USE_HORN, true);
+        this.dataManager.register(BLOWING, false);
+        this.dataManager.register(CAN_BLOW, true);
     }
 
     @Override
@@ -62,13 +63,11 @@ public class Parasaurolophus extends RiftCreature {
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, ParasaurolophusConfig.parasaurolophusTargets, false, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(1, new RiftParasaurControlledHornUse(this));
-        this.tasks.addTask(2, new RiftParasaurolophusAlertHerd(this));
+        this.tasks.addTask(2, new RiftParasaurolophusBlow(this));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
         this.tasks.addTask(3, new RiftAttack.ParasaurolophusAttack(this, 1.0D, 0.52F, 0.24F));
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
@@ -79,72 +78,15 @@ public class Parasaurolophus extends RiftCreature {
         this.tasks.addTask(9, new RiftLookAround(this));
     }
 
-    public void useScareHorn() {
-        AxisAlignedBB aabb = this.getEntityBoundingBox().grow(12D);
-        List<String> blacklist = Arrays.asList(ParasaurolophusConfig.parasaurolophusScareBlacklist);
-        List<EntityLiving> entityList = this.world.getEntitiesWithinAABB(EntityLiving.class, aabb, new Predicate<EntityLiving>() {
-            @Override
-            public boolean apply(@Nullable EntityLiving input) {
-                if (input instanceof EntityTameable) {
-                    EntityTameable tame = (EntityTameable) input;
-                    return !tame.isTamed();
-                }
-                return true;
-            }
-        });
-        entityList.remove(this);
-        for (EntityLiving entityLiving : entityList) {
-            if (ParasaurolophusConfig.parasaurolophusScareBlistAsWlist) {
-                if (blacklist.contains(EntityList.getKey(entityLiving).toString())) {
-                    entityLiving.getNavigator().clearPath();
-                    entityLiving.setAttackTarget(null);
-                    BlockPos pos = this.getValidSpot(entityLiving);
-                    entityLiving.getMoveHelper().setMoveTo(pos.getX(), pos.getY(), pos.getZ(), 2.25D);
-                }
-            }
-            else {
-                if (!blacklist.contains(EntityList.getKey(entityLiving).toString())) {
-                    entityLiving.getNavigator().clearPath();
-                    entityLiving.setAttackTarget(null);
-                    BlockPos pos = this.getValidSpot(entityLiving);
-                    entityLiving.getMoveHelper().setMoveTo(pos.getX(), pos.getY(), pos.getZ(), 2.25D);
-                }
-            }
-        }
+    //blowing stuff starts here
+    public void parasaurBlow(EntityLivingBase entity, float strength) {
+        double d0 = this.posX - entity.posX;
+        double d1 = this.posZ - entity.posZ;
+        double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
+        entity.knockBack(this, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
+        entity.attackEntityFrom(DamageSource.causeMobDamage(this), 0);
     }
-
-    private BlockPos getValidSpot(Entity entity) {
-        Vec3d targetPos = this.getPositionVector();
-        Random random = new Random();
-
-        for (int i = 0; i < 10; i++) {
-            double angle = random.nextDouble() * 2 * Math.PI;
-            double xOffset = 48 * Math.cos(angle);
-            double zOffset = 48 * Math.sin(angle);
-
-            BlockPos newPos = new BlockPos(targetPos.x + xOffset, targetPos.y, targetPos.z + zOffset);
-
-            if (this.isPositionValid(newPos, entity)) return newPos;
-        }
-        return null;
-    }
-
-    private boolean isPositionValid(BlockPos pos, Entity entity) {
-        IBlockState state = this.world.getBlockState(pos);
-        if (state.getMaterial().isSolid()) {
-            return false;
-        }
-        int height = Math.round(entity.height);
-        int width = Math.round(entity.width);
-        for (int x = (int)(width/2f - 1f); x <= (int)(width/2f + 1f); x++) {
-            for (int z = (int)(width/2f - 1f); z <= (int)(width/2f + 1f); z++) {
-                for (int y = -height; y <= height; y++) {
-                    if (!this.world.getBlockState(pos.add(x, y, z)).getMaterial().isSolid()) return true;
-                }
-            }
-        }
-        return false;
-    }
+    //blowing stuff ends here
 
     @Override
     public Vec3d riderPos() {
@@ -167,15 +109,15 @@ public class Parasaurolophus extends RiftCreature {
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
         }
-        else if (control == 1) {
-            System.out.println("right click");
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.setUsingHorn(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
+//        else if (control == 1) {
+//            System.out.println("right click");
+//            if (this.getEnergy() > 0) {
+//                if (!this.isActing()) {
+//                    this.setUsingHorn(true);
+//                }
+//            }
+//            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+//        }
     }
 
     @Override
@@ -185,7 +127,7 @@ public class Parasaurolophus extends RiftCreature {
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return false;
+        return true;
     }
 
     @Override
@@ -213,28 +155,28 @@ public class Parasaurolophus extends RiftCreature {
         return 27;
     }
 
-    public boolean isUsingHorn() {
-        return this.dataManager.get(USING_HORN);
+    public boolean isBlowing() {
+        return this.dataManager.get(BLOWING);
     }
 
-    public void setUsingHorn(boolean value) {
-        this.dataManager.set(USING_HORN, value);
+    public void setBlowing(boolean value) {
+        this.dataManager.set(BLOWING, value);
         this.setActing(value);
     }
 
-    public boolean canUseHorn() {
-        return this.dataManager.get(CAN_USE_HORN);
+    public boolean canBlow() {
+        return this.dataManager.get(CAN_BLOW);
     }
 
-    public void setCanUseHorn(boolean value) {
-        this.dataManager.set(CAN_USE_HORN, value);
+    public void setCanBlow(boolean value) {
+        this.dataManager.set(CAN_BLOW, value);
     }
 
     @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::parasaurolophusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::parasaurolophusAttack));
-        data.addAnimationController(new AnimationController(this, "hornUse", 0, this::parasaurolophusHorn));
+        data.addAnimationController(new AnimationController(this, "blow", 0, this::parasaurolophusBlow));
     }
 
     private <E extends IAnimatable> PlayState parasaurolophusMovement(AnimationEvent<E> event) {
@@ -259,9 +201,9 @@ public class Parasaurolophus extends RiftCreature {
         return PlayState.STOP;
     }
 
-    private <E extends IAnimatable> PlayState parasaurolophusHorn(AnimationEvent<E> event) {
-        if (this.isUsingHorn()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.call", false));
+    private <E extends IAnimatable> PlayState parasaurolophusBlow(AnimationEvent<E> event) {
+        if (this.isBlowing()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.blow", false));
             return PlayState.CONTINUE;
         }
         event.getController().clearAnimationCache();

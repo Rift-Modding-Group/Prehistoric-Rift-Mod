@@ -59,7 +59,6 @@ public class RiftChargeAttack extends EntityAIBase {
         this.finalChargePos = new BlockPos(entitylivingbase.posX, entitylivingbase.posY, entitylivingbase.posZ);
         Vec3d chargerVec = this.attacker.getPositionVector();
         Vec3d targetVec = entitylivingbase.getPositionVector();
-//        this.attacker.faceEntity(entitylivingbase, 30.0F, 30.0F);
         this.forceLook();
         this.chargeVector = targetVec.subtract(chargerVec).normalize();
         this.endFlag = false;
