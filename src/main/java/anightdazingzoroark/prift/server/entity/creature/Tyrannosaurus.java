@@ -359,7 +359,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
                     this.setCanRoar(false);
                     this.roar(0.015f * Math.min(holdAmount, 100) + 1.5f);
                     this.setEnergy(this.getEnergy() - (int)(0.06d * (double)Math.min(holdAmount, 100) + 6d));
-                    this.setRightClickCooldown(holdAmount * 2);
+                    this.setRightClickCooldown(Math.max(60, holdAmount * 2));
                     this.playSound(RiftSounds.TYRANNOSAURUS_ROAR, 2, 1);
                 }
             }

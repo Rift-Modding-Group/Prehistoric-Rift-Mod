@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.ParasaurolophusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -14,6 +15,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -67,9 +69,9 @@ public class Parasaurolophus extends RiftCreature {
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftParasaurolophusBlow(this));
+        this.tasks.addTask(2, new RiftResetAnimatedPose(this, 1.52F, 1));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
-        this.tasks.addTask(3, new RiftAttack.ParasaurolophusAttack(this, 1.0D, 0.52F, 0.24F));
+        this.tasks.addTask(3, new RiftParasaurolophusBlow(this));
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(5, new RiftHerdDistanceFromOtherMembers(this, 1D));
         this.tasks.addTask(6, new RiftHerdMemberFollow(this, 8D, 4D, 1D));
@@ -78,8 +80,71 @@ public class Parasaurolophus extends RiftCreature {
         this.tasks.addTask(9, new RiftLookAround(this));
     }
 
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        this.manageCanBlow();
+    }
+
+    private void manageCanBlow() {
+        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
+        if (this.getRightClickCooldown() == 0) this.setCanBlow(true);
+    }
+
     //blowing stuff starts here
-    public void parasaurBlow(EntityLivingBase entity, float strength) {
+    public void useBlow(float strength) {
+        double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + 8D;
+        Vec3d vec3d = this.getPositionEyes(1.0F);
+        Vec3d vec3d1 = this.getLook(1.0F);
+        Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
+        double d1 = dist;
+        Entity rider = this.getControllingPassenger();
+        List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(3.0D, 3.0D, 3.0D), null);
+        double d2 = d1;
+        for (EntityLivingBase entity : list) {
+            AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().grow((double) entity.getCollisionBorderSize() + 2F);
+            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
+
+            if (entity != this && entity != rider) {
+                if (entity instanceof Parasaurolophus) {
+                    if ((((Parasaurolophus)entity).isTamed() && !this.isTamed()) || (!((Parasaurolophus)entity).isTamed() && this.isTamed())) {
+                        if (axisalignedbb.contains(vec3d)) {
+                            if (d2 >= 0.0D) {
+                                this.parasaurKnockback(entity, strength);
+                                d2 = 0.0D;
+                            }
+                        }
+                        else if (raytraceresult != null) {
+                            double d3 = vec3d.distanceTo(raytraceresult.hitVec);
+
+                            if (d3 < d2 || d2 == 0.0D) {
+                                this.parasaurKnockback(entity, strength);
+                                d2 = d3;
+                            }
+                        }
+                    }
+                }
+                else {
+                    if (axisalignedbb.contains(vec3d)) {
+                        if (d2 >= 0.0D) {
+                            this.parasaurKnockback(entity, strength);
+                            d2 = 0.0D;
+                        }
+                    }
+                    else if (raytraceresult != null) {
+                        double d3 = vec3d.distanceTo(raytraceresult.hitVec);
+
+                        if (d3 < d2 || d2 == 0.0D) {
+                            this.parasaurKnockback(entity, strength);
+                            d2 = d3;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void parasaurKnockback(EntityLivingBase entity, float strength) {
         double d0 = this.posX - entity.posX;
         double d1 = this.posZ - entity.posZ;
         double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
@@ -109,15 +174,18 @@ public class Parasaurolophus extends RiftCreature {
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
         }
-//        else if (control == 1) {
-//            System.out.println("right click");
-//            if (this.getEnergy() > 0) {
-//                if (!this.isActing()) {
-//                    this.setUsingHorn(true);
-//                }
-//            }
-//            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-//        }
+        if (control == 1) {
+            if (this.getEnergy() > 6) {
+                if (this.canBlow() && !this.isActing()) {
+                    this.setActing(true);
+                    this.setCanBlow(false);
+                    this.useBlow(RiftUtil.clamp(0.04f * holdAmount + 2f, 2f, 6f));
+                    this.setEnergy(this.getEnergy() - (int)(0.05d * (double)Math.min(holdAmount, 100) + 1d));
+                    this.setRightClickCooldown(Math.max(60, holdAmount * 2));
+                }
+            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
     }
 
     @Override
@@ -177,6 +245,7 @@ public class Parasaurolophus extends RiftCreature {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::parasaurolophusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::parasaurolophusAttack));
         data.addAnimationController(new AnimationController(this, "blow", 0, this::parasaurolophusBlow));
+        data.addAnimationController(new AnimationController(this, "controlledBlow", 0, this::parasaurolophusControlledBlow));
     }
 
     private <E extends IAnimatable> PlayState parasaurolophusMovement(AnimationEvent<E> event) {
@@ -208,5 +277,14 @@ public class Parasaurolophus extends RiftCreature {
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
+    }
+
+    private <E extends IAnimatable> PlayState parasaurolophusControlledBlow(AnimationEvent<E> event) {
+        if (this.getRightClickCooldown() == 0) {
+            if (this.getRightClickUse() > 0 && this.getRightClickUse() < 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.use_blow_p1", false));
+            else if (this.getRightClickUse() >= 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.use_blow_p1_hold", true));
+        }
+        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.use_blow_p2", false));
+        return PlayState.CONTINUE;
     }
 }

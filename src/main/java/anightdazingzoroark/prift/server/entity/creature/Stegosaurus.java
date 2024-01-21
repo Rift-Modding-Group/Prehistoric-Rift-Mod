@@ -136,7 +136,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
                             else {
                                 this.setIsStrongAttacking(true);
                                 this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
-                                this.setLeftClickCooldown(holdAmount * 2);
+                                this.setRightClickCooldown(Math.max(60, holdAmount * 2));
                             }
                         }
                     }
@@ -147,7 +147,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
                             else {
                                 this.setIsStrongAttacking(true);
                                 this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
-                                this.setLeftClickCooldown(holdAmount * 2);
+                                this.setRightClickCooldown(Math.max(60, holdAmount * 2));
                             }
                         }
                     }
@@ -162,7 +162,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
                     if (!this.isActing()) {
                         this.setActing(true);
                         this.controlRangedAttack(RiftUtil.clamp(holdAmount, 0, 100));
-                        this.setRightClickCooldown(holdAmount * 2);
+                        this.setRightClickCooldown(Math.max(60, holdAmount * 2));
                         this.setEnergy(this.getEnergy() - (int)(0.09D * (double)holdAmount + 1D));
                     }
                 }
