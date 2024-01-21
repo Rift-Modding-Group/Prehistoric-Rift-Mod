@@ -1,17 +1,8 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.pathfinding.Path;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
-
-import java.util.List;
 
 public class RiftParasaurolophusBlow extends EntityAIBase {
     private Parasaurolophus parasaurolophus;
@@ -47,6 +38,7 @@ public class RiftParasaurolophusBlow extends EntityAIBase {
     public void resetTask() {
         this.parasaurolophus.setBlowing(false);
         this.parasaurolophus.setAttackTarget(null);
+        this.parasaurolophus.setRevengeTarget(null);
     }
 
     @Override

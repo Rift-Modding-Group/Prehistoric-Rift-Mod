@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.ParasaurolophusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -13,12 +15,15 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -33,6 +38,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Parasaurolophus extends RiftCreature {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
     private static final DataParameter<Boolean> BLOWING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_BLOW = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
 
@@ -99,7 +105,7 @@ public class Parasaurolophus extends RiftCreature {
         Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
         double d1 = dist;
         Entity rider = this.getControllingPassenger();
-        List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(3.0D, 3.0D, 3.0D), null);
+        List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(5.0D, 5.0D, 5.0D), null);
         double d2 = d1;
         for (EntityLivingBase entity : list) {
             AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().grow((double) entity.getCollisionBorderSize() + 2F);
@@ -125,13 +131,16 @@ public class Parasaurolophus extends RiftCreature {
                     }
                 }
                 else {
+                    System.out.println("not another parasaur");
                     if (axisalignedbb.contains(vec3d)) {
+                        System.out.println("cond 1");
                         if (d2 >= 0.0D) {
                             this.parasaurKnockback(entity, strength);
                             d2 = 0.0D;
                         }
                     }
                     else if (raytraceresult != null) {
+                        System.out.println("cond 2");
                         double d3 = vec3d.distanceTo(raytraceresult.hitVec);
 
                         if (d3 < d2 || d2 == 0.0D) {
@@ -149,7 +158,7 @@ public class Parasaurolophus extends RiftCreature {
         double d1 = this.posZ - entity.posZ;
         double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
         entity.knockBack(this, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
-        entity.attackEntityFrom(DamageSource.causeMobDamage(this), 0);
+        entity.attackEntityFrom(DamageSource.causeMobDamage(this), 1);
     }
     //blowing stuff ends here
 
@@ -241,6 +250,12 @@ public class Parasaurolophus extends RiftCreature {
     }
 
     @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
+    }
+
+    @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::parasaurolophusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::parasaurolophusAttack));
@@ -286,5 +301,17 @@ public class Parasaurolophus extends RiftCreature {
         }
         else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.use_blow_p2", false));
         return PlayState.CONTINUE;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.PARASAUROLOPHUS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.PARASAUROLOPHUS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.PARASAUROLOPHUS_DEATH;
     }
 }

@@ -67,6 +67,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.apatosaurus.death")
     public static final SoundEvent APATOSAURUS_DEATH = createSoundEvent("prift.apatosaurus.death");
 
+    @GameRegistry.ObjectHolder("prift.parasaurolophus.idle")
+    public static final SoundEvent PARASAUROLOPHUS_IDLE = createSoundEvent("prift.parasaurolophus.idle");
+
+    @GameRegistry.ObjectHolder("prift.parasaurolophus.hurt")
+    public static final SoundEvent PARASAUROLOPHUS_HURT = createSoundEvent("prift.parasaurolophus.hurt");
+
+    @GameRegistry.ObjectHolder("prift.parasaurolophus.death")
+    public static final SoundEvent PARASAUROLOPHUS_DEATH = createSoundEvent("prift.parasaurolophus.hurt");
+
     private static SoundEvent createSoundEvent(String soundName) {
         ResourceLocation soundID = new ResourceLocation(RiftInitialize.MODID, soundName);
         return new SoundEvent(soundID).setRegistryName(soundID);

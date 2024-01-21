@@ -6,6 +6,7 @@ entity.dodo.name=Dodo
 entity.triceratops.name=Triceratops
 entity.utahraptor.name=Utahraptor
 entity.apatosaurus.name=Apatosaurus
+entity.parasaurolophus.name=Parasaurolophus
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon
@@ -18,9 +19,11 @@ inventory.inventory=%s Inventory
 item.raw_exotic_meat.name=Raw Exotic Meat
 item.raw_fibrous_meat.name=Raw Fibrous Meat
 item.raw_dodo_meat.name=Raw Dodo Meat
+item.raw_hadrosaur_meat.name=Raw Hadrosaur Meat
 item.cooked_exotic_meat.name=Cooked Exotic Meat
 item.cooked_fibrous_meat.name=Cooked Fibrous Meat
 item.cooked_dodo_meat.name=Cooked Dodo Meat
+item.cooked_hadrosaur_meat.name=Cooked Hadrosaur Meat
 item.fiber_bar.name=Fiber Bar
 item.basic_herbivore_meal.name=Basic Herbivore Meal
 item.basic_carnivore_meal.name=Basic Carnivore Meal
@@ -43,6 +46,7 @@ item.dodo_egg.name=Dodo Egg
 item.triceratops_egg.name=Triceratops Egg
 item.utahraptor_egg.name=Utahraptor Egg
 item.apatosaurus_egg.name=Apatosaurus Egg
+item.parasaurolophus_egg.name=Parasaurolophus Egg
 
 item.apatosaurus_platform.name=Apatosaurus Platform
 item.cannon.name=Cannon
@@ -130,6 +134,10 @@ sounds.subtitle.utahraptor_call=Utahraptor calls
 sounds.subtitle.apatosaurus_idle=Apatosaurus grunts
 sounds.subtitle.apatosaurus_hurt=Apatosaurus hurts
 sounds.subtitle.apatosaurus_death=Apatosaurus dies
+
+sounds.subtitle.parasaurolophus_idle=Parasaurolophus grunts
+sounds.subtitle.parasaurolophus_hurt=Parasaurolophus hurts
+sounds.subtitle.parasaurolophus_death=Parasaurolophus dies
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral

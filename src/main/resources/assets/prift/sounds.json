@@ -143,5 +143,27 @@
       "prift:entities/apatosaurus/apatosaurus_death"
     ],
     "subtitle": "sounds.subtitle.apatosaurus_death"
+  },
+
+  "prift.parasaurolophus.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/parasaurolophus/parasaurolophus_idle"
+    ],
+    "subtitle": "sounds.subtitle.parasaurolophus_idle"
+  },
+  "prift.parasaurolophus.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/parasaurolophus/parasaurolophus_hurt"
+    ],
+    "subtitle": "sounds.subtitle.parasaurolophus_hurt"
+  },
+  "prift.parasaurolophus.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/parasaurolophus/parasaurolophus_death"
+    ],
+    "subtitle": "sounds.subtitle.parasaurolophus_death"
   }
 }

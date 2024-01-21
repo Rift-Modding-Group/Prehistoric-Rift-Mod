@@ -133,8 +133,8 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(CAN_ROAR, Boolean.valueOf(true));
-        this.dataManager.register(ROARING, Boolean.valueOf(false));
+        this.dataManager.register(CAN_ROAR, true);
+        this.dataManager.register(ROARING, false);
         this.setCanPickUpLoot(true);
     }
 

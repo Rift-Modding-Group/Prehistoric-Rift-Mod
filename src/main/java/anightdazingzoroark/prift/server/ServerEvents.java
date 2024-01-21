@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
+import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
@@ -80,6 +81,14 @@ public class ServerEvents {
             if (event.getPlayer().getRidingEntity() instanceof RiftCreature || event.getPlayer().getRidingEntity() instanceof RiftLargeWeapon) {
                 event.setCanceled(true);
             }
+        }
+    }
+
+    //ensure parasaurs always do 0 damage
+    @SubscribeEvent
+    public void zeroDamage(LivingDamageEvent event) {
+        if (event.getSource().getTrueSource() instanceof Parasaurolophus) {
+            event.setCanceled(true);
         }
     }
 

@@ -7,18 +7,20 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
 
-public class RiftDodoMeatItem extends ItemFood {
+public class RiftSpecialMeatItem extends ItemFood {
     private final boolean isCooked;
+    private final PotionEffect eatenEffect;
 
-    public RiftDodoMeatItem(int amount, float saturation, boolean isCooked, boolean isWolfFood) {
-        super(amount, saturation, isWolfFood);
+    public RiftSpecialMeatItem(int amount, float saturation, boolean isCooked, PotionEffect eatenEffect) {
+        super(amount, saturation, true);
         this.isCooked = isCooked;
+        this.eatenEffect = eatenEffect;
     }
 
     protected void onFoodEaten(ItemStack stack, World worldIn, EntityPlayer player) {
         if (!worldIn.isRemote) {
-            if (isCooked) player.addPotionEffect(new PotionEffect(MobEffects.ABSORPTION, 600, 4));
-            else player.addPotionEffect(new PotionEffect(MobEffects.HUNGER, 200));
+            if (this.isCooked && this.eatenEffect != null) player.addPotionEffect(eatenEffect);
+            else if (!this.isCooked) player.addPotionEffect(new PotionEffect(MobEffects.HUNGER, 200));
         }
     }
 }
