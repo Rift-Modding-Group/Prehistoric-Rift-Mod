@@ -14,6 +14,7 @@ import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -133,6 +134,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public int leapCooldown;
     public float maxRightClickCooldown;
     public String saddleItem;
+    public int forcedBreakBlockOffset;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -159,6 +161,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.yFloatPos = 0D;
         this.chargeCooldown = 0;
         this.maxRightClickCooldown = 100f;
+        this.forcedBreakBlockOffset = 0;
     }
 
     @Override
@@ -320,7 +323,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                     }
                     if (this.hasRightClickChargeBar()) {
-                        if (this.getRightClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
+                        if (this.getRightClickUse() > 0) {
+                            if (toBeAttacked != null) {
+                                int targetId = toBeAttacked.getEntityId();
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId, 1, this.getRightClickUse()));
+                            }
+                            else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
+                        }
                     }
                     if (this.hasSpacebarChargeBar()) {
                         if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 2, this.getSpacebarUse()));
@@ -1302,7 +1311,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public abstract boolean hasSpacebarChargeBar();
 
+    public boolean checkBasedOnStrength(Block block, IBlockState blockState) {
+        switch (this.creatureType.getBlockBreakTier()) {
+            case DIRT:
+                return RiftUtil.blockWeakerThanDirt(block, blockState);
+            case WOOD:
+                System.out.println("wood");
+                return RiftUtil.blockWeakerThanWood(block, blockState);
+            case STONE:
+                return RiftUtil.blockWeakerThanStone(block, blockState);
+        }
+        return false;
+    }
+
     public void controlAttack() {
+        //attack entity
         EntityLivingBase target;
         if (this.ssrTarget == null) target = this.getControlAttackTargets(this.attackWidth);
         else target = this.ssrTarget;
@@ -1319,6 +1342,28 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             else this.attackEntityAsMob(target);
         }
         this.ssrTarget = null;
+        //this.forcedBreakBlockOffset
+
+        //break blocks
+        double xOffset = this.posX + (this.forcedBreakBlockOffset * Math.cos(this.rotationYaw));
+        double yOffset = this.posY;
+        double zOffset = this.posZ + (this.forcedBreakBlockOffset * Math.sin(this.rotationYaw));
+        BlockPos pos = new BlockPos(xOffset, yOffset, zOffset);
+        System.out.println(pos);
+        int height = (int)(Math.ceil(this.height)) + (this.isBeingRidden() ? (this.getControllingPassenger() != null ? (int)(Math.ceil(this.getControllingPassenger().height)) : 0) : 0);
+        int radius = (int)(Math.ceil(this.width));
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = 0; y <= height; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    BlockPos tempPos = pos.add(x, y, z);
+                    IBlockState iblockstate = this.world.getBlockState(tempPos);
+                    Block block = iblockstate.getBlock();
+                    if (iblockstate.getMaterial() != Material.AIR && this.checkBasedOnStrength(block, iblockstate)) {
+                        this.world.destroyBlock(tempPos, true);
+                    }
+                }
+            }
+        }
     }
 
     public EntityLivingBase getControlAttackTargets(double attackDetectWidth) {

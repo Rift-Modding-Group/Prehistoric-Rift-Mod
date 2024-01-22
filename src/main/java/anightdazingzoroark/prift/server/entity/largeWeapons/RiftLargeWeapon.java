@@ -1,12 +1,12 @@
 package anightdazingzoroark.prift.server.entity.largeWeapons;
 
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerHorseChest;
@@ -24,8 +24,6 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.EntityEntry;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -57,6 +55,12 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
         this.dataManager.register(USING_LEFT_CLICK, Boolean.FALSE);
         this.dataManager.register(LEFT_CLICK_USE, 0);
         this.dataManager.register(LEFT_CLICK_COOLDOWN, 0);
+    }
+
+    @Override
+    protected void applyEntityAttributes() {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
     }
 
     @Override

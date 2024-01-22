@@ -165,5 +165,12 @@
       "prift:entities/parasaurolophus/parasaurolophus_death"
     ],
     "subtitle": "sounds.subtitle.parasaurolophus_death"
+  },
+  "prift.parasaurolophus.blow": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/parasaurolophus/parasaurolophus_blow"
+    ],
+    "subtitle": "sounds.subtitle.parasaurolophus_blow"
   }
 }

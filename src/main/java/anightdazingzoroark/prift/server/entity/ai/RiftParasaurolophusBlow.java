@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -52,7 +53,10 @@ public class RiftParasaurolophusBlow extends EntityAIBase {
         EntityLivingBase entitylivingbase = this.parasaurolophus.getAttackTarget();
         if (entitylivingbase != null) {
             this.parasaurolophus.getLookHelper().setLookPositionWithEntity(entitylivingbase, 30.0F, 30.0F);
-            if (this.animTime == this.animBlowTime) this.parasaurolophus.useBlow(4);
+            if (this.animTime == this.animBlowTime) {
+                this.parasaurolophus.useBlow(null,4);
+                this.parasaurolophus.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);
+            }
         }
     }
 }

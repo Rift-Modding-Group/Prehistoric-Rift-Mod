@@ -72,7 +72,7 @@ public class Apatosaurus extends RiftCreature {
         super(worldIn, RiftCreatureType.APATOSAURUS);
         this.minCreatureHealth = ApatosaurusConfig.getMinHealth();
         this.maxCreatureHealth = ApatosaurusConfig.getMaxHealth();
-        this.setSize(3f, 3f);
+        this.setSize(4f, 3f);
         this.favoriteFood = ApatosaurusConfig.apatosaurusFavoriteFood;
         this.tamingFood = ApatosaurusConfig.apatosaurusBreedingFood;
         this.experienceValue = 50;

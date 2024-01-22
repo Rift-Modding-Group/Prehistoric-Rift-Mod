@@ -3,10 +3,7 @@ package anightdazingzoroark.prift.server.entity;
 import anightdazingzoroark.prift.client.renderer.entity.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.*;
-import anightdazingzoroark.prift.server.enums.CreatureCategory;
-import anightdazingzoroark.prift.server.enums.CreatureDiet;
-import anightdazingzoroark.prift.server.enums.EnergyCategory;
-import anightdazingzoroark.prift.server.enums.EnergyRechargeCategory;
+import anightdazingzoroark.prift.server.enums.*;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
@@ -16,19 +13,20 @@ import java.util.Locale;
 import static anightdazingzoroark.prift.server.items.RiftItems.riftEggItem;
 
 public enum RiftCreatureType {
-    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, TyrannosaurusRenderer::new, 3670016, 2428687, 450, 1),
-    STEGOSAURUS(Stegosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, StegosaurusRenderer::new, 1731840, 16743424, 300, 1),
-    DODO(Dodo.class, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, null, DodoRenderer::new, 7828853, 6184028, 90, 0.25f),
-    TRICERATOPS(Triceratops.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, TriceratopsRenderer::new, 935177, 3631923, 300, 1),
-    UTAHRAPTOR(Utahraptor.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.FAST, UtahraptorRenderer::new, 5855577, 10439936, 180, 0.25f),
-    APATOSAURUS(Apatosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.VERY_SLOW, EnergyRechargeCategory.SLOW, ApatosaurusRenderer::new, 3160621, 16748800, 450, 1),
-    PARASAUROLOPHUS(Parasaurolophus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.NORMAL, ParasaurolophusRenderer::new, 10055190, 8920579, 300, 1);
+    TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, BlockBreakTier.WOOD, TyrannosaurusRenderer::new, 3670016, 2428687, 450, 1),
+    STEGOSAURUS(Stegosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.DIRT, StegosaurusRenderer::new, 1731840, 16743424, 300, 1),
+    DODO(Dodo.class, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, null, null, DodoRenderer::new, 7828853, 6184028, 90, 0.25f),
+    TRICERATOPS(Triceratops.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, TriceratopsRenderer::new, 935177, 3631923, 300, 1),
+    UTAHRAPTOR(Utahraptor.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.FAST, BlockBreakTier.DIRT, UtahraptorRenderer::new, 5855577, 10439936, 180, 0.25f),
+    APATOSAURUS(Apatosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.VERY_SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.STONE, ApatosaurusRenderer::new, 3160621, 16748800, 450, 1),
+    PARASAUROLOPHUS(Parasaurolophus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, ParasaurolophusRenderer::new, 10055190, 8920579, 300, 1);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;
     private final CreatureDiet creatureDiet;
     private final EnergyCategory energyCategory;
     private final EnergyRechargeCategory energyRechargeCategory;
+    private final BlockBreakTier blockBreakTier;
     private final IRenderFactory renderFactory;
     private final int eggPrimary;
     private final int eggSecondary;
@@ -37,12 +35,13 @@ public enum RiftCreatureType {
     public Item eggItem;
     public final String friendlyName;
 
-    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, IRenderFactory renderFactory,  int eggPrimary, int eggSecondary, int hatchTime, float eggScale) {
+    RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, BlockBreakTier blockBreakTier, IRenderFactory renderFactory,  int eggPrimary, int eggSecondary, int hatchTime, float eggScale) {
         this.creature = creature;
         this.creatureCategory = creatureCategory;
         this.creatureDiet = creatureDiet;
         this.energyCategory = energyCategory;
         this.energyRechargeCategory = energyRechargeCategory;
+        this.blockBreakTier = blockBreakTier;
         this.friendlyName = this.name().toUpperCase(Locale.ENGLISH).substring(0, 1) + this.name().toLowerCase().substring(1);
         this.renderFactory = renderFactory;
         this.eggPrimary = eggPrimary;
@@ -69,6 +68,10 @@ public enum RiftCreatureType {
 
     public EnergyRechargeCategory getEnergyRechargeCategory() {
         return this.energyRechargeCategory;
+    }
+
+    public BlockBreakTier getBlockBreakTier() {
+        return this.blockBreakTier;
     }
 
     public IRenderFactory getRenderFactory() {

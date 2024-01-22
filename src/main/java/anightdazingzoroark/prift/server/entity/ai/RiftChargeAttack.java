@@ -167,7 +167,7 @@ public class RiftChargeAttack extends EntityAIBase {
                                 Block block = iblockstate.getBlock();
 
                                 if (iblockstate.getMaterial() != Material.AIR && y >= this.attacker.posY) {
-                                    if (RiftUtil.blockWeakerThanWood(block, iblockstate)) toBreak.add(blockpos);
+                                    if (this.attacker.checkBasedOnStrength(block, iblockstate)) toBreak.add(blockpos);
                                 }
                             }
                         }

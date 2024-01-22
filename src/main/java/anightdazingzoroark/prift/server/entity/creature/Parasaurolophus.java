@@ -32,10 +32,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Parasaurolophus extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
@@ -98,22 +95,40 @@ public class Parasaurolophus extends RiftCreature {
     }
 
     //blowing stuff starts here
-    public void useBlow(float strength) {
-        double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + 8D;
-        Vec3d vec3d = this.getPositionEyes(1.0F);
-        Vec3d vec3d1 = this.getLook(1.0F);
-        Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
-        double d1 = dist;
-        Entity rider = this.getControllingPassenger();
-        List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(5.0D, 5.0D, 5.0D), null);
-        double d2 = d1;
-        for (EntityLivingBase entity : list) {
-            AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().grow((double) entity.getCollisionBorderSize() + 2F);
-            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
+    public void useBlow(EntityLivingBase target, float strength) {
+        if (target == null) {
+            double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + 8D;
+            Vec3d vec3d = this.getPositionEyes(1.0F);
+            Vec3d vec3d1 = this.getLook(1.0F);
+            Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
+            double d1 = dist;
+            Entity rider = this.getControllingPassenger();
+            List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(5.0D, 5.0D, 5.0D), null);
+            double d2 = d1;
+            for (EntityLivingBase entity : list) {
+                AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().grow((double) entity.getCollisionBorderSize() + 2F);
+                RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
 
-            if (entity != this && entity != rider) {
-                if (entity instanceof Parasaurolophus) {
-                    if ((((Parasaurolophus)entity).isTamed() && !this.isTamed()) || (!((Parasaurolophus)entity).isTamed() && this.isTamed())) {
+                if (entity != this && entity != rider) {
+                    if (entity instanceof Parasaurolophus) {
+                        if ((((Parasaurolophus)entity).isTamed() && !this.isTamed()) || (!((Parasaurolophus)entity).isTamed() && this.isTamed())) {
+                            if (axisalignedbb.contains(vec3d)) {
+                                if (d2 >= 0.0D) {
+                                    this.parasaurKnockback(entity, strength);
+                                    d2 = 0.0D;
+                                }
+                            }
+                            else if (raytraceresult != null) {
+                                double d3 = vec3d.distanceTo(raytraceresult.hitVec);
+
+                                if (d3 < d2 || d2 == 0.0D) {
+                                    this.parasaurKnockback(entity, strength);
+                                    d2 = d3;
+                                }
+                            }
+                        }
+                    }
+                    else {
                         if (axisalignedbb.contains(vec3d)) {
                             if (d2 >= 0.0D) {
                                 this.parasaurKnockback(entity, strength);
@@ -130,26 +145,26 @@ public class Parasaurolophus extends RiftCreature {
                         }
                     }
                 }
-                else {
-                    System.out.println("not another parasaur");
-                    if (axisalignedbb.contains(vec3d)) {
-                        System.out.println("cond 1");
-                        if (d2 >= 0.0D) {
-                            this.parasaurKnockback(entity, strength);
-                            d2 = 0.0D;
-                        }
-                    }
-                    else if (raytraceresult != null) {
-                        System.out.println("cond 2");
-                        double d3 = vec3d.distanceTo(raytraceresult.hitVec);
-
-                        if (d3 < d2 || d2 == 0.0D) {
-                            this.parasaurKnockback(entity, strength);
-                            d2 = d3;
-                        }
-                    }
-                }
             }
+        }
+        else {
+            UUID ownerUUID = this.getOwnerId();
+            AxisAlignedBB aabb = target.getEntityBoundingBox().grow(5);
+            List<EntityLivingBase> entityList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, aabb, new Predicate<EntityLivingBase>() {
+                @Override
+                public boolean apply(@Nullable EntityLivingBase input) {
+                    if (input instanceof EntityPlayer) {
+                        return !input.getUniqueID().equals(ownerUUID);
+                    }
+                    if (input instanceof EntityTameable) {
+                        if (((EntityTameable)input).isTamed()) {
+                            return !((EntityTameable) input).getOwnerId().equals(ownerUUID);
+                        }
+                    }
+                    return true;
+                }
+            });
+            for (EntityLivingBase entityLivingBase : entityList) this.parasaurKnockback(entityLivingBase, strength);
         }
     }
 
@@ -176,6 +191,7 @@ public class Parasaurolophus extends RiftCreature {
                 }
                 else {
                     if (!this.isActing()) {
+                        System.out.println(target);
                         this.ssrTarget = target;
                         this.setAttacking(true);
                     }
@@ -188,9 +204,10 @@ public class Parasaurolophus extends RiftCreature {
                 if (this.canBlow() && !this.isActing()) {
                     this.setActing(true);
                     this.setCanBlow(false);
-                    this.useBlow(RiftUtil.clamp(0.04f * holdAmount + 2f, 2f, 6f));
+                    this.useBlow(target, RiftUtil.clamp(0.04f * holdAmount + 2f, 2f, 6f));
                     this.setEnergy(this.getEnergy() - (int)(0.05d * (double)Math.min(holdAmount, 100) + 1d));
                     this.setRightClickCooldown(Math.max(60, holdAmount * 2));
+                    this.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

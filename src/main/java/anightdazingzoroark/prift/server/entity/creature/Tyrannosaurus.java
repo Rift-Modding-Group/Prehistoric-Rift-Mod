@@ -283,7 +283,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
                                     Block block = iblockstate.getBlock();
 
                                     if (iblockstate.getMaterial() != Material.AIR) {
-                                        if (RiftUtil.blockWeakerThanWood(block, iblockstate)) f -= 0.24F;
+                                        if (this.checkBasedOnStrength(block, iblockstate)) f -= 0.24F;
                                         else f -= (1200F + 0.3F) * 0.3F;
 
                                         if (f > 0.0F) set.add(blockpos);

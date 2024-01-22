@@ -138,6 +138,7 @@ sounds.subtitle.apatosaurus_death=Apatosaurus dies
 sounds.subtitle.parasaurolophus_idle=Parasaurolophus grunts
 sounds.subtitle.parasaurolophus_hurt=Parasaurolophus hurts
 sounds.subtitle.parasaurolophus_death=Parasaurolophus dies
+sounds.subtitle.parasaurolophus_blow=Parasaurolophus blows
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral
