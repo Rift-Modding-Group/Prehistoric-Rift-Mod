@@ -305,6 +305,10 @@ public class RiftDialMenu extends GuiScreen {
                     RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
                     this.mc.player.closeScreen();
                 }
+                else if (selectedItem == 4) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftStartSetWorkstation(this.creature));
+                    this.mc.player.closeScreen();
+                }
                 break;
             case 3:
                 if (selectedItem == 0) {
@@ -331,31 +335,32 @@ public class RiftDialMenu extends GuiScreen {
         }
     }
 
-    private static List<RiftTameRadialChoice> getMain() {
+    private List<RiftTameRadialChoice> getMain() {
         return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.RIDE, RiftTameRadialChoice.OPTIONS, RiftTameRadialChoice.BEHAVIOR);
     }
 
-    private static List<RiftTameRadialChoice> getMainUnrideable() {
+    private List<RiftTameRadialChoice> getMainUnrideable() {
         return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.OPTIONS, RiftTameRadialChoice.BEHAVIOR);
     }
 
-    private static List<RiftTameRadialChoice> getState() {
+    private List<RiftTameRadialChoice> getState() {
         return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.STAND, RiftTameRadialChoice.SIT, RiftTameRadialChoice.WANDER);
     }
 
-    private static List<RiftTameRadialChoice> getBehavior() {
+    private List<RiftTameRadialChoice> getBehavior() {
         return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.ASSIST, RiftTameRadialChoice.NEUTRAL, RiftTameRadialChoice.AGGRESSIVE, RiftTameRadialChoice.PASSIVE);
     }
 
-    private static List<RiftTameRadialChoice> getBehaviorCanTurret() {
+    private List<RiftTameRadialChoice> getBehaviorCanTurret() {
         return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.ASSIST, RiftTameRadialChoice.NEUTRAL, RiftTameRadialChoice.AGGRESSIVE, RiftTameRadialChoice.PASSIVE, RiftTameRadialChoice.TURRET);
     }
 
-    private static List<RiftTameRadialChoice> getBehaviorTurretOnly() {
+    private List<RiftTameRadialChoice> getBehaviorTurretOnly() {
         return Arrays.asList(RiftTameRadialChoice.BACK,RiftTameRadialChoice.PASSIVE, RiftTameRadialChoice.TURRET);
     }
 
-    private static List<RiftTameRadialChoice> getOptions() {
+    private List<RiftTameRadialChoice> getOptions() {
+        if (this.creature.canUseWorkstation()) return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.CHANGE_NAME, RiftTameRadialChoice.SET_HOME, RiftTameRadialChoice.UNCLAIM, RiftTameRadialChoice.SET_WORKSTATION);
         return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.CHANGE_NAME, RiftTameRadialChoice.SET_HOME, RiftTameRadialChoice.UNCLAIM);
     }
 }

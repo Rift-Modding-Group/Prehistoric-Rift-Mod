@@ -12,6 +12,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -132,6 +133,16 @@ public class Triceratops extends RiftCreature implements IChargingMob {
 
     @Override
     public boolean hasSpacebarChargeBar() {
+        return false;
+    }
+
+    @Override
+    public boolean canUseWorkstation() {
+        return false;
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
         return false;
     }
 

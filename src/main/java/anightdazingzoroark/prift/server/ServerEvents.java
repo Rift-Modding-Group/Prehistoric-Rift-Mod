@@ -14,6 +14,8 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
@@ -25,6 +27,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;
@@ -89,6 +92,25 @@ public class ServerEvents {
     public void zeroDamage(LivingDamageEvent event) {
         if (event.getSource().getTrueSource() instanceof Parasaurolophus) {
             event.setCanceled(true);
+        }
+    }
+
+    //manage setting creature workstation
+    @SubscribeEvent
+    public void setCreatureWorkstation(PlayerInteractEvent.RightClickBlock event) {
+        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(event.getEntityPlayer(), RiftEntityProperties.class);
+        if (properties.settingCreatureWorkstation) {
+            RiftCreature creature = (RiftCreature) event.getWorld().getEntityByID(properties.creatureIdForWorkstation);
+            IBlockState iblockstate = event.getWorld().getBlockState(event.getPos());
+            if (iblockstate.getMaterial() != Material.AIR) {
+                if (creature.isWorkstation(event.getPos())) {
+                    creature.setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
+                    event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_success"), false);
+                }
+                else event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_fail"), false);
+                properties.settingCreatureWorkstation = false;
+                properties.creatureIdForWorkstation = -1;
+            }
         }
     }
 

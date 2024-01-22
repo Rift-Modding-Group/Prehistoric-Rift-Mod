@@ -17,6 +17,8 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     public boolean isBleeding;
     public int bleedingStrength;
     public int ticksUntilStopBleeding;
+    public boolean settingCreatureWorkstation;
+    public int creatureIdForWorkstation;
 
     @Override
     public int getTrackingTime() {
@@ -34,6 +36,9 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.isBleeding = false;
         this.bleedingStrength = -1;
         this.ticksUntilStopBleeding = 0;
+
+        this.settingCreatureWorkstation = false;
+        this.creatureIdForWorkstation = -1;
     }
 
     @Override

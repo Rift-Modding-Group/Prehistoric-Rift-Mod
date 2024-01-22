@@ -1,3 +1,7 @@
+action.set_creature_workstation_start=Right click on any viable workstation for this mob to start using
+action.set_creature_workstation_success=This creature will now start operation on the workstation you selected
+action.set_creature_workstation_fail=Not a valid workstation! Redo this process on a valid block!
+
 death.attack.prift_bleed=%s bled to death
 
 entity.tyrannosaurus.name=Tyrannosaurus

@@ -24,6 +24,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -321,6 +322,16 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     @Override
     public boolean hasSpacebarChargeBar() {
         return true;
+    }
+
+    @Override
+    public boolean canUseWorkstation() {
+        return false;
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
+        return false;
     }
 
     @Override

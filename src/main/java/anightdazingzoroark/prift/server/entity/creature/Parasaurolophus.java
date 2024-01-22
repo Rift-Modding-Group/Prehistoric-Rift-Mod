@@ -6,7 +6,10 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.ParasaurolophusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import com.codetaylor.mc.pyrotech.modules.tech.machine.block.BlockBrickKiln;
+import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustionWorkerStoneBase;
 import com.google.common.base.Predicate;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
@@ -24,6 +27,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.common.Loader;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -226,6 +230,20 @@ public class Parasaurolophus extends RiftCreature {
 
     @Override
     public boolean hasSpacebarChargeBar() {
+        return false;
+    }
+
+    @Override
+    public boolean canUseWorkstation() {
+        return Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID);
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
+        Block block = this.world.getBlockState(pos).getBlock();
+        if (Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID)) {
+            if (block instanceof BlockCombustionWorkerStoneBase) return true;
+        }
         return false;
     }
 

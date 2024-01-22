@@ -600,6 +600,16 @@ public class Apatosaurus extends RiftCreature {
     }
 
     @Override
+    public boolean canUseWorkstation() {
+        return false;
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
+        return false;
+    }
+
+    @Override
     public void refreshInventory() {
         ItemStack saddle = this.creatureInventory.getStackInSlot(0);
         if (!this.world.isRemote) this.setSaddled(saddle.getItem() == RiftItems.APATOSAURUS_PLATFORM && !saddle.isEmpty());

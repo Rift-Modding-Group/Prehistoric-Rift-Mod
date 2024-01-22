@@ -96,6 +96,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<String> CREATURE_UUID = EntityDataManager.createKey(RiftCreature.class, DataSerializers.STRING);
+    private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> WORKSTATION_Z_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -203,6 +207,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(UNCLAIM_TIMER, 0);
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(CREATURE_UUID, UUID.randomUUID().toString());
+        this.dataManager.register(USING_WORKSTATION, false);
+        this.dataManager.register(WORKSTATION_X_POS, 0);
+        this.dataManager.register(WORKSTATION_Y_POS, 0);
+        this.dataManager.register(WORKSTATION_Z_POS, 0);
     }
 
     @Override
@@ -789,6 +797,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.canDoHerding()) {
             if (this.getHerdLeaderId() != null) compound.setString("LeaderUUID", this.getHerdLeaderId().toString());
         }
+        compound.setBoolean("UsingWorkstation", this.isUsingWorkstation());
+        if (compound.getBoolean("UsingWorkstation")) {
+            compound.setInteger("WorkstationX", this.getWorkstationPos().getX());
+            compound.setInteger("WorkstationY", this.getWorkstationPos().getY());
+            compound.setInteger("WorkstationZ", this.getWorkstationPos().getZ());
+        }
     }
 
     @Override
@@ -830,6 +844,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setHerdLeader(UUID.fromString(compound.getString("LeaderUUID")));
         }
         if (this.isUnclaimed()) this.setTamed(true);
+        if (compound.getBoolean("UsingWorkstation")) this.setUseWorkstation(compound.getInteger("WorkstationX"), compound.getInteger("WorkstationY"), compound.getInteger("WorkstationZ"));
     }
 
     private void initInventory() {
@@ -1269,6 +1284,28 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.getAgeInDays() < 1;
     }
 
+    public void setUseWorkstation(double x, double y, double z) {
+        this.dataManager.set(USING_WORKSTATION, true);
+        this.dataManager.set(WORKSTATION_X_POS, (int)x);
+        this.dataManager.set(WORKSTATION_Y_POS, (int)y);
+        this.dataManager.set(WORKSTATION_Z_POS, (int)z);
+    }
+
+    public void setNotUseWorkstation() {
+        this.dataManager.set(USING_WORKSTATION, false);
+        this.dataManager.set(WORKSTATION_X_POS, 0);
+        this.dataManager.set(WORKSTATION_Y_POS, 0);
+        this.dataManager.set(WORKSTATION_Z_POS, 0);
+    }
+
+    public boolean isUsingWorkstation() {
+        return this.dataManager.get(USING_WORKSTATION);
+    }
+
+    public BlockPos getWorkstationPos() {
+        return new BlockPos(this.dataManager.get(WORKSTATION_X_POS), this.dataManager.get(WORKSTATION_Y_POS), this.dataManager.get(WORKSTATION_Z_POS));
+    }
+
     public boolean isMoving() {
         double fallMotion = !this.onGround ? this.motionY : 0;
         return Math.sqrt((this.motionX * this.motionX) + (fallMotion * fallMotion) + (this.motionZ * this.motionZ)) > 0;
@@ -1316,7 +1353,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             case DIRT:
                 return RiftUtil.blockWeakerThanDirt(block, blockState);
             case WOOD:
-                System.out.println("wood");
                 return RiftUtil.blockWeakerThanWood(block, blockState);
             case STONE:
                 return RiftUtil.blockWeakerThanStone(block, blockState);
@@ -1546,6 +1582,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.updateFallState(y, onGroundIn, state, pos);
         this.lastYd = this.motionY;
     }
+
+    public abstract boolean canUseWorkstation();
+
+    public abstract boolean isWorkstation(BlockPos pos);
 
     @Nullable
     @Override

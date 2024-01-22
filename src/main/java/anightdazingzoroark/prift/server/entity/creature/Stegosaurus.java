@@ -22,6 +22,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -183,6 +184,16 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     @Override
     public boolean hasSpacebarChargeBar() {
+        return false;
+    }
+
+    @Override
+    public boolean canUseWorkstation() {
+        return false;
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
         return false;
     }
 

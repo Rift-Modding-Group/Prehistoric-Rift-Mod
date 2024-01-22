@@ -17,5 +17,6 @@ public enum RiftTameRadialChoice {
     TURRET,
     CHANGE_NAME,
     SET_HOME,
-    UNCLAIM;
+    UNCLAIM,
+    SET_WORKSTATION;
 }
