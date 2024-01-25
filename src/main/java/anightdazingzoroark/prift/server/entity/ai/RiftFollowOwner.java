@@ -26,6 +26,6 @@ public class RiftFollowOwner extends EntityAIFollowOwner {
     }
 
     public boolean shouldContinueExecuting() {
-        return this.tameable.getTameStatus() != TameStatusType.STAND && !this.tameable.isUtilizingCharging() && super.shouldContinueExecuting();
+        return this.tameable.getTameStatus() != TameStatusType.STAND && !this.tameable.isUtilizingCharging() && !this.tameable.isUsingWorkstation() && super.shouldContinueExecuting();
     }
 }

@@ -137,16 +137,6 @@ public class Triceratops extends RiftCreature implements IChargingMob {
     }
 
     @Override
-    public boolean canUseWorkstation() {
-        return false;
-    }
-
-    @Override
-    public boolean isWorkstation(BlockPos pos) {
-        return false;
-    }
-
-    @Override
     public boolean canDoHerding() {
         return !this.isTamed();
     }

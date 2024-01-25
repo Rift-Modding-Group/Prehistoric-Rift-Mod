@@ -31,13 +31,13 @@ public class RiftAttackForOwner extends EntityAITarget {
                     RiftCreature riddenCreature = (RiftCreature) owner.getRidingEntity();
                     this.hitTarget = riddenCreature.getLastAttackedEntity();
                     int i = riddenCreature.getLastAttackedEntityTime();
-                    return i != this.timestamp && this.isSuitableTarget(this.hitTarget, false) && this.creature.shouldAttackEntity(this.hitTarget, owner) &&  !this.creature.isBeingRidden();
+                    return i != this.timestamp && this.isSuitableTarget(this.hitTarget, false) && this.creature.shouldAttackEntity(this.hitTarget, owner) &&  !this.creature.isBeingRidden() && !this.creature.isUsingWorkstation();
                 }
             }
             else {
                 this.hitTarget = owner.getLastAttackedEntity();
                 int i = owner.getLastAttackedEntityTime();
-                return i != this.timestamp && this.isSuitableTarget(this.hitTarget, false) && this.creature.shouldAttackEntity(this.hitTarget, owner);
+                return i != this.timestamp && this.isSuitableTarget(this.hitTarget, false) && this.creature.shouldAttackEntity(this.hitTarget, owner) && !this.creature.isUsingWorkstation();
             }
         }
         return false;

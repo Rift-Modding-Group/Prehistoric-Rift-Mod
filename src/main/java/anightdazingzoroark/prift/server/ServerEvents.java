@@ -7,12 +7,14 @@ import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -40,6 +42,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -101,13 +104,33 @@ public class ServerEvents {
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(event.getEntityPlayer(), RiftEntityProperties.class);
         if (properties.settingCreatureWorkstation) {
             RiftCreature creature = (RiftCreature) event.getWorld().getEntityByID(properties.creatureIdForWorkstation);
+            IWorkstationUser workstationUser = (IWorkstationUser) creature;
             IBlockState iblockstate = event.getWorld().getBlockState(event.getPos());
             if (iblockstate.getMaterial() != Material.AIR) {
-                if (creature.isWorkstation(event.getPos())) {
-                    creature.setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
-                    event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_success"), false);
+                boolean canUseFlag = true;
+                List<RiftCreature> workstationUsers = event.getWorld().getEntities(RiftCreature.class, new Predicate<RiftCreature>() {
+                    @Override
+                    public boolean apply(@Nullable RiftCreature input) {
+                        return input instanceof IWorkstationUser;
+                    }
+                });
+                for (RiftCreature creature1 : workstationUsers) {
+                    if (creature1.getWorkstationPos().equals(event.getPos())) {
+                        canUseFlag = false;
+                        break;
+                    }
                 }
-                else event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_fail"), false);
+
+                if (canUseFlag) {
+                    if (workstationUser.isWorkstation(event.getPos())) {
+                        event.setCanceled(true);
+                        creature.setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
+                        event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_success"), false);
+                    }
+                    else event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_fail"), false);
+                }
+                else event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.creature_workstation_already_used"), false);
+
                 properties.settingCreatureWorkstation = false;
                 properties.creatureIdForWorkstation = -1;
             }

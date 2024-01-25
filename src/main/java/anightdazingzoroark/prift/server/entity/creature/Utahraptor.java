@@ -325,16 +325,6 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     }
 
     @Override
-    public boolean canUseWorkstation() {
-        return false;
-    }
-
-    @Override
-    public boolean isWorkstation(BlockPos pos) {
-        return false;
-    }
-
-    @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.3f, 1f);
     }

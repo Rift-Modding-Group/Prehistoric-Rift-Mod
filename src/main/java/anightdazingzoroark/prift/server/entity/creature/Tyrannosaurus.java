@@ -383,16 +383,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     }
 
     @Override
-    public boolean canUseWorkstation() {
-        return false;
-    }
-
-    @Override
-    public boolean isWorkstation(BlockPos pos) {
-        return false;
-    }
-
-    @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;

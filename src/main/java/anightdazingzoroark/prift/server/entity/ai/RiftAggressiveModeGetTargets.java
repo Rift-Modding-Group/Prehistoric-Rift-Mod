@@ -38,15 +38,10 @@ public class RiftAggressiveModeGetTargets extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        if (!this.creature.isTamed()) {
-            return false;
-        }
-        else if (this.creature.isBeingRidden()) {
-            return false;
-        }
-        else if (this.creature.getTameBehavior() != TameBehaviorType.AGGRESSIVE) {
-            return false;
-        }
+        if (!this.creature.isTamed()) return false;
+        else if (this.creature.isBeingRidden()) return false;
+        else if (this.creature.getTameBehavior() != TameBehaviorType.AGGRESSIVE) return false;
+        else if (!this.creature.isUsingWorkstation()) return false;
         else {
             if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {
                 return false;

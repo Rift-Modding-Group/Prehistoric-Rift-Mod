@@ -1,6 +1,9 @@
 action.set_creature_workstation_start=Right click on any viable workstation for this mob to start using
 action.set_creature_workstation_success=This creature will now start operation on the workstation you selected
 action.set_creature_workstation_fail=Not a valid workstation! Redo this process on a valid block!
+action.clear_creature_workstation=Cleared workstation
+action.creature_workstation_destroyed=This creature's workstation has been destroyed!
+action.creature_workstation_already_used=This workstation is already used by another creature!
 
 death.attack.prift_bleed=%s bled to death
 
@@ -80,6 +83,8 @@ radial.choice.change_name=Change Name
 radial.choice.set_home=Set Home Position
 radial.choice.reset_home=Clear Home Position
 radial.choice.unclaim=Unclaim
+radial.choice.set_workstation=Set Workstation
+radial.choice.clear_workstation=Clear Workstation
 radial.note.need_saddle=This creature needs a saddle to be ridden!
 radial.note.too_young_saddle=This creature is too young to be saddled!
 radial.note.too_young_unclaim=Babies cannot be unclaimed! >:(

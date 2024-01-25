@@ -187,16 +187,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return false;
     }
 
-    @Override
-    public boolean canUseWorkstation() {
-        return false;
-    }
-
-    @Override
-    public boolean isWorkstation(BlockPos pos) {
-        return false;
-    }
-
     public void strongControlAttack() {
         EntityLivingBase target;
         if (this.ssrTarget == null) target = this.getControlAttackTargets(this.attackWidth);

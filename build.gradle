@@ -140,6 +140,7 @@ dependencies {
     compileOnly "net.ilexiconn:llibrary:1.7.19-1.12.2"
     compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
     compileOnly "curse.maven:pyrotech-306676:4956838"
+    compileOnly "curse.maven:athenaeum-284350:4633750"
     compileOnly "mezz.jei:jei_${mc_version}:${jei_version}:api"
     implementation "mezz.jei:jei_${mc_version}:${jei_version}"
 }

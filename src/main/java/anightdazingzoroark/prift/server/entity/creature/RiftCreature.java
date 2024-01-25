@@ -557,7 +557,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
-                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking()) {
+                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isUsingWorkstation()) {
                         RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
@@ -1291,11 +1291,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(WORKSTATION_Z_POS, (int)z);
     }
 
-    public void setNotUseWorkstation() {
+    public void clearWorkstation(boolean destroyed) {
         this.dataManager.set(USING_WORKSTATION, false);
         this.dataManager.set(WORKSTATION_X_POS, 0);
         this.dataManager.set(WORKSTATION_Y_POS, 0);
         this.dataManager.set(WORKSTATION_Z_POS, 0);
+        EntityPlayer owner = (EntityPlayer) this.getOwner();
+        if (destroyed) {
+            System.out.println("destroyed");
+            owner.sendStatusMessage(new TextComponentTranslation("action.creature_workstation_destroyed"), false);
+        }
+        else {
+            System.out.println("not destroyed");
+            owner.sendStatusMessage(new TextComponentTranslation("action.clear_creature_workstation"), false);
+        }
     }
 
     public boolean isUsingWorkstation() {
@@ -1582,10 +1591,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.updateFallState(y, onGroundIn, state, pos);
         this.lastYd = this.motionY;
     }
-
-    public abstract boolean canUseWorkstation();
-
-    public abstract boolean isWorkstation(BlockPos pos);
 
     @Nullable
     @Override

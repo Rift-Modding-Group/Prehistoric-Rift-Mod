@@ -1,15 +1,18 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import com.codetaylor.mc.athenaeum.util.Properties;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.ParasaurolophusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.block.BlockBrickKiln;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustionWorkerStoneBase;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
@@ -18,6 +21,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -38,7 +42,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Parasaurolophus extends RiftCreature {
+public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
     private static final DataParameter<Boolean> BLOWING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_BLOW = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
@@ -75,6 +79,7 @@ public class Parasaurolophus extends RiftCreature {
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
+        this.tasks.addTask(0, new RiftParasaurStokeCombustor(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftResetAnimatedPose(this, 1.52F, 1));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
@@ -248,6 +253,25 @@ public class Parasaurolophus extends RiftCreature {
     }
 
     @Override
+    public BlockPos workstationUseFromPos() {
+        IBlockState blockState = this.world.getBlockState(this.getWorkstationPos());
+        if (blockState.getMaterial().isSolid()) {
+            EnumFacing direction = blockState.getValue(Properties.FACING_HORIZONTAL);
+            switch (direction) {
+                case NORTH:
+                    return this.getWorkstationPos().add(0, 0, -4);
+                case SOUTH:
+                    return this.getWorkstationPos().add(0, 0, 4);
+                case EAST:
+                    return this.getWorkstationPos().add(4, 0, 0);
+                case WEST:
+                    return this.getWorkstationPos().add(-4, 0, 0);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public boolean canDoHerding() {
         return !this.isTamed();
     }
@@ -299,7 +323,7 @@ public class Parasaurolophus extends RiftCreature {
     }
 
     private <E extends IAnimatable> PlayState parasaurolophusMovement(AnimationEvent<E> event) {
-        if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
+        if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget() && !this.isUsingWorkstation()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.sitting", true));
             return PlayState.CONTINUE;
         }

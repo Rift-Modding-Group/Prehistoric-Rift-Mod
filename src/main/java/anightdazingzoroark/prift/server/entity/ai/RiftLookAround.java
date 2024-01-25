@@ -15,6 +15,6 @@ public class RiftLookAround extends EntityAILookIdle {
 
     @Override
     public boolean shouldExecute() {
-        return !this.creature.isBeingRidden() && super.shouldExecute();
+        return !this.creature.isBeingRidden() && !this.creature.isUsingWorkstation() && super.shouldExecute();
     }
 }

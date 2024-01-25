@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.PopupFromRadial;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
@@ -170,6 +171,10 @@ public class RiftDialMenu extends GuiScreen {
                 if (creature.getHasHomePos()) radialString = I18n.format("radial.choice.reset_home");
                 else radialString = I18n.format("radial.choice.set_home");
             }
+            else if (i == 4 && this.radialChoiceMenu == 2) {
+                if (!creature.isUsingWorkstation()) radialString = I18n.format("radial.choice.set_workstation");
+                else radialString = I18n.format("radial.choice.clear_workstation");
+            }
             else radialString = I18n.format("radial.choice."+this.choices.get(i).name().toLowerCase());
 
             if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled())) && i == 2) radialString = "["+radialString+"]";
@@ -306,7 +311,7 @@ public class RiftDialMenu extends GuiScreen {
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 4) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftStartSetWorkstation(this.creature));
+                    RiftMessages.WRAPPER.sendToServer(new RiftSetWorkstation(this.creature, !this.creature.isUsingWorkstation()));
                     this.mc.player.closeScreen();
                 }
                 break;
@@ -360,7 +365,9 @@ public class RiftDialMenu extends GuiScreen {
     }
 
     private List<RiftTameRadialChoice> getOptions() {
-        if (this.creature.canUseWorkstation()) return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.CHANGE_NAME, RiftTameRadialChoice.SET_HOME, RiftTameRadialChoice.UNCLAIM, RiftTameRadialChoice.SET_WORKSTATION);
+        if (this.creature instanceof IWorkstationUser) {
+            if (((IWorkstationUser)this.creature).canUseWorkstation()) return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.CHANGE_NAME, RiftTameRadialChoice.SET_HOME, RiftTameRadialChoice.UNCLAIM, RiftTameRadialChoice.SET_WORKSTATION);
+        }
         return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.CHANGE_NAME, RiftTameRadialChoice.SET_HOME, RiftTameRadialChoice.UNCLAIM);
     }
 }
