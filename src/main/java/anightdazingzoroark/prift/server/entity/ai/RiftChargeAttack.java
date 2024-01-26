@@ -49,7 +49,7 @@ public class RiftChargeAttack extends EntityAIBase {
         else if (!entitylivingbase.isEntityAlive()) return false;
         else {
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
-            return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr(entitylivingbase);
+            return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr(entitylivingbase);
         }
     }
 
@@ -69,7 +69,7 @@ public class RiftChargeAttack extends EntityAIBase {
     }
 
     public boolean shouldContinueExecuting() {
-        return !this.endFlag && !this.attacker.isBeingRidden();
+        return !this.endFlag && !this.attacker.isBeingRidden() && this.attacker.getEnergy() > 6;
     }
 
     public void resetTask() {
@@ -83,30 +83,26 @@ public class RiftChargeAttack extends EntityAIBase {
     }
 
     public void updateTask() {
+        this.attacker.getLookHelper().setLookPosition(this.finalChargePos.getX(), this.finalChargePos.getY(), this.finalChargePos.getZ(), 30, 30);
         if (this.animTick >= this.initAnimLength && this.attacker.isLoweringHead()) {
             this.attacker.setLowerHead(false);
             this.attacker.setStartCharging(true);
             this.animTick = 0;
-//            this.forceLook();
         }
         else if (this.attacker.isLoweringHead()) {
             this.animTick++;
-//            this.forceLook();
         }
 
         if (this.animTick >= this.chargeTime && this.attacker.isStartCharging()) {
             this.attacker.setStartCharging(false);
             this.attacker.setIsCharging(true);
             this.animTick = 0;
-//            this.forceLook();
         }
         else if (this.attacker.isStartCharging()) {
             this.animTick++;
-//            this.forceLook();
         }
 
         if (this.attacker.isCharging()) {
-//            this.forceLook();
             this.attacker.motionX = this.chargeVector.x * this.chargeBoost;
             this.attacker.motionZ = this.chargeVector.z * this.chargeBoost;
 
@@ -183,7 +179,7 @@ public class RiftChargeAttack extends EntityAIBase {
         if (this.animTick >= this.initAnimLength && this.attacker.isEndCharging()) {
             this.attacker.setEndCharging(false);
             this.attacker.setRightClickCooldown(this.cooldownTime);
-            this.attacker.setEnergy(this.attacker.getEnergy() - 6);
+            if (this.attacker.isTamed()) this.attacker.setEnergy(this.attacker.getEnergy() - 6);
             this.attacker.setCanCharge(false);
             this.endFlag = true;
         }

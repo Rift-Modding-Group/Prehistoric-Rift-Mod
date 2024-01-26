@@ -41,9 +41,9 @@ public class RiftLeapAttack extends EntityAIBase {
         else {
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
             if (this.attacker instanceof IPackHunter) {
-                return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && !((IPackHunter)this.attacker).isPackBuffing() && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
+                return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && !((IPackHunter)this.attacker).isPackBuffing() && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
             }
-            return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
+            return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
         }
     }
 
@@ -87,6 +87,7 @@ public class RiftLeapAttack extends EntityAIBase {
             if (leapedEntities.contains(this.target)) {
                 this.attacker.attackEntityAsMob(this.target);
                 this.leapAttackFlag = true;
+                this.attacker.setEnergy(this.attacker.getEnergy() - 3);
             }
         }
     }

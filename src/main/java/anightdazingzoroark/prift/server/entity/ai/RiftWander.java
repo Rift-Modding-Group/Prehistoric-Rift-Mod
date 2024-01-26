@@ -20,7 +20,12 @@ public class RiftWander extends EntityAIWander {
             else return false;
         }
         else if (this.creature.canDoHerding() && (this.creature.isHerdLeader() || this.creature.getHerdLeader().equals(this.creature))) return super.shouldExecute();
-        else if (!this.creature.canDoHerding()) return super.shouldExecute();
+        else if (!this.creature.canDoHerding()) return this.creature.getEnergy() > 0 && super.shouldExecute();
         return false;
+    }
+
+    @Override
+    public boolean shouldContinueExecuting() {
+        return this.creature.getEnergy() > 0 && super.shouldContinueExecuting();
     }
 }

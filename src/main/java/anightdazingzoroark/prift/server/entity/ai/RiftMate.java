@@ -41,6 +41,7 @@ public class RiftMate extends EntityAIBase {
     public void resetTask() {
         this.targetMate = null;
         this.spawnBabyDelay = 0;
+        this.creature.getNavigator().clearPath();
     }
 
     public void updateTask() {

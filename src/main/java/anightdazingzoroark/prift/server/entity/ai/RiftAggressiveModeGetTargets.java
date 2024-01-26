@@ -1,7 +1,10 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITarget;
@@ -9,6 +12,7 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,14 +45,19 @@ public class RiftAggressiveModeGetTargets extends EntityAITarget {
         if (!this.creature.isTamed()) return false;
         else if (this.creature.isBeingRidden()) return false;
         else if (this.creature.getTameBehavior() != TameBehaviorType.AGGRESSIVE) return false;
-        else if (!this.creature.isUsingWorkstation()) return false;
+        else if (this.creature.isUsingWorkstation()) return false;
         else {
             if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {
                 return false;
             }
             else {
                 List<EntityLivingBase> list = new ArrayList<>();
-                for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), null)) {
+                for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), new Predicate<EntityLivingBase>() {
+                    @Override
+                    public boolean apply(@Nullable EntityLivingBase input) {
+                        return !(input instanceof RiftEgg) && !(input instanceof RiftLargeWeapon);
+                    }
+                })) {
                     if (!entity.isRiding()) {
                         if (entity instanceof EntityPlayer) {
                             if (!entity.getUniqueID().equals(this.creature.getOwnerId())) {
@@ -57,8 +66,10 @@ public class RiftAggressiveModeGetTargets extends EntityAITarget {
                         }
                         else if (entity instanceof EntityTameable) {
                             if ((((EntityTameable) entity).isTamed())) {
-                                if (!((EntityTameable) entity).getOwner().equals(this.creature.getOwner())) {
-                                    list.add(entity);
+                                if (this.creature.getOwner() != null) {
+                                    if (!((EntityTameable) entity).getOwner().equals(this.creature.getOwner())) {
+                                        list.add(entity);
+                                    }
                                 }
                             }
                             else {

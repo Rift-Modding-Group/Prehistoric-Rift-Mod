@@ -56,15 +56,15 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
     @Override
     public void updateTask() {
         if (this.parasaur.workstationUseFromPos() != null) {
+            this.parasaur.getLookHelper().setLookPosition(this.parasaur.getWorkstationPos().getX(), this.parasaur.getWorkstationPos().getY(), this.parasaur.getWorkstationPos().getZ(), 30, 30);
             if (RiftUtil.entityAtLocation(this.parasaur, this.parasaur.workstationUseFromPos(), 0.5)) {
                 //use workstation
-                this.parasaur.getLookHelper().setLookPosition(this.parasaur.getWorkstationPos().getX(), this.parasaur.getWorkstationPos().getY(), this.parasaur.getWorkstationPos().getZ(), 30, 30);
                 TileEntity tileEntity = this.parasaur.world.getTileEntity(this.parasaur.getWorkstationPos());
 
                 if (tileEntity != null) {
                     if (tileEntity instanceof TileCombustionWorkerStoneBase) {
                         TileCombustionWorkerStoneBase stoked = (TileCombustionWorkerStoneBase) tileEntity;
-                        if (stoked.hasFuel() && stoked.workerIsActive() && stoked.hasInput()) {
+                        if (this.parasaur.getEnergy() > 6 && stoked.hasFuel() && stoked.workerIsActive() && stoked.hasInput()) {
                             if (this.animTime == 0) {
                                 this.parasaur.setBlowing(true);
                                 this.parasaur.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);
@@ -74,6 +74,7 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
                     }
                     if (this.animTime == this.animLength) {
                         this.parasaur.setBlowing(false);
+                        this.parasaur.setEnergy(this.parasaur.getEnergy() - 3);
                     }
                     if (this.animTime > 120) {
                         this.animTime = -1;

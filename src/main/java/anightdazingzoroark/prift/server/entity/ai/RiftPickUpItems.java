@@ -30,7 +30,6 @@ public class RiftPickUpItems extends EntityAIBase {
         this.items = new Predicate<EntityItem>() {
             @Override
             public boolean apply(@Nullable EntityItem entityItem) {
-                String itemName = Item.REGISTRY.getNameForObject(entityItem.getItem().getItem()).toString();
                 for (String itemString : items) {
                     int itemIdFirst = itemString.indexOf(":");
                     int itemIdSecond = itemString.indexOf(":", itemIdFirst + 1);

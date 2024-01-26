@@ -1297,14 +1297,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(WORKSTATION_Y_POS, 0);
         this.dataManager.set(WORKSTATION_Z_POS, 0);
         EntityPlayer owner = (EntityPlayer) this.getOwner();
-        if (destroyed) {
-            System.out.println("destroyed");
-            owner.sendStatusMessage(new TextComponentTranslation("action.creature_workstation_destroyed"), false);
-        }
-        else {
-            System.out.println("not destroyed");
-            owner.sendStatusMessage(new TextComponentTranslation("action.clear_creature_workstation"), false);
-        }
+        if (destroyed) owner.sendStatusMessage(new TextComponentTranslation("action.creature_workstation_destroyed"), false);
+        else owner.sendStatusMessage(new TextComponentTranslation("action.clear_creature_workstation"), false);
     }
 
     public boolean isUsingWorkstation() {
@@ -1394,7 +1388,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         double yOffset = this.posY;
         double zOffset = this.posZ + (this.forcedBreakBlockOffset * Math.sin(this.rotationYaw));
         BlockPos pos = new BlockPos(xOffset, yOffset, zOffset);
-        System.out.println(pos);
         int height = (int)(Math.ceil(this.height)) + (this.isBeingRidden() ? (this.getControllingPassenger() != null ? (int)(Math.ceil(this.getControllingPassenger().height)) : 0) : 0);
         int radius = (int)(Math.ceil(this.width));
         for (int x = -radius; x <= radius; x++) {

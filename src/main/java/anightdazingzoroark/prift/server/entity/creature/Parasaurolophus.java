@@ -8,11 +8,10 @@ import anightdazingzoroark.prift.config.ParasaurolophusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
-import com.codetaylor.mc.pyrotech.modules.tech.machine.block.BlockBrickKiln;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustionWorkerStoneBase;
+import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
@@ -20,6 +19,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -104,6 +104,10 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
     }
 
     //blowing stuff starts here
+    public void useBlow(float strength) {
+        this.useBlow(null, strength);
+    }
+
     public void useBlow(EntityLivingBase target, float strength) {
         if (target == null) {
             double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + 8D;
@@ -184,6 +188,28 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
         entity.knockBack(this, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
         entity.attackEntityFrom(DamageSource.causeMobDamage(this), 1);
     }
+
+    public void parsaurManualStokeHeater(float strength) {
+        double xOffset = this.posX + (this.forcedBreakBlockOffset * Math.cos(this.rotationYaw));
+        double zOffset = this.posZ + (this.forcedBreakBlockOffset * Math.sin(this.rotationYaw));
+        BlockPos pos = new BlockPos(xOffset, this.posY, zOffset);
+        int radius = 5;
+
+        for (int x = -radius; x <= radius; x++) {
+            for (int z = -radius; z <= radius; z++) {
+                BlockPos tempPos = pos.add(x, 0, z);
+                TileEntity tileEntity = this.world.getTileEntity(tempPos);
+                if (tileEntity != null) {
+                    if (tileEntity instanceof TileCombustionWorkerStoneBase) {
+                        TileCombustionWorkerStoneBase stoked = (TileCombustionWorkerStoneBase) tileEntity;
+                        if (stoked.hasFuel() && stoked.workerIsActive() && stoked.hasInput()) {
+                            stoked.consumeAirflow(RiftUtil.clamp(0.04f * strength + 12f, 12, 16), false);
+                        }
+                    }
+                }
+            }
+        }
+    }
     //blowing stuff ends here
 
     @Override
@@ -200,7 +226,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
                 }
                 else {
                     if (!this.isActing()) {
-                        System.out.println(target);
                         this.ssrTarget = target;
                         this.setAttacking(true);
                     }
@@ -217,6 +242,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
                     this.setEnergy(this.getEnergy() - (int)(0.05d * (double)Math.min(holdAmount, 100) + 1d));
                     this.setRightClickCooldown(Math.max(60, holdAmount * 2));
                     this.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);
+                    if (Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID)) this.parsaurManualStokeHeater(holdAmount);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

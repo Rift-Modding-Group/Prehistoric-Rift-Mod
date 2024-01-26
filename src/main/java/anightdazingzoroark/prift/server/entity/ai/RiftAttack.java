@@ -45,18 +45,18 @@ public class RiftAttack extends EntityAIBase {
             this.path = this.attacker.getNavigator().getPathToEntityLiving(entitylivingbase);
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
 
-            if (this.path != null) return true;
+            if (this.path != null) return this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden();
             else {
                 if (this.attacker instanceof IRangedAttackMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof IChargingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isUtilizingCharging() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isUtilizingCharging() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof ILeapingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isLeaping() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isLeaping() && !this.attacker.isActing();
                 }
-                return this.getAttackReachSqr(entitylivingbase) >= d0;
+                return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden();
             }
         }
     }
@@ -64,7 +64,9 @@ public class RiftAttack extends EntityAIBase {
     public boolean shouldContinueExecuting() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
-        if (this.attacker.isUtilizingCharging()) return false;
+        if (this.attacker.getEnergy() == 0) return false;
+        else if (this.attacker.isBeingRidden()) return false;
+        else if (this.attacker.isUtilizingCharging()) return false;
         else if (this.attacker.isLeaping()) return false;
         else if (entitylivingbase == null) return false;
         else if (!entitylivingbase.isEntityAlive()) return false;
@@ -80,7 +82,6 @@ public class RiftAttack extends EntityAIBase {
         this.delayCounter = 0;
         this.animTime = 0;
         this.attackCooldown = 0;
-        if (this.attacker.isTamed()) this.attacker.energyActionMod++;
     }
 
     @Override
@@ -135,6 +136,7 @@ public class RiftAttack extends EntityAIBase {
                 this.animTime = 0;
                 this.attacker.setAttacking(false);
                 this.attackCooldown = 20;
+                if (this.attacker.isTamed()) this.attacker.energyActionMod++;
             }
         }
     }
@@ -159,19 +161,6 @@ public class RiftAttack extends EntityAIBase {
     }
 
     //subclasses for different creatures
-    public static class ParasaurolophusAttack extends RiftAttack {
-        private Parasaurolophus parasaur;
-
-        public ParasaurolophusAttack(Parasaurolophus parasaur, double speedIn, float attackAnimLength, float attackAnimTime) {
-            super(parasaur, speedIn, attackAnimLength, attackAnimTime);
-            this.parasaur = parasaur;
-        }
-
-        @Override
-        public boolean shouldExecute() {
-            return this.parasaur.isTamed() && super.shouldExecute();
-        }
-    }
 
     public static class ApatosaurusAttack extends RiftAttack {
         protected int whipAnimLength;

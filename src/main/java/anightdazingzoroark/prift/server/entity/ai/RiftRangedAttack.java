@@ -39,23 +39,23 @@ public class RiftRangedAttack extends EntityAIBase {
         else {
             EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
-            return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getRangedAttackReachSqr();
+            return d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getRangedAttackReachSqr() && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden();
         }
     }
 
     public boolean shouldContinueExecuting() {
-        return this.shouldExecute() || !this.attacker.getNavigator().noPath();
+        return (this.shouldExecute() || !this.attacker.getNavigator().noPath()) && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden();
     }
 
     public void startExecuting() {
         this.attackCooldown = 20;
         this.animTime = 0;
-        if (this.attacker.isTamed()) this.attacker.energyActionMod++;
     }
 
     public void resetTask() {
         this.seeTime = 0;
         this.attacker.resetSpeed();
+        this.attacker.setRangedAttacking(false);
     }
 
     public void updateTask() {
@@ -100,12 +100,15 @@ public class RiftRangedAttack extends EntityAIBase {
                     this.attacker.setRangedAttacking(true);
                     if (!this.canMoveWhenShooting) this.attacker.removeSpeed();
                     this.animTime++;
-                    if (this.animTime == this.shootAnimTime) ((IRangedAttackMob)(this.attacker)).attackEntityWithRangedAttack(entitylivingbase, 1F);
+                    if (this.animTime == this.shootAnimTime) {
+                        ((IRangedAttackMob) (this.attacker)).attackEntityWithRangedAttack(entitylivingbase, 1F);
+                    }
                     if (this.animTime > this.shootAnimLength) {
                         this.animTime = 0;
                         this.attacker.setRangedAttacking(false);
                         this.attacker.resetSpeed();
                         this.attackCooldown = 20;
+                        if (this.attacker.isTamed()) this.attacker.energyActionMod++;
                     }
                 }
             }
