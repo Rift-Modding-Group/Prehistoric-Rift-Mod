@@ -98,6 +98,14 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
         this.manageCanBlow();
     }
 
+    public void resetParts(float scale) {
+        if (scale > this.oldScale) {
+            this.oldScale = scale;
+            this.removeParts();
+            this.bodyPart = new RiftCreaturePart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
+        }
+    }
+
     private void manageCanBlow() {
         if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
         if (this.getRightClickCooldown() == 0) this.setCanBlow(true);
@@ -190,11 +198,8 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
     }
 
     public void parsaurManualStokeHeater(float strength) {
-        double xOffset = this.posX + (this.forcedBreakBlockOffset * Math.cos(this.rotationYaw));
-        double zOffset = this.posZ + (this.forcedBreakBlockOffset * Math.sin(this.rotationYaw));
-        BlockPos pos = new BlockPos(xOffset, this.posY, zOffset);
+        BlockPos pos = new BlockPos(this.posX, this.posY, this.posZ);
         int radius = 5;
-
         for (int x = -radius; x <= radius; x++) {
             for (int z = -radius; z <= radius; z++) {
                 BlockPos tempPos = pos.add(x, 0, z);
@@ -262,6 +267,11 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
     @Override
     public boolean hasSpacebarChargeBar() {
         return false;
+    }
+
+    @Override
+    public float getRenderSizeModifier() {
+        return RiftUtil.setModelScale(this, 0.3f, 1.5f);
     }
 
     @Override

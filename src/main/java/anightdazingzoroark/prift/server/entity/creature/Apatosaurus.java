@@ -125,28 +125,13 @@ public class Apatosaurus extends RiftCreature {
         if (this.getPassengers().size() == 1) this.dismount = false;
     }
 
-     //this will be repurposed in the next update so that most mobs will break blocks
-     //using their forced attack, or can clear up paths when in search of a target
-     //utilizin their attacks
-//    private void manageBreakBlock() {
-//        if (ApatosaurusConfig.apatosaurusCanBreakBlocks && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this)) {
-//            for (int x = (int)this.getEntityBoundingBox().minX - 2; x <= (int)this.getEntityBoundingBox().maxX + 2; x++) {
-//                for (int y = (int)this.getEntityBoundingBox().minY; y <= (int)this.getEntityBoundingBox().maxY + 4 && y <= 256; y++) {
-//                    for (int z = (int)this.getEntityBoundingBox().minZ - 2; z <= (int)this.getEntityBoundingBox().maxZ + 2; z++) {
-//                        IBlockState state = world.getBlockState(new BlockPos(x, y, z));
-//                        Block block = state.getBlock();
-//                        if (RiftUtil.blockWeakerThanWood(block, state)) {
-//                            this.motionX *= 0.6D;
-//                            this.motionZ *= 0.6D;
-//                            if (!this.world.isRemote) {
-//                                this.world.destroyBlock(new BlockPos(x, y, z), false);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+    public void resetParts(float scale) {
+        if (scale > this.oldScale) {
+            this.oldScale = scale;
+            this.removeParts();
+            this.bodyPart = new RiftCreaturePart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
+        }
+    }
 
     private void manageWeaponCooldown() {
         if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);
@@ -597,6 +582,11 @@ public class Apatosaurus extends RiftCreature {
     @Override
     public boolean hasSpacebarChargeBar() {
         return false;
+    }
+
+    @Override
+    public float getRenderSizeModifier() {
+        return RiftUtil.setModelScale(this, 0.35f, 2.25f);
     }
 
     @Override

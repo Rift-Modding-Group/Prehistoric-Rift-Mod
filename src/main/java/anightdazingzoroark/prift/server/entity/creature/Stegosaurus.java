@@ -22,7 +22,6 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -97,6 +96,14 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         super.onLivingUpdate();
         this.manageCanStrongAttack();
         this.manageCanControlledPlateFling();
+    }
+
+    public void resetParts(float scale) {
+        if (scale > this.oldScale) {
+            this.oldScale = scale;
+            this.removeParts();
+            this.bodyPart = new RiftCreaturePart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
+        }
     }
 
     private void manageCanStrongAttack() {

@@ -18,6 +18,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
@@ -138,7 +139,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public int leapCooldown;
     public float maxRightClickCooldown;
     public String saddleItem;
-    public int forcedBreakBlockOffset;
+    public int forcedBreakBlockRad = 0;
+    public RiftCreaturePart headPart;
+    public RiftCreaturePart bodyPart;
+    public float oldScale;
+    public boolean changeSitFlag;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -165,7 +170,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.yFloatPos = 0D;
         this.chargeCooldown = 0;
         this.maxRightClickCooldown = 100f;
-        this.forcedBreakBlockOffset = 0;
+        this.oldScale = 0;
+        this.changeSitFlag = false;
+        this.resetParts(0);
     }
 
     @Override
@@ -255,6 +262,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setControls();
         }
         if (this.canDoHerding()) this.manageHerding();
+        this.updateParts();
+        this.resetParts(this.getRenderSizeModifier());
+
+        if (this instanceof Tyrannosaurus) System.out.println("oxygen: "+this.getAir());
     }
 
     @SideOnly(Side.CLIENT)
@@ -344,6 +355,24 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
             }
+        }
+    }
+
+    public void updateParts() {
+        if (this.headPart != null) this.headPart.onUpdate();
+        if (this.bodyPart != null) this.bodyPart.onUpdate();
+    }
+
+    public abstract void resetParts(float scale);
+
+    public void removeParts() {
+        if (this.headPart != null) {
+            this.world.removeEntityDangerously(this.headPart);
+            this.headPart = null;
+        }
+        if (this.bodyPart != null) {
+            this.world.removeEntityDangerously(this.bodyPart);
+            this.bodyPart = null;
         }
     }
 
@@ -859,12 +888,26 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    public abstract float getRenderSizeModifier();
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldRender(ICamera camera) {
+        return this.inFrustrum(camera, this.headPart) || this.inFrustrum(camera, this.bodyPart);
+    }
+
+    public boolean inFrustrum(ICamera camera, Entity entity) {
+        return camera != null && entity != null && camera.isBoundingBoxInFrustum(entity.getEntityBoundingBox());
+    }
+
     @Override
     public boolean isOnLadder() {
         return this.isClimbing();
     }
 
-    protected void setCreatureSize(float width, float height) {}
+    public boolean canBreatheUnderwater() {
+        if (this.headPart != null) return !this.headPart.isInWater();
+        return false;
+    }
 
     public void refreshInventory() {
         ItemStack saddle = this.creatureInventory.getStackInSlot(0);
@@ -913,10 +956,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     return !input.isTamed();
                 }
             });
-//            if (potentialHerders.size() > 1 && this.getHerdLeader().equals(this)) {
-//                int herdLeaderId = Collections.min(potentialHerders.stream().map(RiftCreature::getEntityId).collect(Collectors.toList()));
-//                this.setHerdLeader((RiftCreature) this.world.getEntityByID(herdLeaderId));
-//            }
             int herdLeaderId = Collections.min(potentialHerders.stream().map(RiftCreature::getEntityId).collect(Collectors.toList()));
             this.setHerdLeader((RiftCreature) this.world.getEntityByID(herdLeaderId));
             this.herdCheckCountdown = RiftUtil.randomInRange(10, 15) * 20;
@@ -1038,6 +1077,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setTameStatus(TameStatusType tameStatus) {
         this.dataManager.set(STATUS, (byte) tameStatus.ordinal());
+        this.changeSitFlag = tameStatus.equals(TameStatusType.SIT);
     }
 
     public int getEnergy() {
@@ -1381,15 +1421,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             else this.attackEntityAsMob(target);
         }
         this.ssrTarget = null;
-        //this.forcedBreakBlockOffset
 
         //break blocks
-        double xOffset = this.posX + (this.forcedBreakBlockOffset * Math.cos(this.rotationYaw));
-        double yOffset = this.posY;
-        double zOffset = this.posZ + (this.forcedBreakBlockOffset * Math.sin(this.rotationYaw));
-        BlockPos pos = new BlockPos(xOffset, yOffset, zOffset);
+        BlockPos pos = new BlockPos(this.posX, this.posY, this.posZ);
         int height = (int)(Math.ceil(this.height)) + (this.isBeingRidden() ? (this.getControllingPassenger() != null ? (int)(Math.ceil(this.getControllingPassenger().height)) : 0) : 0);
-        int radius = (int)(Math.ceil(this.width));
+        int radius = (int)(Math.ceil(this.width)) + this.forcedBreakBlockRad;
         for (int x = -radius; x <= radius; x++) {
             for (int y = 0; y <= height; y++) {
                 for (int z = -radius; z <= radius; z++) {

@@ -59,6 +59,8 @@ public class Dodo extends RiftCreature {
         }
     }
 
+    public void resetParts(float scale) {}
+
     public void fall(float distance, float damageMultiplier) {}
 
     @Override

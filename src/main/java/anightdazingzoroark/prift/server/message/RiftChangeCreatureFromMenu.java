@@ -13,6 +13,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatureFromMenu> {
     private TameStatusType tameStatus;
@@ -52,7 +54,15 @@ public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatu
     }
 
     @Override
-    public void onClientReceived(Minecraft client, RiftChangeCreatureFromMenu message, EntityPlayer player, MessageContext messageContext) {}
+    @SideOnly(Side.CLIENT)
+    public void onClientReceived(Minecraft client, RiftChangeCreatureFromMenu message, EntityPlayer player, MessageContext messageContext) {
+        RiftCreature interacted = (RiftCreature) player.world.getEntityByID(message.creatureId);
+        System.out.println("client test");
+        interacted.setTameBehavior(message.tameBehavior);
+        interacted.setTameStatus(message.tameStatus);
+        interacted.getNavigator().clearPath();
+        interacted.setAttackTarget((EntityLivingBase)null);
+    }
 
     @Override
     public void onServerReceived(MinecraftServer server, RiftChangeCreatureFromMenu message, EntityPlayer player, MessageContext messageContext) {

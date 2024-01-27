@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -75,6 +76,14 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         this.manageCanCharge();
     }
 
+    public void resetParts(float scale) {
+        if (scale > this.oldScale) {
+            this.oldScale = scale;
+            this.removeParts();
+            this.bodyPart = new RiftCreaturePart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
+        }
+    }
+
     private void manageCanCharge() {
         if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
         if (this.getRightClickCooldown() == 0) this.setCanCharge(true);
@@ -134,6 +143,11 @@ public class Triceratops extends RiftCreature implements IChargingMob {
     @Override
     public boolean hasSpacebarChargeBar() {
         return false;
+    }
+
+    @Override
+    public float getRenderSizeModifier() {
+        return RiftUtil.setModelScale(this, 0.3f, 1.75f);
     }
 
     @Override
