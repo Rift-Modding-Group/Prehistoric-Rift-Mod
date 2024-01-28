@@ -190,7 +190,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
             this.removeParts();
             this.oldScale = scale;
             this.headPart = new RiftCreaturePart(this, 3f, 0, 3f, 0.75f * scale, 0.5f * scale, 1);
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 2f, 0.75f * scale, 0.75f * scale, 1.5f);
+            this.bodyPart = new RiftMainBodyPart(this, 0, 0, 2f, 0.75f * scale, 0.75f * scale, 1.5f);
             this.neckPart = new RiftCreaturePart(this, 1.75f, 0, 2.75f, 0.5f * scale, 0.5f * scale, 1.5f);
             this.hipPart = new RiftCreaturePart(this, -2f, 0, 2f, 0.75f * scale, 0.75f * scale, 1);
             this.leftLegPart = new RiftCreaturePart(this, 2.875f, -156, 0, 0.4f * scale, 1.135f * scale, 0.5f);

@@ -129,9 +129,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int tickUse;
     private BlockPos homePosition;
     public boolean isFloating;
-    private double lastYd;
     private double waterLevel;
-    private double yFloatPos;
+    public double yFloatPos;
     public String[] favoriteFood;
     public String[] tamingFood;
     public int chargeCooldown;
@@ -141,7 +140,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public String saddleItem;
     public int forcedBreakBlockRad = 0;
     public RiftCreaturePart headPart;
-    public RiftCreaturePart bodyPart;
+    public RiftMainBodyPart bodyPart;
     public float oldScale;
     public boolean changeSitFlag;
 
@@ -166,7 +165,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.herdCheckCountdown = 0;
         this.tickUse = 0;
         this.isFloating = false;
-        this.lastYd = 0D;
         this.yFloatPos = 0D;
         this.chargeCooldown = 0;
         this.maxRightClickCooldown = 100f;
@@ -246,7 +244,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setHasTarget(this.getAttackTarget() != null);
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();
-            this.controlWaterMovement();
+//            this.controlWaterMovement();
             if (this.isTamed()) {
                 if (this.isUnclaimed()) this.manageUnclaimed();
                 this.updateEnergyMove();
@@ -264,8 +262,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.canDoHerding()) this.manageHerding();
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
-
-        if (this instanceof Tyrannosaurus) System.out.println("oxygen: "+this.getAir());
     }
 
     @SideOnly(Side.CLIENT)
@@ -1532,10 +1528,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
 
                 if (this.isFloating && forward > 0) {
-                    BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F) * 2, this.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F) * 2);
-                    BlockPos above = ahead.up();
-                    if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
-                        this.setPosition(this.posX, this.posY + 1.0, this.posZ);
+                    if (this.bodyPart != null) {
+                        BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
+                        BlockPos above = ahead.up();
+                        if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                            this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
+                        }
                     }
                 }
 
@@ -1560,6 +1558,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return !this.isFloating && super.isEntityInsideOpaqueBlock();
     }
 
+    //manage floating on water stuff
     private void controlWaterMovement() {
         if (!this.isFloating && this.isInWater()) {
             this.yFloatPos = this.getHighestWaterLevel();
@@ -1614,11 +1613,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         finally {
             blockpos$pooledmutableblockpos.release();
         }
-    }
-
-    protected void updateFallState(double y, boolean onGroundIn, IBlockState state, BlockPos pos) {
-        super.updateFallState(y, onGroundIn, state, pos);
-        this.lastYd = this.motionY;
     }
 
     @Nullable

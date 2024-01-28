@@ -129,7 +129,7 @@ public class Apatosaurus extends RiftCreature {
         if (scale > this.oldScale) {
             this.oldScale = scale;
             this.removeParts();
-            this.bodyPart = new RiftCreaturePart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
+            this.bodyPart = new RiftMainBodyPart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
         }
     }
 

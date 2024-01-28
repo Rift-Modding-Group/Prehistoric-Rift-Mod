@@ -18,8 +18,11 @@ public class RiftCreaturePart extends PartEntity {
 
     @Override
     public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-        if (this.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftMultipartInteract((RiftCreature) this.parent, -1));
-        return ((RiftCreature)this.parent).processInteract(player, hand);
+        if (!this.parent.isBeingRidden()) {
+            if (this.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftMultipartInteract((RiftCreature) this.parent, -1));
+            return ((RiftCreature)this.parent).processInteract(player, hand);
+        }
+        return false;
     }
 
     @Override
