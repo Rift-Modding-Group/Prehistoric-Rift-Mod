@@ -10,6 +10,7 @@ import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 
 public class RiftCreaturePart extends PartEntity {
     public RiftCreaturePart(EntityLiving parent, float radius, float angleYaw, float offsetY, float sizeX, float sizeY, float damageMultiplier) {
@@ -51,5 +52,11 @@ public class RiftCreaturePart extends PartEntity {
 
     public boolean shouldNotExist() {
         return !this.parent.isEntityAlive();
+    }
+
+    public boolean isUnderwater() {
+        BlockPos thisPos = new BlockPos(this.posX, this.posY, this.posZ);
+        BlockPos abovePos = thisPos.add(0, 1, 0);
+        return this.world.getBlockState(thisPos).getMaterial().isLiquid() && this.world.getBlockState(abovePos).getMaterial().isLiquid();
     }
 }

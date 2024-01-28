@@ -32,7 +32,7 @@ public class RiftMainBodyPart extends RiftCreaturePart {
                 }
                 else {
                     creature.motionY = 0;
-                    creature.setPosition(this.posX, this.yFloatPos - this.offsetY, this.posZ);
+                    creature.setPosition(creature.posX, this.yFloatPos - this.offsetY, creature.posZ);
                     creature.stepHeight = 3;
                     creature.fallDistance = 0;
                 }

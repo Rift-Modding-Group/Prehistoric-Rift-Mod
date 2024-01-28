@@ -901,7 +901,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean canBreatheUnderwater() {
-        if (this.headPart != null) return !this.headPart.isInWater();
+        if (this.headPart != null) return !this.headPart.isUnderwater();
         return false;
     }
 
@@ -1544,10 +1544,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.stepHeight = 0.5F;
             this.jumpMovementFactor = 0.02F;
             if (this.isFloating && forward > 0) {
-                BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F) * 2, this.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F) * 2);
-                BlockPos above = ahead.up();
-                if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
-                    this.setPosition(this.posX, this.posY + 1.0, this.posZ);
+                if (this.bodyPart != null) {
+                    BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
+                    BlockPos above = ahead.up();
+                    if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                        this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
+                    }
                 }
             }
             super.travel(strafe, vertical, forward);

@@ -8,7 +8,9 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
@@ -28,6 +30,8 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -41,6 +45,14 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public int strongAttackCharge;
+    private RiftCreaturePart neckPart;
+    private RiftCreaturePart hipPart;
+    private RiftCreaturePart leftBackLegPart;
+    private RiftCreaturePart rightBackLegPart;
+    private RiftCreaturePart tail0Part;
+    private RiftCreaturePart tail1Part;
+    private RiftCreaturePart tail2Part;
+    private RiftCreaturePart tail3Part;
 
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
@@ -102,7 +114,78 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         if (scale > this.oldScale) {
             this.oldScale = scale;
             this.removeParts();
-            this.bodyPart = new RiftMainBodyPart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
+            this.headPart = new RiftCreaturePart(this, 3.125f, 0, 1.1f, 0.6f * scale, 0.5f * scale, 1.5f);
+            this.bodyPart = new RiftMainBodyPart(this, 0.55f, 0, 0.8f, 0.875f * scale, 0.75f * scale, 1f);
+            this.neckPart = new RiftCreaturePart(this, 2.1f, 0, 1f, 0.4f * scale, 0.5f * scale, 1.5f);
+            this.hipPart = new RiftCreaturePart(this, -1.2f, 0, 0.8f, 0.875f * scale, 0.9f * scale, 1f);
+            this.leftBackLegPart = new RiftCreaturePart(this, 1.5f, -150, 0f, 0.5f * scale, scale, 0.5f);
+            this.rightBackLegPart = new RiftCreaturePart(this, 1.5f, 150, 0f, 0.5f * scale, scale, 0.5f);
+            this.tail0Part = new RiftCreaturePart(this, -2.5f, 0, 1f, 0.6f * scale, 0.6f * scale, 0.5f);
+            this.tail1Part = new RiftCreaturePart(this, -3.5f, 0, 1f, 0.4f * scale, 0.5f * scale, 0.5f);
+            this.tail2Part = new RiftCreaturePart(this, -4.25f, 0, 1f, 0.4f * scale, 0.5f * scale, 0.5f);
+            this.tail3Part = new RiftCreaturePart(this, -5.25f, 0, 1f, 0.6f * scale, 0.5f * scale, 0.5f);
+        }
+    }
+
+    @Override
+    public void updateParts() {
+        super.updateParts();
+        if (this.neckPart != null) this.neckPart.onUpdate();
+        if (this.hipPart != null) this.hipPart.onUpdate();
+        if (this.leftBackLegPart != null) this.leftBackLegPart.onUpdate();
+        if (this.rightBackLegPart != null) this.rightBackLegPart.onUpdate();
+        if (this.tail0Part != null) this.tail0Part.onUpdate();
+        if (this.tail1Part != null) this.tail1Part.onUpdate();
+        if (this.tail2Part != null) this.tail2Part.onUpdate();
+        if (this.tail3Part != null) this.tail3Part.onUpdate();
+
+        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.5f : 0.25f;
+        float tail1SitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.6f : 0.5f;
+        float tail2SitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.8f : 0.5f;
+        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
+        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
+        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
+        if (this.hipPart != null) this.hipPart.setPositionAndUpdate(this.hipPart.posX, this.hipPart.posY + sitOffset, this.hipPart.posZ);
+        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
+        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + tail1SitOffset, this.tail1Part.posZ);
+        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + tail2SitOffset, this.tail2Part.posZ);
+        if (this.tail3Part != null) this.tail3Part.setPositionAndUpdate(this.tail3Part.posX, this.tail3Part.posY + tail2SitOffset, this.tail3Part.posZ);
+    }
+
+    @Override
+    public void removeParts() {
+        super.removeParts();
+        if (this.neckPart != null) {
+            this.world.removeEntityDangerously(this.neckPart);
+            this.neckPart = null;
+        }
+        if (this.hipPart != null) {
+            this.world.removeEntityDangerously(this.hipPart);
+            this.hipPart = null;
+        }
+        if (this.leftBackLegPart != null) {
+            this.world.removeEntityDangerously(this.leftBackLegPart);
+            this.leftBackLegPart = null;
+        }
+        if (this.rightBackLegPart != null) {
+            this.world.removeEntityDangerously(this.rightBackLegPart);
+            this.rightBackLegPart = null;
+        }
+        if (this.tail0Part != null) {
+            this.world.removeEntityDangerously(this.tail0Part);
+            this.tail0Part = null;
+        }
+        if (this.tail1Part != null) {
+            this.world.removeEntityDangerously(this.tail1Part);
+            this.tail1Part = null;
+        }
+        if (this.tail2Part != null) {
+            this.world.removeEntityDangerously(this.tail2Part);
+            this.tail2Part = null;
+        }
+        if (this.tail3Part != null) {
+            this.world.removeEntityDangerously(this.tail3Part);
+            this.tail3Part = null;
         }
     }
 
@@ -132,6 +215,11 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         float xOffset = (float)(this.posX + (-1) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-1) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY + 0.6, zOffset);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldRender(ICamera camera) {
+        return super.shouldRender(camera) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.hipPart) || this.inFrustrum(camera, this.leftBackLegPart) || this.inFrustrum(camera, this.rightBackLegPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part) || this.inFrustrum(camera, this.tail3Part);
     }
 
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {
