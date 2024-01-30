@@ -59,7 +59,14 @@ public class Dodo extends RiftCreature {
         }
     }
 
-    public void resetParts(float scale) {}
+    public void resetParts(float scale) {
+        if (scale > this.oldScale) {
+            this.oldScale = scale;
+            this.removeParts();
+            this.bodyPart = new RiftMainBodyPart(this, 0, 0, 0.25f, scale,  0.55f * scale, 1f);
+            this.headPart = new RiftCreaturePart(this, 0.35f, 0, 0.5f, 0.5f * scale,  0.5f * scale, 1f);
+        }
+    }
 
     public void fall(float distance, float damageMultiplier) {}
 

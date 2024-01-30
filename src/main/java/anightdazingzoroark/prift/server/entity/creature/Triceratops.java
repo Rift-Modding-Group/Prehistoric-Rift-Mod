@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,6 +30,12 @@ import javax.annotation.Nullable;
 
 public class Triceratops extends RiftCreature implements IChargingMob {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/triceratops"));
+    private RiftCreaturePart hipPart;
+    private RiftCreaturePart leftBackLegPart;
+    private RiftCreaturePart rightBackLegPart;
+    private RiftCreaturePart tail0Part;
+    private RiftCreaturePart tail1Part;
+    private RiftCreaturePart tail2Part;
 
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
@@ -80,7 +87,62 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         if (scale > this.oldScale) {
             this.oldScale = scale;
             this.removeParts();
-            this.bodyPart = new RiftMainBodyPart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
+            this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.2f, scale, 1.25f * scale, 0f);
+            this.bodyPart = new RiftMainBodyPart(this, 1.125f, 0, 0.8f, scale, 0.875f * scale, 1f);
+            this.hipPart = new RiftCreaturePart(this, -0.25f, 0, 0.7f, scale, scale, 1f);
+            this.leftBackLegPart = new RiftCreaturePart(this, 0.9f, -115, 0, 0.6f * scale, 1.125f * scale, 0.5f);
+            this.rightBackLegPart = new RiftCreaturePart(this, 0.9f, 115, 0, 0.6f * scale, 1.125f * scale, 0.5f);
+            this.tail0Part = new RiftCreaturePart(this, -1.5f, 0, 0.8f, 0.8f * scale, 0.75f * scale, 0.5f);
+            this.tail1Part = new RiftCreaturePart(this, -2.5f, 0, 1f, 0.6f * scale, 0.6f * scale, 0.5f);
+            this.tail2Part = new RiftCreaturePart(this, -3.375f, 0, 0.9f, 0.6f * scale, 0.5f * scale, 0.5f);
+        }
+    }
+
+    @Override
+    public void updateParts() {
+        super.updateParts();
+        if (this.hipPart != null) this.hipPart.onUpdate();
+        if (this.leftBackLegPart != null) this.leftBackLegPart.onUpdate();
+        if (this.rightBackLegPart != null) this.rightBackLegPart.onUpdate();
+        if (this.tail0Part != null) this.tail0Part.onUpdate();
+        if (this.tail1Part != null) this.tail1Part.onUpdate();
+        if (this.tail2Part != null) this.tail2Part.onUpdate();
+
+        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.65f : 0;
+        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
+        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
+        if (this.hipPart != null) this.hipPart.setPositionAndUpdate(this.hipPart.posX, this.hipPart.posY + sitOffset, this.hipPart.posZ);
+        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
+        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
+        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
+    }
+
+    @Override
+    public void removeParts() {
+        super.removeParts();
+        if (this.hipPart != null) {
+            this.world.removeEntityDangerously(this.hipPart);
+            this.hipPart = null;
+        }
+        if (this.leftBackLegPart != null) {
+            this.world.removeEntityDangerously(this.leftBackLegPart);
+            this.leftBackLegPart = null;
+        }
+        if (this.rightBackLegPart != null) {
+            this.world.removeEntityDangerously(this.rightBackLegPart);
+            this.rightBackLegPart = null;
+        }
+        if (this.tail0Part != null) {
+            this.world.removeEntityDangerously(this.tail0Part);
+            this.tail0Part = null;
+        }
+        if (this.tail1Part != null) {
+            this.world.removeEntityDangerously(this.tail1Part);
+            this.tail1Part = null;
+        }
+        if (this.tail2Part != null) {
+            this.world.removeEntityDangerously(this.tail2Part);
+            this.tail2Part = null;
         }
     }
 

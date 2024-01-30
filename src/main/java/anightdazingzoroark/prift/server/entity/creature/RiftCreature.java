@@ -401,7 +401,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void updateEnergyMove() {
-        if (this.isMoving() && !this.isActing()) {
+        if (this.isMoving(false) && !this.isActing()) {
             this.energyMod++;
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
@@ -419,7 +419,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
         }
-        else if (!this.isMoving() && !this.isActing()) {
+        else if (!this.isMoving(false) && !this.isActing()) {
             this.energyMod = 0;
             if (this.energyRegenModDelay <= 20) this.energyRegenModDelay++;
             else this.energyRegenMod++;
@@ -1345,8 +1345,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return new BlockPos(this.dataManager.get(WORKSTATION_X_POS), this.dataManager.get(WORKSTATION_Y_POS), this.dataManager.get(WORKSTATION_Z_POS));
     }
 
-    public boolean isMoving() {
-        double fallMotion = !this.onGround ? this.motionY : 0;
+    public boolean isMoving(boolean includeY) {
+        double fallMotion = !this.onGround && includeY ? this.motionY : 0;
         return Math.sqrt((this.motionX * this.motionX) + (fallMotion * fallMotion) + (this.motionZ * this.motionZ)) > 0;
     }
 

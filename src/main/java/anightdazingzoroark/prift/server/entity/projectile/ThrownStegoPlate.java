@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -84,32 +85,68 @@ public class ThrownStegoPlate extends EntityArrow implements IRiftProjectile {
         Entity entity = raytraceResultIn.entityHit;
 
         if (!this.world.isRemote) {
-            if (entity != null && entity != this.rider) {
-                float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-                int i = MathHelper.ceil((double) f * this.getDamage());
+            if (entity != null) {
+                if (entity instanceof RiftCreaturePart) {
+                    RiftCreaturePart part = (RiftCreaturePart) entity;
+                    RiftCreature parent = part.getParent();
 
-                if (this.getIsCritical()) i += this.rand.nextInt(i / 2 + 2);
+                    if (parent != this.shootingEntity) {
+                        float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+                        int i = MathHelper.ceil((double) f * this.getDamage());
 
-                DamageSource damagesource;
+                        if (this.getIsCritical()) i += this.rand.nextInt(i / 2 + 2);
 
-                if (this.shootingEntity == null) damagesource = DamageSource.causeArrowDamage(this, this);
-                else damagesource = DamageSource.causeArrowDamage(this, this.shootingEntity);
+                        DamageSource damagesource;
 
-                if (entity.attackEntityFrom(damagesource, (float) i)) {
-                    if (entity instanceof EntityLivingBase) {
-                        EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
-                        this.arrowHit(entitylivingbase);
+                        if (this.shootingEntity == null) damagesource = DamageSource.causeArrowDamage(this, this);
+                        else damagesource = DamageSource.causeArrowDamage(this, this.shootingEntity);
+
+                        if (entity.attackEntityFrom(damagesource, (float) i)) {
+//                            if (entity instanceof EntityLivingBase) {
+//                                EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
+//                                this.arrowHit(entitylivingbase);
+//                            }
+                            this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                        }
+                        else {
+                            this.motionX *= -0.10000000149011612D;
+                            this.motionY *= -0.10000000149011612D;
+                            this.motionZ *= -0.10000000149011612D;
+                            this.rotationYaw += 180.0F;
+                            this.prevRotationYaw += 180.0F;
+                            if (this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ < 0.0010000000474974513D) {
+                                this.setDead();
+                            }
+                        }
                     }
-                    this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 }
-                else {
-                    this.motionX *= -0.10000000149011612D;
-                    this.motionY *= -0.10000000149011612D;
-                    this.motionZ *= -0.10000000149011612D;
-                    this.rotationYaw += 180.0F;
-                    this.prevRotationYaw += 180.0F;
-                    if (this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ < 0.0010000000474974513D) {
-                        this.setDead();
+                else if (entity != this.rider) {
+                    float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+                    int i = MathHelper.ceil((double) f * this.getDamage());
+
+                    if (this.getIsCritical()) i += this.rand.nextInt(i / 2 + 2);
+
+                    DamageSource damagesource;
+
+                    if (this.shootingEntity == null) damagesource = DamageSource.causeArrowDamage(this, this);
+                    else damagesource = DamageSource.causeArrowDamage(this, this.shootingEntity);
+
+                    if (entity.attackEntityFrom(damagesource, (float) i)) {
+                        if (entity instanceof EntityLivingBase) {
+                            EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
+                            this.arrowHit(entitylivingbase);
+                        }
+                        this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                    }
+                    else {
+                        this.motionX *= -0.10000000149011612D;
+                        this.motionY *= -0.10000000149011612D;
+                        this.motionZ *= -0.10000000149011612D;
+                        this.rotationYaw += 180.0F;
+                        this.prevRotationYaw += 180.0F;
+                        if (this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ < 0.0010000000474974513D) {
+                            this.setDead();
+                        }
                     }
                 }
             }

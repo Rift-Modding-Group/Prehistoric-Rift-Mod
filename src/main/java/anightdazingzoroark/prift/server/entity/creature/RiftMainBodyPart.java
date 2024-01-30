@@ -64,13 +64,13 @@ public class RiftMainBodyPart extends RiftCreaturePart {
                             // Check if the block above is not water
                             IBlockState iblockstateAbove = this.world.getBlockState(blockpos$pooledmutableblockpos.up());
                             if (iblockstateAbove.getMaterial() != Material.WATER) {
-                                return (float) k1;
+                                return (float)k1 + 2f;
                             }
                         }
                     }
                 }
             }
-            return (float) l;
+            return (float)l + 2f;
         }
         finally {
             blockpos$pooledmutableblockpos.release();

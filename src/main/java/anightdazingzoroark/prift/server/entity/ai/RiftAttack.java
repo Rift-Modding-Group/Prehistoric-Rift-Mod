@@ -64,7 +64,8 @@ public class RiftAttack extends EntityAIBase {
     public boolean shouldContinueExecuting() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
-        if (this.attacker.getEnergy() == 0) return false;
+        if (!this.attacker.isAttacking()) return false;
+        else if (this.attacker.getEnergy() == 0) return false;
         else if (this.attacker.isBeingRidden()) return false;
         else if (this.attacker.isUtilizingCharging()) return false;
         else if (this.attacker.isLeaping()) return false;

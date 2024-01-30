@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
@@ -14,6 +15,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftOnHitMultipart;
 import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.material.Material;
@@ -59,13 +61,22 @@ public class ServerEvents {
         }
     }
 
-    //prevent players from attackin while ridin
     @SubscribeEvent
     public void noAttackWhileRiding(AttackEntityEvent event) {
+        //prevent players from attackin while ridin
         if (event.getEntityPlayer().isRiding()) {
             if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature || event.getEntityPlayer().getRidingEntity() instanceof RiftLargeWeapon) {
                 event.setCanceled(true);
             }
+        }
+
+        //ensure that damage towards hitboxes is same damage to creature
+        if (event.getTarget() instanceof RiftCreaturePart && event.getEntity() instanceof EntityPlayer) {
+            event.setCanceled(true);
+            RiftCreaturePart part = (RiftCreaturePart) event.getTarget();
+            RiftCreature parent = part.getParent();
+            ((EntityPlayer) event.getEntity()).attackTargetEntityWithCurrentItem(parent);
+            RiftMessages.WRAPPER.sendToServer(new RiftOnHitMultipart(parent));
         }
     }
 

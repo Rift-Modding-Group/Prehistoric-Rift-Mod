@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -47,6 +48,11 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     private int packBuffCooldown;
     private boolean contLeapAttackFlag;
     private EntityLivingBase contLeapTarget;
+    private RiftCreaturePart neckPart;
+    private RiftCreaturePart hipPart;
+    private RiftCreaturePart tail0Part;
+    private RiftCreaturePart tail1Part;
+    private RiftCreaturePart tail2Part;
 
     public Utahraptor(World worldIn) {
         super(worldIn, RiftCreatureType.UTAHRAPTOR);
@@ -130,7 +136,57 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         if (scale > this.oldScale) {
             this.oldScale = scale;
             this.removeParts();
-            this.bodyPart = new RiftMainBodyPart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
+            this.headPart = new RiftCreaturePart(this, 2f, 0, 1.7f, scale, 0.6f * scale, 1.5f);
+            this.bodyPart = new RiftMainBodyPart(this, 0.8f, 0, 0.9f, scale, 0.8f * scale, 1f);
+            this.neckPart = new RiftCreaturePart(this, 1.5f, 0, 1.2f, 0.7f * scale, 0.7f * scale, 1.5f);
+            this.hipPart = new RiftCreaturePart(this, 0, 0, 0.7f, scale, scale, 1f);
+            this.tail0Part = new RiftCreaturePart(this, -0.9f, 0, 1f, 0.7f * scale, 0.6f * scale, 0.5f);
+            this.tail1Part = new RiftCreaturePart(this, -1.5f, 0, 0.95f, 0.6f * scale, 0.6f * scale, 0.5f);
+            this.tail2Part = new RiftCreaturePart(this, -2.1f, 0, 0.9f, 0.6f * scale, 0.6f * scale, 0.5f);
+        }
+    }
+
+    @Override
+    public void updateParts() {
+        super.updateParts();
+        if (this.neckPart != null) this.neckPart.onUpdate();
+        if (this.hipPart != null) this.hipPart.onUpdate();
+        if (this.tail0Part != null) this.tail0Part.onUpdate();
+        if (this.tail1Part != null) this.tail1Part.onUpdate();
+        if (this.tail2Part != null) this.tail2Part.onUpdate();
+
+        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.45f : 0;
+        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
+        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
+        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
+        if (this.hipPart != null) this.hipPart.setPositionAndUpdate(this.hipPart.posX, this.hipPart.posY + sitOffset, this.hipPart.posZ);
+        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
+        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
+        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
+    }
+
+    @Override
+    public void removeParts() {
+        super.removeParts();
+        if (this.neckPart != null) {
+            this.world.removeEntityDangerously(this.neckPart);
+            this.neckPart = null;
+        }
+        if (this.hipPart != null) {
+            this.world.removeEntityDangerously(this.hipPart);
+            this.hipPart = null;
+        }
+        if (this.tail0Part != null) {
+            this.world.removeEntityDangerously(this.tail0Part);
+            this.tail0Part = null;
+        }
+        if (this.tail1Part != null) {
+            this.world.removeEntityDangerously(this.tail1Part);
+            this.tail1Part = null;
+        }
+        if (this.tail2Part != null) {
+            this.world.removeEntityDangerously(this.tail2Part);
+            this.tail2Part = null;
         }
     }
 
@@ -298,7 +354,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
             final float leapHeight = Math.min(6f, 0.25f * holdAmount + 1);
             final float g = 0.08f;
             if (this.getEnergy() > 6) {
-                if (this.isMoving()) {
+                if (this.isMoving(false)) {
                     double dx = (16 * Math.sin(-Math.toRadians(this.rotationYaw)));
                     double dz = (16 * Math.cos(Math.toRadians(this.rotationYaw)));
 

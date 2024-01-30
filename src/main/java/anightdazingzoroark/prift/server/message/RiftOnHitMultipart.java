@@ -4,60 +4,50 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftMultipartInteract extends AbstractMessage<RiftMultipartInteract> {
+public class RiftOnHitMultipart extends AbstractMessage<RiftOnHitMultipart> {
     private int creatureId;
-    private float damage;
 
-    public RiftMultipartInteract() {}
+    public RiftOnHitMultipart() {}
 
-    public RiftMultipartInteract(RiftCreature creature, float damage) {
+    public RiftOnHitMultipart(RiftCreature creature) {
         this.creatureId = creature.getEntityId();
-        this.damage = damage;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.creatureId = buf.readInt();
-        this.damage = buf.readFloat();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.creatureId);
-        buf.writeFloat(this.damage);
     }
 
     @Override
-    public void onClientReceived(Minecraft client, RiftMultipartInteract message, EntityPlayer player, MessageContext messageContext) {
+    public void onClientReceived(Minecraft client, RiftOnHitMultipart message, EntityPlayer player, MessageContext messageContext) {
         if (player.world != null) {
             RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
             if (creature != null) {
                 double dist = player.getDistance(creature);
                 if (dist < 128) {
-                    if (message.damage >= 0F) creature.attackEntityFrom(DamageSource.causeMobDamage(player), message.damage);
-                    else creature.processInteract(player, EnumHand.MAIN_HAND);
+                    player.attackTargetEntityWithCurrentItem(creature);
                 }
             }
         }
     }
 
     @Override
-    public void onServerReceived(MinecraftServer server, RiftMultipartInteract message, EntityPlayer player, MessageContext messageContext) {
-        System.out.println(message.damage);
+    public void onServerReceived(MinecraftServer server, RiftOnHitMultipart message, EntityPlayer player, MessageContext messageContext) {
         if (player.world != null) {
             RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
             if (creature != null) {
                 double dist = player.getDistance(creature);
                 if (dist < 128) {
-                    if (message.damage >= 0F) creature.attackEntityFrom(DamageSource.causeMobDamage(player), message.damage);
-                    else creature.processInteract(player, EnumHand.MAIN_HAND);
+                    player.attackTargetEntityWithCurrentItem(creature);
                 }
             }
         }

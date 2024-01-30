@@ -4,9 +4,6 @@ import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftMultipartInteract;
 import net.ilexiconn.llibrary.server.entity.multipart.PartEntity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -28,8 +25,13 @@ public class RiftCreaturePart extends PartEntity {
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float damage) {
-        if (this.world.isRemote && source.getTrueSource() instanceof EntityPlayer) {
-            RiftMessages.WRAPPER.sendToServer(new RiftMultipartInteract((RiftCreature) this.parent, damage * this.damageMultiplier));
+        if (this.world.isRemote) {
+            if (source.getTrueSource() != null) {
+                if (source.getTrueSource().equals(this.parent)) return false;
+                else if (source.getTrueSource() instanceof EntityPlayer) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftMultipartInteract((RiftCreature) this.parent, damage * this.damageMultiplier));
+                }
+            }
         }
         return this.parent.attackEntityFrom(source, damage * this.damageMultiplier);
     }
@@ -45,7 +47,7 @@ public class RiftCreaturePart extends PartEntity {
     @Override
     public void onUpdate() {
         super.onUpdate();
-        if (this.parent == null || shouldNotExist()) {
+        if (this.parent == null || this.shouldNotExist()) {
             this.world.removeEntityDangerously(this);
         }
     }
