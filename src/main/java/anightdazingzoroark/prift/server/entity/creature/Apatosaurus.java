@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
 import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
 import anightdazingzoroark.prift.server.message.*;
@@ -20,6 +21,7 @@ import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
@@ -67,6 +69,18 @@ public class Apatosaurus extends RiftCreature {
     private EntityLivingBase passengerTwo;
     private int launchTick;
     public boolean dismount = false;
+    private RiftCreaturePart neck0Part;
+    private RiftCreaturePart neck1Part;
+    private RiftCreaturePart neck2Part;
+    private RiftCreaturePart neck3Part;
+    private RiftCreaturePart neck4Part;
+    private RiftCreaturePart neck5Part;
+    private RiftCreaturePart leftBackLegPart;
+    private RiftCreaturePart rightBackLegPart;
+    private RiftCreaturePart tail0Part;
+    private RiftCreaturePart tail1Part;
+    private RiftCreaturePart tail2Part;
+    private RiftCreaturePart tail3Part;
 
     public Apatosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.APATOSAURUS);
@@ -129,7 +143,104 @@ public class Apatosaurus extends RiftCreature {
         if (scale > this.oldScale) {
             this.oldScale = scale;
             this.removeParts();
-            this.bodyPart = new RiftMainBodyPart(this, 1.5f, 0, 1, 1 * scale, 1 * scale, 0);
+            this.headPart = new RiftCreaturePart(this, 6.625f, 0, 4.5125f, 0.625f * scale, 0.5f * scale, 2f);
+            this.bodyPart = new RiftMainBodyPart(this, -0.75f, 0, 1.35f, 1.65f * scale, scale, 1f);
+            this.neck0Part = new RiftCreaturePart(this, 5.75f, 0, 4.25f, 0.5f * scale, 0.5f * scale, 1.5f);
+            this.neck1Part = new RiftCreaturePart(this, 5f, 0, 3.75f, 0.5f * scale, 0.5f * scale, 1.5f);
+            this.neck2Part = new RiftCreaturePart(this, 4.25f, 0, 3.25f, 0.5f * scale, 0.5f * scale, 1.5f);
+            this.neck3Part = new RiftCreaturePart(this, 3.5f, 0, 2.75f, 0.5f * scale, 0.625f * scale, 1.5f);
+            this.neck4Part = new RiftCreaturePart(this, 2.75f, 0, 2.5f, 0.5f * scale, 0.625f * scale, 1.5f);
+            this.neck5Part = new RiftCreaturePart(this, 1.75f, 0, 2.25f, 0.625f * scale, 0.625f * scale, 1.5f);
+            this.leftBackLegPart = new RiftCreaturePart(this, 2.375f, -150, 0, 0.625f * scale, 1.25f * scale, 0.5f);
+            this.rightBackLegPart = new RiftCreaturePart(this, 2.375f, 150, 0, 0.625f * scale, 1.25f * scale, 0.5f);
+            this.tail0Part = new RiftCreaturePart(this, -3.25f, 0, 1.9f, 0.675f * scale, 0.625f * scale, 0.5f);
+            this.tail1Part = new RiftCreaturePart(this, -4.75f, 0, 1.8f, 0.625f * scale, 0.6f * scale, 0.5f);
+            this.tail2Part = new RiftCreaturePart(this, -6f, 0, 1.7f, 0.625f * scale, 0.6f * scale, 0.5f);
+            this.tail3Part = new RiftCreaturePart(this, -7.25f, 0, 1.7f, 0.625f * scale, 0.45f * scale, 0.5f);
+        }
+    }
+
+    @Override
+    public void updateParts() {
+        super.updateParts();
+        if (this.neck0Part != null) this.neck0Part.onUpdate();
+        if (this.neck1Part != null) this.neck1Part.onUpdate();
+        if (this.neck2Part != null) this.neck2Part.onUpdate();
+        if (this.neck3Part != null) this.neck3Part.onUpdate();
+        if (this.neck4Part != null) this.neck4Part.onUpdate();
+        if (this.neck5Part != null) this.neck5Part.onUpdate();
+        if (this.leftBackLegPart != null) this.leftBackLegPart.onUpdate();
+        if (this.rightBackLegPart != null) this.rightBackLegPart.onUpdate();
+        if (this.tail0Part != null) this.tail0Part.onUpdate();
+        if (this.tail1Part != null) this.tail1Part.onUpdate();
+        if (this.tail2Part != null) this.tail2Part.onUpdate();
+        if (this.tail3Part != null) this.tail3Part.onUpdate();
+
+        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -1.125f : 0;
+        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
+        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
+        if (this.neck0Part != null) this.neck0Part.setPositionAndUpdate(this.neck0Part.posX, this.neck0Part.posY + sitOffset, this.neck0Part.posZ);
+        if (this.neck1Part != null) this.neck1Part.setPositionAndUpdate(this.neck1Part.posX, this.neck1Part.posY + sitOffset, this.neck1Part.posZ);
+        if (this.neck2Part != null) this.neck2Part.setPositionAndUpdate(this.neck2Part.posX, this.neck2Part.posY + sitOffset, this.neck2Part.posZ);
+        if (this.neck3Part != null) this.neck3Part.setPositionAndUpdate(this.neck3Part.posX, this.neck3Part.posY + sitOffset, this.neck3Part.posZ);
+        if (this.neck4Part != null) this.neck4Part.setPositionAndUpdate(this.neck4Part.posX, this.neck4Part.posY + sitOffset, this.neck4Part.posZ);
+        if (this.neck5Part != null) this.neck5Part.setPositionAndUpdate(this.neck5Part.posX, this.neck5Part.posY + sitOffset, this.neck5Part.posZ);
+        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
+        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
+        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
+        if (this.tail3Part != null) this.tail3Part.setPositionAndUpdate(this.tail3Part.posX, this.tail3Part.posY + sitOffset, this.tail3Part.posZ);
+    }
+
+    @Override
+    public void removeParts() {
+        super.removeParts();
+        if (this.neck0Part != null) {
+            this.world.removeEntityDangerously(this.neck0Part);
+            this.neck0Part = null;
+        }
+        if (this.neck1Part != null) {
+            this.world.removeEntityDangerously(this.neck1Part);
+            this.neck1Part = null;
+        }
+        if (this.neck2Part != null) {
+            this.world.removeEntityDangerously(this.neck2Part);
+            this.neck2Part = null;
+        }
+        if (this.neck3Part != null) {
+            this.world.removeEntityDangerously(this.neck3Part);
+            this.neck3Part = null;
+        }
+        if (this.neck4Part != null) {
+            this.world.removeEntityDangerously(this.neck4Part);
+            this.neck4Part = null;
+        }
+        if (this.neck5Part != null) {
+            this.world.removeEntityDangerously(this.neck5Part);
+            this.neck5Part = null;
+        }
+        if (this.leftBackLegPart != null) {
+            this.world.removeEntityDangerously(this.leftBackLegPart);
+            this.leftBackLegPart = null;
+        }
+        if (this.rightBackLegPart != null) {
+            this.world.removeEntityDangerously(this.rightBackLegPart);
+            this.rightBackLegPart = null;
+        }
+        if (this.tail0Part != null) {
+            this.world.removeEntityDangerously(this.tail0Part);
+            this.tail0Part = null;
+        }
+        if (this.tail1Part != null) {
+            this.world.removeEntityDangerously(this.tail1Part);
+            this.tail1Part = null;
+        }
+        if (this.tail2Part != null) {
+            this.world.removeEntityDangerously(this.tail2Part);
+            this.tail2Part = null;
+        }
+        if (this.tail3Part != null) {
+            this.world.removeEntityDangerously(this.tail3Part);
+            this.tail3Part = null;
         }
     }
 
@@ -329,6 +440,11 @@ public class Apatosaurus extends RiftCreature {
         float seatTwoX = (float)(this.posX + (-2) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float seatTwoZ = (float)(this.posZ + (-2) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(seatTwoX, this.posY + 2.25, seatTwoZ);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldRender(ICamera camera) {
+        return super.shouldRender(camera) || this.inFrustrum(camera, this.neck0Part) || this.inFrustrum(camera, this.neck1Part) || this.inFrustrum(camera, this.neck2Part) || this.inFrustrum(camera, this.neck3Part) || this.inFrustrum(camera, this.neck4Part) || this.inFrustrum(camera, this.neck5Part) || this.inFrustrum(camera, this.leftBackLegPart) || this.inFrustrum(camera, this.rightBackLegPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part) || this.inFrustrum(camera, this.tail3Part);
     }
 
     @Override

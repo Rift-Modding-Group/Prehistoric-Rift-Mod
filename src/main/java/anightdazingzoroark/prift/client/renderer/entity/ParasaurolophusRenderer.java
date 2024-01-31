@@ -2,8 +2,12 @@ package anightdazingzoroark.prift.client.renderer.entity;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.model.RiftCreatureModel;
+import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
+import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
@@ -13,6 +17,12 @@ public class ParasaurolophusRenderer extends GeoEntityRenderer<RiftCreature> {
     public ParasaurolophusRenderer(RenderManager renderManager) {
         super(renderManager, new RiftCreatureModel());
         this.shadowSize = 1;
+    }
+
+    @Override
+    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
+        Parasaurolophus parasaurolophus = (Parasaurolophus) livingEntity;
+        return super.shouldRender(parasaurolophus, camera, camX, camY, camZ) || parasaurolophus.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(parasaurolophus);
     }
 
     @Override

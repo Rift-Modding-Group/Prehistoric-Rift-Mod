@@ -3,7 +3,11 @@ package anightdazingzoroark.prift.client.renderer.entity;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.model.RiftCreatureModel;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.Stegosaurus;
+import anightdazingzoroark.prift.server.entity.creature.Tyrannosaurus;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
@@ -13,6 +17,12 @@ public class StegosaurusRenderer extends GeoEntityRenderer<RiftCreature> {
     public StegosaurusRenderer(RenderManager renderManager) {
         super(renderManager, new RiftCreatureModel());
         this.shadowSize = 1.0f;
+    }
+
+    @Override
+    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
+        Stegosaurus stegosaurus = (Stegosaurus) livingEntity;
+        return super.shouldRender(stegosaurus, camera, camX, camY, camZ) || stegosaurus.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(stegosaurus);
     }
 
     @Override
