@@ -50,7 +50,6 @@ public class RiftMultipartInteract extends AbstractMessage<RiftMultipartInteract
 
     @Override
     public void onServerReceived(MinecraftServer server, RiftMultipartInteract message, EntityPlayer player, MessageContext messageContext) {
-        System.out.println(message.damage);
         if (player.world != null) {
             RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
             if (creature != null) {

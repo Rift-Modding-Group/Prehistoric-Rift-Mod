@@ -57,7 +57,6 @@ public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatu
     @SideOnly(Side.CLIENT)
     public void onClientReceived(Minecraft client, RiftChangeCreatureFromMenu message, EntityPlayer player, MessageContext messageContext) {
         RiftCreature interacted = (RiftCreature) player.world.getEntityByID(message.creatureId);
-        System.out.println("client test");
         interacted.setTameBehavior(message.tameBehavior);
         interacted.setTameStatus(message.tameStatus);
         interacted.getNavigator().clearPath();
