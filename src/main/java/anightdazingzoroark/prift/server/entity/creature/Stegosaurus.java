@@ -15,6 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
@@ -311,7 +312,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.world.spawnEntity(thrownStegoPlate);
     }
 
-
     private boolean attackEntityAsMobStrong(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), ((float) this.strongAttackCharge - 100f)/3f + 30f + (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
         if (flag) {
@@ -361,6 +361,11 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
+    }
+
+    @Override
+    public boolean canBeLeashedTo(EntityPlayer player) {
+        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT);
     }
 
     @Override

@@ -415,6 +415,11 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
     }
 
     @Override
+    public boolean canBeLeashedTo(EntityPlayer player) {
+        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT);
+    }
+
+    @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController(this, "movement", 0, this::parasaurolophusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::parasaurolophusAttack));

@@ -42,7 +42,10 @@ public class RiftMultipartInteract extends AbstractMessage<RiftMultipartInteract
                 double dist = player.getDistance(creature);
                 if (dist < 128) {
                     if (message.damage >= 0F) creature.attackEntityFrom(DamageSource.causeMobDamage(player), message.damage);
-                    else creature.processInteract(player, EnumHand.MAIN_HAND);
+                    else {
+                        creature.processInteract(player, EnumHand.MAIN_HAND);
+                        creature.processInitialInteract(player, EnumHand.MAIN_HAND);
+                    }
                 }
             }
         }
@@ -56,7 +59,10 @@ public class RiftMultipartInteract extends AbstractMessage<RiftMultipartInteract
                 double dist = player.getDistance(creature);
                 if (dist < 128) {
                     if (message.damage >= 0F) creature.attackEntityFrom(DamageSource.causeMobDamage(player), message.damage);
-                    else creature.processInteract(player, EnumHand.MAIN_HAND);
+                    else {
+                        creature.processInteract(player, EnumHand.MAIN_HAND);
+                        creature.processInitialInteract(player, EnumHand.MAIN_HAND);
+                    }
                 }
             }
         }
