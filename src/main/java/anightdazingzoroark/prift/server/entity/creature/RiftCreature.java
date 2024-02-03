@@ -143,6 +143,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public RiftMainBodyPart bodyPart;
     public float oldScale;
     public boolean changeSitFlag;
+    private int healthRegen;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -170,6 +171,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.maxRightClickCooldown = 100f;
         this.oldScale = 0;
         this.changeSitFlag = false;
+        this.healthRegen = 0;
         this.resetParts(0);
     }
 
@@ -244,7 +246,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setHasTarget(this.getAttackTarget() != null);
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();
-//            this.controlWaterMovement();
             if (this.isTamed()) {
                 if (this.isUnclaimed()) this.manageUnclaimed();
                 this.updateEnergyMove();
@@ -254,6 +255,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.eatFromInventory();
                 if (this.isBeingRidden()) this.informRiderEnergy();
                 this.manageTargetingBySitting();
+                if (this.canNaturalRegen()) {
+                    if (this.getHealth() < this.getMaxHealth()) this.naturalRegen();
+                    else this.healthRegen = 0;
+                }
             }
         }
         if (this.world.isRemote) {
@@ -369,6 +374,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.bodyPart != null) {
             this.world.removeEntityDangerously(this.bodyPart);
             this.bodyPart = null;
+        }
+    }
+
+    private void naturalRegen() {
+        if (this.healthRegen <= 100) {
+            this.healthRegen++;
+        }
+        else {
+            this.healthRegen = 0;
+            this.heal(2f);
         }
     }
 
@@ -1348,6 +1363,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean isMoving(boolean includeY) {
         double fallMotion = !this.onGround && includeY ? this.motionY : 0;
         return Math.sqrt((this.motionX * this.motionX) + (fallMotion * fallMotion) + (this.motionZ * this.motionZ)) > 0;
+    }
+
+    public boolean canNaturalRegen() {
+        return true;
     }
 
     public boolean isTameableByFeeding() {

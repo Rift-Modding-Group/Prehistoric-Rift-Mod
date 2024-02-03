@@ -92,7 +92,7 @@ public class Apatosaurus extends RiftCreature {
         this.experienceValue = 50;
         this.speed = 0.15D;
         this.isRideable = true;
-        this.attackWidth = 4.5f;
+        this.attackWidth = 6f;
         this.launchTick = 0;
         this.saddleItem = ApatosaurusConfig.apatosaurusSaddleItem;
     }

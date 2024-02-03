@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
@@ -13,26 +14,31 @@ import net.minecraft.util.math.AxisAlignedBB;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RiftGetTargets extends EntityAITarget {
     private final int targetChance;
     private List<String> targetList;
+    private List<String> targetBlacklist;
     protected final RiftGetTargets.Sorter sorter;
     protected final Predicate <? super EntityLivingBase > targetEntitySelector;
     protected final boolean alertOthers;
     protected EntityLivingBase targetEntity;
+    private boolean useCarnivoreTList;
 
-    public RiftGetTargets(EntityCreature creature, String[] targetList, boolean alertOthers, boolean checkSight) {
-        this(creature, targetList, checkSight, alertOthers, false);
+    public RiftGetTargets(EntityCreature creature, String[] targetList, String[] targetBlacklist, boolean alertOthers, boolean checkSight, boolean useCarnivoreTList) {
+        this(creature, targetList, targetBlacklist, checkSight, alertOthers, false, useCarnivoreTList);
     }
 
-    public RiftGetTargets(EntityCreature creature, String[] targetList, boolean alertOthers, boolean checkSight, boolean onlyNearby) {
-        this(creature, targetList, alertOthers, 10, checkSight, onlyNearby, (Predicate)null);
+    public RiftGetTargets(EntityCreature creature, String[] targetList, String[] targetBlacklist, boolean alertOthers, boolean checkSight, boolean onlyNearby, boolean useCarnivoreTList) {
+        this(creature, targetList, targetBlacklist, alertOthers, 10, checkSight, onlyNearby, (Predicate)null, useCarnivoreTList);
     }
 
-    public RiftGetTargets(EntityCreature creature, String[] targetList, boolean alertOthers, int chance, boolean checkSight, boolean onlyNearby, @Nullable final Predicate <? super EntityLivingBase > targetSelector) {
+    public RiftGetTargets(EntityCreature creature, String[] targetList, String[] targetBlacklist, boolean alertOthers, int chance, boolean checkSight, boolean onlyNearby, @Nullable final Predicate <? super EntityLivingBase > targetSelector, boolean useCarnivoreTList) {
         super(creature, checkSight, onlyNearby);
         this.targetList = Arrays.asList(targetList);
+        this.targetBlacklist = Arrays.asList(targetBlacklist);
         this.targetChance = chance;
         this.sorter = new RiftGetTargets.Sorter(creature);
         this.setMutexBits(1);
@@ -47,6 +53,7 @@ public class RiftGetTargets extends EntityAITarget {
                 }
             }
         };
+        this.useCarnivoreTList = useCarnivoreTList;
     }
 
     @Override
@@ -56,6 +63,15 @@ public class RiftGetTargets extends EntityAITarget {
         else if (creature.canDoHerding() && !creature.isHerdLeader() && !creature.getHerdLeader().equals(creature)) return false;
         else {
             List<EntityLivingBase> list = new ArrayList<>();
+            List<String> baseTargetList = new ArrayList<>(Arrays.asList(GeneralConfig.universalCarnivoreTargets));
+
+            if (this.useCarnivoreTList) {
+                // Now baseTargetList is modifiable, so removeIf should work without throwing an exception
+                baseTargetList.removeIf(this.targetBlacklist::contains);
+                this.targetList = Stream.concat(this.targetList.stream(), baseTargetList.stream())
+                        .collect(Collectors.toList());
+            }
+
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
                 if (!entity.isRiding()) {
                     if (entity instanceof EntityPlayer) {

@@ -84,6 +84,11 @@ public class Dodo extends RiftCreature {
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
 
     @Override
+    public boolean canNaturalRegen() {
+        return false;
+    }
+
+    @Override
     public boolean hasLeftClickChargeBar() {
         return false;
     }
