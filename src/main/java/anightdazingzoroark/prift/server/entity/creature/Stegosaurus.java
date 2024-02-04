@@ -86,6 +86,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
 
     protected void initEntityAI() {
+        this.targetTasks.addTask(0, new RiftTurretModeTargeting(this, true));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
@@ -283,6 +284,10 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return false;
     }
 
+    public boolean canDoTurretMode() {
+        return true;
+    }
+
     public void strongControlAttack() {
         EntityLivingBase target;
         if (this.ssrTarget == null) target = this.getControlAttackTargets(this.attackWidth);
@@ -365,7 +370,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     @Override
     public boolean canBeLeashedTo(EntityPlayer player) {
-        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT);
+        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && !this.getTameStatus().equals(TameStatusType.TURRET_MODE);
     }
 
     @Override

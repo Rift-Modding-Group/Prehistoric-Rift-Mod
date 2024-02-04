@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -45,18 +46,18 @@ public class RiftAttack extends EntityAIBase {
             this.path = this.attacker.getNavigator().getPathToEntityLiving(entitylivingbase);
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
 
-            if (this.path != null) return this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden();
+            if (this.path != null) return this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE);
             else {
                 if (this.attacker instanceof IRangedAttackMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof IChargingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isUtilizingCharging() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isUtilizingCharging() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof ILeapingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isLeaping() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isLeaping() && !this.attacker.isActing();
                 }
-                return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden();
+                return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE);
             }
         }
     }

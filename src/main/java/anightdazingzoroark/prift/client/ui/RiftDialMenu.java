@@ -3,10 +3,7 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
-import anightdazingzoroark.prift.server.enums.PopupFromRadial;
-import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
-import anightdazingzoroark.prift.server.enums.TameBehaviorType;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
+import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -130,7 +127,7 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 1 && this.creature.getTameStatus().name().equals(this.choices.get(i).name())) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 128, 0, 128, 128);
             }
-            else if (this.radialChoiceMenu == 3 && this.creature.getTameBehavior().name().equals(this.choices.get(i).name())) {
+            else if (this.radialChoiceMenu == 3 && ((!this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.creature.getTameBehavior().name().equals(this.choices.get(i).name())) || (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.creature.getTurretTargeting().name().equals(this.choices.get(i).name())))) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 128, 0, 128, 128);
             }
             else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 2) {
@@ -167,17 +164,21 @@ public class RiftDialMenu extends GuiScreen {
         //text
         for (int i = 0; i < numItems; i++) {
             String radialString;
-            if (i == 2 && this.radialChoiceMenu == 2) {
-                if (creature.getHasHomePos()) radialString = I18n.format("radial.choice.reset_home");
+            if (i == 4 && this.radialChoiceMenu == 0) {
+                if (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) radialString = I18n.format("radial.choice.turret_targeting");
+                else radialString = I18n.format("radial.choice.behavior");
+            }
+            else if (i == 2 && this.radialChoiceMenu == 2) {
+                if (this.creature.getHasHomePos()) radialString = I18n.format("radial.choice.reset_home");
                 else radialString = I18n.format("radial.choice.set_home");
             }
             else if (i == 4 && this.radialChoiceMenu == 2) {
-                if (!creature.isUsingWorkstation()) radialString = I18n.format("radial.choice.set_workstation");
+                if (!this.creature.isUsingWorkstation()) radialString = I18n.format("radial.choice.set_workstation");
                 else radialString = I18n.format("radial.choice.clear_workstation");
             }
             else radialString = I18n.format("radial.choice."+this.choices.get(i).name().toLowerCase());
 
-            if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled())) && i == 2) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled()) || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) || this.creature.isUsingWorkstation()) && i == 2) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 4) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 2 && this.creature.isBaby() && i == 3) radialString = "["+radialString+"]";
 
@@ -194,6 +195,9 @@ public class RiftDialMenu extends GuiScreen {
         //hover text
         if (this.radialChoiceMenu == 0 && this.creature.isBaby() && selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.too_young_saddle"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 0 && (this.creature.isUsingWorkstation() || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) && selectedItem == 2) {
+            this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
         }
         else if (this.radialChoiceMenu == 0 && !this.creature.isSaddled() && selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.need_saddle"), mouseX, mouseY);
@@ -259,7 +263,7 @@ public class RiftDialMenu extends GuiScreen {
                     this.choices = getState();
                     this.radialChoiceMenu = 1;
                 }
-                else if (selectedItem == 2 && !this.creature.isBaby() && this.creature.isSaddled()) {
+                else if (selectedItem == 2 && !this.creature.isBaby() && !this.creature.isUsingWorkstation() && !this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.creature.isSaddled()) {
                     this.mc.player.closeScreen();
                     RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
                 }
@@ -287,6 +291,10 @@ public class RiftDialMenu extends GuiScreen {
                 }
                 else if (selectedItem == 3) {
                     RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.WANDER));
+                    this.mc.player.closeScreen();
+                }
+                else if (selectedItem == 4) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.TURRET_MODE));
                     this.mc.player.closeScreen();
                 }
                 break;
@@ -321,19 +329,23 @@ public class RiftDialMenu extends GuiScreen {
                     this.radialChoiceMenu = 0;
                 }
                 else if (selectedItem == 1) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.ASSIST));
+                    if (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TurretModeTargeting.PLAYERS));
+                    else RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.ASSIST));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 2) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.NEUTRAL));
+                    if (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TurretModeTargeting.PLAYERS_AND_OTHER_TAMES));
+                    else RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.NEUTRAL));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 3) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.AGGRESSIVE));
+                    if (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TurretModeTargeting.HOSTILES));
+                    else RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.AGGRESSIVE));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 4) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.PASSIVE));
+                    if (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TurretModeTargeting.ALL));
+                    else RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameBehaviorType.PASSIVE));
                     this.mc.player.closeScreen();
                 }
                 break;
@@ -344,24 +356,14 @@ public class RiftDialMenu extends GuiScreen {
         return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.RIDE, RiftTameRadialChoice.OPTIONS, RiftTameRadialChoice.BEHAVIOR);
     }
 
-    private List<RiftTameRadialChoice> getMainUnrideable() {
-        return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.OPTIONS, RiftTameRadialChoice.BEHAVIOR);
-    }
-
     private List<RiftTameRadialChoice> getState() {
+        if (this.creature.canDoTurretMode()) return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.STAND, RiftTameRadialChoice.SIT, RiftTameRadialChoice.WANDER, RiftTameRadialChoice.TURRET_MODE);
         return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.STAND, RiftTameRadialChoice.SIT, RiftTameRadialChoice.WANDER);
     }
 
     private List<RiftTameRadialChoice> getBehavior() {
+        if (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.PLAYERS, RiftTameRadialChoice.PLAYERS_AND_OTHER_TAMES, RiftTameRadialChoice.HOSTILES, RiftTameRadialChoice.ALL);
         return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.ASSIST, RiftTameRadialChoice.NEUTRAL, RiftTameRadialChoice.AGGRESSIVE, RiftTameRadialChoice.PASSIVE);
-    }
-
-    private List<RiftTameRadialChoice> getBehaviorCanTurret() {
-        return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.ASSIST, RiftTameRadialChoice.NEUTRAL, RiftTameRadialChoice.AGGRESSIVE, RiftTameRadialChoice.PASSIVE, RiftTameRadialChoice.TURRET);
-    }
-
-    private List<RiftTameRadialChoice> getBehaviorTurretOnly() {
-        return Arrays.asList(RiftTameRadialChoice.BACK,RiftTameRadialChoice.PASSIVE, RiftTameRadialChoice.TURRET);
     }
 
     private List<RiftTameRadialChoice> getOptions() {

@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -76,7 +77,7 @@ public class RiftRangedAttack extends EntityAIBase {
                 ++this.strafingTime;
             }
             else {
-                this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget);
+                if (!this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE)) this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget);
                 this.strafingTime = -1;
             }
 
@@ -90,7 +91,7 @@ public class RiftRangedAttack extends EntityAIBase {
                 if (d0 > this.getRangedAttackReachSqr() * 0.75D) this.strafingBackwards = false;
                 else if (d0 < this.getRangedAttackReachSqr() * 0.25D) this.strafingBackwards = true;
 
-                this.attacker.getMoveHelper().strafe(this.strafingBackwards ? -0.5F : 0.5F, this.strafingClockwise ? 0.5F : -0.5F);
+                if (!this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE)) this.attacker.getMoveHelper().strafe(this.strafingBackwards ? -0.5F : 0.5F, this.strafingClockwise ? 0.5F : -0.5F);
                 this.attacker.faceEntity(entitylivingbase, 30.0F, 30.0F);
             }
             else this.attacker.getLookHelper().setLookPositionWithEntity(entitylivingbase, 30.0F, 30.0F);
@@ -106,7 +107,7 @@ public class RiftRangedAttack extends EntityAIBase {
                     if (this.animTime > this.shootAnimLength) {
                         this.animTime = 0;
                         this.attacker.setRangedAttacking(false);
-                        this.attacker.resetSpeed();
+                        if (!this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE)) this.attacker.resetSpeed();
                         this.attackCooldown = 20;
                         if (this.attacker.isTamed()) this.attacker.energyActionMod++;
                     }
@@ -116,6 +117,7 @@ public class RiftRangedAttack extends EntityAIBase {
     }
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
+        if (this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE)) return 0;
         return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
     }
 

@@ -84,6 +84,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
     }
 
     protected void initEntityAI() {
+        this.targetTasks.addTask(0, new RiftTurretModeTargeting(this, true));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
@@ -333,6 +334,10 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
         return false;
     }
 
+    public boolean canDoTurretMode() {
+        return true;
+    }
+
     @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.3f, 1.5f);
@@ -416,7 +421,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
 
     @Override
     public boolean canBeLeashedTo(EntityPlayer player) {
-        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT);
+        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && !this.getTameStatus().equals(TameStatusType.TURRET_MODE);
     }
 
     @Override

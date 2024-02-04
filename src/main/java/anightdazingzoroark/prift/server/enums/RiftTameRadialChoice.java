@@ -10,13 +10,17 @@ public enum RiftTameRadialChoice {
     STAND,
     SIT,
     WANDER,
+    TURRET_MODE,
     ASSIST,
     NEUTRAL,
     AGGRESSIVE,
     PASSIVE,
-    TURRET,
     CHANGE_NAME,
     SET_HOME,
     UNCLAIM,
-    SET_WORKSTATION;
+    SET_WORKSTATION,
+    PLAYERS,
+    PLAYERS_AND_OTHER_TAMES,
+    HOSTILES,
+    ALL;
 }

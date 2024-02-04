@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.enums.PopupFromRadial;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
@@ -72,6 +73,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
+    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ACTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -189,6 +191,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(VARIANT, rand.nextInt(4));
         this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
+        this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
         this.dataManager.register(SADDLED, Boolean.FALSE);
         this.dataManager.register(ENERGY, 20);
         this.dataManager.register(ACTING, Boolean.FALSE);
@@ -597,7 +600,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
-                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isUsingWorkstation()) {
+                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isUsingWorkstation() && !this.getTameStatus().equals(TameStatusType.TURRET_MODE)) {
                         RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
@@ -806,6 +809,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setInteger("Variant", this.getVariant());
         compound.setByte("TameStatus", (byte) this.getTameStatus().ordinal());
         compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
+        compound.setByte("TurretTargeting", (byte) this.getTurretTargeting().ordinal());
         compound.setBoolean("Saddled", this.isSaddled());
         if (creatureType != null) {
             NBTTagList nbttaglist = new NBTTagList();
@@ -851,6 +855,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setVariant(compound.getInteger("Variant"));
         if (compound.hasKey("TameStatus")) this.setTameStatus(TameStatusType.values()[compound.getByte("TameStatus")]);
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
+        if (this.canDoTurretMode() && compound.hasKey("TurretTargeting")) this.setTurretModeTargeting(TurretModeTargeting.values()[compound.getByte("TurretTargeting")]);
         this.setSaddled(compound.getBoolean("Saddled"));
         if (creatureInventory != null) {
             NBTTagList nbtTagList = compound.getTagList("Items", 10);
@@ -1130,6 +1135,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(BEHAVIOR, (byte) tameBehavior.ordinal());
     }
 
+    public TurretModeTargeting getTurretTargeting() {
+        return TurretModeTargeting.values()[this.dataManager.get(TURRET_TARGET).byteValue()];
+    }
+    public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
+        this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
+    }
+
     public boolean isSaddled() {
         return this.dataManager.get(SADDLED);
     }
@@ -1405,6 +1417,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public abstract boolean hasRightClickChargeBar();
 
     public abstract boolean hasSpacebarChargeBar();
+
+    public boolean canDoTurretMode() {
+        return false;
+    }
 
     public boolean checkBasedOnStrength(Block block, IBlockState blockState) {
         switch (this.creatureType.getBlockBreakTier()) {

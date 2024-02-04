@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
@@ -32,7 +33,7 @@ public class RiftParasaurolophusBlow extends EntityAIBase {
                 this.path = this.parasaurolophus.getNavigator().getPathToEntityLiving(entitylivingbase);
                 if (this.path != null) return this.parasaurolophus.getEnergy() > 6 && !this.parasaurolophus.isBeingRidden();
             }
-            return this.parasaurolophus.getEnergy() > 6 && this.parasaurolophus.getDistance(entitylivingbase) <= 8f && !this.parasaurolophus.isBeingRidden();
+            return this.parasaurolophus.getEnergy() > 6 && this.parasaurolophus.getDistance(entitylivingbase) <= 16f && !this.parasaurolophus.isBeingRidden();
         }
     }
 
@@ -47,7 +48,7 @@ public class RiftParasaurolophusBlow extends EntityAIBase {
     @Override
     public void resetTask() {
         this.parasaurolophus.setBlowing(false);
-        this.parasaurolophus.resetSpeed();
+        if (!this.parasaurolophus.getTameStatus().equals(TameStatusType.TURRET_MODE)) this.parasaurolophus.resetSpeed();
     }
 
     @Override
@@ -64,7 +65,7 @@ public class RiftParasaurolophusBlow extends EntityAIBase {
             this.parasaurolophus.getLookHelper().setLookPositionWithEntity(entitylivingbase, 30.0F, 30.0F);
             this.parasaurolophus.getMoveHelper().setMoveTo(entitylivingbase.posX, entitylivingbase.posY, entitylivingbase.posZ, 1D);
 
-            if (((this.parasaurolophus.isTamed() && this.parasaurolophus.getDistance(entitylivingbase) <= 3) || !this.parasaurolophus.isTamed()) && !this.startBlowFlag) {
+            if (((this.parasaurolophus.isTamed() && this.parasaurolophus.getDistance(entitylivingbase) <= 6) || !this.parasaurolophus.isTamed()) && !this.startBlowFlag) {
                 this.startBlowFlag = true;
             }
             if (this.startBlowFlag) {
@@ -78,7 +79,7 @@ public class RiftParasaurolophusBlow extends EntityAIBase {
                 }
                 if (this.animTime > this.animLength) {
                     this.animTime = -1;
-                    this.parasaurolophus.resetSpeed();
+                    if (!this.parasaurolophus.getTameStatus().equals(TameStatusType.TURRET_MODE)) this.parasaurolophus.resetSpeed();
                     this.parasaurolophus.setBlowing(false);
                     this.startBlowFlag = false;
                     if (!this.parasaurolophus.isTamed()) this.useFlag = false;
