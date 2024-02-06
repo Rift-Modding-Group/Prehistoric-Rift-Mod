@@ -3,19 +3,44 @@
 	"animations": {
 		"animation.dimetrodon.walk": {
 			"loop": true,
+			"animation_length": 2.08,
 			"anim_time_update": "query.modified_distance_moved",
 			"bones": {
 				"leftBackLeg": {
-					"rotation": ["math.sin(query.anim_time * 30) * 10", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.52": [15, 0, 0],
+						"1.04": [0, 0, 0],
+						"1.56": [-15, 0, 0],
+						"2.08": [0, 0, 0]
+					}
 				},
 				"rightBackLeg": {
-					"rotation": ["math.sin(query.anim_time * 30) * -10", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.52": [-15, 0, 0],
+						"1.04": [0, 0, 0],
+						"1.56": [15, 0, 0],
+						"2.08": [0, 0, 0]
+					}
 				},
 				"leftFrontLeg": {
-					"rotation": ["math.sin(query.anim_time * 30) * -10", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.52": [-15, 0, 0],
+						"1.04": [0, 0, 0],
+						"1.56": [15, 0, 0],
+						"2.08": [0, 0, 0]
+					}
 				},
 				"rightFrontLeg": {
-					"rotation": ["math.sin(query.anim_time * 30) * 10", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.52": [15, 0, 0],
+						"1.04": [0, 0, 0],
+						"1.56": [-15, 0, 0],
+						"2.08": [0, 0, 0]
+					}
 				}
 			}
 		},

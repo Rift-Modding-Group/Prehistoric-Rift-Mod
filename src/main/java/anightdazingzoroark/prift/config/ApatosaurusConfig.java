@@ -12,7 +12,6 @@ public class ApatosaurusConfig extends RiftConfig {
     public static String apatosaurusSaddleItem = "prift:apatosaurus_platform:0";
     public static boolean apatosaurusPassengerWhitelist = false;
     public static String[] apatosaurusPassengerBlacklist = {"minecraft:ender_dragon", "minecraft:wither", "prift:tyrannosaurus", "prift:apatosaurus"};
-//    public static boolean apatosaurusCanBreakBlocks = true;
 
     public ApatosaurusConfig(Configuration config) {
         super(config, new String[]{"tag:plains:7:1:3", "-tag:savanna"});
