@@ -2,9 +2,9 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
-import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.util.math.Vec3d;
@@ -17,6 +17,11 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 public class Dimetrodon extends RiftCreature {
+    private RiftCreaturePart neckPart;
+    private RiftCreaturePart tail0Part;
+    private RiftCreaturePart tail1Part;
+    private RiftCreaturePart tail2Part;
+
     public Dimetrodon(World worldIn) {
         super(worldIn, RiftCreatureType.DIMETRODON);
         this.minCreatureHealth = DimetrodonConfig.getMinHealth();
@@ -54,7 +59,54 @@ public class Dimetrodon extends RiftCreature {
 
     @Override
     public void resetParts(float scale) {
+        if (scale > this.oldScale) {
+            this.oldScale = scale;
+            this.removeParts();
+            this.headPart = new RiftCreaturePart(this, 1.25f, 0, 0.45f, 0.5f * scale, 0.425f * scale, 1.5f);
+            this.bodyPart = new RiftMainBodyPart(this, 0, 0, 0.3f, scale, 0.5f * scale, 1f);
+            this.neckPart = new RiftCreaturePart(this, 0.75f, 0, 0.45f, 0.375f * scale, 0.375f * scale, 1.5f);
+            this.tail0Part = new RiftCreaturePart(this, -0.8f, 0, 0.4f, 0.375f * scale, 0.375f * scale, 0.5f);
+            this.tail1Part = new RiftCreaturePart(this, -1.2f, 0, 0.35f, 0.375f * scale, 0.375f * scale, 0.5f);
+            this.tail2Part = new RiftCreaturePart(this, -1.6f, 0, 0.3f, 0.375f * scale, 0.375f * scale, 0.5f);
+        }
+    }
 
+    @Override
+    public void updateParts() {
+        super.updateParts();
+        if (this.neckPart != null) this.neckPart.onUpdate();
+        if (this.tail0Part != null) this.tail0Part.onUpdate();
+        if (this.tail1Part != null) this.tail1Part.onUpdate();
+        if (this.tail2Part != null) this.tail2Part.onUpdate();
+
+        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.25f : 0;
+        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
+        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
+        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
+        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
+        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
+        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
+    }
+
+    @Override
+    public void removeParts() {
+        super.removeParts();
+        if (this.neckPart != null) {
+            this.world.removeEntityDangerously(this.neckPart);
+            this.neckPart = null;
+        }
+        if (this.tail0Part != null) {
+            this.world.removeEntityDangerously(this.tail0Part);
+            this.tail0Part = null;
+        }
+        if (this.tail1Part != null) {
+            this.world.removeEntityDangerously(this.tail1Part);
+            this.tail1Part = null;
+        }
+        if (this.tail2Part != null) {
+            this.world.removeEntityDangerously(this.tail2Part);
+            this.tail2Part = null;
+        }
     }
 
     @Override
@@ -65,6 +117,11 @@ public class Dimetrodon extends RiftCreature {
     @Override
     public Vec3d riderPos() {
         return null;
+    }
+
+    @Override
+    public int slotCount() {
+        return 9;
     }
 
     @Override

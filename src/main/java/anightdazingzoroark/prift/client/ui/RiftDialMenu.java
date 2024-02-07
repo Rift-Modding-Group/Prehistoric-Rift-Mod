@@ -178,7 +178,7 @@ public class RiftDialMenu extends GuiScreen {
             }
             else radialString = I18n.format("radial.choice."+this.choices.get(i).name().toLowerCase());
 
-            if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled()) || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) || this.creature.isUsingWorkstation()) && i == 2) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 0 && this.creature.isRideable && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled()) || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) || this.creature.isUsingWorkstation()) && i == 2) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 4) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 2 && this.creature.isBaby() && i == 3) radialString = "["+radialString+"]";
 
@@ -199,7 +199,7 @@ public class RiftDialMenu extends GuiScreen {
         else if (this.radialChoiceMenu == 0 && (this.creature.isUsingWorkstation() || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) && selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
         }
-        else if (this.radialChoiceMenu == 0 && !this.creature.isSaddled() && selectedItem == 2) {
+        else if (this.radialChoiceMenu == 0 && this.creature.isRideable && !this.creature.isSaddled() && selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.need_saddle"), mouseX, mouseY);
         }
         else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && selectedItem == 4) {
@@ -263,13 +263,25 @@ public class RiftDialMenu extends GuiScreen {
                     this.choices = getState();
                     this.radialChoiceMenu = 1;
                 }
-                else if (selectedItem == 2 && !this.creature.isBaby() && !this.creature.isUsingWorkstation() && !this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.creature.isSaddled()) {
-                    this.mc.player.closeScreen();
-                    RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
+                else if (selectedItem == 2) {
+                    if (this.creature.isRideable && !this.creature.isBaby() && !this.creature.isUsingWorkstation() && !this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.creature.isSaddled()) {
+                        this.mc.player.closeScreen();
+                        RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
+                    }
+                    else if (!this.creature.isRideable) {
+                        this.choices = getOptions();
+                        this.radialChoiceMenu = 2;
+                    }
                 }
                 else if (selectedItem == 3) {
-                    this.choices = getOptions();
-                    this.radialChoiceMenu = 2;
+                    if (this.creature.isRideable) {
+                        this.choices = getOptions();
+                        this.radialChoiceMenu = 2;
+                    }
+                    else {
+                        this.choices = getBehavior();
+                        this.radialChoiceMenu = 3;
+                    }
                 }
                 else if (selectedItem == 4 && !this.creature.isBaby()) {
                     this.choices = getBehavior();
@@ -353,6 +365,7 @@ public class RiftDialMenu extends GuiScreen {
     }
 
     private List<RiftTameRadialChoice> getMain() {
+        if (!this.creature.isRideable) return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.OPTIONS, RiftTameRadialChoice.BEHAVIOR);
         return Arrays.asList(RiftTameRadialChoice.INVENTORY, RiftTameRadialChoice.STATE, RiftTameRadialChoice.RIDE, RiftTameRadialChoice.OPTIONS, RiftTameRadialChoice.BEHAVIOR);
     }
 
