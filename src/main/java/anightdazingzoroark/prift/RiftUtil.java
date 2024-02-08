@@ -3,6 +3,7 @@ package anightdazingzoroark.prift;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.CreatureDiet;
+import anightdazingzoroark.prift.server.enums.EggTemperature;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -268,5 +269,15 @@ public class RiftUtil {
                 });
 
         return closest.orElse(null);
+    }
+
+    public static EggTemperature getCorrespondingTempFromBiome(World world, BlockPos blockPos) {
+        float temperature = world.getBiome(blockPos).getTemperature(blockPos);
+        if (temperature < 0f) return EggTemperature.VERY_COLD;
+        else if (temperature >= 0f && temperature < 0.5f) return EggTemperature.COLD;
+        else if (temperature >= 0.5f && temperature < 1f) return EggTemperature.NEUTRAL;
+        else if (temperature >= 1f && temperature < 1.5f) return EggTemperature.WARM;
+        else if (temperature >= 1.5f) return EggTemperature.VERY_WARM;
+        else return EggTemperature.NEUTRAL;
     }
 }

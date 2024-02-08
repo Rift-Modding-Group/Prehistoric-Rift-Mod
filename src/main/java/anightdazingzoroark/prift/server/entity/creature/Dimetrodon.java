@@ -1,12 +1,20 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -17,6 +25,9 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 public class Dimetrodon extends RiftCreature {
+    private static final DataParameter<Byte> TEMPERATURE = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.BYTE);
+    private static final DataParameter<Boolean> FORCED_TEMPERATURE = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.BOOLEAN);
+
     private RiftCreaturePart neckPart;
     private RiftCreaturePart tail0Part;
     private RiftCreaturePart tail1Part;
@@ -33,6 +44,13 @@ public class Dimetrodon extends RiftCreature {
         this.speed = 0.20D;
         this.isRideable = false;
         this.attackWidth = 3f;
+    }
+
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+        this.dataManager.register(TEMPERATURE, (byte) EggTemperature.NEUTRAL.ordinal());
+        this.dataManager.register(FORCED_TEMPERATURE, false);
     }
 
     @Override
@@ -55,6 +73,53 @@ public class Dimetrodon extends RiftCreature {
         this.tasks.addTask(4, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(5, new RiftWander(this, 1.0D));
         this.tasks.addTask(6, new RiftLookAround(this));
+    }
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        this.dynamicTemperature();
+        this.showTemperatureParticles();
+    }
+
+    private void showTemperatureParticles() {
+        if (this.getTemperature().equals(EggTemperature.WARM) || this.getTemperature().equals(EggTemperature.VERY_WARM)) {
+            double motionY = RiftUtil.randomInRange(0.0D, 0.15D);
+            double f = this.getRNG().nextFloat() * (this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX) + this.getEntityBoundingBox().minX;
+            double f1 = 0.05D * (this.getEntityBoundingBox().maxY - this.getEntityBoundingBox().minY) + this.getEntityBoundingBox().minY;
+            double f2 = this.getRNG().nextFloat() * (this.getEntityBoundingBox().maxZ - this.getEntityBoundingBox().minZ) + this.getEntityBoundingBox().minZ;
+            if (this.world.isRemote) this.world.spawnParticle(EnumParticleTypes.FLAME, f, f1, f2, motionX, motionY, motionZ);
+        }
+        else if (this.getTemperature().equals(EggTemperature.COLD) || this.getTemperature().equals(EggTemperature.VERY_COLD)) {
+            double motionY = RiftUtil.randomInRange(-0.75D, -0.25D);
+            double f = this.getRNG().nextFloat() * (this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX) + this.getEntityBoundingBox().minX;
+            double f1 = 0.05D * (this.getEntityBoundingBox().maxY - this.getEntityBoundingBox().minY) + this.getEntityBoundingBox().minY;
+            double f2 = this.getRNG().nextFloat() * (this.getEntityBoundingBox().maxZ - this.getEntityBoundingBox().minZ) + this.getEntityBoundingBox().minZ;
+            if (this.world.isRemote) RiftInitialize.PROXY.spawnParticle("snow", f, f1, f2, 0D, motionY, 0D);
+        }
+    }
+
+    private void dynamicTemperature() {
+        if (!this.isTemperatureForced()) {
+            EggTemperature temperature = RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition());
+            switch (temperature) {
+                case VERY_COLD:
+                    this.setTemperature(EggTemperature.VERY_WARM);
+                    break;
+                case COLD:
+                    this.setTemperature(EggTemperature.WARM);
+                    break;
+                case WARM:
+                    this.setTemperature(EggTemperature.COLD);
+                    break;
+                case VERY_WARM:
+                    this.setTemperature(EggTemperature.VERY_COLD);
+                    break;
+                default:
+                    this.setTemperature(EggTemperature.NEUTRAL);
+                    break;
+            }
+        }
     }
 
     @Override
@@ -110,6 +175,20 @@ public class Dimetrodon extends RiftCreature {
     }
 
     @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setByte("Temperature", (byte) this.getTemperature().ordinal());
+        compound.setBoolean("ForcedTemperature", this.isTemperatureForced());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        if (compound.hasKey("Temperature")) this.setTemperature(EggTemperature.values()[compound.getByte("Temperature")]);
+        this.setTemperatureForced(compound.getBoolean("ForcedTemperature"));
+    }
+
+    @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.4f, 1.25f);
     }
@@ -125,9 +204,7 @@ public class Dimetrodon extends RiftCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
-
-    }
+    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
 
     @Override
     public boolean hasLeftClickChargeBar() {
@@ -142,6 +219,22 @@ public class Dimetrodon extends RiftCreature {
     @Override
     public boolean hasSpacebarChargeBar() {
         return false;
+    }
+
+    public EggTemperature getTemperature() {
+        return EggTemperature.values()[this.dataManager.get(TEMPERATURE).byteValue()];
+    }
+
+    public void setTemperature(EggTemperature value) {
+        this.dataManager.set(TEMPERATURE, (byte)value.ordinal());
+    }
+
+    public boolean isTemperatureForced() {
+        return this.dataManager.get(FORCED_TEMPERATURE);
+    }
+
+    public void setTemperatureForced(boolean value) {
+        this.dataManager.set(FORCED_TEMPERATURE, value);
     }
 
     @Override

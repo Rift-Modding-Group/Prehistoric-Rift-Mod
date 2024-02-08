@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.particle.RiftBleedParticle;
 import anightdazingzoroark.prift.client.particle.RiftParticleSpawner;
+import anightdazingzoroark.prift.client.particle.RiftSnowParticle;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.server.ServerProxy;
@@ -68,6 +69,7 @@ public class ClientProxy extends ServerProxy {
         Particle particle = null;
         if (world == null) return;
         if (name.equals("bleed")) particle = new RiftBleedParticle(world, x, y, z, motX, motY, motZ);
+        else if (name.equals("snow")) particle = new RiftSnowParticle(world, x, y, z, motX, motY, motZ);
         if (particle != null) particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
     }
 

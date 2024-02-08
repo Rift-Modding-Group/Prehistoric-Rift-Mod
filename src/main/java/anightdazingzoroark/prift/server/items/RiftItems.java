@@ -37,6 +37,11 @@ public class RiftItems {
     public static Item ADVANCED_HERBIVORE_MEAL;
     public static Item ADVANCED_CARNIVORE_MEAL;
     public static Item CREATIVE_MEAL;
+    public static Item FLAME_STIMULANT;
+    public static Item EXTREME_FLAME_STIMULANT;
+    public static Item FROST_STIMULANT;
+    public static Item EXTREME_FROST_STIMULANT;
+    public static Item NEUTRAL_STIMULANT;
 
     public static Item TYRANNOSAURUS_ARM;
     public static Item STEGOSAURUS_PLATE;
@@ -72,6 +77,11 @@ public class RiftItems {
         ADVANCED_HERBIVORE_MEAL = riftGlintedItem("advanced_herbivore_meal");
         ADVANCED_CARNIVORE_MEAL = riftGlintedItem("advanced_carnivore_meal");
         CREATIVE_MEAL = riftGlintedItem("creative_meal");
+        FLAME_STIMULANT = riftGenericItem("flame_stimulant", false);
+        EXTREME_FLAME_STIMULANT = riftGlintedItem("extreme_flame_stimulant");
+        FROST_STIMULANT = riftGenericItem("frost_stimulant", false);
+        EXTREME_FROST_STIMULANT = riftGlintedItem("extreme_frost_stimulant");
+        NEUTRAL_STIMULANT = riftGenericItem("neutral_stimulant", false);
 
         FIBER_BAR = riftFibrousFoodItem("fiber_bar", 2, false);
 
