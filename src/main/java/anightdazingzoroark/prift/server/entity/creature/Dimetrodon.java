@@ -4,19 +4,28 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -24,9 +33,13 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
+import javax.annotation.Nullable;
+
 public class Dimetrodon extends RiftCreature {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dimetrodon"));
     private static final DataParameter<Byte> TEMPERATURE = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> FORCED_TEMPERATURE = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> FORCED_TEMPERATURE_TIME = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.VARINT);
 
     private RiftCreaturePart neckPart;
     private RiftCreaturePart tail0Part;
@@ -51,6 +64,8 @@ public class Dimetrodon extends RiftCreature {
         super.entityInit();
         this.dataManager.register(TEMPERATURE, (byte) EggTemperature.NEUTRAL.ordinal());
         this.dataManager.register(FORCED_TEMPERATURE, false);
+        this.dataManager.register(FORCED_TEMPERATURE_TIME, 0);
+        this.setCanPickUpLoot(true);
     }
 
     @Override
@@ -78,8 +93,16 @@ public class Dimetrodon extends RiftCreature {
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
+        this.manageForcedTemperatureTime();
         this.dynamicTemperature();
         this.showTemperatureParticles();
+    }
+
+    private void manageForcedTemperatureTime() {
+        if (this.isTemperatureForced()) {
+            if (this.getForcedTemperatureTime() > 0) this.setForcedTemperatureTime(this.getForcedTemperatureTime() - 1);
+            else if (this.getForcedTemperatureTime() == 0) this.setTemperatureForced(false);
+        }
     }
 
     private void showTemperatureParticles() {
@@ -174,11 +197,34 @@ public class Dimetrodon extends RiftCreature {
         }
     }
 
+
+    @Override
+    public boolean processInteract(EntityPlayer player, EnumHand hand) {
+        ItemStack itemstack = player.getHeldItem(hand);
+        if (this.isTamed()) {
+            try {
+                if (this.getOwnerId().equals(player.getUniqueID())) {
+                    if (this.isTemperatureSettingItem(itemstack)) {
+                        this.setTemperatureForced(true);
+                        this.setTemperature(this.getTemperatureFromItem(itemstack));
+                        this.setForcedTemperatureTime(this.getTemperatureTimeFromItem(itemstack));
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e) {
+                return false;
+            }
+        }
+        return super.processInteract(player, hand);
+    }
+
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         compound.setByte("Temperature", (byte) this.getTemperature().ordinal());
         compound.setBoolean("ForcedTemperature", this.isTemperatureForced());
+        compound.setInteger("ForcedTemperatureTime", this.getForcedTemperatureTime());
     }
 
     @Override
@@ -186,6 +232,71 @@ public class Dimetrodon extends RiftCreature {
         super.readEntityFromNBT(compound);
         if (compound.hasKey("Temperature")) this.setTemperature(EggTemperature.values()[compound.getByte("Temperature")]);
         this.setTemperatureForced(compound.getBoolean("ForcedTemperature"));
+        this.setForcedTemperatureTime(compound.getInteger("ForcedTemperatureTime"));
+    }
+
+    private boolean isTemperatureSettingItem (ItemStack itemstack) {
+        for (String item : DimetrodonConfig.dimetrodonForcedTemperatureItems) {
+            int itemIdFirst = item.indexOf(":");
+            int itemIdSecond = item.indexOf(":", itemIdFirst + 1);
+            int itemIdThird = item.indexOf(":", itemIdSecond + 1);
+            String itemId = item.substring(0, itemIdSecond);
+            int itemData = Integer.parseInt(item.substring(itemIdSecond + 1, itemIdThird));
+            if (!itemstack.isEmpty() && itemstack.getItem().equals(Item.getByNameOrId(itemId)) && ((itemstack.getMetadata() == itemData) || (itemData == -1))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private EggTemperature getTemperatureFromItem(ItemStack itemstack) {
+        for (String item : DimetrodonConfig.dimetrodonForcedTemperatureItems) {
+            int itemIdFirst = item.indexOf(":");
+            int itemIdSecond = item.indexOf(":", itemIdFirst + 1);
+            int itemIdThird = item.indexOf(":", itemIdSecond + 1);
+            int itemIdFourth = item.indexOf(":", itemIdThird + 1);
+            String itemId = item.substring(0, itemIdSecond);
+            int itemData = Integer.parseInt(item.substring(itemIdSecond + 1, itemIdThird));
+            String temperatureType = item.substring(itemIdFourth + 1);
+            if (!itemstack.isEmpty() && itemstack.getItem().equals(Item.getByNameOrId(itemId)) && (itemstack.getMetadata() == itemData) || (itemData == -1)) {
+                return EggTemperature.valueOf(temperatureType);
+            }
+        }
+        return null;
+    }
+
+    private int getTemperatureTimeFromItem(ItemStack itemstack) {
+        for (String item : DimetrodonConfig.dimetrodonForcedTemperatureItems) {
+            int itemIdFirst = item.indexOf(":");
+            int itemIdSecond = item.indexOf(":", itemIdFirst + 1);
+            int itemIdThird = item.indexOf(":", itemIdSecond + 1);
+            int itemIdFourth = item.indexOf(":", itemIdThird + 1);
+            String itemId = item.substring(0, itemIdSecond);
+            int itemData = Integer.parseInt(item.substring(itemIdSecond + 1, itemIdThird));
+            int time = Integer.parseInt(item.substring(itemIdThird + 1, itemIdFourth));
+            if (!itemstack.isEmpty() && itemstack.getItem().equals(Item.getByNameOrId(itemId)) && (itemstack.getMetadata() == itemData) || (itemData == -1)) {
+                return time;
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public boolean attackEntityAsMob(Entity entityIn) {
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
+        if (flag) {
+            this.applyEnchantments(this, entityIn);
+            if (this.getTemperature().equals(EggTemperature.WARM) || this.getTemperature().equals(EggTemperature.VERY_WARM)) {
+                entityIn.setFire(5);
+            }
+            else if (this.getTemperature().equals(EggTemperature.COLD) || this.getTemperature().equals(EggTemperature.VERY_COLD)) {
+                EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
+                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 0));
+                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 100, 0));
+            }
+        }
+        this.setLastAttackedEntity(entityIn);
+        return flag;
     }
 
     @Override
@@ -235,6 +346,20 @@ public class Dimetrodon extends RiftCreature {
 
     public void setTemperatureForced(boolean value) {
         this.dataManager.set(FORCED_TEMPERATURE, value);
+    }
+
+    public int getForcedTemperatureTime() {
+        return this.dataManager.get(FORCED_TEMPERATURE_TIME);
+    }
+
+    public void setForcedTemperatureTime(int value) {
+        this.dataManager.set(FORCED_TEMPERATURE_TIME, value);
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
     }
 
     @Override

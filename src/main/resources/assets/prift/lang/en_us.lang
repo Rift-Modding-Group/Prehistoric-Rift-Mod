@@ -44,6 +44,7 @@ item.dodo_beak.name=Dodo Beak
 item.triceratops_horn.name=Triceratops Horn
 item.utahraptor_claw.name=Utahraptor Claw
 item.apatosaurus_vertebrae.name=Apatosaurus Vertebrae
+item.dimetrodon_sail.name=Dimetrodon Sail
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -54,6 +55,7 @@ item.triceratops_egg.name=Triceratops Egg
 item.utahraptor_egg.name=Utahraptor Egg
 item.apatosaurus_egg.name=Apatosaurus Egg
 item.parasaurolophus_egg.name=Parasaurolophus Egg
+item.dimetrodon_egg.name=Dimetrodon Egg
 
 item.apatosaurus_platform.name=Apatosaurus Platform
 item.cannon.name=Cannon

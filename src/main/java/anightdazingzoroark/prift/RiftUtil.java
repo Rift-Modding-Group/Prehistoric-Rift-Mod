@@ -40,7 +40,7 @@ public class RiftUtil {
                     return true;
                 }
             })) {
-                if (creature.getUUID().equals(uuid)) return creature;
+                if (creature.getUniqueID().equals(uuid)) return creature;
             }
         }
         return null;

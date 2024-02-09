@@ -50,6 +50,7 @@ public class RiftItems {
     public static Item UTAHRAPTOR_CLAW;
     public static Item APATOSAURUS_VERTEBRAE;
     public static Item PARASAUROLOPHUS_HORN;
+    public static Item DIMETRODON_SAIL;
 
     public static Item APATOSAURUS_PLATFORM;
     public static Item CANNON;
@@ -92,6 +93,7 @@ public class RiftItems {
         UTAHRAPTOR_CLAW = riftGenericItem("utahraptor_claw", true);
         APATOSAURUS_VERTEBRAE = riftGenericItem("apatosaurus_vertebrae", true);
         PARASAUROLOPHUS_HORN = riftGenericItem("parasaurolophus_horn", true);
+        DIMETRODON_SAIL = riftGenericItem("dimetrodon_sail", true);
 
         APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
         CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);

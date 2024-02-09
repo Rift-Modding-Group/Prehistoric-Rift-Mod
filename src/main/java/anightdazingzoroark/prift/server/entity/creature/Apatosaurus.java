@@ -568,39 +568,46 @@ public class Apatosaurus extends RiftCreature {
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         if (this.isTamed()) {
-            if (itemstack.getItem() instanceof RiftLargeWeaponItem && this.getWeapon().equals(RiftLargeWeaponType.NONE)) {
-                if (itemstack.getItem().equals(RiftItems.CANNON)) {
-                    this.setWeapon(RiftLargeWeaponType.CANNON);
-                    this.consumeItemFromStack(player, itemstack);
-                    return true;
-                }
-                else if (itemstack.getItem().equals(RiftItems.MORTAR)) {
-                    this.setWeapon(RiftLargeWeaponType.MORTAR);
-                    this.consumeItemFromStack(player, itemstack);
-                    return true;
-                }
-                else if (itemstack.getItem().equals(RiftItems.CATAPULT)) {
-                    this.setWeapon(RiftLargeWeaponType.CATAPULT);
-                    this.consumeItemFromStack(player, itemstack);
-                    return true;
-                }
-            }
-            else if (itemstack.getItem().equals(RiftItems.WRENCH) && !this.getWeapon().equals(RiftLargeWeaponType.NONE)) {
-                if (!player.capabilities.isCreativeMode) {
-                    switch (this.getWeapon()) {
-                        case CANNON:
-                            player.inventory.addItemStackToInventory(new ItemStack(RiftItems.CANNON));
-                            break;
-                        case MORTAR:
-                            player.inventory.addItemStackToInventory(new ItemStack(RiftItems.MORTAR));
-                            break;
-                        case CATAPULT:
-                            player.inventory.addItemStackToInventory(new ItemStack(RiftItems.CATAPULT));
-                            break;
+            try {
+                if (this.getOwnerId().equals(player.getUniqueID())) {
+                    if (itemstack.getItem() instanceof RiftLargeWeaponItem && this.getWeapon().equals(RiftLargeWeaponType.NONE)) {
+                        if (itemstack.getItem().equals(RiftItems.CANNON)) {
+                            this.setWeapon(RiftLargeWeaponType.CANNON);
+                            this.consumeItemFromStack(player, itemstack);
+                            return true;
+                        }
+                        else if (itemstack.getItem().equals(RiftItems.MORTAR)) {
+                            this.setWeapon(RiftLargeWeaponType.MORTAR);
+                            this.consumeItemFromStack(player, itemstack);
+                            return true;
+                        }
+                        else if (itemstack.getItem().equals(RiftItems.CATAPULT)) {
+                            this.setWeapon(RiftLargeWeaponType.CATAPULT);
+                            this.consumeItemFromStack(player, itemstack);
+                            return true;
+                        }
+                    }
+                    else if (itemstack.getItem().equals(RiftItems.WRENCH) && !this.getWeapon().equals(RiftLargeWeaponType.NONE)) {
+                        if (!player.capabilities.isCreativeMode) {
+                            switch (this.getWeapon()) {
+                                case CANNON:
+                                    player.inventory.addItemStackToInventory(new ItemStack(RiftItems.CANNON));
+                                    break;
+                                case MORTAR:
+                                    player.inventory.addItemStackToInventory(new ItemStack(RiftItems.MORTAR));
+                                    break;
+                                case CATAPULT:
+                                    player.inventory.addItemStackToInventory(new ItemStack(RiftItems.CATAPULT));
+                                    break;
+                            }
+                        }
+                        this.setWeapon(RiftLargeWeaponType.NONE);
+                        return true;
                     }
                 }
-                this.setWeapon(RiftLargeWeaponType.NONE);
-                return true;
+            }
+            catch (Exception e) {
+                return false;
             }
         }
         return super.processInteract(player, hand);

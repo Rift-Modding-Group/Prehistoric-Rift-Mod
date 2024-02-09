@@ -98,7 +98,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> UNCLAIMED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<String> CREATURE_UUID = EntityDataManager.createKey(RiftCreature.class, DataSerializers.STRING);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -216,7 +215,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(UNCLAIMED, Boolean.FALSE);
         this.dataManager.register(UNCLAIM_TIMER, 0);
         this.dataManager.register(CLIMBING, false);
-        this.dataManager.register(CREATURE_UUID, UUID.randomUUID().toString());
         this.dataManager.register(USING_WORKSTATION, false);
         this.dataManager.register(WORKSTATION_X_POS, 0);
         this.dataManager.register(WORKSTATION_Y_POS, 0);
@@ -837,7 +835,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         compound.setBoolean("Unclaimed", this.isUnclaimed());
         compound.setInteger("UnclaimTimer", this.getUnclaimTimer());
-        compound.setString("UUID", this.getUUID().toString());
         if (this.canDoHerding()) {
             if (this.getHerdLeaderId() != null) compound.setString("LeaderUUID", this.getHerdLeaderId().toString());
         }
@@ -884,7 +881,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
         this.setUnclaimed(compound.getBoolean("Unclaimed"));
         this.setUnclaimTimer(compound.getInteger("UnclaimTimer"));
-        this.setUUID(UUID.fromString(compound.getString("UUID")));
         if (this.canDoHerding() && !compound.getString("LeaderUUID").isEmpty()) {
             this.setHerdLeader(UUID.fromString(compound.getString("LeaderUUID")));
         }
@@ -947,7 +943,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isHerdLeader() {
-        return this.getUUID().equals(this.getHerdLeaderId()) && !this.getHerdMembers(false).isEmpty();
+        return this.getUniqueID().equals(this.getHerdLeaderId()) && !this.getHerdMembers(false).isEmpty();
     }
 
     public boolean isHerdMember() {
@@ -955,7 +951,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void setHerdLeader(RiftCreature creature) {
-        this.dataManager.set(HERD_LEADER_UUID, creature.getUUID().toString());
+        this.dataManager.set(HERD_LEADER_UUID, creature.getUniqueID().toString());
     }
 
     public void setHerdLeader(UUID uuid) {
@@ -1329,14 +1325,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public boolean getHasHomePos() {
         return this.dataManager.get(HAS_HOME_POS);
-    }
-
-    public void setUUID(UUID value) {
-        this.dataManager.set(CREATURE_UUID, value.toString());
-    }
-
-    public UUID getUUID() {
-        return UUID.fromString(this.dataManager.get(CREATURE_UUID));
     }
 
     public BlockPos getHomePos() {

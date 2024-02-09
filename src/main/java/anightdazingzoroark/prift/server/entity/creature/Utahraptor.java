@@ -75,7 +75,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(PACK_BUFFING, Boolean.valueOf(false));
+        this.dataManager.register(PACK_BUFFING, false);
         this.setCanPickUpLoot(true);
     }
 

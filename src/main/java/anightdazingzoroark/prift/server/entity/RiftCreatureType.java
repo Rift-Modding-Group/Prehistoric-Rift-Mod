@@ -159,7 +159,7 @@ public enum RiftCreatureType {
 
     public static void registerEggs() {
         for (RiftCreatureType creature : RiftCreatureType.values()) {
-            if (creature.getCreatureCategory().equals(CreatureCategory.DINOSAUR) || creature.getCreatureCategory().equals(CreatureCategory.REPTILE) || creature.getCreatureCategory().equals(CreatureCategory.BIRD)) {
+            if (creature.getCreatureCategory().equals(CreatureCategory.DINOSAUR) || creature.getCreatureCategory().equals(CreatureCategory.REPTILE) || creature.getCreatureCategory().equals(CreatureCategory.BIRD) || creature.equals(DIMETRODON)) {
                 creature.eggItem = riftEggItem(creature.name().toLowerCase()+"_egg", creature);
             }
         }

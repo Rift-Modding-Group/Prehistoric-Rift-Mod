@@ -65,6 +65,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
         this.tamingFood = ParasaurolophusConfig.parasaurolophusTamingFood;
         this.experienceValue = 20;
         this.speed = 0.25D;
+        this.isRideable = true;
         this.attackWidth = 3.5f;
         this.saddleItem = ParasaurolophusConfig.parasaurolophusSaddleItem;
     }
