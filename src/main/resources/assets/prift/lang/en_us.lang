@@ -120,6 +120,8 @@ reminder.unclaim_creature=You have unclaimed %s!
 prift.egg.time=Time
 prift.egg.minutes=minute(s)
 prift.egg.seconds=second(s)
+prift.egg.too_cold=Too cold for hatching!
+prift.egg.too_warm=Too warm for hatching!
 
 prift.notify.egg_hatched=Your Egg has hatched!
 

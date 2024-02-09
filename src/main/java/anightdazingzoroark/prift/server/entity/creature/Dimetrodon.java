@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -286,13 +287,17 @@ public class Dimetrodon extends RiftCreature {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
         if (flag) {
             this.applyEnchantments(this, entityIn);
-            if (this.getTemperature().equals(EggTemperature.WARM) || this.getTemperature().equals(EggTemperature.VERY_WARM)) {
-                entityIn.setFire(5);
-            }
-            else if (this.getTemperature().equals(EggTemperature.COLD) || this.getTemperature().equals(EggTemperature.VERY_COLD)) {
+            if (this.getTemperature().equals(EggTemperature.VERY_WARM)) entityIn.setFire(15);
+            else if (this.getTemperature().equals(EggTemperature.WARM)) entityIn.setFire(5);
+            else if (this.getTemperature().equals(EggTemperature.COLD)) {
                 EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
                 entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 0));
                 entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 100, 0));
+            }
+            else if (this.getTemperature().equals(EggTemperature.VERY_COLD)) {
+                EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
+                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 300, 0));
+                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 300, 0));
             }
         }
         this.setLastAttackedEntity(entityIn);

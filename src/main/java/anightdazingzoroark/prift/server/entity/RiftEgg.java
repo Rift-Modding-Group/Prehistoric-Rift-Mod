@@ -1,11 +1,15 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.passive.EntityTameable;
@@ -26,11 +30,13 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RiftEgg extends EntityTameable implements IAnimatable {
     private static final DataParameter<Integer> HATCH_TIME = EntityDataManager.<Integer>createKey(RiftEgg.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> EGG_TYPE = EntityDataManager.createKey(RiftEgg.class, DataSerializers.BYTE);
+    private static final DataParameter<Byte> TEMPERATURE = EntityDataManager.createKey(RiftEgg.class, DataSerializers.BYTE);
 
     public AnimationFactory factory = new AnimationFactory(this);
 
@@ -44,6 +50,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         super.entityInit();
         this.dataManager.register(HATCH_TIME, 20);
         this.dataManager.register(EGG_TYPE, (byte) RiftCreatureType.TYRANNOSAURUS.ordinal());
+        this.dataManager.register(TEMPERATURE, (byte) EggTemperature.NEUTRAL.ordinal());
     }
 
     @Override
@@ -55,7 +62,12 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
     public void onLivingUpdate() {
         super.onLivingUpdate();
 
-        this.setHatchTime(this.getHatchTime() - 1);
+        //manage temperature
+//        this.setTemperature(RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition()));
+        if (!this.world.isRemote) this.temperatureFromExtSources();
+
+        //manage hatching
+        if (this.getTemperature().equals(this.getCreatureType().getEggTemperature())) this.setHatchTime(this.getHatchTime() - 1);
         if (this.getHatchTime() == 0) {
             RiftCreature creature = this.getCreatureType().invokeClass(this.world);
             creature.setHealth((float) creature.minCreatureHealth);
@@ -78,6 +90,25 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
             }
             this.setDead();
         }
+    }
+
+    private void temperatureFromExtSources() {
+        float biomeTempWeight = (float)RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition()).getTempStrength();
+        List<Float> tempList = new ArrayList<>();
+        tempList.add(biomeTempWeight);
+        for (Dimetrodon dimetrodon : this.world.getEntities(Dimetrodon.class, new Predicate<Dimetrodon>() {
+            @Override
+            public boolean apply(@Nullable Dimetrodon input) {
+                return true;
+            }
+        })) {
+            AxisAlignedBB dimetrodonBoundBox = dimetrodon.getEntityBoundingBox().grow(8.0D);
+            if (dimetrodonBoundBox.intersects(this.getEntityBoundingBox())) {
+                tempList.add((float)dimetrodon.getTemperature().getTempStrength());
+            }
+        }
+        int tempValue = Math.round((float)tempList.stream().mapToDouble(Float::doubleValue).average().getAsDouble());
+        this.setTemperature(EggTemperature.values()[tempValue]);
     }
 
     @Override
@@ -158,12 +189,24 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         return new int[]{minutes, seconds};
     }
 
+    public boolean isInRightTemperature() {
+        return this.getTemperature().equals(this.getCreatureType().getEggTemperature());
+    }
+
     public RiftCreatureType getCreatureType() {
         return RiftCreatureType.values()[this.dataManager.get(EGG_TYPE).byteValue()];
     }
 
     public void setCreatureType(RiftCreatureType type) {
         this.dataManager.set(EGG_TYPE, (byte) type.ordinal());
+    }
+
+    public EggTemperature getTemperature() {
+        return EggTemperature.values()[this.dataManager.get(TEMPERATURE).byteValue()];
+    }
+
+    public void setTemperature(EggTemperature value) {
+        this.dataManager.set(TEMPERATURE, (byte)value.ordinal());
     }
 
     @Override

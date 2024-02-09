@@ -77,7 +77,6 @@ public class RiftEggMenu extends GuiScreen {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.disableLighting();
         this.drawGuiContainerForegroundLayer();
-//        GlStateManager.translate(0, -120, 0);
         GlStateManager.enableLighting();
         GlStateManager.popMatrix();
         GlStateManager.enableLighting();
@@ -96,10 +95,21 @@ public class RiftEggMenu extends GuiScreen {
         printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 20, 0, 0, 0);
         GlStateManager.popMatrix();
         {
-            int minutes = egg.getHatchTimeMinutes()[0];
-            int seconds = egg.getHatchTimeMinutes()[1];
-            String minutesString = minutes > 0 ? minutes + " " + I18n.format("prift.egg.minutes") : "";
-            String s1 = I18n.format("prift.egg.time") + ": " + minutesString + " " + seconds + " " + I18n.format("prift.egg.seconds");
+            String s1;
+            if (egg.isInRightTemperature()) {
+                int minutes = egg.getHatchTimeMinutes()[0];
+                int seconds = egg.getHatchTimeMinutes()[1];
+                String minutesString = minutes > 0 ? minutes + " " + I18n.format("prift.egg.minutes") : "";
+                s1 = I18n.format("prift.egg.time") + ": " + minutesString + " " + seconds + " " + I18n.format("prift.egg.seconds");
+            }
+            else {
+                if (egg.getTemperature().getTempStrength() > egg.getCreatureType().getEggTemperature().getTempStrength()) {
+                    s1 = I18n.format("prift.egg.too_warm");
+                }
+                else {
+                    s1 = I18n.format("prift.egg.too_cold");
+                }
+            }
             printStringXY(s1, (-this.fontRenderer.getStringWidth(s1) + this.xGui)/ 2, 140, 0, 0, 0);
         }
     }
