@@ -46,7 +46,7 @@ public class RiftDialMenu extends GuiScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
-        if (creature.isDead) {
+        if (this.creature.isDead) {
             this.mc.player.closeScreen();
         }
     }
@@ -66,6 +66,12 @@ public class RiftDialMenu extends GuiScreen {
         if (Minecraft.getMinecraft().currentScreen instanceof RiftDialMenu) {
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public static void cancelRenders(RenderGameOverlayEvent.Pre event) {
+        if (event.getType()==RenderGameOverlayEvent.ElementType.ALL && Minecraft.getMinecraft().currentScreen instanceof RiftDialMenu)
+            event.setCanceled(true);
     }
 
     @Override

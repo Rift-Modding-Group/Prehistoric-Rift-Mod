@@ -136,6 +136,7 @@ dependencies {
             transitive = false
         }
     }
+    runtimeOnly 'com.cleanroommc:strip-latest-forge-requirements:1.0'
     implementation 'software.bernie.geckolib:geckolib-forge-1.12.2:3.0.31'
     compileOnly "net.ilexiconn:llibrary:1.7.19-1.12.2"
     compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
