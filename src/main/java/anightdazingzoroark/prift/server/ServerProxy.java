@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
@@ -8,6 +9,7 @@ import anightdazingzoroark.prift.server.inventory.CreatureContainer;
 import anightdazingzoroark.prift.server.inventory.WeaponContainer;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.recipes.RiftRecipes;
+import com.charles445.simpledifficulty.api.temperature.TemperatureRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,6 +17,7 @@ import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -40,6 +43,9 @@ public class ServerProxy implements IGuiHandler {
         RiftRecipes.registerSmelting();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
         RiftEntities.registerEntities();
+        if (Loader.isModLoaded(RiftInitialize.SIMPLE_DIFFICULTY_MOD_ID)) {
+            TemperatureRegistry.registerModifier(new ModifierDimetrodon());
+        }
     }
 
     public void init(FMLInitializationEvent event) {

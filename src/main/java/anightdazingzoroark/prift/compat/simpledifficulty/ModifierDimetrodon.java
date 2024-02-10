@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 
 public class ModifierDimetrodon extends ModifierBase {
-    protected ModifierDimetrodon() {
+    public ModifierDimetrodon() {
         super("Dimetrodon");
     }
 
@@ -20,35 +20,32 @@ public class ModifierDimetrodon extends ModifierBase {
     public float getWorldInfluence(World world, BlockPos pos) {
         AxisAlignedBB playerAABB = new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), pos.getY() + 1, pos.getZ());
         float dimetrodonTemperature = 0f;
-        if (!world.isRemote) {
-            for (EntityLivingBase entityLivingBase : world.getEntities(EntityLiving.class, new Predicate<EntityLiving>() {
-                @Override
-                public boolean apply(@Nullable EntityLiving input) {
-                    return true;
-                }
-            })) {
-                if (entityLivingBase instanceof Dimetrodon) {
-                    Dimetrodon dimetrodon = (Dimetrodon) entityLivingBase;
-                    if (dimetrodon.getEntityBoundingBox().expand(8.0D, 8.0D, 8.0D).intersects(playerAABB)) {
-                        switch (dimetrodon.getTemperature()) {
-                            case VERY_COLD:
-                                dimetrodonTemperature -= 20f;
-                                break;
-                            case COLD:
-                                dimetrodonTemperature -= 10f;
-                                break;
-                            case WARM:
-                                dimetrodonTemperature += 10f;
-                                break;
-                            case VERY_WARM:
-                                dimetrodonTemperature += 20f;
-                                break;
-                        }
+        for (EntityLivingBase entityLivingBase : world.getEntities(EntityLiving.class, new Predicate<EntityLiving>() {
+            @Override
+            public boolean apply(@Nullable EntityLiving input) {
+                return true;
+            }
+        })) {
+            if (entityLivingBase instanceof Dimetrodon) {
+                Dimetrodon dimetrodon = (Dimetrodon) entityLivingBase;
+                if (dimetrodon.getEntityBoundingBox().grow(8.0D).intersects(playerAABB)) {
+                    switch (dimetrodon.getTemperature()) {
+                        case VERY_COLD:
+                            dimetrodonTemperature -= 15f;
+                            break;
+                        case COLD:
+                            dimetrodonTemperature -= 10f;
+                            break;
+                        case WARM:
+                            dimetrodonTemperature += 10f;
+                            break;
+                        case VERY_WARM:
+                            dimetrodonTemperature += 15f;
+                            break;
                     }
                 }
             }
-            return dimetrodonTemperature;
         }
-        return 0f;
+        return dimetrodonTemperature;
     }
 }

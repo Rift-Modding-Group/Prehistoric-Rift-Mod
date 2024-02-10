@@ -31,12 +31,18 @@ item.cooked_exotic_meat.name=Cooked Exotic Meat
 item.cooked_fibrous_meat.name=Cooked Fibrous Meat
 item.cooked_dodo_meat.name=Cooked Dodo Meat
 item.cooked_hadrosaur_meat.name=Cooked Hadrosaur Meat
+item.truffle.name=Truffle
 item.fiber_bar.name=Fiber Bar
 item.basic_herbivore_meal.name=Basic Herbivore Meal
 item.basic_carnivore_meal.name=Basic Carnivore Meal
 item.advanced_herbivore_meal.name=Advanced Herbivore Meal
 item.advanced_carnivore_meal.name=Advanced Carnivore Meal
 item.creative_meal.name=Creative Meal
+item.flame_stimulant.name=Flame Stimulant
+item.extreme_flame_stimulant.name=Extreme Flame Stimulant
+item.frost_stimulant.name=Frost Stimulant
+item.extreme_frost_stimulant.name=Extreme Frost Stimulant
+item.neutral_stimulant.name=Neutral Stimulant
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 item.stegosaurus_plate.name=Stegosaurus Plate
@@ -44,6 +50,7 @@ item.dodo_beak.name=Dodo Beak
 item.triceratops_horn.name=Triceratops Horn
 item.utahraptor_claw.name=Utahraptor Claw
 item.apatosaurus_vertebrae.name=Apatosaurus Vertebrae
+item.parasaurolophus_horn.name=Parasaurolophus Horn
 item.dimetrodon_sail.name=Dimetrodon Sail
 
 itemGroup.prift_items=Prehistoric Rift Items

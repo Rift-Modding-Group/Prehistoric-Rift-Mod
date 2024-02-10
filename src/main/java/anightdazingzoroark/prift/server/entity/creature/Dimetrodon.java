@@ -12,6 +12,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -209,12 +210,17 @@ public class Dimetrodon extends RiftCreature {
                         this.setTemperatureForced(true);
                         this.setTemperature(this.getTemperatureFromItem(itemstack));
                         this.setForcedTemperatureTime(this.getTemperatureTimeFromItem(itemstack));
+                        if (!player.capabilities.isCreativeMode) {
+                            itemstack.shrink(1);
+                            if (itemstack.isEmpty()) player.setHeldItem(hand, new ItemStack(Items.BOWL));
+                            else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.BOWL))) player.dropItem(new ItemStack(Items.BOWL), false);
+                        }
                         return true;
                     }
                 }
             }
             catch (Exception e) {
-                return false;
+                return true;
             }
         }
         return super.processInteract(player, hand);

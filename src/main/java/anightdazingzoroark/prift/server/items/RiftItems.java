@@ -31,6 +31,7 @@ public class RiftItems {
     public static Item COOKED_DODO_MEAT;
     public static Item RAW_HADROSAUR_MEAT;
     public static Item COOKED_HADROSAUR_MEAT;
+    public static Item TRUFFLE;
     public static Item FIBER_BAR;
     public static Item BASIC_HERBIVORE_MEAL;
     public static Item BASIC_CARNIVORE_MEAL;
@@ -75,14 +76,16 @@ public class RiftItems {
         COOKED_HADROSAUR_MEAT = riftSpecialMeatItem("cooked_hadrosaur_meat", 4, 0.6f, true, new PotionEffect(MobEffects.RESISTANCE, 600, 1));
         BASIC_HERBIVORE_MEAL = riftGenericItem("basic_herbivore_meal", true);
         BASIC_CARNIVORE_MEAL = riftGenericItem("basic_carnivore_meal", true);
-        ADVANCED_HERBIVORE_MEAL = riftGlintedItem("advanced_herbivore_meal");
-        ADVANCED_CARNIVORE_MEAL = riftGlintedItem("advanced_carnivore_meal");
-        CREATIVE_MEAL = riftGlintedItem("creative_meal");
+        ADVANCED_HERBIVORE_MEAL = riftGlintedItem("advanced_herbivore_meal", true);
+        ADVANCED_CARNIVORE_MEAL = riftGlintedItem("advanced_carnivore_meal", true);
+        CREATIVE_MEAL = riftGlintedItem("creative_meal", true);
         FLAME_STIMULANT = riftGenericItem("flame_stimulant", false);
-        EXTREME_FLAME_STIMULANT = riftGlintedItem("extreme_flame_stimulant");
+        EXTREME_FLAME_STIMULANT = riftGlintedItem("extreme_flame_stimulant", false);
         FROST_STIMULANT = riftGenericItem("frost_stimulant", false);
-        EXTREME_FROST_STIMULANT = riftGlintedItem("extreme_frost_stimulant");
+        EXTREME_FROST_STIMULANT = riftGlintedItem("extreme_frost_stimulant", false);
         NEUTRAL_STIMULANT = riftGenericItem("neutral_stimulant", false);
+
+        TRUFFLE = riftGenericItem("truffle", true);
 
         FIBER_BAR = riftFibrousFoodItem("fiber_bar", 2, false);
 
@@ -160,8 +163,9 @@ public class RiftItems {
         return registerItem(item, registryName);
     }
 
-    public static Item riftGlintedItem(String registryName) {
+    public static Item riftGlintedItem(String registryName, boolean stackable) {
         final RiftGlintedItem item = new RiftGlintedItem();
+        if (!stackable) item.setMaxStackSize(1);
         return registerItem(item, registryName);
     }
 
