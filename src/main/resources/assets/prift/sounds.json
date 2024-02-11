@@ -172,5 +172,27 @@
       "prift:entities/parasaurolophus/parasaurolophus_blow"
     ],
     "subtitle": "sounds.subtitle.parasaurolophus_blow"
+  },
+
+  "prift.dimetrodon.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dimetrodon/dimetrodon_idle"
+    ],
+    "subtitle": "sounds.subtitle.dimetrodon_idle"
+  },
+  "prift.dimetrodon.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dimetrodon/dimetrodon_hurt"
+    ],
+    "subtitle": "sounds.subtitle.dimetrodon_hurt"
+  },
+  "prift.dimetrodon.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dimetrodon/dimetrodon_death"
+    ],
+    "subtitle": "sounds.subtitle.dimetrodon_death"
   }
 }

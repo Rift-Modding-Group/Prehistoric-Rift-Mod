@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
@@ -21,10 +22,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -126,23 +124,43 @@ public class Dimetrodon extends RiftCreature {
 
     private void dynamicTemperature() {
         if (!this.isTemperatureForced()) {
-            EggTemperature temperature = RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition());
-            switch (temperature) {
-                case VERY_COLD:
-                    this.setTemperature(EggTemperature.VERY_WARM);
-                    break;
-                case COLD:
-                    this.setTemperature(EggTemperature.WARM);
-                    break;
-                case WARM:
-                    this.setTemperature(EggTemperature.COLD);
-                    break;
-                case VERY_WARM:
-                    this.setTemperature(EggTemperature.VERY_COLD);
-                    break;
-                default:
-                    this.setTemperature(EggTemperature.NEUTRAL);
-                    break;
+            if ((this.world.isRaining() && this.world.getBiome(this.getPosition()).canRain()) || this.inWater) {
+                EggTemperature temperature = RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition());
+                switch (temperature) {
+                    case VERY_COLD:
+                        this.setTemperature(EggTemperature.VERY_WARM);
+                    case COLD:
+                        this.setTemperature(EggTemperature.VERY_WARM);
+                    case NEUTRAL:
+                        this.setTemperature(EggTemperature.WARM);
+                        break;
+                    case WARM:
+                        this.setTemperature(EggTemperature.NEUTRAL);
+                        break;
+                    case VERY_WARM:
+                        this.setTemperature(EggTemperature.COLD);
+                        break;
+                }
+            }
+            else {
+                EggTemperature temperature = RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition());
+                switch (temperature) {
+                    case VERY_COLD:
+                        this.setTemperature(EggTemperature.VERY_WARM);
+                        break;
+                    case COLD:
+                        this.setTemperature(EggTemperature.WARM);
+                        break;
+                    case WARM:
+                        this.setTemperature(EggTemperature.COLD);
+                        break;
+                    case VERY_WARM:
+                        this.setTemperature(EggTemperature.VERY_COLD);
+                        break;
+                    default:
+                        this.setTemperature(EggTemperature.NEUTRAL);
+                        break;
+                }
             }
         }
     }
@@ -399,5 +417,17 @@ public class Dimetrodon extends RiftCreature {
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.DIMETRODON_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.DIMETRODON_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.DIMETRODON_DEATH;
     }
 }

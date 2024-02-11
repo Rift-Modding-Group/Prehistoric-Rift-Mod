@@ -1,0 +1,20 @@
+{
+  "type": "forge:ore_shapeless",
+  "ingredients": [
+    {
+      "item": "prift:truffle"
+    },
+    {
+      "item": "prift:cooked_exotic_meat"
+    },
+    {
+      "item": "prift:cooked_exotic_meat"
+    },
+    {
+      "item": "minecraft:bowl"
+    }
+  ],
+  "result": {
+    "item": "prift:neutral_stimulant"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "###",
+    "#X#",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:gold_ingot"
+    },
+    "X": {
+      "item": "prift:flame_stimulant"
+    }
+  },
+  "result": {
+    "item": "prift:extreme_flame_stimulant"
+  }
+}

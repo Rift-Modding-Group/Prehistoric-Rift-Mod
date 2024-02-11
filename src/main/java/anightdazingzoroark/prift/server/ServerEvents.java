@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
+import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOnHitMultipart;
@@ -28,12 +29,17 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.world.biome.Biome;
+import net.minecraftforge.common.BiomeDictionary;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -49,6 +55,7 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class ServerEvents {
@@ -146,6 +153,19 @@ public class ServerEvents {
 
                 properties.settingCreatureWorkstation = false;
                 properties.creatureIdForWorkstation = -1;
+            }
+        }
+    }
+
+    //manage adding new drops to blocks
+    @SubscribeEvent
+    public void onBlockBreak(BlockEvent.HarvestDropsEvent event) {
+        if (event.getState().getBlock().equals(Blocks.GRASS)) {
+            for (Biome biome : Biome.REGISTRY) {
+                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType("forest"))) {
+                    if (new Random().nextFloat() < 0.5f) event.getDrops().add(new ItemStack(RiftItems.TRUFFLE, RiftUtil.randomInRange(1, 3)));
+                    break;
+                }
             }
         }
     }

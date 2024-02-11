@@ -14,6 +14,7 @@ entity.triceratops.name=Triceratops
 entity.utahraptor.name=Utahraptor
 entity.apatosaurus.name=Apatosaurus
 entity.parasaurolophus.name=Parasaurolophus
+entity.dimetrodon.name=Dimetrodon
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon
@@ -165,6 +166,10 @@ sounds.subtitle.parasaurolophus_idle=Parasaurolophus grunts
 sounds.subtitle.parasaurolophus_hurt=Parasaurolophus hurts
 sounds.subtitle.parasaurolophus_death=Parasaurolophus dies
 sounds.subtitle.parasaurolophus_blow=Parasaurolophus blows
+
+sounds.subtitle.dimetrodon_idle=Dimetrodon grunts
+sounds.subtitle.dimetrodon_hurt=Dimetrodon hurts
+sounds.subtitle.dimetrodon_death=Dimetrodon dies
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral

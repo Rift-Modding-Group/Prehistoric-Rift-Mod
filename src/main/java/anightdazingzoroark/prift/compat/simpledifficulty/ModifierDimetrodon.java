@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.compat.simpledifficulty;
 
+import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import com.charles445.simpledifficulty.temperature.ModifierBase;
 import com.google.common.base.Predicate;
@@ -31,16 +32,16 @@ public class ModifierDimetrodon extends ModifierBase {
                 if (dimetrodon.getEntityBoundingBox().grow(8.0D).intersects(playerAABB)) {
                     switch (dimetrodon.getTemperature()) {
                         case VERY_COLD:
-                            dimetrodonTemperature -= 15f;
+                            dimetrodonTemperature += DimetrodonConfig.dimetrodonVeryColdValue;
                             break;
                         case COLD:
-                            dimetrodonTemperature -= 10f;
+                            dimetrodonTemperature += DimetrodonConfig.dimetrodonColdValue;
                             break;
                         case WARM:
-                            dimetrodonTemperature += 10f;
+                            dimetrodonTemperature += DimetrodonConfig.dimetrodonWarmValue;
                             break;
                         case VERY_WARM:
-                            dimetrodonTemperature += 15f;
+                            dimetrodonTemperature += DimetrodonConfig.dimetrodonVeryWarmValue;
                             break;
                     }
                 }

@@ -1,0 +1,19 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "###",
+    "#X#",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:gold_ingot"
+    },
+    "X": {
+      "item": "prift:frost_stimulant"
+    }
+  },
+  "result": {
+    "item": "prift:extreme_frost_stimulant"
+  }
+}
