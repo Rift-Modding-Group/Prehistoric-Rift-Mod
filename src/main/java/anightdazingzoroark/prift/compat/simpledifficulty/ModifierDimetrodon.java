@@ -8,6 +8,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -32,21 +33,42 @@ public class ModifierDimetrodon extends ModifierBase {
                 if (dimetrodon.getEntityBoundingBox().grow(8.0D).intersects(playerAABB)) {
                     switch (dimetrodon.getTemperature()) {
                         case VERY_COLD:
-                            dimetrodonTemperature += DimetrodonConfig.dimetrodonVeryColdValue;
+                            dimetrodonTemperature += this.changeByDistance(DimetrodonConfig.dimetrodonVeryColdValue, pos, dimetrodon.getEntityBoundingBox());
                             break;
                         case COLD:
-                            dimetrodonTemperature += DimetrodonConfig.dimetrodonColdValue;
+                            dimetrodonTemperature += this.changeByDistance(DimetrodonConfig.dimetrodonColdValue, pos, dimetrodon.getEntityBoundingBox());
                             break;
                         case WARM:
-                            dimetrodonTemperature += DimetrodonConfig.dimetrodonWarmValue;
+                            dimetrodonTemperature += this.changeByDistance(DimetrodonConfig.dimetrodonWarmValue, pos, dimetrodon.getEntityBoundingBox());
                             break;
                         case VERY_WARM:
-                            dimetrodonTemperature += DimetrodonConfig.dimetrodonVeryWarmValue;
+                            dimetrodonTemperature += this.changeByDistance(DimetrodonConfig.dimetrodonVeryWarmValue, pos, dimetrodon.getEntityBoundingBox());
                             break;
                     }
                 }
             }
         }
         return dimetrodonTemperature;
+    }
+
+    private float changeByDistance(float temperatureValue, BlockPos blockPos, AxisAlignedBB dimetrodonAABB) {
+        // First bounding box, grown by double its size
+        AxisAlignedBB firstBoundingBox = dimetrodonAABB.grow(2.0D);
+
+        // Second bounding box, grown to a fixed 8-block radius from the center
+        AxisAlignedBB secondBoundingBox = dimetrodonAABB.grow(8.0D);
+
+        Vec3d posVec = new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        if (firstBoundingBox.contains(posVec) && secondBoundingBox.contains(posVec)) return temperatureValue;
+        else if (!firstBoundingBox.contains(posVec) && secondBoundingBox.contains(posVec)) {
+            double distFromCenterX = blockPos.getX() - dimetrodonAABB.getCenter().x;
+            double distFromCenterY = blockPos.getY() - dimetrodonAABB.getCenter().y;
+            double distFromCenterZ = blockPos.getZ() - dimetrodonAABB.getCenter().z;
+            double dist = Math.sqrt(distFromCenterX * distFromCenterX + distFromCenterY * distFromCenterY + distFromCenterZ * distFromCenterZ);
+            if (dist > 2 && dist <= 8) {
+                return (-temperatureValue * ((float) dist - 8f))/6f;
+            }
+        }
+        return 0f;
     }
 }

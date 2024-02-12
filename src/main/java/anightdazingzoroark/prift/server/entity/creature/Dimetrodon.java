@@ -9,6 +9,13 @@ import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import com.charles445.simpledifficulty.api.config.JsonConfig;
+import com.charles445.simpledifficulty.api.config.json.JsonTemperature;
+import com.charles445.simpledifficulty.api.temperature.TemperatureEnum;
+import com.charles445.simpledifficulty.config.ModConfig;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -23,9 +30,14 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.*;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fml.common.Loader;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -94,7 +106,7 @@ public class Dimetrodon extends RiftCreature {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageForcedTemperatureTime();
-        this.dynamicTemperature();
+        if (!this.world.isRemote) this.dynamicTemperature();
         this.showTemperatureParticles();
     }
 
@@ -124,46 +136,146 @@ public class Dimetrodon extends RiftCreature {
 
     private void dynamicTemperature() {
         if (!this.isTemperatureForced()) {
-            if ((this.world.isRaining() && this.world.getBiome(this.getPosition()).canRain()) || this.inWater) {
-                EggTemperature temperature = RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition());
-                switch (temperature) {
-                    case VERY_COLD:
-                        this.setTemperature(EggTemperature.VERY_WARM);
-                    case COLD:
-                        this.setTemperature(EggTemperature.VERY_WARM);
-                    case NEUTRAL:
-                        this.setTemperature(EggTemperature.WARM);
-                        break;
-                    case WARM:
-                        this.setTemperature(EggTemperature.NEUTRAL);
-                        break;
-                    case VERY_WARM:
-                        this.setTemperature(EggTemperature.COLD);
-                        break;
+            if (Loader.isModLoaded(RiftInitialize.SIMPLE_DIFFICULTY_MOD_ID)) {
+                //for default temperature
+                float temperatureValue = (TemperatureEnum.NORMAL.getUpperBound() + TemperatureEnum.COLD.getUpperBound()) / 2;
+
+                //for altitude
+                if (this.world.provider.isSurfaceWorld()) {
+                    temperatureValue += -1.0f * (Math.abs(((64.0f - (float)this.posY) / 64.0f * ModConfig.server.temperature.altitudeMultiplier) + 1.0f));
                 }
+
+                //for biome
+                float biomeAverage = (this.getTempForBiome(this.world.getBiome(this.getPosition().add(10,0,0))) +
+                        this.getTempForBiome(this.world.getBiome(this.getPosition().add(-10,0,0))) +
+                        this.getTempForBiome(this.world.getBiome(this.getPosition().add(0,0,10))) +
+                        this.getTempForBiome(this.world.getBiome(this.getPosition().add(0,0,-10))) +
+                        this.getTempForBiome(this.world.getBiome(this.getPosition().add(7,0,7))) +
+                        this.getTempForBiome(this.world.getBiome(this.getPosition().add(7,0,-7))) +
+                        this.getTempForBiome(this.world.getBiome(this.getPosition().add(-7,0,7))) +
+                        this.getTempForBiome(this.world.getBiome(this.getPosition().add(-7,0,-7))) +
+                        this.getTempForBiome(this.world.getBiome(this.getPosition())))/9.0f;
+                temperatureValue += this.dynamicTempUnderground(this.normalizeToPlusMinus(biomeAverage) * ModConfig.server.temperature.biomeMultiplier);
+
+                //for dimension
+                JsonTemperature tempInfoDim = JsonConfig.dimensionTemperature.get(""+world.provider.getDimension());
+                if (tempInfoDim != null) temperatureValue += tempInfoDim.temperature;
+
+                //for snow
+                if(this.world.isRaining() && this.world.canSeeSky(this.getPosition())) {
+                    Biome biome = world.getBiome(this.getPosition());
+                    if (biome.getEnableSnow()) temperatureValue += ModConfig.server.temperature.snowValue;
+                    else {
+                        if (this.world.canSnowAt(this.getPosition(), false)) temperatureValue += ModConfig.server.temperature.snowValue;
+                    }
+                }
+
+                //fluids or rain
+                IBlockState state = this.world.getBlockState(this.getPosition());
+                Block block = state.getBlock();
+
+                if (block instanceof IFluidBlock) {
+                    //Modded fluid
+                    Fluid fluid = ((IFluidBlock)block).getFluid();
+                    if(fluid != null) {
+                        JsonTemperature tempInfoFluid = JsonConfig.fluidTemperatures.get(fluid.getName());
+                        if (tempInfoFluid != null) temperatureValue += tempInfoFluid.temperature;
+                    }
+                }
+
+                //vanilla fluid, or modded fluid with no override, or no fluid at all, or rain
+                if (state.getMaterial() == Material.WATER) temperatureValue += ModConfig.server.temperature.wetValue;
+                else if(world.isRainingAt(this.getPosition())) temperatureValue += ModConfig.server.temperature.wetValue;
+
+                //for time
+                if (this.world.provider.isSurfaceWorld()) {
+                    long time = this.world.getWorldTime() % 24000;
+                    if ((time >= 12000 || ModConfig.server.temperature.timeTemperatureDay) && (time < 12000 || ModConfig.server.temperature.timeTemperatureNight)) {
+                        float timetemperature = (Math.abs(((time % 12000.0f) - 6000.0f)/6000.0f) - 1.0f) * ModConfig.server.temperature.timeMultiplier;
+                        if (time < 12000) timetemperature *= -1.0f;
+                        float biomeMultiplier = 1.0f + (Math.abs(this.normalizeToPlusMinus(this.getTempForBiome(this.world.getBiome(this.getPosition())))) * ((float)ModConfig.server.temperature.timeBiomeMultiplier - 1.0f));
+                        timetemperature *= biomeMultiplier;
+                        //for shade
+                        int shadeConf = ModConfig.server.temperature.timeTemperatureShade;
+                        if (timetemperature > 0 && shadeConf != 0 && !this.world.canSeeSky(this.getPosition()) && !this.world.canSeeSky(this.getPosition().up())) {
+                            timetemperature = Math.max(0, timetemperature + shadeConf);
+                        }
+                        temperatureValue += this.dynamicTempUnderground(timetemperature);
+                    }
+                }
+
+                if (temperatureValue >= 0f && temperatureValue <= 5f) this.setTemperature(EggTemperature.VERY_WARM);
+                else if (temperatureValue >= 6f && temperatureValue <= 10f) this.setTemperature(EggTemperature.WARM);
+                else if (temperatureValue >= 11f && temperatureValue <= 14f) this.setTemperature(EggTemperature.NEUTRAL);
+                else if (temperatureValue >= 15f && temperatureValue <= 19f) this.setTemperature(EggTemperature.COLD);
+                else if (temperatureValue >= 20f) this.setTemperature(EggTemperature.VERY_COLD);
             }
             else {
-                EggTemperature temperature = RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition());
-                switch (temperature) {
-                    case VERY_COLD:
-                        this.setTemperature(EggTemperature.VERY_WARM);
-                        break;
-                    case COLD:
-                        this.setTemperature(EggTemperature.WARM);
-                        break;
-                    case WARM:
-                        this.setTemperature(EggTemperature.COLD);
-                        break;
-                    case VERY_WARM:
-                        this.setTemperature(EggTemperature.VERY_COLD);
-                        break;
-                    default:
-                        this.setTemperature(EggTemperature.NEUTRAL);
-                        break;
+                if ((this.world.isRaining() && this.world.getBiome(this.getPosition()).canRain()) || this.inWater) {
+                    EggTemperature temperature = RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition());
+                    switch (temperature) {
+                        case VERY_COLD:
+                            this.setTemperature(EggTemperature.VERY_WARM);
+                        case COLD:
+                            this.setTemperature(EggTemperature.VERY_WARM);
+                        case NEUTRAL:
+                            this.setTemperature(EggTemperature.WARM);
+                            break;
+                        case WARM:
+                            this.setTemperature(EggTemperature.NEUTRAL);
+                            break;
+                        case VERY_WARM:
+                            this.setTemperature(EggTemperature.COLD);
+                            break;
+                    }
+                }
+                else {
+                    EggTemperature temperature = RiftUtil.getCorrespondingTempFromBiome(this.world, this.getPosition());
+                    switch (temperature) {
+                        case VERY_COLD:
+                            this.setTemperature(EggTemperature.VERY_WARM);
+                            break;
+                        case COLD:
+                            this.setTemperature(EggTemperature.WARM);
+                            break;
+                        case WARM:
+                            this.setTemperature(EggTemperature.COLD);
+                            break;
+                        case VERY_WARM:
+                            this.setTemperature(EggTemperature.VERY_COLD);
+                            break;
+                        default:
+                            this.setTemperature(EggTemperature.NEUTRAL);
+                            break;
+                    }
                 }
             }
         }
     }
+
+    //for simple difficulty compat
+    private float normalizeToPlusMinus(float value) {
+        return (value * 2.0f) - 1.0f;
+    }
+
+    private float dynamicTempUnderground(float temperature) {
+        if (this.posY >= 64) return temperature;
+
+        if(!ModConfig.server.temperature.undergroundEffect || !this.world.provider.isSurfaceWorld()) return temperature;
+
+        if (this.world.canSeeSky(this.getPosition()) || this.world.canSeeSky(this.getPosition().up())) return temperature;
+
+        int cutoff = ModConfig.server.temperature.undergroundEffectCutoff;
+
+        if (this.posY <= cutoff || cutoff == 64) return 0.0f;
+
+        return temperature * (float)((float)this.posY - cutoff) / (64.0f - cutoff);
+    }
+
+    protected float getTempForBiome(Biome biome) {
+        return MathHelper.clamp(biome.getDefaultTemperature(), 0.0f, 1.35f)/1.35f;
+    }
+    //simple difficulty compat ends here
 
     @Override
     public void resetParts(float scale) {

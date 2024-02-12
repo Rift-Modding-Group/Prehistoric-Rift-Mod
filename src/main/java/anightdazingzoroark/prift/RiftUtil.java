@@ -46,16 +46,6 @@ public class RiftUtil {
         return null;
     }
 
-    public static boolean blockExposedToSky(World world, BlockPos pos) {
-        for (int y = pos.getY() + 1; y < 256; y++) {
-            BlockPos aboveBlockPos = new BlockPos(pos.getX(), y, pos.getZ());
-            if (!world.isAirBlock(aboveBlockPos)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static String[] removeElementFromArray(String[] array, String element) {
         int size = array.length;
         for(int i = 0; i < size; i++) {

@@ -14,10 +14,10 @@ public class DimetrodonConfig extends RiftConfig {
     public static String[] dimetrodonForcedTemperatureItems = {"prift:extreme_frost_stimulant:0:9600:VERY_COLD", "prift:frost_stimulant:0:9600:COLD", "prift:neutral_stimulant:0:9600:NEUTRAL", "prift:flame_stimulant:0:9600:WARM", "prift:extreme_flame_stimulant:0:9600:VERY_WARM"};
 
     private String simpleDiffName = "For Simple Difficulty Integration";
-    public static float dimetrodonVeryWarmValue = 15;
-    public static float dimetrodonWarmValue = 10;
-    public static float dimetrodonVeryColdValue = -15;
-    public static float dimetrodonColdValue = -10;
+    public static float dimetrodonVeryWarmValue = 10;
+    public static float dimetrodonWarmValue = 5;
+    public static float dimetrodonVeryColdValue = -10;
+    public static float dimetrodonColdValue = -5;
 
     public DimetrodonConfig(Configuration config) {
         super(config, new String[]{"tag:desert:10:1:1", "tag:savanna:10:1:1"});
@@ -37,10 +37,10 @@ public class DimetrodonConfig extends RiftConfig {
         dimetrodonTargetBlacklist = config.getStringList("Dimetrodon Target Blacklist", "General", new String[]{"minecraft:player", "prift:stegosaurus", "prift:triceratops", "prift:parasaurolophus"}, "Identifiers of mobs that are here, if they are in the general config for all carnivores to target, will not be targeted by Dimetrodons.");
         dimetrodonForcedTemperatureItems = config.getStringList("Dimetrodon Temperature Changing Items", "General", new String[]{"prift:extreme_frost_stimulant:0:9600:VERY_COLD", "prift:frost_stimulant:0:9600:COLD", "prift:neutral_stimulant:0:9600:NEUTRAL", "prift:flame_stimulant:0:9600:WARM", "prift:extreme_flame_stimulant:0:9600:VERY_WARM"}, "List of items that can forcibly change the temperature mode of a Dimetrodon. To add items add \"<insert item's identifier here>:<insert data id here>:<insert time in ticks here>:<insert temperature mode here>\". Valid temperature mods are VERY_COLD, COLD, NEUTRAL, WARM, and VERY_WARM");
 
-        dimetrodonVeryWarmValue = config.getFloat("\"Very Warm\" temperature value", this.simpleDiffName, 15f, -69420f, 69420f, "Temperature strength of Dimetrodons in \"Very Warm\" mode");
-        dimetrodonWarmValue = config.getFloat("\"Warm\" temperature value", this.simpleDiffName, 10f, -69420f, 69420f, "Temperature strength of Dimetrodons in \"Warm\" mode");
-        dimetrodonVeryColdValue = config.getFloat("\"Very Cold\" temperture value", this.simpleDiffName, -15f, -69420666f, 69420666f, "Temperature strength of Dimetrodons in \"Very Cold\" mode");
-        dimetrodonColdValue = config.getFloat("\"Cold\" temperture value", this.simpleDiffName, -10f, -69420666f, 69420666f, "Temperature strength of Dimetrodons in \"Cold\" mode");
+        dimetrodonVeryWarmValue = config.getFloat("\"Very Warm\" temperature value", this.simpleDiffName, 10f, 0, 69420f, "Temperature strength of Dimetrodons in \"Very Warm\" mode");
+        dimetrodonWarmValue = config.getFloat("\"Warm\" temperature value", this.simpleDiffName, 5f, 0, 69420f, "Temperature strength of Dimetrodons in \"Warm\" mode");
+        dimetrodonVeryColdValue = config.getFloat("\"Very Cold\" temperture value", this.simpleDiffName, -10f, -69420f, 0, "Temperature strength of Dimetrodons in \"Very Cold\" mode");
+        dimetrodonColdValue = config.getFloat("\"Cold\" temperture value", this.simpleDiffName, -5f, -69420f, 0, "Temperature strength of Dimetrodons in \"Cold\" mode");
     }
 
     public static double getMaxHealth() {
