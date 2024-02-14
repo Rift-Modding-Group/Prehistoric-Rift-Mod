@@ -19,6 +19,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -43,9 +44,7 @@ public class ServerProxy implements IGuiHandler {
         RiftRecipes.registerSmelting();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
         RiftEntities.registerEntities();
-        if (Loader.isModLoaded(RiftInitialize.SIMPLE_DIFFICULTY_MOD_ID)) {
-            TemperatureRegistry.registerModifier(new ModifierDimetrodon());
-        }
+        if (Loader.isModLoaded(RiftInitialize.SIMPLE_DIFFICULTY_MOD_ID)) loadTemperatureRegistry();
     }
 
     public void init(FMLInitializationEvent event) {
@@ -55,6 +54,11 @@ public class ServerProxy implements IGuiHandler {
     public void postInit(FMLPostInitializationEvent event) {}
 
     public void spawnParticle(String name, double x, double y, double z, double motX, double motY, double motZ) {}
+
+    @Optional.Method(modid = RiftInitialize.SIMPLE_DIFFICULTY_MOD_ID)
+    private void loadTemperatureRegistry() {
+        TemperatureRegistry.registerModifier(new ModifierDimetrodon());
+    }
 
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {}
