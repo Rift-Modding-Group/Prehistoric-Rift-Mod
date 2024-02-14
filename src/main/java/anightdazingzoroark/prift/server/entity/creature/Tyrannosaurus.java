@@ -351,7 +351,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         if (canBreak) {
             if (!this.world.isRemote) {
                 Set<BlockPos> set = Sets.<BlockPos>newHashSet();
-                int i = 16;
                 for (int j = 0; j < 16; ++j) {
                     for (int k = 0; k < 16; ++k) {
                         for (int l = 0; l < 16; ++l) {
