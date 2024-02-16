@@ -3,7 +3,7 @@
     "modid": "prift",
     "name": "Prehistoric Rift",
     "description": "A Minecraft Java mod that aims to add dinosaurs and expand upon gameplay. Formerly on Bedrock.",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "mcversion": "${mcversion}",
     "url": "https://discord.gg/qVWaKRMCRc",
     "updateUrl": "",

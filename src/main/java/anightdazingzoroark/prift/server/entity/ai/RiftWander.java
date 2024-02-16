@@ -9,7 +9,11 @@ public class RiftWander extends EntityAIWander {
     private final RiftCreature creature;
 
     public RiftWander(EntityCreature creatureIn, double speedIn) {
-        super(creatureIn, speedIn);
+        this(creatureIn, speedIn, 120);
+    }
+
+    public RiftWander(EntityCreature creatureIn, double speedIn, int chance) {
+        super(creatureIn, speedIn, chance);
         this.creature = (RiftCreature) creatureIn;
     }
 

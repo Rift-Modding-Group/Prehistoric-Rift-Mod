@@ -122,7 +122,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
     public double speed;
-    private int herdCheckCountdown;
+    protected int herdCheckCountdown;
     public float attackWidth;
     public float rangedWidth;
     public float chargeWidth;
@@ -958,7 +958,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(HERD_LEADER_UUID, uuid.toString());
     }
 
-    private void manageHerding() {
+    protected void manageHerding() {
         this.herdCheckCountdown--;
         if (this.herdCheckCountdown <= 0) {
             //add members to herd
@@ -1566,7 +1566,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else {
             this.stepHeight = 0.5F;
             this.jumpMovementFactor = 0.02F;
-            if (this.isFloating && forward > 0) {
+            //for surface mobs
+            if (this.isInWater() && this.isFloating && forward > 0) {
                 if (this.bodyPart != null) {
                     BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
                     BlockPos above = ahead.up();
@@ -1575,6 +1576,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
             }
+            //for underwater mobs
+//            else if (this.isInWater() && !this.isFloating) {
+//                this.moveRelative(strafe, vertical, forward, 0.01f);
+//                this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+//
+//                this.motionX *= 0.9;
+//                this.motionY *= 0.9;
+//                this.motionZ *= 0.9;
+//            }
             super.travel(strafe, vertical, forward);
         }
     }
