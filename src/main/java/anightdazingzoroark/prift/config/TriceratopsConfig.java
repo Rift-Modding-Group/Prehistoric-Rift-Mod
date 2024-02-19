@@ -12,7 +12,7 @@ public class TriceratopsConfig extends RiftConfig {
     public static String triceratopsSaddleItem = "minecraft:saddle:0";
 
     public TriceratopsConfig(Configuration config) {
-        super(config, new String[]{"tag:plains:10:4:6", "-tag:savanna"});
+        super(config, new String[]{"tag:plains:10:4:6:CREATURE", "-tag:savanna"});
         maxHealth = initMaxHealth = 80;
         damage = initDamage = 25;
     }

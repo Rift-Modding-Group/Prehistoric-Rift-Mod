@@ -12,7 +12,7 @@ public class ParasaurolophusConfig extends RiftConfig {
     public static String parasaurolophusSaddleItem = "minecraft:saddle:0";
 
     public ParasaurolophusConfig(Configuration config) {
-        super(config, new String[]{"tag:plains:10:4:6", "-tag:savanna"});
+        super(config, new String[]{"tag:plains:10:4:6:CREATURE", "-tag:savanna"});
         maxHealth = initMaxHealth = 60;
         damage = initDamage = 0;
     }

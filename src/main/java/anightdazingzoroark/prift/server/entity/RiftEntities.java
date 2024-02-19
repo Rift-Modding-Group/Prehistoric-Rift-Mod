@@ -65,24 +65,28 @@ public class RiftEntities {
 
                         if (spawnerType.equals("biome")) {
                             int partFive = entry.indexOf(":", partFour + 1);
+                            int partSix = entry.indexOf(":", partFive + 1);
+                            String category = entry.substring(partSix + 1);
                             String biomeIdentifier = entry.substring(partOne + 1, partThree);
                             int spawnWeight = Integer.parseInt(entry.substring(partThree + 1, partFour));
                             int minCount = Integer.parseInt(entry.substring(partFour + 1, partFive));
-                            int maxCount = Integer.parseInt(entry.substring(partFive + 1));
+                            int maxCount = Integer.parseInt(entry.substring(partFive + 1, partSix));
                             for (Biome biome : Biome.REGISTRY) {
-                                if (biome.getRegistryName().equals(biomeIdentifier)) {
-                                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(creatureClass, spawnWeight, minCount, maxCount));
+                                if (biome.getRegistryName().toString().equals(biomeIdentifier)) {
+                                    biome.getSpawnableList(EnumCreatureType.valueOf(category)).add(new Biome.SpawnListEntry(creatureClass, spawnWeight, minCount, maxCount));
                                 }
                             }
                         }
                         else if (spawnerType.equals("tag")) {
+                            int partFive = entry.indexOf(":", partFour + 1);
                             String biomeTag = entry.substring(partOne + 1, partTwo);
                             int spawnWeight = Integer.parseInt(entry.substring(partTwo + 1, partThree));
                             int minCount = Integer.parseInt(entry.substring(partThree + 1, partFour));
-                            int maxCount = Integer.parseInt(entry.substring(partFour + 1));
+                            int maxCount = Integer.parseInt(entry.substring(partFour + 1, partFive));
+                            String category = entry.substring(partFive + 1);
                             for (Biome biome : Biome.REGISTRY) {
                                 if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(biomeTag))) {
-                                    biome.getSpawnableList(EnumCreatureType.CREATURE).add(new Biome.SpawnListEntry(creatureClass, spawnWeight, minCount, maxCount));
+                                    biome.getSpawnableList(EnumCreatureType.valueOf(category)).add(new Biome.SpawnListEntry(creatureClass, spawnWeight, minCount, maxCount));
                                 }
                             }
                         }
@@ -121,5 +125,9 @@ public class RiftEntities {
                 }
             }
         }
+//        for (Biome biome : Biome.REGISTRY) {
+//            System.out.println(biome.getSpawnableList(EnumCreatureType.CREATURE));
+//            System.out.println(biome.getSpawnableList(EnumCreatureType.WATER_CREATURE));
+//        }
     }
 }

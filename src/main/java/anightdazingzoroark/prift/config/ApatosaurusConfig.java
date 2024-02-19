@@ -14,7 +14,7 @@ public class ApatosaurusConfig extends RiftConfig {
     public static String[] apatosaurusPassengerBlacklist = {"minecraft:ender_dragon", "minecraft:wither", "prift:tyrannosaurus", "prift:apatosaurus"};
 
     public ApatosaurusConfig(Configuration config) {
-        super(config, new String[]{"tag:plains:7:1:3", "-tag:savanna"});
+        super(config, new String[]{"tag:plains:7:1:3:CREATURE", "-tag:savanna"});
         maxHealth = initMaxHealth = 200;
         damage = initDamage = 80;
     }

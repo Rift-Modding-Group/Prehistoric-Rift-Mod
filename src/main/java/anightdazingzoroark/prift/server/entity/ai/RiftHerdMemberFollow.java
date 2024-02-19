@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNodeType;
@@ -58,7 +59,7 @@ public class RiftHerdMemberFollow extends EntityAIBase {
     public void startExecuting() {
         this.timeToRecalcPath = 0;
         this.oldWaterCost = this.creature.getPathPriority(PathNodeType.WATER);
-        this.creature.setPathPriority(PathNodeType.WATER, 0.0F);
+        if (!(this.creature instanceof RiftWaterCreature)) this.creature.setPathPriority(PathNodeType.WATER, 0.0F);
     }
 
     public void resetTask() {

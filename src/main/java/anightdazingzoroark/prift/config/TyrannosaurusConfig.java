@@ -16,7 +16,7 @@ public class TyrannosaurusConfig extends RiftConfig {
     public static String tyrannosaurusSaddleItem = "minecraft:saddle:0";
 
     public TyrannosaurusConfig(Configuration config) {
-        super(config, new String[]{"tag:plains:7:1:1", "tag:mountain:10:1:1", "-tag:savanna", "-tag:cold"});
+        super(config, new String[]{"tag:plains:7:1:1:CREATURE", "tag:mountain:10:1:1:CREATURE", "-tag:savanna", "-tag:cold"});
         maxHealth = initMaxHealth = 160;
         damage = initDamage = 35;
     }

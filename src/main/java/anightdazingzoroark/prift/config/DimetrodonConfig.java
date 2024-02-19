@@ -20,7 +20,7 @@ public class DimetrodonConfig extends RiftConfig {
     public static float dimetrodonColdValue = -5;
 
     public DimetrodonConfig(Configuration config) {
-        super(config, new String[]{"tag:desert:10:1:1", "tag:savanna:10:1:1"});
+        super(config, new String[]{"tag:desert:10:1:1:CREATURE", "tag:savanna:10:1:1:CREATURE"});
         maxHealth = initMaxHealth = 40;
         damage = initDamage = 8;
     }

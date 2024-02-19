@@ -1559,33 +1559,36 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                     }
                 }
-
                 super.travel(strafe, vertical, forward);
             }
         }
         else {
-            this.stepHeight = 0.5F;
-            this.jumpMovementFactor = 0.02F;
-            //for surface mobs
-            if (this.isInWater() && this.isFloating && forward > 0) {
-                if (this.bodyPart != null) {
-                    BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
-                    BlockPos above = ahead.up();
-                    if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
-                        this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
+            if (this.isServerWorld()) {
+                //for surface mobs
+                this.stepHeight = 0.5F;
+                this.jumpMovementFactor = 0.02F;
+                if (this.isInWater() && this.isFloating && forward > 0 && this.isServerWorld()) {
+                    if (this.bodyPart != null) {
+                        BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
+                        BlockPos above = ahead.up();
+                        if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                            this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
+                        }
                     }
                 }
+                //for underwater mobs
+                else if (this.isInWater() && !this.isFloating) {
+                    this.moveRelative(strafe, vertical, forward, 0.01f);
+                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+
+                    this.motionX *= 0.9;
+                    this.motionY *= 0.9;
+                    this.motionZ *= 0.9;
+
+                    if (this.getAttackTarget() == null) this.motionY -= 0.005;
+                }
+                else if (this.isServerWorld()) super.travel(strafe, vertical, forward);
             }
-            //for underwater mobs
-//            else if (this.isInWater() && !this.isFloating) {
-//                this.moveRelative(strafe, vertical, forward, 0.01f);
-//                this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-//
-//                this.motionX *= 0.9;
-//                this.motionY *= 0.9;
-//                this.motionZ *= 0.9;
-//            }
-            super.travel(strafe, vertical, forward);
         }
     }
 

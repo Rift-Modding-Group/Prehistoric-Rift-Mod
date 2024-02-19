@@ -13,7 +13,7 @@ public class StegosaurusConfig extends RiftConfig {
     public static String stegosaurusSaddleItem = "minecraft:saddle:0";
 
     public StegosaurusConfig(Configuration config) {
-        super(config, new String[]{"tag:plains:10:4:6", "-tag:savanna"});
+        super(config, new String[]{"tag:plains:10:4:6:CREATURE", "-tag:savanna"});
         maxHealth = initMaxHealth = 100;
         damage = initDamage = 30;
     }

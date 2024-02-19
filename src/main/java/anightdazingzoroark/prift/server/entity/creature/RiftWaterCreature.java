@@ -2,11 +2,13 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftWaterCreature;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.pathfinding.PathNavigate;
-import net.minecraft.pathfinding.PathNavigateClimber;
 import net.minecraft.pathfinding.PathNavigateSwimmer;
+import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 public abstract class RiftWaterCreature extends RiftCreature {
     public RiftWaterCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn, creatureType);
+        this.moveHelper = new RiftWaterCreatureMoveHelper(this);
+        this.setPathPriority(PathNodeType.WATER, 0);
     }
 
     @Override
@@ -27,13 +31,14 @@ public abstract class RiftWaterCreature extends RiftCreature {
         //flipping around on land
         if (!this.isDead && !this.isInWater() && this.onGround && this.collidedVertically) {
             this.motionX += 0.05 * (this.rand.nextFloat() * 2 - 1);
-            this.motionY += 0.4;
+            this.motionY += 0.5;
             this.motionZ += 0.05 * (this.rand.nextFloat() * 2 - 1);
 
             this.onGround = false;
             this.isAirBorne = true;
-//            playSound(getFlopSound(), getSoundVolume(), getSoundPitch());
         }
+
+        if (this.isServerWorld()) this.motionY = 0;
     }
 
     public void onEntityUpdate() {
@@ -93,11 +98,10 @@ public abstract class RiftWaterCreature extends RiftCreature {
     }
 
     protected PathNavigate createNavigator(World worldIn) {
-        return new PathNavigateSwimmer(this, worldIn);
+        return new PathNavigateRiftWaterCreature(this, worldIn);
     }
 
-    protected boolean canTriggerWalking()
-    {
+    protected boolean canTriggerWalking() {
         return false;
     }
 }

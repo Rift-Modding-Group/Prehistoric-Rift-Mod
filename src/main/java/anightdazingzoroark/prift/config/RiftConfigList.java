@@ -17,7 +17,8 @@ public enum RiftConfigList {
     UTAHRAPTOR(Utahraptor.class, UtahraptorConfig.class),
     APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class),
     PARASAUROLOPHUS(Parasaurolophus.class, ParasaurolophusConfig.class),
-    DIMETRODON(Dimetrodon.class, DimetrodonConfig.class);
+    DIMETRODON(Dimetrodon.class, DimetrodonConfig.class),
+    COELACANTH(Coelacanth.class, CoelacanthConfig.class);
 
     private final Class<? extends RiftCreature> creatureClass;
     private final Class<? extends RiftConfig> configClass;

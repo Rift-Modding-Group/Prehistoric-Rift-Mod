@@ -14,7 +14,7 @@ public class UtahraptorConfig extends RiftConfig {
     public static String utahraptorSaddleItem = "minecraft:saddle:0";
 
     public UtahraptorConfig(Configuration config) {
-        super(config, new String[]{"tag:plains:10:2:4", "tag:forest:15:2:4", "tag:jungle:15:2:4", "-tag:savanna", "-tag:cold"});
+        super(config, new String[]{"tag:plains:10:2:4:CREATURE", "tag:forest:15:2:4:CREATURE", "tag:jungle:15:2:4:CREATURE", "-tag:savanna", "-tag:cold"});
         maxHealth = initMaxHealth = 30;
         damage = initDamage = 6;
     }
