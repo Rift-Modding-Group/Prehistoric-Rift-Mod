@@ -16,9 +16,10 @@ public class RiftWanderWater extends RiftWander {
     @Override
     protected Vec3d getPosition() {
         Vec3d pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
-        BlockPos blockPos = new BlockPos(pos);
-        for (int i = 0; pos != null && !this.isWaterDestination(blockPos) && i < 10; i++) pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
-
+        if (pos != null) {
+            BlockPos blockPos = new BlockPos(pos);
+            for (int i = 0; !this.isWaterDestination(blockPos) && i < 10; i++) pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+        }
         return pos;
     }
 

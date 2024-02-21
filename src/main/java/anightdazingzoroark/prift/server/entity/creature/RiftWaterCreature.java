@@ -5,11 +5,13 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
 import com.google.common.base.Predicate;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNavigateSwimmer;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -37,8 +39,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
             this.onGround = false;
             this.isAirBorne = true;
         }
-
-        if (this.isServerWorld()) this.motionY = 0;
     }
 
     public void onEntityUpdate() {
@@ -81,10 +81,16 @@ public abstract class RiftWaterCreature extends RiftCreature {
         return this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this);
     }
 
+    @Override
+    public boolean getCanSpawnHere() {
+        return true;
+    }
+
     public void manageHerding() {
         this.herdCheckCountdown--;
         if (this.herdCheckCountdown <= 0) {
             //add members to herd
+            //should modify this so that it can only follow mobs that it can path to
             List<RiftWaterCreature> potentialHerders = this.world.getEntitiesWithinAABB(this.getClass(), this.getHerdBoundingBox(), new Predicate<RiftWaterCreature>() {
                 @Override
                 public boolean apply(@Nullable RiftWaterCreature input) {

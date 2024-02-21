@@ -16,25 +16,22 @@ public class RiftWaterCreatureMoveHelper extends EntityMoveHelper {
 
     @Override
     public void onUpdateMoveHelper() {
-        if (this.action == EntityMoveHelper.Action.MOVE_TO && !this.creature.getNavigator().noPath() && this.creature.isInWater()) {
-            if (this.creature.isInsideOfMaterial(Material.WATER)) this.creature.motionY += 0.005;
+        if(this.creature.isInsideOfMaterial(Material.WATER)) this.creature.motionY += 0.005;
+        if(this.action == Action.MOVE_TO && !this.creature.getNavigator().noPath()) {
+            final double newSpeed = this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+            this.creature.setAIMoveSpeed(this.creature.getAIMoveSpeed() + (float)(newSpeed - this.creature.getAIMoveSpeed()) * 0.125f);
 
-            double d0 = this.posX - this.creature.posX;
-            double d1 = this.posY - this.creature.posY;
-            double d2 = this.posZ - this.creature.posZ;
-            double d3 = (double)MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-            d1 = d1 / d3;
-            float f = (float)(MathHelper.atan2(d2, d0) * (180D / Math.PI)) - 90.0F;
-            this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, f, 90.0F);
-            this.creature.renderYawOffset = this.creature.rotationYaw;
+            final double x = this.posX - this.creature.posX;
+            final double y = this.posY - this.creature.posY;
+            final double z = this.posZ - this.creature.posZ;
 
-            float f1 = (float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
-            this.creature.setAIMoveSpeed(this.creature.getAIMoveSpeed() + (f1 - this.creature.getAIMoveSpeed()) * 0.125F);
-
-            this.creature.motionY += (double)this.creature.getAIMoveSpeed() * d1 * 0.1D;
+            if (y != 0) this.creature.motionY += this.creature.getAIMoveSpeed() * y / Math.sqrt(x * x + y * y + z * z) * 0.1;
+            if (x != 0 || z != 0) {
+                this.creature.rotationYaw = limitAngle(this.creature.rotationYaw, (float)(MathHelper.atan2(z, x) * 180 / Math.PI - 90), 90);
+                this.creature.setRenderYawOffset(this.creature.rotationYaw);
+            }
         }
 
-        if (!this.creature.isInWater()) this.creature.setAIMoveSpeed(0.0F);
-        else super.onUpdateMoveHelper();
+        else this.creature.setAIMoveSpeed(0);
     }
 }

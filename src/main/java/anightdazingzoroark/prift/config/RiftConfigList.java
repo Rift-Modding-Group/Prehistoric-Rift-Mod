@@ -9,28 +9,41 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 
 public enum RiftConfigList {
-    GENERAL(null, GeneralConfig.class),
-    TYRANNOSAURUS(Tyrannosaurus.class, TyrannosaurusConfig.class),
-    STEGOSAURUS(Stegosaurus.class, StegosaurusConfig.class),
-    DODO(Dodo.class, DodoConfig.class),
-    TRICERATOPS(Triceratops.class, TriceratopsConfig.class),
-    UTAHRAPTOR(Utahraptor.class, UtahraptorConfig.class),
-    APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class),
-    PARASAUROLOPHUS(Parasaurolophus.class, ParasaurolophusConfig.class),
-    DIMETRODON(Dimetrodon.class, DimetrodonConfig.class),
-    COELACANTH(Coelacanth.class, CoelacanthConfig.class);
+    GENERAL(null, GeneralConfig.class, false),
+    TYRANNOSAURUS(Tyrannosaurus.class, TyrannosaurusConfig.class, false),
+    STEGOSAURUS(Stegosaurus.class, StegosaurusConfig.class, false),
+    DODO(Dodo.class, DodoConfig.class, false),
+    TRICERATOPS(Triceratops.class, TriceratopsConfig.class, false),
+    UTAHRAPTOR(Utahraptor.class, UtahraptorConfig.class, false),
+    APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class, false),
+    PARASAUROLOPHUS(Parasaurolophus.class, ParasaurolophusConfig.class, false),
+    DIMETRODON(Dimetrodon.class, DimetrodonConfig.class, false),
+    COELACANTH(Coelacanth.class, CoelacanthConfig.class, true);
 
     private final Class<? extends RiftCreature> creatureClass;
+    private final Class<? extends RiftWaterCreature> waterCreatureClass;
     private final Class<? extends RiftConfig> configClass;
     private RiftConfig configInstance;
+    private boolean isWaterCreature;
 
-    RiftConfigList(Class<? extends RiftCreature> creatureClass, Class<? extends RiftConfig> configClass) {
+    RiftConfigList(Class<? extends RiftCreature> creatureClass, Class<? extends RiftConfig> configClass, boolean isWaterCreature) {
         this.creatureClass = creatureClass;
         this.configClass = configClass;
+        this.isWaterCreature = isWaterCreature;
+        if (isWaterCreature) this.waterCreatureClass = (Class<? extends RiftWaterCreature>)this.creatureClass;
+        else this.waterCreatureClass = null;
     }
 
-    public Class getCreatureClass() {
+    public Class<? extends RiftCreature> getCreatureClass() {
         return this.creatureClass;
+    }
+
+    public Class<? extends RiftWaterCreature> getWaterCreatureClass() {
+        return this.waterCreatureClass;
+    }
+
+    public boolean getIsWaterCreature() {
+        return this.isWaterCreature;
     }
 
     public void loadConfig(File directory) {

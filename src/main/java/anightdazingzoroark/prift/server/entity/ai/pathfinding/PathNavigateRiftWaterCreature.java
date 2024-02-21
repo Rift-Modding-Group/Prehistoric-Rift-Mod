@@ -24,9 +24,10 @@ public class PathNavigateRiftWaterCreature extends PathNavigateSwimmer {
             if (this.canNavigate()) this.pathFollow();
             else if (this.currentPath != null && this.currentPath.getCurrentPathIndex() < this.currentPath.getCurrentPathLength()) {
                 Vec3d pos = this.currentPath.getVectorFromIndex(this.creature, this.currentPath.getCurrentPathIndex());
-                // Ensure target position is below water surface
-                int waterSurfaceY = this.findWaterSurfaceY(new BlockPos(pos.x, pos.y, pos.z));
-                pos = new Vec3d(pos.x, Math.min(pos.y, waterSurfaceY), pos.z);
+                if (this.creature.isInWater()) {
+                    int waterSurfaceY = this.findWaterSurfaceY(new BlockPos(pos.x, pos.y, pos.z));
+                    pos = new Vec3d(pos.x, Math.min(pos.y, waterSurfaceY), pos.z);
+                }
 
                 if (MathHelper.floor(this.creature.posX) == MathHelper.floor(pos.x) && MathHelper.floor(this.creature.posY) == MathHelper.floor(pos.y) && MathHelper.floor(this.creature.posZ) == MathHelper.floor(pos.z))
                     this.currentPath.incrementPathIndex();
@@ -35,9 +36,10 @@ public class PathNavigateRiftWaterCreature extends PathNavigateSwimmer {
             this.debugPathFinding();
             if (!this.noPath() && this.currentPath != null) {
                 Vec3d pos = this.currentPath.getPosition(this.creature);
-                int waterSurfaceY = this.findWaterSurfaceY(new BlockPos(pos.x, pos.y, pos.z));
-                pos = new Vec3d(pos.x, Math.min(pos.y, waterSurfaceY), pos.z);
-
+                if (this.creature.isInWater()) {
+                    int waterSurfaceY = this.findWaterSurfaceY(new BlockPos(pos.x, pos.y, pos.z));
+                    pos = new Vec3d(pos.x, Math.min(pos.y, waterSurfaceY), pos.z);
+                }
                 this.creature.getMoveHelper().setMoveTo(pos.x, pos.y, pos.z, this.speed);
             }
         }

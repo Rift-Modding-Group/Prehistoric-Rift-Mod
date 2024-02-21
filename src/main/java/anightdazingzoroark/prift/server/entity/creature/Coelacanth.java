@@ -18,7 +18,6 @@ public class Coelacanth extends RiftWaterCreature {
         this.maxCreatureHealth = 6D;
         this.setSize(0.5f, 1f);
         this.experienceValue = 3;
-        this.spawnableBlock = Blocks.WATER;
         this.speed = 0.5D;
     }
 
@@ -30,10 +29,6 @@ public class Coelacanth extends RiftWaterCreature {
 
     @Override
     public void resetParts(float scale) {}
-
-    public boolean getCanSpawnHere() {
-        return this.world.getBlockState(this.getPosition()).getMaterial() == Material.WATER;
-    }
 
     @Override
     public boolean canDoHerding() {

@@ -951,7 +951,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void setHerdLeader(RiftCreature creature) {
-        this.dataManager.set(HERD_LEADER_UUID, creature.getUniqueID().toString());
+        if (creature != null) this.dataManager.set(HERD_LEADER_UUID, creature.getUniqueID().toString());
+        else this.dataManager.set(HERD_LEADER_UUID, "");
     }
 
     public void setHerdLeader(UUID uuid) {
@@ -1567,7 +1568,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 //for surface mobs
                 this.stepHeight = 0.5F;
                 this.jumpMovementFactor = 0.02F;
-                if (this.isInWater() && this.isFloating && forward > 0 && this.isServerWorld()) {
+                if (this.isInWater() && this.isFloating && forward > 0) {
                     if (this.bodyPart != null) {
                         BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
                         BlockPos above = ahead.up();
@@ -1587,7 +1588,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
                     if (this.getAttackTarget() == null) this.motionY -= 0.005;
                 }
-                else if (this.isServerWorld()) super.travel(strafe, vertical, forward);
+                else if (!this.isInWater()) super.travel(strafe, vertical, forward);
             }
         }
     }

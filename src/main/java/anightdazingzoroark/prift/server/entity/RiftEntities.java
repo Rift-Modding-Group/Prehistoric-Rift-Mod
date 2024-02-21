@@ -2,6 +2,9 @@ package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.config.RiftConfigList;
+import anightdazingzoroark.prift.server.entity.creature.Coelacanth;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
@@ -9,7 +12,11 @@ import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.passive.EntitySquid;
+import net.minecraft.init.Biomes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
@@ -52,7 +59,7 @@ public class RiftEntities {
     public static void registerSpawn() {
         for (int x = 0; x < RiftConfigList.values().length; x++) {
             if (x > 0 && RiftConfigList.values()[x].getConfigInstance().canSpawn) {
-                Class creatureClass = RiftConfigList.values()[x].getCreatureClass();
+                Class<? extends RiftCreature> creatureClass = RiftConfigList.values()[x].getCreatureClass();
                 for (int y = 0; y < RiftConfigList.values()[x].getConfigInstance().spawnPlaces.length; y++) {
                     String entry = RiftConfigList.values()[x].getConfigInstance().spawnPlaces[y];
                     int partOne = entry.indexOf(":");
@@ -73,7 +80,7 @@ public class RiftEntities {
                             int maxCount = Integer.parseInt(entry.substring(partFive + 1, partSix));
                             for (Biome biome : Biome.REGISTRY) {
                                 if (biome.getRegistryName().toString().equals(biomeIdentifier)) {
-                                    biome.getSpawnableList(EnumCreatureType.valueOf(category)).add(new Biome.SpawnListEntry(creatureClass, spawnWeight, minCount, maxCount));
+                                    EntityRegistry.addSpawn(creatureClass, spawnWeight, minCount, maxCount, EnumCreatureType.valueOf(category), biome);
                                 }
                             }
                         }
@@ -86,7 +93,7 @@ public class RiftEntities {
                             String category = entry.substring(partFive + 1);
                             for (Biome biome : Biome.REGISTRY) {
                                 if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(biomeTag))) {
-                                    biome.getSpawnableList(EnumCreatureType.valueOf(category)).add(new Biome.SpawnListEntry(creatureClass, spawnWeight, minCount, maxCount));
+                                    EntityRegistry.addSpawn(creatureClass, spawnWeight, minCount, maxCount, EnumCreatureType.valueOf(category), biome);
                                 }
                             }
                         }
@@ -97,13 +104,7 @@ public class RiftEntities {
                             String biomeIdentifier = entry.substring(partOne + 1);
                             for (Biome biome : Biome.REGISTRY) {
                                 if (biome.getRegistryName().equals(biomeIdentifier)) {
-                                    Iterator<Biome.SpawnListEntry> iterator = biome.getSpawnableList(EnumCreatureType.CREATURE).iterator();
-                                    while(iterator.hasNext()) {
-                                        Biome.SpawnListEntry toRemove = iterator.next();
-                                        if (toRemove.entityClass.equals(creatureClass)) {
-                                            iterator.remove();
-                                        }
-                                    }
+                                    for (EnumCreatureType creatureType : EnumCreatureType.values())  EntityRegistry.removeSpawn(creatureClass, creatureType, biome);
                                 }
                             }
                         }
@@ -111,23 +112,16 @@ public class RiftEntities {
                             String biomeTag = entry.substring(partOne + 1);
                             for (Biome biome : Biome.REGISTRY) {
                                 if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(biomeTag))) {
-                                    Iterator<Biome.SpawnListEntry> iterator = biome.getSpawnableList(EnumCreatureType.CREATURE).iterator();
-                                    while(iterator.hasNext()) {
-                                        Biome.SpawnListEntry toRemove = iterator.next();
-                                        if (toRemove.entityClass.equals(creatureClass)) {
-                                            iterator.remove();
-                                        }
-                                    }
+                                    for (EnumCreatureType creatureType : EnumCreatureType.values())  EntityRegistry.removeSpawn(creatureClass, creatureType, biome);
                                 }
                             }
                         }
                     }
                 }
+                if (RiftConfigList.values()[x].getIsWaterCreature()) {
+                    EntitySpawnPlacementRegistry.setPlacementType(creatureClass, EntityLiving.SpawnPlacementType.IN_WATER);
+                }
             }
         }
-//        for (Biome biome : Biome.REGISTRY) {
-//            System.out.println(biome.getSpawnableList(EnumCreatureType.CREATURE));
-//            System.out.println(biome.getSpawnableList(EnumCreatureType.WATER_CREATURE));
-//        }
     }
 }
