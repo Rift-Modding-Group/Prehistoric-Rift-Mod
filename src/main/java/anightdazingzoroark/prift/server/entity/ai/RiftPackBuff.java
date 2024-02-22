@@ -28,7 +28,7 @@ public class RiftPackBuff extends EntityAIBase {
         if (this.attacker.isTamed()) return false;
         else if (this.attacker.getAttackTarget() == null) return false;
         else {
-            this.packMembers = this.attacker.world.getEntitiesWithinAABB(this.attacker.getClass(), this.attacker.getHerdBoundingBox(), new Predicate<RiftCreature>() {
+            this.packMembers = this.attacker.world.getEntitiesWithinAABB(this.attacker.getClass(), this.attacker.herdBoundingBox(), new Predicate<RiftCreature>() {
                 @Override
                 public boolean apply(@Nullable RiftCreature input) {
                     return !input.isTamed();

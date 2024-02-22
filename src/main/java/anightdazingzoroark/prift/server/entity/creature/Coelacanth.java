@@ -22,7 +22,7 @@ public class Coelacanth extends RiftWaterCreature {
     }
 
     protected void initEntityAI() {
-        this.tasks.addTask(2, new RiftHerdDistanceFromOtherMembers(this, 1D));
+//        this.tasks.addTask(2, new RiftHerdDistanceFromOtherMembers(this, 1D));
         this.tasks.addTask(3, new RiftHerdMemberFollow(this, 3D, 1D, 1D));
         this.tasks.addTask(4, new RiftWanderWater(this, 1.0D));
     }

@@ -86,23 +86,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         return true;
     }
 
-    public void manageHerding() {
-        this.herdCheckCountdown--;
-        if (this.herdCheckCountdown <= 0) {
-            //add members to herd
-            //should modify this so that it can only follow mobs that it can path to
-            List<RiftWaterCreature> potentialHerders = this.world.getEntitiesWithinAABB(this.getClass(), this.getHerdBoundingBox(), new Predicate<RiftWaterCreature>() {
-                @Override
-                public boolean apply(@Nullable RiftWaterCreature input) {
-                    return !input.isTamed() && input.isInWater();
-                }
-            });
-            int herdLeaderId = Collections.min(potentialHerders.stream().map(RiftWaterCreature::getEntityId).collect(Collectors.toList()));
-            this.setHerdLeader((RiftCreature) this.world.getEntityByID(herdLeaderId));
-            this.herdCheckCountdown = RiftUtil.randomInRange(10, 15) * 20;
-        }
-    }
-
     protected PathNavigate createNavigator(World worldIn) {
         return new PathNavigateRiftWaterCreature(this, worldIn);
     }

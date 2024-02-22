@@ -15,6 +15,9 @@ public class RiftCreaturePart extends PartEntity {
     }
 
     @Override
+    public void collideWithNearbyEntities() {}
+
+    @Override
     public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
         if (!this.parent.isBeingRidden()) {
             if (this.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftMultipartInteract((RiftCreature) this.parent, -1));

@@ -26,12 +26,10 @@ public class RiftControlledPackBuff extends EntityAIBase {
     public boolean shouldExecute() {
         if (this.creature.isTamed()) {
             UUID ownerID =  this.creature.getOwnerId();
-            this.packMembers = this.creature.world.getEntitiesWithinAABB(this.creature.getClass(), this.creature.getHerdBoundingBox(), new Predicate<RiftCreature>() {
+            this.packMembers = this.creature.world.getEntitiesWithinAABB(this.creature.getClass(), this.creature.herdBoundingBox(), new Predicate<RiftCreature>() {
                 @Override
                 public boolean apply(@Nullable RiftCreature input) {
-                    if (input.isTamed()) {
-                        return ownerID.equals(input.getOwnerId());
-                    }
+                    if (input.isTamed()) return ownerID.equals(input.getOwnerId());
                     return false;
                 }
             });

@@ -6,74 +6,64 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNodeType;
 
+import java.util.List;
+import java.util.Map;
+
 public class RiftHerdMemberFollow extends EntityAIBase {
     private RiftCreature creature;
+    protected int navigateTimer;
+
     private double minDist;
     private double minDistDoubled;
     private double maxDist;
     private double maxDistDoubled;
     private double speedMod;
     private RiftCreature herdLeader;
-    private final PathNavigate pathfinder;
+//    private final PathNavigate pathfinder;
     private int timeToRecalcPath;
     private float oldWaterCost;
 
     public RiftHerdMemberFollow(RiftCreature creature, double minDist, double maxDist, double speedMod) {
         this.creature = creature;
-        this.minDist = minDist;
-        this.minDistDoubled = minDist * minDist;
-        this.maxDist = maxDist;
-        this.maxDistDoubled = maxDist * maxDist;
-        this.speedMod = speedMod;
-        this.pathfinder = creature.getNavigator();
+//        this.minDist = minDist;
+//        this.minDistDoubled = minDist * minDist;
+//        this.maxDist = maxDist;
+//        this.maxDistDoubled = maxDist * maxDist;
+//        this.speedMod = speedMod;
+//        this.pathfinder = creature.getNavigator();
         this.setMutexBits(3);
     }
 
+    protected int getInitialFollowDelay() { return 200 + this.creature.getRNG().nextInt(200) % 20; }
+
     @Override
     public boolean shouldExecute() {
-        if (!this.creature.canDoHerding()) {
-            return false;
+        if (this.creature.canDoHerding() && !this.creature.isTamed()) {
+            final List<RiftCreature> nearbyCreatures = this.creature.world.getEntitiesWithinAABB(this.creature.getClass(), this.creature.herdBoundingBox(), entity -> entity.canAddToHerd() || !entity.hasHerdLeader());
+            final RiftCreature herdLeader = nearbyCreatures.stream().filter(RiftCreature::canAddToHerd).findAny().orElse(this.creature);
+            herdLeader.addCreatureToHerd(nearbyCreatures.stream().filter(RiftCreature::hasNoHerdLeader));
+            return this.creature.hasHerdLeader() && !this.creature.isTamed();
         }
-        else if (this.creature.isHerdLeader()) {
-            return false;
-        }
-        else if (this.creature.getHerdLeader() != null) {
-            if (this.creature.getDistanceSq(this.creature.getHerdLeader()) <= this.minDistDoubled) {
-                return false;
-            }
-            else {
-                this.herdLeader = this.creature.getHerdLeader();
-                return true;
-            }
-        }
-        else {
-            return false;
-        }
+        else return false;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return !this.creature.isHerdLeader() && !this.pathfinder.noPath() && this.creature.getDistance(this.creature.getHerdLeader()) <= this.minDistDoubled;
+        return this.creature.hasHerdLeader() && this.creature.isNearHerdLeader();
     }
 
     public void startExecuting() {
-        this.timeToRecalcPath = 0;
-        this.oldWaterCost = this.creature.getPathPriority(PathNodeType.WATER);
-        if (!(this.creature instanceof RiftWaterCreature)) this.creature.setPathPriority(PathNodeType.WATER, 0.0F);
+        this.navigateTimer = 0;
     }
 
     public void resetTask() {
-        this.herdLeader = null;
-        this.pathfinder.clearPath();
-        this.creature.setPathPriority(PathNodeType.WATER, this.oldWaterCost);
+        this.creature.separateFromHerdLeader();
     }
 
     public void updateTask() {
-        this.creature.getLookHelper().setLookPositionWithEntity(this.herdLeader, (float) this.creature.getHerdDist(), (float)this.creature.getVerticalFaceSpeed());
-
-        if (--this.timeToRecalcPath <= 0) {
-            this.timeToRecalcPath = 10;
-            this.pathfinder.tryMoveToEntityLiving(this.herdLeader, this.speedMod);
+        if (--this.navigateTimer < 0) {
+            this.navigateTimer = -Math.floorDiv(10, 2);
+            this.creature.followLeader();
         }
     }
 }

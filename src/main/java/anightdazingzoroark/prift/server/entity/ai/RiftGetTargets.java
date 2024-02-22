@@ -60,7 +60,6 @@ public class RiftGetTargets extends EntityAITarget {
     public boolean shouldExecute() {
         RiftCreature creature = (RiftCreature) this.taskOwner;
         if (creature.isTamed()) return false;
-        else if (creature.canDoHerding() && !creature.isHerdLeader() && !creature.getHerdLeader().equals(creature)) return false;
         else {
             List<EntityLivingBase> list = new ArrayList<>();
             List<String> baseTargetList = new ArrayList<>(Arrays.asList(GeneralConfig.universalCarnivoreTargets));
@@ -102,9 +101,10 @@ public class RiftGetTargets extends EntityAITarget {
     }
 
     public void startExecuting() {
+        RiftCreature creature = (RiftCreature)this.taskOwner;
         this.taskOwner.setAttackTarget(this.targetEntity);
-        if (this.alertOthers) {
-            List<RiftCreature> allyList = this.taskOwner.world.getEntitiesWithinAABB(((RiftCreature)this.taskOwner).getClass(), ((RiftCreature)this.taskOwner).getHerdBoundingBox(), new Predicate<RiftCreature>() {
+        if (this.alertOthers && creature.canDoHerding() && creature.isHerdLeader()) {
+            List<RiftCreature> allyList = creature.world.getEntitiesWithinAABB(creature.getClass(), creature.herdBoundingBox(), new Predicate<RiftCreature>() {
                 @Override
                 public boolean apply(@Nullable RiftCreature input) {
                     return !input.isTamed();
@@ -127,12 +127,8 @@ public class RiftGetTargets extends EntityAITarget {
             double d0 = this.entity.getDistanceSq(p_compare_1_);
             double d1 = this.entity.getDistanceSq(p_compare_2_);
 
-            if (d0 < d1) {
-                return -1;
-            }
-            else {
-                return d0 > d1 ? 1 : 0;
-            }
+            if (d0 < d1) return -1;
+            else return d0 > d1 ? 1 : 0;
         }
     }
 }

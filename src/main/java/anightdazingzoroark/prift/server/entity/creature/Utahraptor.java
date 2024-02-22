@@ -101,7 +101,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 1D));
+//        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 1D));
         this.tasks.addTask(9, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
         this.tasks.addTask(10, new RiftWander(this, 1.0D));
         this.tasks.addTask(11, new RiftLookAround(this));
@@ -335,7 +335,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         if (control == 1) {
             if (!this.isActing()) {
                 UUID ownerID =  this.getOwnerId();
-                List<Utahraptor> tamedPackList = this.world.getEntitiesWithinAABB(Utahraptor.class, this.getHerdBoundingBox(), new Predicate<RiftCreature>() {
+                List<Utahraptor> tamedPackList = this.world.getEntitiesWithinAABB(Utahraptor.class, this.herdBoundingBox(), new Predicate<RiftCreature>() {
                     @Override
                     public boolean apply(@Nullable RiftCreature input) {
                         if (input.isTamed()) {

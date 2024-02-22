@@ -96,7 +96,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
         this.tasks.addTask(3, new RiftParasaurolophusBlow(this));
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(5, new RiftHerdDistanceFromOtherMembers(this, 1D));
+//        this.tasks.addTask(5, new RiftHerdDistanceFromOtherMembers(this, 1D));
         this.tasks.addTask(6, new RiftHerdMemberFollow(this, 8D, 4D, 1D));
         this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(8, new RiftWander(this, 1.0D));

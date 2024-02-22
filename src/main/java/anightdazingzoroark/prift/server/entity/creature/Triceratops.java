@@ -74,7 +74,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         this.tasks.addTask(3, new RiftChargeAttack(this, 1.75f, 0.24f, 4f, 8f));
         this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.72F, 0.48F));
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(5, new RiftHerdDistanceFromOtherMembers(this, 3D));
+//        this.tasks.addTask(5, new RiftHerdDistanceFromOtherMembers(this, 3D));
         this.tasks.addTask(6, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
         this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(8, new RiftWander(this, 1.0D));
