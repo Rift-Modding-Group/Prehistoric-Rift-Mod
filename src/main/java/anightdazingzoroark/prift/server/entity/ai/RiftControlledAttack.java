@@ -15,6 +15,7 @@ public class RiftControlledAttack extends EntityAIBase  {
         //attackAnimLength and attackAnimTime are in seconds, will convert to ticks automatically here
         this.attackAnimLength = (int)(attackAnimLength * 20);
         this.attackAnimTime = (int)(attackAnimTime * 20);
+        this.setMutexBits(3);
     }
 
     @Override

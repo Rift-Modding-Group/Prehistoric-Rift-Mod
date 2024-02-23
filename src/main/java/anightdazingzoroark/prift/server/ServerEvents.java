@@ -308,6 +308,15 @@ public class ServerEvents {
                 properties.ticksUntilStopBleeding--;
             }
             if (properties.ticksUntilStopBleeding <= 0) properties.resetBleeding();
+
+            RiftCreature creature = null;
+            if (entity instanceof RiftCreature) creature = (RiftCreature) entity;
+            if (creature != null) {
+                //make sure that if a creature's target dies, their path is cleared
+                if (creature.getAttackTarget() != null) {
+                    if (!creature.getAttackTarget().isEntityAlive()) creature.getNavigator().clearPath();
+                }
+            }
         }
         else {
             //manage swing disable when riding creature

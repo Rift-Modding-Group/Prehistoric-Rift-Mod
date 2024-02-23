@@ -15,6 +15,7 @@ entity.utahraptor.name=Utahraptor
 entity.apatosaurus.name=Apatosaurus
 entity.parasaurolophus.name=Parasaurolophus
 entity.dimetrodon.name=Dimetrodon
+entity.coelacanth.name=Coelacanth
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon

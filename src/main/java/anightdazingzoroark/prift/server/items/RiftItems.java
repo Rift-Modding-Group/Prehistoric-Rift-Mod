@@ -31,6 +31,7 @@ public class RiftItems {
     public static Item COOKED_DODO_MEAT;
     public static Item RAW_HADROSAUR_MEAT;
     public static Item COOKED_HADROSAUR_MEAT;
+    public static Item RAW_COELACANTH;
     public static Item TRUFFLE;
     public static Item FIBER_BAR;
     public static Item BASIC_HERBIVORE_MEAL;
@@ -52,6 +53,7 @@ public class RiftItems {
     public static Item APATOSAURUS_VERTEBRAE;
     public static Item PARASAUROLOPHUS_HORN;
     public static Item DIMETRODON_SAIL;
+    public static Item COELACANTH_SCALES;
 
     public static Item APATOSAURUS_PLATFORM;
     public static Item CANNON;
@@ -70,10 +72,11 @@ public class RiftItems {
         COOKED_EXOTIC_MEAT = riftFoodItem("cooked_exotic_meat", 8, 0.6f, true);
         RAW_FIBROUS_MEAT = riftFoodItem("raw_fibrous_meat", 1, 0.45f, true);
         COOKED_FIBROUS_MEAT = riftFibrousFoodItem("cooked_fibrous_meat", 2, true);
-        RAW_DODO_MEAT = riftSpecialMeatItem("raw_dodo_meat", 2, 0.3f, false, null);
-        COOKED_DODO_MEAT = riftSpecialMeatItem("cooked_dodo_meat", 4, 0.6f, true, new PotionEffect(MobEffects.ABSORPTION, 600, 2));
-        RAW_HADROSAUR_MEAT = riftSpecialMeatItem("raw_hadrosaur_meat", 3, 0.3f, false,  null);
-        COOKED_HADROSAUR_MEAT = riftSpecialMeatItem("cooked_hadrosaur_meat", 4, 0.6f, true, new PotionEffect(MobEffects.RESISTANCE, 600, 1));
+        RAW_DODO_MEAT = riftSpecialMeatItem("raw_dodo_meat", 2, 0.3f, new PotionEffect(MobEffects.HUNGER, 200));
+        COOKED_DODO_MEAT = riftSpecialMeatItem("cooked_dodo_meat", 4, 0.6f, new PotionEffect(MobEffects.ABSORPTION, 600, 2));
+        RAW_HADROSAUR_MEAT = riftSpecialMeatItem("raw_hadrosaur_meat", 3, 0.3f,  new PotionEffect(MobEffects.HUNGER, 200));
+        COOKED_HADROSAUR_MEAT = riftSpecialMeatItem("cooked_hadrosaur_meat", 4, 0.6f, new PotionEffect(MobEffects.RESISTANCE, 600, 1));
+        RAW_COELACANTH = riftSpecialMeatItem("raw_coelacanth", 1, 0.3f, new PotionEffect(MobEffects.WITHER, 100, 0));
         BASIC_HERBIVORE_MEAL = riftGenericItem("basic_herbivore_meal", true);
         BASIC_CARNIVORE_MEAL = riftGenericItem("basic_carnivore_meal", true);
         ADVANCED_HERBIVORE_MEAL = riftGlintedItem("advanced_herbivore_meal", true);
@@ -97,6 +100,7 @@ public class RiftItems {
         APATOSAURUS_VERTEBRAE = riftGenericItem("apatosaurus_vertebrae", true);
         PARASAUROLOPHUS_HORN = riftGenericItem("parasaurolophus_horn", true);
         DIMETRODON_SAIL = riftGenericItem("dimetrodon_sail", true);
+        COELACANTH_SCALES = riftGenericItem("coelacanth_scales", true);
 
         APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
         CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);
@@ -151,8 +155,8 @@ public class RiftItems {
         return registerItem(item, registryName);
     }
 
-    public static Item riftSpecialMeatItem(String registryName, int amount, float saturation, boolean isCooked, PotionEffect eatenEffect) {
-        final RiftSpecialMeatItem item = new RiftSpecialMeatItem(amount, saturation, isCooked, eatenEffect);
+    public static Item riftSpecialMeatItem(String registryName, int amount, float saturation, PotionEffect eatenEffect) {
+        final RiftSpecialMeatItem item = new RiftSpecialMeatItem(amount, saturation, eatenEffect);
         item.setAlwaysEdible();
         return registerItem(item, registryName);
     }

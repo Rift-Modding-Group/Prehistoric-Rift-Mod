@@ -272,6 +272,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.canDoHerding()) this.manageHerding();
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
+        if (this.isServerWorld()) System.out.println(this.getEntityId()+", leader: "+this.herdLeader);
     }
 
     @SideOnly(Side.CLIENT)
@@ -975,13 +976,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         stream.limit(this.maxHerdSize() - this.herdSize).filter(creature -> creature != this).forEach(creature -> creature.addToHerdLeader(this));
     }
 
+    public double followRange() {
+        return 0.5D;
+    }
+
     public void followLeader() {
         if (this.hasHerdLeader()) {
-            if (!this.getEntityBoundingBox().intersects(this.herdLeader.getEntityBoundingBox().grow(4.5D))) {
-                System.out.println("follow");
-                this.navigator.tryMoveToEntityLiving(this.herdLeader, 1);
+            if (!this.getEntityBoundingBox().intersects(this.herdLeader.getEntityBoundingBox().grow(this.followRange()))) {
+                this.getMoveHelper().setMoveTo(this.herdLeader.posX, this.herdLeader.posY, this.herdLeader.posZ, 1D);
+//                this.navigator.tryMoveToEntityLiving(this.herdLeader, 1);
             }
         }
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
     }
 
     public int maxHerdSize() {
@@ -1556,32 +1565,30 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else {
-            if (this.isServerWorld()) {
-                //for surface mobs
-                this.stepHeight = 0.5F;
-                this.jumpMovementFactor = 0.02F;
-                if (this.isInWater() && this.isFloating && forward > 0) {
-                    if (this.bodyPart != null) {
-                        BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
-                        BlockPos above = ahead.up();
-                        if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
-                            this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
-                        }
+            //for surface mobs
+            this.stepHeight = 0.5F;
+            this.jumpMovementFactor = 0.02F;
+            if (this.isInWater() && this.isFloating && forward > 0) {
+                if (this.bodyPart != null) {
+                    BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
+                    BlockPos above = ahead.up();
+                    if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                        this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
                     }
                 }
-                //for underwater mobs
-                else if (this.isInWater() && !this.isFloating) {
-                    this.moveRelative(strafe, vertical, forward, 0.01f);
-                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-
-                    this.motionX *= 0.9;
-                    this.motionY *= 0.9;
-                    this.motionZ *= 0.9;
-
-                    if (this.getAttackTarget() == null) this.motionY -= 0.005;
-                }
-                else if (!this.isInWater()) super.travel(strafe, vertical, forward);
             }
+            //for underwater mobs
+            else if (this.isInWater() && !this.isFloating) {
+                this.moveRelative(strafe, vertical, forward, 0.01f);
+                this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+
+                this.motionX *= 0.9;
+                this.motionY *= 0.9;
+                this.motionZ *= 0.9;
+
+                if (this.getAttackTarget() == null) this.motionY -= 0.005;
+            }
+            else if (!this.isInWater()) super.travel(strafe, vertical, forward);
         }
     }
 

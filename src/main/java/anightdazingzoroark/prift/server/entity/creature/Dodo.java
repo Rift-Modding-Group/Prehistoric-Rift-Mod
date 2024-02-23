@@ -40,8 +40,8 @@ public class Dodo extends RiftCreature {
 
     protected void initEntityAI() {
         this.tasks.addTask(1, new RiftMate(this));
-//        this.tasks.addTask(2, new RiftHerdDistanceFromOtherMembers(this, 1D));
-        this.tasks.addTask(3, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
+        this.tasks.addTask(2, new RiftHerdDistanceFromOtherMembers(this, 1.5D));
+        this.tasks.addTask(3, new RiftHerdMemberFollow(this));
         this.tasks.addTask(4, new RiftWander(this, 1.0D));
         this.tasks.addTask(5, new RiftLookAround(this));
     }
@@ -73,6 +73,10 @@ public class Dodo extends RiftCreature {
     @Override
     public boolean canDoHerding() {
         return true;
+    }
+
+    public double followRange() {
+        return 3D;
     }
 
     @Override

@@ -21,6 +21,7 @@ public class RiftPackBuff extends EntityAIBase {
         this.attacker = attackerIn;
         this.animTime = (int)(animTimeIn * 20);
         this.cooldown = (int)(cooldownIn * 20);
+//        this.setMutexBits(3);
     }
 
     @Override

@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -101,8 +102,8 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
-//        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 1D));
-        this.tasks.addTask(9, new RiftHerdMemberFollow(this, 10D, 2D, 1D));
+        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 1D));
+        this.tasks.addTask(9, new RiftHerdMemberFollow(this));
         this.tasks.addTask(10, new RiftWander(this, 1.0D));
         this.tasks.addTask(11, new RiftLookAround(this));
     }
@@ -202,7 +203,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     public void fall(float distance, float damageMultiplier) {}
 
     protected PathNavigate createNavigator(World worldIn) {
-        return new PathNavigateClimber(this, worldIn);
+        return new PathNavigateRiftClimber(this, worldIn);
     }
 
     private void leapToControlledTargetLoc() {
@@ -248,6 +249,10 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
+    }
+
+    public double followRange() {
+        return 4D;
     }
 
     @Override
@@ -416,7 +421,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.walk", true));
             return PlayState.CONTINUE;
         }
-        else if (!this.onGround && !this.isSitting()) {
+        else if (event.isMoving() && !this.onGround && !this.isSitting()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.pounce", true));
             return PlayState.CONTINUE;
         }

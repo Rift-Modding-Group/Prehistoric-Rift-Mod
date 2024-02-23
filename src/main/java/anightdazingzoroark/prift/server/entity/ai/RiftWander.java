@@ -23,11 +23,15 @@ public class RiftWander extends EntityAIWander {
             if (this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden()) return super.shouldExecute();
             else return false;
         }
-        return super.shouldExecute();
+        else {
+            if (this.creature.isHerdLeader()) return super.shouldExecute();
+            else if (!this.creature.isHerdLeader() && !this.creature.hasHerdLeader()) return super.shouldExecute();
+            else return false;
+        }
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.creature.getEnergy() > 0 && super.shouldContinueExecuting();
+        return this.creature.getEnergy() > 0 && !this.creature.hasHerdLeader() && super.shouldContinueExecuting();
     }
 }

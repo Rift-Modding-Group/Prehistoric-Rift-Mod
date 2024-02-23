@@ -11,30 +11,11 @@ import java.util.Map;
 
 public class RiftHerdMemberFollow extends EntityAIBase {
     private RiftCreature creature;
-    protected int navigateTimer;
 
-    private double minDist;
-    private double minDistDoubled;
-    private double maxDist;
-    private double maxDistDoubled;
-    private double speedMod;
-    private RiftCreature herdLeader;
-//    private final PathNavigate pathfinder;
-    private int timeToRecalcPath;
-    private float oldWaterCost;
-
-    public RiftHerdMemberFollow(RiftCreature creature, double minDist, double maxDist, double speedMod) {
+    public RiftHerdMemberFollow(RiftCreature creature) {
         this.creature = creature;
-//        this.minDist = minDist;
-//        this.minDistDoubled = minDist * minDist;
-//        this.maxDist = maxDist;
-//        this.maxDistDoubled = maxDist * maxDist;
-//        this.speedMod = speedMod;
-//        this.pathfinder = creature.getNavigator();
         this.setMutexBits(3);
     }
-
-    protected int getInitialFollowDelay() { return 200 + this.creature.getRNG().nextInt(200) % 20; }
 
     @Override
     public boolean shouldExecute() {
@@ -52,18 +33,11 @@ public class RiftHerdMemberFollow extends EntityAIBase {
         return this.creature.hasHerdLeader() && this.creature.isNearHerdLeader();
     }
 
-    public void startExecuting() {
-        this.navigateTimer = 0;
-    }
-
     public void resetTask() {
         this.creature.separateFromHerdLeader();
     }
 
     public void updateTask() {
-        if (--this.navigateTimer < 0) {
-            this.navigateTimer = -Math.floorDiv(10, 2);
-            this.creature.followLeader();
-        }
+        if (!this.creature.isHerdLeader() && this.creature.hasHerdLeader()) this.creature.followLeader();
     }
 }

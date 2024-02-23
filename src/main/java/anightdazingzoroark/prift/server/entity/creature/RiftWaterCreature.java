@@ -93,4 +93,13 @@ public abstract class RiftWaterCreature extends RiftCreature {
     protected boolean canTriggerWalking() {
         return false;
     }
+
+    //herding modifications
+    public void followLeader() {
+        if (this.hasHerdLeader()) {
+            if (!this.getEntityBoundingBox().intersects(this.herdLeader.getEntityBoundingBox().grow(this.followRange()))) {
+                this.navigator.tryMoveToEntityLiving(this.herdLeader, 1D);
+            }
+        }
+    }
 }
