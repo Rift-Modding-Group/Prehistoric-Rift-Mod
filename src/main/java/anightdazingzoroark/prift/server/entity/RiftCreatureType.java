@@ -21,7 +21,8 @@ public enum RiftCreatureType {
     APATOSAURUS(Apatosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.VERY_SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.STONE, ApatosaurusRenderer::new, 3160621, 16748800, 450, 1, EggTemperature.VERY_WARM),
     PARASAUROLOPHUS(Parasaurolophus.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, ParasaurolophusRenderer::new, 10055190, 8920579, 300, 1, EggTemperature.COLD),
     DIMETRODON(Dimetrodon.class, CreatureCategory.MAMMAL, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, null, DimetrodonRenderer::new, 10968581, 13198105, 90, 0.5f, EggTemperature.NEUTRAL),
-    COELACANTH(Coelacanth.class, CreatureCategory.FISH, CreatureDiet.INSECTIVORE, null, null, null, CoelacanthRenderer::new, 1329530, 1857680, 0, 0, null);
+    COELACANTH(Coelacanth.class, CreatureCategory.FISH, CreatureDiet.INSECTIVORE, null, null, null, CoelacanthRenderer::new, 1329530, 1857680, 0, 0, null),
+    MEGAPIRANHA(Megapiranha.class, CreatureCategory.FISH, CreatureDiet.CARNIVORE, null, null, null, MegapiranhaRenderer::new, 8421504, 10226700, 0, 0, null);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;

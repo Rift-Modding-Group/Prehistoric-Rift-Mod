@@ -3,31 +3,68 @@
 	"animations": {
 		"animation.coelacanth.move": {
 			"loop": true,
-			"anim_time_update": "query.modified_distance_moved",
+			"animation_length": 0.96,
 			"bones": {
 				"bodyFront": {
-					"rotation": [0, "math.sin(query.anim_time * 30) * 5", 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.24": [0, 7.5, 0],
+						"0.48": [0, 0, 0],
+						"0.72": [0, -7.5, 0],
+						"0.96": [0, 0, 0]
+					}
 				},
 				"bodyBack": {
-					"rotation": [0, "math.sin(query.anim_time * 30) * -5", 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.24": [0, -7.5, 0],
+						"0.48": [0, 0, 0],
+						"0.72": [0, 7.5, 0],
+						"0.96": [0, 0, 0]
+					}
 				},
 				"tail": {
-					"rotation": [0, "math.sin(query.anim_time * 30) * -5", 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.24": [0, -7.5, 0],
+						"0.48": [0, 0, 0],
+						"0.72": [0, 7.5, 0],
+						"0.96": [0, 0, 0]
+					}
 				}
 			}
 		},
 		"animation.coelacanth.flop": {
 			"loop": true,
+			"animation_length": 0.32,
 			"bones": {
 				"bodyFront": {
-					"rotation": [0, "math.sin(query.anim_time * 360) * 5", -90],
+					"rotation": {
+						"0.0": [0, 0, -90],
+						"0.08": [0, 5, -90],
+						"0.16": [0, 0, -90],
+						"0.24": [0, -5, -90],
+						"0.32": [0, 0, -90]
+					},
 					"position": [0, -7, 0]
 				},
 				"bodyBack": {
-					"rotation": [0, "math.sin(query.anim_time * 360) * -5", 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.08": [0, -5, 0],
+						"0.16": [0, 0, 0],
+						"0.24": [0, 5, 0],
+						"0.32": [0, 0, 0]
+					}
 				},
 				"tail": {
-					"rotation": [0, "math.sin(query.anim_time * 360) * -5", 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.08": [0, -5, 0],
+						"0.16": [0, 0, 0],
+						"0.24": [0, 5, 0],
+						"0.32": [0, 0, 0]
+					}
 				}
 			}
 		}

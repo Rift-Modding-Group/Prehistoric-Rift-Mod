@@ -272,7 +272,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.canDoHerding()) this.manageHerding();
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
-        if (this.isServerWorld()) System.out.println(this.getEntityId()+", leader: "+this.herdLeader);
     }
 
     @SideOnly(Side.CLIENT)
