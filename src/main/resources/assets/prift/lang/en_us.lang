@@ -16,6 +16,7 @@ entity.apatosaurus.name=Apatosaurus
 entity.parasaurolophus.name=Parasaurolophus
 entity.dimetrodon.name=Dimetrodon
 entity.coelacanth.name=Coelacanth
+entity.megapiranha.name=Megapiranha
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon
@@ -33,6 +34,9 @@ item.cooked_exotic_meat.name=Cooked Exotic Meat
 item.cooked_fibrous_meat.name=Cooked Fibrous Meat
 item.cooked_dodo_meat.name=Cooked Dodo Meat
 item.cooked_hadrosaur_meat.name=Cooked Hadrosaur Meat
+item.raw_coelacanth.name=Raw Coelacanth
+item.raw_megapiranha.name=Raw Megapiranha
+item.cooked_megapiranha_name=Cooked Megapiranha
 item.truffle.name=Truffle
 item.fiber_bar.name=Fiber Bar
 item.basic_herbivore_meal.name=Basic Herbivore Meal
@@ -54,6 +58,8 @@ item.utahraptor_claw.name=Utahraptor Claw
 item.apatosaurus_vertebrae.name=Apatosaurus Vertebrae
 item.parasaurolophus_horn.name=Parasaurolophus Horn
 item.dimetrodon_sail.name=Dimetrodon Sail
+item.coelacanth_scales.name=Coelacanth Scales
+item.megapiranha_scales.name=Megapiranha Scales
 
 itemGroup.prift_items=Prehistoric Rift Items
 

@@ -18,7 +18,8 @@ public enum RiftConfigList {
     APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class, false),
     PARASAUROLOPHUS(Parasaurolophus.class, ParasaurolophusConfig.class, false),
     DIMETRODON(Dimetrodon.class, DimetrodonConfig.class, false),
-    COELACANTH(Coelacanth.class, CoelacanthConfig.class, true);
+    COELACANTH(Coelacanth.class, CoelacanthConfig.class, true),
+    MEGAPIRANHA(Megapiranha.class, MegapiranhaConfig.class, true);
 
     private final Class<? extends RiftCreature> creatureClass;
     private final Class<? extends RiftWaterCreature> waterCreatureClass;

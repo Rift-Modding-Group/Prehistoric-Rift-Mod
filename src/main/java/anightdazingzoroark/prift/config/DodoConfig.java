@@ -15,7 +15,7 @@ public class DodoConfig extends RiftConfig {
     @Override
     public void init() {
         super.init();
-        maxHealth = config.getInt("Max health for this creature", "Creature Stats", initMaxHealth, 1, 69420, "Maximum health of this creature");
+        maxHealth = config.getInt("Max health for this creature", "Creature Stats", initMaxHealth, 1, 69420666, "Maximum health of this creature");
 
         dodoBreedingFood = config.getStringList("Dodo Breeding Food", "General", new String[]{"minecraft:wheat_seeds:0:0", "minecraft:pumpkin_seeds:0:0", "minecraft:melon_seeds:0:0", "minecraft:beetroot_seeds:0:0"}, "List of foods Dodos need to be fed in order to breed. To add items add \"<insert item's identifier here>:<insert data id here>:0\"");
     }

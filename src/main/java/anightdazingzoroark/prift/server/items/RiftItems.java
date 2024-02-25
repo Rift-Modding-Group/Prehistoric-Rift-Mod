@@ -32,6 +32,8 @@ public class RiftItems {
     public static Item RAW_HADROSAUR_MEAT;
     public static Item COOKED_HADROSAUR_MEAT;
     public static Item RAW_COELACANTH;
+    public static Item RAW_MEGAPIRANHA;
+    public static Item COOKED_MEGAPIRANHA;
     public static Item TRUFFLE;
     public static Item FIBER_BAR;
     public static Item BASIC_HERBIVORE_MEAL;
@@ -54,6 +56,7 @@ public class RiftItems {
     public static Item PARASAUROLOPHUS_HORN;
     public static Item DIMETRODON_SAIL;
     public static Item COELACANTH_SCALES;
+    public static Item MEGAPIRANHA_SCALES;
 
     public static Item APATOSAURUS_PLATFORM;
     public static Item CANNON;
@@ -77,6 +80,8 @@ public class RiftItems {
         RAW_HADROSAUR_MEAT = riftSpecialMeatItem("raw_hadrosaur_meat", 3, 0.3f,  new PotionEffect(MobEffects.HUNGER, 200));
         COOKED_HADROSAUR_MEAT = riftSpecialMeatItem("cooked_hadrosaur_meat", 4, 0.6f, new PotionEffect(MobEffects.RESISTANCE, 600, 1));
         RAW_COELACANTH = riftSpecialMeatItem("raw_coelacanth", 1, 0.3f, new PotionEffect(MobEffects.WITHER, 100, 0));
+        RAW_MEGAPIRANHA = riftSpecialMeatItem("raw_megapiranha", 2, 0.3f, new PotionEffect(MobEffects.HUNGER, 200));
+        COOKED_MEGAPIRANHA = riftSpecialMeatItem("cooked_megapiranha", 4, 0.6f, new PotionEffect(MobEffects.REGENERATION, 300));
         BASIC_HERBIVORE_MEAL = riftGenericItem("basic_herbivore_meal", true);
         BASIC_CARNIVORE_MEAL = riftGenericItem("basic_carnivore_meal", true);
         ADVANCED_HERBIVORE_MEAL = riftGlintedItem("advanced_herbivore_meal", true);
@@ -101,6 +106,7 @@ public class RiftItems {
         PARASAUROLOPHUS_HORN = riftGenericItem("parasaurolophus_horn", true);
         DIMETRODON_SAIL = riftGenericItem("dimetrodon_sail", true);
         COELACANTH_SCALES = riftGenericItem("coelacanth_scales", true);
+        MEGAPIRANHA_SCALES = riftGenericItem("megapiranha_scales", true);
 
         APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
         CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);

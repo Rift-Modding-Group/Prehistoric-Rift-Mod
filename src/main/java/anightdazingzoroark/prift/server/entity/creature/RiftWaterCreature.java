@@ -31,14 +31,8 @@ public abstract class RiftWaterCreature extends RiftCreature {
         super.onLivingUpdate();
 
         //flipping around on land
-        if (!this.isDead && !this.isInWater() && this.onGround && this.collidedVertically) {
-            this.motionX += 0.05 * (this.rand.nextFloat() * 2 - 1);
-            this.motionY += 0.5;
-            this.motionZ += 0.05 * (this.rand.nextFloat() * 2 - 1);
-
-            this.onGround = false;
-            this.isAirBorne = true;
-        }
+        this.flopOnLand();
+        this.targetOnLandManage();
     }
 
     public void onEntityUpdate() {
@@ -58,6 +52,23 @@ public abstract class RiftWaterCreature extends RiftCreature {
         else if (this.isAmphibious() && this.isEntityAlive()) this.setAir(300);
     }
 
+    private void targetOnLandManage() {
+        if (this.getAttackTarget() != null) {
+            if (!this.getAttackTarget().isInWater() && this.isInWater()) this.setAttackTarget(null);
+        }
+    }
+
+    private void flopOnLand() {
+        if (!this.isDead && !this.isInWater() && this.onGround && this.collidedVertically && this.canFlop()) {
+            this.motionX += 0.05 * (this.rand.nextFloat() * 2 - 1);
+            this.motionY += 0.5;
+            this.motionZ += 0.05 * (this.rand.nextFloat() * 2 - 1);
+
+            this.onGround = false;
+            this.isAirBorne = true;
+        }
+    }
+
     @Override
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
 
@@ -65,6 +76,10 @@ public abstract class RiftWaterCreature extends RiftCreature {
     public boolean canBreatheUnderwater()
     {
         return true;
+    }
+
+    public boolean canFlop() {
+        return false;
     }
 
     public abstract boolean isAmphibious();

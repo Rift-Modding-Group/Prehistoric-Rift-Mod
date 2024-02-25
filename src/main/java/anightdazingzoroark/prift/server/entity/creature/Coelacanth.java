@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.config.CoelacanthConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import net.minecraft.block.material.Material;
@@ -32,8 +33,8 @@ public class Coelacanth extends RiftWaterCreature {
 
     public Coelacanth(World worldIn) {
         super(worldIn, RiftCreatureType.COELACANTH);
-        this.minCreatureHealth = 6D;
-        this.maxCreatureHealth = 6D;
+        this.minCreatureHealth = CoelacanthConfig.getMinHealth();
+        this.maxCreatureHealth = CoelacanthConfig.getMaxHealth();
         this.setSize(0.5f, 1f);
         this.experienceValue = 3;
         this.speed = 0.5D;
@@ -101,6 +102,10 @@ public class Coelacanth extends RiftWaterCreature {
         return this.isInWater();
     }
 
+    public double followRange() {
+        return 2D;
+    }
+
     @Override
     public float getRenderSizeModifier() {
         return 1f;
@@ -132,6 +137,10 @@ public class Coelacanth extends RiftWaterCreature {
     @Override
     public boolean isAmphibious() {
         return false;
+    }
+
+    public boolean canFlop() {
+        return true;
     }
 
     @Override

@@ -22,8 +22,8 @@ public class ApatosaurusConfig extends RiftConfig {
     @Override
     public void init() {
         super.init();
-        maxHealth = config.getInt("Max health for this creature", "Creature Stats", initMaxHealth, 1, 69420, "Maximum health of this creature");
-        damage = config.getInt("Max damage for this creature", "Creature Stats", initDamage, 0, 69420, "Maximum (melee) damage of this creature");
+        maxHealth = config.getInt("Max health for this creature", "Creature Stats", initMaxHealth, 1, 69420666, "Maximum health of this creature");
+        damage = config.getInt("Max damage for this creature", "Creature Stats", initDamage, 0, 69420666, "Maximum (melee) damage of this creature");
 
         apatosaurusFavoriteFood = config.getStringList("Apatosaurus Favorite Food", "General", new String[]{"minecraft:leaves:-1:0.025", "minecraft:leaves2:-1:0.025"}, "List of foods Apatosauruses will eat (when tamed) or pick up when on the ground. To add items add \"<insert item's identifier here>:<insert data id here>:<insert percentage of health that will be healed upon consumption here>\"");
         apatosaurusBreedingFood = config.getStringList("Apatosaurus Breeding Food", "General", new String[]{"prift:basic_herbivore_meal:0:0", "prift:advanced_herbivore_meal:0:0"}, "List of foods Apatosauruses need to be fed in order to breed. To add items add \"<insert item's identifier here>:<insert data id here>:0\"");
