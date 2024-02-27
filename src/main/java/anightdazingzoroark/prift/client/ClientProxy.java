@@ -54,6 +54,7 @@ public class ClientProxy extends ServerProxy {
         registerItemRenderer();
         MinecraftForge.EVENT_BUS.register(new ClientEvents());
         this.particleSpawner = new RiftParticleSpawner();
+        RiftControls.init();
     }
 
     @SideOnly(Side.CLIENT)

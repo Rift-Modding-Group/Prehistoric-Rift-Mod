@@ -1,16 +1,37 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-import javax.annotation.Nullable;
+public class RiftWanderWater extends EntityAIWander {
+    private RiftWaterCreature waterCreature;
 
-public class RiftWanderWater extends RiftWander {
-    public RiftWanderWater(EntityCreature creatureIn, double speedIn) {
+    public RiftWanderWater(RiftWaterCreature creatureIn, double speedIn) {
         super(creatureIn, speedIn, 1);
+        this.waterCreature = creatureIn;
+    }
+
+    @Override
+    public boolean shouldExecute() {
+        if (this.waterCreature.isTamed()) {
+            if (this.waterCreature.getTameStatus() == TameStatusType.WANDER && !this.waterCreature.isBeingRidden() && this.waterCreature.isInWater()) return super.shouldExecute();
+            else return false;
+        }
+        else {
+            if (this.waterCreature.isHerdLeader() && this.waterCreature.isInWater()) return super.shouldExecute();
+            else if (!this.waterCreature.isHerdLeader() && !this.waterCreature.hasHerdLeader() && this.waterCreature.isInWater()) return super.shouldExecute();
+            else return false;
+        }
+    }
+
+    @Override
+    public boolean shouldContinueExecuting() {
+        return this.waterCreature.getEnergy() > 0 && !this.waterCreature.hasHerdLeader() && this.waterCreature.isInWater() && super.shouldContinueExecuting();
     }
 
     @Override

@@ -65,7 +65,7 @@ public class Dimetrodon extends RiftCreature {
         this.setSize(1f, 1f);
         this.favoriteFood = DimetrodonConfig.dimetrodonFavoriteFood;
         this.tamingFood = DimetrodonConfig.dimetrodonTamingFood;
-        this.experienceValue = 3;
+        this.experienceValue = 10;
         this.speed = 0.20D;
         this.isRideable = false;
         this.attackWidth = 3f;

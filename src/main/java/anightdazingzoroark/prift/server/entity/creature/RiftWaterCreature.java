@@ -1,18 +1,35 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.SSRCompatUtils;
+import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
+import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
+import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.ai.EntityMoveHelper;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemFood;
+import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.pathfinding.PathNavigateSwimmer;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -20,10 +37,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class RiftWaterCreature extends RiftCreature {
+    protected final float defaultWaterCost;
+    private final PathNavigateRiftWaterCreature waterNavigate;
+    private final PathNavigateGround landNavigate;
+    private boolean amphibiousInWater;
+
     public RiftWaterCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn, creatureType);
         this.moveHelper = new RiftWaterCreatureMoveHelper(this);
-        this.setPathPriority(PathNodeType.WATER, 0);
+        this.waterNavigate = new PathNavigateRiftWaterCreature(this, this.world);
+        this.landNavigate = new PathNavigateGround(this, this.world);
+        this.amphibiousInWater = true;
+//        this.setPathPriority(PathNodeType.WATER, 0f);
+        if (!this.isAmphibious()) {
+            this.setPathPriority(PathNodeType.WATER, 0f);
+            this.defaultWaterCost = 0F;
+        }
+        else this.defaultWaterCost = this.getPathPriority(PathNodeType.WATER);
+    }
+
+    @Override
+    protected void entityInit() {
+        super.entityInit();
     }
 
     @Override
@@ -31,7 +66,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
         super.onLivingUpdate();
 
         //flipping around on land
-        this.flopOnLand();
+        this.movementManager();
         this.targetOnLandManage();
     }
 
@@ -52,13 +87,98 @@ public abstract class RiftWaterCreature extends RiftCreature {
         else if (this.isAmphibious() && this.isEntityAlive()) this.setAir(300);
     }
 
-    private void targetOnLandManage() {
-        if (this.getAttackTarget() != null) {
-            if (!this.getAttackTarget().isInWater() && this.isInWater()) this.setAttackTarget(null);
+    @SideOnly(Side.CLIENT)
+    public void setControls() {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        if (this.isBeingRidden()) {
+            if (this.getControllingPassenger().equals(player)) {
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown()));
+
+                RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 0, RiftControls.mountAscend.isKeyDown() && !RiftControls.mountDescend.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 1, RiftControls.mountDescend.isKeyDown() && !RiftControls.mountAscend.isKeyDown()));
+
+                if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
+                    if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) {
+                        if (ShoulderInstance.getInstance().doShoulderSurfing()) {
+                            Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                            if (this.hasLeftClickChargeBar()) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                            }
+                            else {
+                                if (toBeAttacked != null) {
+                                    int targetId = toBeAttacked.getEntityId();
+                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
+                                }
+                                else {
+                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
+                                }
+                            }
+                        }
+                        else {
+                            if (this.hasLeftClickChargeBar()) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                            }
+                            else {
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
+                            }
+                        }
+                    }
+                    else {
+                        if (this.hasLeftClickChargeBar()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                        }
+                        else {
+                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
+                        }
+                    }
+                }
+                else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.getRightClickCooldown() == 0 && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
+                    if (this.hasRightClickChargeBar()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
+                    }
+                    else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, 0));
+                }
+                else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
+                }
+                else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()) {
+                    Entity toBeAttacked = null;
+                    if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                    if (this.hasLeftClickChargeBar()) {
+                        if (this.getLeftClickUse() > 0) {
+                            if (toBeAttacked != null) {
+                                int targetId = toBeAttacked.getEntityId();
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0, this.getLeftClickUse()));
+                            }
+                            else {
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0, this.getLeftClickUse()));
+                            }
+                        }
+                    }
+                    if (this.hasRightClickChargeBar()) {
+                        if (this.getRightClickUse() > 0) {
+                            if (toBeAttacked != null) {
+                                int targetId = toBeAttacked.getEntityId();
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId, 1, this.getRightClickUse()));
+                            }
+                            else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
+                        }
+                    }
+                }
+            }
         }
     }
 
-    private void flopOnLand() {
+    private void targetOnLandManage() {
+        if (this.getAttackTarget() != null) {
+            if (!this.getAttackTarget().isInWater() && this.isInWater() && !this.isAmphibious()) this.setAttackTarget(null);
+        }
+    }
+
+    private void movementManager() {
+        //for flopping on land
         if (!this.isDead && !this.isInWater() && this.onGround && this.collidedVertically && this.canFlop()) {
             this.motionX += 0.05 * (this.rand.nextFloat() * 2 - 1);
             this.motionY += 0.5;
@@ -66,6 +186,26 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
             this.onGround = false;
             this.isAirBorne = true;
+        }
+
+        //for changing navigator on land for amphibious
+        if (this.isAmphibious()) {
+            if (this.isInWater() && !this.amphibiousInWater) {
+                System.out.println("to water");
+                this.navigator = this.waterNavigate;
+                this.moveHelper = new RiftWaterCreatureMoveHelper(this);
+                this.setPathPriority(PathNodeType.WATER, 0);
+                this.amphibiousInWater = true;
+                this.navigator.clearPath();
+            }
+            else if (!this.isInWater() && this.amphibiousInWater) {
+                System.out.println("to land");
+                this.navigator = this.landNavigate;
+                this.moveHelper = new EntityMoveHelper(this);
+                this.setPathPriority(PathNodeType.WATER, this.defaultWaterCost);
+                this.amphibiousInWater = false;
+                this.navigator.clearPath();
+            }
         }
     }
 
@@ -96,16 +236,21 @@ public abstract class RiftWaterCreature extends RiftCreature {
         return this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this);
     }
 
+    protected PathNavigate createNavigator(World worldIn) {
+        return new PathNavigateRiftWaterCreature(this, this.world);
+    }
+
     @Override
     public boolean getCanSpawnHere() {
         return true;
     }
 
-    protected PathNavigate createNavigator(World worldIn) {
-        return new PathNavigateRiftWaterCreature(this, worldIn);
+    protected boolean canTriggerWalking() {
+        return false;
     }
 
-    protected boolean canTriggerWalking() {
+    @Override
+    public boolean hasSpacebarChargeBar() {
         return false;
     }
 

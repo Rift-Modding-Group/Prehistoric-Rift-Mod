@@ -60,7 +60,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.minCreatureHealth = UtahraptorConfig.getMinHealth();
         this.maxCreatureHealth = UtahraptorConfig.getMaxHealth();
         this.setSize(1.25f, 1.5f);
-        this.experienceValue = 3;
+        this.experienceValue = 10;
         this.favoriteFood = UtahraptorConfig.utahraptorFavoriteFood;
         this.tamingFood = UtahraptorConfig.utahraptorTamingFood;
         this.speed = 0.35D;

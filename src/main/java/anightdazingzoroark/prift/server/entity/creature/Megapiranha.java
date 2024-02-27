@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
+import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -29,7 +30,8 @@ public class Megapiranha extends RiftWaterCreature {
         this.maxCreatureHealth = MegapiranhaConfig.getMaxHealth();
         this.experienceValue = 3;
         this.favoriteFood = MegapiranhaConfig.megapiranhaFavoriteFood;
-        this.speed = 0.75D;
+        this.speed = 0.35D;
+        this.waterSpeed = 4D;
         this.attackWidth = 2f;
     }
 
@@ -85,11 +87,6 @@ public class Megapiranha extends RiftWaterCreature {
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
         return false;
     }
 

@@ -122,7 +122,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public EntityLivingBase ssrTarget;
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
-    public double speed;
+    protected double speed;
+    protected double waterSpeed = 1D;
     protected int herdCheckCountdown;
     public float attackWidth;
     public float rangedWidth;
@@ -153,6 +154,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super(worldIn);
         this.creatureType = creatureType;
         this.setSpeed(0f);
+        this.setWaterSpeed(1f);
         this.setScaleForAge(false);
         this.initInventory();
         this.energyMod = 0;
@@ -658,6 +660,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.justSpawned()) {
             this.heal((float) this.maxCreatureHealth);
             this.setSpeed(this.speed);
+            this.setWaterSpeed(this.waterSpeed);
             this.setJustSpawned(false);
         }
     }
@@ -983,7 +986,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.hasHerdLeader()) {
             if (!this.getEntityBoundingBox().intersects(this.herdLeader.getEntityBoundingBox().grow(this.followRange()))) {
                 this.getMoveHelper().setMoveTo(this.herdLeader.posX, this.herdLeader.posY, this.herdLeader.posZ, 1D);
-//                this.navigator.tryMoveToEntityLiving(this.herdLeader, 1);
             }
         }
     }
@@ -1113,12 +1115,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(value);
     }
 
+    private void setWaterSpeed(double value) {
+        this.getEntityAttribute(EntityLivingBase.SWIM_SPEED).setBaseValue(value);
+    }
+
     public void resetSpeed() {
         this.setSpeed(this.speed);
+        this.setWaterSpeed(this.waterSpeed);
     }
 
     public void removeSpeed() {
         this.setSpeed(0D);
+        this.setWaterSpeed(0D);
     }
 
     public boolean canMove() {
