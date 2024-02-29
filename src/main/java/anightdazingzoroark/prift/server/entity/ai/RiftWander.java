@@ -36,7 +36,6 @@ public class RiftWander extends EntityAIWander {
         }
         else {
             if (this.creature instanceof RiftWaterCreature) {
-                System.out.println("search");
                 if (this.creature.isHerdLeader() && !this.creature.isInWater()) return super.shouldExecute();
                 else if (!this.creature.isHerdLeader() && !this.creature.hasHerdLeader() && !this.creature.isInWater()) return super.shouldExecute();
                 else return false;

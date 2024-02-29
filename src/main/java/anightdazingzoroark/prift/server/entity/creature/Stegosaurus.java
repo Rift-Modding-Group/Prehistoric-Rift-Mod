@@ -74,7 +74,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(STRONG_ATTACKING, Boolean.FALSE);
+        this.dataManager.register(STRONG_ATTACKING, false);
     }
 
     @Override

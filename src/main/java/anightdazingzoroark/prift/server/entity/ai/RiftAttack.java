@@ -1,18 +1,24 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.math.BlockPos;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class RiftAttack extends EntityAIBase {
     protected RiftCreature attacker;
@@ -65,8 +71,7 @@ public class RiftAttack extends EntityAIBase {
     public boolean shouldContinueExecuting() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
-        if (!this.attacker.isAttacking()) return false;
-        else if (this.attacker.getEnergy() == 0) return false;
+        if (this.attacker.getEnergy() == 0) return false;
         else if (this.attacker.isBeingRidden()) return false;
         else if (this.attacker.isUtilizingCharging()) return false;
         else if (this.attacker.isLeaping()) return false;
@@ -97,6 +102,7 @@ public class RiftAttack extends EntityAIBase {
         this.attacker.getNavigator().clearPath();
         this.animTime = 0;
         this.attacker.setAttacking(false);
+        this.attacker.resetSpeed();
     }
 
     public void updateTask() {
@@ -130,6 +136,7 @@ public class RiftAttack extends EntityAIBase {
 
         if (--this.attackCooldown <= 0) {
             if (distToEnemySqr <= d0) this.attacker.setAttacking(true);
+            if (this.animTime == 0) this.attacker.removeSpeed();
             this.animTime++;
             if (this.animTime == this.attackAnimTime) {
                 if (distToEnemySqr <= d0) this.attacker.attackEntityAsMob(enemy);
@@ -138,6 +145,7 @@ public class RiftAttack extends EntityAIBase {
                 this.animTime = 0;
                 this.attacker.setAttacking(false);
                 this.attackCooldown = 20;
+                this.attacker.resetSpeed();
                 if (this.attacker.isTamed()) this.attacker.energyActionMod++;
             }
         }
@@ -165,14 +173,16 @@ public class RiftAttack extends EntityAIBase {
     //subclasses for different creatures
 
     public static class ApatosaurusAttack extends RiftAttack {
+        private final Apatosaurus apatosaurus;
         protected int whipAnimLength;
         protected int whipAnimTime;
         private int attackMode; //0 is stomp, 1 is tail whip
 
         //apato has two attacks, stomp and tail whip
         //the default attack stuff is for the stomp
-        public ApatosaurusAttack(RiftCreature creature, double speedIn, float attackAnimLength, float attackAnimTime) {
-            super(creature, speedIn, attackAnimLength, attackAnimTime);
+        public ApatosaurusAttack(Apatosaurus apatosaurus, double speedIn, float attackAnimLength, float attackAnimTime) {
+            super(apatosaurus, speedIn, attackAnimLength, attackAnimTime);
+            this.apatosaurus = apatosaurus;
             this.whipAnimLength = (int) (0.6f * 20f);
             this.whipAnimTime = (int) (0.4f * 20f);
         }
@@ -186,7 +196,7 @@ public class RiftAttack extends EntityAIBase {
         @Override
         public void resetTask() {
             super.resetTask();
-            ((Apatosaurus) (this.attacker)).setTailWhipping(false);
+            this.apatosaurus.setTailWhipping(false);
         }
 
         @Override
@@ -207,20 +217,112 @@ public class RiftAttack extends EntityAIBase {
                         this.attackCooldown = 20;
                         this.attackMode = RiftUtil.randomInRange(0, 1);
                     }
-                } else if (this.attackMode == 1) {
-                    Apatosaurus apatosaurus = (Apatosaurus) this.attacker;
-                    if (distToEnemySqr <= d0) apatosaurus.setTailWhipping(true);
+                }
+                else if (this.attackMode == 1) {
+                    if (distToEnemySqr <= d0) this.apatosaurus.setTailWhipping(true);
                     if (this.animTime == this.whipAnimTime) {
-                        if (distToEnemySqr <= d0) apatosaurus.useWhipAttack();
+                        if (distToEnemySqr <= d0) this.apatosaurus.useWhipAttack();
                     }
                     if (this.animTime > this.whipAnimLength) {
                         this.animTime = 0;
-                        apatosaurus.setTailWhipping(false);
+                        this.apatosaurus.setTailWhipping(false);
                         this.attackCooldown = 20;
                         this.attackMode = RiftUtil.randomInRange(0, 1);
                     }
                 }
             }
+        }
+    }
+
+    public static class SarcosuchusAttack extends RiftAttack {
+        private final Sarcosuchus sarcosuchus;
+        private EntityLivingBase spinVictim;
+        private int spinTime;
+
+        public SarcosuchusAttack(Sarcosuchus sarcosuchus, double speedIn, float attackAnimLength, float attackAnimTime) {
+            super(sarcosuchus, speedIn, attackAnimLength, attackAnimTime);
+            this.sarcosuchus = sarcosuchus;
+        }
+
+        @Override
+        public void startExecuting() {
+            super.startExecuting();
+            this.spinTime = 0;
+        }
+
+        @Override
+        public void resetTask() {
+            super.resetTask();
+            this.spinTime = 0;
+            this.sarcosuchus.setIsSpinning(false);
+            this.spinVictim = null;
+        }
+
+        @Override
+        public void updateTask() {
+            if (this.spinVictim == null) super.updateTask();
+            else this.manageSpin();
+        }
+
+        @Override
+        protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
+            double d0 = this.getAttackReachSqr(enemy);
+
+            if (--this.attackCooldown <= 0) {
+                if (distToEnemySqr <= d0) this.sarcosuchus.setAttacking(true);
+
+                if (this.animTime == 0) this.sarcosuchus.removeSpeed();
+                this.animTime++;
+                if (this.animTime == this.attackAnimTime) {
+                    if (distToEnemySqr <= d0) this.sarcosuchus.attackEntityAsMob(enemy);
+                }
+                if (this.animTime > this.attackAnimLength + 1) {
+                    this.animTime = 0;
+                    this.sarcosuchus.setAttacking(false);
+                    this.attackCooldown = 20;
+                    if (this.sarcosuchus.isTamed()) this.sarcosuchus.energyActionMod++;
+//                    this.sarcosuchus.resetSpeed();
+
+                    if (enemy.isEntityAlive()) {
+                        List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
+                        if (enemy instanceof EntityPlayer) {
+                            if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("player")) {
+                                this.sarcosuchus.setIsSpinning(true);
+                                this.spinVictim = enemy;
+                            }
+                            else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("player")) {
+                                this.sarcosuchus.setIsSpinning(true);
+                                this.spinVictim = enemy;
+                            }
+                        }
+                        else {
+                            if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getEntityString(enemy))) {
+                                this.sarcosuchus.setIsSpinning(true);
+                                this.spinVictim = enemy;
+                            }
+                            else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getEntityString(enemy))) {
+                                this.sarcosuchus.setIsSpinning(true);
+                                this.spinVictim = enemy;
+                            }
+                        }
+                    }
+                    else this.sarcosuchus.resetSpeed();
+                }
+            }
+        }
+
+        protected void manageSpin() {
+            if (this.spinVictim.isEntityAlive()) {
+                double angleToTarget = Math.atan2(this.sarcosuchus.getLookVec().z, this.sarcosuchus.getLookVec().x);
+                this.spinVictim.setPosition(2 * Math.cos(angleToTarget) + this.sarcosuchus.posX, this.sarcosuchus.posY, 2 * Math.sin(angleToTarget) + this.sarcosuchus.posZ);
+                this.sarcosuchus.attackEntityAsMob(this.spinVictim);
+                if (this.spinTime >= 20) {
+                    if (this.sarcosuchus.isTamed()) this.sarcosuchus.setEnergy(this.sarcosuchus.getEnergy() - 1);
+                    this.spinTime = 0;
+                }
+                this.spinTime++;
+            }
+            else this.sarcosuchus.setIsSpinning(false);
         }
     }
 }

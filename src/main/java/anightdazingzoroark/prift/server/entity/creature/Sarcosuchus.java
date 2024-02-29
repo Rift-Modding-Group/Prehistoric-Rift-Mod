@@ -5,7 +5,9 @@ import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -16,6 +18,8 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 public class Sarcosuchus extends RiftWaterCreature {
+    private static final DataParameter<Boolean> SPINNING = EntityDataManager.<Boolean>createKey(Sarcosuchus.class, DataSerializers.BOOLEAN);
+
     public Sarcosuchus(World worldIn) {
         super(worldIn, RiftCreatureType.SARCOSUCHUS);
         this.setSize(1.25f, 1.25f);
@@ -28,20 +32,21 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.attackWidth = 3f;
         this.saddleItem = SarcosuchusConfig.sarcosuchusSaddleItem;
         this.speed = 0.2D;
-        this.waterSpeed = 5D;
+        this.waterSpeed = 10D;
     }
 
     @Override
     protected void entityInit() {
         super.entityInit();
         this.setCanPickUpLoot(true);
+        this.dataManager.register(SPINNING, false);
     }
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, SarcosuchusConfig.sarcosuchusTargets, SarcosuchusConfig.sarcosuchusTargetBlacklist, true, true, true));
+        this.targetTasks.addTask(2, new RiftGetTargets(this, SarcosuchusConfig.sarcosuchusTargets, SarcosuchusConfig.sarcosuchusTargetBlacklist, true, true, true));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, SarcosuchusConfig.sarcosuchusFavoriteFood, true));
-        this.tasks.addTask(2, new RiftAttack(this, 4.0D, 0.52f, 0.52f));
+        this.tasks.addTask(2, new RiftAttack.SarcosuchusAttack(this, 4.0D, 0.52f, 0.52f));
         this.tasks.addTask(4, new RiftGoToWater(this, 16, 1.0D));
         this.tasks.addTask(5, new RiftWanderWater(this, 1.0D));
         this.tasks.addTask(6, new RiftWander(this, 1.0D));
@@ -60,6 +65,15 @@ public class Sarcosuchus extends RiftWaterCreature {
     @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.3f, 1.5f);
+    }
+
+    public boolean isSpinning() {
+        return this.dataManager.get(SPINNING);
+    }
+
+    public void setIsSpinning(boolean value) {
+        this.dataManager.set(SPINNING, value);
+        this.setActing(value);
     }
 
     @Override
@@ -110,6 +124,10 @@ public class Sarcosuchus extends RiftWaterCreature {
     private <E extends IAnimatable> PlayState sarcosuchusAttack(AnimationEvent<E> event) {
         if (this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.attack", false));
+            return PlayState.CONTINUE;
+        }
+        if (this.isSpinning()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.spin_attack", true));
             return PlayState.CONTINUE;
         }
         event.getController().clearAnimationCache();
