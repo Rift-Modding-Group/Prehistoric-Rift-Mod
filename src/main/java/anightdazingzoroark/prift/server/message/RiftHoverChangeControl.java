@@ -37,14 +37,19 @@ public class RiftHoverChangeControl extends AbstractMessage<RiftHoverChangeContr
     }
 
     @Override
-    public void onClientReceived(Minecraft client, RiftHoverChangeControl message, EntityPlayer player, MessageContext messageContext) {
-
-    }
+    public void onClientReceived(Minecraft client, RiftHoverChangeControl message, EntityPlayer player, MessageContext messageContext) {}
 
     @Override
     public void onServerReceived(MinecraftServer server, RiftHoverChangeControl message, EntityPlayer player, MessageContext messageContext) {
         RiftWaterCreature creature = (RiftWaterCreature)player.world.getEntityByID(message.creatureId);
-        if (message.isUsing && message.control == 0) {}
-        else if (message.isUsing && message.control == 1) {}
+        if (creature.isInWater()) {
+            if (message.isUsing && message.control == 0) {
+                creature.motionY = 0.25D;
+            }
+            else if (message.isUsing && message.control == 1) {
+                creature.motionY = -0.25;
+            }
+            else if (message.control == 2) creature.setUsingSwimControls(message.isUsing);
+        }
     }
 }

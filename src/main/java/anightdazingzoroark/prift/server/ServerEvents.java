@@ -71,6 +71,21 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
+    public void stopPlayerMovement(InputEvent.KeyInputEvent event) {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        RiftEntityProperties playerProperties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
+        if (playerProperties.trappedBySarco) {
+            KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
+            KeyBinding.setKeyBindState(settings.keyBindBack.getKeyCode(), false);
+            KeyBinding.setKeyBindState(settings.keyBindLeft.getKeyCode(), false);
+            KeyBinding.setKeyBindState(settings.keyBindRight.getKeyCode(), false);
+            KeyBinding.setKeyBindState(settings.keyBindJump.getKeyCode(), false);
+        }
+//        event.setCanceled();
+    }
+
+    @SubscribeEvent
     public void noAttackWhileRiding(AttackEntityEvent event) {
         //prevent players from attackin while ridin
         if (event.getEntityPlayer().isRiding()) {
@@ -332,12 +347,20 @@ public class ServerEvents {
         }
     }
 
-    //stop bleeding upon death
+    //reset some properties (like bleeding) upon death
     @SubscribeEvent
     public void onEntityDeath(LivingDeathEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
         properties.resetBleeding();
+        properties.trappedBySarco = false;
+    }
+
+    //reset some properties upon logging out
+    @SubscribeEvent
+    public void onPlayerLogOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(event.player, RiftEntityProperties.class);
+        properties.trappedBySarco = false;
     }
 
     //manage cannon impacting stuff

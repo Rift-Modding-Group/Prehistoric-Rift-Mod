@@ -4,10 +4,12 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -44,12 +46,19 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, SarcosuchusConfig.sarcosuchusTargets, SarcosuchusConfig.sarcosuchusTargetBlacklist, true, true, true));
+        this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, SarcosuchusConfig.sarcosuchusTargets, SarcosuchusConfig.sarcosuchusTargetBlacklist, true, true, true));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, SarcosuchusConfig.sarcosuchusFavoriteFood, true));
+
+        this.tasks.addTask(1, new RiftMate(this));
+
         this.tasks.addTask(2, new RiftAttack.SarcosuchusAttack(this, 4.0D, 0.52f, 0.52f));
-        this.tasks.addTask(4, new RiftGoToWater(this, 16, 1.0D));
-        this.tasks.addTask(5, new RiftWanderWater(this, 1.0D));
-        this.tasks.addTask(6, new RiftWander(this, 1.0D));
+
+//        this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 6.0F, 2.0F));
+        this.tasks.addTask(4, new RiftMoveToHomePos(this, 1.0D));
+
+        this.tasks.addTask(5, new RiftGoToWater(this, 16, 1.0D));
+        this.tasks.addTask(6, new RiftWanderWater(this, 1.0D));
+        this.tasks.addTask(7, new RiftWander(this, 1.0D));
     }
 
     @Override
@@ -76,9 +85,16 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.setActing(value);
     }
 
+    public boolean attackEntityUsingSpin(Entity entityIn) {
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)(this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()/4D)));
+        if (flag) this.applyEnchantments(this, entityIn);
+        this.setLastAttackedEntity(entityIn);
+        return flag;
+    }
+
     @Override
     public Vec3d riderPos() {
-        return null;
+        return new Vec3d(this.posX, this.posY - 1.375, this.posZ);
     }
 
     @Override
@@ -94,6 +110,21 @@ public class Sarcosuchus extends RiftWaterCreature {
     @Override
     public boolean isAmphibious() {
         return true;
+    }
+
+    @Override
+    public boolean isTameableByFeeding() {
+        return true;
+    }
+
+    @Override
+    public boolean canBeSaddled() {
+        return true;
+    }
+
+    @Override
+    public int slotCount() {
+        return 27;
     }
 
     @Override

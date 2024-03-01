@@ -1568,7 +1568,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                     }
                 }
-                super.travel(strafe, vertical, forward);
+//                super.travel(strafe, vertical, forward);
+                if ((this instanceof RiftWaterCreature) && this.isInWater()) {
+                    System.out.println("test one");
+                    RiftWaterCreature waterCreature = (RiftWaterCreature) this;
+                    super.travel(strafe, waterCreature.isUsingSwimControls() ? vertical : 0, forward);
+                }
+                else {
+                    System.out.println("test two");
+                    super.travel(strafe, vertical, forward);
+                }
             }
         }
         else {

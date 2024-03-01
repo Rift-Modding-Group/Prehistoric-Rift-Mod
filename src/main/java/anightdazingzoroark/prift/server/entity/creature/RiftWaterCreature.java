@@ -20,6 +20,9 @@ import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemMonsterPlacer;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.pathfinding.PathNavigateSwimmer;
@@ -37,6 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class RiftWaterCreature extends RiftCreature {
+    private static final DataParameter<Boolean> USING_SWIM_CONTROLS = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
     protected final float defaultWaterCost;
     private final PathNavigateRiftWaterCreature waterNavigate;
     private final PathNavigateGround landNavigate;
@@ -48,7 +52,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         this.waterNavigate = new PathNavigateRiftWaterCreature(this, this.world);
         this.landNavigate = new PathNavigateGround(this, this.world);
         this.amphibiousInWater = true;
-//        this.setPathPriority(PathNodeType.WATER, 0f);
         if (!this.isAmphibious()) {
             this.setPathPriority(PathNodeType.WATER, 0f);
             this.defaultWaterCost = 0F;
@@ -59,13 +62,13 @@ public abstract class RiftWaterCreature extends RiftCreature {
     @Override
     protected void entityInit() {
         super.entityInit();
+        this.dataManager.register(USING_SWIM_CONTROLS, false);
     }
 
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
 
-        //flipping around on land
         this.movementManager();
         this.targetOnLandManage();
     }
@@ -98,6 +101,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
                 RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 0, RiftControls.mountAscend.isKeyDown() && !RiftControls.mountDescend.isKeyDown()));
                 RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 1, RiftControls.mountDescend.isKeyDown() && !RiftControls.mountAscend.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 2, RiftControls.mountDescend.isKeyDown() || RiftControls.mountAscend.isKeyDown()));
 
                 if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
                     if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) {
@@ -191,7 +195,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         //for changing navigator on land for amphibious
         if (this.isAmphibious()) {
             if (this.isInWater() && !this.amphibiousInWater) {
-                System.out.println("to water");
                 this.navigator = this.waterNavigate;
                 this.moveHelper = new RiftWaterCreatureMoveHelper(this);
                 this.setPathPriority(PathNodeType.WATER, 0);
@@ -199,13 +202,18 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 this.navigator.clearPath();
             }
             else if (!this.isInWater() && this.amphibiousInWater) {
-                System.out.println("to land");
                 this.navigator = this.landNavigate;
                 this.moveHelper = new EntityMoveHelper(this);
                 this.setPathPriority(PathNodeType.WATER, this.defaultWaterCost);
                 this.amphibiousInWater = false;
                 this.navigator.clearPath();
             }
+        }
+
+        //for not sinkin when ridden
+        if (this.isBeingRidden() && this.isInWater() && !this.isUsingSwimControls()) {
+            System.out.println("no");
+            this.motionY *= 0;
         }
     }
 
@@ -250,6 +258,11 @@ public abstract class RiftWaterCreature extends RiftCreature {
     }
 
     @Override
+    public boolean shouldDismountInWater(Entity rider) {
+        return false;
+    }
+
+    @Override
     public boolean hasSpacebarChargeBar() {
         return false;
     }
@@ -261,5 +274,13 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 this.navigator.tryMoveToEntityLiving(this.herdLeader, 1D);
             }
         }
+    }
+
+    public boolean isUsingSwimControls() {
+        return this.dataManager.get(USING_SWIM_CONTROLS);
+    }
+
+    public void setUsingSwimControls(boolean value) {
+        this.dataManager.set(USING_SWIM_CONTROLS, value);
     }
 }
