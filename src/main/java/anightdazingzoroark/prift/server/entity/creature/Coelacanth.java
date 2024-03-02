@@ -146,6 +146,9 @@ public class Coelacanth extends RiftWaterCreature {
     }
 
     @Override
+    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
+
+    @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;

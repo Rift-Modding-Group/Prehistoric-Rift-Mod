@@ -21,6 +21,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
@@ -1558,6 +1559,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
+                float f4;
 
                 if (this.isFloating && forward > 0) {
                     if (this.bodyPart != null) {
@@ -1568,11 +1570,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                     }
                 }
-//                super.travel(strafe, vertical, forward);
                 if ((this instanceof RiftWaterCreature) && this.isInWater()) {
-                    System.out.println("test one");
                     RiftWaterCreature waterCreature = (RiftWaterCreature) this;
-                    super.travel(strafe, waterCreature.isUsingSwimControls() ? vertical : 0, forward);
+                    this.moveRelative(strafe, waterCreature.isUsingSwimControls() ? vertical : 0, forward, 0.05F);
+                    f4 = 0.6F;
+                    float d0 = (float) EnchantmentHelper.getDepthStriderModifier(this);
+                    if (d0 > 3.0F) d0 = 3.0F;
+                    if (!this.onGround) d0 *= 0.5F;
+                    if (d0 > 0.0F) f4 += (0.54600006F - f4) * d0 / 3.0F;
+                    this.move(MoverType.SELF, this.motionX, waterCreature.isUsingSwimControls() ? this.motionY : 0, this.motionZ);
+                    this.motionX *= f4;
+                    this.motionX *= 0.900000011920929D;
+                    this.motionY *= 0.900000011920929D;
+                    this.motionY *= f4;
+                    this.motionZ *= 0.900000011920929D;
+                    this.motionZ *= f4;
                 }
                 else {
                     System.out.println("test two");
@@ -1595,14 +1607,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             //for underwater mobs
             else if (this.isInWater() && !this.isFloating) {
-                this.moveRelative(strafe, vertical, forward, 0.01f);
-                this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+                if (this instanceof RiftWaterCreature && this.getTameStatus() == TameStatusType.SIT) {
+                    this.moveRelative(0, 0, 0, 0.01f);
+                    this.move(MoverType.SELF, 0, 0, 0);
+                }
+                else {
+                    this.moveRelative(strafe, vertical, forward, 0.01f);
+                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
 
-                this.motionX *= 0.9;
-                this.motionY *= 0.9;
-                this.motionZ *= 0.9;
+                    this.motionX *= 0.9;
+                    this.motionY *= 0.9;
+                    this.motionZ *= 0.9;
 
-                if (this.getAttackTarget() == null) this.motionY -= 0.005;
+                    if (this.getAttackTarget() == null) this.motionY -= 0.005;
+                }
             }
             else if (!this.isInWater()) super.travel(strafe, vertical, forward);
         }

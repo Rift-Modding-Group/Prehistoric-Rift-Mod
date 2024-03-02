@@ -57,6 +57,7 @@ public class RiftItems {
     public static Item DIMETRODON_SAIL;
     public static Item COELACANTH_SCALES;
     public static Item MEGAPIRANHA_SCALES;
+    public static Item SARCOSUCHUS_SNOUT;
 
     public static Item APATOSAURUS_PLATFORM;
     public static Item CANNON;
@@ -107,6 +108,7 @@ public class RiftItems {
         DIMETRODON_SAIL = riftGenericItem("dimetrodon_sail", true);
         COELACANTH_SCALES = riftGenericItem("coelacanth_scales", true);
         MEGAPIRANHA_SCALES = riftGenericItem("megapiranha_scales", true);
+        SARCOSUCHUS_SNOUT = riftGenericItem("sarcosuchus_snout", true);
 
         APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
         CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);

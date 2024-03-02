@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.pathfinding.PathNodeType;
@@ -103,6 +104,9 @@ public class Megapiranha extends RiftWaterCreature {
     protected boolean canDespawn() {
         return true;
     }
+
+    @Override
+    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
 
     @Override
     public void registerControllers(AnimationData data) {

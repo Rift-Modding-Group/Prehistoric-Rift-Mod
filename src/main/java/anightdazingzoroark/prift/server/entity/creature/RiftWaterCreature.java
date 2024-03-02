@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
@@ -210,15 +211,14 @@ public abstract class RiftWaterCreature extends RiftCreature {
             }
         }
 
-        //for not sinkin when ridden
+        //for not sinkin in certain conditions
         if (this.isBeingRidden() && this.isInWater() && !this.isUsingSwimControls()) {
-            System.out.println("no");
+            this.motionY *= 0;
+        }
+        if (this.isInWater() && this.getTameStatus() == TameStatusType.SIT) {
             this.motionY *= 0;
         }
     }
-
-    @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
 
     @Override
     public boolean canBreatheUnderwater()

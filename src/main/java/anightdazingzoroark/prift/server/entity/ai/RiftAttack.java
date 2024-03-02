@@ -246,7 +246,6 @@ public class RiftAttack extends EntityAIBase {
         public SarcosuchusAttack(Sarcosuchus sarcosuchus, double speedIn, float attackAnimLength, float attackAnimTime) {
             super(sarcosuchus, speedIn, attackAnimLength, attackAnimTime);
             this.sarcosuchus = sarcosuchus;
-            this.spinFlag = true;
         }
 
         @Override
@@ -258,6 +257,7 @@ public class RiftAttack extends EntityAIBase {
 
         public boolean shouldContinueExecuting() {
             if (!this.spinFlag) return false;
+            else if (this.sarcosuchus.isSpinning()) return super.shouldContinueExecuting() && this.sarcosuchus.getEnergy() > 6;
             return super.shouldContinueExecuting();
         }
 
@@ -297,7 +297,7 @@ public class RiftAttack extends EntityAIBase {
                         this.attackCooldown = 20;
                         if (this.sarcosuchus.isTamed()) this.sarcosuchus.energyActionMod++;
 
-                        if (enemy.isEntityAlive()) {
+                        if (enemy.isEntityAlive() && this.sarcosuchus.getEnergy() > 6) {
                             List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
                             if (enemy instanceof EntityPlayer) {
                                 if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("player")) {
@@ -351,7 +351,7 @@ public class RiftAttack extends EntityAIBase {
                 this.spinVictim.motionX = 0;
                 this.spinVictim.motionY = 0;
                 this.spinVictim.motionZ = 0;
-                if (this.sarcosuchus.isTamed()) this.sarcosuchus.setEnergy(this.sarcosuchus.getEnergy() - 1);
+                if (this.sarcosuchus.isTamed() && this.spinTime % 10 == 0) this.sarcosuchus.setEnergy(this.sarcosuchus.getEnergy() - 1);
                 if (this.spinTime >= 100) this.spinFlag = false;
                 this.spinTime++;
             }
