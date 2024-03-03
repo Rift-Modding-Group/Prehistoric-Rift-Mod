@@ -5,9 +5,12 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -26,10 +29,16 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class Sarcosuchus extends RiftWaterCreature {
     private static final DataParameter<Boolean> SPINNING = EntityDataManager.<Boolean>createKey(Sarcosuchus.class, DataSerializers.BOOLEAN);
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/sarcosuchus"));
+    private EntityLivingBase forcedSpinVictim;
+    private int spinTime;
+    private boolean messageSent;
 
     public Sarcosuchus(World worldIn) {
         super(worldIn, RiftCreatureType.SARCOSUCHUS);
@@ -44,6 +53,8 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.saddleItem = SarcosuchusConfig.sarcosuchusSaddleItem;
         this.speed = 0.2D;
         this.waterSpeed = 10D;
+        this.spinTime = 0;
+        this.messageSent = true;
     }
 
     @Override
@@ -77,6 +88,90 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        if (this.isBeingRidden() && this.canUseRightClick() && this.getRightClickCooldown() == 0 && this.isUsingRightClick() && (this.getRightClickUse() >= 0 && this.getRightClickUse() <= 100) && this.getEnergy() > 6) this.forcedSpinAttack();
+        else if (!this.isBeingRidden() || !this.canUseRightClick() || this.getRightClickCooldown() > 0 || !this.isUsingRightClick()) {
+            this.spinTime = 0;
+            this.forcedSpinVictim = null;
+            if (this.getRightClickCooldown() > 0) {
+                this.setRightClickCooldown(this.getRightClickCooldown() - 1);
+            }
+        }
+        if (this.isBeingRidden() && this.getEnergy() <= 6 && this.isUsingRightClick() && !this.messageSent) {
+            ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+            this.messageSent = true;
+        }
+        else if (!this.isUsingRightClick() && this.messageSent) this.messageSent = false;
+        if (this.isBeingRidden()) {
+            if (this.getRightClickUse() > 100) this.forcedSpinVictim = null;
+            if (this.forcedSpinVictim == null) this.setIsSpinning(false);
+        }
+    }
+
+    private void forcedSpinAttack() {
+        if (this.forcedSpinVictim != null) {
+            if (this.forcedSpinVictim.isEntityAlive()) {
+                if (!this.isSpinning()) this.setIsSpinning(true);
+                double angleToTarget = Math.atan2(this.getLookVec().z, this.getLookVec().x);
+                this.forcedSpinVictim.setPosition(2 * Math.cos(angleToTarget) + this.posX, this.posY, 2 * Math.sin(angleToTarget) + this.posZ);
+                this.getLookHelper().setLookPositionWithEntity(this.forcedSpinVictim, 30.0F, 30.0F);
+                this.attackEntityUsingSpin(this.forcedSpinVictim);
+                this.forcedSpinVictim.motionX = 0;
+                this.forcedSpinVictim.motionY = 0;
+                this.forcedSpinVictim.motionZ = 0;
+                if (this.isTamed() && this.spinTime % 10 == 0) this.setEnergy(this.getEnergy() - 1);
+                this.spinTime++;
+            }
+            else {
+                this.setIsSpinning(false);
+                this.setCanUseRightClick(false);
+            }
+        }
+        else {
+            UUID ownerID = this.getOwnerId();
+            List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
+            List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
+                @Override
+                public boolean apply(@Nullable EntityLivingBase input) {
+                    if (input instanceof EntityPlayer) {
+                        if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("player")) {
+                            return !input.getUniqueID().equals(ownerID);
+                        }
+                        else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("player")) {
+                            return !input.getUniqueID().equals(ownerID);
+                        }
+                    }
+                    else {
+                        if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getKey(input).toString())) {
+                            if (input instanceof EntityTameable) {
+                                EntityTameable inpTameable = (EntityTameable)input;
+                                if (inpTameable.isTamed()) {
+                                    return !ownerID.equals(inpTameable.getOwnerId());
+                                }
+                                else return true;
+                            }
+                            return true;
+                        }
+                        else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(input).toString())) {
+                            if (input instanceof EntityTameable) {
+                                EntityTameable inpTameable = (EntityTameable)input;
+                                if (inpTameable.isTamed()) {
+                                    return !ownerID.equals(inpTameable.getOwnerId());
+                                }
+                                else return true;
+                            }
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
+            if (!potTargetListM.isEmpty()) this.forcedSpinVictim = potTargetListM.get(0);
+        }
+    }
+
+    @Override
     public void resetParts(float scale) {}
 
     @Override
@@ -90,7 +185,18 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     public void setIsSpinning(boolean value) {
         this.dataManager.set(SPINNING, value);
-        this.setActing(value);
+        if (value) this.removeSpeed();
+        else this.resetSpeed();
+//        this.setActing(value);
+    }
+
+    public void setRightClickUse(int value) {
+       if (this.getRightClickUse() > value) super.setRightClickUse(value);
+       else {
+           if (this.forcedSpinVictim != null) {
+               if (this.forcedSpinVictim.isEntityAlive()) super.setRightClickUse(value);
+           }
+       }
     }
 
     public boolean attackEntityUsingSpin(Entity entityIn) {
@@ -98,6 +204,10 @@ public class Sarcosuchus extends RiftWaterCreature {
         if (flag) this.applyEnchantments(this, entityIn);
         this.setLastAttackedEntity(entityIn);
         return flag;
+    }
+
+    public void knockBack(Entity entityIn, float strength, double xRatio, double zRatio) {
+        if (!this.isSpinning()) super.knockBack(entityIn, strength, xRatio, zRatio);
     }
 
     @Override
@@ -112,7 +222,7 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return false;
+        return true;
     }
 
     @Override
@@ -140,16 +250,24 @@ public class Sarcosuchus extends RiftWaterCreature {
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (target == null) {
-                    if (!this.isActing()) this.setAttacking(true);
+                    if (!this.isActing() && !this.isUsingRightClick()) this.setAttacking(true);
                 }
                 else {
-                    if (!this.isActing()) {
+                    if (!this.isActing() && !this.isUsingRightClick()) {
                         this.ssrTarget = target;
                         this.setAttacking(true);
                     }
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
+        if (control == 1) {
+            if (this.getEnergy() > 6) {
+                if (this.getRightClickCooldown() == 0) {
+                    this.setRightClickCooldown(holdAmount * 2);
+                    this.setRightClickUse(0);
+                }
+            }
         }
     }
 

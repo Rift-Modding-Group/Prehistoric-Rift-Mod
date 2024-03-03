@@ -1210,7 +1210,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void setUsingRightClick(boolean value) {
-        this.dataManager.set(USING_RIGHT_CLICK, Boolean.valueOf(value));
+        this.dataManager.set(USING_RIGHT_CLICK, value);
     }
 
     public int getRightClickUse() {
@@ -1586,10 +1586,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.motionZ *= 0.900000011920929D;
                     this.motionZ *= f4;
                 }
-                else {
-                    System.out.println("test two");
-                    super.travel(strafe, vertical, forward);
-                }
+                else super.travel(strafe, vertical, forward);
             }
         }
         else {

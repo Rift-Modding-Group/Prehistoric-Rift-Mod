@@ -115,6 +115,16 @@ public class ServerEvents {
         }
     }
 
+    //prevent players from using interactions when ridin
+    @SubscribeEvent
+    public void onPlayerInteract(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (event.getEntityPlayer().isRiding()) {
+            if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature || event.getEntityPlayer().getRidingEntity() instanceof RiftLargeWeapon) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
     //prevent players from placin blocks while ridin
     @SubscribeEvent
     public void noBlockPlaceWhileRiding(BlockEvent.PlaceEvent event) {

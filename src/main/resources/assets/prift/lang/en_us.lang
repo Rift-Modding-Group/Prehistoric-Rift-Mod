@@ -17,6 +17,7 @@ entity.parasaurolophus.name=Parasaurolophus
 entity.dimetrodon.name=Dimetrodon
 entity.coelacanth.name=Coelacanth
 entity.megapiranha.name=Megapiranha
+entity.sarcosuchus.name=Sarcosuchus
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon
@@ -36,7 +37,7 @@ item.cooked_dodo_meat.name=Cooked Dodo Meat
 item.cooked_hadrosaur_meat.name=Cooked Hadrosaur Meat
 item.raw_coelacanth.name=Raw Coelacanth
 item.raw_megapiranha.name=Raw Megapiranha
-item.cooked_megapiranha_name=Cooked Megapiranha
+item.cooked_megapiranha.name=Cooked Megapiranha
 item.truffle.name=Truffle
 item.fiber_bar.name=Fiber Bar
 item.basic_herbivore_meal.name=Basic Herbivore Meal
@@ -60,6 +61,7 @@ item.parasaurolophus_horn.name=Parasaurolophus Horn
 item.dimetrodon_sail.name=Dimetrodon Sail
 item.coelacanth_scales.name=Coelacanth Scales
 item.megapiranha_scales.name=Megapiranha Scales
+item.sarcosuchus_snout.name=Sarcosuchus Snout
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -71,6 +73,7 @@ item.utahraptor_egg.name=Utahraptor Egg
 item.apatosaurus_egg.name=Apatosaurus Egg
 item.parasaurolophus_egg.name=Parasaurolophus Egg
 item.dimetrodon_egg.name=Dimetrodon Egg
+item.sarcosuchus_egg.name=Sarcosuchus Egg
 
 item.apatosaurus_platform.name=Apatosaurus Platform
 item.cannon.name=Cannon
