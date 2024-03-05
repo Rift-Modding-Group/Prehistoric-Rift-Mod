@@ -19,7 +19,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     public int ticksUntilStopBleeding;
     public boolean settingCreatureWorkstation;
     public int creatureIdForWorkstation;
-    public boolean trappedBySarco;
 
     @Override
     public int getTrackingTime() {
@@ -40,8 +39,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
 
         this.settingCreatureWorkstation = false;
         this.creatureIdForWorkstation = -1;
-
-        this.trappedBySarco = false;
     }
 
     @Override
@@ -55,8 +52,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         compound.setBoolean("IsBleeding", this.isBleeding);
         compound.setInteger("BleedingStrength", this.bleedingStrength);
         compound.setInteger("TicksUntilStopBleeding", this.ticksUntilStopBleeding);
-
-        compound.setBoolean("TrappedBySarco", this.trappedBySarco);
     }
 
     @Override
@@ -70,8 +65,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.isBleeding = compound.getBoolean("IsBleeding");
         this.bleedingStrength = compound.getInteger("BleedingStrength");
         this.ticksUntilStopBleeding = compound.getInteger("TicksUntilStopBleeding");
-
-        this.trappedBySarco = compound.getBoolean("TrappedBySarco");
     }
 
     @Override

@@ -1603,8 +1603,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
             //for underwater mobs
-            else if (this.isInWater() && !this.isFloating) {
-                if (this instanceof RiftWaterCreature && this.getTameStatus() == TameStatusType.SIT) {
+            else if (this.isInWater() && !this.isFloating && (this instanceof RiftWaterCreature)) {
+                if (this.getTameStatus() == TameStatusType.SIT) {
                     this.moveRelative(0, 0, 0, 0.01f);
                     this.move(MoverType.SELF, 0, 0, 0);
                 }

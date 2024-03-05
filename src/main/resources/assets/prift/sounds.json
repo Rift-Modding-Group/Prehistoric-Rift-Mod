@@ -194,5 +194,27 @@
       "prift:entities/dimetrodon/dimetrodon_death"
     ],
     "subtitle": "sounds.subtitle.dimetrodon_death"
+  },
+
+  "prift.sarcosuchus.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/sarcosuchus/sarcosuchus_idle"
+    ],
+    "subtitle": "sounds.subtitle.sarcosuchus_idle"
+  },
+  "prift.sarcosuchus.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/sarcosuchus/sarcosuchus_hurt"
+    ],
+    "subtitle": "sounds.subtitle.sarcosuchus_hurt"
+  },
+  "prift.sarcosuchus.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/sarcosuchus/sarcosuchus_death"
+    ],
+    "subtitle": "sounds.subtitle.sarcosuchus_death"
   }
 }

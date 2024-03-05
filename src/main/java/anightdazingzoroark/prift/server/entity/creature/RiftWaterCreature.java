@@ -14,6 +14,7 @@ import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -176,6 +177,17 @@ public abstract class RiftWaterCreature extends RiftCreature {
         }
     }
 
+    public void updateParts() {
+        if (this.headPart != null) this.headPart.onUpdate();
+    }
+
+    public void removeParts() {
+        if (this.headPart != null) {
+            this.world.removeEntityDangerously(this.headPart);
+            this.headPart = null;
+        }
+    }
+
     private void targetOnLandManage() {
         if (this.getAttackTarget() != null) {
             if (!this.getAttackTarget().isInWater() && this.isInWater() && !this.isAmphibious()) this.setAttackTarget(null);
@@ -282,5 +294,10 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
     public void setUsingSwimControls(boolean value) {
         this.dataManager.set(USING_SWIM_CONTROLS, value);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldRender(ICamera camera) {
+        return this.inFrustrum(camera, this.headPart);
     }
 }

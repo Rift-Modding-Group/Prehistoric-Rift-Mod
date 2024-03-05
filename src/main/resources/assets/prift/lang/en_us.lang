@@ -181,6 +181,10 @@ sounds.subtitle.dimetrodon_idle=Dimetrodon grunts
 sounds.subtitle.dimetrodon_hurt=Dimetrodon hurts
 sounds.subtitle.dimetrodon_death=Dimetrodon dies
 
+sounds.subtitle.sarcosuchus_idle=Sarcosuchus grunts
+sounds.subtitle.sarcosuchus_hurt=Sarcosuchus hurts
+sounds.subtitle.sarcosuchus_death=Sarcosuchus dies
+
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral
 tamebehavior.aggressive=%s is currently aggressive

@@ -2,10 +2,15 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
 import com.google.common.base.Predicate;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
@@ -17,10 +22,13 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -39,6 +47,13 @@ public class Sarcosuchus extends RiftWaterCreature {
     private EntityLivingBase forcedSpinVictim;
     private int spinTime;
     private boolean messageSent;
+    private RiftCreaturePart snoutPart;
+    private RiftCreaturePart frontBodyPart;
+    private RiftCreaturePart tail0;
+    private RiftCreaturePart tail1;
+    private RiftCreaturePart tail2;
+    private RiftCreaturePart tail3;
+    private RiftCreaturePart tail4;
 
     public Sarcosuchus(World worldIn) {
         super(worldIn, RiftCreatureType.SARCOSUCHUS);
@@ -113,13 +128,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         if (this.forcedSpinVictim != null) {
             if (this.forcedSpinVictim.isEntityAlive()) {
                 if (!this.isSpinning()) this.setIsSpinning(true);
-                double angleToTarget = Math.atan2(this.getLookVec().z, this.getLookVec().x);
-                this.forcedSpinVictim.setPosition(2 * Math.cos(angleToTarget) + this.posX, this.posY, 2 * Math.sin(angleToTarget) + this.posZ);
-                this.getLookHelper().setLookPositionWithEntity(this.forcedSpinVictim, 30.0F, 30.0F);
-                this.attackEntityUsingSpin(this.forcedSpinVictim);
-                this.forcedSpinVictim.motionX = 0;
-                this.forcedSpinVictim.motionY = 0;
-                this.forcedSpinVictim.motionZ = 0;
+                RiftMessages.WRAPPER.sendToServer(new RiftSarcosuchusSpinTargeting(this, this.forcedSpinVictim));
                 if (this.isTamed() && this.spinTime % 10 == 0) this.setEnergy(this.getEnergy() - 1);
                 this.spinTime++;
             }
@@ -135,10 +144,10 @@ public class Sarcosuchus extends RiftWaterCreature {
                 @Override
                 public boolean apply(@Nullable EntityLivingBase input) {
                     if (input instanceof EntityPlayer) {
-                        if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("player")) {
+                        if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("minecraft:player")) {
                             return !input.getUniqueID().equals(ownerID);
                         }
-                        else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("player")) {
+                        else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("minecraft:player")) {
                             return !input.getUniqueID().equals(ownerID);
                         }
                     }
@@ -171,8 +180,74 @@ public class Sarcosuchus extends RiftWaterCreature {
         }
     }
 
+    public void resetParts(float scale) {
+        if (scale > this.oldScale) {
+            this.oldScale = scale;
+            this.removeParts();
+            this.headPart = new RiftCreaturePart(this, 1.625f, 0, 0.125f, scale * 0.625f, scale * 0.625f, 1.5f);
+            this.snoutPart = new RiftCreaturePart(this, 2.5f, 0, 0.2f, scale * 0.55f, scale * 0.5f, 1.5f);
+            this.frontBodyPart = new RiftCreaturePart(this, 0.75f, 0, 0.125f, scale * 0.75f, scale * 0.65f, 1f);
+            this.tail0 = new RiftCreaturePart(this, -0.75f, 0, 0.125f, scale * 0.75f, scale * 0.65f, 0.5f);
+            this.tail1 = new RiftCreaturePart(this, -1.625f, 0, 0.2f, scale * 0.575f, scale * 0.525f, 0.5f);
+            this.tail2 = new RiftCreaturePart(this, -2.375f, 0, 0.225f, scale * 0.525f, scale * 0.475f, 0.5f);
+            this.tail3 = new RiftCreaturePart(this, -3.125f, 0, 0.225f, scale * 0.525f, scale * 0.475f, 0.5f);
+            this.tail4 = new RiftCreaturePart(this, -3.75f, 0, 0.25f, scale * 0.475f, scale * 0.425f, 0.5f);
+        }
+    }
+
     @Override
-    public void resetParts(float scale) {}
+    public void updateParts() {
+        super.updateParts();
+        if (this.snoutPart != null) this.snoutPart.onUpdate();
+        if (this.frontBodyPart != null) this.frontBodyPart.onUpdate();
+        if (this.tail0 != null) this.tail0.onUpdate();
+        if (this.tail1 != null) this.tail1.onUpdate();
+        if (this.tail2 != null) this.tail2.onUpdate();
+        if (this.tail3 != null) this.tail3.onUpdate();
+        if (this.tail4 != null) this.tail4.onUpdate();
+
+        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.175f : 0;
+        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
+        if (this.snoutPart != null) this.snoutPart.setPositionAndUpdate(this.snoutPart.posX, this.snoutPart.posY + sitOffset, this.snoutPart.posZ);
+        if (this.frontBodyPart != null) this.frontBodyPart.setPositionAndUpdate(this.frontBodyPart.posX, this.frontBodyPart.posY + sitOffset, this.frontBodyPart.posZ);
+        if (this.tail0 != null) this.tail0.setPositionAndUpdate(this.tail0.posX, this.tail0.posY + sitOffset, this.tail0.posZ);
+        if (this.tail1 != null) this.tail1.setPositionAndUpdate(this.tail1.posX, this.tail1.posY + sitOffset, this.tail1.posZ);
+        if (this.tail2 != null) this.tail2.setPositionAndUpdate(this.tail2.posX, this.tail2.posY + sitOffset, this.tail2.posZ);
+        if (this.tail3 != null) this.tail3.setPositionAndUpdate(this.tail3.posX, this.tail3.posY + sitOffset, this.tail3.posZ);
+        if (this.tail4 != null) this.tail4.setPositionAndUpdate(this.tail4.posX, this.tail4.posY + sitOffset, this.tail4.posZ);
+    }
+
+    public void removeParts() {
+        super.removeParts();
+        if (this.snoutPart != null) {
+            this.world.removeEntityDangerously(this.snoutPart);
+            this.snoutPart = null;
+        }
+        if (this.frontBodyPart != null) {
+            this.world.removeEntityDangerously(this.frontBodyPart);
+            this.frontBodyPart = null;
+        }
+        if (this.tail0 != null) {
+            this.world.removeEntityDangerously(this.tail0);
+            this.tail0 = null;
+        }
+        if (this.tail1 != null) {
+            this.world.removeEntityDangerously(this.tail1);
+            this.tail1 = null;
+        }
+        if (this.tail2 != null) {
+            this.world.removeEntityDangerously(this.tail2);
+            this.tail2 = null;
+        }
+        if (this.tail3 != null) {
+            this.world.removeEntityDangerously(this.tail3);
+            this.tail3 = null;
+        }
+        if (this.tail4 != null) {
+            this.world.removeEntityDangerously(this.tail4);
+            this.tail4 = null;
+        }
+    }
 
     @Override
     public float getRenderSizeModifier() {
@@ -212,7 +287,9 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     @Override
     public Vec3d riderPos() {
-        return new Vec3d(this.posX, this.posY - 1.375, this.posZ);
+        float xOffset = (float)(this.posX - (0.3) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
+        float zOffset = (float)(this.posZ - (0.3) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        return new Vec3d(xOffset, this.posY - 1.375, zOffset);
     }
 
     @Override
@@ -243,6 +320,11 @@ public class Sarcosuchus extends RiftWaterCreature {
     @Override
     public int slotCount() {
         return 27;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldRender(ICamera camera) {
+        return super.shouldRender(camera) || this.inFrustrum(camera, this.snoutPart) || this.inFrustrum(camera, this.frontBodyPart) || this.inFrustrum(camera, this.tail0) || this.inFrustrum(camera, this.tail1) || this.inFrustrum(camera, this.tail2) || this.inFrustrum(camera, this.tail3) || this.inFrustrum(camera, this.tail4);
     }
 
     @Override
@@ -313,5 +395,17 @@ public class Sarcosuchus extends RiftWaterCreature {
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.SARCOSUCHUS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.SARCOSUCHUS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.SARCOSUCHUS_DEATH;
     }
 }

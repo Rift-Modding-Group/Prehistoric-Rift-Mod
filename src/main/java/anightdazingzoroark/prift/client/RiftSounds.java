@@ -88,6 +88,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.dimetrodon.death")
     public static final SoundEvent DIMETRODON_DEATH = createSoundEvent("prift.dimetrodon.death");
 
+    @GameRegistry.ObjectHolder("prift.sarcosuchus.idle")
+    public static final SoundEvent SARCOSUCHUS_IDLE = createSoundEvent("prift.sarcosuchus.idle");
+
+    @GameRegistry.ObjectHolder("prift.sarcosuchus.hurt")
+    public static final SoundEvent SARCOSUCHUS_HURT = createSoundEvent("prift.sarcosuchus.hurt");
+
+    @GameRegistry.ObjectHolder("prift.sarcosuchus.death")
+    public static final SoundEvent SARCOSUCHUS_DEATH = createSoundEvent("prift.sarcosuchus.death");
+
     private static SoundEvent createSoundEvent(String soundName) {
         ResourceLocation soundID = new ResourceLocation(RiftInitialize.MODID, soundName);
         return new SoundEvent(soundID).setRegistryName(soundID);

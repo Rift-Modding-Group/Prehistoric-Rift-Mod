@@ -10,6 +10,8 @@ import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
@@ -34,7 +36,6 @@ public class RiftAttack extends EntityAIBase {
     private double targetX;
     private double targetY;
     private double targetZ;
-    private int failedPathFindingPenalty = 0;
     protected int attackCooldown;
 
     public RiftAttack(RiftCreature creature, double speedIn, float attackAnimLength, float attackAnimTime) {
@@ -266,10 +267,6 @@ public class RiftAttack extends EntityAIBase {
             super.resetTask();
             this.spinTime = 0;
             this.sarcosuchus.setIsSpinning(false);
-            if (this.spinVictim instanceof EntityPlayer) {
-                RiftEntityProperties playerProperties = EntityPropertiesHandler.INSTANCE.getProperties(this.spinVictim, RiftEntityProperties.class);
-                playerProperties.trappedBySarco = false;
-            }
             this.spinVictim = null;
         }
 
@@ -300,39 +297,23 @@ public class RiftAttack extends EntityAIBase {
                         if (enemy.isEntityAlive() && this.sarcosuchus.getEnergy() > 6) {
                             List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
                             if (enemy instanceof EntityPlayer) {
-                                if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("player")) {
+                                if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("minecraft:player")) {
                                     this.sarcosuchus.setIsSpinning(true);
                                     this.spinVictim = enemy;
-                                    if (this.spinVictim instanceof EntityPlayer) {
-                                        RiftEntityProperties playerProperties = EntityPropertiesHandler.INSTANCE.getProperties(this.spinVictim, RiftEntityProperties.class);
-                                        playerProperties.trappedBySarco = true;
-                                    }
                                 }
-                                else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("player")) {
+                                else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("minecraft:player")) {
                                     this.sarcosuchus.setIsSpinning(true);
                                     this.spinVictim = enemy;
-                                    if (this.spinVictim instanceof EntityPlayer) {
-                                        RiftEntityProperties playerProperties = EntityPropertiesHandler.INSTANCE.getProperties(this.spinVictim, RiftEntityProperties.class);
-                                        playerProperties.trappedBySarco = true;
-                                    }
                                 }
                             }
                             else {
-                                if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getEntityString(enemy))) {
+                                if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getKey(enemy).toString())) {
                                     this.sarcosuchus.setIsSpinning(true);
                                     this.spinVictim = enemy;
-                                    if (this.spinVictim instanceof EntityPlayer) {
-                                        RiftEntityProperties playerProperties = EntityPropertiesHandler.INSTANCE.getProperties(this.spinVictim, RiftEntityProperties.class);
-                                        playerProperties.trappedBySarco = true;
-                                    }
                                 }
-                                else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getEntityString(enemy))) {
+                                else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(enemy).toString())) {
                                     this.sarcosuchus.setIsSpinning(true);
                                     this.spinVictim = enemy;
-                                    if (this.spinVictim instanceof EntityPlayer) {
-                                        RiftEntityProperties playerProperties = EntityPropertiesHandler.INSTANCE.getProperties(this.spinVictim, RiftEntityProperties.class);
-                                        playerProperties.trappedBySarco = true;
-                                    }
                                 }
                             }
                         }
@@ -344,13 +325,7 @@ public class RiftAttack extends EntityAIBase {
 
         protected void manageSpin() {
             if (this.spinVictim.isEntityAlive()) {
-                double angleToTarget = Math.atan2(this.sarcosuchus.getLookVec().z, this.sarcosuchus.getLookVec().x);
-                this.spinVictim.setPosition(2 * Math.cos(angleToTarget) + this.sarcosuchus.posX, this.sarcosuchus.posY, 2 * Math.sin(angleToTarget) + this.sarcosuchus.posZ);
-                this.sarcosuchus.getLookHelper().setLookPositionWithEntity(this.spinVictim, 30.0F, 30.0F);
-                this.sarcosuchus.attackEntityUsingSpin(this.spinVictim);
-                this.spinVictim.motionX = 0;
-                this.spinVictim.motionY = 0;
-                this.spinVictim.motionZ = 0;
+                RiftMessages.WRAPPER.sendToServer(new RiftSarcosuchusSpinTargeting(this.sarcosuchus, this.spinVictim));
                 if (this.sarcosuchus.isTamed() && this.spinTime % 10 == 0) this.sarcosuchus.setEnergy(this.sarcosuchus.getEnergy() - 1);
                 if (this.spinTime >= 100) this.spinFlag = false;
                 this.spinTime++;
