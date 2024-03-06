@@ -16,8 +16,11 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MoverType;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemFood;
@@ -47,6 +50,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
     private final PathNavigateRiftWaterCreature waterNavigate;
     private final PathNavigateGround landNavigate;
     private boolean amphibiousInWater;
+    public RiftCreaturePart bodyPart;
 
     public RiftWaterCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn, creatureType);
@@ -178,10 +182,15 @@ public abstract class RiftWaterCreature extends RiftCreature {
     }
 
     public void updateParts() {
+        if (this.bodyPart != null) this.bodyPart.onUpdate();
         if (this.headPart != null) this.headPart.onUpdate();
     }
 
     public void removeParts() {
+        if (this.bodyPart != null) {
+            this.world.removeEntityDangerously(this.bodyPart);
+            this.bodyPart = null;
+        }
         if (this.headPart != null) {
             this.world.removeEntityDangerously(this.headPart);
             this.headPart = null;
@@ -236,6 +245,11 @@ public abstract class RiftWaterCreature extends RiftCreature {
     public boolean canBreatheUnderwater()
     {
         return true;
+    }
+
+    @Override
+    public boolean isInWater() {
+        return this.world.getBlockState(this.getPosition()).getMaterial() == Material.WATER;
     }
 
     public boolean canFlop() {
@@ -299,5 +313,70 @@ public abstract class RiftWaterCreature extends RiftCreature {
     @SideOnly(Side.CLIENT)
     public boolean shouldRender(ICamera camera) {
         return this.inFrustrum(camera, this.headPart);
+    }
+
+    @Override
+    public void travel(float strafe, float vertical, float forward) {
+        if (this.isSaddled() && this.isBeingRidden() && this.canBeSteered()) {
+            EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();
+            if (controller != null && this.isInWater()) {
+                this.rotationYaw = controller.rotationYaw;
+                this.prevRotationYaw = this.rotationYaw;
+                this.rotationPitch = controller.rotationPitch * 0.5f;
+                this.setRotation(this.rotationYaw, this.rotationPitch);
+                this.renderYawOffset = this.rotationYaw;
+                strafe = controller.moveStrafing * 0.5f;
+                forward = controller.moveForward;
+                this.stepHeight = 1.0F;
+                this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1F;
+                this.fallDistance = 0;
+                float moveSpeedMod = (this.getEnergy() > 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
+                float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
+                float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
+
+                this.moveRelative(strafe, this.isUsingSwimControls() ? vertical : 0, forward, 0.05F);
+                float f4 = 0.6F;
+                float d0 = (float) EnchantmentHelper.getDepthStriderModifier(this);
+                if (d0 > 3.0F) d0 = 3.0F;
+                if (!this.onGround) d0 *= 0.5F;
+                if (d0 > 0.0F) f4 += (0.54600006F - f4) * d0 / 3.0F;
+                this.move(MoverType.SELF, this.motionX, this.isUsingSwimControls() ? this.motionY : 0, this.motionZ);
+                this.motionX *= f4;
+                this.motionX *= 0.900000011920929D;
+                this.motionY *= 0.900000011920929D;
+                this.motionY *= f4;
+                this.motionZ *= 0.900000011920929D;
+                this.motionZ *= f4;
+
+                if (this.isAmphibious() && forward > 0) {
+                    BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
+                    BlockPos above = ahead.up();
+                    if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                        this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
+                    }
+                }
+            }
+            else super.travel(strafe, vertical, forward);
+        }
+        else {
+            if (this.isInWater()) {
+                if (this.getTameStatus() == TameStatusType.SIT) {
+                    this.moveRelative(0, 0, 0, 0.01f);
+                    this.move(MoverType.SELF, 0, 0, 0);
+                }
+                else {
+                    this.moveRelative(strafe, vertical, forward, 0.01f);
+                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+
+                    this.motionX *= 0.9;
+                    this.motionY *= 0.9;
+                    this.motionZ *= 0.9;
+
+                    if (this.getAttackTarget() == null) this.motionY -= 0.005;
+                }
+            }
+            else super.travel(strafe, vertical, forward);
+        }
     }
 }

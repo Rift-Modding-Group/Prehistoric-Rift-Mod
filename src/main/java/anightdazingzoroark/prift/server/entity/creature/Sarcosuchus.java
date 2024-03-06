@@ -184,6 +184,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         if (scale > this.oldScale) {
             this.oldScale = scale;
             this.removeParts();
+            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.125f, scale * 0.75f, scale * 0.675f, 1f);
             this.headPart = new RiftCreaturePart(this, 1.625f, 0, 0.125f, scale * 0.625f, scale * 0.625f, 1.5f);
             this.snoutPart = new RiftCreaturePart(this, 2.5f, 0, 0.2f, scale * 0.55f, scale * 0.5f, 1.5f);
             this.frontBodyPart = new RiftCreaturePart(this, 0.75f, 0, 0.125f, scale * 0.75f, scale * 0.65f, 1f);
@@ -207,6 +208,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         if (this.tail4 != null) this.tail4.onUpdate();
 
         float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.175f : 0;
+        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
         if (this.snoutPart != null) this.snoutPart.setPositionAndUpdate(this.snoutPart.posX, this.snoutPart.posY + sitOffset, this.snoutPart.posZ);
         if (this.frontBodyPart != null) this.frontBodyPart.setPositionAndUpdate(this.frontBodyPart.posX, this.frontBodyPart.posY + sitOffset, this.frontBodyPart.posZ);

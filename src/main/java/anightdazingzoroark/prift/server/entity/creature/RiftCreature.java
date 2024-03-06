@@ -52,6 +52,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import scala.Int;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -65,6 +66,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable {
+    private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> RANGED_ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOWER_HEAD = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -185,6 +187,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     protected void entityInit() {
         super.entityInit();
+        this.dataManager.register(LEVEL, 1);
         this.dataManager.register(ATTACKING, Boolean.FALSE);
         this.dataManager.register(RANGED_ATTACKING, Boolean.FALSE);
         this.dataManager.register(LOWER_HEAD, Boolean.FALSE);
@@ -635,6 +638,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setAttackTarget(null);
                     if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
                     this.world.setEntityState(this, (byte)7);
+                    this.enablePersistence();
                 }
                 else {
                     this.consumeItemFromStack(player, itemstack);
@@ -1008,8 +1012,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
     //herdin stuff stops here
 
+    public int getLevel() {
+        return this.dataManager.get(LEVEL);
+    }
+
+    public void setLevel(int variant) {
+        this.dataManager.set(LEVEL, variant);
+    }
+
+
     public int getVariant() {
-        return this.dataManager.get(VARIANT).intValue();
+        return this.dataManager.get(VARIANT);
     }
 
     public void setVariant(int variant) {
@@ -1021,7 +1034,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void setAttacking(boolean value) {
-        this.dataManager.set(ATTACKING, Boolean.valueOf(value));
+        this.dataManager.set(ATTACKING, value);
         this.setActing(value);
     }
 
@@ -1030,7 +1043,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void setRangedAttacking(boolean value) {
-        this.dataManager.set(RANGED_ATTACKING, Boolean.valueOf(value));
+        this.dataManager.set(RANGED_ATTACKING, value);
         this.setActing(value);
     }
 
@@ -1559,32 +1572,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
-                float f4;
 
                 if (this.isFloating && forward > 0) {
                     if (this.bodyPart != null) {
-                        BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
+                        BlockPos ahead = new BlockPos(this.posX + Math.sin(-this.rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(this.rotationYaw * 0.017453292F));
                         BlockPos above = ahead.up();
                         if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
                             this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
                         }
                     }
-                }
-                if ((this instanceof RiftWaterCreature) && this.isInWater()) {
-                    RiftWaterCreature waterCreature = (RiftWaterCreature) this;
-                    this.moveRelative(strafe, waterCreature.isUsingSwimControls() ? vertical : 0, forward, 0.05F);
-                    f4 = 0.6F;
-                    float d0 = (float) EnchantmentHelper.getDepthStriderModifier(this);
-                    if (d0 > 3.0F) d0 = 3.0F;
-                    if (!this.onGround) d0 *= 0.5F;
-                    if (d0 > 0.0F) f4 += (0.54600006F - f4) * d0 / 3.0F;
-                    this.move(MoverType.SELF, this.motionX, waterCreature.isUsingSwimControls() ? this.motionY : 0, this.motionZ);
-                    this.motionX *= f4;
-                    this.motionX *= 0.900000011920929D;
-                    this.motionY *= 0.900000011920929D;
-                    this.motionY *= f4;
-                    this.motionZ *= 0.900000011920929D;
-                    this.motionZ *= f4;
                 }
                 else super.travel(strafe, vertical, forward);
             }
@@ -1602,24 +1598,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
             }
-            //for underwater mobs
-            else if (this.isInWater() && !this.isFloating && (this instanceof RiftWaterCreature)) {
-                if (this.getTameStatus() == TameStatusType.SIT) {
-                    this.moveRelative(0, 0, 0, 0.01f);
-                    this.move(MoverType.SELF, 0, 0, 0);
-                }
-                else {
-                    this.moveRelative(strafe, vertical, forward, 0.01f);
-                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-
-                    this.motionX *= 0.9;
-                    this.motionY *= 0.9;
-                    this.motionZ *= 0.9;
-
-                    if (this.getAttackTarget() == null) this.motionY -= 0.005;
-                }
-            }
-            else if (!this.isInWater()) super.travel(strafe, vertical, forward);
+            else super.travel(strafe, vertical, forward);
         }
     }
 

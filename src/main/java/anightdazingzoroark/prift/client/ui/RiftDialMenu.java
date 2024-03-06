@@ -80,11 +80,11 @@ public class RiftDialMenu extends GuiScreen {
         int numItems = this.choices.size();
 
         String creatureTypeName = "entity."+creature.creatureType.name().toLowerCase()+".name";
-        String creatureName = creature.hasCustomName() ? creature.getName()+"\n" : "";
-        String string = creatureName + I18n.format(creatureTypeName);
+        String creatureName = creature.getCustomNameTag();
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.75f, 0.75f, 0.75f);
-        this.fontRenderer.drawSplitString(string, (int)((width / 0.75 / 2) - (this.fontRenderer.getStringWidth(string) / 2)), (int)(((height / 0.75) - this.fontRenderer.FONT_HEIGHT) / 2), 80, 0xFFFFFFFF);
+        this.fontRenderer.drawString(I18n.format(creatureTypeName), (int)((width / 0.75 / 2) - (this.fontRenderer.getStringWidth(I18n.format(creatureTypeName)) / 2)), (int)(((height / 0.75) - this.fontRenderer.FONT_HEIGHT) / 2) + 8, 0xFFFFFF);
+        if (this.creature.hasCustomName()) this.fontRenderer.drawString(I18n.format(creatureName), (int)((width / 0.75 / 2) - (this.fontRenderer.getStringWidth(I18n.format(creatureName)) / 2)), (int)(((height / 0.75) - this.fontRenderer.FONT_HEIGHT) / 2) - 8, 0xFFFFFF);
         GlStateManager.popMatrix();
 
         float radiusIn = 40f;
