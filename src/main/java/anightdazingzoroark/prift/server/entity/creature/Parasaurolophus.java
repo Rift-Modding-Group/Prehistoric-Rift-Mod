@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.codetaylor.mc.athenaeum.util.Properties;
 import anightdazingzoroark.prift.RiftInitialize;
@@ -68,6 +69,9 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
         this.isRideable = true;
         this.attackWidth = 3.5f;
         this.saddleItem = ParasaurolophusConfig.parasaurolophusSaddleItem;
+        this.attackDamage = ParasaurolophusConfig.damage;
+        this.healthLevelMultiplier = ParasaurolophusConfig.healthMultiplier;
+        this.damageLevelMultiplier = ParasaurolophusConfig.damageMultiplier;
     }
 
     @Override
@@ -80,7 +84,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(ParasaurolophusConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
 

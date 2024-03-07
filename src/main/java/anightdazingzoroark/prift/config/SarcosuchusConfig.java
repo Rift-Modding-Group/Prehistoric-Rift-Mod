@@ -7,6 +7,8 @@ public class SarcosuchusConfig extends RiftConfig {
     private static int initMaxHealth;
     public static int damage;
     private static int initDamage;
+    public static double healthMultiplier = 0.1;
+    public static double damageMultiplier = 0.5;
     public static String[] sarcosuchusFavoriteFood = {"minecraft:beef:0:0.025", "minecraft:cooked_beef:0:0.05", "minecraft:porkchop:0:0.025", "minecraft:cooked_porkchop:0:0.05", "minecraft:chicken:0:0.025", "minecraft:cooked_chicken:0:0.05", "minecraft:mutton:0:0.025", "minecraft:cooked_mutton:0:0.05", "minecraft:rabbit:0:0.025", "minecraft:cooked_rabbit:0:0.05", "minecraft:rotten_flesh:0:0.05", "prift:raw_exotic_meat:0:0.025", "prift:cooked_exotic_meat:0:0.05", "prift:raw_fibrous_meat:0:0", "prift:cooked_fibrous_meat:0:0", "prift:raw_hadrosaur_meat:0:0.025", "prift:cooked_hadrosaur_meat:0:0.05", "prift:raw_megapiranha:0:0.05", "prift:cooked_megapiranha:0:0.075"};
     public static String[] sarcosuchusTamingFood = {"prift:basic_carnivore_meal:0:0.10", "prift:advanced_carnivore_meal:0:0.33"};
     public static String[] sarcosuchusTargets = {"prift:megapiranha"};
@@ -24,8 +26,10 @@ public class SarcosuchusConfig extends RiftConfig {
     @Override
     public void init() {
         super.init();
-        maxHealth = config.getInt("Max health for this creature", "Creature Stats", initMaxHealth, 1, 69420666, "Maximum health of this creature");
-        damage = config.getInt("Max damage for this creature", "Creature Stats", initDamage, 0, 69420666, "Maximum (melee) damage of this creature");
+        maxHealth = config.getInt(RiftConfig.healthConfigName, "Creature Stats", initMaxHealth, 1, 69420666, RiftConfig.healthConfigMessage);
+        damage = config.getInt(RiftConfig.damageConfigName, "Creature Stats", initDamage, 0, 69420666, RiftConfig.damageConfigMessage);
+        healthMultiplier = config.getFloat(RiftConfig.healthMultiplierConfigName, "Creature Stats", 0.1f, 0, 1f, RiftConfig.healthMultiplierConfigMessage);
+        damageMultiplier = config.getFloat(RiftConfig.damageMultiplierConfigName, "Creature Stats", 0.5f, 0, 1f, RiftConfig.damageMultiplierConfigMessage);
 
         sarcosuchusFavoriteFood = config.getStringList("Sarcosuchus Favorite Food", "General", new String[]{"minecraft:beef:0:0.025", "minecraft:cooked_beef:0:0.05", "minecraft:porkchop:0:0.025", "minecraft:cooked_porkchop:0:0.05", "minecraft:chicken:0:0.025", "minecraft:cooked_chicken:0:0.05", "minecraft:mutton:0:0.025", "minecraft:cooked_mutton:0:0.05", "minecraft:rabbit:0:0.025", "minecraft:cooked_rabbit:0:0.05", "minecraft:rotten_flesh:0:0.05", "prift:raw_exotic_meat:0:0.025", "prift:cooked_exotic_meat:0:0.05", "prift:raw_fibrous_meat:0:0", "prift:cooked_fibrous_meat:0:0", "prift:raw_hadrosaur_meat:0:0.025", "prift:cooked_hadrosaur_meat:0:0.05", "prift:raw_megapiranha:0:0.05", "prift:cooked_megapiranha:0:0.075"}, "List of foods Sarcosuchuses will eat (when tamed) or pick up when on the ground. To add items add \"<insert item's identifier here>:<insert data id here>:<insert percentage of health that will be healed upon consumption here>\"");
         sarcosuchusTamingFood = config.getStringList("Sarcosuchus Taming Food", "General", new String[]{"prift:basic_carnivore_meal:0:0.10", "prift:advanced_carnivore_meal:0:0.33"}, "List of foods Sarcosuchuses must be fed to be tamed (if wild) or bred (if tamed). To add items add \"<insert item's identifier here>:<insert data id here>:0\"");

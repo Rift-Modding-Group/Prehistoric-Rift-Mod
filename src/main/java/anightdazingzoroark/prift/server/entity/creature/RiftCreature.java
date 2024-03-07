@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.SSRCompatUtils;
+import anightdazingzoroark.prift.config.TyrannosaurusConfig;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
@@ -67,6 +68,7 @@ import java.util.stream.Stream;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> RANGED_ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOWER_HEAD = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -152,6 +154,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int healthRegen;
     protected int herdSize = 1;
     protected RiftCreature herdLeader;
+    protected double attackDamage;
+    public double healthLevelMultiplier;
+    public double damageLevelMultiplier;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -188,6 +193,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(LEVEL, 1);
+        this.dataManager.register(XP, 0);
         this.dataManager.register(ATTACKING, Boolean.FALSE);
         this.dataManager.register(RANGED_ATTACKING, Boolean.FALSE);
         this.dataManager.register(LOWER_HEAD, Boolean.FALSE);
@@ -233,6 +239,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20D);
+        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
     }
 
     @Override
@@ -240,11 +247,28 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public IEntityLivingData onInitialSpawn(@Nonnull DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
         super.onInitialSpawn(difficulty, livingdata);
         this.setAgeInDays(1);
+        //manage level based on distance from 0, 0
+        double distFromCenter = Math.sqrt(this.posX * this.posX + this.posZ * this.posZ);
+        double level = Math.floor((distFromCenter / 800)) * 10 + RiftUtil.randomInRange(1, 10) + this.levelAddFromDifficulty();
+        this.setLevel(RiftUtil.clamp((int) level, 0, 100));
         if (this.canDoHerding()) {
             if (!(livingdata instanceof HerdData)) return new HerdData(this);
             this.addToHerdLeader(((HerdData)livingdata).herdLeader);
         }
         return livingdata;
+    }
+
+    private int levelAddFromDifficulty() {
+        switch (this.world.getDifficulty()) {
+            case PEACEFUL:
+            case EASY:
+                return 0;
+            case NORMAL:
+                return 5;
+            case HARD:
+                return 10;
+        }
+        return 0;
     }
 
     @Override
@@ -272,6 +296,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (this.getHealth() < this.getMaxHealth()) this.naturalRegen();
                     else this.healthRegen = 0;
                 }
+                this.manageXPAndLevel();
             }
         }
         if (this.world.isRemote) this.setControls();
@@ -370,6 +395,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    private void manageXPAndLevel() {
+        if (this.getXP() >= this.getMaxXP() && this.getLevel() < 100) {
+            int tempXp = this.getXP() - this.getMaxXP();
+            this.setXP(tempXp);
+            this.setLevel(this.getLevel() + 1);
+            ((EntityPlayer)(this.getOwner())).sendStatusMessage(new TextComponentTranslation("reminder.level_up", this.getDisplayName(), this.getLevel()), false);
+        }
+    }
+
     public void updateParts() {
         if (this.headPart != null) this.headPart.onUpdate();
         if (this.bodyPart != null) this.bodyPart.onUpdate();
@@ -432,7 +466,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
             if (this.isBeingRidden()) {
-                boolean isSprinting = this.getControllingPassenger() != null ? this.getControllingPassenger().isSprinting() : false;
+                boolean isSprinting = this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting();
                 if (this.energyMod > (int)((double)this.creatureType.getMaxEnergyModMovement() * (isSprinting ? 0.75D : 1D))) {
                     this.setEnergy(this.getEnergy() - 1);
                     this.energyMod = 0;
@@ -560,6 +594,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return false;
     }
 
+    protected int getExperiencePoints(EntityPlayer player) {
+        return this.experienceValue;
+    }
+
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
@@ -661,9 +699,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void manageAttributes() {
         double healthValue = ((this.maxCreatureHealth - this.minCreatureHealth)/24000D) * (this.getAgeInTicks() - 24000D) + this.maxCreatureHealth;
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(RiftUtil.clamp(Math.floor(healthValue), this.minCreatureHealth, this.maxCreatureHealth));
+        double baseHealthValue = RiftUtil.clamp(Math.floor(healthValue), this.minCreatureHealth, this.maxCreatureHealth);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(baseHealthValue + (this.healthLevelMultiplier) * (this.getLevel() - 1) * baseHealthValue);
+        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(this.attackDamage + (double)Math.round((this.getLevel() - 1) * this.damageLevelMultiplier));
         if (this.justSpawned()) {
-            this.heal((float) this.maxCreatureHealth);
+            this.heal((float) (this.maxCreatureHealth + (0.1D) * (this.getLevel() - 1) * this.maxCreatureHealth));
             this.setSpeed(this.speed);
             this.setWaterSpeed(this.waterSpeed);
             this.setJustSpawned(false);
@@ -816,6 +856,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
+        compound.setInteger("Level", this.getLevel());
+        compound.setInteger("XP", this.getXP());
         compound.setInteger("Variant", this.getVariant());
         compound.setByte("TameStatus", (byte) this.getTameStatus().ordinal());
         compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
@@ -858,6 +900,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
+        this.setLevel(compound.getInteger("Level"));
+        this.setXP(compound.getInteger("XP"));
         this.setVariant(compound.getInteger("Variant"));
         if (compound.hasKey("TameStatus")) this.setTameStatus(TameStatusType.values()[compound.getByte("TameStatus")]);
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
@@ -1020,6 +1064,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(LEVEL, variant);
     }
 
+    public int getXP() {
+        return this.dataManager.get(XP);
+    }
+
+    public void setXP(int value) {
+        if (this.getLevel() == 100) this.dataManager.set(XP, RiftUtil.clamp(value, 0, this.getMaxXP()));
+        else this.dataManager.set(XP, value);
+    }
+
+    public int getMaxXP() {
+        return (int)Math.round((double)this.getLevel() * this.creatureType.getLevelupRate().getRate() * 25D);
+    }
 
     public int getVariant() {
         return this.dataManager.get(VARIANT);

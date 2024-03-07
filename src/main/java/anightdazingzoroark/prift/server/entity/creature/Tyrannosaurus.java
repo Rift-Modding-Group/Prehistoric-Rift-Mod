@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
@@ -141,6 +142,9 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         this.isRideable = true;
         this.attackWidth = 6.5f;
         this.saddleItem = TyrannosaurusConfig.tyrannosaurusSaddleItem;
+        this.attackDamage = TyrannosaurusConfig.damage;
+        this.healthLevelMultiplier = TyrannosaurusConfig.healthMultiplier;
+        this.damageLevelMultiplier = TyrannosaurusConfig.damageMultiplier;
     }
 
     @Override
@@ -154,7 +158,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(TyrannosaurusConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }

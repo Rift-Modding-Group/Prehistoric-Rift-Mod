@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.ApatosaurusConfig;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
@@ -69,6 +70,9 @@ public class Dimetrodon extends RiftCreature {
         this.speed = 0.20D;
         this.isRideable = false;
         this.attackWidth = 3f;
+        this.attackDamage = DimetrodonConfig.damage;
+        this.healthLevelMultiplier = DimetrodonConfig.healthMultiplier;
+        this.damageLevelMultiplier = DimetrodonConfig.damageMultiplier;
     }
 
     @Override
@@ -83,7 +87,6 @@ public class Dimetrodon extends RiftCreature {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(DimetrodonConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
 

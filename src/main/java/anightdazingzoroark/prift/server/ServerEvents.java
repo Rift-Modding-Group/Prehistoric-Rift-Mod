@@ -128,6 +128,15 @@ public class ServerEvents {
         }
     }
 
+    //give xp to creature for every creature it kills
+    @SubscribeEvent
+    public void gainXpFromKill(LivingDeathEvent event) {
+        if (event.getSource().getTrueSource() instanceof RiftCreature) {
+            RiftCreature creature = (RiftCreature) event.getSource().getTrueSource();
+            if (creature.isTamed()) creature.setXP(creature.getXP() + 8);
+        }
+    }
+
     //manage setting creature workstation
     @SubscribeEvent
     public void setCreatureWorkstation(PlayerInteractEvent.RightClickBlock event) {

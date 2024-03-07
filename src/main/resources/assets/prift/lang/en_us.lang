@@ -115,7 +115,6 @@ radial.note.too_busy=This creature is too busy to be ridden!
 radial.note.too_young_saddle=This creature is too young to be saddled!
 radial.note.too_young_unclaim=Babies cannot be unclaimed! >:(
 radial.note.too_young_behavior=This creature is too young to have its behavior tamed!
-reminder.insufficient_pack_members=Not enough pack members to use!
 
 radial.popup_choice.set_home=Are you sure you want to clear this creature's home position?
 radial.popup_choice.unclaim=Are you sure you want to unclaim this creature? It can be then claimed by anyone else, and if it remains unclaimed within 1 day, it becomes wild again.
@@ -126,6 +125,7 @@ radial.popup_button.no=No
 radial.popup_button.confirm=Confirm
 radial.popup_button.cancel=Cancel
 
+reminder.insufficient_pack_members=Not enough pack members to use!
 reminder.insufficient_energy=%s does not have enough energy to use this!
 reminder.low_energy=%s is low on energy!
 reminder.no_energy=%s is out of energy! It needs to rest in order to regenerate!
@@ -134,6 +134,7 @@ reminder.taming_finished=You have successfully tamed a %s!
 reminder.not_creature_owner=This creature is owned by %s!
 reminder.claim_creature=You have claimed %s!
 reminder.unclaim_creature=You have unclaimed %s!
+reminder.level_up=%s has reached Level %s!
 
 prift.egg.time=Time
 prift.egg.minutes=minute(s)
@@ -199,3 +200,4 @@ turrettargeting.players=%s will now target other players
 turrettargeting.players_and_other_tames=%s will now target other players and their tamed creatures
 turrettargeting.hostiles=%s will now target hostile mobs
 turrettargeting.all=%s will now target anything it deems unfriendly
+tametrait.level=Level %s

@@ -7,6 +7,14 @@ public class RiftConfig {
     public String[] spawnPlaces;
     public boolean canSpawn;
     private final String[] initSpawnPlaces;
+    protected static final String healthConfigName = "Base health for this creature";
+    protected static final String healthConfigMessage = "Health of this creature at level 1";
+    protected static final String damageConfigName = "Base damage for this creature";
+    protected static final String damageConfigMessage = "(Melee) Damage of this creature at level 1";
+    protected static final String healthMultiplierConfigName = "Health multiplier (due to level) of this creature";
+    protected static final String healthMultiplierConfigMessage = "Health multiplier of this creature. Note that the formula for creature health is equal to baseHealth + (healthMultiplier * baseHealth * (level - 1))";
+    protected static final String damageMultiplierConfigName = "Damage multiplier (due to level) of this creature";
+    protected static final String damageMultiplierConfigMessage = "Damage multiplier of this creature. Note that the formula for creature damage is equal to baseDamage + (damageMultiplier * (level - 1))";
 
     public RiftConfig(Configuration config, String[] spawnPlaces) {
         this.config = config;

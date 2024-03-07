@@ -4,14 +4,8 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.config.CoelacanthConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.init.Blocks;
-import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -40,6 +34,7 @@ public class Coelacanth extends RiftWaterCreature {
         this.setSize(0.5f, 1f);
         this.experienceValue = 3;
         this.speed = 0.5D;
+        this.healthLevelMultiplier = CoelacanthConfig.healthMultiplier;
     }
 
     protected void initEntityAI() {

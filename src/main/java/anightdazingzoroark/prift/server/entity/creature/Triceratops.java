@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -53,12 +54,14 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         this.attackWidth = 4.875f;
         this.chargeWidth = 20f;
         this.saddleItem = TriceratopsConfig.triceratopsSaddleItem;
+        this.attackDamage = TriceratopsConfig.damage;
+        this.healthLevelMultiplier = TriceratopsConfig.healthMultiplier;
+        this.damageLevelMultiplier = TriceratopsConfig.damageMultiplier;
     }
 
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(TriceratopsConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }

@@ -91,6 +91,9 @@ public class Apatosaurus extends RiftCreature {
         this.attackWidth = 6f;
         this.launchTick = 0;
         this.saddleItem = ApatosaurusConfig.apatosaurusSaddleItem;
+        this.attackDamage = ApatosaurusConfig.damage;
+        this.healthLevelMultiplier = ApatosaurusConfig.healthMultiplier;
+        this.damageLevelMultiplier = ApatosaurusConfig.damageMultiplier;
     }
 
     @Override
@@ -106,7 +109,6 @@ public class Apatosaurus extends RiftCreature {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(ApatosaurusConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }

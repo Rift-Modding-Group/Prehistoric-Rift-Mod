@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -71,6 +72,9 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.contLeapAttackFlag = true;
         this.maxRightClickCooldown = 1800f;
         this.saddleItem = UtahraptorConfig.utahraptorSaddleItem;
+        this.attackDamage = UtahraptorConfig.damage;
+        this.healthLevelMultiplier = UtahraptorConfig.healthMultiplier;
+        this.damageLevelMultiplier = UtahraptorConfig.damageMultiplier;
     }
 
     @Override
@@ -83,7 +87,6 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(UtahraptorConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
 

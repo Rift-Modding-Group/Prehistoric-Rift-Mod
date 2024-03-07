@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -34,6 +35,9 @@ public class Megapiranha extends RiftWaterCreature {
         this.speed = 0.35D;
         this.waterSpeed = 4D;
         this.attackWidth = 2f;
+        this.attackDamage = MegapiranhaConfig.damage;
+        this.healthLevelMultiplier = MegapiranhaConfig.healthMultiplier;
+        this.damageLevelMultiplier = MegapiranhaConfig.damageMultiplier;
     }
 
     @Override
@@ -55,7 +59,6 @@ public class Megapiranha extends RiftWaterCreature {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(MegapiranhaConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
 

@@ -79,12 +79,17 @@ public class RiftDialMenu extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
         int numItems = this.choices.size();
 
-        String creatureTypeName = "entity."+creature.creatureType.name().toLowerCase()+".name";
+        String creatureTypeName = I18n.format("entity."+creature.creatureType.name().toLowerCase()+".name");
         String creatureName = creature.getCustomNameTag();
+        String level = I18n.format("tametrait.level", this.creature.getLevel());
+        String xp = I18n.format(this.creature.getXP()+"/"+this.creature.getMaxXP()+" XP");
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.75f, 0.75f, 0.75f);
-        this.fontRenderer.drawString(I18n.format(creatureTypeName), (int)((width / 0.75 / 2) - (this.fontRenderer.getStringWidth(I18n.format(creatureTypeName)) / 2)), (int)(((height / 0.75) - this.fontRenderer.FONT_HEIGHT) / 2) + 8, 0xFFFFFF);
-        if (this.creature.hasCustomName()) this.fontRenderer.drawString(I18n.format(creatureName), (int)((width / 0.75 / 2) - (this.fontRenderer.getStringWidth(I18n.format(creatureName)) / 2)), (int)(((height / 0.75) - this.fontRenderer.FONT_HEIGHT) / 2) - 8, 0xFFFFFF);
+
+        this.fontRenderer.drawString(xp, (int)((width / 0.75 / 2) - (this.fontRenderer.getStringWidth(xp) / 2)), (int)(((height / 0.75) - this.fontRenderer.FONT_HEIGHT) / 2) + (this.creature.hasCustomName() ? 18 : 12), 0xFFFFFF);
+        this.fontRenderer.drawString(level, (int)((width / 0.75 / 2) - (this.fontRenderer.getStringWidth(level) / 2)), (int)(((height / 0.75) - this.fontRenderer.FONT_HEIGHT) / 2) + (this.creature.hasCustomName() ? 6 : 0), 0xFFFFFF);
+        this.fontRenderer.drawString(creatureTypeName, (int)((width / 0.75 / 2) - (this.fontRenderer.getStringWidth(creatureTypeName) / 2)), (int)(((height / 0.75) - this.fontRenderer.FONT_HEIGHT) / 2) + (this.creature.hasCustomName() ? -6 : -12), 0xFFFFFF);
+        if (this.creature.hasCustomName()) this.fontRenderer.drawString(I18n.format(creatureName), (int)((width / 0.75 / 2) - (this.fontRenderer.getStringWidth(I18n.format(creatureName)) / 2)), (int)(((height / 0.75) - this.fontRenderer.FONT_HEIGHT) / 2) - 18, 0xFFFFFF);
         GlStateManager.popMatrix();
 
         float radiusIn = 40f;

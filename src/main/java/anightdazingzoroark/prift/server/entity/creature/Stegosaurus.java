@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.StegosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
@@ -69,6 +70,9 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.rangedWidth = 12f;
         this.strongAttackCharge = 0;
         this.saddleItem = StegosaurusConfig.stegosaurusSaddleItem;
+        this.attackDamage = StegosaurusConfig.damage;
+        this.healthLevelMultiplier = StegosaurusConfig.healthMultiplier;
+        this.damageLevelMultiplier = StegosaurusConfig.damageMultiplier;
     }
 
     @Override
@@ -80,7 +84,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(StegosaurusConfig.damage);
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
