@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.SSRCompatUtils;
-import anightdazingzoroark.prift.config.TyrannosaurusConfig;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
@@ -14,7 +14,6 @@ import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
-import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -22,7 +21,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
@@ -48,22 +46,21 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.*;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import scala.Int;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable {
@@ -249,7 +246,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setAgeInDays(1);
         //manage level based on distance from 0, 0
         double distFromCenter = Math.sqrt(this.posX * this.posX + this.posZ * this.posZ);
-        double level = Math.floor((distFromCenter / 800)) * 10 + RiftUtil.randomInRange(1, 10) + this.levelAddFromDifficulty();
+        double level = Math.floor((distFromCenter / GeneralConfig.levelingRadius)) * GeneralConfig.levelingRadisIncrement + RiftUtil.randomInRange(1, 10) + this.levelAddFromDifficulty();
         this.setLevel(RiftUtil.clamp((int) level, 0, 100));
         if (this.canDoHerding()) {
             if (!(livingdata instanceof HerdData)) return new HerdData(this);
@@ -259,14 +256,30 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private int levelAddFromDifficulty() {
+        int easyIncrement = 0, normalIncrement = 0, hardIncrement = 0;
+        for (String diffString : GeneralConfig.difficultyIncrement) {
+            int getColon = diffString.indexOf(":");
+            int increment = Integer.parseInt(diffString.substring(getColon + 1));
+            switch (EnumDifficulty.valueOf(diffString.substring(0, getColon))) {
+                case EASY:
+                    easyIncrement = increment;
+                    break;
+                case NORMAL:
+                    normalIncrement = increment;
+                    break;
+                case HARD:
+                    hardIncrement = increment;
+                    break;
+            }
+        }
+
         switch (this.world.getDifficulty()) {
-            case PEACEFUL:
             case EASY:
-                return 0;
+                return easyIncrement;
             case NORMAL:
-                return 5;
+                return easyIncrement + normalIncrement;
             case HARD:
-                return 10;
+                return easyIncrement + normalIncrement + hardIncrement;
         }
         return 0;
     }
@@ -594,8 +607,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return false;
     }
 
-    protected int getExperiencePoints(EntityPlayer player) {
+    @Override
+    public int getExperiencePoints(EntityPlayer player) {
         return this.experienceValue;
+    }
+
+    @Override
+    public String getName() {
+        if (this.hasCustomName()) return this.getCustomNameTag() + " ("+ I18n.format("tametrait.level", this.getLevel())+")";
+        else {
+            String s = EntityList.getEntityString(this);
+            if (s == null) s = "generic";
+            return I18n.format("entity." + s + ".name") + " ("+ I18n.format("tametrait.level", this.getLevel())+")";
+        }
     }
 
     @Override

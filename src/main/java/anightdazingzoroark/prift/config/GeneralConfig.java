@@ -17,6 +17,11 @@ public class GeneralConfig  extends RiftConfig {
     public static String[] universalCarnivoreTargets = {"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:llama", "minecraft:villager", "prift:stegosaurus", "prift:dodo", "prift:triceratops", "prift:parasaurolophus"};
     public static String[] turretModeHostileTargets = {"minecraft:cave_spider", "minecraft:enderman", "minecraft:spider", "minecraft:zombie_pigman", "minecraft:blaze", "minecraft:creeper", "minecraft:elder_guardian", "minecraft:endermite", "minecraft:evoker", "minecraft:ghast", "minecraft:guardian", "minecraft:husk", "minecraft:magma_cube", "minecraft:shulker", "minecraft:silverfish", "minecraft:skeleton", "minecraft:slime", "minecraft:stray", "minecraft:vex", "minecraft:vindicator", "minecraft:witch", "minecraft:wither_skeleton", "minecraft:zombie", "minecraft:zombie_villager", "prift:tyrannosaurus", "prift:utahraptor"};
 
+    //creature leveling
+    public static int levelingRadius = 800;
+    public static int levelingRadisIncrement = 10;
+    public static String[] difficultyIncrement = {"EASY:0", "NORMAL:5", "HARD:10"};
+
     //debug
     public static boolean quickEggHatch = false;
 
@@ -41,6 +46,11 @@ public class GeneralConfig  extends RiftConfig {
         canDropFromCreatureKill = config.getBoolean("Mobs killed by wild creatures drop loot", "General", false, "Mostly to try manage lag. This manages if mobs killed by wild creatures from this mod will drop their loot.");
         universalCarnivoreTargets = config.getStringList("List of mobs carnivores will attack", "General", new String[]{"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:llama", "minecraft:villager", "prift:stegosaurus", "prift:dodo", "prift:triceratops", "prift:parasaurolophus"}, "Identifiers of mobs that all carnivores will actively hunt");
         turretModeHostileTargets = config.getStringList("Hostile mobs targeted by mobs in turret mode", "General", new String[]{"minecraft:cave_spider", "minecraft:enderman", "minecraft:spider", "minecraft:zombie_pigman", "minecraft:blaze", "minecraft:creeper", "minecraft:elder_guardian", "minecraft:endermite", "minecraft:evoker", "minecraft:ghast", "minecraft:guardian", "minecraft:husk", "minecraft:magma_cube", "minecraft:shulker", "minecraft:silverfish", "minecraft:skeleton", "minecraft:slime", "minecraft:stray", "minecraft:vex", "minecraft:vindicator", "minecraft:witch", "minecraft:wither_skeleton", "minecraft:zombie", "minecraft:zombie_villager", "prift:tyrannosaurus", "prift:utahraptor"}, "Identifiers of mobs that creatures in turret mode will attack, if their targeting is set to \"Attack Hostiles\"");
+
+        //creature leveling
+        levelingRadius = config.getInt("Level based on distance from (0, 0)", "Creature Leveling", 800, 0, 69420666, "Distance from (0, 0) from which creature levels get increased. This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");
+        levelingRadisIncrement = config.getInt("Level increment based on distance from (0, 0)", "Creature Leveling", 10, 0, 69420666, "Level increment based on distance from (0, 0). This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");
+        difficultyIncrement = config.getStringList("Level increment based on difficulty", "Creature Leveling", new String[]{"EASY:0", "NORMAL:5", "HARD:5"}, "Level increment based on the difficulty setting of the world. Only the number may be edited, changing the names can cause crashes. Note that the numbers are additive, so if Easy, Normal, and Hard are set to 5, the increment will be 15. Changing the order of the strings can also cause a crash.");
 
         //debug
         quickEggHatch = config.getBoolean("All eggs hatch quickly", "Debug", false, "Turning this on makes all eggs hatch within 5 seconds. Mainly here for testing purposes, idk i could have made this a gamerule or smth");

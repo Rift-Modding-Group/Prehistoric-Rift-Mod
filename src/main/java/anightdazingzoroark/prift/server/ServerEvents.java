@@ -133,7 +133,13 @@ public class ServerEvents {
     public void gainXpFromKill(LivingDeathEvent event) {
         if (event.getSource().getTrueSource() instanceof RiftCreature) {
             RiftCreature creature = (RiftCreature) event.getSource().getTrueSource();
-            if (creature.isTamed()) creature.setXP(creature.getXP() + 8);
+            if (creature.isTamed()) {
+                if (event.getEntity() instanceof EntityLiving) {
+                    EntityLiving entityLiving = (EntityLiving) event.getEntity();
+                    int newXp = 5 * entityLiving.getExperiencePoints((EntityPlayer) creature.getOwner());
+                    creature.setXP(creature.getXP() + newXp);
+                }
+            }
         }
     }
 
