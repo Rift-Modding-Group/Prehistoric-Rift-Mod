@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.TyrannosaurusConfig;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -145,6 +146,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         this.attackDamage = TyrannosaurusConfig.damage;
         this.healthLevelMultiplier = TyrannosaurusConfig.healthMultiplier;
         this.damageLevelMultiplier = TyrannosaurusConfig.damageMultiplier;
+        this.densityLimit = TyrannosaurusConfig.tyrannosaurusDensityLimit;
     }
 
     @Override

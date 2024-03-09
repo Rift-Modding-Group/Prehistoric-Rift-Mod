@@ -14,6 +14,7 @@ import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
+import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -154,6 +155,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected double attackDamage;
     public double healthLevelMultiplier;
     public double damageLevelMultiplier;
+    protected int densityLimit;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -413,7 +415,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             int tempXp = this.getXP() - this.getMaxXP();
             this.setXP(tempXp);
             this.setLevel(this.getLevel() + 1);
-            ((EntityPlayer)(this.getOwner())).sendStatusMessage(new TextComponentTranslation("reminder.level_up", this.getDisplayName(), this.getLevel()), false);
+            ((EntityPlayer)(this.getOwner())).sendStatusMessage(new TextComponentTranslation("reminder.level_up", this.getName(false), this.getLevel()), false);
         }
     }
 
@@ -614,11 +616,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public String getName() {
-        if (this.hasCustomName()) return this.getCustomNameTag() + " ("+ I18n.format("tametrait.level", this.getLevel())+")";
+        return this.getName(true);
+    }
+
+    public String getName(boolean includeLevel) {
+        if (this.hasCustomName()) return this.getCustomNameTag() + (includeLevel ? " ("+ I18n.format("tametrait.level", this.getLevel())+")" : "");
         else {
             String s = EntityList.getEntityString(this);
             if (s == null) s = "generic";
-            return I18n.format("entity." + s + ".name") + " ("+ I18n.format("tametrait.level", this.getLevel())+")";
+            return I18n.format("entity." + s + ".name") + (includeLevel ? " ("+ I18n.format("tametrait.level", this.getLevel())+")" : "");
         }
     }
 
@@ -784,9 +790,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             String itemId = foodItem.substring(0, itemIdSecond);
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
             int adder = (int)(Double.parseDouble(foodItem.substring(itemIdThird + 1)) * 100);
+            int levelMod = (int)Math.ceil((double)this.getLevel() / 10D);
             if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == -1) return adder;
-                else if (stack.getMetadata() == itemData) return adder;
+                if (itemData == -1) return adder / levelMod;
+                else if (stack.getMetadata() == itemData) return adder / levelMod;
             }
         }
         return !stack.isEmpty() && stack.getItem() == RiftItems.CREATIVE_MEAL ? 100 : 0;
@@ -990,6 +997,29 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.isClimbing();
     }
 
+    @Override
+    public boolean getCanSpawnHere() {
+        List<String> blockSpawn = Arrays.asList(GeneralConfig.universalSpawnBlocks);
+        IBlockState belowState = this.world.getBlockState(this.getPosition().down());
+        for (String blockVal : blockSpawn) {
+            int colData = blockVal.indexOf(":", blockVal.indexOf(":"));
+            int blockData = Integer.parseInt(blockVal.substring(colData + 1));
+            String blockName = blockVal.substring(0, colData);
+            return Block.getBlockFromName(blockName) == belowState.getBlock() && (blockData == - 1 || belowState.getBlock().getMetaFromState(belowState) == blockData) && this.world.getLight(this.getPosition()) > 8 && !this.world.getBlockState(this.getPosition()).getMaterial().isLiquid() && this.testOtherCreatures();
+        }
+        return false;
+    }
+
+    protected boolean testOtherCreatures() {
+        List<RiftCreature> creatureList = this.world.getEntitiesWithinAABB(this.getClass(), this.getEntityBoundingBox().grow(64D), new Predicate<RiftCreature>() {
+            @Override
+            public boolean apply(@Nullable RiftCreature input) {
+                return !input.isTamed();
+            }
+        });
+        return creatureList.size() < this.densityLimit;
+    }
+
     public boolean canBreatheUnderwater() {
         if (this.headPart != null) return !this.headPart.isUnderwater();
         return false;
@@ -1048,7 +1078,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void addCreatureToHerd(@Nonnull Stream<RiftCreature> stream) {
-        stream.limit(this.maxHerdSize() - this.herdSize).filter(creature -> creature != this).forEach(creature -> creature.addToHerdLeader(this));
+        try {
+            stream.limit(this.maxHerdSize() - this.herdSize).filter(creature -> creature != this).forEach(creature -> creature.addToHerdLeader(this));
+        }
+        catch (Exception e) {}
     }
 
     public double followRange() {

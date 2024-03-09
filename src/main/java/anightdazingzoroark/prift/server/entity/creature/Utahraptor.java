@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -75,6 +76,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.attackDamage = UtahraptorConfig.damage;
         this.healthLevelMultiplier = UtahraptorConfig.healthMultiplier;
         this.damageLevelMultiplier = UtahraptorConfig.damageMultiplier;
+        this.densityLimit = UtahraptorConfig.utahraptorDensityLimit;
     }
 
     @Override

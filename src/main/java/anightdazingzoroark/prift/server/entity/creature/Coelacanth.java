@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.config.ApatosaurusConfig;
 import anightdazingzoroark.prift.config.CoelacanthConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -35,6 +36,7 @@ public class Coelacanth extends RiftWaterCreature {
         this.experienceValue = 3;
         this.speed = 0.5D;
         this.healthLevelMultiplier = CoelacanthConfig.healthMultiplier;
+        this.densityLimit = CoelacanthConfig.coelacanthDensityLimit;
     }
 
     protected void initEntityAI() {

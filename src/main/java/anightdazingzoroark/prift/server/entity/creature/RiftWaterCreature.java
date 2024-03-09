@@ -276,7 +276,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
     @Override
     public boolean getCanSpawnHere() {
-        return true;
+        return this.testOtherCreatures();
     }
 
     protected boolean canTriggerWalking() {

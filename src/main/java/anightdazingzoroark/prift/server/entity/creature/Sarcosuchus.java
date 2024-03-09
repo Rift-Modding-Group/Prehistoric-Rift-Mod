@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -74,6 +75,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.attackDamage = SarcosuchusConfig.damage;
         this.healthLevelMultiplier = SarcosuchusConfig.healthMultiplier;
         this.damageLevelMultiplier = SarcosuchusConfig.damageMultiplier;
+        this.densityLimit = SarcosuchusConfig.sarcosuchusDensityLimit;
     }
 
     @Override

@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.ApatosaurusConfig;
+import anightdazingzoroark.prift.config.CoelacanthConfig;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
@@ -73,6 +74,7 @@ public class Dimetrodon extends RiftCreature {
         this.attackDamage = DimetrodonConfig.damage;
         this.healthLevelMultiplier = DimetrodonConfig.healthMultiplier;
         this.damageLevelMultiplier = DimetrodonConfig.damageMultiplier;
+        this.densityLimit = DimetrodonConfig.dimetrodonDensityLimit;
     }
 
     @Override

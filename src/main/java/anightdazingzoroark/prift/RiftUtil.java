@@ -18,6 +18,8 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
@@ -269,5 +271,12 @@ public class RiftUtil {
         else if (temperature >= 1f && temperature < 1.5f) return EggTemperature.WARM;
         else if (temperature >= 1.5f) return EggTemperature.VERY_WARM;
         else return EggTemperature.NEUTRAL;
+    }
+
+    public static boolean biomeTagMatchFromList(List<String> list, Biome biome) {
+        for (String tag : list) {
+            if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(tag))) return true;
+        }
+        return false;
     }
 }

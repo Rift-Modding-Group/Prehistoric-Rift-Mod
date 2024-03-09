@@ -9,6 +9,7 @@ public class ApatosaurusConfig extends RiftConfig {
     private static int initDamage;
     public static double healthMultiplier = 0.1;
     public static double damageMultiplier = 0.5;
+    public static int apatosaurusDensityLimit = 4;
     public static String[] apatosaurusFavoriteFood = {"minecraft:leaves:-1:0.025", "minecraft:leaves2:-1:0.025"};
     public static String[] apatosaurusBreedingFood = {"prift:basic_herbivore_meal:0:0", "prift:advanced_herbivore_meal:0:0"};
     public static String apatosaurusSaddleItem = "prift:apatosaurus_platform:0";
@@ -24,6 +25,9 @@ public class ApatosaurusConfig extends RiftConfig {
     @Override
     public void init() {
         super.init();
+
+        apatosaurusDensityLimit = config.getInt("Density Limit", "Spawning", 4, 1, 69620666, "Maximum amount of creatures of this type in a 64 x 64 x 64 area");
+
         maxHealth = config.getInt(RiftConfig.healthConfigName, "Creature Stats", initMaxHealth, 1, 69420666, RiftConfig.healthConfigMessage);
         damage = config.getInt(RiftConfig.damageConfigName, "Creature Stats", initDamage, 0, 69420666, RiftConfig.damageConfigMessage);
         healthMultiplier = config.getFloat(RiftConfig.healthMultiplierConfigName, "Creature Stats", 0.1f, 0, 1f, RiftConfig.healthMultiplierConfigMessage);
@@ -34,7 +38,6 @@ public class ApatosaurusConfig extends RiftConfig {
         apatosaurusSaddleItem = config.getString("Apatosaurus Saddle Item", "General", "prift:apatosaurus_platform:0", "Item that counts as a saddle for this creature. To add an item add \"<insert item's identifier here>:<insert data id here>\"");
         apatosaurusPassengerWhitelist = config.getBoolean("Use Apatosaurus passenger blacklist as a whitelist", "General", false, "Turn the blacklist of mobs that can be made to forcefully ride an Apatosaurus (with a platform) into a whitelist");
         apatosaurusPassengerBlacklist = config.getStringList("Mobs that not can be passengers for the Apatosaurus", "General", new String[]{"minecraft:ender_dragon", "minecraft:wither", "prift:tyrannosaurus", "prift:apatosaurus"}, "Mobs within this list cannot be passengers on the back of an Apatosaurus (with a platform)");
-//        apatosaurusCanBreakBlocks = config.getBoolean("Apatosaurus can break blocks", "General", true, "If true, this mob can break blocks weaker than wood just by walking through them.");
     }
 
     public static double getMaxHealth() {

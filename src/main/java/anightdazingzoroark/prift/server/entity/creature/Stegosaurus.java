@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.StegosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
@@ -73,6 +74,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.attackDamage = StegosaurusConfig.damage;
         this.healthLevelMultiplier = StegosaurusConfig.healthMultiplier;
         this.damageLevelMultiplier = StegosaurusConfig.damageMultiplier;
+        this.densityLimit = StegosaurusConfig.stegosaurusDensityLimit;
     }
 
     @Override
@@ -210,6 +212,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         double d3 = (double) MathHelper.sqrt(d0 * d0 + d2 * d2);
         thrownStegoPlate.setVariant(this.getVariant());
         thrownStegoPlate.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 5F);
+        thrownStegoPlate.setDamage(4D + (double)(this.getLevel())/10D);
         this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
         this.world.spawnEntity(thrownStegoPlate);
     }
@@ -312,7 +315,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     public void controlRangedAttack(double strength) {
         ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this, (EntityPlayer)this.getControllingPassenger());
-        thrownStegoPlate.setDamage(strength * 0.04D + 4D);
+        thrownStegoPlate.setDamage(strength * 0.04D + 4D + (double)(this.getLevel())/10D);
         thrownStegoPlate.setIsCritical(strength >= 50);
         thrownStegoPlate.setVariant(this.getVariant());
         float velocity = (float) strength * 0.015f + 1.5f;

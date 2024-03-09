@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.CoelacanthConfig;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.DodoConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -38,6 +39,7 @@ public class Dodo extends RiftCreature {
         this.speed = 0.25D;
         this.isRideable = false;
         this.healthLevelMultiplier = DodoConfig.healthMultiplier;
+        this.densityLimit = DodoConfig.dodoDensityLimit;
     }
 
     protected void initEntityAI() {

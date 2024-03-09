@@ -97,6 +97,15 @@ public class RiftEntities {
                                 }
                             }
                         }
+                        else if (spawnerType.equals("all")) {
+                            int spawnWeight = Integer.parseInt(entry.substring(partOne + 1, partTwo));
+                            int minCount = Integer.parseInt(entry.substring(partTwo + 1, partThree));
+                            int maxCount = Integer.parseInt(entry.substring(partThree + 1, partFour));
+                            String category = entry.substring(partFour + 1);
+                            for (Biome biome : Biome.REGISTRY) {
+                                EntityRegistry.addSpawn(creatureClass, spawnWeight, minCount, maxCount, EnumCreatureType.valueOf(category), biome);
+                            }
+                        }
                     }
                     else {
                         String spawnerType = entry.substring(1, partOne);

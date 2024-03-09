@@ -94,6 +94,7 @@ public class Apatosaurus extends RiftCreature {
         this.attackDamage = ApatosaurusConfig.damage;
         this.healthLevelMultiplier = ApatosaurusConfig.healthMultiplier;
         this.damageLevelMultiplier = ApatosaurusConfig.damageMultiplier;
+        this.densityLimit = ApatosaurusConfig.apatosaurusDensityLimit;
     }
 
     @Override

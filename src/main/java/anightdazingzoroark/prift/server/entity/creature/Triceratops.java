@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -57,6 +58,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         this.attackDamage = TriceratopsConfig.damage;
         this.healthLevelMultiplier = TriceratopsConfig.healthMultiplier;
         this.damageLevelMultiplier = TriceratopsConfig.damageMultiplier;
+        this.densityLimit = TriceratopsConfig.triceratopsDensityLimit;
     }
 
     @Override

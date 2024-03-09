@@ -10,15 +10,13 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
-import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOnHitMultipart;
-import com.charles445.simpledifficulty.api.SDCapabilities;
-import com.charles445.simpledifficulty.api.config.QuickConfig;
 import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -33,30 +31,24 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
-import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class ServerEvents {
     //make people join le discord
@@ -185,11 +177,48 @@ public class ServerEvents {
     //manage adding new drops to blocks
     @SubscribeEvent
     public void onBlockBreak(BlockEvent.HarvestDropsEvent event) {
-        if (event.getState().getBlock().equals(Blocks.GRASS)) {
-            for (Biome biome : Biome.REGISTRY) {
-                if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType("forest"))) {
-                    if (new Random().nextFloat() < 0.5f) event.getDrops().add(new ItemStack(RiftItems.TRUFFLE, RiftUtil.randomInRange(1, 3)));
-                    break;
+        Block block = event.getState().getBlock();
+        IBlockState blockState = event.getState();
+        if (GeneralConfig.truffleSpawning) {
+            List<String> blocksArray = Arrays.asList(GeneralConfig.truffleBlocks);
+            for (String blockEntry : blocksArray) {
+                int itemColonPos = blockEntry.indexOf(":", blockEntry.indexOf(":") + 1);
+                int blockData = Integer.parseInt(blockEntry.substring(itemColonPos + 1));
+                String blockName = blockEntry.substring(0, itemColonPos);
+                if (Block.getBlockFromName(blockName).equals(block) && (blockData == - 1 || block.getMetaFromState(blockState) == blockData)) {
+                    Biome blockBiome = event.getWorld().getBiome(event.getPos());
+
+                    List<String> wlistBiomes = new ArrayList<>();
+                    List<String> blistBiomes = new ArrayList<>();
+                    List<String> wlistTags = new ArrayList<>();
+                    List<String> blistTags = new ArrayList<>();
+
+                    for (String biomeEntry : GeneralConfig.truffleBiomes) {
+                        int firstPos = biomeEntry.indexOf(":");
+                        String newName = biomeEntry.substring(firstPos + 1);
+
+                        if (biomeEntry.substring(0, 1).equals("-")) {
+                            if (biomeEntry.substring(1, firstPos).equals("tag")) blistTags.add(newName);
+                            else if (biomeEntry.substring(1, firstPos).equals("biome")) blistBiomes.add(newName);
+                        }
+                        else {
+                            if (biomeEntry.substring(0, firstPos).equals("tag")) wlistTags.add(newName);
+                            else if (biomeEntry.substring(0, firstPos).equals("biome")) wlistBiomes.add(newName);
+                        }
+                    }
+
+                    if ((wlistBiomes.contains(blockBiome.getRegistryName().toString())
+                            || RiftUtil.biomeTagMatchFromList(wlistTags, blockBiome))
+                            && !blistBiomes.contains(blockBiome.getRegistryName().toString())
+                            && !RiftUtil.biomeTagMatchFromList(blistTags, blockBiome)
+                    ) {
+                        if (new Random().nextDouble() <= GeneralConfig.truffleChance) {
+                            int lowVal = Integer.parseInt(GeneralConfig.truffleAmntRange[0]);
+                            int hiVal = Integer.parseInt(GeneralConfig.truffleAmntRange[1]);
+                            event.getDrops().add(new ItemStack(RiftItems.TRUFFLE, RiftUtil.randomInRange(lowVal, hiVal)));
+                        }
+                        break;
+                    }
                 }
             }
         }

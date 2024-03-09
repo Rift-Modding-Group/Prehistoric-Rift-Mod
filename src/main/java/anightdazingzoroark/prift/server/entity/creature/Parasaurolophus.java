@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.codetaylor.mc.athenaeum.util.Properties;
 import anightdazingzoroark.prift.RiftInitialize;
@@ -72,6 +73,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
         this.attackDamage = ParasaurolophusConfig.damage;
         this.healthLevelMultiplier = ParasaurolophusConfig.healthMultiplier;
         this.damageLevelMultiplier = ParasaurolophusConfig.damageMultiplier;
+        this.densityLimit = ParasaurolophusConfig.parasaurolophusDensityLimit;
     }
 
     @Override
