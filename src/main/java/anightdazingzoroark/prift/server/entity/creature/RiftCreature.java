@@ -1002,7 +1002,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         List<String> blockSpawn = Arrays.asList(GeneralConfig.universalSpawnBlocks);
         IBlockState belowState = this.world.getBlockState(this.getPosition().down());
         for (String blockVal : blockSpawn) {
-            int colData = blockVal.indexOf(":", blockVal.indexOf(":"));
+            int colData = blockVal.indexOf(":", blockVal.indexOf(":") + 1);
             int blockData = Integer.parseInt(blockVal.substring(colData + 1));
             String blockName = blockVal.substring(0, colData);
             return Block.getBlockFromName(blockName) == belowState.getBlock() && (blockData == - 1 || belowState.getBlock().getMetaFromState(belowState) == blockData) && this.world.getLight(this.getPosition()) > 8 && !this.world.getBlockState(this.getPosition()).getMaterial().isLiquid() && this.testOtherCreatures();
