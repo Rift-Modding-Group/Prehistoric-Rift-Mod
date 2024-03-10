@@ -33,34 +33,6 @@ public class RiftUtil {
         return entityLivingBase.getEntityBoundingBox().grow(radius).contains(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static RiftCreature getCreatureFromUUID(World world, UUID uuid) {
-        if (uuid == null) return null;
-        if (!world.isRemote) {
-            for (RiftCreature creature : world.getEntities(RiftCreature.class, new Predicate<RiftCreature>() {
-                @Override
-                public boolean apply(@Nullable RiftCreature input) {
-                    return true;
-                }
-            })) {
-                if (creature.getUniqueID().equals(uuid)) return creature;
-            }
-        }
-        return null;
-    }
-
-    public static String[] removeElementFromArray(String[] array, String element) {
-        int size = array.length;
-        for(int i = 0; i < size; i++) {
-            if (element == array[i]) {
-                for(int j = i; j < (size - 1); j++)
-                    array[j] = array[j+1];
-                size--;
-                i--;
-            }
-        }
-        return array;
-    }
-
     public static boolean blockInOreDicType(Block block, String oreDicType) {
         NonNullList<ItemStack> blocksInOreDicType = OreDictionary.getOres(oreDicType);
         for (ItemStack item : blocksInOreDicType) {

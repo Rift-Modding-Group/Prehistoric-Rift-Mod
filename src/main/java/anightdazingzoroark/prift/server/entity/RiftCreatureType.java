@@ -23,7 +23,8 @@ public enum RiftCreatureType {
     DIMETRODON(Dimetrodon.class, CreatureCategory.MAMMAL, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, null, LevelupRate.NORMAL, DimetrodonRenderer::new, 10968581, 13198105, 90, 0.5f, EggTemperature.NEUTRAL),
     COELACANTH(Coelacanth.class, CreatureCategory.FISH, CreatureDiet.INSECTIVORE, null, null, null, null, CoelacanthRenderer::new, 1329530, 1857680, 0, 0, null),
     MEGAPIRANHA(Megapiranha.class, CreatureCategory.FISH, CreatureDiet.CARNIVORE, null, null, null, null, MegapiranhaRenderer::new, 8421504, 10226700, 0, 0, null),
-    SARCOSUCHUS(Sarcosuchus.class, CreatureCategory.REPTILE, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.SLOW, BlockBreakTier.DIRT, LevelupRate.NORMAL,  SarcosuchusRenderer::new, 2302246, 2627379, 300, 0.5f, EggTemperature.COLD);
+    SARCOSUCHUS(Sarcosuchus.class, CreatureCategory.REPTILE, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL,  SarcosuchusRenderer::new, 2302246, 2627379, 300, 0.5f, EggTemperature.COLD),
+    ANOMALOCARIS(Anomalocaris.class, CreatureCategory.INVERTEBRATE, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.DIRT, LevelupRate.NORMAL, AnomalocarisRenderer::new, 10892050, 12270358, 300, 1f, null);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;
