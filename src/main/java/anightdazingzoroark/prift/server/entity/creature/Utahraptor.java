@@ -261,11 +261,6 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     }
 
     @Override
-    public boolean isTameableByFeeding() {
-        return true;
-    }
-
-    @Override
     public boolean canBeSaddled() {
         return true;
     }

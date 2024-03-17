@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.renderer.entity;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.model.RiftCreatureModel;
+import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -16,17 +17,22 @@ public class AnomalocarisRenderer extends GeoEntityRenderer<RiftCreature> {
 
     @Override
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
-        float scale = RiftUtil.setModelScale(animatable, 1f, 2f);
+        Anomalocaris anomalocaris = (Anomalocaris) animatable;
+        float scale = RiftUtil.setModelScale(anomalocaris, 1f, 2f);
+        float translucency = anomalocaris.isUsingInvisibility() ? 0.25f : 1f;
 
         //hide saddle stuff
-        model.getBone("saddle").get().setHidden(!animatable.isSaddled());
-        model.getBone("leftAppendageSaddle").get().setHidden(!animatable.isSaddled());
-        model.getBone("rightAppendageSaddle").get().setHidden(!animatable.isSaddled());
+        model.getBone("saddle").get().setHidden(!anomalocaris.isSaddled());
+        model.getBone("leftAppendageSaddle").get().setHidden(!anomalocaris.isSaddled());
+        model.getBone("rightAppendageSaddle").get().setHidden(!anomalocaris.isSaddled());
         model.getBone("chest").get().setHidden(true);
 
         GlStateManager.pushMatrix();
         GlStateManager.scale(scale, scale, scale);
-        super.render(model, animatable, partialTicks, red, green, blue, alpha);
+        GlStateManager.enableBlend();
+        GlStateManager.color(1.0f, 1.0f, 1.0f, translucency);
+        super.render(model, anomalocaris, partialTicks, red, green, blue, translucency);
+        GlStateManager.disableBlend();
         GlStateManager.popMatrix();
     }
 }

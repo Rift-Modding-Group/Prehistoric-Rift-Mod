@@ -85,7 +85,6 @@ public class RiftWaterCreatureFollowOwner extends EntityAIBase {
                         }
                     }
                 }
-                else System.out.println("wheeeee");
             }
         }
     }

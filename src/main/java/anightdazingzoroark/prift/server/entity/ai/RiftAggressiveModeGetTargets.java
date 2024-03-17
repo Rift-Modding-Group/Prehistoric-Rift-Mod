@@ -74,19 +74,13 @@ public class RiftAggressiveModeGetTargets extends EntityAITarget {
                                     }
                                 }
                             }
-                            else {
-                                list.add(entity);
-                            }
+                            else list.add(entity);
                         }
-                        else {
-                            list.add(entity);
-                        }
+                        else list.add(entity);
                     }
                 }
 
-                if (list.isEmpty()) {
-                    return false;
-                }
+                if (list.isEmpty()) return false;
                 else {
                     Collections.sort(list, this.sorter);
                     this.targetEntity = list.get(0);

@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -243,6 +244,7 @@ public class RiftAttack extends EntityAIBase {
         private EntityLivingBase spinVictim;
         private int spinTime;
         private boolean spinFlag;
+        private RiftEntityProperties targetProperties;
 
         public SarcosuchusAttack(Sarcosuchus sarcosuchus, double speedIn, float attackAnimLength, float attackAnimTime) {
             super(sarcosuchus, speedIn, attackAnimLength, attackAnimTime);
@@ -254,6 +256,7 @@ public class RiftAttack extends EntityAIBase {
             super.startExecuting();
             this.spinTime = 0;
             this.spinFlag = true;
+            this.targetProperties = EntityPropertiesHandler.INSTANCE.getProperties(this.sarcosuchus.getAttackTarget(), RiftEntityProperties.class);
         }
 
         public boolean shouldContinueExecuting() {
@@ -267,6 +270,7 @@ public class RiftAttack extends EntityAIBase {
             super.resetTask();
             this.spinTime = 0;
             this.sarcosuchus.setIsSpinning(false);
+            if (this.spinVictim != null) EntityPropertiesHandler.INSTANCE.getProperties(this.spinVictim, RiftEntityProperties.class).isCaptured = false;
             this.spinVictim = null;
         }
 
@@ -294,26 +298,30 @@ public class RiftAttack extends EntityAIBase {
                         this.attackCooldown = 20;
                         if (this.sarcosuchus.isTamed()) this.sarcosuchus.energyActionMod++;
 
-                        if (enemy.isEntityAlive() && this.sarcosuchus.getEnergy() > 6) {
+                        if (enemy.isEntityAlive() && this.sarcosuchus.getEnergy() > 6 && !this.targetProperties.isCaptured) {
                             List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
                             if (enemy instanceof EntityPlayer) {
                                 if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("minecraft:player")) {
                                     this.sarcosuchus.setIsSpinning(true);
                                     this.spinVictim = enemy;
+                                    this.targetProperties.isCaptured = true;
                                 }
                                 else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("minecraft:player")) {
                                     this.sarcosuchus.setIsSpinning(true);
                                     this.spinVictim = enemy;
+                                    this.targetProperties.isCaptured = true;
                                 }
                             }
                             else {
                                 if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getKey(enemy).toString())) {
                                     this.sarcosuchus.setIsSpinning(true);
                                     this.spinVictim = enemy;
+                                    this.targetProperties.isCaptured = true;
                                 }
                                 else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(enemy).toString())) {
                                     this.sarcosuchus.setIsSpinning(true);
                                     this.spinVictim = enemy;
+                                    this.targetProperties.isCaptured = true;
                                 }
                             }
                         }
@@ -327,7 +335,10 @@ public class RiftAttack extends EntityAIBase {
             if (this.spinVictim.isEntityAlive()) {
                 RiftMessages.WRAPPER.sendToServer(new RiftSarcosuchusSpinTargeting(this.sarcosuchus, this.spinVictim));
                 if (this.sarcosuchus.isTamed() && this.spinTime % 10 == 0) this.sarcosuchus.setEnergy(this.sarcosuchus.getEnergy() - 1);
-                if (this.spinTime >= 100) this.spinFlag = false;
+                if (this.spinTime >= 100) {
+                    this.spinFlag = false;
+                    EntityPropertiesHandler.INSTANCE.getProperties(this.spinVictim, RiftEntityProperties.class).isCaptured = false;
+                }
                 this.spinTime++;
             }
             else this.sarcosuchus.setIsSpinning(false);

@@ -392,11 +392,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
     }
 
     @Override
-    public boolean isTameableByFeeding() {
-        return true;
-    }
-
-    @Override
     public boolean canBeSaddled() {
         return true;
     }

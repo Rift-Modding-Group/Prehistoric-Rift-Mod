@@ -416,6 +416,10 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         return this.dataManager.get(CAN_ROAR);
     }
 
+    public boolean isTameableByFeeding() {
+        return false;
+    }
+
     @Override
     public boolean canBeSaddled() {
         return true;

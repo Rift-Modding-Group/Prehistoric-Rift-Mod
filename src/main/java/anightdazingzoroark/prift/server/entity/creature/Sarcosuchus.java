@@ -7,11 +7,13 @@ import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
 import com.google.common.base.Predicate;
+import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -110,9 +112,11 @@ public class Sarcosuchus extends RiftWaterCreature {
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
+
         if (this.isBeingRidden() && this.canUseRightClick() && this.getRightClickCooldown() == 0 && this.isUsingRightClick() && (this.getRightClickUse() >= 0 && this.getRightClickUse() <= 100) && this.getEnergy() > 6) this.forcedSpinAttack();
         else if (!this.isBeingRidden() || !this.canUseRightClick() || this.getRightClickCooldown() > 0 || !this.isUsingRightClick()) {
             this.spinTime = 0;
+            if (this.forcedSpinVictim != null) EntityPropertiesHandler.INSTANCE.getProperties(this.forcedSpinVictim, RiftEntityProperties.class).isCaptured = false;
             this.forcedSpinVictim = null;
             if (this.getRightClickCooldown() > 0) {
                 this.setRightClickCooldown(this.getRightClickCooldown() - 1);
@@ -124,7 +128,10 @@ public class Sarcosuchus extends RiftWaterCreature {
         }
         else if (!this.isUsingRightClick() && this.messageSent) this.messageSent = false;
         if (this.isBeingRidden()) {
-            if (this.getRightClickUse() > 100) this.forcedSpinVictim = null;
+            if (this.getRightClickUse() > 100) {
+                if (this.forcedSpinVictim != null) EntityPropertiesHandler.INSTANCE.getProperties(this.forcedSpinVictim, RiftEntityProperties.class).isCaptured = false;
+                this.forcedSpinVictim = null;
+            }
             if (this.forcedSpinVictim == null) this.setIsSpinning(false);
         }
     }
@@ -148,12 +155,13 @@ public class Sarcosuchus extends RiftWaterCreature {
             List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
                 @Override
                 public boolean apply(@Nullable EntityLivingBase input) {
+                    RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
                     if (input instanceof EntityPlayer) {
                         if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("minecraft:player")) {
-                            return !input.getUniqueID().equals(ownerID);
+                            return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
                         }
                         else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("minecraft:player")) {
-                            return !input.getUniqueID().equals(ownerID);
+                            return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
                         }
                     }
                     else {
@@ -161,26 +169,27 @@ public class Sarcosuchus extends RiftWaterCreature {
                             if (input instanceof EntityTameable) {
                                 EntityTameable inpTameable = (EntityTameable)input;
                                 if (inpTameable.isTamed()) {
-                                    return !ownerID.equals(inpTameable.getOwnerId());
+                                    return !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
                                 }
-                                else return true;
+                                else return !properties.isCaptured;
                             }
-                            return true;
+                            return !properties.isCaptured;
                         }
                         else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(input).toString())) {
                             if (input instanceof EntityTameable) {
                                 EntityTameable inpTameable = (EntityTameable)input;
                                 if (inpTameable.isTamed()) {
-                                    return !ownerID.equals(inpTameable.getOwnerId());
+                                    return !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
                                 }
-                                else return true;
+                                else return !properties.isCaptured;
                             }
-                            return true;
+                            return !properties.isCaptured;
                         }
                     }
                     return false;
                 }
             });
+            System.out.println(potTargetListM);
             if (!potTargetListM.isEmpty()) this.forcedSpinVictim = potTargetListM.get(0);
         }
     }
@@ -293,6 +302,13 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     @Override
+    public void onDeath(DamageSource source) {
+        super.onDeath(source);
+        if (this.forcedSpinVictim != null) EntityPropertiesHandler.INSTANCE.getProperties(this.forcedSpinVictim, RiftEntityProperties.class).isCaptured = false;
+        if (this.getAttackTarget() != null) EntityPropertiesHandler.INSTANCE.getProperties(this.getAttackTarget(), RiftEntityProperties.class).isCaptured = false;
+    }
+
+    @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX - (0.3) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ - (0.3) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
@@ -311,11 +327,6 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     @Override
     public boolean isAmphibious() {
-        return true;
-    }
-
-    @Override
-    public boolean isTameableByFeeding() {
         return true;
     }
 

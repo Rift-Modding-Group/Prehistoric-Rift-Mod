@@ -62,6 +62,32 @@ public class ServerEvents {
         }
     }
 
+    //make sure players cant move when trapped
+    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
+    public void noMoveWhileTrapped(InputEvent.KeyInputEvent event) {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
+
+        if (properties.isCaptured) {
+            if (settings.keyBindForward.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
+            }
+            if (settings.keyBindBack.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindBack.getKeyCode(), false);
+            }
+            if (settings.keyBindLeft.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindLeft.getKeyCode(), false);
+            }
+            if (settings.keyBindRight.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindRight.getKeyCode(), false);
+            }
+            if (settings.keyBindJump.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindJump.getKeyCode(), false);
+            }
+        }
+    }
+
     @SubscribeEvent
     public void noAttackWhileRiding(AttackEntityEvent event) {
         //prevent players from attackin while ridin
@@ -384,6 +410,9 @@ public class ServerEvents {
                 }
             }
         }
+
+        //make sure mobs dont fall when trapped
+        if (properties.isCaptured) entity.fallDistance = 0;
     }
 
     //reset some properties (like bleeding) upon death
@@ -392,6 +421,15 @@ public class ServerEvents {
         EntityLivingBase entity = event.getEntityLiving();
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
         properties.resetBleeding();
+        properties.isCaptured = false;
+    }
+
+    //reset some properties upon logging out
+    @SubscribeEvent
+    public void onLogOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(event.player, RiftEntityProperties.class);
+        properties.isCaptured = false;
+
     }
 
     //manage cannon impacting stuff

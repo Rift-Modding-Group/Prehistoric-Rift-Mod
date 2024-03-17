@@ -1506,7 +1506,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isTameableByFeeding() {
-        return false;
+        return true;
     }
 
     public boolean canBeSaddled() {

@@ -236,11 +236,6 @@ public class Triceratops extends RiftCreature implements IChargingMob {
     }
 
     @Override
-    public boolean isTameableByFeeding() {
-        return true;
-    }
-
-    @Override
     public boolean canBeSaddled() {
         return true;
     }

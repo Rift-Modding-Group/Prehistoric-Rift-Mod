@@ -343,11 +343,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
 
     @Override
-    public boolean isTameableByFeeding() {
-        return true;
-    }
-
-    @Override
     public boolean canBeSaddled() {
         return true;
     }

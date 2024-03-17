@@ -375,6 +375,10 @@ public class Apatosaurus extends RiftCreature {
         if (compound.hasKey("Weapon")) this.setWeapon(RiftLargeWeaponType.values()[compound.getByte("Weapon")]);
     }
 
+    public boolean isTameableByFeeding() {
+        return false;
+    }
+
     @Override
     public boolean canBeSaddled() {
         return true;
