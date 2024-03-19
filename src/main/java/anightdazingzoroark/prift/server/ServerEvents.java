@@ -42,6 +42,7 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -359,6 +360,11 @@ public class ServerEvents {
                 }
             }
         }
+        //make it so that when a mob tries to target an invisible anomalocaris nothing happens
+        if (event.getTarget() instanceof Anomalocaris) {
+            Anomalocaris anomalocaris = (Anomalocaris)event.getTarget();
+            if (anomalocaris.isUsingInvisibility()) ((EntityLiving)event.getEntityLiving()).setAttackTarget(null);
+        }
         //make it so when a player uses a large weapon on a mob, the mob will go after its operator
         if (event.getTarget() instanceof RiftLargeWeapon) {
             RiftLargeWeapon weapon = (RiftLargeWeapon) event.getTarget();
@@ -424,11 +430,16 @@ public class ServerEvents {
         properties.isCaptured = false;
     }
 
-    //reset some properties upon logging out
+    //reset some properties upon starting the world
     @SubscribeEvent
-    public void onLogOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(event.player, RiftEntityProperties.class);
-        properties.isCaptured = false;
+    public void onStartWorld(WorldEvent.Load event) {
+        if (!event.getWorld().isRemote) {
+            System.out.println("hola tonotos");
+            for (Entity entity : event.getWorld().getLoadedEntityList()) {
+                RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
+                properties.isCaptured = false;
+            }
+        }
 
     }
 

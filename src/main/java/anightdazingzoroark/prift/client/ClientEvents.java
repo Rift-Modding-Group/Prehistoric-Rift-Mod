@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -10,8 +11,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.opengl.GL11;
 
 public class ClientEvents {
     //set cam to 3rd person when ridin a creature
@@ -43,6 +46,23 @@ public class ClientEvents {
         if (event.getGui() instanceof GuiInventory && player.isRiding() && player.getRidingEntity() instanceof RiftLargeWeapon) {
             RiftMessages.WRAPPER.sendToServer(new RiftOpenWeaponInventory((RiftLargeWeapon)player.getRidingEntity()));
             event.setCanceled(true);
+        }
+    }
+
+    //make player invisible when anomalocaris is invisible
+    @SubscribeEvent
+    public void onPlayerRender(RenderPlayerEvent.Pre event) {
+        if (event.getEntityPlayer().isRiding()) {
+            if (event.getEntityPlayer().getRidingEntity() instanceof Anomalocaris) {
+                Anomalocaris anomalocaris = (Anomalocaris)event.getEntityPlayer().getRidingEntity();
+
+                GL11.glPushMatrix();
+                GL11.glEnable(GL11.GL_BLEND);
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                GL11.glColor4f(1.0F, 1.0F, 1.0F, anomalocaris.isUsingInvisibility() ? 0.25f : 1f);
+                GL11.glDisable(GL11.GL_BLEND);
+                GL11.glPopMatrix();
+            }
         }
     }
 }

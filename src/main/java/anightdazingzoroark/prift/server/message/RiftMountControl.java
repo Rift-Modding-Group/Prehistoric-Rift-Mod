@@ -54,7 +54,15 @@ public class RiftMountControl extends AbstractMessage<RiftMountControl> {
     }
 
     @Override
-    public void onClientReceived(Minecraft client, RiftMountControl message, EntityPlayer player, MessageContext messageContext) {}
+    public void onClientReceived(Minecraft client, RiftMountControl message, EntityPlayer player, MessageContext messageContext) {
+        World world = player.getEntityWorld();
+        RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
+        EntityLivingBase target;
+
+        if (message.targetId == -1) target = null;
+        else target = (EntityLivingBase)world.getEntityByID(message.targetId);
+        creature.controlInput(message.control, message.tick, target);
+    }
 
     @Override
     public void onServerReceived(MinecraftServer server, RiftMountControl message, EntityPlayer player, MessageContext messageContext) {

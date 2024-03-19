@@ -8,21 +8,25 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftGrabberTargeting;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftSetGrabTarget;
+import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.MobEffects;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
@@ -31,8 +35,10 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     private static final DataParameter<Boolean> INVISIBLE = EntityDataManager.createKey(Anomalocaris.class, DataSerializers.BOOLEAN);
@@ -77,6 +83,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         this.targetTasks.addTask(3, new RiftPickUpItems(this, AnomalocarisConfig.anomalocarisFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.36F));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.36F));
         this.tasks.addTask(6, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
@@ -88,12 +95,30 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         super.onLivingUpdate();
         this.manageInvisibility();
         this.manageGrabVictim();
+        this.resetIsActing();
+    }
+
+    private void resetIsActing() {
+        if (this.isActing() && !this.isUsingRightClick() && !this.isUsingLeftClick()) {
+            this.setActing(false);
+        }
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setBoolean("UsingInvis", this.isUsingInvisibility());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.setUseInvisibility(compound.getBoolean("UsingInvis"));
     }
 
     private void manageInvisibility() {
         if (!this.world.isRemote) {
-            if (!this.isTamed() && !this.isUsingInvisibility() && this.invisibilityTimeout == 0) this.setUseInvisibility(true);
-            else if (this.isTamed() && this.getControllingPassenger() == null) this.setUseInvisibility(false);
+            if (!this.isUsingInvisibility() && this.invisibilityTimeout == 0) this.setUseInvisibility(true);
             if (this.invisibilityTimeout > 0) this.invisibilityTimeout--;
         }
     }
@@ -101,7 +126,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     public void manageGrabVictim() {
         if (this.getGrabVictim() != null) {
             this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1);
-            if (!this.getGrabVictim().isEntityAlive()) this.setGrabVictim(null);
+            if (!this.getGrabVictim().isEntityAlive()) RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, null));
             else RiftMessages.WRAPPER.sendToServer(new RiftGrabberTargeting(this, this.getGrabVictim()));
         }
         else this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(0);
@@ -130,12 +155,70 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
 
     @Override
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {
-
+        if (control == 0) {
+            if (this.getEnergy() > 0) {
+                if (target == null) {
+                    if (!this.isActing()) this.setAttacking(true);
+                }
+                else {
+                    if (!this.isActing() && !this.isUsingRightClick()) {
+                        this.ssrTarget = target;
+                        this.setAttacking(true);
+                    }
+                }
+            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
+        if (control == 1) {
+            if (!this.isActing()) {
+                if (this.getGrabVictim() == null) {
+                    UUID ownerID = this.getOwnerId();
+                    List<String> blackList = Arrays.asList(AnomalocarisConfig.anomalocarisGrabBlacklist);
+                    List<EntityLivingBase> potGrabList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
+                        @Override
+                        public boolean apply(@Nullable EntityLivingBase input) {
+                            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
+                            if (input instanceof EntityPlayer) {
+                                if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains("minecraft:player")) {
+                                    return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                                }
+                                else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains("minecraft:player")) {
+                                    return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                                }
+                            }
+                            else {
+                                if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains(EntityList.getKey(input).toString())) {
+                                    return !properties.isCaptured;
+                                }
+                                else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains(EntityList.getKey(input).toString())) {
+                                    return !properties.isCaptured;
+                                }
+                            }
+                            return false;
+                        }
+                    });
+                    if (!potGrabList.isEmpty()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, potGrabList.get(0)));
+                        EntityPropertiesHandler.INSTANCE.getProperties(potGrabList.get(0), RiftEntityProperties.class).isCaptured = true;
+                        this.setActing(true);
+                    }
+                }
+                else {
+                    EntityPropertiesHandler.INSTANCE.getProperties(this.getGrabVictim(), RiftEntityProperties.class).isCaptured = false;
+                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, null));
+                    this.setActing(true);
+                }
+            }
+            this.setRightClickUse(0);
+        }
+        if (control == 3) {
+            if (!this.world.isRemote) {
+                this.invisibilityTimeout = !this.isUsingInvisibility() ? 0 : -1;
+                this.setUseInvisibility(!this.isUsingInvisibility());
+            }
+        }
     }
 
-    //temporary, will replace this with a mechanism where if the attack animation starts
-    //the invisibility wears off and will wear off some time after the target dies
-    //or some time after the target breaks free from their grasp
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
         if (!this.world.isRemote) {
@@ -143,26 +226,27 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
             this.invisibilityTimeout = 200;
         }
         this.heal((float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue())/2f);
-        if (entityIn.isEntityAlive() && entityIn instanceof EntityLivingBase) {
+        boolean playerRideFlag = (this.isBeingRidden() && this.getControllingPassenger() instanceof EntityPlayer);
+        if (entityIn.isEntityAlive() && entityIn instanceof EntityLivingBase && !playerRideFlag) {
             EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
             RiftEntityProperties entityProperties = EntityPropertiesHandler.INSTANCE.getProperties(entityLivingBase, RiftEntityProperties.class);
             if (entityIn instanceof EntityPlayer) {
                 if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !this.blacklist().contains("minecraft:player") && !entityProperties.isCaptured) {
-                    this.setGrabVictim(entityLivingBase);
+                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
                     entityProperties.isCaptured = true;
                 }
                 else if (AnomalocarisConfig.anomalocarisGrabWhitelist && this.blacklist().contains("minecraft:player") && !entityProperties.isCaptured) {
-                    this.setGrabVictim(entityLivingBase);
+                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
                     entityProperties.isCaptured = true;
                 }
             }
             else {
                 if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !this.blacklist().contains(EntityList.getKey(entityIn).toString()) && !entityProperties.isCaptured) {
-                    this.setGrabVictim(entityLivingBase);
+                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
                     entityProperties.isCaptured = true;
                 }
                 else if (AnomalocarisConfig.anomalocarisGrabWhitelist && this.blacklist().contains(EntityList.getKey(entityIn).toString()) && !entityProperties.isCaptured) {
-                    this.setGrabVictim(entityLivingBase);
+                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
                     entityProperties.isCaptured = true;
                 }
             }
@@ -183,6 +267,45 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     public void onDeath(DamageSource source) {
         super.onDeath(source);
         if (this.getGrabVictim() != null) EntityPropertiesHandler.INSTANCE.getProperties(this.getGrabVictim(), RiftEntityProperties.class).isCaptured = false;
+    }
+
+    public void setTamedBy(EntityPlayer player) {
+        super.setTamedBy(player);
+        if (!this.world.isRemote) {
+            this.setUseInvisibility(false);
+            this.invisibilityTimeout = -1;
+        }
+    }
+
+    public void removePassenger(Entity passenger) {
+        super.removePassenger(passenger);
+        if (this.getTameStatus().equals(TameStatusType.SIT)) {
+            if (!this.world.isRemote) {
+                this.setUseInvisibility(false);
+                this.invisibilityTimeout = -1;
+            }
+        }
+        else {
+            if (!this.world.isRemote) {
+                this.setUseInvisibility(false);
+                this.invisibilityTimeout = 200;
+            }
+        }
+    }
+    public void setTameStatus(TameStatusType tameStatus) {
+        super.setTameStatus(tameStatus);
+        if (tameStatus.equals(TameStatusType.SIT)) {
+            if (!this.world.isRemote) {
+                this.setUseInvisibility(false);
+                this.invisibilityTimeout = -1;
+            }
+        }
+        else {
+            if (!this.world.isRemote) {
+                this.setUseInvisibility(false);
+                this.invisibilityTimeout = 200;
+            }
+        }
     }
 
     @Override

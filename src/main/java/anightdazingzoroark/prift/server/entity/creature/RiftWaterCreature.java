@@ -102,8 +102,9 @@ public abstract class RiftWaterCreature extends RiftCreature {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (this.isBeingRidden()) {
             if (this.getControllingPassenger().equals(player)) {
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()));
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 3, !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown()));
 
                 RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 0, RiftControls.mountAscend.isKeyDown() && !RiftControls.mountDescend.isKeyDown()));
                 RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 1, RiftControls.mountDescend.isKeyDown() && !RiftControls.mountAscend.isKeyDown()));
@@ -153,7 +154,10 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
                 }
-                else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()) {
+                else if (settings.keyBindPickBlock.isKeyDown() && !this.isActing()) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 3));
+                }
+                else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()) {
                     Entity toBeAttacked = null;
                     if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                     if (this.hasLeftClickChargeBar()) {
@@ -175,6 +179,10 @@ public abstract class RiftWaterCreature extends RiftCreature {
                             }
                             else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
                         }
+                    }
+                    if (this.getMiddleClickUse() > 0) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 3));
+                        this.setMiddleClickUse(0);
                     }
                 }
             }

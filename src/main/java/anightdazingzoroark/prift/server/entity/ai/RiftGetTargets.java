@@ -44,12 +44,12 @@ public class RiftGetTargets extends EntityAITarget {
         this.setMutexBits(1);
         this.alertOthers = alertOthers;
         this.targetEntitySelector = new Predicate<EntityLivingBase>() {
-            public boolean apply(@Nullable EntityLivingBase p_apply_1_)
+            public boolean apply(@Nullable EntityLivingBase entity)
             {
-                if (p_apply_1_ == null) return false;
-                else if (targetSelector != null && !targetSelector.apply(p_apply_1_)) return false;
+                if (entity == null) return false;
+                else if (targetSelector != null && !targetSelector.apply(entity)) return false;
                 else {
-                    return !EntitySelectors.NOT_SPECTATING.apply(p_apply_1_) ? false : RiftGetTargets.this.isSuitableTarget(p_apply_1_, false);
+                    return !EntitySelectors.NOT_SPECTATING.apply(entity) ? false : RiftGetTargets.this.isSuitableTarget(entity, false) && !entity.isRiding();
                 }
             }
         };

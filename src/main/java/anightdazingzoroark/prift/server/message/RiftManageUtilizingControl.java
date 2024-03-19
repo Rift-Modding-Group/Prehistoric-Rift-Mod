@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftManageUtilizingControl extends AbstractMessage<RiftManageUtilizingControl> {
     private int entityId;
-    private int control;
+    private int control; //0 is left click, 1 is right click, 2 is spacebar, 3 is middle click
     private boolean isUsing;
 
     public RiftManageUtilizingControl() {}

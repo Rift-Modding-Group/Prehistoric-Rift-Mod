@@ -189,7 +189,6 @@ public class Sarcosuchus extends RiftWaterCreature {
                     return false;
                 }
             });
-            System.out.println(potTargetListM);
             if (!potTargetListM.isEmpty()) this.forcedSpinVictim = potTargetListM.get(0);
         }
     }

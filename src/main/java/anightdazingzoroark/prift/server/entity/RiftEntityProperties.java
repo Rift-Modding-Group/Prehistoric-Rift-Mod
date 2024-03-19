@@ -54,8 +54,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         compound.setBoolean("IsBleeding", this.isBleeding);
         compound.setInteger("BleedingStrength", this.bleedingStrength);
         compound.setInteger("TicksUntilStopBleeding", this.ticksUntilStopBleeding);
-
-        compound.setBoolean("IsCaptured", this.isCaptured);
     }
 
     @Override
@@ -69,8 +67,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.isBleeding = compound.getBoolean("IsBleeding");
         this.bleedingStrength = compound.getInteger("BleedingStrength");
         this.ticksUntilStopBleeding = compound.getInteger("TicksUntilStopBleeding");
-
-        this.isCaptured = compound.getBoolean("IsCaptured");
     }
 
     @Override

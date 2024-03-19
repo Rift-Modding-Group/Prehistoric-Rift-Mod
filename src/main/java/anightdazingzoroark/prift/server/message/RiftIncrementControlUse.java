@@ -59,6 +59,9 @@ public class RiftIncrementControlUse extends AbstractMessage<RiftIncrementContro
                     case 2:
                         if (creature.getEnergy() > 6) creature.setSpacebarUse(creature.getSpacebarUse() + 1);
                         break;
+                    case 3:
+                        if (creature.getEnergy() > 6) creature.setMiddleClickUse(creature.getMiddleClickUse() + 1);
+                        break;
                 }
             }
             else if (entity instanceof RiftCatapult) {

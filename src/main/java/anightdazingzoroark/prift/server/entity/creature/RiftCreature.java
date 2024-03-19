@@ -90,6 +90,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+
+    private static final DataParameter<Boolean> CAN_USE_MIDDLE_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_MIDDLE_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> MIDDLE_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+
     private static final DataParameter<Boolean> CAN_USE_SPACEBAR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_SPACEBAR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> SPACEBAR_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -122,7 +127,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
     private boolean steerable = true;
-    public EntityLivingBase ssrTarget;
+    protected EntityLivingBase ssrTarget;
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
     protected double speed;
@@ -193,39 +198,42 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.entityInit();
         this.dataManager.register(LEVEL, 1);
         this.dataManager.register(XP, 0);
-        this.dataManager.register(ATTACKING, Boolean.FALSE);
-        this.dataManager.register(RANGED_ATTACKING, Boolean.FALSE);
-        this.dataManager.register(LOWER_HEAD, Boolean.FALSE);
-        this.dataManager.register(CAN_CHARGE, Boolean.TRUE);
-        this.dataManager.register(START_CHARGING, Boolean.FALSE);
-        this.dataManager.register(CHARGING, Boolean.FALSE);
-        this.dataManager.register(END_CHARGING, Boolean.FALSE);
-        this.dataManager.register(LEAPING, Boolean.FALSE);
+        this.dataManager.register(ATTACKING, false);
+        this.dataManager.register(RANGED_ATTACKING, false);
+        this.dataManager.register(LOWER_HEAD, false);
+        this.dataManager.register(CAN_CHARGE, true);
+        this.dataManager.register(START_CHARGING, false);
+        this.dataManager.register(CHARGING, false);
+        this.dataManager.register(END_CHARGING, false);
+        this.dataManager.register(LEAPING, false);
         this.dataManager.register(VARIANT, rand.nextInt(4));
         this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
         this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
-        this.dataManager.register(SADDLED, Boolean.FALSE);
+        this.dataManager.register(SADDLED, false);
         this.dataManager.register(ENERGY, 20);
-        this.dataManager.register(ACTING, Boolean.FALSE);
-        this.dataManager.register(CAN_USE_LEFT_CLICK, Boolean.TRUE);
-        this.dataManager.register(USING_LEFT_CLICK, Boolean.FALSE);
+        this.dataManager.register(ACTING, false);
+        this.dataManager.register(CAN_USE_LEFT_CLICK, true);
+        this.dataManager.register(USING_LEFT_CLICK, false);
         this.dataManager.register(LEFT_CLICK_USE, 0);
         this.dataManager.register(LEFT_CLICK_COOLDOWN, 0);
-        this.dataManager.register(CAN_USE_RIGHT_CLICK, Boolean.FALSE);
-        this.dataManager.register(USING_RIGHT_CLICK, Boolean.FALSE);
+        this.dataManager.register(CAN_USE_RIGHT_CLICK, false);
+        this.dataManager.register(USING_RIGHT_CLICK, false);
         this.dataManager.register(RIGHT_CLICK_USE, 0);
         this.dataManager.register(RIGHT_CLICK_COOLDOWN, 0);
+        this.dataManager.register(CAN_USE_MIDDLE_CLICK, true);
+        this.dataManager.register(USING_MIDDLE_CLICK, false);
+        this.dataManager.register(MIDDLE_CLICK_USE, 0);
         this.dataManager.register(CAN_USE_SPACEBAR, true);
         this.dataManager.register(USING_SPACEBAR, false);
         this.dataManager.register(SPACEBAR_USE, 0);
         this.dataManager.register(SPACEBAR_COOLDOWN, 0);
-        this.dataManager.register(HAS_TARGET, Boolean.FALSE);
+        this.dataManager.register(HAS_TARGET, false);
         this.dataManager.register(AGE_TICKS, 0);
         this.dataManager.register(JUST_SPAWNED, true);
         this.dataManager.register(TAME_PROGRESS, 0);
-        this.dataManager.register(HAS_HOME_POS, Boolean.FALSE);
-        this.dataManager.register(UNCLAIMED, Boolean.FALSE);
+        this.dataManager.register(HAS_HOME_POS, false);
+        this.dataManager.register(UNCLAIMED, false);
         this.dataManager.register(UNCLAIM_TIMER, 0);
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(USING_WORKSTATION, false);
@@ -1354,6 +1362,30 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setRightClickCooldown(int value) {
         this.dataManager.set(RIGHT_CLICK_COOLDOWN, value);
+    }
+
+    public boolean canUseMiddleClick() {
+        return this.dataManager.get(CAN_USE_MIDDLE_CLICK);
+    }
+
+    public void setCanUseMiddleClick(boolean value) {
+        this.dataManager.set(CAN_USE_MIDDLE_CLICK, value);
+    }
+
+    public boolean isUsingMiddleClick() {
+        return this.dataManager.get(USING_MIDDLE_CLICK);
+    }
+
+    public void setUsingMiddleClick(boolean value) {
+        this.dataManager.set(USING_MIDDLE_CLICK, value);
+    }
+
+    public int getMiddleClickUse() {
+        return this.dataManager.get(MIDDLE_CLICK_USE);
+    }
+
+    public void setMiddleClickUse(int value) {
+        this.dataManager.set(MIDDLE_CLICK_USE, value);
     }
 
     public boolean canUseSpacebar() {
