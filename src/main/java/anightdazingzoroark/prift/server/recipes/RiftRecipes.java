@@ -11,5 +11,6 @@ public class RiftRecipes {
         GameRegistry.addSmelting(RiftItems.RAW_DODO_MEAT, new ItemStack(RiftItems.COOKED_DODO_MEAT), 0.35F);
         GameRegistry.addSmelting(RiftItems.RAW_HADROSAUR_MEAT, new ItemStack(RiftItems.COOKED_HADROSAUR_MEAT), 0.35F);
         GameRegistry.addSmelting(RiftItems.RAW_MEGAPIRANHA, new ItemStack(RiftItems.COOKED_MEGAPIRANHA), 0.35F);
+        GameRegistry.addSmelting(RiftItems.RAW_HEMOLYMPH, new ItemStack(RiftItems.COOKED_HEMOLYMPH), 0.35F);
     }
 }

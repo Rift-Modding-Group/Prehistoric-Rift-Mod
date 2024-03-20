@@ -27,6 +27,8 @@ public class RiftItems {
     public static Item COOKED_EXOTIC_MEAT;
     public static Item RAW_FIBROUS_MEAT;
     public static Item COOKED_FIBROUS_MEAT;
+    public static Item RAW_HEMOLYMPH;
+    public static Item COOKED_HEMOLYMPH;
     public static Item RAW_DODO_MEAT;
     public static Item COOKED_DODO_MEAT;
     public static Item RAW_HADROSAUR_MEAT;
@@ -58,6 +60,9 @@ public class RiftItems {
     public static Item COELACANTH_SCALES;
     public static Item MEGAPIRANHA_SCALES;
     public static Item SARCOSUCHUS_SNOUT;
+    public static Item ANOMALOCARIS_APPENDAGE;
+
+    public static Item CHITIN;
 
     public static Item APATOSAURUS_PLATFORM;
     public static Item CANNON;
@@ -76,6 +81,8 @@ public class RiftItems {
         COOKED_EXOTIC_MEAT = riftFoodItem("cooked_exotic_meat", 8, 0.6f, true);
         RAW_FIBROUS_MEAT = riftFoodItem("raw_fibrous_meat", 1, 0.45f, true);
         COOKED_FIBROUS_MEAT = riftFibrousFoodItem("cooked_fibrous_meat", 2, true);
+        RAW_HEMOLYMPH = riftFoodItem("raw_hemolymph", 3, 0.3f, false);
+        COOKED_HEMOLYMPH = riftFoodItem("cooked_hemolymph", 6, 0.6f, false);
         RAW_DODO_MEAT = riftSpecialMeatItem("raw_dodo_meat", 2, 0.3f, new PotionEffect(MobEffects.HUNGER, 200));
         COOKED_DODO_MEAT = riftSpecialMeatItem("cooked_dodo_meat", 4, 0.6f, new PotionEffect(MobEffects.ABSORPTION, 600, 2));
         RAW_HADROSAUR_MEAT = riftSpecialMeatItem("raw_hadrosaur_meat", 3, 0.3f,  new PotionEffect(MobEffects.HUNGER, 200));
@@ -109,6 +116,9 @@ public class RiftItems {
         COELACANTH_SCALES = riftGenericItem("coelacanth_scales", true);
         MEGAPIRANHA_SCALES = riftGenericItem("megapiranha_scales", true);
         SARCOSUCHUS_SNOUT = riftGenericItem("sarcosuchus_snout", true);
+        ANOMALOCARIS_APPENDAGE = riftGenericItem("anomalocaris_appendage", true);
+
+        CHITIN = riftGenericItem("chitin", true);
 
         APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
         CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);
@@ -123,6 +133,7 @@ public class RiftItems {
         COMMAND_CONSOLE = riftGenericItem("command_console", false);
 
         RiftCreatureType.registerEggs();
+        RiftCreatureType.registerSacs();
 
         //dont ask why this is here
         RiftProjectiles.registerProjectiles();
@@ -183,6 +194,11 @@ public class RiftItems {
 
     public static Item riftEggItem(String registryName, RiftCreatureType creature) {
         final Item item = new RiftEggItem(creature);
+        return registerItem(item, registryName);
+    }
+
+    public static Item riftSacItem(String registryName, RiftCreatureType creature) {
+        final Item item = new RiftSacItem(creature);
         return registerItem(item, registryName);
     }
 

@@ -25,6 +25,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -36,6 +37,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -147,9 +149,9 @@ public class ServerEvents {
         }
     }
 
-    //give xp to creature for every creature it kills
     @SubscribeEvent
     public void gainXpFromKill(LivingDeathEvent event) {
+        //give xp to creature for every creature it kills
         if (event.getSource().getTrueSource() instanceof RiftCreature) {
             RiftCreature creature = (RiftCreature) event.getSource().getTrueSource();
             if (creature.isTamed()) {
@@ -158,6 +160,15 @@ public class ServerEvents {
                     int newXp = 5 * entityLiving.getExperiencePoints((EntityPlayer) creature.getOwner());
                     creature.setXP(creature.getXP() + newXp);
                 }
+            }
+        }
+
+        //make arthropods drop chitin and hemolymph
+        if (!event.getEntityLiving().world.isRemote) {
+            if (event.getEntityLiving().getCreatureAttribute().equals(EnumCreatureAttribute.ARTHROPOD) && !(event.getEntityLiving() instanceof RiftCreature)) {
+                event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.CHITIN, RiftUtil.randomInRange(1, 3)), 0);
+                if (event.getEntityLiving().isBurning()) event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.COOKED_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
+                else event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.RAW_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
             }
         }
     }
@@ -428,19 +439,6 @@ public class ServerEvents {
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
         properties.resetBleeding();
         properties.isCaptured = false;
-    }
-
-    //reset some properties upon starting the world
-    @SubscribeEvent
-    public void onStartWorld(WorldEvent.Load event) {
-        if (!event.getWorld().isRemote) {
-            System.out.println("hola tonotos");
-            for (Entity entity : event.getWorld().getLoadedEntityList()) {
-                RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
-                properties.isCaptured = false;
-            }
-        }
-
     }
 
     //manage cannon impacting stuff

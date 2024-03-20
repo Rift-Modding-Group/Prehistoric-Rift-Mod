@@ -57,7 +57,6 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
     private static final DataParameter<Integer> HATCH_TIME = EntityDataManager.<Integer>createKey(RiftEgg.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> EGG_TYPE = EntityDataManager.createKey(RiftEgg.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> TEMPERATURE = EntityDataManager.createKey(RiftEgg.class, DataSerializers.BYTE);
-
     public AnimationFactory factory = new AnimationFactory(this);
 
     public RiftEgg(World worldIn) {

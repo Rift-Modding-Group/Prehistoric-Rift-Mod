@@ -1,7 +1,10 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
+import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,7 +53,9 @@ public class RiftMate extends EntityAIBase {
         ++this.spawnBabyDelay;
 
         if (this.spawnBabyDelay >= 20 && this.creature.getDistanceSq(this.targetMate) <= 24.0D) {
-            this.spawnEgg();
+            CreatureCategory category = this.creature.creatureType.getCreatureCategory();
+            if (category.equals(CreatureCategory.DINOSAUR) || category.equals(CreatureCategory.REPTILE) || category.equals(CreatureCategory.BIRD) || this.creature.creatureType.equals(RiftCreatureType.DIMETRODON)) this.spawnEgg();
+            else if (category.equals(CreatureCategory.INVERTEBRATE)) this.spawnSac();
         }
     }
 
@@ -91,6 +96,47 @@ public class RiftMate extends EntityAIBase {
             egg.enablePersistence();
             egg.setHatchTime(this.creature.creatureType.getHatchTime() * 20);
             this.world.spawnEntity(egg);
+
+            Random random = this.creature.getRNG();
+            for (int i = 0; i < 17; ++i) {
+                double d0 = random.nextGaussian() * 0.02D;
+                double d1 = random.nextGaussian() * 0.02D;
+                double d2 = random.nextGaussian() * 0.02D;
+                double d3 = random.nextDouble() * (double) this.creature.width * 2.0D - (double) this.creature.width;
+                double d4 = 0.5D + random.nextDouble() * (double) this.creature.height;
+                double d5 = random.nextDouble() * (double) this.creature.width * 2.0D - (double) this.creature.width;
+                this.world.spawnParticle(EnumParticleTypes.HEART, this.creature.posX + d3, this.creature.posY + d4, this.creature.posZ + d5, d0, d1, d2);
+            }
+
+            if (this.world.getGameRules().getBoolean("doMobLoot")) {
+                this.world.spawnEntity(new EntityXPOrb(this.world, this.creature.posX, this.creature.posY, this.creature.posZ, random.nextInt(7) + 1));
+            }
+        }
+    }
+
+    private void spawnSac() {
+        RiftSac sac = (RiftSac) this.creature.createChild(this.targetMate);
+
+        final net.minecraftforge.event.entity.living.BabyEntitySpawnEvent event = new net.minecraftforge.event.entity.living.BabyEntitySpawnEvent(creature, targetMate, sac);
+        final boolean cancelled = net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event);
+        if (cancelled) {
+            this.creature.resetInLove();
+            this.targetMate.resetInLove();
+            return;
+        }
+
+        if (sac != null) {
+            EntityPlayer player = this.creature.getLoveCause();
+            if (player == null && this.targetMate.getLoveCause() != null) player = this.targetMate.getLoveCause();
+            if (player != null) player.addStat(StatList.ANIMALS_BRED);
+            this.creature.resetInLove();
+            this.targetMate.resetInLove();
+            sac.setCreatureType(this.creature.creatureType);
+            if (this.creature.isTamed()) sac.setOwnerId(this.creature.getOwnerId());
+            sac.setLocationAndAngles(this.creature.posX, this.creature.posY, this.creature.posZ, 0.0F, 0.0F);
+            sac.enablePersistence();
+            sac.setHatchTime(this.creature.creatureType.getHatchTime() * 20);
+            this.world.spawnEntity(sac);
 
             Random random = this.creature.getRNG();
             for (int i = 0; i < 17; ++i) {

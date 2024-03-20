@@ -30,10 +30,12 @@ inventory.inventory=%s Inventory
 
 item.raw_exotic_meat.name=Raw Exotic Meat
 item.raw_fibrous_meat.name=Raw Fibrous Meat
+item.raw_hemolymph.name=Raw Hemolymph
 item.raw_dodo_meat.name=Raw Dodo Meat
 item.raw_hadrosaur_meat.name=Raw Hadrosaur Meat
 item.cooked_exotic_meat.name=Cooked Exotic Meat
 item.cooked_fibrous_meat.name=Cooked Fibrous Meat
+item.cooked_hemolymph.name=Cooked Hemolymph
 item.cooked_dodo_meat.name=Cooked Dodo Meat
 item.cooked_hadrosaur_meat.name=Cooked Hadrosaur Meat
 item.raw_coelacanth.name=Raw Coelacanth
@@ -51,6 +53,7 @@ item.extreme_flame_stimulant.name=Extreme Flame Stimulant
 item.frost_stimulant.name=Frost Stimulant
 item.extreme_frost_stimulant.name=Extreme Frost Stimulant
 item.neutral_stimulant.name=Neutral Stimulant
+item.chitin.name=Chitin
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 item.stegosaurus_plate.name=Stegosaurus Plate
@@ -63,6 +66,7 @@ item.dimetrodon_sail.name=Dimetrodon Sail
 item.coelacanth_scales.name=Coelacanth Scales
 item.megapiranha_scales.name=Megapiranha Scales
 item.sarcosuchus_snout.name=Sarcosuchus Snout
+item.anomalocaris_appendage.name=Anomalocaris Appendage
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -75,6 +79,7 @@ item.apatosaurus_egg.name=Apatosaurus Egg
 item.parasaurolophus_egg.name=Parasaurolophus Egg
 item.dimetrodon_egg.name=Dimetrodon Egg
 item.sarcosuchus_egg.name=Sarcosuchus Egg
+item.anomalocaris_sac.name=Anomalocaris Sac
 
 item.apatosaurus_platform.name=Apatosaurus Platform
 item.cannon.name=Cannon

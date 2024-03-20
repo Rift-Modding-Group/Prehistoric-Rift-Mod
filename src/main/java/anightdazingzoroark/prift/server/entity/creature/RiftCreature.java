@@ -8,10 +8,8 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
-import anightdazingzoroark.prift.server.enums.PopupFromRadial;
-import anightdazingzoroark.prift.server.enums.TameBehaviorType;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
-import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
+import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
@@ -1759,13 +1757,26 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Nullable
     @Override
     public EntityAgeable createChild(EntityAgeable ageable) {
-        RiftEgg egg = new RiftEgg(this.world);
-        egg.setCreatureType(this.creatureType);
-        egg.setOwnerId(this.getOwnerId());
-        egg.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
-        egg.enablePersistence();
-        egg.setHatchTime(this.creatureType.getHatchTime() * 20);
-        return egg;
+        CreatureCategory category = this.creatureType.getCreatureCategory();
+        if (category.equals(CreatureCategory.DINOSAUR) || category.equals(CreatureCategory.REPTILE) || category.equals(CreatureCategory.BIRD) || this.creatureType.equals(RiftCreatureType.DIMETRODON)) {
+            RiftEgg egg = new RiftEgg(this.world);
+            egg.setCreatureType(this.creatureType);
+            egg.setOwnerId(this.getOwnerId());
+            egg.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
+            egg.enablePersistence();
+            egg.setHatchTime(this.creatureType.getHatchTime() * 20);
+            return egg;
+        }
+        else if (category.equals(CreatureCategory.INVERTEBRATE)) {
+            RiftSac sac = new RiftSac(this.world);
+            sac.setCreatureType(this.creatureType);
+            sac.setOwnerId(this.getOwnerId());
+            sac.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
+            sac.enablePersistence();
+            sac.setHatchTime(this.creatureType.getHatchTime() * 20);
+            return sac;
+        }
+        else return null;
     }
 
     @Override

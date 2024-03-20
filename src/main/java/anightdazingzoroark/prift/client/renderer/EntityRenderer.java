@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.client.renderer.entity.*;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
@@ -21,6 +22,7 @@ public class EntityRenderer {
 
         //everythin else
         RenderingRegistry.registerEntityRenderingHandler(RiftEgg.class, RiftEggRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftSac.class, RiftSacRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftCannon.class, RiftLargeWeaponRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftMortar.class, RiftLargeWeaponRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftCatapult.class, RiftCatapultRenderer::new);

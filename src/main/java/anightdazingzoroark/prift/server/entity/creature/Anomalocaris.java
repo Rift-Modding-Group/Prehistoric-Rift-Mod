@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.AnomalocarisConfig;
 import anightdazingzoroark.prift.config.ApatosaurusConfig;
@@ -14,10 +15,7 @@ import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSetGrabTarget;
 import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -25,9 +23,11 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Anomalocaris extends RiftWaterCreature implements IGrabber {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/anomalocaris"));
     private static final DataParameter<Boolean> INVISIBLE = EntityDataManager.createKey(Anomalocaris.class, DataSerializers.BOOLEAN);
     private int invisibilityTimeout = 0;
     private EntityLivingBase grabVictim = null;
@@ -67,7 +68,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(INVISIBLE, false);
+        this.dataManager.register(INVISIBLE, true);
     }
 
     @Override
@@ -292,6 +293,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
             }
         }
     }
+
     public void setTameStatus(TameStatusType tameStatus) {
         super.setTameStatus(tameStatus);
         if (tameStatus.equals(TameStatusType.SIT)) {
@@ -306,6 +308,12 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
                 this.invisibilityTimeout = 200;
             }
         }
+    }
+
+    @Override
+    public EnumCreatureAttribute getCreatureAttribute()
+    {
+        return EnumCreatureAttribute.ARTHROPOD;
     }
 
     @Override
@@ -352,6 +360,12 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     @Override
     public List<String> blacklist() {
         return Arrays.asList(AnomalocarisConfig.anomalocarisGrabBlacklist);
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
     }
 
     @Override

@@ -4,13 +4,12 @@ import anightdazingzoroark.prift.client.renderer.entity.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.enums.*;
+import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 
 import java.util.Locale;
-
-import static anightdazingzoroark.prift.server.items.RiftItems.riftEggItem;
 
 public enum RiftCreatureType {
     TYRANNOSAURUS(Tyrannosaurus.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, BlockBreakTier.WOOD, LevelupRate.SLOW, TyrannosaurusRenderer::new, 3670016, 2428687, 450, 1, EggTemperature.VERY_WARM),
@@ -40,6 +39,7 @@ public enum RiftCreatureType {
     private final float eggScale;
     private final EggTemperature eggTemperature;
     public Item eggItem;
+    public Item sacItem;
     public final String friendlyName;
 
     RiftCreatureType(Class<? extends RiftCreature> creature, CreatureCategory creatureCategory, CreatureDiet creatureDiet, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, BlockBreakTier blockBreakTier, LevelupRate levelupRate, IRenderFactory renderFactory,  int eggPrimary, int eggSecondary, int hatchTime, float eggScale, EggTemperature eggTemperature) {
@@ -170,7 +170,15 @@ public enum RiftCreatureType {
     public static void registerEggs() {
         for (RiftCreatureType creature : RiftCreatureType.values()) {
             if (creature.getCreatureCategory().equals(CreatureCategory.DINOSAUR) || creature.getCreatureCategory().equals(CreatureCategory.REPTILE) || creature.getCreatureCategory().equals(CreatureCategory.BIRD) || creature.equals(DIMETRODON)) {
-                creature.eggItem = riftEggItem(creature.name().toLowerCase()+"_egg", creature);
+                creature.eggItem = RiftItems.riftEggItem(creature.name().toLowerCase()+"_egg", creature);
+            }
+        }
+    }
+
+    public static void registerSacs() {
+        for (RiftCreatureType creature : RiftCreatureType.values()) {
+            if (creature.getCreatureCategory().equals(CreatureCategory.INVERTEBRATE)) {
+                creature.sacItem = RiftItems.riftSacItem(creature.name().toLowerCase()+"_sac", creature);
             }
         }
     }
