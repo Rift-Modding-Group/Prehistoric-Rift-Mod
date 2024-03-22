@@ -747,15 +747,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isFavoriteFood(ItemStack stack) {
+        int matches = 0;
         for (String foodItem : this.favoriteFood) {
             int itemIdFirst = foodItem.indexOf(":");
             int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
             int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
             String itemId = foodItem.substring(0, itemIdSecond);
             int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == -1);
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId)) && (stack.getMetadata() == itemData) || (itemData == -1)) matches++;
         }
-        return false;
+        return matches > 0;
     }
 
     public int getFavoriteFoodHeal(ItemStack stack) {

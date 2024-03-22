@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "normal": {
+      "model": "prift:lead_powered_crank"
+    }
+  }
+}

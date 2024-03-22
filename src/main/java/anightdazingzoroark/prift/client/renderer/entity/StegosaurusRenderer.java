@@ -1,10 +1,9 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.model.RiftCreatureModel;
+import anightdazingzoroark.prift.client.model.entity.RiftCreatureModel;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.Stegosaurus;
-import anightdazingzoroark.prift.server.entity.creature.Tyrannosaurus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.culling.ICamera;

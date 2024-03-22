@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.particle.RiftBleedParticle;
 import anightdazingzoroark.prift.client.particle.RiftParticleSpawner;
 import anightdazingzoroark.prift.client.particle.RiftSnowParticle;
+import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.server.ServerProxy;
@@ -41,6 +42,7 @@ public class ClientProxy extends ServerProxy {
     public void preInit(FMLPreInitializationEvent e) {
         super.preInit(e);
         EntityRenderer.registerRenderers();
+        BlockRenderer.registerRenderers();
         MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());
         MinecraftForge.EVENT_BUS.register(new RiftRightClickChargeBar());
         MinecraftForge.EVENT_BUS.register(new RiftLeftClickChargeBar());

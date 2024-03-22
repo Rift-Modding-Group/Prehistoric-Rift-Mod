@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift;
 
+import anightdazingzoroark.prift.compat.bwm.blocks.RiftBWMBlocks;
 import anightdazingzoroark.prift.config.RiftConfigList;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.commands.RiftBleedCommand;

@@ -134,16 +134,13 @@ dependencies {
         }
     }
     runtimeOnly 'com.cleanroommc:strip-latest-forge-requirements:1.0'
-//    implementation ('com.cleanroommc:strip-latest-forge-requirements:1.0') {
-//        transitive = false
-//    }
     implementation 'software.bernie.geckolib:geckolib-forge-1.12.2:3.0.31'
     compileOnly "net.ilexiconn:llibrary:1.7.19-1.12.2"
     compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
     compileOnly "curse.maven:pyrotech-306676:4956838"
     compileOnly "curse.maven:athenaeum-284350:4633750"
     compileOnly "curse.maven:simpledifficulty-360779:3613814"
-    compileOnly 'curse.maven:better-with-everything-896908:4819046'
+    compileOnly "curse.maven:better-with-everything-896908:5202745"
     compileOnly "mezz.jei:jei_${mc_version}:${jei_version}:api"
     implementation "mezz.jei:jei_${mc_version}:${jei_version}"
 }

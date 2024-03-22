@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.model;
+package anightdazingzoroark.prift.client.model.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlateAnimator;

@@ -1,8 +1,7 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.model.RiftCreatureModel;
-import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
+import anightdazingzoroark.prift.client.model.entity.RiftCreatureModel;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
 import net.minecraft.client.Minecraft;

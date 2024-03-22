@@ -1,8 +1,6 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
-import anightdazingzoroark.prift.client.model.RiftEggModel;
-import anightdazingzoroark.prift.client.model.RiftSacModel;
-import anightdazingzoroark.prift.server.entity.RiftEgg;
+import anightdazingzoroark.prift.client.model.entity.RiftSacModel;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;

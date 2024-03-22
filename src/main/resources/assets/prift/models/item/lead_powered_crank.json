@@ -1,0 +1,39 @@
+{
+	"parent": "prift:block/lead_powered_crank",
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [
+				0,
+				90,
+				55
+			],
+			"translation": [
+				0,
+				1.75,
+				0.5
+			],
+			"scale": [
+				0.375,
+				0.375,
+				0.375
+			]
+		},
+		"firstperson_righthand": {
+			"rotation": [
+				0,
+				-90,
+				25
+			],
+			"translation": [
+				0,
+				4,
+				2
+			],
+			"scale": [
+				0.25,
+				0.25,
+				0.25
+			]
+		}
+	}
+}

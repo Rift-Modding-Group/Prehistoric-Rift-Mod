@@ -372,6 +372,9 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 if (this.getTameStatus() == TameStatusType.SIT || this.getNavigator().noPath()) {
                     this.moveRelative(0, 0, 0, 0.01f);
                     this.move(MoverType.SELF, 0, 0, 0);
+                    this.motionX *= 0;
+                    this.motionY *= 0;
+                    this.motionZ *= 0;
                 }
                 else {
                     this.moveRelative(strafe, vertical, forward, 0.01f);
