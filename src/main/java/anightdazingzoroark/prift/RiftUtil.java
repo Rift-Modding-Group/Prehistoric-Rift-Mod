@@ -28,6 +28,21 @@ import java.util.*;
 
 public class RiftUtil {
     public static final double gravity = 0.08D;
+    public static final UUID nilUUID = new UUID(0L, 0L);
+
+    public static EntityLivingBase getEntityFromUUID(World world, UUID uuid) {
+        if (world != null) {
+            for (Entity entity : world.getLoadedEntityList()) {
+                if (entity instanceof EntityLivingBase) {
+                    EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
+                    if (entityLivingBase.getUniqueID().equals(uuid)) {
+                        return entityLivingBase;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     public static boolean entityAtLocation(EntityLivingBase entityLivingBase, BlockPos pos, double radius) {
         return entityLivingBase.getEntityBoundingBox().grow(radius).contains(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));

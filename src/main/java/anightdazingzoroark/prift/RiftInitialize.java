@@ -1,12 +1,10 @@
 package anightdazingzoroark.prift;
 
-import anightdazingzoroark.prift.compat.bwm.blocks.RiftBWMBlocks;
 import anightdazingzoroark.prift.config.RiftConfigList;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;

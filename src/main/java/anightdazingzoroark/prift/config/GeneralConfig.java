@@ -29,7 +29,12 @@ public class GeneralConfig  extends RiftConfig {
     public static int levelingRadisIncrement = 10;
     public static String[] difficultyIncrement = {"EASY:0", "NORMAL:5", "HARD:10"};
 
+    //spawning
     public static String[] universalSpawnBlocks = {"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1"};
+
+    //mystical mechanics integration
+    public static boolean mmIntegration = true;
+    public static String[] lpcUsers = {"prift:stegosaurus", "prift:triceratops", "prift:utahraptor", "prift:parasaurolophus"};
 
     //debug
     public static boolean quickEggHatch = false;
@@ -70,6 +75,10 @@ public class GeneralConfig  extends RiftConfig {
         levelingRadius = config.getInt("Level based on distance from (0, 0)", "Creature Leveling", 1600, 0, 69420666, "Distance from (0, 0) from which creature levels get increased. This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");
         levelingRadisIncrement = config.getInt("Level increment based on distance from (0, 0)", "Creature Leveling", 10, 0, 69420666, "Level increment based on distance from (0, 0). This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");
         difficultyIncrement = config.getStringList("Level increment based on difficulty", "Creature Leveling", new String[]{"EASY:0", "NORMAL:5", "HARD:5"}, "Level increment based on the difficulty setting of the world. Only the number may be edited, changing the names can cause crashes. Note that the numbers are additive, so if Easy, Normal, and Hard are set to 5, the increment will be 15. Changing the order of the strings may also cause a crash.");
+
+        //mm integration
+        mmIntegration = config.getBoolean("Activate Mystical Mechanics Integration", "Mystical Mechanics Integration", true, "Whether or not additional features will be turned on if Better With Mods is detected in the mods folder");
+        lpcUsers = config.getStringList("Lead Powered Crank users", "Mystical Mechanics Integration", new String[]{"prift:stegosaurus", "prift:triceratops", "prift:utahraptor", "prift:parasaurolophus"}, "Mobs that can use the Lead Powered Crank (only works on creatures from Prehistoric Rift)");
 
         //debug
         quickEggHatch = config.getBoolean("All eggs hatch quickly", "Debug", false, "Turning this on makes all eggs hatch within 5 seconds. Mainly here for testing purposes, idk i could have made this a gamerule or smth");

@@ -1752,7 +1752,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public boolean canBeLeashedTo(EntityPlayer player) {
-        return false;
+        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && !this.getTameStatus().equals(TameStatusType.TURRET_MODE);
     }
 
     @Nullable

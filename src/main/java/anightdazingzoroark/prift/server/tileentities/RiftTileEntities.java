@@ -1,10 +1,10 @@
 package anightdazingzoroark.prift.server.tileentities;
 
-import anightdazingzoroark.prift.compat.bwm.tileentities.RiftBWMTileEntities;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.RiftMMTileEntities;
 import net.minecraftforge.fml.common.Loader;
 
 public class RiftTileEntities {
     public static void registerTileEntities() {
-        if (Loader.isModLoaded("betterwithmods")) RiftBWMTileEntities.registerTileEntities();
+        if (Loader.isModLoaded("mysticalmechanics")) RiftMMTileEntities.registerTileEntities();
     }
 }

@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.client.model.block;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.compat.bwm.tileentities.TileEntityLeadPoweredCrank;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityLeadPoweredCrank;
 import net.minecraft.util.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 

@@ -140,7 +140,7 @@ dependencies {
     compileOnly "curse.maven:pyrotech-306676:4956838"
     compileOnly "curse.maven:athenaeum-284350:4633750"
     compileOnly "curse.maven:simpledifficulty-360779:3613814"
-    compileOnly "curse.maven:better-with-everything-896908:5202745"
+    compileOnly "curse.maven:mysticalmechanics-300742:3006392"
     compileOnly "mezz.jei:jei_${mc_version}:${jei_version}:api"
     implementation "mezz.jei:jei_${mc_version}:${jei_version}"
 }
