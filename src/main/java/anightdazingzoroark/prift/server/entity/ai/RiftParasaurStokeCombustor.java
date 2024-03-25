@@ -31,7 +31,11 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.parasaur.isUsingWorkstation();
+        TileEntity te = this.parasaur.world.getTileEntity(this.parasaur.getWorkstationPos());
+        if (te != null) {
+            return te instanceof TileCombustionWorkerStoneBase && this.parasaur.isUsingWorkstation();
+        }
+        return false;
     }
 
     @Override

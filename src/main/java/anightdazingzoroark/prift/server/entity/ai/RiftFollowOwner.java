@@ -19,6 +19,9 @@ public class RiftFollowOwner extends EntityAIFollowOwner {
         if (this.tameable.getTameStatus() != TameStatusType.STAND) {
             return false;
         }
+        else if (this.tameable.isUsingWorkstation()) {
+            return false;
+        }
         else if (this.tameable.isUtilizingCharging()) {
             return false;
         }

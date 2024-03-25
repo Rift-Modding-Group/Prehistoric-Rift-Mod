@@ -1515,8 +1515,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(WORKSTATION_Y_POS, 0);
         this.dataManager.set(WORKSTATION_Z_POS, 0);
         EntityPlayer owner = (EntityPlayer) this.getOwner();
-        if (destroyed) owner.sendStatusMessage(new TextComponentTranslation("action.creature_workstation_destroyed"), false);
-        else owner.sendStatusMessage(new TextComponentTranslation("action.clear_creature_workstation"), false);
+        if (!this.world.isRemote) {
+            if (destroyed) owner.sendStatusMessage(new TextComponentTranslation("action.creature_workstation_destroyed"), false);
+            else owner.sendStatusMessage(new TextComponentTranslation("action.clear_creature_workstation"), false);
+        }
     }
 
     public boolean isUsingWorkstation() {
