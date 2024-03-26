@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.codetaylor.mc.athenaeum.util.Properties;
 import anightdazingzoroark.prift.RiftInitialize;
@@ -48,7 +50,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
+public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
     private static final DataParameter<Boolean> BLOWING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_BLOW = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
@@ -96,6 +98,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftParasaurStokeCombustor(this));
+        this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftResetAnimatedPose(this, 1.52F, 1));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
@@ -380,6 +383,23 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean canBeAttachedForWork() {
+        return Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
+    }
+
+    public boolean isAttachableForWork(BlockPos pos) {
+        Block block = this.world.getBlockState(pos).getBlock();
+        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+            if (block instanceof BlockLeadPoweredCrank) return true;
+        }
+        return false;
+    }
+
+    public int pullPower() {
+        return 5;
     }
 
     @Override

@@ -4,6 +4,8 @@ import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityLeadPoweredCrank;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import mysticalmechanics.block.BlockGearbox;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -25,6 +27,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -79,8 +82,13 @@ public class BlockLeadPoweredCrank extends Block implements ITileEntityProvider 
     }
 
     @Override
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+        return new AxisAlignedBB(0.375, 0, 0.375, 0.625, 1, 0.625);
+    }
+
+    @Override
     public boolean canPlaceBlockAt(World world, BlockPos pos) {
-        return world.isSideSolid(pos.down(), EnumFacing.UP);
+        return world.isSideSolid(pos.down(), EnumFacing.UP) || world.isSideSolid(pos.up(), EnumFacing.DOWN);
     }
 
     public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
@@ -96,14 +104,11 @@ public class BlockLeadPoweredCrank extends Block implements ITileEntityProvider 
 
         if (crank != null) {
             //find creature within reach
-            List<String> vUserList = Arrays.asList(GeneralConfig.lpcUsers);
-            search: for (String mobIdentifier : vUserList) {
-                for (RiftCreature creature : worldIn.getEntitiesWithinAABB(RiftCreature.class, detectArea)) {
-                    if (EntityList.getKey(creature).toString().equals(mobIdentifier)) {
-                        if (creature.getLeashed() && creature.getLeashHolder() == playerIn) {
-                            creatureUser = creature;
-                            break search;
-                        }
+            for (RiftCreature creature : worldIn.getEntitiesWithinAABB(RiftCreature.class, detectArea)) {
+                if (creature instanceof ILeadWorkstationUser) {
+                    ILeadWorkstationUser user = (ILeadWorkstationUser) creature;
+                    if (creature.getLeashed() && creature.getLeashHolder() == playerIn && user.isAttachableForWork(pos)) {
+                        creatureUser = creature;
                     }
                 }
             }

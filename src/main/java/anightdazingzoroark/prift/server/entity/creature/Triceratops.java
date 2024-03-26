@@ -3,13 +3,17 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -22,6 +26,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -33,7 +38,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 
-public class Triceratops extends RiftCreature implements IChargingMob {
+public class Triceratops extends RiftCreature implements IChargingMob, ILeadWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/triceratops"));
     private RiftCreaturePart hipPart;
     private RiftCreaturePart leftBackLegPart;
@@ -73,6 +78,7 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
+        this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftControlledCharge(this, 1.75f, 0.24f, 4f));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.72F, 0.48F));
@@ -165,6 +171,23 @@ public class Triceratops extends RiftCreature implements IChargingMob {
         float xOffset = (float)(this.posX + (-0.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-0.5) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY, zOffset);
+    }
+
+    @Override
+    public boolean canBeAttachedForWork() {
+        return Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
+    }
+
+    public boolean isAttachableForWork(BlockPos pos) {
+        Block block = this.world.getBlockState(pos).getBlock();
+        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+            if (block instanceof BlockLeadPoweredCrank) return true;
+        }
+        return false;
+    }
+
+    public int pullPower() {
+        return 5;
     }
 
     @SideOnly(Side.CLIENT)

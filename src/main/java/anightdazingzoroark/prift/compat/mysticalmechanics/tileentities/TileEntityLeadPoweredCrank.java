@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import mysticalmechanics.api.DefaultMechCapability;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
@@ -20,6 +21,10 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
@@ -31,7 +36,7 @@ import static net.minecraft.block.BlockDoor.getFacing;
 public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatable, ITickable {
     private final AnimationFactory factory = new AnimationFactory(this);
     private boolean hasLead = false;
-    private int rotation = 0;
+    private float rotation = 0;
     private RiftCreature worker;
     private NBTTagCompound workerNBT;
     public IMechCapability mechPower;
@@ -62,7 +67,7 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
     }
 
     public EnumFacing getFacing() {
-        IBlockState state = getWorld().getBlockState(getPos());
+        IBlockState state = this.getWorld().getBlockState(this.getPos());
         return state.getValue(BlockLeadPoweredCrank.FACING);
     }
 
@@ -83,12 +88,21 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
     }
 
     public void updateNeighbors() {
-        EnumFacing facing = this.getFacing().getOpposite();
-        TileEntity tile = this.world.getTileEntity(getPos().offset(facing));
-        if (tile != null) {
-            if (tile.hasCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facing.getOpposite())) {
-                if (tile.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facing.getOpposite()).isInput(facing.getOpposite())) {
-                    tile.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facing.getOpposite()).setPower(this.mechPower.getPower(facing.getOpposite()), facing.getOpposite());
+        EnumFacing facing = this.getFacing();
+        EnumFacing facingOpp = this.getFacing().getOpposite();
+        TileEntity tileBelow = this.world.getTileEntity(this.getPos().offset(facingOpp));
+        TileEntity tileAbove = this.world.getTileEntity(this.getPos().offset(facing));
+        if (tileBelow != null) {
+            if (tileBelow.hasCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp)) {
+                if (tileBelow.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp).isInput(facingOpp)) {
+                    tileBelow.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp).setPower(this.mechPower.getPower(facingOpp), facingOpp);
+                }
+            }
+        }
+        if (tileAbove != null) {
+            if (tileAbove.hasCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facing)) {
+                if (tileAbove.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facing).isInput(facing)) {
+                    tileAbove.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facing).setPower(this.mechPower.getPower(facing), facing);
                 }
             }
         }
@@ -102,28 +116,33 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
 
         //for updatin power related stuff
         if (this.worker != null && this.world != null) {
+            //manage giving power
             if (!this.world.isRemote) {
                 if (this.worker.isMoving(false)) {
-//                    System.out.println("power");
-                    this.mechPower.setPower(5f, null);
+                    ILeadWorkstationUser user = (ILeadWorkstationUser)this.worker;
+                    this.mechPower.setPower((float)user.pullPower(), null);
                 }
-                else {
-//                    System.out.println("not moving");
-                    this.mechPower.setPower(0f, null);
-                }
+                else this.mechPower.setPower(0f, null);
                 this.updateNeighbors();
                 this.markDirty();
+            }
+
+            //manage rotation anim
+            if (this.worker.isMoving(false)) {
+                ILeadWorkstationUser user = (ILeadWorkstationUser)this.worker;
+                this.setRotation(this.rotation + (float) user.pullPower());
+                if (this.rotation >= 360f) {
+                    this.setRotation(this.rotation - 360f);
+                }
             }
         }
         else if (this.worker == null && this.world != null) {
             if (!this.world.isRemote) {
-//                System.out.println("no worker");
                 this.mechPower.setPower(0f, null);
                 this.updateNeighbors();
                 this.markDirty();
             }
         }
-//        System.out.println(this.mechPower);
     }
 
     public void onBreakCrank() {
@@ -137,7 +156,7 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
 
         this.mechPower.writeToNBT(compound);
         compound.setBoolean("hasLead", this.hasLead);
-        compound.setInteger("rotation", this.rotation);
+        compound.setFloat("rotation", this.rotation);
 
         if (this.worker != null) {
             if (this.workerNBT == null) {
@@ -155,7 +174,7 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        
+
         this.mechPower.readFromNBT(compound);
         this.hasLead = compound.getBoolean("hasLead");
         this.rotation = compound.getInteger("rotation");
@@ -184,7 +203,7 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
         Misc.syncTE(this, false);
     }
 
-    public void setRotation(int value) {
+    public void setRotation(float value) {
         this.rotation = value;
         if (!this.world.isRemote) {
             this.markDirty();
@@ -193,7 +212,7 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
         }
     }
 
-    public int getRotation() {
+    public float getRotation() {
         return this.rotation;
     }
 
@@ -259,7 +278,14 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
     }
 
     @Override
-    public void registerControllers(AnimationData animationData) {}
+    public void registerControllers(AnimationData data) {
+        data.addAnimationController(new AnimationController(this, "rotation", 0, this::rotation));
+    }
+
+    private <E extends IAnimatable> PlayState rotation(AnimationEvent<E> event) {
+        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.lead_powered_crank.rotate", true));
+        return PlayState.CONTINUE;
+    }
 
     @Override
     public AnimationFactory getFactory() {

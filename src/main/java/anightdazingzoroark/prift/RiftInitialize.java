@@ -22,6 +22,7 @@ public class RiftInitialize {
     public static final String SSR_MOD_ID = "shouldersurfing";
     public static final String PYROTECH_MOD_ID = "pyrotech";
     public static final String SIMPLE_DIFFICULTY_MOD_ID = "simpledifficulty";
+    public static final String MYSTICAL_MECHANICS_MOD_ID = "mysticalmechanics";
     public static final String MODNAME = "Prehistoric Rift";
     public static final String MODVERSION= "0.0.9";
     @SidedProxy(clientSide = "anightdazingzoroark.prift.client.ClientProxy", serverSide = "anightdazingzoroark.prift.server.ServerProxy")

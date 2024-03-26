@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.message.*;
@@ -141,14 +142,24 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 3 && ((!this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.creature.getTameBehavior().name().equals(this.choices.get(i).name())) || (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.creature.getTurretTargeting().name().equals(this.choices.get(i).name())))) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 128, 0, 128, 128);
             }
-            else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 2) {
+            else if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) || this.creature.isUsingWorkstation()) && i == 2) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
             else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 4) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
-            else if (this.radialChoiceMenu == 2 && this.creature.isBaby() && i == 3) {
+            else if (this.radialChoiceMenu == 2 && (this.creature.isBaby() || this.creature.isUsingWorkstation()) && i == 3) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+            }
+            else if (this.radialChoiceMenu == 1 && i == 4 && this.creature.isUsingWorkstation()) {
+                drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+            }
+            else if (this.radialChoiceMenu == 2 && i == 4) {
+                if (this.creature instanceof ILeadWorkstationUser) {
+                    ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                    if (user.isAttachableForWork(this.creature.getWorkstationPos())) drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+                    else drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
+                }
             }
             else {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
@@ -189,9 +200,18 @@ public class RiftDialMenu extends GuiScreen {
             }
             else radialString = I18n.format("radial.choice."+this.choices.get(i).name().toLowerCase());
 
+            //additional disablin text
             if (this.radialChoiceMenu == 0 && this.creature.isRideable && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled()) || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) || this.creature.isUsingWorkstation()) && i == 2) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 4) radialString = "["+radialString+"]";
-            if (this.radialChoiceMenu == 2 && this.creature.isBaby() && i == 3) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 2 && (this.creature.isBaby() || this.creature.isUsingWorkstation()) && i == 3) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 1 && this.creature.isUsingWorkstation() && i == 4) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 2 && i == 4) {
+                System.out.println("for workstation");
+                if (this.creature instanceof ILeadWorkstationUser) {
+                    ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                    if (user.isAttachableForWork(this.creature.getWorkstationPos())) radialString = "["+radialString+"]";
+                }
+            }
 
             float angle1 = ((i / (float) numItems) + 0.25f) * 2 * (float) Math.PI;
             float posX = x + 75 + itemRadius * (float) Math.cos(angle1) - (float)(this.fontRenderer.getStringWidth(radialString) / 2);
@@ -204,20 +224,32 @@ public class RiftDialMenu extends GuiScreen {
         }
 
         //hover text
-        if (this.radialChoiceMenu == 0 && this.creature.isBaby() && selectedItem == 2) {
+        if (this.radialChoiceMenu == 0 && this.creature.isBaby() && this.selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.too_young_saddle"), mouseX, mouseY);
         }
-        else if (this.radialChoiceMenu == 0 && (this.creature.isUsingWorkstation() || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) && selectedItem == 2) {
+        else if (this.radialChoiceMenu == 0 && (this.creature.isUsingWorkstation() || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) && this.selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
         }
-        else if (this.radialChoiceMenu == 0 && this.creature.isRideable && !this.creature.isSaddled() && selectedItem == 2) {
+        else if (this.radialChoiceMenu == 0 && this.creature.isRideable && !this.creature.isSaddled() && this.selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.need_saddle"), mouseX, mouseY);
         }
-        else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && selectedItem == 4) {
+        else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && this.selectedItem == 4) {
             this.drawHoveringText(I18n.format("radial.note.too_young_behavior"), mouseX, mouseY);
         }
-        else if (this.radialChoiceMenu == 2 && this.creature.isBaby() && selectedItem == 3) {
-            this.drawHoveringText(I18n.format("radial.note.too_young_unclaim"), mouseX, mouseY);
+        else if (this.radialChoiceMenu == 1 && this.creature.isUsingWorkstation() && this.selectedItem == 4) {
+            this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 2 && this.selectedItem == 3) {
+            if (this.creature.isBaby()) this.drawHoveringText(I18n.format("radial.note.too_young_unclaim"), mouseX, mouseY);
+            else if (this.creature.isUsingWorkstation()) this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 2 && this.selectedItem == 4) {
+            if (this.creature instanceof ILeadWorkstationUser) {
+                ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
+                    this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+                }
+            }
         }
 
         RenderHelper.disableStandardItemLighting();
@@ -316,7 +348,7 @@ public class RiftDialMenu extends GuiScreen {
                     RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.WANDER));
                     this.mc.player.closeScreen();
                 }
-                else if (selectedItem == 4) {
+                else if (selectedItem == 4 && !this.creature.isUsingWorkstation()) {
                     RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureFromMenu(this.creature, TameStatusType.TURRET_MODE));
                     this.mc.player.closeScreen();
                 }
@@ -336,14 +368,23 @@ public class RiftDialMenu extends GuiScreen {
                     RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature, !this.creature.getHasHomePos()));
                     this.mc.player.closeScreen();
                 }
-                else if (selectedItem == 3 && !this.creature.isBaby()) {
+                else if (selectedItem == 3 && !this.creature.isBaby() && !this.creature.isUsingWorkstation()) {
                     ClientProxy.popupFromRadial = PopupFromRadial.UNCLAIM;
                     RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 4) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftSetWorkstation(this.creature, !this.creature.isUsingWorkstation()));
-                    this.mc.player.closeScreen();
+                    if (this.creature instanceof ILeadWorkstationUser) {
+                        ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                        if (!user.isAttachableForWork(this.creature.getWorkstationPos())) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftSetWorkstation(this.creature, !this.creature.isUsingWorkstation()));
+                            this.mc.player.closeScreen();
+                        }
+                    }
+                    else {
+                        RiftMessages.WRAPPER.sendToServer(new RiftSetWorkstation(this.creature, !this.creature.isUsingWorkstation()));
+                        this.mc.player.closeScreen();
+                    }
                 }
                 break;
             case 3:
@@ -392,7 +433,8 @@ public class RiftDialMenu extends GuiScreen {
 
     private List<RiftTameRadialChoice> getOptions() {
         if (this.creature instanceof IWorkstationUser) {
-            if (((IWorkstationUser)this.creature).canUseWorkstation()) return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.CHANGE_NAME, RiftTameRadialChoice.SET_HOME, RiftTameRadialChoice.UNCLAIM, RiftTameRadialChoice.SET_WORKSTATION);
+            IWorkstationUser user = (IWorkstationUser) this.creature;
+            if (user.canUseWorkstation()) return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.CHANGE_NAME, RiftTameRadialChoice.SET_HOME, RiftTameRadialChoice.UNCLAIM, RiftTameRadialChoice.SET_WORKSTATION);
         }
         return Arrays.asList(RiftTameRadialChoice.BACK, RiftTameRadialChoice.CHANGE_NAME, RiftTameRadialChoice.SET_HOME, RiftTameRadialChoice.UNCLAIM);
     }

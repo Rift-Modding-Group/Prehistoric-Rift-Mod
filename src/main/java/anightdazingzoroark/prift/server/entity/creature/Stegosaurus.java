@@ -3,15 +3,20 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.StegosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustionWorkerStoneBase;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -27,12 +32,14 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -44,7 +51,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 
-public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob {
+public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob, ILeadWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public int strongAttackCharge;
@@ -224,6 +231,23 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         float xOffset = (float)(this.posX + (-1) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-1) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY + 0.6, zOffset);
+    }
+
+    @Override
+    public boolean canBeAttachedForWork() {
+        return Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
+    }
+
+    public boolean isAttachableForWork(BlockPos pos) {
+        Block block = this.world.getBlockState(pos).getBlock();
+        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+            if (block instanceof BlockLeadPoweredCrank) return true;
+        }
+        return false;
+    }
+
+    public int pullPower() {
+        return 5;
     }
 
     @SideOnly(Side.CLIENT)

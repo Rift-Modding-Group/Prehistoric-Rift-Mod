@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.server.blocks;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -20,7 +22,7 @@ public class RiftBlocks {
     public static final List<ItemBlock> ITEM_BLOCKS = new ArrayList<>();
 
     public static void registerBlocks() {
-        if (Loader.isModLoaded("mysticalmechanics")) RiftMMBlocks.registerMMBlocks();
+        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID) && GeneralConfig.mmIntegration) RiftMMBlocks.registerMMBlocks();
     }
 
     public static Block registerBlock(Block block, String registryName) {

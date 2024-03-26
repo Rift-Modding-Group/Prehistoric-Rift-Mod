@@ -18,6 +18,6 @@ public class RiftLeadPoweredCrankModel extends AnimatedGeoModel<TileEntityLeadPo
 
     @Override
     public ResourceLocation getAnimationFileLocation(TileEntityLeadPoweredCrank tileEntityLeadPoweredCrank) {
-        return null;
+        return new ResourceLocation(RiftInitialize.MODID, "animations/lead_powered_crank.animation.json");
     }
 }
