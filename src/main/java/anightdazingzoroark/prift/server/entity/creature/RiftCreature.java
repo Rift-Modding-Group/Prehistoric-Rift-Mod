@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
@@ -1754,7 +1755,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public boolean canBeLeashedTo(EntityPlayer player) {
-        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && !this.getTameStatus().equals(TameStatusType.TURRET_MODE);
+        boolean leashOperatingFlag = true;
+        if (this instanceof ILeadWorkstationUser) {
+            leashOperatingFlag = !this.isUsingWorkstation();
+        }
+        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && !this.getTameStatus().equals(TameStatusType.TURRET_MODE) && leashOperatingFlag;
     }
 
     @Nullable

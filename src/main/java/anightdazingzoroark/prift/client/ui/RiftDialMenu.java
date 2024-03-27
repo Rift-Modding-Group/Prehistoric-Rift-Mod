@@ -148,18 +148,18 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 4) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
-            else if (this.radialChoiceMenu == 2 && (this.creature.isBaby() || this.creature.isUsingWorkstation()) && i == 3) {
+            else if (this.radialChoiceMenu == 2 && this.creature.isBaby() && i == 3) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
             else if (this.radialChoiceMenu == 1 && i == 4 && this.creature.isUsingWorkstation()) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
-            else if (this.radialChoiceMenu == 2 && i == 4) {
-                if (this.creature instanceof ILeadWorkstationUser) {
-                    ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
-                    if (user.isAttachableForWork(this.creature.getWorkstationPos())) drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
-                    else drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
+            else if (this.radialChoiceMenu == 0 && i == 3) {
+                ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
+                    drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
                 }
+                else drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
             }
             else {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
@@ -203,13 +203,12 @@ public class RiftDialMenu extends GuiScreen {
             //additional disablin text
             if (this.radialChoiceMenu == 0 && this.creature.isRideable && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled()) || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) || this.creature.isUsingWorkstation()) && i == 2) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 4) radialString = "["+radialString+"]";
-            if (this.radialChoiceMenu == 2 && (this.creature.isBaby() || this.creature.isUsingWorkstation()) && i == 3) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 2 && this.creature.isBaby() && i == 3) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 1 && this.creature.isUsingWorkstation() && i == 4) radialString = "["+radialString+"]";
-            if (this.radialChoiceMenu == 2 && i == 4) {
-                System.out.println("for workstation");
-                if (this.creature instanceof ILeadWorkstationUser) {
-                    ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
-                    if (user.isAttachableForWork(this.creature.getWorkstationPos())) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 0 && i == 3) {
+                ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
+                    radialString = "["+radialString+"]";
                 }
             }
 
@@ -239,16 +238,10 @@ public class RiftDialMenu extends GuiScreen {
         else if (this.radialChoiceMenu == 1 && this.creature.isUsingWorkstation() && this.selectedItem == 4) {
             this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
         }
-        else if (this.radialChoiceMenu == 2 && this.selectedItem == 3) {
-            if (this.creature.isBaby()) this.drawHoveringText(I18n.format("radial.note.too_young_unclaim"), mouseX, mouseY);
-            else if (this.creature.isUsingWorkstation()) this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
-        }
-        else if (this.radialChoiceMenu == 2 && this.selectedItem == 4) {
-            if (this.creature instanceof ILeadWorkstationUser) {
-                ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
-                if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
-                    this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
-                }
+        else if (this.radialChoiceMenu == 0 && this.selectedItem == 3) {
+            ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+            if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
+                this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
         }
 
@@ -317,13 +310,28 @@ public class RiftDialMenu extends GuiScreen {
                     }
                 }
                 else if (selectedItem == 3) {
-                    if (this.creature.isRideable) {
-                        this.choices = getOptions();
-                        this.radialChoiceMenu = 2;
+                    if (this.creature instanceof ILeadWorkstationUser) {
+                        ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                        if (!user.isAttachableForWork(this.creature.getWorkstationPos())) {
+                            if (this.creature.isRideable) {
+                                this.choices = getOptions();
+                                this.radialChoiceMenu = 2;
+                            }
+                            else {
+                                this.choices = getBehavior();
+                                this.radialChoiceMenu = 3;
+                            }
+                        }
                     }
                     else {
-                        this.choices = getBehavior();
-                        this.radialChoiceMenu = 3;
+                        if (this.creature.isRideable) {
+                            this.choices = getOptions();
+                            this.radialChoiceMenu = 2;
+                        }
+                        else {
+                            this.choices = getBehavior();
+                            this.radialChoiceMenu = 3;
+                        }
                     }
                 }
                 else if (selectedItem == 4 && !this.creature.isBaby()) {
@@ -368,23 +376,14 @@ public class RiftDialMenu extends GuiScreen {
                     RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature, !this.creature.getHasHomePos()));
                     this.mc.player.closeScreen();
                 }
-                else if (selectedItem == 3 && !this.creature.isBaby() && !this.creature.isUsingWorkstation()) {
+                else if (selectedItem == 3 && !this.creature.isBaby()) {
                     ClientProxy.popupFromRadial = PopupFromRadial.UNCLAIM;
                     RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 4) {
-                    if (this.creature instanceof ILeadWorkstationUser) {
-                        ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
-                        if (!user.isAttachableForWork(this.creature.getWorkstationPos())) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftSetWorkstation(this.creature, !this.creature.isUsingWorkstation()));
-                            this.mc.player.closeScreen();
-                        }
-                    }
-                    else {
-                        RiftMessages.WRAPPER.sendToServer(new RiftSetWorkstation(this.creature, !this.creature.isUsingWorkstation()));
-                        this.mc.player.closeScreen();
-                    }
+                    RiftMessages.WRAPPER.sendToServer(new RiftSetWorkstation(this.creature, !this.creature.isUsingWorkstation()));
+                    this.mc.player.closeScreen();
                 }
                 break;
             case 3:

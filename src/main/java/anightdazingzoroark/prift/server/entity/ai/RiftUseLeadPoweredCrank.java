@@ -3,19 +3,26 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityLeadPoweredCrank;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RiftUseLeadPoweredCrank extends EntityAIBase {
     private final RiftCreature creature;
     private final double radius;
-    private int angle;
+    private int posMark; //is values from 0 to 7
     private boolean restFlag;
+    private double yRotPos;
 
     public RiftUseLeadPoweredCrank(RiftCreature creature) {
         this.creature = creature;
-        this.radius = 3 + creature.width;
+        this.radius = 3 + creature.width * 2;
         this.setMutexBits(4);
     }
 
@@ -36,57 +43,85 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
     @Override
     public void startExecuting() {
         this.restFlag = false;
-        this.angle = this.distFromCrankDeg();
+        this.posMark = this.initPostMark();
+        this.yRotPos = this.creature.posY;
+    }
+
+    @Override
+    public void resetTask() {
+        this.creature.getNavigator().clearPath();
     }
 
     @Override
     public void updateTask() {
         if (this.creature.getEnergy() > 6 && !this.restFlag) {
-//            System.out.println(distFromCrank());
-            if (this.withinTolerance(this.distFromCrank(), this.radius, 0.25D)) {
-//                System.out.println("in tolerance");
-                if (this.angle >= 360) this.angle = 0;
-                else this.angle += 1;
+            if (this.hasMoveSpace()) {
+                double markAngle = Math.toRadians((this.posMark * 45) - 90);
+                double xPos = (this.radius * Math.cos(markAngle)) + this.creature.getWorkstationPos().getX();
+                double zPos = (this.radius * Math.sin(markAngle)) + this.creature.getWorkstationPos().getZ();
+                BlockPos newPos = new BlockPos(xPos, this.yRotPos, zPos);
 
-                double radian = Math.toRadians(this.angle);
-                double offsetX = Math.cos(radian) * this.radius;
-                double offsetZ = Math.sin(radian) * this.radius;
-                BlockPos targetPos = this.creature.getWorkstationPos().add(offsetX, 0, offsetZ);
+                this.creature.getNavigator().tryMoveToXYZ(newPos.getX(), newPos.getY(), newPos.getZ(), 1);
 
-                this.creature.getMoveHelper().setMoveTo(targetPos.getX(), this.creature.posY, targetPos.getZ(), 1);
+                if (RiftUtil.entityAtLocation(this.creature, newPos, 1)) {
+                    this.posMark++;
+                    if (this.posMark > 7) this.posMark = 0;
+                }
             }
-            else if (this.distFromCrank() > this.radius + this.radius * 0.25D) {
-//                System.out.println("outside");
-                double workXPos = this.creature.getWorkstationPos().getX();
-                double workZPos = this.creature.getWorkstationPos().getZ();
-                this.creature.getMoveHelper().setMoveTo(workXPos, this.creature.posY, workZPos, 1);
-            }
-            else if (this.distFromCrank() < this.radius - this.radius * 0.25D) {
-                double xDist = Math.cos(Math.toRadians(this.distFromCrankDeg())) * this.radius;
-                double zDist = Math.sin(Math.toRadians(this.distFromCrankDeg())) * this.radius;
-                BlockPos newPos = this.creature.getWorkstationPos().add(xDist, 0, zDist);
-                this.creature.getMoveHelper().setMoveTo(newPos.getX(), 0 ,newPos.getZ(), 1);
+            else {
+                //send message
+                if (!this.creature.getNavigator().noPath()) {
+                    EntityPlayer player = (EntityPlayer)this.creature.getOwner();
+                    player.sendStatusMessage(new TextComponentTranslation("reminder.crank_blocked", this.creature.getName()), false);
+                }
+
+                //clear path
+                this.creature.getNavigator().clearPath();
             }
         }
-        else if (this.creature.getEnergy() <= 6 && !this.restFlag) this.restFlag = true;
+        else if (this.creature.getEnergy() <= 6 && !this.restFlag) {
+            this.creature.getNavigator().clearPath();
+            this.restFlag = true;
+        }
         else if (this.creature.getEnergy() == 20) this.restFlag = false;
     }
 
-    private double distFromCrank() {
-        double xDist = this.creature.getWorkstationPos().getX() - this.creature.posX;
-        double zDist = this.creature.getWorkstationPos().getZ() - this.creature.posZ;
-        return Math.sqrt(xDist * xDist + zDist * zDist);
+    private int initPostMark() {
+        double minDist = Double.MAX_VALUE;
+        int minIndex = -1;
+
+        for (int i = 0; i < 8; i++) {
+            double markAngle = Math.toRadians((i * 45) - 90);
+            double xPos = (this.radius * Math.cos(markAngle)) + this.creature.getWorkstationPos().getX();
+            double zPos = (this.radius * Math.sin(markAngle)) + this.creature.getWorkstationPos().getZ();
+            double xDist = xPos - this.creature.posX;
+            double zDist = zPos - this.creature.posZ;
+            double dist = Math.sqrt(xDist * xDist + zDist * zDist);
+            if (dist < minDist) {
+                minDist = dist;
+                minIndex = i;
+            }
+        }
+        return minIndex;
     }
 
-    private int distFromCrankDeg() { //angle in degrees
-        double xWorkDist = this.creature.posX - this.creature.getWorkstationPos().getX();
-        double zWorkDist = this.creature.posZ - this.creature.getWorkstationPos().getZ();
-        return (int)Math.toDegrees(Math.atan2(zWorkDist, xWorkDist));
-    }
+    private boolean hasMoveSpace() {
+        final int xzBound = 3 + Math.round(this.creature.width);
+        final int lowerY = (int)(this.creature.posY - this.creature.getWorkstationPos().getY());
+        final int boundY = 3 + (int)(this.creature.height + Math.abs(this.yRotPos - this.creature.getWorkstationPos().getY()));
 
-    private boolean withinTolerance(double inp, double value, double tolerance) {
-        double lowerVal = value - (value * tolerance);
-        double upperVal = value + (value * tolerance);
-        return inp >= lowerVal && inp <= upperVal;
+        for (double x = -xzBound; x <= xzBound; x++) {
+            for (int y = lowerY; y <= boundY; y++) {
+                for (double z = -xzBound; z <= xzBound; z++) {
+                    BlockPos spacePos = this.creature.getWorkstationPos().add(x, y, z);
+                    System.out.println(spacePos);
+                    if (x != 0 && z != 0) {
+                        if (this.creature.world.getBlockState(spacePos).getMaterial() != Material.AIR) return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 }

@@ -141,6 +141,7 @@ reminder.not_creature_owner=This creature is owned by %s!
 reminder.claim_creature=You have claimed %s!
 reminder.unclaim_creature=You have unclaimed %s!
 reminder.level_up=%s has reached Level %s!
+reminder.crank_blocked=%s's path is being blocked! Make sure there's sufficient space around the crank!
 
 prift.egg.time=Time
 prift.egg.minutes=minute(s)

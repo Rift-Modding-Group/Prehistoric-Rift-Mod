@@ -88,21 +88,20 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
     }
 
     public void updateNeighbors() {
-        EnumFacing facing = this.getFacing();
         EnumFacing facingOpp = this.getFacing().getOpposite();
         TileEntity tileBelow = this.world.getTileEntity(this.getPos().offset(facingOpp));
-        TileEntity tileAbove = this.world.getTileEntity(this.getPos().offset(facing));
+        TileEntity tileAbove = this.world.getTileEntity(this.getPos().offset(this.getFacing()));
         if (tileBelow != null) {
-            if (tileBelow.hasCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp)) {
-                if (tileBelow.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp).isInput(facingOpp)) {
-                    tileBelow.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp).setPower(this.mechPower.getPower(facingOpp), facingOpp);
+            if (tileBelow.hasCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp.getOpposite())) {
+                if (tileBelow.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp.getOpposite()).isInput(facingOpp.getOpposite())) {
+                    tileBelow.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp.getOpposite()).setPower(this.mechPower.getPower(facingOpp.getOpposite()), facingOpp.getOpposite());
                 }
             }
         }
         if (tileAbove != null) {
-            if (tileAbove.hasCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facing)) {
-                if (tileAbove.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facing).isInput(facing)) {
-                    tileAbove.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facing).setPower(this.mechPower.getPower(facing), facing);
+            if (tileAbove.hasCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp)) {
+                if (tileAbove.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp).isInput(facingOpp)) {
+                    tileAbove.getCapability(MysticalMechanicsAPI.MECH_CAPABILITY, facingOpp).setPower(this.mechPower.getPower(facingOpp), facingOpp);
                 }
             }
         }

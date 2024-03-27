@@ -86,11 +86,6 @@ public class BlockLeadPoweredCrank extends Block implements ITileEntityProvider 
         return new AxisAlignedBB(0.375, 0, 0.375, 0.625, 1, 0.625);
     }
 
-    @Override
-    public boolean canPlaceBlockAt(World world, BlockPos pos) {
-        return world.isSideSolid(pos.down(), EnumFacing.UP) || world.isSideSolid(pos.up(), EnumFacing.DOWN);
-    }
-
     public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
         return this.getDefaultState().withProperty(FACING, EnumFacing.UP);
     }
