@@ -114,10 +114,8 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
             for (int y = lowerY; y <= boundY; y++) {
                 for (double z = -xzBound; z <= xzBound; z++) {
                     BlockPos spacePos = this.creature.getWorkstationPos().add(x, y, z);
-                    System.out.println(spacePos);
-                    if (x != 0 && z != 0) {
-                        if (this.creature.world.getBlockState(spacePos).getMaterial() != Material.AIR) return false;
-                    }
+                    if (x == 0 && z == 0) continue;
+                    if (this.creature.world.getBlockState(spacePos).getMaterial() != Material.AIR) return false;
                 }
             }
         }

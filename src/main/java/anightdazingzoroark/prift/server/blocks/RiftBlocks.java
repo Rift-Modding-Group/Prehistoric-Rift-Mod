@@ -25,12 +25,12 @@ public class RiftBlocks {
         if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID) && GeneralConfig.mmIntegration) RiftMMBlocks.registerMMBlocks();
     }
 
-    public static Block registerBlock(Block block, String registryName) {
+    public static Block registerBlock(Block block, String registryName, boolean includeItem) {
         block.setCreativeTab(RiftCreativeTabs.creativeItemsTab);
         block.setRegistryName(registryName);
         block.setTranslationKey(registryName);
         BLOCKS.add(block);
-        ITEM_BLOCKS.add((ItemBlock)(new ItemBlock(block).setRegistryName(registryName).setTranslationKey(registryName)));
+        if (includeItem) ITEM_BLOCKS.add((ItemBlock)(new ItemBlock(block).setRegistryName(registryName).setTranslationKey(registryName)));
         return block;
     }
 

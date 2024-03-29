@@ -1,0 +1,18 @@
+package anightdazingzoroark.prift.compat.mysticalmechanics.items;
+
+import anightdazingzoroark.prift.server.items.RiftItems;
+import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
+import net.minecraft.item.Item;
+
+public class RiftMMItems {
+    public static Item BLOW_POWERED_TURBINE;
+
+    public static void registerMMItems() {
+        BLOW_POWERED_TURBINE = riftBlowPoweredTurbineItem("blow_powered_turbine");
+    }
+
+    public static Item riftBlowPoweredTurbineItem(String registryName) {
+        final RiftBlowPoweredTurbinePlacer item = new RiftBlowPoweredTurbinePlacer();
+        return RiftItems.registerItem(item, registryName);
+    }
+}

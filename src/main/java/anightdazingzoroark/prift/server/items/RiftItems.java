@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.items;
 
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
+import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectiles;
@@ -134,6 +135,9 @@ public class RiftItems {
 
         RiftCreatureType.registerEggs();
         RiftCreatureType.registerSacs();
+
+        //compat items
+        RiftMMItems.registerMMItems();
 
         //dont ask why this is here
         RiftProjectiles.registerProjectiles();

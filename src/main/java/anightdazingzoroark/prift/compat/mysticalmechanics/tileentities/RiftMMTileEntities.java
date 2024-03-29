@@ -7,5 +7,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class RiftMMTileEntities {
     public static void registerTileEntities() {
         GameRegistry.registerTileEntity(TileEntityLeadPoweredCrank.class, new ResourceLocation(RiftInitialize.MODID, "lead_powered_crank"));
+        GameRegistry.registerTileEntity(TileEntityBlowPoweredTurbine.class, new ResourceLocation(RiftInitialize.MODID, "blow_powered_turbine"));
     }
 }

@@ -142,6 +142,7 @@ reminder.claim_creature=You have claimed %s!
 reminder.unclaim_creature=You have unclaimed %s!
 reminder.level_up=%s has reached Level %s!
 reminder.crank_blocked=%s's path is being blocked! Make sure there's sufficient space around the crank!
+reminder.cannot_place_turbine=Cannot place turbine! Make sure that there's a 3 block tall and 3 block wide area for the turbine to be placed on!
 
 prift.egg.time=Time
 prift.egg.minutes=minute(s)
@@ -208,3 +209,5 @@ turrettargeting.players_and_other_tames=%s will now target other players and the
 turrettargeting.hostiles=%s will now target hostile mobs
 turrettargeting.all=%s will now target anything it deems unfriendly
 tametrait.level=Level %s
+
+tile.lead_powered_crank.name=Lead Powered Crank

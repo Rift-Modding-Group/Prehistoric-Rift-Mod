@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "prift:blow_powered_turbine" },
+    "facing=south": { "model": "prift:blow_powered_turbine", "y": 180 },
+    "facing=west":  { "model": "prift:blow_powered_turbine", "y": 270 },
+    "facing=east":  { "model": "prift:blow_powered_turbine", "y": 90 }
+  }
+}
