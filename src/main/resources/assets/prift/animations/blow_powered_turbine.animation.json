@@ -1,0 +1,13 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.blow_powered_turbine.rotate": {
+			"loop": true,
+			"bones": {
+				"fan": {
+					"rotation": [0, 0, "rotation"]
+				}
+			}
+		}
+	}
+}

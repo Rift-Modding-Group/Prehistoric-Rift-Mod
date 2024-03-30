@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
@@ -98,6 +100,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftParasaurStokeCombustor(this));
+        this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 10f, 1.76f, 0.24f));
         this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftResetAnimatedPose(this, 1.52F, 1));
@@ -354,7 +357,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     @Override
     public boolean canUseWorkstation() {
-        return Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID);
+        return Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID) || Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
     }
 
     @Override
@@ -363,26 +366,46 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         if (Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID)) {
             if (block instanceof BlockCombustionWorkerStoneBase) return true;
         }
+        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+            if (block instanceof BlockBlowPoweredTurbine) return true;
+        }
         return false;
     }
 
     @Override
     public BlockPos workstationUseFromPos() {
         IBlockState blockState = this.world.getBlockState(this.getWorkstationPos());
+        int downF = 0;
+        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+            TileEntity te = this.world.getTileEntity(this.getWorkstationPos());
+            if (te != null) downF = te instanceof TileEntityBlowPoweredTurbine ? -1 : 0;
+        }
         if (blockState.getMaterial().isSolid()) {
             EnumFacing direction = blockState.getValue(Properties.FACING_HORIZONTAL);
             switch (direction) {
                 case NORTH:
-                    return this.getWorkstationPos().add(0, 0, -4);
+                    return this.getWorkstationPos().add(0, downF, -4);
                 case SOUTH:
-                    return this.getWorkstationPos().add(0, 0, 4);
+                    return this.getWorkstationPos().add(0, downF, 4);
                 case EAST:
-                    return this.getWorkstationPos().add(4, 0, 0);
+                    return this.getWorkstationPos().add(4, downF, 0);
                 case WEST:
-                    return this.getWorkstationPos().add(-4, 0, 0);
+                    return this.getWorkstationPos().add(-4, downF, 0);
             }
         }
         return null;
+    }
+
+    public boolean isUsingWorkAnim() {
+        return this.isBlowing();
+    }
+
+    public void setUsingWorkAnim(boolean value) {
+        this.setBlowing(value);
+    }
+
+    public SoundEvent useAnimSound() {
+        return RiftSounds.PARASAUROLOPHUS_BLOW;
     }
 
     @Override

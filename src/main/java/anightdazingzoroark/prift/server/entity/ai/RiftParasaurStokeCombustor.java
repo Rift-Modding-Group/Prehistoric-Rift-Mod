@@ -42,7 +42,7 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.parasaur.isUsingWorkstation() && this.parasaur.world.getBlockState(this.parasaur.getWorkstationPos()).getMaterial().isSolid();
+        return this.parasaur.isUsingWorkstation() && !this.destroyedFlag;
     }
 
     @Override

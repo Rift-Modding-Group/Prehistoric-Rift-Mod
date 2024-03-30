@@ -155,9 +155,11 @@ public class RiftDialMenu extends GuiScreen {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
             else if (this.radialChoiceMenu == 0 && i == 3) {
-                ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
-                if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
-                    drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+                if (this.creature instanceof ILeadWorkstationUser) {
+                    ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                    if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
+                        drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+                    }
                 }
                 else drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
             }
@@ -206,9 +208,11 @@ public class RiftDialMenu extends GuiScreen {
             if (this.radialChoiceMenu == 2 && this.creature.isBaby() && i == 3) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 1 && this.creature.isUsingWorkstation() && i == 4) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 0 && i == 3) {
-                ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
-                if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
-                    radialString = "["+radialString+"]";
+                if (this.creature instanceof ILeadWorkstationUser) {
+                    ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                    if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
+                        radialString = "["+radialString+"]";
+                    }
                 }
             }
 
@@ -239,9 +243,11 @@ public class RiftDialMenu extends GuiScreen {
             this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
         }
         else if (this.radialChoiceMenu == 0 && this.selectedItem == 3) {
-            ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
-            if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
-                this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+            if (this.creature instanceof ILeadWorkstationUser) {
+                ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
+                if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
+                    this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+                }
             }
         }
 

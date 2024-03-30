@@ -18,6 +18,6 @@ public class RiftBlowPoweredTurbineModel extends AnimatedGeoModel<TileEntityBlow
 
     @Override
     public ResourceLocation getAnimationFileLocation(TileEntityBlowPoweredTurbine tileEntityBlowPoweredTurbine) {
-        return null;
+        return new ResourceLocation(RiftInitialize.MODID, "animations/blow_powered_turbine.animation.json");
     }
 }

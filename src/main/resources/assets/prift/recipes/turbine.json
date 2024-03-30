@@ -1,0 +1,20 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    " X ",
+    "X#X",
+    " X "
+  ],
+  "key": {
+    "#": {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    },
+    "X": {
+      "item": "prift:turbine_blade"
+    }
+  },
+  "result": {
+    "item": "prift:turbine"
+  }
+}

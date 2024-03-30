@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
+import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityLeadPoweredCrank;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -9,6 +10,7 @@ import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import mysticalmechanics.block.BlockGearbox;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockStateContainer;
@@ -38,8 +40,11 @@ public class BlockLeadPoweredCrank extends Block implements ITileEntityProvider 
     public static final PropertyDirection FACING = PropertyDirection.create("facing");
 
     public BlockLeadPoweredCrank() {
-        super(Material.ROCK);
+        super(Material.WOOD);
         this.setCreativeTab(RiftCreativeTabs.creativeItemsTab);
+        this.setHardness(2.0f);
+        this.setResistance(5.0f);
+        this.setSoundType(SoundType.WOOD);
     }
 
     @Override
@@ -140,11 +145,13 @@ public class BlockLeadPoweredCrank extends Block implements ITileEntityProvider 
                 leadPoweredCrank.getWorker().clearWorkstation(true);
                 leadPoweredCrank.onBreakCrank();
 
+                //drop lead
                 EntityItem droppedLead = new EntityItem(worldIn);
                 droppedLead.setPosition(pos.getX(), pos.getY() + 1, pos.getZ());
                 droppedLead.setItem(new ItemStack(Items.LEAD));
                 worldIn.spawnEntity(droppedLead);
             }
+
         }
         super.onBlockHarvested(worldIn, pos, state, player);
     }

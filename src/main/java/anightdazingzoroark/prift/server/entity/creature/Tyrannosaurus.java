@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.RiftInitialize;
@@ -10,7 +12,10 @@ import anightdazingzoroark.prift.config.TyrannosaurusConfig;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IApexPredator;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import com.codetaylor.mc.athenaeum.util.Properties;
+import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustionWorkerStoneBase;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -26,7 +31,9 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -35,6 +42,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -49,7 +57,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPredator {
+public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPredator, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus"));
     private static final Predicate<EntityLivingBase> WEAKNESS_BLACKLIST = new Predicate<EntityLivingBase>() {
         @Override
@@ -172,6 +180,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, TyrannosaurusConfig.tyrannosaurusFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
+        this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 30f, 2.08f, 0.64f));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftResetAnimatedPose(this, 1.68F, 1));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
@@ -398,6 +407,56 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         }
     }
     //end of roar stuff
+
+    @Override
+    public boolean canUseWorkstation() {
+        return Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
+        Block block = this.world.getBlockState(pos).getBlock();
+        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+            if (block instanceof BlockBlowPoweredTurbine) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public BlockPos workstationUseFromPos() {
+        IBlockState blockState = this.world.getBlockState(this.getWorkstationPos());
+        int downF = 0;
+        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+            TileEntity te = this.world.getTileEntity(this.getWorkstationPos());
+            if (te != null) downF = te instanceof TileEntityBlowPoweredTurbine ? -1 : 0;
+        }
+        if (blockState.getMaterial().isSolid()) {
+            EnumFacing direction = blockState.getValue(Properties.FACING_HORIZONTAL);
+            switch (direction) {
+                case NORTH:
+                    return this.getWorkstationPos().add(0, downF, -4);
+                case SOUTH:
+                    return this.getWorkstationPos().add(0, downF, 4);
+                case EAST:
+                    return this.getWorkstationPos().add(4, downF, 0);
+                case WEST:
+                    return this.getWorkstationPos().add(-4, downF, 0);
+            }
+        }
+        return null;
+    }
+
+    public boolean isUsingWorkAnim() {
+        return this.isRoaring();
+    }
+
+    public void setUsingWorkAnim(boolean value) {
+        this.setRoaring(value);
+    }
+
+    public SoundEvent useAnimSound() {
+        return RiftSounds.TYRANNOSAURUS_ROAR;
+    }
 
     public void setRoaring(boolean value) {
         this.dataManager.set(ROARING, Boolean.valueOf(value));

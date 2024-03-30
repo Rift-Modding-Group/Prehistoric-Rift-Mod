@@ -54,6 +54,9 @@ item.frost_stimulant.name=Frost Stimulant
 item.extreme_frost_stimulant.name=Extreme Frost Stimulant
 item.neutral_stimulant.name=Neutral Stimulant
 item.chitin.name=Chitin
+item.blow_powered_turbine.name=Blow Powered Turbine
+item.turbine.name=Turbine
+item.turbine_blade.name=Turbine Blade
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 item.stegosaurus_plate.name=Stegosaurus Plate
@@ -211,3 +214,4 @@ turrettargeting.all=%s will now target anything it deems unfriendly
 tametrait.level=Level %s
 
 tile.lead_powered_crank.name=Lead Powered Crank
+tile.blow_powered_turbine.name=Blow Powered Turbine
