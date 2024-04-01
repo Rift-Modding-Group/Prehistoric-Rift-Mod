@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
@@ -34,7 +35,7 @@ public class RiftBlowIntoTurbine extends EntityAIBase {
     public boolean shouldExecute() {
         TileEntity te = this.creature.world.getTileEntity(this.creature.getWorkstationPos());
         if (te != null) {
-            if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) return te instanceof TileEntityBlowPoweredTurbine && this.creature.isUsingWorkstation() && this.creature instanceof IWorkstationUser;
+            if (GeneralConfig.canUseMM()) return te instanceof TileEntityBlowPoweredTurbine && this.creature.isUsingWorkstation() && this.creature instanceof IWorkstationUser;
         }
         return false;
     }
@@ -80,6 +81,7 @@ public class RiftBlowIntoTurbine extends EntityAIBase {
                     if (this.animTime == this.animLength) {
                         this.user.setUsingWorkAnim(false);
                         this.creature.setEnergy(this.creature.getEnergy() - 3);
+                        this.creature.setXP(this.creature.getXP() + 5);
                     }
                     if (this.animTime > 120) {
                         this.animTime = -1;

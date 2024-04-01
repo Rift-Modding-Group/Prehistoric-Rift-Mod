@@ -1,9 +1,11 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.DodoConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
+import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
@@ -42,6 +44,7 @@ public class Megapiranha extends RiftWaterCreature {
         this.healthLevelMultiplier = MegapiranhaConfig.healthMultiplier;
         this.damageLevelMultiplier = MegapiranhaConfig.damageMultiplier;
         this.densityLimit = MegapiranhaConfig.megapiranhaDensityLimit;
+        this.targetList = RiftUtil.creatureTargets(MegapiranhaConfig.megapiranhaTargets, MegapiranhaConfig.megapiranhaTargetBlacklist, true);
     }
 
     @Override
@@ -52,7 +55,7 @@ public class Megapiranha extends RiftWaterCreature {
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, MegapiranhaConfig.megapiranhaTargets, MegapiranhaConfig.megapiranhaTargetBlacklist, true, true, true));
+        this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, MegapiranhaConfig.megapiranhaFavoriteFood, true));
         this.tasks.addTask(1, new EntityAIAvoidEntity(this, Sarcosuchus.class, 8.0F, 4.0D, 4D));
         this.tasks.addTask(2, new EntityAIAttackMelee(this, 4.0D, true));

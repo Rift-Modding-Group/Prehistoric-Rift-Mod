@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.config;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.Loader;
 
 public class GeneralConfig  extends RiftConfig {
     //general
@@ -32,9 +34,10 @@ public class GeneralConfig  extends RiftConfig {
     //spawning
     public static String[] universalSpawnBlocks = {"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1"};
 
-    //mystical mechanics integration
+    //mod integration
     public static boolean mmIntegration = true;
-    public static String[] lpcUsers = {"prift:stegosaurus", "prift:triceratops", "prift:utahraptor", "prift:parasaurolophus"};
+    public static boolean pyrotechIntegration = true;
+    public static boolean simpleDiffIntegration = true;
 
     //debug
     public static boolean quickEggHatch = false;
@@ -76,11 +79,24 @@ public class GeneralConfig  extends RiftConfig {
         levelingRadisIncrement = config.getInt("Level increment based on distance from (0, 0)", "Creature Leveling", 10, 0, 69420666, "Level increment based on distance from (0, 0). This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");
         difficultyIncrement = config.getStringList("Level increment based on difficulty", "Creature Leveling", new String[]{"EASY:0", "NORMAL:5", "HARD:5"}, "Level increment based on the difficulty setting of the world. Only the number may be edited, changing the names can cause crashes. Note that the numbers are additive, so if Easy, Normal, and Hard are set to 5, the increment will be 15. Changing the order of the strings may also cause a crash.");
 
-        //mm integration
-        mmIntegration = config.getBoolean("Activate Mystical Mechanics Integration", "Mystical Mechanics Integration", true, "Whether or not additional features will be turned on if Better With Mods is detected in the mods folder");
-        lpcUsers = config.getStringList("Lead Powered Crank users", "Mystical Mechanics Integration", new String[]{"prift:stegosaurus", "prift:triceratops", "prift:utahraptor", "prift:parasaurolophus"}, "Mobs that can use the Lead Powered Crank (only works on creatures from Prehistoric Rift)");
+        //mod integration
+        mmIntegration = config.getBoolean("Activate Mystical Mechanics Integration", "Mod Integration", true, "Whether or not additional features will be turned on if Mystical Mechanics is detected in the mods folder");
+        pyrotechIntegration = config.getBoolean("Activate Pyrotech Integration", "Mod Integration", true, "Whether or not additional features will be turned on if Pyrotech is detected in the mods folder");
+        simpleDiffIntegration = config.getBoolean("Activate Simple Difficulty Integration", "Mod Integration", true, "Whether or not additional features will be turned on if Simple Difficulty is detected in the mods folder");
 
         //debug
         quickEggHatch = config.getBoolean("All eggs hatch quickly", "Debug", false, "Turning this on makes all eggs hatch within 5 seconds. Mainly here for testing purposes, idk i could have made this a gamerule or smth");
+    }
+
+    public static boolean canUseMM() {
+        return mmIntegration && Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
+    }
+
+    public static boolean canUsePyrotech() {
+        return pyrotechIntegration && Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID);
+    }
+
+    public static boolean canUseSimpleDiff() {
+        return simpleDiffIntegration && Loader.isModLoaded(RiftInitialize.SIMPLE_DIFFICULTY_MOD_ID);
     }
 }

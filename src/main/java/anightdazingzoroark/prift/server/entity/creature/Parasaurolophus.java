@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPowere
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -324,7 +325,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
                     this.setEnergy(this.getEnergy() - (int)(0.05d * (double)Math.min(holdAmount, 100) + 1d));
                     this.setRightClickCooldown(Math.max(60, holdAmount * 2));
                     this.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);
-                    if (Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID)) this.parsaurManualStokeHeater(holdAmount);
+                    if (GeneralConfig.canUsePyrotech()) this.parsaurManualStokeHeater(holdAmount);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
@@ -357,16 +358,16 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     @Override
     public boolean canUseWorkstation() {
-        return Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID) || Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
+        return GeneralConfig.canUsePyrotech() || GeneralConfig.canUseMM();
     }
 
     @Override
     public boolean isWorkstation(BlockPos pos) {
         Block block = this.world.getBlockState(pos).getBlock();
-        if (Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID)) {
+        if (GeneralConfig.canUsePyrotech()) {
             if (block instanceof BlockCombustionWorkerStoneBase) return true;
         }
-        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+        if (GeneralConfig.canUseMM()) {
             if (block instanceof BlockBlowPoweredTurbine) return true;
         }
         return false;
@@ -376,7 +377,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     public BlockPos workstationUseFromPos() {
         IBlockState blockState = this.world.getBlockState(this.getWorkstationPos());
         int downF = 0;
-        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+        if (GeneralConfig.canUseMM()) {
             TileEntity te = this.world.getTileEntity(this.getWorkstationPos());
             if (te != null) downF = te instanceof TileEntityBlowPoweredTurbine ? -1 : 0;
         }
@@ -410,12 +411,12 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     @Override
     public boolean canBeAttachedForWork() {
-        return Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
+        return GeneralConfig.canUseMM();
     }
 
     public boolean isAttachableForWork(BlockPos pos) {
         Block block = this.world.getBlockState(pos).getBlock();
-        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+        if (GeneralConfig.canUseMM()) {
             if (block instanceof BlockLeadPoweredCrank) return true;
         }
         return false;

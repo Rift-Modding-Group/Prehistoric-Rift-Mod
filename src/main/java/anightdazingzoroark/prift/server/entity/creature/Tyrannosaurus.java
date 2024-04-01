@@ -2,13 +2,10 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
-import anightdazingzoroark.prift.config.DimetrodonConfig;
-import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.config.*;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.config.MegapiranhaConfig;
-import anightdazingzoroark.prift.config.TyrannosaurusConfig;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IApexPredator;
@@ -155,6 +152,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         this.healthLevelMultiplier = TyrannosaurusConfig.healthMultiplier;
         this.damageLevelMultiplier = TyrannosaurusConfig.damageMultiplier;
         this.densityLimit = TyrannosaurusConfig.tyrannosaurusDensityLimit;
+        this.targetList = RiftUtil.creatureTargets(TyrannosaurusConfig.tyrannosaurusTargets, TyrannosaurusConfig.tyrannosaurusTargetBlacklist, true);
     }
 
     @Override
@@ -175,7 +173,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, TyrannosaurusConfig.tyrannosaurusTargets, TyrannosaurusConfig.tyrannosaurusTargetBlacklist, false, true, true));
+        this.targetTasks.addTask(2, new RiftGetTargets(this, false, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, TyrannosaurusConfig.tyrannosaurusFavoriteFood, true));
@@ -410,13 +408,13 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
 
     @Override
     public boolean canUseWorkstation() {
-        return Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
+        return GeneralConfig.canUseMM();
     }
 
     @Override
     public boolean isWorkstation(BlockPos pos) {
         Block block = this.world.getBlockState(pos).getBlock();
-        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+        if (GeneralConfig.canUseMM()) {
             if (block instanceof BlockBlowPoweredTurbine) return true;
         }
         return false;
@@ -426,7 +424,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     public BlockPos workstationUseFromPos() {
         IBlockState blockState = this.world.getBlockState(this.getWorkstationPos());
         int downF = 0;
-        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+        if (GeneralConfig.canUseMM()) {
             TileEntity te = this.world.getTileEntity(this.getWorkstationPos());
             if (te != null) downF = te instanceof TileEntityBlowPoweredTurbine ? -1 : 0;
         }

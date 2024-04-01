@@ -3,9 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.config.ApatosaurusConfig;
-import anightdazingzoroark.prift.config.CoelacanthConfig;
-import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.*;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -75,6 +73,7 @@ public class Dimetrodon extends RiftCreature {
         this.healthLevelMultiplier = DimetrodonConfig.healthMultiplier;
         this.damageLevelMultiplier = DimetrodonConfig.damageMultiplier;
         this.densityLimit = DimetrodonConfig.dimetrodonDensityLimit;
+        this.targetList = RiftUtil.creatureTargets(DimetrodonConfig.dimetrodonTargets, DimetrodonConfig.dimetrodonTargetBlacklist, true);
     }
 
     @Override
@@ -94,7 +93,7 @@ public class Dimetrodon extends RiftCreature {
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, DimetrodonConfig.dimetrodonTargets, DimetrodonConfig.dimetrodonTargetBlacklist, false, true, true));
+        this.targetTasks.addTask(2, new RiftGetTargets(this, false, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, DimetrodonConfig.dimetrodonFavoriteFood, true));
@@ -141,9 +140,9 @@ public class Dimetrodon extends RiftCreature {
 
     private void dynamicTemperature() {
         if (!this.isTemperatureForced()) {
-            if (Loader.isModLoaded(RiftInitialize.SIMPLE_DIFFICULTY_MOD_ID)) {
+            if (GeneralConfig.canUseSimpleDiff()) {
                 //for default temperature
-                float temperatureValue = (TemperatureEnum.NORMAL.getUpperBound() + TemperatureEnum.COLD.getUpperBound()) / 2;
+                float temperatureValue = (TemperatureEnum.NORMAL.getUpperBound() + TemperatureEnum.COLD.getUpperBound()) / 2f;
 
                 //for altitude
                 if (this.world.provider.isSurfaceWorld()) {

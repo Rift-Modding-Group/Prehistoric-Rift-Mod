@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
@@ -49,7 +50,7 @@ public class ServerProxy implements IGuiHandler {
         MinecraftForge.EVENT_BUS.register(new RiftItems());
         MinecraftForge.EVENT_BUS.register(new RiftBlocks());
         RiftEntities.registerEntities();
-        if (Loader.isModLoaded(RiftInitialize.SIMPLE_DIFFICULTY_MOD_ID)) loadTemperatureRegistry();
+        if (GeneralConfig.canUseSimpleDiff()) loadTemperatureRegistry();
     }
 
     public void init(FMLInitializationEvent event) {

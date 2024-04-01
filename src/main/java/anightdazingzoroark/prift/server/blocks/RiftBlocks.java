@@ -22,7 +22,7 @@ public class RiftBlocks {
     public static final List<ItemBlock> ITEM_BLOCKS = new ArrayList<>();
 
     public static void registerBlocks() {
-        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID) && GeneralConfig.mmIntegration) RiftMMBlocks.registerMMBlocks();
+        if (GeneralConfig.canUseMM()) RiftMMBlocks.registerMMBlocks();
     }
 
     public static Block registerBlock(Block block, String registryName, boolean includeItem) {

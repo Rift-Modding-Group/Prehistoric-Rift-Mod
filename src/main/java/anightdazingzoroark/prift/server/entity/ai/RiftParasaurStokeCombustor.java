@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import com.codetaylor.mc.pyrotech.IAirflowConsumerCapability;
 import com.codetaylor.mc.pyrotech.modules.core.ModuleCore;
@@ -35,7 +36,7 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
     public boolean shouldExecute() {
         TileEntity te = this.parasaur.world.getTileEntity(this.parasaur.getWorkstationPos());
         if (te != null) {
-            if (Loader.isModLoaded(RiftInitialize.PYROTECH_MOD_ID)) return te instanceof TileCombustionWorkerStoneBase && this.parasaur.isUsingWorkstation();
+            if (GeneralConfig.canUsePyrotech()) return te instanceof TileCombustionWorkerStoneBase && this.parasaur.isUsingWorkstation();
         }
         return false;
     }
@@ -81,6 +82,7 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
                     if (this.animTime == this.animLength) {
                         this.parasaur.setBlowing(false);
                         this.parasaur.setEnergy(this.parasaur.getEnergy() - 3);
+                        this.parasaur.setXP(this.parasaur.getXP() + 5);
                     }
                     if (this.animTime > 120) {
                         this.animTime = -1;

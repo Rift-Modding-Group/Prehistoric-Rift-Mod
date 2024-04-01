@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.renderer.entity.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.*;
@@ -107,44 +108,62 @@ public enum RiftCreatureType {
         return this.eggScale;
     }
 
-    public int getMaxEnergyModMovement() {
+    public int getMaxEnergyModMovement(int level) {
+        int adder = 0;
         switch (this.energyCategory) {
             case FAST:
-                return 60;
+                adder = 60;
+                break;
             case NORMAL:
-                return 100;
+                adder = 100;
+                break;
             case SLOW:
-                return 160;
+                adder = 160;
+                break;
             case VERY_SLOW:
-                return 200;
+                adder = 200;
+                break;
         }
-        return 0;
+        return adder + (int)((double)level * 0.3D);
     }
 
-    public int getMaxEnergyModAction() {
+    public int getMaxEnergyModAction(int level) {
+        int adder = 0;
         switch (this.energyCategory) { //all of these r in how many times an action was done
             case FAST:
-                return 5;
+                adder = 5;
+                break;
             case NORMAL:
-                return 8;
+                adder = 8;
+                break;
             case SLOW:
-                return 10;
+                adder = 10;
+                break;
             case VERY_SLOW:
-                return 12;
+                adder = 12;
+                break;
         }
-        return 0;
+        return adder + (int)((double)level * 0.1);
     }
 
-    public int getMaxEnergyRegenMod() {
+    public int getMaxEnergyRegenMod(int level) {
+        int adder = 0;
+        double slope = 0;
         switch (this.energyRechargeCategory) { //all of these r in seconds that r converted to ticks
             case FAST:
-                return 10;
+                adder = 10;
+                slope = 0.1;
+                break;
             case NORMAL:
-                return 40;
+                adder = 40;
+                slope = 0.25;
+                break;
             case SLOW:
-                return 80;
+                adder = 80;
+                slope = 0.5;
+                break;
         }
-        return 0;
+        return RiftUtil.clamp(adder - (int)((double)level * slope), 1, 80);
     }
 
     public EggTemperature getEggTemperature() {

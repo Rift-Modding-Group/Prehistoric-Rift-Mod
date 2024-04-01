@@ -19,26 +19,21 @@ import java.util.stream.Stream;
 
 public class RiftGetTargets extends EntityAITarget {
     protected final int targetChance;
-    protected List<String> targetList;
-    protected List<String> targetBlacklist;
     protected final RiftGetTargets.Sorter sorter;
     protected final Predicate <? super EntityLivingBase > targetEntitySelector;
     protected final boolean alertOthers;
     protected EntityLivingBase targetEntity;
-    protected boolean useCarnivoreTList;
 
-    public RiftGetTargets(EntityCreature creature, String[] targetList, String[] targetBlacklist, boolean alertOthers, boolean checkSight, boolean useCarnivoreTList) {
-        this(creature, targetList, targetBlacklist, checkSight, alertOthers, false, useCarnivoreTList);
+    public RiftGetTargets(EntityCreature creature, boolean alertOthers, boolean checkSight) {
+        this(creature, checkSight, alertOthers, false);
     }
 
-    public RiftGetTargets(EntityCreature creature, String[] targetList, String[] targetBlacklist, boolean alertOthers, boolean checkSight, boolean onlyNearby, boolean useCarnivoreTList) {
-        this(creature, targetList, targetBlacklist, alertOthers, 10, checkSight, onlyNearby, (Predicate)null, useCarnivoreTList);
+    public RiftGetTargets(EntityCreature creature, boolean alertOthers, boolean checkSight, boolean onlyNearby) {
+        this(creature, alertOthers, 10, checkSight, onlyNearby, (Predicate)null);
     }
 
-    public RiftGetTargets(EntityCreature creature, String[] targetList, String[] targetBlacklist, boolean alertOthers, int chance, boolean checkSight, boolean onlyNearby, @Nullable final Predicate <? super EntityLivingBase > targetSelector, boolean useCarnivoreTList) {
+    public RiftGetTargets(EntityCreature creature, boolean alertOthers, int chance, boolean checkSight, boolean onlyNearby, @Nullable final Predicate <? super EntityLivingBase > targetSelector) {
         super(creature, checkSight, onlyNearby);
-        this.targetList = Arrays.asList(targetList);
-        this.targetBlacklist = Arrays.asList(targetBlacklist);
         this.targetChance = chance;
         this.sorter = new RiftGetTargets.Sorter(creature);
         this.setMutexBits(1);
@@ -53,7 +48,6 @@ public class RiftGetTargets extends EntityAITarget {
                 }
             }
         };
-        this.useCarnivoreTList = useCarnivoreTList;
     }
 
     @Override
@@ -62,24 +56,17 @@ public class RiftGetTargets extends EntityAITarget {
         if (creature.isTamed()) return false;
         else {
             List<EntityLivingBase> list = new ArrayList<>();
-            List<String> baseTargetList = new ArrayList<>(Arrays.asList(GeneralConfig.universalCarnivoreTargets));
-
-            if (this.useCarnivoreTList) {
-                baseTargetList.removeIf(this.targetBlacklist::contains);
-                this.targetList = Stream.concat(this.targetList.stream(), baseTargetList.stream())
-                        .collect(Collectors.toList());
-            }
 
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
                 if (!entity.isRiding()) {
                     if (entity instanceof EntityPlayer) {
-                        if (this.targetList.contains("minecraft:player")) {
+                        if (creature.getTargetList().contains("minecraft:player")) {
                             EntityPlayer player = (EntityPlayer) entity;
                             if (!player.isSneaking() || !creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
                         }
                     }
                     else {
-                        if (this.targetList.contains(EntityList.getKey(entity).toString())) {
+                        if (creature.getTargetList().contains(EntityList.getKey(entity).toString())) {
                             list.add(entity);
                         }
                     }
@@ -132,16 +119,16 @@ public class RiftGetTargets extends EntityAITarget {
     }
 
     public static class RiftGetTargetsWater extends RiftGetTargets {
-        public RiftGetTargetsWater(EntityCreature creature, String[] targetList, String[] targetBlacklist, boolean alertOthers, boolean checkSight, boolean useCarnivoreTList) {
-            super(creature, targetList, targetBlacklist, checkSight, alertOthers, false, useCarnivoreTList);
+        public RiftGetTargetsWater(EntityCreature creature, boolean alertOthers, boolean checkSight) {
+            super(creature, checkSight, alertOthers, false);
         }
 
-        public RiftGetTargetsWater(EntityCreature creature, String[] targetList, String[] targetBlacklist, boolean alertOthers, boolean checkSight, boolean onlyNearby, boolean useCarnivoreTList) {
-            super(creature, targetList, targetBlacklist, alertOthers, 10, checkSight, onlyNearby, (Predicate)null, useCarnivoreTList);
+        public RiftGetTargetsWater(EntityCreature creature, boolean alertOthers, boolean checkSight, boolean onlyNearby) {
+            super(creature, alertOthers, 10, checkSight, onlyNearby, (Predicate)null);
         }
 
-        public RiftGetTargetsWater(EntityCreature creature, String[] targetList, String[] targetBlacklist, boolean alertOthers, int chance, boolean checkSight, boolean onlyNearby, @Nullable final Predicate <? super EntityLivingBase > targetSelector, boolean useCarnivoreTList) {
-            super(creature, targetList, targetBlacklist, alertOthers, chance, checkSight, onlyNearby, targetSelector, useCarnivoreTList);
+        public RiftGetTargetsWater(EntityCreature creature, boolean alertOthers, int chance, boolean checkSight, boolean onlyNearby, @Nullable final Predicate <? super EntityLivingBase > targetSelector) {
+            super(creature, alertOthers, chance, checkSight, onlyNearby, targetSelector);
         }
 
         @Override
@@ -151,24 +138,17 @@ public class RiftGetTargets extends EntityAITarget {
                 if (creature.isTamed()) return false;
                 else {
                     List<EntityLivingBase> list = new ArrayList<>();
-                    List<String> baseTargetList = new ArrayList<>(Arrays.asList(GeneralConfig.universalCarnivoreTargets));
-
-                    if (this.useCarnivoreTList) {
-                        baseTargetList.removeIf(this.targetBlacklist::contains);
-                        this.targetList = Stream.concat(this.targetList.stream(), baseTargetList.stream())
-                                .collect(Collectors.toList());
-                    }
 
                     for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
                         if (!entity.isRiding() && entity.isInWater()) {
                             if (entity instanceof EntityPlayer) {
-                                if (this.targetList.contains("minecraft:player")) {
+                                if (creature.getTargetList().contains("minecraft:player")) {
                                     EntityPlayer player = (EntityPlayer) entity;
                                     if (!player.isSneaking() || !creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
                                 }
                             }
                             else {
-                                if (this.targetList.contains(EntityList.getKey(entity).toString())) {
+                                if (creature.getTargetList().contains(EntityList.getKey(entity).toString())) {
                                     list.add(entity);
                                 }
                             }

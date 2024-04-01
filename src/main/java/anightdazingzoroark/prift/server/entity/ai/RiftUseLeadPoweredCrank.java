@@ -65,6 +65,7 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
 
                 if (RiftUtil.entityAtLocation(this.creature, newPos, 1)) {
                     this.posMark++;
+                    this.creature.setXP(this.creature.getXP() + 1);
                     if (this.posMark > 7) this.posMark = 0;
                 }
             }

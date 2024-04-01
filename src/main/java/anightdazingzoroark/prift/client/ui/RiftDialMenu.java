@@ -160,19 +160,20 @@ public class RiftDialMenu extends GuiScreen {
                     if (user.isAttachableForWork(this.creature.getWorkstationPos())) {
                         drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
                     }
+                    else drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
                 }
                 else drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
             }
-            else {
-                drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
-            }
+            else if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && (i == 1 || i == 4)) drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+            else if (this.radialChoiceMenu == 2 && this.creature.isUsingWorkstation() && i != 0 && i != 4) drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+            else drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
         }
 
         //lock mouse position
         double scaledX = Mouse.getX() - (mc.displayWidth / 2.0f);
         double scaledY = Mouse.getY() - (mc.displayHeight / 2.0f);
         double distance = Math.sqrt(scaledX * scaledX + scaledY * scaledY);
-        double radius = 90.0 * (mc.displayWidth / width);
+        double radius = 90.0 * ((double) mc.displayWidth / width);
         if (distance > radius) {
             double fixedX = scaledX * radius / distance;
             double fixedY = scaledY * radius / distance;
@@ -215,6 +216,8 @@ public class RiftDialMenu extends GuiScreen {
                     }
                 }
             }
+            if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && (i == 1 || i == 4)) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 2 && this.creature.isUsingWorkstation() && i != 0 && i != 4) radialString = "["+radialString+"]";
 
             float angle1 = ((i / (float) numItems) + 0.25f) * 2 * (float) Math.PI;
             float posX = x + 75 + itemRadius * (float) Math.cos(angle1) - (float)(this.fontRenderer.getStringWidth(radialString) / 2);
@@ -240,6 +243,15 @@ public class RiftDialMenu extends GuiScreen {
             this.drawHoveringText(I18n.format("radial.note.too_young_behavior"), mouseX, mouseY);
         }
         else if (this.radialChoiceMenu == 1 && this.creature.isUsingWorkstation() && this.selectedItem == 4) {
+            this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && this.selectedItem == 1) {
+            this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && this.selectedItem == 4) {
+            this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 2 && this.creature.isUsingWorkstation() && this.selectedItem != 0 && this.selectedItem != 4) {
             this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
         }
         else if (this.radialChoiceMenu == 0 && this.selectedItem == 3) {
@@ -301,7 +313,7 @@ public class RiftDialMenu extends GuiScreen {
                     RiftMessages.WRAPPER.sendToServer(new RiftOpenInventoryFromMenu(this.creature.getEntityId()));
                     this.mc.player.closeScreen();
                 }
-                else if (selectedItem == 1) {
+                else if (selectedItem == 1 && !this.creature.isUsingWorkstation()) {
                     this.choices = getState();
                     this.radialChoiceMenu = 1;
                 }
@@ -340,7 +352,7 @@ public class RiftDialMenu extends GuiScreen {
                         }
                     }
                 }
-                else if (selectedItem == 4 && !this.creature.isBaby()) {
+                else if (selectedItem == 4 && !this.creature.isBaby() && !this.creature.isUsingWorkstation()) {
                     this.choices = getBehavior();
                     this.radialChoiceMenu = 3;
                 }
@@ -373,19 +385,25 @@ public class RiftDialMenu extends GuiScreen {
                     this.radialChoiceMenu = 0;
                 }
                 else if (selectedItem == 1) {
-                    ClientProxy.popupFromRadial = PopupFromRadial.CHANGE_NAME;
-                    RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
-                    this.mc.player.closeScreen();
+                    if (!this.creature.isUsingWorkstation()) {
+                        ClientProxy.popupFromRadial = PopupFromRadial.CHANGE_NAME;
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
+                        this.mc.player.closeScreen();
+                    }
                 }
                 else if (selectedItem == 2) {
-                    ClientProxy.popupFromRadial = PopupFromRadial.SET_HOME;
-                    RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature, !this.creature.getHasHomePos()));
-                    this.mc.player.closeScreen();
+                    if (!this.creature.isUsingWorkstation()) {
+                        ClientProxy.popupFromRadial = PopupFromRadial.SET_HOME;
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature, !this.creature.getHasHomePos()));
+                        this.mc.player.closeScreen();
+                    }
                 }
                 else if (selectedItem == 3 && !this.creature.isBaby()) {
-                    ClientProxy.popupFromRadial = PopupFromRadial.UNCLAIM;
-                    RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
-                    this.mc.player.closeScreen();
+                    if (!this.creature.isUsingWorkstation()) {
+                        ClientProxy.popupFromRadial = PopupFromRadial.UNCLAIM;
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
+                        this.mc.player.closeScreen();
+                    }
                 }
                 else if (selectedItem == 4) {
                     RiftMessages.WRAPPER.sendToServer(new RiftSetWorkstation(this.creature, !this.creature.isUsingWorkstation()));

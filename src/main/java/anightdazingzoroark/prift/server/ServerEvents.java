@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -22,16 +23,15 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.*;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
@@ -200,6 +200,7 @@ public class ServerEvents {
                     if (workstationUser.isWorkstation(event.getPos())) {
                         event.setCanceled(true);
                         creature.setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
+                        creature.setTameStatus(TameStatusType.STAND);
                         event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_success"), false);
                     }
                     else event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_fail"), false);
@@ -340,21 +341,36 @@ public class ServerEvents {
         }
     }
 
-    //to reduce potential lag, mobs killed by wild creatures will not drop items
     @SubscribeEvent
-    public void stopMobDrops(LivingDropsEvent event) {
+    public void manageDropItems(LivingDropsEvent event) {
+        //to reduce potential lag, mobs killed by wild creatures will not drop items
         if (!GeneralConfig.canDropFromCreatureKill) {
             if (event.getSource().getTrueSource() instanceof RiftCreature) {
                 RiftCreature attacker = (RiftCreature) event.getSource().getTrueSource();
                 Entity attacked = event.getEntity();
                 if (!attacker.isTamed()) {
                     if (attacked instanceof EntityTameable) {
-                        if (!(((EntityTameable) attacked).isTamed())) {
-                            event.setCanceled(true);
-                        }
+                        if (!(((EntityTameable) attacked).isTamed())) event.setCanceled(true);
                     }
-                    else if (!(attacked instanceof EntityPlayer)) {
-                        event.setCanceled(true);
+                    else if (!(attacked instanceof EntityPlayer)) event.setCanceled(true);
+                }
+            }
+        }
+
+        //make it so that items dropped by mobs killed by creatures will go to the inventory of its killer
+        if (event.getSource().getImmediateSource() instanceof RiftCreature) {
+            RiftCreature attacker = (RiftCreature) event.getSource().getImmediateSource();
+            if (attacker.isTamed()) {
+                event.setCanceled(true);
+                for (EntityItem entityItem : event.getDrops()) {
+                    ItemStack collected = attacker.creatureInventory.addItem(entityItem.getItem());
+                    //if inventory is full drop the item on the floor
+                    if (!collected.isEmpty()) {
+                        BlockPos vicPos = event.getEntityLiving().getPosition();
+                        EntityItem item = new EntityItem(attacker.getEntityWorld());
+                        item.setItem(collected);
+                        item.setPosition(vicPos.getX(), vicPos.getY(), vicPos.getZ());
+                        attacker.getEntityWorld().spawnEntity(item);
                     }
                 }
             }
@@ -367,7 +383,19 @@ public class ServerEvents {
         if (event.getTarget() instanceof EntityPlayer) {
             if (event.getTarget().isRiding()) {
                 if (event.getTarget().getRidingEntity() instanceof RiftCreature) {
-                    ((EntityLiving)event.getEntityLiving()).setAttackTarget((RiftCreature)event.getTarget().getRidingEntity());
+                    RiftCreature creatureRidden = (RiftCreature) event.getTarget().getRidingEntity();
+                    EntityLiving entityLiving = (EntityLiving) event.getEntityLiving();
+                    if (entityLiving instanceof RiftCreature) {
+                        RiftCreature creatureAttacker = (RiftCreature) entityLiving;
+
+                        if (!creatureAttacker.getTargetList().isEmpty()) {
+                            if (creatureAttacker.getTargetList().contains(EntityList.getKey(creatureRidden).toString())) {
+                                creatureAttacker.setAttackTarget(creatureRidden);
+                            }
+                            else creatureAttacker.setAttackTarget(null);
+                        }
+                    }
+                    else entityLiving.setAttackTarget((RiftCreature)event.getTarget().getRidingEntity());
                 }
             }
         }

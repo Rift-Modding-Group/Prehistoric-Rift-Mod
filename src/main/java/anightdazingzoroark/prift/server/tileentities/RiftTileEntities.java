@@ -7,6 +7,6 @@ import net.minecraftforge.fml.common.Loader;
 
 public class RiftTileEntities {
     public static void registerTileEntities() {
-        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID) && GeneralConfig.mmIntegration) RiftMMTileEntities.registerTileEntities();
+        if (GeneralConfig.canUseMM()) RiftMMTileEntities.registerTileEntities();
     }
 }

@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.AnomalocarisConfig;
 import anightdazingzoroark.prift.config.ApatosaurusConfig;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
+import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -63,6 +64,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         this.healthLevelMultiplier = AnomalocarisConfig.healthMultiplier;
         this.damageLevelMultiplier = AnomalocarisConfig.damageMultiplier;
         this.densityLimit = AnomalocarisConfig.anomalocarisDensityLimit;
+        this.targetList = RiftUtil.creatureTargets(AnomalocarisConfig.anomalocarisTargets, AnomalocarisConfig.anomalocarisTargetBlacklist, true);
     }
 
     @Override
@@ -80,7 +82,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
-        this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, AnomalocarisConfig.anomalocarisTargets, AnomalocarisConfig.anomalocarisTargetBlacklist, true, true, true));
+        this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, AnomalocarisConfig.anomalocarisFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));

@@ -25,6 +25,8 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RiftUtil {
     public static final double gravity = 0.08D;
@@ -265,5 +267,21 @@ public class RiftUtil {
             if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(tag))) return true;
         }
         return false;
+    }
+
+    public static List<String> creatureTargets(String[] whiteList) {
+        return creatureTargets(whiteList, new String[]{}, false);
+    }
+
+    public static List<String> creatureTargets(String[] whiteList, String[] blackList, boolean useCUniversal) {
+        List<String> finalTargets = new ArrayList<>();
+        List<String> wLList = Arrays.asList(whiteList);
+        List<String> bLList = Arrays.asList(blackList);
+        List<String> baseTargetList = new ArrayList<>(Arrays.asList(GeneralConfig.universalCarnivoreTargets));
+        if (useCUniversal) {
+            baseTargetList.removeIf(bLList::contains);
+            finalTargets = Stream.concat(wLList.stream(), baseTargetList.stream()).collect(Collectors.toList());
+        }
+        return finalTargets;
     }
 }

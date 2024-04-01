@@ -160,6 +160,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public double healthLevelMultiplier;
     public double damageLevelMultiplier;
     protected int densityLimit;
+    protected List<String> targetList;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -489,13 +490,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.energyRegenModDelay = 0;
             if (this.isBeingRidden()) {
                 boolean isSprinting = this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting();
-                if (this.energyMod > (int)((double)this.creatureType.getMaxEnergyModMovement() * (isSprinting ? 0.75D : 1D))) {
+                if (this.energyMod > (int)((double)this.creatureType.getMaxEnergyModMovement(this.getLevel()) * (isSprinting ? 0.75D : 1D))) {
                     this.setEnergy(this.getEnergy() - 1);
                     this.energyMod = 0;
                 }
             }
             else {
-                if (this.energyMod > this.creatureType.getMaxEnergyModMovement()) {
+                if (this.energyMod > this.creatureType.getMaxEnergyModMovement(this.getLevel())) {
                     this.setEnergy(this.getEnergy() - 1);
                     this.energyMod = 0;
                 }
@@ -505,7 +506,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.energyMod = 0;
             if (this.energyRegenModDelay <= 20) this.energyRegenModDelay++;
             else this.energyRegenMod++;
-            if (this.energyRegenMod > this.creatureType.getMaxEnergyRegenMod()) {
+            if (this.energyRegenMod > this.creatureType.getMaxEnergyRegenMod(this.getLevel())) {
                 this.setEnergy(this.getEnergy() + 1);
                 this.energyRegenMod = 0;
                 this.energyActionMod = 0;
@@ -514,7 +515,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void updateEnergyActions() {
-        if (this.energyActionMod >= this.creatureType.getMaxEnergyModAction()) {
+        if (this.energyActionMod >= this.creatureType.getMaxEnergyModAction(this.getLevel())) {
             this.setEnergy(this.getEnergy() - 2);
             this.energyActionMod = 0;
         }
@@ -987,6 +988,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 if (!itemStack.isEmpty()) this.creatureInventory.setInventorySlotContents(i, itemStack.copy());
             }
         }
+    }
+
+    public List<String> getTargetList() {
+        return this.targetList;
     }
 
     public abstract float getRenderSizeModifier();

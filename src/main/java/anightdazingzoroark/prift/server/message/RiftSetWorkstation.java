@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
@@ -42,6 +43,7 @@ public class RiftSetWorkstation extends AbstractMessage<RiftSetWorkstation> {
         RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
         if (creature.getOwner().equals(player)) {
             if (message.startUse) {
+                creature.setTameStatus(TameStatusType.STAND);
                 RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
                 properties.settingCreatureWorkstation = true;
                 properties.creatureIdForWorkstation = message.creatureId;

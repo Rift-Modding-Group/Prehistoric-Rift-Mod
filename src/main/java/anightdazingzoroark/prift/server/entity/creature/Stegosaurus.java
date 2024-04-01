@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.StegosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -235,12 +236,12 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     @Override
     public boolean canBeAttachedForWork() {
-        return Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID);
+        return GeneralConfig.canUseMM();
     }
 
     public boolean isAttachableForWork(BlockPos pos) {
         Block block = this.world.getBlockState(pos).getBlock();
-        if (Loader.isModLoaded(RiftInitialize.MYSTICAL_MECHANICS_MOD_ID)) {
+        if (GeneralConfig.canUseMM()) {
             if (block instanceof BlockLeadPoweredCrank) return true;
         }
         return false;

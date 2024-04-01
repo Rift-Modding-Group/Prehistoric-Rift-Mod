@@ -77,6 +77,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.healthLevelMultiplier = UtahraptorConfig.healthMultiplier;
         this.damageLevelMultiplier = UtahraptorConfig.damageMultiplier;
         this.densityLimit = UtahraptorConfig.utahraptorDensityLimit;
+        this.targetList = RiftUtil.creatureTargets(UtahraptorConfig.utahraptorTargets, UtahraptorConfig.utahraptorTargetBlacklist, true);
     }
 
     @Override
@@ -94,7 +95,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, UtahraptorConfig.utahraptorTargets, UtahraptorConfig.utahraptorTargetBlacklist, true, true, true));
+        this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpItems(this, UtahraptorConfig.utahraptorFavoriteFood, true));
