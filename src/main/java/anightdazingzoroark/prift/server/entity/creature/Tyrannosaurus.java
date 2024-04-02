@@ -11,12 +11,11 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IApexPredator;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
-import com.codetaylor.mc.athenaeum.util.Properties;
-import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustionWorkerStoneBase;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -429,7 +428,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
             if (te != null) downF = te instanceof TileEntityBlowPoweredTurbine ? -1 : 0;
         }
         if (blockState.getMaterial().isSolid()) {
-            EnumFacing direction = blockState.getValue(Properties.FACING_HORIZONTAL);
+            EnumFacing direction = blockState.getValue(BlockHorizontal.FACING);
             switch (direction) {
                 case NORTH:
                     return this.getWorkstationPos().add(0, downF, -4);

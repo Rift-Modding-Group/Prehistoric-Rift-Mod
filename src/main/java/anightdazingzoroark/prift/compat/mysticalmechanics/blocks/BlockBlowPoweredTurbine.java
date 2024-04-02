@@ -21,6 +21,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -110,5 +111,9 @@ public class BlockBlowPoweredTurbine extends Block implements ITileEntityProvide
             }
         }
         super.onBlockHarvested(worldIn, pos, state, player);
+    }
+
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+        return new ItemStack(RiftMMItems.BLOW_POWERED_TURBINE);
     }
 }

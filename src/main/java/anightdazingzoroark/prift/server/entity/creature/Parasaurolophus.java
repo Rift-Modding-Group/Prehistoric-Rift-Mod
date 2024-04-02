@@ -3,12 +3,9 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
-import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
-import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
-import com.codetaylor.mc.athenaeum.util.Properties;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
@@ -20,6 +17,7 @@ import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustion
 import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.*;
@@ -382,7 +380,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
             if (te != null) downF = te instanceof TileEntityBlowPoweredTurbine ? -1 : 0;
         }
         if (blockState.getMaterial().isSolid()) {
-            EnumFacing direction = blockState.getValue(Properties.FACING_HORIZONTAL);
+            EnumFacing direction = blockState.getValue(BlockHorizontal.FACING);
             switch (direction) {
                 case NORTH:
                     return this.getWorkstationPos().add(0, downF, -4);

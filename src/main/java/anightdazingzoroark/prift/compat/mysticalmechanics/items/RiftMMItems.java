@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.items;
 
 import anightdazingzoroark.prift.server.items.RiftItems;
-import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
 import net.minecraft.item.Item;
 
 public class RiftMMItems {

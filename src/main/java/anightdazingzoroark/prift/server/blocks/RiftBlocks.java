@@ -26,11 +26,21 @@ public class RiftBlocks {
     }
 
     public static Block registerBlock(Block block, String registryName, boolean includeItem) {
+        return registerBlock(block, registryName, includeItem, true);
+    }
+
+    public static Block registerBlock(Block block, String registryName, boolean includeItem, boolean itemStackable) {
         block.setCreativeTab(RiftCreativeTabs.creativeItemsTab);
         block.setRegistryName(registryName);
         block.setTranslationKey(registryName);
         BLOCKS.add(block);
-        if (includeItem) ITEM_BLOCKS.add((ItemBlock)(new ItemBlock(block).setRegistryName(registryName).setTranslationKey(registryName)));
+        if (includeItem) {
+            ItemBlock itemBlock = new ItemBlock(block);
+            itemBlock.setRegistryName(registryName);
+            itemBlock.setTranslationKey(registryName);
+            if (!itemStackable) itemBlock.setMaxStackSize(1);
+            ITEM_BLOCKS.add(itemBlock);
+        }
         return block;
     }
 
