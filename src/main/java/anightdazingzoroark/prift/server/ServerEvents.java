@@ -150,7 +150,7 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
-    public void gainXpFromKill(LivingDeathEvent event) {
+    public void onDeath(LivingDeathEvent event) {
         //give xp to creature for every creature it kills
         if (event.getSource().getTrueSource() instanceof RiftCreature) {
             RiftCreature creature = (RiftCreature) event.getSource().getTrueSource();
@@ -165,10 +165,16 @@ public class ServerEvents {
 
         //make arthropods drop chitin and hemolymph
         if (!event.getEntityLiving().world.isRemote) {
-            if (event.getEntityLiving().getCreatureAttribute().equals(EnumCreatureAttribute.ARTHROPOD) && !(event.getEntityLiving() instanceof RiftCreature)) {
-                event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.CHITIN, RiftUtil.randomInRange(1, 3)), 0);
-                if (event.getEntityLiving().isBurning()) event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.COOKED_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
-                else event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.RAW_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
+            //event.getSource().getImmediateSource() instanceof RiftCreature
+            //((RiftCreature) event.getSource().getImmediateSource()).isTamed()
+            boolean creatureFlag = event.getSource().getImmediateSource() instanceof RiftCreature && ((RiftCreature) event.getSource().getImmediateSource()).isTamed();
+            boolean putInInvFlag = GeneralConfig.putDropsInCreatureInv && creatureFlag;
+            if (GeneralConfig.dropHemolymph && !putInInvFlag) {
+                if (event.getEntityLiving().getCreatureAttribute().equals(EnumCreatureAttribute.ARTHROPOD) && !(event.getEntityLiving() instanceof RiftCreature)) {
+                    event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.CHITIN, RiftUtil.randomInRange(1, 3)), 0);
+                    if (event.getEntityLiving().isBurning()) event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.COOKED_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
+                    else event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.RAW_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
+                }
             }
         }
     }
@@ -358,19 +364,43 @@ public class ServerEvents {
         }
 
         //make it so that items dropped by mobs killed by creatures will go to the inventory of its killer
-        if (event.getSource().getImmediateSource() instanceof RiftCreature) {
-            RiftCreature attacker = (RiftCreature) event.getSource().getImmediateSource();
-            if (attacker.isTamed()) {
-                event.setCanceled(true);
-                for (EntityItem entityItem : event.getDrops()) {
-                    ItemStack collected = attacker.creatureInventory.addItem(entityItem.getItem());
-                    //if inventory is full drop the item on the floor
-                    if (!collected.isEmpty()) {
-                        BlockPos vicPos = event.getEntityLiving().getPosition();
-                        EntityItem item = new EntityItem(attacker.getEntityWorld());
-                        item.setItem(collected);
-                        item.setPosition(vicPos.getX(), vicPos.getY(), vicPos.getZ());
-                        attacker.getEntityWorld().spawnEntity(item);
+        if (GeneralConfig.putDropsInCreatureInv) {
+            if (event.getSource().getImmediateSource() instanceof RiftCreature) {
+                RiftCreature attacker = (RiftCreature) event.getSource().getImmediateSource();
+                if (attacker.isTamed()) {
+                    event.setCanceled(true);
+                    for (EntityItem entityItem : event.getDrops()) {
+                        ItemStack collected = attacker.creatureInventory.addItem(entityItem.getItem());
+                        //if inventory is full drop the item on the floor
+                        if (!collected.isEmpty()) {
+                            BlockPos vicPos = event.getEntityLiving().getPosition();
+                            EntityItem item = new EntityItem(attacker.getEntityWorld());
+                            item.setItem(collected);
+                            item.setPosition(vicPos.getX(), vicPos.getY(), vicPos.getZ());
+                            attacker.getEntityWorld().spawnEntity(item);
+                        }
+                    }
+
+                    //add hemolymph and chitin to drops if killed mob is an arthropod
+                    if (GeneralConfig.dropHemolymph && event.getEntityLiving().getCreatureAttribute().equals(EnumCreatureAttribute.ARTHROPOD) && !(event.getEntityLiving() instanceof RiftCreature)) {
+                        ItemStack addChitin = attacker.creatureInventory.addItem(new ItemStack(RiftItems.CHITIN, RiftUtil.randomInRange(1, 3)));
+                        if (!addChitin.isEmpty()) {
+                            BlockPos vicPos = event.getEntityLiving().getPosition();
+                            EntityItem item = new EntityItem(attacker.getEntityWorld());
+                            item.setItem(addChitin);
+                            item.setPosition(vicPos.getX(), vicPos.getY(), vicPos.getZ());
+                            attacker.getEntityWorld().spawnEntity(item);
+                        }
+
+                        ItemStack hemolymph = new ItemStack(event.getEntityLiving().isBurning() ? RiftItems.COOKED_HEMOLYMPH : RiftItems.RAW_HEMOLYMPH, RiftUtil.randomInRange(1, 3));
+                        ItemStack addHemolymph = attacker.creatureInventory.addItem(hemolymph);
+                        if (!addHemolymph.isEmpty()) {
+                            BlockPos vicPos = event.getEntityLiving().getPosition();
+                            EntityItem item = new EntityItem(attacker.getEntityWorld());
+                            item.setItem(addHemolymph);
+                            item.setPosition(vicPos.getX(), vicPos.getY(), vicPos.getZ());
+                            attacker.getEntityWorld().spawnEntity(item);
+                        }
                     }
                 }
             }

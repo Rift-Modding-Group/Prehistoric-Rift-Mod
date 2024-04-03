@@ -29,16 +29,12 @@ public class RiftApatosaurusManagePassengers extends AbstractMessage<RiftApatosa
     }
 
     @Override
-    public void onClientReceived(Minecraft client, RiftApatosaurusManagePassengers message, EntityPlayer player, MessageContext messageContext) {
-        World world = player.world;
-        Apatosaurus apatosaurus = (Apatosaurus) world.getEntityByID(message.apatoId);
-        apatosaurus.addPassengersFromSpacebar();
-    }
+    public void onClientReceived(Minecraft client, RiftApatosaurusManagePassengers message, EntityPlayer player, MessageContext messageContext) {}
 
     @Override
     public void onServerReceived(MinecraftServer server, RiftApatosaurusManagePassengers message, EntityPlayer player, MessageContext messageContext) {
         World world = player.world;
         Apatosaurus apatosaurus = (Apatosaurus) world.getEntityByID(message.apatoId);
-        apatosaurus.addPassengersFromSpacebar();
+        apatosaurus.addPassengersManual();
     }
 }

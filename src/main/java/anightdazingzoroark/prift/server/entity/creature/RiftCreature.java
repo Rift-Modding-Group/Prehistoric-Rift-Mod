@@ -1642,7 +1642,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         double d1 = dist;
         Entity pointedEntity = null;
         Entity rider = this.getControllingPassenger();
-        List<Entity> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(1.0D, 1.0D, 1.0D), null);
+        List<Entity> passengers = this.getPassengers();
+        List<Entity> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(1.0D, 1.0D, 1.0D), new Predicate<Entity>() {
+            @Override
+            public boolean apply(@Nullable Entity entity) {
+                return !passengers.contains(entity);
+            }
+        });
         double d2 = d1;
         for (Entity potentialTarget : list) {
             AxisAlignedBB axisalignedbb = potentialTarget.getEntityBoundingBox().grow((double) potentialTarget.getCollisionBorderSize() + 2F);

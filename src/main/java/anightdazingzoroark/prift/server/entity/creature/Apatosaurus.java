@@ -53,6 +53,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class Apatosaurus extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/apatosaurus"));
@@ -61,8 +62,8 @@ public class Apatosaurus extends RiftCreature {
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOADED = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> TAIL_WHIPPING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
-    private EntityLivingBase passengerOne;
-    private EntityLivingBase passengerTwo;
+    private static final DataParameter<String> PASSENGER_ONE_UUID = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.STRING);
+    private static final DataParameter<String> PASSENGER_TWO_UUID = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.STRING);
     private int launchTick;
     public boolean dismount = false;
     private RiftCreaturePart neck0Part;
@@ -105,6 +106,8 @@ public class Apatosaurus extends RiftCreature {
         this.dataManager.register(CHARGING, false);
         this.dataManager.register(LOADED, false);
         this.dataManager.register(TAIL_WHIPPING, false);
+        this.dataManager.register(PASSENGER_ONE_UUID, RiftUtil.nilUUID.toString());
+        this.dataManager.register(PASSENGER_TWO_UUID, RiftUtil.nilUUID.toString());
     }
 
     @Override
@@ -136,6 +139,7 @@ public class Apatosaurus extends RiftCreature {
         if (!this.world.isRemote) this.manageCatapultAnims();
         //passenger stuff
         if (this.getPassengers().size() == 1) this.dismount = false;
+        else if (this.getPassengers().size() > 1) this.dismount = true;
     }
 
     public void resetParts(float scale) {
@@ -255,9 +259,9 @@ public class Apatosaurus extends RiftCreature {
         if (this.isBeingRidden()) {
             if (this.getControllingPassenger() != null) {
                 if (this.getControllingPassenger().equals(player)) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()));
-                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown()));
-                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 2, settings.keyBindJump.isKeyDown()));
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
+                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 3, !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown()));
 
                     if (settings.keyBindAttack.isKeyDown() && !this.isActing()) {
                         if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) {
@@ -300,12 +304,15 @@ public class Apatosaurus extends RiftCreature {
                     else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
                         RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
                     }
-                    else if (this.isUsingSpacebar() && this.canUseSpacebar()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 2, false));
-                        RiftMessages.WRAPPER.sendToServer(new RiftApatosaurusManagePassengers(this));
-                        this.addPassengersFromSpacebar();
+//                    else if (this.isUsingSpacebar() && this.canUseSpacebar()) {
+//                        RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 2, false));
+//                        RiftMessages.WRAPPER.sendToServer(new RiftApatosaurusManagePassengers(this));
+//                        this.addPassengersFromSpacebar();
+//                    }
+                    else if (settings.keyBindPickBlock.isKeyDown() && !this.isActing()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 3));
                     }
-                    else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindJump.isKeyDown()) {
+                    else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()) {
                         Entity toBeAttacked = null;
                         if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                         if (this.hasLeftClickChargeBar()) {
@@ -319,7 +326,11 @@ public class Apatosaurus extends RiftCreature {
                                 }
                             }
                         }
-                        if (!this.canUseSpacebar()) RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 2, true));
+//                        if (!this.canUseSpacebar()) RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 2, true));
+                        if (this.getMiddleClickUse() > 0) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 3));
+                            this.setMiddleClickUse(0);
+                        }
                     }
                 }
             }
@@ -393,16 +404,16 @@ public class Apatosaurus extends RiftCreature {
         if (this.isPassenger(passenger)) {
             if (passenger.equals(this.getControllingPassenger()) && passenger.equals(this.getOwner())) super.updatePassenger(passenger);
             else {
-                if (this.passengerTwo == null) this.passengerTwo = (EntityLivingBase) passenger;
-                else if (this.passengerOne == null) this.passengerOne = (EntityLivingBase) passenger;
-                if (this.passengerOne != null) {
-                    if (this.passengerOne.equals(passenger)) {
+                if (this.getPassengerTwo() == null) this.setPassengerTwo((EntityLivingBase) passenger);
+                else if (this.getPassengerOne() == null) this.setPassengerOne((EntityLivingBase) passenger);
+                if (this.getPassengerOne() != null) {
+                    if (this.getPassengerOne().equals(passenger)) {
                         passenger.setPosition(passengerPosOne().x, passengerPosOne().y + passenger.height, passengerPosOne().z);
                         ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
                     }
                 }
-                if (this.passengerTwo != null) {
-                    if (this.passengerTwo.equals(passenger)) {
+                if (this.getPassengerTwo() != null) {
+                    if (this.getPassengerTwo().equals(passenger)) {
                         passenger.setPosition(passengerPosTwo().x, passengerPosTwo().y + passenger.height, passengerPosTwo().z);
                         ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
                     }
@@ -410,14 +421,14 @@ public class Apatosaurus extends RiftCreature {
             }
             if (this.isDead) passenger.dismountRidingEntity();
             if (passenger.isDead) {
-                if (this.passengerOne != null) {
-                    if (this.passengerOne.equals(passenger)) {
+                if (this.getPassengerOne() != null) {
+                    if (this.getPassengerOne().equals(passenger)) {
                         passenger.dismountRidingEntity();
                         this.setPassengerOne(null);
                     }
                 }
-                if (this.passengerTwo != null) {
-                    if (this.passengerTwo.equals(passenger)) {
+                if (this.getPassengerTwo() != null) {
+                    if (this.getPassengerTwo().equals(passenger)) {
                         passenger.dismountRidingEntity();
                         this.setPassengerTwo(null);
                     }
@@ -490,6 +501,9 @@ public class Apatosaurus extends RiftCreature {
                 if (!this.isActing()) this.setTailWhipping(true);
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
+        else if (control == 3) {
+            if (!this.isActing()) RiftMessages.WRAPPER.sendToServer(new RiftApatosaurusManagePassengers(this));
         }
     }
 
@@ -644,7 +658,7 @@ public class Apatosaurus extends RiftCreature {
         }
     }
 
-    public void addPassengersFromSpacebar() {
+    public void addPassengersManual() {
         AxisAlignedBB area = this.getEntityBoundingBox().grow(4D, 4D, 4D);
         int passengerSize = this.getPassengers().size();
         if (passengerSize == 1) {
@@ -763,19 +777,21 @@ public class Apatosaurus extends RiftCreature {
     }
 
     public EntityLivingBase getPassengerOne() {
-        return this.passengerOne;
+        return RiftUtil.getEntityFromUUID(this.world, UUID.fromString(this.dataManager.get(PASSENGER_ONE_UUID)));
     }
 
     public void setPassengerOne(EntityLivingBase entity) {
-        this.passengerOne = entity;
+        if (entity == null) this.dataManager.set(PASSENGER_ONE_UUID, RiftUtil.nilUUID.toString());
+        else this.dataManager.set(PASSENGER_ONE_UUID, entity.getUniqueID().toString());
     }
 
     public EntityLivingBase getPassengerTwo() {
-        return this.passengerOne;
+        return RiftUtil.getEntityFromUUID(this.world, UUID.fromString(this.dataManager.get(PASSENGER_TWO_UUID)));
     }
 
     public void setPassengerTwo(EntityLivingBase entity) {
-        this.passengerTwo = entity;
+        if (entity == null) this.dataManager.set(PASSENGER_TWO_UUID, RiftUtil.nilUUID.toString());
+        else this.dataManager.set(PASSENGER_TWO_UUID, entity.getUniqueID().toString());
     }
 
     @Override
