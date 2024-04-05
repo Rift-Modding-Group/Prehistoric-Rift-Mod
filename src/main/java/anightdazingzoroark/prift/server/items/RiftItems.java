@@ -50,6 +50,7 @@ public class RiftItems {
     public static Item FROST_STIMULANT;
     public static Item EXTREME_FROST_STIMULANT;
     public static Item NEUTRAL_STIMULANT;
+    public static Item REVIVAL_MIX;
 
     public static Item TYRANNOSAURUS_ARM;
     public static Item STEGOSAURUS_PLATE;
@@ -102,6 +103,7 @@ public class RiftItems {
         FROST_STIMULANT = riftGenericItem("frost_stimulant", false);
         EXTREME_FROST_STIMULANT = riftGlintedItem("extreme_frost_stimulant", false);
         NEUTRAL_STIMULANT = riftGenericItem("neutral_stimulant", false);
+        REVIVAL_MIX = riftGenericItem("revival_mix", true);
 
         TRUFFLE = riftGenericItem("truffle", true);
 

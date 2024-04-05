@@ -25,6 +25,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
@@ -54,6 +55,10 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
@@ -89,11 +94,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-
     private static final DataParameter<Boolean> CAN_USE_MIDDLE_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_MIDDLE_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> MIDDLE_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-
     private static final DataParameter<Boolean> CAN_USE_SPACEBAR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_SPACEBAR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> SPACEBAR_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -104,6 +107,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> TAME_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HAS_HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> UNCLAIMED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> INCAP_COUNTDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -234,6 +239,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(TAME_PROGRESS, 0);
         this.dataManager.register(HAS_HOME_POS, false);
         this.dataManager.register(UNCLAIMED, false);
+        this.dataManager.register(INCAPACITATED, false);
+        this.dataManager.register(INCAP_COUNTDOWN, 1200);
         this.dataManager.register(UNCLAIM_TIMER, 0);
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(USING_WORKSTATION, false);
@@ -320,6 +327,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else this.healthRegen = 0;
                 }
                 this.manageXPAndLevel();
+                this.manageIncapacitated();
             }
         }
         if (this.world.isRemote) this.setControls();
@@ -415,6 +423,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
             }
+        }
+    }
+
+    private void manageIncapacitated() {
+        if (this.isIncapacitated()) {
+            this.setIncapTimer(this.getIncapTimer() - 1);
         }
     }
 
@@ -639,7 +653,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
-        if (this.isTamed()) {
+        if (this.isTamed() && !this.isIncapacitated()) {
             try {
                 if (this.getOwnerId().equals(player.getUniqueID())) {
                     if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
@@ -703,7 +717,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             return true;
         }
-        else {
+        else if (this.isTamed() && this.isIncapacitated()) {
+            if (!itemstack.isEmpty() && itemstack.getItem().equals(RiftItems.REVIVAL_MIX)) {
+                this.consumeItemFromStack(player, itemstack);
+                this.setHealth((float)this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue()/4f);
+                this.setIncapTimer(1200);
+                this.setIncapacitated(false);
+                return true;
+            }
+        }
+        else if (!this.isTamed()) {
             if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     this.consumeItemFromStack(player, itemstack);
@@ -929,6 +952,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         compound.setBoolean("Unclaimed", this.isUnclaimed());
         compound.setInteger("UnclaimTimer", this.getUnclaimTimer());
+        compound.setBoolean("Incapacitated", this.isIncapacitated());
         compound.setBoolean("UsingWorkstation", this.isUsingWorkstation());
         if (compound.getBoolean("UsingWorkstation")) {
             compound.setInteger("WorkstationX", this.getWorkstationPos().getX());
@@ -974,6 +998,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
         this.setUnclaimed(compound.getBoolean("Unclaimed"));
         this.setUnclaimTimer(compound.getInteger("UnclaimTimer"));
+        this.setIncapacitated(compound.getBoolean("Incapacitated"));
         if (this.isUnclaimed()) this.setTamed(true);
         if (compound.getBoolean("UsingWorkstation")) this.setUseWorkstation(compound.getInteger("WorkstationX"), compound.getInteger("WorkstationY"), compound.getInteger("WorkstationZ"));
     }
@@ -1457,6 +1482,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(UNCLAIMED, value);
     }
 
+    public boolean isIncapacitated() {
+        return this.dataManager.get(INCAPACITATED);
+    }
+
+    public void setIncapacitated(boolean value) {
+        this.dataManager.set(INCAPACITATED, value);
+    }
+
+    public int getIncapTimer() {
+        return this.dataManager.get(INCAP_COUNTDOWN);
+    }
+
+    public void setIncapTimer(int value) {
+        this.dataManager.set(INCAP_COUNTDOWN, value);
+    }
+
     public int getUnclaimTimer() {
         return this.dataManager.get(UNCLAIM_TIMER);
     }
@@ -1773,6 +1814,80 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && !this.getTameStatus().equals(TameStatusType.TURRET_MODE) && leashOperatingFlag;
     }
 
+    public void onDeath(DamageSource cause) {
+        super.onDeath(cause);
+        if (!this.world.isRemote && this.creatureInventory != null) {
+            for (int i = 0; i < this.creatureInventory.getSizeInventory(); i++) {
+                ItemStack itemStack = this.creatureInventory.getStackInSlot(i);
+                boolean hasSaddleFlag = !this.canBeSaddled() || i != 0;
+                if (!itemStack.isEmpty() && hasSaddleFlag) {
+                    this.entityDropItem(itemStack, 0.0f);
+                    this.creatureInventory.setInventorySlotContents(i, new ItemStack(Items.AIR));
+                }
+            }
+        }
+    }
+
+    private void sendDeathMessage() {
+        if (this.isTamed() && !this.world.isRemote && this.world.getGameRules().getBoolean("showDeathMessages") && this.getOwner() instanceof EntityPlayerMP) {
+            this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage());
+        }
+    }
+
+    private void sendIncapMessage() {
+        if (this.isTamed() && !this.world.isRemote && this.getOwner() instanceof EntityPlayerMP) {
+            ((EntityPlayer)this.getOwner()).sendStatusMessage(new TextComponentTranslation("reminder.incapacitated", this.getDisplayName()), false);
+        }
+    }
+
+    protected void onDeathUpdate() {
+        try {
+            EnumDifficulty diff = EnumDifficulty.valueOf(GeneralConfig.minRevivalDiff);
+            if (this.world.getDifficulty().getId() < diff.getId()) {
+                if (this.isTamed()) {
+                    if (this.getIncapTimer() > 0) {
+                        this.deathTime = 0;
+                        if (!this.isIncapacitated()) this.sendIncapMessage();
+                        this.setIncapacitated(true);
+                    }
+                    else {
+                        this.setIncapacitated(false);
+                        if (this.deathTime == 0) this.sendDeathMessage();
+                        super.onDeathUpdate();
+                    }
+                }
+                else {
+                    if (this.deathTime == 0) this.sendDeathMessage();
+                    super.onDeathUpdate();
+                }
+            }
+            else {
+                if (this.deathTime == 0) this.sendDeathMessage();
+                super.onDeathUpdate();
+            }
+        }
+        catch (Exception e) {
+            if (GeneralConfig.minRevivalDiff.equals("NONE")) {
+                if (this.isTamed()) {
+                    if (this.getIncapTimer() > 0) {
+                        this.deathTime = 0;
+                        if (!this.isIncapacitated()) this.sendIncapMessage();
+                        this.setIncapacitated(true);
+                    }
+                    else {
+                        this.setIncapacitated(false);
+                        if (this.deathTime == 0) this.sendDeathMessage();
+                        super.onDeathUpdate();
+                    }
+                }
+                else {
+                    if (this.deathTime == 0) this.sendDeathMessage();
+                    super.onDeathUpdate();
+                }
+            }
+        }
+    }
+
     @Nullable
     @Override
     public EntityAgeable createChild(EntityAgeable ageable) {
@@ -1799,7 +1914,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @Override
-    public abstract void registerControllers(AnimationData data);
+    public void registerControllers(AnimationData data) {
+        data.addAnimationController(new AnimationController(this, "incapacitance", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent event) {
+                if (isIncapacitated()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".incapacitated", true));
+                    return PlayState.CONTINUE;
+                }
+                event.getController().clearAnimationCache();
+                return PlayState.STOP;
+            }
+        }));
+    }
 
     @Override
     public AnimationFactory getFactory() {

@@ -166,6 +166,51 @@
 					}
 				}
 			}
+		},
+		"animation.triceratops.incapacitated": {
+			"loop": true,
+			"bones": {
+				"base": {
+					"position": [0, -7, 0]
+				},
+				"neck": {
+					"rotation": [22.5, 0, 0]
+				},
+				"head": {
+					"rotation": [-12.5, 0, 0]
+				},
+				"leftFrontLeg": {
+					"rotation": [-90, 0, 0]
+				},
+				"rightFrontLeg": {
+					"rotation": [-90, 0, 0]
+				},
+				"leftBackLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, -4, 0]
+				},
+				"leftBackShin": {
+					"rotation": [-5, 0, 0],
+					"position": [0, 0, -3]
+				},
+				"rightBackLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, -4, 0]
+				},
+				"rightBackShin": {
+					"rotation": [-5, 0, 0],
+					"position": [0, 0, -3]
+				},
+				"tail0": {
+					"rotation": [-2.5, 0, 0]
+				},
+				"tail1": {
+					"rotation": [-2.5, 0, 0]
+				},
+				"tail2": {
+					"rotation": [-2.5, 0, 0]
+				}
+			}
 		}
 	}
 }

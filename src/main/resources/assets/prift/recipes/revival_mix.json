@@ -1,0 +1,23 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X#X",
+    "#X#",
+    "III"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:dye",
+      "data": 4
+    },
+    "X": {
+      "item": "minecraft:nether_wart"
+    },
+    "I": {
+      "item": "prift:truffle"
+    }
+  },
+  "result": {
+    "item": "prift:revival_mix"
+  }
+}

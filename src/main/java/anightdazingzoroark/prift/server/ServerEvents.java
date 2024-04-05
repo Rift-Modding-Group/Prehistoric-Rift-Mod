@@ -409,7 +409,8 @@ public class ServerEvents {
 
     @SubscribeEvent
     public void onSetTarget(LivingSetAttackTargetEvent event) {
-        //make it so when mobs detect u as a target, they target the mounted creature instead
+        //make it so when mobs detect u as a target, they either target the mounted creature instead
+        //or just ignore them all in all
         if (event.getTarget() instanceof EntityPlayer) {
             if (event.getTarget().isRiding()) {
                 if (event.getTarget().getRidingEntity() instanceof RiftCreature) {
@@ -425,15 +426,17 @@ public class ServerEvents {
                             else creatureAttacker.setAttackTarget(null);
                         }
                     }
-                    else entityLiving.setAttackTarget((RiftCreature)event.getTarget().getRidingEntity());
+                    else entityLiving.setAttackTarget(null);
                 }
             }
         }
+
         //make it so that when a mob tries to target an invisible anomalocaris nothing happens
         if (event.getTarget() instanceof Anomalocaris) {
             Anomalocaris anomalocaris = (Anomalocaris)event.getTarget();
             if (anomalocaris.isUsingInvisibility()) ((EntityLiving)event.getEntityLiving()).setAttackTarget(null);
         }
+
         //make it so when a player uses a large weapon on a mob, the mob will go after its operator
         if (event.getTarget() instanceof RiftLargeWeapon) {
             RiftLargeWeapon weapon = (RiftLargeWeapon) event.getTarget();

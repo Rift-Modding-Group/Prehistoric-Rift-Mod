@@ -192,6 +192,47 @@
 					"effect": "call"
 				}
 			}
+		},
+		"animation.utahraptor.incapacitated": {
+			"loop": true,
+			"bones": {
+				"base": {
+					"position": [0, -14, 0]
+				},
+				"neck": {
+					"rotation": [50, 0, 0],
+					"position": [0, -2.5, 0]
+				},
+				"head": {
+					"rotation": [-50, 0, 0],
+					"position": [0, -0.6, -3.1]
+				},
+				"leftArm": {
+					"rotation": [-75.3472, -8.7749, 61.1508],
+					"position": [1, 0, 0]
+				},
+				"rightArm": {
+					"rotation": [-75.34721, 8.77489, -61.1508],
+					"position": [-1, 0, 0]
+				},
+				"tail0": {
+					"rotation": [-5, 0, 0]
+				},
+				"leftLeg": {
+					"rotation": [82.5, 0, 0]
+				},
+				"leftShin": {
+					"rotation": [5, 0, 0],
+					"position": [0, 0, -4]
+				},
+				"rightLeg": {
+					"rotation": [82.5, 0, 0]
+				},
+				"rightShin": {
+					"rotation": [5, 0, 0],
+					"position": [0, 0, -4]
+				}
+			}
 		}
 	}
 }

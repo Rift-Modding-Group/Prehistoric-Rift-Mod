@@ -325,6 +325,58 @@
 					}
 				}
 			}
+		},
+		"animation.apatosaurus.incapacitated": {
+			"loop": true,
+			"bones": {
+				"base": {
+					"position": [0, -10, 0]
+				},
+				"neck0": {
+					"rotation": [27.5, 0, 0],
+					"position": [0, -0.2, 0]
+				},
+				"neck1": {
+					"rotation": [2.5, 0, 0]
+				},
+				"neck2": {
+					"rotation": [10, 0, 0]
+				},
+				"head": {
+					"rotation": [-39.5, 0, 0]
+				},
+				"tail0": {
+					"rotation": [-7.5, 0, 0]
+				},
+				"tail1": {
+					"rotation": [2.5, 0, 0]
+				},
+				"tail2": {
+					"rotation": [7.5, 0, 0]
+				},
+				"leftFrontLeg": {
+					"rotation": [-90, 0, 0]
+				},
+				"rightFrontLeg": {
+					"rotation": [-90, 0, 0]
+				},
+				"leftBackLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, -2, 0]
+				},
+				"leftBackShin": {
+					"rotation": [-7.5, 0, 0],
+					"position": [0, -2, -4]
+				},
+				"rightBackLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, -2, 0]
+				},
+				"rightBackShin": {
+					"rotation": [-7.5, 0, 0],
+					"position": [0, -2, -4]
+				}
+			}
 		}
 	}
 }

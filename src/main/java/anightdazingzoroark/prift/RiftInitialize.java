@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift;
 
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigList;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
@@ -63,6 +64,11 @@ public class RiftInitialize {
             if (cfg.hasChanged()) {
                 cfg.save();
             }
+        }
+
+        //crash game if some config stuff is wrong
+        if (!GeneralConfig.minRevivalDiff.equals("PEACEFUL") && !GeneralConfig.minRevivalDiff.equals("EASY") && !GeneralConfig.minRevivalDiff.equals("NORMAL") && !GeneralConfig.minRevivalDiff.equals("HARD") && !GeneralConfig.minRevivalDiff.equals("NONE")) {
+            throw new RuntimeException("Invalid configuration value detected for field \"Minimum Difficulty for Creature Revival\" in general.cfg. Please correct your configuration file.");
         }
     }
 

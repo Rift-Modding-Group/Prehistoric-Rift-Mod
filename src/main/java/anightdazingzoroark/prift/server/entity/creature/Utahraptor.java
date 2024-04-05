@@ -407,6 +407,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     @Override
     public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::utahraptorMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::utahraptorAttack));
         data.addAnimationController(new AnimationController(this, "pack_buff", 0, this::utahraptorPackBuff));

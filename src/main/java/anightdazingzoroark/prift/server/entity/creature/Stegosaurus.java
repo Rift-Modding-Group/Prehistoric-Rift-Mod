@@ -401,6 +401,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     @Override
     public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::stegosaurusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::stegosaurusAttack));
         data.addAnimationController(new AnimationController(this, "controlled_plate_fling", 0, this::stegosaurusControlledPlateFling));

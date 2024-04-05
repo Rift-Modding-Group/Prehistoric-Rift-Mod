@@ -802,6 +802,7 @@ public class Apatosaurus extends RiftCreature {
 
     @Override
     public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::apatosaurusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::apatosaurusAttack));
         data.addAnimationController(new AnimationController(this, "weaponResize", 0, this::apatosaurusWeaponSize));

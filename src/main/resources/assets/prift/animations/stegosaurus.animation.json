@@ -344,6 +344,45 @@
 					}
 				}
 			}
+		},
+		"animation.stegosaurus.incapacitated": {
+			"loop": true,
+			"bones": {
+				"base": {
+					"position": [0, -7.5, 0]
+				},
+				"neck": {
+					"rotation": [10, 0, 0]
+				},
+				"leftFrontLeg": {
+					"rotation": [-90, 0, 0]
+				},
+				"rightFrontLeg": {
+					"rotation": [-90, 0, 0]
+				},
+				"tail0": {
+					"rotation": [-10, 0, 0]
+				},
+				"tail1": {
+					"rotation": [-2.5, 0, 0]
+				},
+				"leftBackLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, -2.5, 0]
+				},
+				"leftBackShin": {
+					"rotation": [-2.5, 0, 0],
+					"position": [0, 0, -3]
+				},
+				"rightBackLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, -2.5, 0]
+				},
+				"rightBackShin": {
+					"rotation": [-2.5, 0, 0],
+					"position": [0, 0, -3]
+				}
+			}
 		}
 	}
 }

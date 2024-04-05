@@ -230,7 +230,7 @@
 				{
 					"name": "leftShin",
 					"parent": "leftLeg",
-					"pivot": [0, 0, 0],
+					"pivot": [-6.5, 12.5, 3],
 					"cubes": [
 						{"origin": [-8, 1.5, 2], "size": [3, 12, 5], "inflate": -0.25, "uv": [92, 81]}
 					]
@@ -256,7 +256,7 @@
 				{
 					"name": "rightShin",
 					"parent": "rightLeg",
-					"pivot": [0, 0, 0],
+					"pivot": [6.5, 12.5, 3],
 					"cubes": [
 						{"origin": [5, 1.5, 2], "size": [3, 12, 5], "inflate": -0.25, "uv": [84, 0]}
 					]

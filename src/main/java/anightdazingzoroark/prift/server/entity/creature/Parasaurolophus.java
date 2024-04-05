@@ -468,6 +468,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     @Override
     public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::parasaurolophusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::parasaurolophusAttack));
         data.addAnimationController(new AnimationController(this, "blow", 0, this::parasaurolophusBlow));

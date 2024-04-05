@@ -277,6 +277,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, ILeadWork
 
     @Override
     public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::triceratopsMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::triceratopsAttack));
         data.addAnimationController(new AnimationController(this, "charge", 0, this::triceratopsCharge));

@@ -380,6 +380,7 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     @Override
     public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::sarcosuchusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::sarcosuchusAttack));
     }

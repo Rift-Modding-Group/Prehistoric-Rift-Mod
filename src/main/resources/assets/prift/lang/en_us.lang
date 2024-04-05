@@ -53,6 +53,7 @@ item.extreme_flame_stimulant.name=Extreme Flame Stimulant
 item.frost_stimulant.name=Frost Stimulant
 item.extreme_frost_stimulant.name=Extreme Frost Stimulant
 item.neutral_stimulant.name=Neutral Stimulant
+item.revival_mix.name=Revival Mix
 item.chitin.name=Chitin
 item.blow_powered_turbine.name=Blow Powered Turbine
 item.turbine.name=Turbine
@@ -146,6 +147,7 @@ reminder.unclaim_creature=You have unclaimed %s!
 reminder.level_up=%s has reached Level %s!
 reminder.crank_blocked=%s's path is being blocked! Make sure there's sufficient space around the crank!
 reminder.cannot_place_turbine=Cannot place turbine! Make sure that there's a 3 block tall and 3 block wide area for the turbine to be placed on!
+reminder.incapacitated=%s has been incapacitated! Revive it or else it will perish!
 
 prift.egg.time=Time
 prift.egg.minutes=minute(s)

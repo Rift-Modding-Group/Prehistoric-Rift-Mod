@@ -372,6 +372,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
 
     @Override
     public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::anomalocarisMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::anomalocarisAttack));
     }

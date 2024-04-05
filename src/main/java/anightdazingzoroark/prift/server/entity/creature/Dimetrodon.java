@@ -509,6 +509,7 @@ public class Dimetrodon extends RiftCreature {
 
     @Override
     public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::dimetrodonMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::dimetrodonAttack));
     }

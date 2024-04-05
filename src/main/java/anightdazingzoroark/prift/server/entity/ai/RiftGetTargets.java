@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
@@ -44,7 +45,7 @@ public class RiftGetTargets extends EntityAITarget {
                 if (entity == null) return false;
                 else if (targetSelector != null && !targetSelector.apply(entity)) return false;
                 else {
-                    return !EntitySelectors.NOT_SPECTATING.apply(entity) ? false : RiftGetTargets.this.isSuitableTarget(entity, false) && !entity.isRiding();
+                    return !EntitySelectors.NOT_SPECTATING.apply(entity) ? false : RiftGetTargets.this.isSuitableTarget(entity, false);
                 }
             }
         };
@@ -58,17 +59,15 @@ public class RiftGetTargets extends EntityAITarget {
             List<EntityLivingBase> list = new ArrayList<>();
 
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
-                if (!entity.isRiding()) {
-                    if (entity instanceof EntityPlayer) {
-                        if (creature.getTargetList().contains("minecraft:player")) {
-                            EntityPlayer player = (EntityPlayer) entity;
-                            if (!player.isSneaking() || !creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
-                        }
+                if (entity instanceof EntityPlayer) {
+                    if (creature.getTargetList().contains("minecraft:player")) {
+                        EntityPlayer player = (EntityPlayer) entity;
+                        if (!player.isSneaking() || !creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
                     }
-                    else {
-                        if (creature.getTargetList().contains(EntityList.getKey(entity).toString())) {
-                            list.add(entity);
-                        }
+                }
+                else {
+                    if (creature.getTargetList().contains(EntityList.getKey(entity).toString())) {
+                        list.add(entity);
                     }
                 }
             }
@@ -140,7 +139,8 @@ public class RiftGetTargets extends EntityAITarget {
                     List<EntityLivingBase> list = new ArrayList<>();
 
                     for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
-                        if (!entity.isRiding() && entity.isInWater()) {
+                        if ((!RiftUtil.isRidingBoat(entity) && entity.isInWater()) || RiftUtil.isRidingBoat(entity)) {
+                            System.out.println("test");
                             if (entity instanceof EntityPlayer) {
                                 if (creature.getTargetList().contains("minecraft:player")) {
                                     EntityPlayer player = (EntityPlayer) entity;

@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -44,6 +45,10 @@ public class RiftUtil {
             }
         }
         return null;
+    }
+
+    public static boolean isRidingBoat(EntityLivingBase entity) {
+        return entity.isRiding() && (entity.getRidingEntity() instanceof EntityBoat);
     }
 
     public static boolean entityAtLocation(EntityLivingBase entityLivingBase, BlockPos pos, double radius) {

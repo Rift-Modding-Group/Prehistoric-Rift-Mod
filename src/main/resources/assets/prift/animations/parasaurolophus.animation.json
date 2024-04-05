@@ -336,6 +336,47 @@
 					}
 				}
 			}
+		},
+		"animation.parasaurolophus.incapacitated": {
+			"loop": true,
+			"bones": {
+				"base": {
+					"position": [0, -8, 0]
+				},
+				"neck": {
+					"rotation": [27.5, 0, 0]
+				},
+				"leftArm": {
+					"rotation": [-120.84447, 39.28675, 1.72951],
+					"position": [1, 0, 0]
+				},
+				"leftShoulder": {
+					"rotation": [32.5, 0, 0]
+				},
+				"rightArm": {
+					"rotation": [-120.84447, -39.2868, 1.72951],
+					"position": [-1, 0, 0]
+				},
+				"rightShoulder": {
+					"rotation": [32.5, 0, 0]
+				},
+				"leftLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, -1.5, 0]
+				},
+				"leftShin": {
+					"rotation": [-5, 0, 0],
+					"position": [0, -2.4, -3.4]
+				},
+				"rightLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, -1.5, 0]
+				},
+				"rightShin": {
+					"rotation": [-5, 0, 0],
+					"position": [0, -2.4, -3.4]
+				}
+			}
 		}
 	}
 }

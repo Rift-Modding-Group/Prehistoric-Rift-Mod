@@ -20,6 +20,10 @@ public class GeneralConfig  extends RiftConfig {
     public static String[] turretModeHostileTargets = {"minecraft:cave_spider", "minecraft:enderman", "minecraft:spider", "minecraft:zombie_pigman", "minecraft:blaze", "minecraft:creeper", "minecraft:elder_guardian", "minecraft:endermite", "minecraft:evoker", "minecraft:ghast", "minecraft:guardian", "minecraft:husk", "minecraft:magma_cube", "minecraft:shulker", "minecraft:silverfish", "minecraft:skeleton", "minecraft:slime", "minecraft:stray", "minecraft:vex", "minecraft:vindicator", "minecraft:witch", "minecraft:wither_skeleton", "minecraft:zombie", "minecraft:zombie_villager", "prift:tyrannosaurus", "prift:utahraptor"};
     public static boolean dropHemolymph = true;
     public static boolean putDropsInCreatureInv = true;
+    public static String minRevivalDiff = "HARD";
+
+    //creature revival
+    public static String[] reviveItems = {};
 
     //truffle stuff
     public static boolean truffleSpawning = true;
@@ -70,6 +74,7 @@ public class GeneralConfig  extends RiftConfig {
         universalSpawnBlocks = config.getStringList("List of blocks creatures can spawn on", "General", new String[]{"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1"}, "Identifiers of blocks that creatures from the mod can spawn on (water creatures don't count). To add blocks add \"block:<insert block's identifier here>:<insert data id here>\"");
         dropHemolymph = config.getBoolean("Let Arthropods drop Hemolymph and Chitin", "General", true, "Whether or not arthropods that are not added by Prehistoric Rift (basically anything Bane of Arthropods works on) will drop some Hemolymph and Chitin");
         putDropsInCreatureInv = config.getBoolean("Put drops of mobs killed by tamed creatures in their inventories", "General", true, "Whether or not items dropped by mobs killed by tamed creatures will automatically go to the inventory of whatever killed it");
+        minRevivalDiff = config.getString("Minimum Difficulty for Creature Revival", "General", "HARD", "Minimum difficulty in which creatures can be capacitated. If the difficulty is set to this or above, killed mobs just get killed. Usable values: PEACEFUL, EASY, NORMAL, HARD, NONE (tamed creatures can be revived regardless of difficulty).");
 
         //truffle stuff
         truffleSpawning = config.getBoolean("Truffles can spawn", "Truffle Spawning Stuff", true, "Whether or not truffles can drop by breaking blocks in certain biomes");

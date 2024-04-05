@@ -226,6 +226,38 @@
 					"rotation": ["Math.clamp(look_pitch, -12.5, 12.5)", "Math.clamp(look_yaw, -10, 10)", 0]
 				}
 			}
+		},
+		"animation.tyrannosaurus.incapacitated": {
+			"loop": true,
+			"bones": {
+				"base": {
+					"position": [0, -11, 0]
+				},
+				"tail0": {
+					"rotation": [-5, 0, 0]
+				},
+				"neck": {
+					"rotation": [15, 0, 0]
+				},
+				"leftArm": {
+					"rotation": [-85, 0, 0]
+				},
+				"leftClaw": {
+					"rotation": [50, 0, 0]
+				},
+				"rightArm": {
+					"rotation": [-85, 0, 0]
+				},
+				"rightClaw": {
+					"rotation": [50, 0, 0]
+				},
+				"leftLeg": {
+					"rotation": [70, 0, 0]
+				},
+				"rightLeg": {
+					"rotation": [70, 0, 0]
+				}
+			}
 		}
 	}
 }

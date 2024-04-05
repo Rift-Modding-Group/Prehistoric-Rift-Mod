@@ -15,8 +15,9 @@ public class RiftCreatureModel extends AnimatedGeoModel<RiftCreature> {
     @Override
     public ResourceLocation getTextureLocation(RiftCreature object) {
         String name = object.creatureType.name().toLowerCase();
+        boolean sleeping = object.isIncapacitated();
         if (object.getVariant() >= 0 && object.getVariant() <= 3) {
-            return new ResourceLocation(RiftInitialize.MODID, "textures/entities/"+name+"/"+name+"_"+(object.getVariant()+1)+".png");
+            return new ResourceLocation(RiftInitialize.MODID, "textures/entities/"+name+"/"+name+"_"+(object.getVariant()+1)+(sleeping ? "_sleep" : "")+".png");
         }
         else {
             return new ResourceLocation(RiftInitialize.MODID, "textures/entities/"+name+"_1.png");

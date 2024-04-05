@@ -117,6 +117,38 @@
 					}
 				}
 			}
+		},
+		"animation.anomalocaris.incapacitated": {
+			"loop": true,
+			"bones": {
+				"leftFrontFins": {
+					"rotation": [0, 0, -15]
+				},
+				"rightFrontFins": {
+					"rotation": [0, 0, 15]
+				},
+				"head": {
+					"rotation": [10, 0, 0]
+				},
+				"leftAppendage0": {
+					"rotation": [50, 0, 0]
+				},
+				"rightAppendage0": {
+					"rotation": [50, 0, 0]
+				},
+				"bodyBack": {
+					"rotation": [-12.5, 0, 0]
+				},
+				"tail": {
+					"rotation": [-15, 0, 0]
+				},
+				"leftBackFins": {
+					"rotation": [0, 0, -15]
+				},
+				"rightBackFins": {
+					"rotation": [0, 0, 15]
+				}
+			}
 		}
 	}
 }
