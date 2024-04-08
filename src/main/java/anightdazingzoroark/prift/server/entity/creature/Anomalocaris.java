@@ -160,12 +160,18 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
+                if (target == null && this.grabVictim == null) {
                     if (!this.isActing()) this.setAttacking(true);
+                }
+                else if (target != null && this.grabVictim == null) {
+                    if (!this.isActing() && !this.isUsingRightClick()) {
+                        this.ssrTarget = target;
+                        this.setAttacking(true);
+                    }
                 }
                 else {
                     if (!this.isActing() && !this.isUsingRightClick()) {
-                        this.ssrTarget = target;
+                        this.ssrTarget = this.grabVictim;
                         this.setAttacking(true);
                     }
                 }
@@ -175,35 +181,64 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         if (control == 1) {
             if (!this.isActing()) {
                 if (this.getGrabVictim() == null) {
-                    UUID ownerID = this.getOwnerId();
-                    List<String> blackList = Arrays.asList(AnomalocarisConfig.anomalocarisGrabBlacklist);
-                    List<EntityLivingBase> potGrabList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
-                        @Override
-                        public boolean apply(@Nullable EntityLivingBase input) {
-                            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
-                            if (input instanceof EntityPlayer) {
-                                if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains("minecraft:player")) {
-                                    return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
-                                }
-                                else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains("minecraft:player")) {
-                                    return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
-                                }
+                    if (target != null && RiftUtil.isUsingSSR()) {
+                        System.out.println(target);
+                        List<String> blackList = Arrays.asList(AnomalocarisConfig.anomalocarisGrabBlacklist);
+                        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
+                        boolean canGrabFlag = false;
+                        if (target instanceof EntityPlayer) {
+                            if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains("minecraft:player")) {
+                                canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
                             }
-                            else {
-                                if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains(EntityList.getKey(input).toString())) {
-                                    return !properties.isCaptured;
-                                }
-                                else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains(EntityList.getKey(input).toString())) {
-                                    return !properties.isCaptured;
-                                }
+                            else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains("minecraft:player")) {
+                                canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
                             }
-                            return false;
                         }
-                    });
-                    if (!potGrabList.isEmpty()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, potGrabList.get(0)));
-                        EntityPropertiesHandler.INSTANCE.getProperties(potGrabList.get(0), RiftEntityProperties.class).isCaptured = true;
-                        this.setActing(true);
+                        else {
+                            if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains(EntityList.getKey(target).toString())) {
+                                canGrabFlag = !properties.isCaptured;
+                            }
+                            else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains(EntityList.getKey(target).toString())) {
+                                canGrabFlag = !properties.isCaptured;
+                            }
+                        }
+                        if (canGrabFlag) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, target));
+                            EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class).isCaptured = true;
+                            this.setActing(true);
+                        }
+                    }
+                    else if (target == null && !RiftUtil.isUsingSSR()) {
+                        UUID ownerID = this.getOwnerId();
+                        List<String> blackList = Arrays.asList(AnomalocarisConfig.anomalocarisGrabBlacklist);
+                        List<EntityLivingBase> potGrabList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
+                            @Override
+                            public boolean apply(@Nullable EntityLivingBase input) {
+                                RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
+                                if (input instanceof EntityPlayer) {
+                                    if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains("minecraft:player")) {
+                                        return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                                    }
+                                    else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains("minecraft:player")) {
+                                        return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                                    }
+                                }
+                                else {
+                                    if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains(EntityList.getKey(input).toString())) {
+                                        return !properties.isCaptured;
+                                    }
+                                    else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains(EntityList.getKey(input).toString())) {
+                                        return !properties.isCaptured;
+                                    }
+                                }
+                                return false;
+                            }
+                        });
+                        if (!potGrabList.isEmpty()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, potGrabList.get(0)));
+                            EntityPropertiesHandler.INSTANCE.getProperties(potGrabList.get(0), RiftEntityProperties.class).isCaptured = true;
+                            this.setActing(true);
+                        }
                     }
                 }
                 else {

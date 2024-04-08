@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.CreatureDiet;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import com.google.common.base.Predicate;
+import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -21,6 +22,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
@@ -45,6 +47,13 @@ public class RiftUtil {
             }
         }
         return null;
+    }
+
+    public static boolean isUsingSSR() {
+        if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) {
+            return ShoulderInstance.getInstance().doShoulderSurfing();
+        }
+        return false;
     }
 
     public static boolean isRidingBoat(EntityLivingBase entity) {

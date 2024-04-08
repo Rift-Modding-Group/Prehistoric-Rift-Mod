@@ -252,6 +252,35 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         }
     }
 
+    private void leapToControlledTargetLoc(EntityLivingBase target) {
+        if (!this.world.isRemote) {
+            this.setLeaping(true);
+            boolean canLeapFlag = true;
+
+            if (target instanceof EntityTameable) {
+                canLeapFlag = ((EntityTameable)target).isTamed();
+            }
+
+            if (canLeapFlag) {
+                this.contLeapTarget = target;
+
+                double dx = this.contLeapTarget.posX - this.posX;
+                double dz = this.contLeapTarget.posZ - this.posZ;
+                double dist = Math.sqrt(dx * dx + dz * dz);
+
+                double velY = Math.sqrt(2 * RiftUtil.gravity * 6f);
+                double totalTime = velY / RiftUtil.gravity;
+                double velXZ = dist * 2 / totalTime;
+
+                double angleToTarget = Math.atan2(dz, dx);
+
+                this.motionX = velXZ * Math.cos(angleToTarget);
+                this.motionZ = velXZ * Math.sin(angleToTarget);
+                this.motionY = velY;
+            }
+        }
+    }
+
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
@@ -331,8 +360,28 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
                 }
                 else {
                     if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
+                        UUID ownerID =  this.getOwnerId();
+                        List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(this.attackWidth, this.attackWidth, this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
+                            @Override
+                            public boolean apply(@Nullable EntityLivingBase input) {
+                                if (input instanceof EntityTameable) {
+                                    EntityTameable inpTameable = (EntityTameable)input;
+                                    if (inpTameable.isTamed()) {
+                                        return !ownerID.equals(inpTameable.getOwnerId());
+                                    }
+                                    else return true;
+                                }
+                                return true;
+                            }
+                        });
+                        potTargetListM.remove(this);
+                        potTargetListM.remove(this.getControllingPassenger());
+
+                        if (!potTargetListM.isEmpty()) {
+                            this.ssrTarget = target;
+                            this.setAttacking(true);
+                        }
+                        else if (this.onGround) this.leapToControlledTargetLoc(target);
                     }
                 }
             }

@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
@@ -152,46 +153,87 @@ public class Sarcosuchus extends RiftWaterCreature {
             }
         }
         else {
-            UUID ownerID = this.getOwnerId();
-            List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
-            List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
-                @Override
-                public boolean apply(@Nullable EntityLivingBase input) {
-                    RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
-                    if (input instanceof EntityPlayer) {
+            if (RiftUtil.isUsingSSR()) {
+                EntityLivingBase target = (EntityLivingBase) SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                if (target != null) {
+                    RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
+                    List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
+                    boolean canSpinFlag = false;
+                    if (target instanceof EntityPlayer) {
                         if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("minecraft:player")) {
-                            return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                            canSpinFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
                         }
                         else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("minecraft:player")) {
-                            return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                            canSpinFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
                         }
                     }
                     else {
-                        if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getKey(input).toString())) {
-                            if (input instanceof EntityTameable) {
-                                EntityTameable inpTameable = (EntityTameable)input;
+                        if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getKey(target).toString())) {
+                            if (target instanceof EntityTameable) {
+                                EntityTameable inpTameable = (EntityTameable)target;
                                 if (inpTameable.isTamed()) {
-                                    return !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
+                                    canSpinFlag = !target.getUniqueID().equals(inpTameable.getOwnerId()) && !properties.isCaptured;
                                 }
-                                else return !properties.isCaptured;
+                                else canSpinFlag = !properties.isCaptured;
                             }
-                            return !properties.isCaptured;
+                            else canSpinFlag = !properties.isCaptured;
                         }
-                        else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(input).toString())) {
-                            if (input instanceof EntityTameable) {
-                                EntityTameable inpTameable = (EntityTameable)input;
+                        else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(target).toString())) {
+                            if (target instanceof EntityTameable) {
+                                EntityTameable inpTameable = (EntityTameable)target;
                                 if (inpTameable.isTamed()) {
-                                    return !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
+                                    canSpinFlag = !target.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
                                 }
-                                else return !properties.isCaptured;
+                                else canSpinFlag = !properties.isCaptured;
                             }
-                            return !properties.isCaptured;
+                            else canSpinFlag = !properties.isCaptured;
                         }
                     }
-                    return false;
+                    if (canSpinFlag) this.forcedSpinVictim = target;
                 }
-            });
-            if (!potTargetListM.isEmpty()) this.forcedSpinVictim = potTargetListM.get(0);
+            }
+            else {
+                UUID ownerID = this.getOwnerId();
+                List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
+                List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
+                    @Override
+                    public boolean apply(@Nullable EntityLivingBase input) {
+                        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
+                        if (input instanceof EntityPlayer) {
+                            if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("minecraft:player")) {
+                                return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                            }
+                            else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("minecraft:player")) {
+                                return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                            }
+                        }
+                        else {
+                            if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getKey(input).toString())) {
+                                if (input instanceof EntityTameable) {
+                                    EntityTameable inpTameable = (EntityTameable)input;
+                                    if (inpTameable.isTamed()) {
+                                        return !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
+                                    }
+                                    else return !properties.isCaptured;
+                                }
+                                return !properties.isCaptured;
+                            }
+                            else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(input).toString())) {
+                                if (input instanceof EntityTameable) {
+                                    EntityTameable inpTameable = (EntityTameable)input;
+                                    if (inpTameable.isTamed()) {
+                                        return !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
+                                    }
+                                    else return !properties.isCaptured;
+                                }
+                                return !properties.isCaptured;
+                            }
+                        }
+                        return false;
+                    }
+                });
+                if (!potTargetListM.isEmpty()) this.forcedSpinVictim = potTargetListM.get(0);
+            }
         }
     }
 

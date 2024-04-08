@@ -111,28 +111,18 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 2, RiftControls.mountDescend.isKeyDown() || RiftControls.mountAscend.isKeyDown()));
 
                 if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
-                    if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) {
-                        if (ShoulderInstance.getInstance().doShoulderSurfing()) {
-                            Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                            if (this.hasLeftClickChargeBar()) {
-                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                            }
-                            else {
-                                if (toBeAttacked != null) {
-                                    int targetId = toBeAttacked.getEntityId();
-                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
-                                }
-                                else {
-                                    RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
-                                }
-                            }
+                    if (RiftUtil.isUsingSSR()) {
+                        Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                        if (this.hasLeftClickChargeBar()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
                         }
                         else {
-                            if (this.hasLeftClickChargeBar()) {
-                                RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                            if (toBeAttacked != null) {
+                                int targetId = toBeAttacked.getEntityId();
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
                             }
                             else {
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
                             }
                         }
                     }
@@ -146,10 +136,27 @@ public abstract class RiftWaterCreature extends RiftCreature {
                     }
                 }
                 else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.getRightClickCooldown() == 0 && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
-                    if (this.hasRightClickChargeBar()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
+                    if (RiftUtil.isUsingSSR()) {
+                        Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                        if (this.hasRightClickChargeBar()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
+                        }
+                        else {
+                            if (toBeAttacked != null) {
+                                int targetId = toBeAttacked.getEntityId();
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,1));
+                            }
+                            else {
+                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,1));
+                            }
+                        }
                     }
-                    else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, 0));
+                    else {
+                        if (this.hasRightClickChargeBar()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
+                        }
+                        else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, 0));
+                    }
                 }
                 else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
@@ -159,7 +166,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 }
                 else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()) {
                     Entity toBeAttacked = null;
-                    if (Loader.isModLoaded(RiftInitialize.SSR_MOD_ID)) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                    if (RiftUtil.isUsingSSR()) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                     if (this.hasLeftClickChargeBar()) {
                         if (this.getLeftClickUse() > 0) {
                             if (toBeAttacked != null) {
