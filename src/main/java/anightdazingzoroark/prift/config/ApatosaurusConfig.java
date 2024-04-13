@@ -26,7 +26,7 @@ public class ApatosaurusConfig extends RiftConfig {
     public void init() {
         super.init();
 
-        apatosaurusDensityLimit = config.getInt("Density Limit", "Spawning", 4, 1, 69620666, "Maximum amount of creatures of this type in a 64 x 64 x 64 area");
+        apatosaurusDensityLimit = config.getInt("Density Limit", "Spawning", 4, 1, 69420666, "Maximum amount of creatures of this type in a 64 x 64 x 64 area");
 
         maxHealth = config.getInt(RiftConfig.healthConfigName, "Creature Stats", initMaxHealth, 1, 69420666, RiftConfig.healthConfigMessage);
         damage = config.getInt(RiftConfig.damageConfigName, "Creature Stats", initDamage, 0, 69420666, RiftConfig.damageConfigMessage);

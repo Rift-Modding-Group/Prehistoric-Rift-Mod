@@ -109,6 +109,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> UNCLAIMED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> INCAP_COUNTDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -241,6 +242,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(UNCLAIMED, false);
         this.dataManager.register(INCAPACITATED, false);
         this.dataManager.register(INCAP_COUNTDOWN, 1200);
+        this.dataManager.register(SLEEPING, false);
         this.dataManager.register(UNCLAIM_TIMER, 0);
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(USING_WORKSTATION, false);
@@ -1486,6 +1488,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setIncapTimer(int value) {
         this.dataManager.set(INCAP_COUNTDOWN, value);
+    }
+
+    public boolean isSleeping() {
+        return this.dataManager.get(SLEEPING);
+    }
+
+    public void setSleeping(boolean value) {
+        this.dataManager.set(SLEEPING, value);
     }
 
     public int getUnclaimTimer() {

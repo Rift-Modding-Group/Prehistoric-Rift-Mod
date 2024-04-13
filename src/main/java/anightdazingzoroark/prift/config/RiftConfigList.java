@@ -21,7 +21,8 @@ public enum RiftConfigList {
     COELACANTH(Coelacanth.class, CoelacanthConfig.class, true),
     MEGAPIRANHA(Megapiranha.class, MegapiranhaConfig.class, true),
     SARCOSUCHUS(Sarcosuchus.class, SarcosuchusConfig.class, true),
-    ANOMALOCARIS(Anomalocaris.class, AnomalocarisConfig.class, true);
+    ANOMALOCARIS(Anomalocaris.class, AnomalocarisConfig.class, true),
+    SAUROPHAGANAX(Saurophaganax.class, SaurophaganaxConfig.class, false);
 
     private final Class<? extends RiftCreature> creatureClass;
     private final Class<? extends RiftWaterCreature> waterCreatureClass;

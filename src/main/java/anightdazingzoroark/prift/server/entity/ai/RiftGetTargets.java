@@ -57,7 +57,6 @@ public class RiftGetTargets extends EntityAITarget {
         if (creature.isTamed()) return false;
         else {
             List<EntityLivingBase> list = new ArrayList<>();
-
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
                 if (entity instanceof EntityPlayer) {
                     if (creature.getTargetList().contains("minecraft:player")) {

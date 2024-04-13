@@ -8,6 +8,8 @@ import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
+import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import net.minecraft.client.Minecraft;
@@ -56,6 +58,7 @@ public class ClientProxy extends ServerProxy {
         registerItemRenderer();
         MinecraftForge.EVENT_BUS.register(new ClientEvents());
         this.particleSpawner = new RiftParticleSpawner();
+        Minecraft.getMinecraft().metadataSerializer.registerMetadataSectionType(new GlowingMetadataSectionSerializer(), GlowingMetadataSection.class);
         RiftControls.init();
     }
 

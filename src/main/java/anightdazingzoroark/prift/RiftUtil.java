@@ -296,6 +296,7 @@ public class RiftUtil {
             baseTargetList.removeIf(bLList::contains);
             finalTargets = Stream.concat(wLList.stream(), baseTargetList.stream()).collect(Collectors.toList());
         }
+        else return wLList;
         return finalTargets;
     }
 }
