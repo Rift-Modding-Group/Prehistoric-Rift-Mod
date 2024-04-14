@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class RiftWander extends EntityAIWander {
-    private final RiftCreature creature;
+    protected final RiftCreature creature;
 
     public RiftWander(RiftCreature creatureIn, double speedIn) {
         this(creatureIn, speedIn, 120);
@@ -24,7 +24,8 @@ public class RiftWander extends EntityAIWander {
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature.isTamed()) {
+        if (this.creature.isSleeping()) return false;
+        else if (this.creature.isTamed()) {
             if (this.creature instanceof RiftWaterCreature) {
                 if (this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden() && !this.creature.isInWater()) return super.shouldExecute();
                 else return false;

@@ -54,7 +54,8 @@ public class RiftGetTargets extends EntityAITarget {
     @Override
     public boolean shouldExecute() {
         RiftCreature creature = (RiftCreature) this.taskOwner;
-        if (creature.isTamed()) return false;
+        if (creature.isSleeping()) return false;
+        else if (creature.isTamed()) return false;
         else {
             List<EntityLivingBase> list = new ArrayList<>();
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {

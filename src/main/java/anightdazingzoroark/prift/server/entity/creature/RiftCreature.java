@@ -1581,6 +1581,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return Math.sqrt((this.motionX * this.motionX) + (fallMotion * fallMotion) + (this.motionZ * this.motionZ)) > 0;
     }
 
+    public boolean isUnderground() {
+        for (int y = this.getPosition().getY(); y < this.world.getActualHeight(); y++) {
+            BlockPos checkPos = new BlockPos(this.getPosition().getX(), y, this.getPosition().getZ());
+            IBlockState blockState = world.getBlockState(checkPos);
+            if (blockState.isOpaqueCube()) {
+                // If any block above is solid, it is underground
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean canNaturalRegen() {
         return true;
     }
@@ -1919,7 +1931,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         data.addAnimationController(new AnimationController(this, "incapacitance", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
-                if (isIncapacitated()) {
+                if (isIncapacitated() || isSleeping()) {
                     event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".incapacitated", true));
                     return PlayState.CONTINUE;
                 }
