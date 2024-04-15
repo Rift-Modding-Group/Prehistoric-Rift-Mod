@@ -375,6 +375,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.getRightClickCooldown() == 0 && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
                     if (this.hasRightClickChargeBar()) {
+                        if (this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
                         RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
                     }
                     else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, 0));
@@ -402,7 +403,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                     }
                     if (this.hasRightClickChargeBar()) {
-                        if (this.getRightClickUse() > 0) {
+                        if (this.getRightClickUse() > 0 && !this.alwaysShowRightClickUse()) {
                             if (toBeAttacked != null) {
                                 int targetId = toBeAttacked.getEntityId();
                                 RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId, 1, this.getRightClickUse()));
@@ -690,7 +691,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
-                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isUsingWorkstation() && !this.getTameStatus().equals(TameStatusType.TURRET_MODE)) {
+                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isUsingWorkstation() && !this.isSleeping() && !this.getTameStatus().equals(TameStatusType.TURRET_MODE)) {
                         RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
@@ -718,7 +719,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 return true;
             }
         }
-        else if (!this.isTamed()) {
+        else if (!this.isTamed() && !this.isSleeping()) {
             if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     this.consumeItemFromStack(player, itemstack);
@@ -750,7 +751,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return false;
     }
 
-    public void manageAttributes() {
+    protected void manageAttributes() {
         double healthValue = ((this.maxCreatureHealth - this.minCreatureHealth)/24000D) * (this.getAgeInTicks() - 24000D) + this.maxCreatureHealth;
         double baseHealthValue = RiftUtil.clamp(Math.floor(healthValue), this.minCreatureHealth, this.maxCreatureHealth);
         this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(baseHealthValue + (this.healthLevelMultiplier) * (this.getLevel() - 1) * baseHealthValue);
@@ -1268,11 +1269,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(TAME_PROGRESS, RiftUtil.clamp(value, 0, 100));
     }
 
-    private void setSpeed(double value) {
+    protected void setSpeed(double value) {
         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(value);
     }
 
-    private void setWaterSpeed(double value) {
+    protected void setWaterSpeed(double value) {
         this.getEntityAttribute(EntityLivingBase.SWIM_SPEED).setBaseValue(value);
     }
 
@@ -1376,6 +1377,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setRightClickUse(int value) {
         this.dataManager.set(RIGHT_CLICK_USE, value);
         this.tickUse = 0;
+    }
+
+    public boolean alwaysShowRightClickUse() {
+        return false;
     }
 
     public int getRightClickCooldown() {
@@ -1496,6 +1501,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setSleeping(boolean value) {
         this.dataManager.set(SLEEPING, value);
+        this.removePassengers();
     }
 
     public int getUnclaimTimer() {
@@ -1586,11 +1592,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             BlockPos checkPos = new BlockPos(this.getPosition().getX(), y, this.getPosition().getZ());
             IBlockState blockState = world.getBlockState(checkPos);
             if (blockState.isOpaqueCube()) {
-                // If any block above is solid, it is underground
                 return true;
             }
         }
         return false;
+    }
+
+    public boolean isInCave() {
+        return this.isUnderground() && this.posY <= 64;
     }
 
     public boolean canNaturalRegen() {

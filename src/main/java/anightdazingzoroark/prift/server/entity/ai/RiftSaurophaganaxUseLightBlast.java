@@ -25,12 +25,18 @@ public class RiftSaurophaganaxUseLightBlast extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.saurophaganax.lightBlastCharge() >= 10 && !this.saurophaganax.isBeingRidden();
+        if (!this.saurophaganax.isTamed()) return this.saurophaganax.lightBlastCharge() >= 10 && !this.saurophaganax.isBeingRidden() && this.saurophaganax.getAttackTarget() != null;
+        else {
+            //when ridden
+            if (this.saurophaganax.isBeingRidden()) return this.saurophaganax.isUsingLightBlast();
+            //when unridden
+            return this.saurophaganax.lightBlastCharge() >= 10 && this.saurophaganax.getEnergy() >= 6 && this.saurophaganax.getAttackTarget() != null;
+        }
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.animTime <= blastAnimLength;
+        return this.animTime <= this.blastAnimLength;
     }
 
     @Override
@@ -45,24 +51,13 @@ public class RiftSaurophaganaxUseLightBlast extends EntityAIBase {
         this.saurophaganax.setUsingLightBlast(false);
         this.saurophaganax.resetSpeed();
         this.saurophaganax.setLightBlastCharge(0);
+        if (this.saurophaganax.isTamed()) this.saurophaganax.setEnergy(this.saurophaganax.getEnergy() - 6);
+        if (this.saurophaganax.isTamed() && this.saurophaganax.isBeingRidden()) this.saurophaganax.setRightClickCooldown(200);
     }
 
     @Override
     public void updateTask() {
         this.animTime++;
-        if (this.animTime == this.blastAttackTime) {
-            List<EntityLivingBase> list = this.saurophaganax.world.getEntitiesWithinAABB(EntityLivingBase.class, this.blastAABB(), new Predicate<EntityLivingBase>() {
-                @Override
-                public boolean apply(@Nullable EntityLivingBase entityLivingBase) {
-                    if (entityLivingBase instanceof EntityPlayer) return saurophaganax.getTargetList().contains("minecraft:player");
-                    else return saurophaganax.getTargetList().contains(EntityList.getKey(entityLivingBase).toString());
-                }
-            });
-            for (EntityLivingBase entityT : list) this.saurophaganax.attackWithLightBlast(entityT);
-        }
-    }
-
-    private AxisAlignedBB blastAABB() {
-        return this.saurophaganax.getEntityBoundingBox().grow(6D);
+        if (this.animTime == this.blastAttackTime) this.saurophaganax.useLightBlast();
     }
 }

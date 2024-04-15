@@ -64,6 +64,7 @@ public class RiftItems {
     public static Item MEGAPIRANHA_SCALES;
     public static Item SARCOSUCHUS_SNOUT;
     public static Item ANOMALOCARIS_APPENDAGE;
+    public static Item SAUROPHAGANAX_EYE;
 
     public static Item CHITIN;
 
@@ -121,6 +122,7 @@ public class RiftItems {
         MEGAPIRANHA_SCALES = riftGenericItem("megapiranha_scales", true);
         SARCOSUCHUS_SNOUT = riftGenericItem("sarcosuchus_snout", true);
         ANOMALOCARIS_APPENDAGE = riftGenericItem("anomalocaris_appendage", true);
+        SAUROPHAGANAX_EYE = riftGenericItem("saurophaganax_eye", true);
 
         CHITIN = riftGenericItem("chitin", true);
 

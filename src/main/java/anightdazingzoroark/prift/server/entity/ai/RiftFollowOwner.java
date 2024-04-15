@@ -16,19 +16,14 @@ public class RiftFollowOwner extends EntityAIFollowOwner {
     }
 
     public boolean shouldExecute() {
-        if (this.tameable.getTameStatus() != TameStatusType.STAND) {
-            return false;
-        }
-        else if (this.tameable.isUsingWorkstation()) {
-            return false;
-        }
-        else if (this.tameable.isUtilizingCharging()) {
-            return false;
-        }
+        if (this.tameable.isSleeping()) return false;
+        else if (this.tameable.getTameStatus() != TameStatusType.STAND) return false;
+        else if (this.tameable.isUsingWorkstation()) return false;
+        else if (this.tameable.isUtilizingCharging()) return false;
         return super.shouldExecute() && this.tameable.getEnergy() > 0;
     }
 
     public boolean shouldContinueExecuting() {
-        return this.tameable.getTameStatus() != TameStatusType.STAND && !this.tameable.isUtilizingCharging() && !this.tameable.isUsingWorkstation() && this.tameable.getEnergy() > 0 && super.shouldContinueExecuting();
+        return !this.tameable.isSleeping() && this.tameable.getTameStatus() != TameStatusType.STAND && !this.tameable.isUtilizingCharging() && !this.tameable.isUsingWorkstation() && this.tameable.getEnergy() > 0 && super.shouldContinueExecuting();
     }
 }

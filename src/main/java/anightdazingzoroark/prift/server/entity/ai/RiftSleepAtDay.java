@@ -13,18 +13,19 @@ public class RiftSleepAtDay extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.creature.world.isDaytime() && this.creature.getAttackTarget() == null && !this.creature.isUnderground();
+        return this.creature.world.isDaytime() && this.creature.getAttackTarget() == null && !this.creature.isInCave();
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.creature.world.isDaytime() && this.creature.getAttackTarget() == null && !this.creature.isUnderground();
+        return this.creature.world.isDaytime() && this.creature.getAttackTarget() == null && !this.creature.isInCave();
     }
 
     @Override
     public void startExecuting() {
         this.creature.setSleeping(true);
         this.creature.getNavigator().clearPath();
+        this.creature.setTameProgress(0);
     }
 
     @Override

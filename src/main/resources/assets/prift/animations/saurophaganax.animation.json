@@ -1,14 +1,6 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"animation.saurophaganax.look": {
-			"loop": true,
-			"bones": {
-				"neck": {
-					"rotation": ["Math.clamp(query.target_x_rotation, -12.5, 12.5)", "Math.clamp(query.target_y_rotation, -12.5, 12.5)", 0]
-				}
-			}
-		},
 		"animation.saurophaganax.walk": {
 			"loop": true,
 			"animation_length": 2.08,

@@ -48,7 +48,7 @@ public class RiftPickUpItems extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.mob.getHeldItemMainhand().isEmpty() && !this.mob.isTamed() && !this.mob.isBeingRidden() && this.mob.getAttackTarget() == null;
+        return !this.mob.isSleeping() && this.mob.getHeldItemMainhand().isEmpty() && !this.mob.isTamed() && !this.mob.isBeingRidden() && this.mob.getAttackTarget() == null;
     }
 
     @Override

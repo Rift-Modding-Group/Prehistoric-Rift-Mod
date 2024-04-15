@@ -22,7 +22,7 @@ public class RiftMoveToHomePos extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature.isTamed()) {
+        if (this.creature.isTamed() && !this.creature.isSleeping()) {
             if (this.creature.getHasHomePos() && creature.getTameStatus() == TameStatusType.WANDER) {
                 if (this.creature.getIdleTime() >= 100) return false;
                 if (this.creature.getRNG().nextInt(120) != 0) return false;
@@ -43,7 +43,7 @@ public class RiftMoveToHomePos extends EntityAIBase {
     }
 
     public boolean shouldContinueExecuting() {
-        return !this.creature.getNavigator().noPath() && this.creature.getEnergy() > 0;
+        return !this.creature.getNavigator().noPath() && this.creature.getEnergy() > 0 && !this.creature.isSleeping();
     }
 
     public void startExecuting() {

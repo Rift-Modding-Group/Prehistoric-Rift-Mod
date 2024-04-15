@@ -19,6 +19,7 @@ entity.coelacanth.name=Coelacanth
 entity.megapiranha.name=Megapiranha
 entity.sarcosuchus.name=Sarcosuchus
 entity.anomalocaris.name=Anomalocaris
+entity.saurophaganax.name=Saurophaganax
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon
@@ -125,6 +126,7 @@ radial.note.too_busy=This creature is too busy!
 radial.note.too_young_saddle=This creature is too young to be saddled!
 radial.note.too_young_unclaim=Babies cannot be unclaimed! >:(
 radial.note.too_young_behavior=This creature is too young to have its behavior tamed!
+radial.note.is_asleep=This creature is asleep!
 
 radial.popup_choice.set_home=Are you sure you want to clear this creature's home position?
 radial.popup_choice.unclaim=Are you sure you want to unclaim this creature? It can be then claimed by anyone else, and if it remains unclaimed within 1 day, it becomes wild again.
@@ -148,6 +150,7 @@ reminder.level_up=%s has reached Level %s!
 reminder.crank_blocked=%s's path is being blocked! Make sure there's sufficient space around the crank!
 reminder.cannot_place_turbine=Cannot place turbine! Make sure that there's a 3 block tall and 3 block wide area for the turbine to be placed on!
 reminder.incapacitated=%s has been incapacitated! Revive it or else it will perish!
+reminder.insufficient_light_blast_charge=% does not have enough charge to do this!
 
 prift.egg.time=Time
 prift.egg.minutes=minute(s)

@@ -40,7 +40,7 @@ public class RiftRightClickChargeBar {
 
                     Minecraft.getMinecraft().getTextureManager().bindTexture(chargeBarHud);
                     renderRightClickChargeHud(creature, resolution.getScaledWidth(), resolution.getScaledHeight());
-                    reduceUnusedChargeBar(creature, creature.isUsingRightClick());
+                    reduceUnusedChargeBar(creature, creature.alwaysShowRightClickUse() ? creature.getRightClickCooldown() == 0 : creature.isUsingRightClick());
                     Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
                 }
             }
@@ -58,8 +58,8 @@ public class RiftRightClickChargeBar {
     }
 
     private void reduceUnusedChargeBar(RiftCreature creature, boolean usingRightClick) {
-        if (usingRightClick) fill = creature.getRightClickUse();
-        else fill = creature.getRightClickCooldown() / 2;
+        if (usingRightClick) this.fill = creature.getRightClickUse();
+        else this.fill = creature.getRightClickCooldown() / 2;
     }
 
     private void renderRightClickChargeHud(RiftCreature creature, int xSize, int ySize) {
@@ -67,7 +67,7 @@ public class RiftRightClickChargeBar {
         GlStateManager.color(1.0f, 1.0f, 1.0f);
         int left = xSize / 2 - 91;
         int top = ySize - 32 + (creature.hasLeftClickChargeBar() || creature.hasSpacebarChargeBar() ? 1 : 3);
-        float fillUpBar = (float)textureXSize / creature.maxRightClickCooldown * fill;
+        float fillUpBar = (float)textureXSize / creature.maxRightClickCooldown * this.fill;
         RiftUtil.drawTexturedModalRect(left, top, 0, 9, textureXSize, textureYSize);
         RiftUtil.drawTexturedModalRect(left, top, 0, 14, Math.min((int)fillUpBar, textureXSize), textureYSize);
         GlStateManager.disableBlend();

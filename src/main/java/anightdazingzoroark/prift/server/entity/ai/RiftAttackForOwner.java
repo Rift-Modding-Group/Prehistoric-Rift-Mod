@@ -21,6 +21,7 @@ public class RiftAttackForOwner extends EntityAITarget {
     @Override
     public boolean shouldExecute() {
         if (!this.creature.isTamed()) return false;
+        else if (this.creature.isSleeping()) return false;
         else if (this.creature.getTameBehavior() != TameBehaviorType.ASSIST) return false;
         else {
             EntityLivingBase owner = this.creature.getOwner();
