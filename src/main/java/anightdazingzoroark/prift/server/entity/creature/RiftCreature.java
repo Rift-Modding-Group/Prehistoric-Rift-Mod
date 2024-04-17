@@ -136,7 +136,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
     protected double speed;
-    protected double waterSpeed = 1D;
+    protected double waterSpeed = 1.5D;
     protected int herdCheckCountdown;
     public float attackWidth;
     public float rangedWidth;
@@ -144,8 +144,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float leapWidth;
     private int tickUse;
     private BlockPos homePosition;
-    public boolean isFloating;
-    private double waterLevel;
     public double yFloatPos;
     public String[] favoriteFood;
     public String[] tamingFood;
@@ -156,7 +154,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public String saddleItem;
     public int forcedBreakBlockRad = 0;
     public RiftCreaturePart headPart;
-    public RiftMainBodyPart bodyPart;
+    public RiftCreaturePart bodyPart;
     public float oldScale;
     public boolean changeSitFlag;
     private int healthRegen;
@@ -189,7 +187,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.heal((float)maxCreatureHealth);
         this.herdCheckCountdown = 0;
         this.tickUse = 0;
-        this.isFloating = false;
         this.yFloatPos = 0D;
         this.chargeCooldown = 0;
         this.maxRightClickCooldown = 100f;
@@ -1794,37 +1791,46 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
 
-                if (this.isFloating && forward > 0) {
+                if (forward > 0) {
                     if (this.bodyPart != null) {
-                        BlockPos ahead = new BlockPos(this.posX + Math.sin(-this.rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(this.rotationYaw * 0.017453292F));
-                        BlockPos above = ahead.up();
-                        if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
-                            this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
+                        if (this.bodyPart.isInWater()) {
+                            if (this.posY >= RiftUtil.highestWaterPos(this) - 2 && this.posY <= RiftUtil.highestWaterPos(this) + 2) {
+                                double xMove = (this.width)*Math.sin(-Math.toRadians(this.rotationYaw));
+                                double zMove = (this.width)*Math.cos(Math.toRadians(this.rotationYaw));
+                                BlockPos ahead = new BlockPos(this.posX + xMove, RiftUtil.highestWaterPos(this), this.posZ + zMove);
+                                BlockPos above = ahead.up();
+                                if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                                    RiftMessages.WRAPPER.sendToServer(new RiftForceChangePos(this, this.posX + xMove, RiftUtil.highestWaterPos(this) + 1.0, this.posZ + zMove));
+
+                                }
+                            }
                         }
                     }
                 }
-                else super.travel(strafe, vertical, forward);
+                super.travel(strafe, vertical, forward);
             }
         }
         else {
             //for surface mobs
             this.stepHeight = 0.5F;
             this.jumpMovementFactor = 0.02F;
-            if (this.isInWater() && this.isFloating && forward > 0) {
+            if (forward > 0) {
                 if (this.bodyPart != null) {
-                    BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
-                    BlockPos above = ahead.up();
-                    if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
-                        this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
+                    if (this.bodyPart.isInWater()) {
+                        if (this.posY >= RiftUtil.highestWaterPos(this) - 2 && this.posY <= RiftUtil.highestWaterPos(this) + 2) {
+                            double xMove = (this.width)*Math.sin(-Math.toRadians(this.rotationYaw));
+                            double zMove = (this.width)*Math.cos(Math.toRadians(this.rotationYaw));
+                            BlockPos ahead = new BlockPos(this.posX + xMove, RiftUtil.highestWaterPos(this), this.posZ + zMove);
+                            BlockPos above = ahead.up();
+                            if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftForceChangePos(this, this.posX + xMove, RiftUtil.highestWaterPos(this) + 1.0, this.posZ + zMove));
+                            }
+                        }
                     }
                 }
             }
-            else super.travel(strafe, vertical, forward);
+            super.travel(strafe, vertical, forward);
         }
-    }
-
-    public boolean isEntityInsideOpaqueBlock() {
-        return !this.isFloating && super.isEntityInsideOpaqueBlock();
     }
 
     @Override

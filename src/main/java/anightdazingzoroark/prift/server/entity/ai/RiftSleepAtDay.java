@@ -13,12 +13,7 @@ public class RiftSleepAtDay extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.creature.world.isDaytime() && this.creature.getAttackTarget() == null && !this.creature.isInCave();
-    }
-
-    @Override
-    public boolean shouldContinueExecuting() {
-        return this.creature.world.isDaytime() && this.creature.getAttackTarget() == null && !this.creature.isInCave();
+        return this.creature.world.isDaytime() && this.creature.getAttackTarget() == null && !this.creature.isInCave() && !this.creature.isInWater();
     }
 
     @Override

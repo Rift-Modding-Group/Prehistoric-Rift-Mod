@@ -140,7 +140,6 @@ public class RiftGetTargets extends EntityAITarget {
 
                     for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
                         if ((!RiftUtil.isRidingBoat(entity) && entity.isInWater()) || RiftUtil.isRidingBoat(entity)) {
-                            System.out.println("test");
                             if (entity instanceof EntityPlayer) {
                                 if (creature.getTargetList().contains("minecraft:player")) {
                                     EntityPlayer player = (EntityPlayer) entity;

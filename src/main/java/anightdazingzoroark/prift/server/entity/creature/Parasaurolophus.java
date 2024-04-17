@@ -102,15 +102,17 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 10f, 1.76f, 0.24f));
         this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftResetAnimatedPose(this, 1.52F, 1));
-        this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
-        this.tasks.addTask(3, new RiftParasaurolophusBlow(this));
+        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
+        this.tasks.addTask(3, new RiftResetAnimatedPose(this, 1.52F, 1));
+        this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.24F));
+        this.tasks.addTask(4, new RiftParasaurolophusBlow(this));
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(6, new RiftHerdDistanceFromOtherMembers(this, 1.5D));
         this.tasks.addTask(7, new RiftHerdMemberFollow(this));
         this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(9, new RiftWander(this, 1.0D));
-        this.tasks.addTask(10, new RiftLookAround(this));
+        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(10, new RiftWander(this, 1.0D));
+        this.tasks.addTask(11, new RiftLookAround(this));
     }
 
     @Override
@@ -124,7 +126,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
             this.oldScale = scale;
             this.removeParts();
             this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.48f, 0.625f * scale, 0.5f * scale, 1.5f);
-            this.bodyPart = new RiftMainBodyPart(this, 1.375f, 0, 0.8f, 0.75f * scale, 0.8f * scale, 1f);
+            this.bodyPart = new RiftCreaturePart(this, 1.375f, 0, 0.8f, 0.75f * scale, 0.8f * scale, 1f);
             this.neckPart = new RiftCreaturePart(this, 2.125f, 0, 1.125f, 0.5f * scale, 0.7f * scale, 1.5f);
             this.tail0Part = new RiftCreaturePart(this, -1.125f, 0, 1f, 0.4f * scale, 0.6f * scale, 0.5f);
             this.tail1Part = new RiftCreaturePart(this, -1.625f, 0, 1.1f, 0.4f * scale, 0.45f * scale, 0.5f);

@@ -106,17 +106,19 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftResetAnimatedPose(this, 0.56F, 1));
-        this.tasks.addTask(2, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
-        this.tasks.addTask(2, new RiftControlledAttack(this, 0.96F, 0.36F));
-        this.tasks.addTask(2, new RiftStegosaurusControlledStrongAttack(this, 0.72F, 0.12F));
-        this.tasks.addTask(3, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
-        this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(5, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(6, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(8, new RiftWander(this, 1.0D));
-        this.tasks.addTask(9, new RiftLookAround(this));
+        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
+        this.tasks.addTask(3, new RiftResetAnimatedPose(this, 0.56F, 1));
+        this.tasks.addTask(3, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
+        this.tasks.addTask(3, new RiftControlledAttack(this, 0.96F, 0.36F));
+        this.tasks.addTask(3, new RiftStegosaurusControlledStrongAttack(this, 0.72F, 0.12F));
+        this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
+        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(6, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(7, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(10, new RiftWander(this, 1.0D));
+        this.tasks.addTask(11, new RiftLookAround(this));
     }
 
     @Override
@@ -131,7 +133,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
             this.oldScale = scale;
             this.removeParts();
             this.headPart = new RiftCreaturePart(this, 3.125f, 0, 1.1f, 0.6f * scale, 0.5f * scale, 1.5f);
-            this.bodyPart = new RiftMainBodyPart(this, 0.55f, 0, 0.8f, 0.875f * scale, 0.75f * scale, 1f);
+            this.bodyPart = new RiftCreaturePart(this, 0.55f, 0, 0.8f, 0.875f * scale, 0.75f * scale, 1f);
             this.neckPart = new RiftCreaturePart(this, 2.1f, 0, 1f, 0.4f * scale, 0.5f * scale, 1.5f);
             this.hipPart = new RiftCreaturePart(this, -1.2f, 0, 0.8f, 0.875f * scale, 0.9f * scale, 1f);
             this.leftBackLegPart = new RiftCreaturePart(this, 1.5f, -150, 0f, 0.5f * scale, scale, 0.5f);

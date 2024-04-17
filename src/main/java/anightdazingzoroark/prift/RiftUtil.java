@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.enums.EggTemperature;
 import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -17,7 +18,9 @@ import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -47,6 +50,17 @@ public class RiftUtil {
             }
         }
         return null;
+    }
+
+    public static double highestWaterPos(RiftCreature creature) {
+        double maxHeight = creature.world.getActualHeight() - creature.getPosition().getY();
+        if (creature.isInWater()) {
+            for (int i = 0; i <= maxHeight; i++) {
+                BlockPos pos = creature.getPosition().add(0, i, 0);
+                if (!creature.world.getBlockState(pos).getMaterial().isLiquid()) return creature.getPosition().getY() + i - 1;
+            }
+        }
+        return 0D;
     }
 
     public static boolean isUsingSSR() {

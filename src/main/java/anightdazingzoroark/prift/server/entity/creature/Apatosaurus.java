@@ -123,13 +123,15 @@ public class Apatosaurus extends RiftCreature {
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftApatosaurusControlledTailWhip(this, 0.6F, 0.4F));
-        this.tasks.addTask(2, new RiftControlledAttack(this, 3F, 3F));
-        this.tasks.addTask(3, new RiftAttack.ApatosaurusAttack(this, 1.0D, 3F, 3F));
-        this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(5, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(6, new RiftWander(this, 1.0D));
-        this.tasks.addTask(7, new RiftLookAround(this));
+        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
+        this.tasks.addTask(3, new RiftApatosaurusControlledTailWhip(this, 0.6F, 0.4F));
+        this.tasks.addTask(3, new RiftControlledAttack(this, 3F, 3F));
+        this.tasks.addTask(4, new RiftAttack.ApatosaurusAttack(this, 1.0D, 3F, 3F));
+        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(7, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(8, new RiftWander(this, 1.0D));
+        this.tasks.addTask(9, new RiftLookAround(this));
     }
 
     @Override
@@ -147,7 +149,7 @@ public class Apatosaurus extends RiftCreature {
             this.oldScale = scale;
             this.removeParts();
             this.headPart = new RiftCreaturePart(this, 6.625f, 0, 4.5125f, 0.625f * scale, 0.5f * scale, 2f);
-            this.bodyPart = new RiftMainBodyPart(this, -0.75f, 0, 1.35f, 1.65f * scale, scale, 1f);
+            this.bodyPart = new RiftCreaturePart(this, -0.75f, 0, 1.35f, 1.65f * scale, scale, 1f);
             this.neck0Part = new RiftCreaturePart(this, 5.75f, 0, 4.25f, 0.5f * scale, 0.5f * scale, 1.5f);
             this.neck1Part = new RiftCreaturePart(this, 5f, 0, 3.75f, 0.5f * scale, 0.5f * scale, 1.5f);
             this.neck2Part = new RiftCreaturePart(this, 4.25f, 0, 3.25f, 0.5f * scale, 0.5f * scale, 1.5f);

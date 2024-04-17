@@ -72,6 +72,7 @@ item.coelacanth_scales.name=Coelacanth Scales
 item.megapiranha_scales.name=Megapiranha Scales
 item.sarcosuchus_snout.name=Sarcosuchus Snout
 item.anomalocaris_appendage.name=Anomalocaris Appendage
+item.saurophaganax_eye.name=Saurophaganax Eye
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -85,6 +86,7 @@ item.parasaurolophus_egg.name=Parasaurolophus Egg
 item.dimetrodon_egg.name=Dimetrodon Egg
 item.sarcosuchus_egg.name=Sarcosuchus Egg
 item.anomalocaris_sac.name=Anomalocaris Sac
+item.saurophaganax_egg.name=Saurophaganax Egg
 
 item.apatosaurus_platform.name=Apatosaurus Platform
 item.cannon.name=Cannon
@@ -150,7 +152,7 @@ reminder.level_up=%s has reached Level %s!
 reminder.crank_blocked=%s's path is being blocked! Make sure there's sufficient space around the crank!
 reminder.cannot_place_turbine=Cannot place turbine! Make sure that there's a 3 block tall and 3 block wide area for the turbine to be placed on!
 reminder.incapacitated=%s has been incapacitated! Revive it or else it will perish!
-reminder.insufficient_light_blast_charge=% does not have enough charge to do this!
+reminder.insufficient_light_blast_charge=%s does not have enough charge to do perform a light blast
 
 prift.egg.time=Time
 prift.egg.minutes=minute(s)

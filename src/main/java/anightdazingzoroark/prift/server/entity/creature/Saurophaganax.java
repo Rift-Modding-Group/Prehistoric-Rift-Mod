@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.GeneralConfig;
@@ -9,6 +10,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
@@ -19,9 +21,13 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -33,6 +39,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class Saurophaganax extends RiftCreature {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/saurophaganax"));
     private static final DataParameter<Boolean> USING_LIGHT_BLAST = EntityDataManager.createKey(Saurophaganax.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> LIGHT_BLAST_CHARGE = EntityDataManager.createKey(Saurophaganax.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> WEAKENED = EntityDataManager.createKey(Saurophaganax.class, DataSerializers.BOOLEAN);
@@ -80,7 +87,23 @@ public class Saurophaganax extends RiftCreature {
             if (this.isTamed()) {
                 this.setRightClickUse(this.lightBlastCharge() * 10);
             }
+
+            if (this.isWeakened() && !this.isInWater()) {
+                this.setSpeed(this.speed * 0.5);
+                this.setWaterSpeed(this.waterSpeed * 0.5);
+            }
+            else {
+                this.setSpeed(this.speed);
+                this.setWaterSpeed(this.waterSpeed);
+            }
         }
+    }
+
+    @Override
+    protected void applyEntityAttributes() {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
 
     protected void initEntityAI() {
@@ -92,13 +115,15 @@ public class Saurophaganax extends RiftCreature {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftSleepAtDay(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftSaurophaganaxUseLightBlast(this));
-        this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.24F));
-        this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
-        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 6.0F, 2.0F));
-        this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(7, new RiftWander(this, 1.0D));
-        this.tasks.addTask(8, new RiftLookAround(this));
+        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
+        this.tasks.addTask(3, new RiftSaurophaganaxUseLightBlast(this));
+        this.tasks.addTask(4, new RiftControlledAttack(this, 0.52F, 0.24F));
+        this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 6.0F, 2.0F));
+        this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(9, new RiftWander(this, 1.0D));
+        this.tasks.addTask(10, new RiftLookAround(this));
     }
 
     @Override
@@ -107,7 +132,7 @@ public class Saurophaganax extends RiftCreature {
             this.removeParts();
             this.oldScale = scale;
             this.headPart = new RiftCreaturePart(this, 3.5f, 0, 2f, 0.6f * scale, 0.6f * scale, 1.5f);
-            this.bodyPart = new RiftMainBodyPart(this, 0f, 0, 1.125f, scale, 0.8f * scale, 1f);
+            this.bodyPart = new RiftCreaturePart(this, 0f, 0, 1.125f, scale, 0.8f * scale, 1f);
             this.neckPart = new RiftCreaturePart(this, 2.5f, 0, 1.7f, 0.5f * scale, 0.65f * scale, 1.5f);
             this.bodyFrontPart = new RiftCreaturePart(this, 1.5f, 0, 1.125f, 0.8f * scale, 0.8f * scale, 1f);
             this.tail0Part = new RiftCreaturePart(this, -1.5f, 0, 1.4f, 0.6f * scale, 0.6f * scale, 0.5f);
@@ -197,9 +222,13 @@ public class Saurophaganax extends RiftCreature {
         return new Vec3d(xOffset, this.posY + 0.35, zOffset);
     }
 
+    @SideOnly(Side.CLIENT)
+    public boolean shouldRender(ICamera camera) {
+        return super.shouldRender(camera) || this.inFrustrum(camera, this.bodyFrontPart) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part);
+    }
+
     @Override
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {
-        System.out.println(control);
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (target == null) {
@@ -299,14 +328,11 @@ public class Saurophaganax extends RiftCreature {
 
     public void setWeakened(boolean value) {
         this.dataManager.set(WEAKENED, value);
-        if (value) {
-            this.setSpeed(this.speed * 0.5);
-            this.setWaterSpeed(this.waterSpeed * 0.5);
-        }
-        else {
-            this.setSpeed(this.speed);
-            this.setWaterSpeed(this.waterSpeed);
-        }
+    }
+
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
     }
 
     @Override

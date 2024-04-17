@@ -101,17 +101,19 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.targetTasks.addTask(3, new RiftPickUpItems(this, UtahraptorConfig.utahraptorFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftPackBuff(this, 1.68f, 90f));
-        this.tasks.addTask(3, new RiftControlledAttack(this, 0.28F, 0.28F));
-        this.tasks.addTask(3, new RiftControlledPackBuff(this, 1.68f));
-        this.tasks.addTask(4, new RiftLeapAttack(this, 6f, 160));
-        this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
-        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 1D));
-        this.tasks.addTask(9, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(10, new RiftWander(this, 1.0D));
-        this.tasks.addTask(11, new RiftLookAround(this));
+        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
+        this.tasks.addTask(3, new RiftPackBuff(this, 1.68f, 90f));
+        this.tasks.addTask(4, new RiftControlledAttack(this, 0.28F, 0.28F));
+        this.tasks.addTask(4, new RiftControlledPackBuff(this, 1.68f));
+        this.tasks.addTask(5, new RiftLeapAttack(this, 6f, 160));
+        this.tasks.addTask(6, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
+        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));
+        this.tasks.addTask(11, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(12, new RiftWander(this, 1.0D));
+        this.tasks.addTask(13, new RiftLookAround(this));
     }
 
     @Override
@@ -144,7 +146,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
             this.oldScale = scale;
             this.removeParts();
             this.headPart = new RiftCreaturePart(this, 2f, 0, 1.7f, scale, 0.6f * scale, 1.5f);
-            this.bodyPart = new RiftMainBodyPart(this, 0.8f, 0, 0.9f, scale, 0.8f * scale, 1f);
+            this.bodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.9f, scale, 0.8f * scale, 1f);
             this.neckPart = new RiftCreaturePart(this, 1.5f, 0, 1.2f, 0.7f * scale, 0.7f * scale, 1.5f);
             this.hipPart = new RiftCreaturePart(this, 0, 0, 0.7f, scale, scale, 1f);
             this.tail0Part = new RiftCreaturePart(this, -0.9f, 0, 1f, 0.7f * scale, 0.6f * scale, 0.5f);

@@ -49,7 +49,7 @@ public class RiftChargeAttack extends EntityAIBase {
         else if (!entitylivingbase.isEntityAlive()) return false;
         else {
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
-            return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr(entitylivingbase);
+            return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr(entitylivingbase) && !this.attacker.isInWater();
         }
     }
 
@@ -69,7 +69,7 @@ public class RiftChargeAttack extends EntityAIBase {
     }
 
     public boolean shouldContinueExecuting() {
-        return !this.endFlag && !this.attacker.isBeingRidden() && this.attacker.getEnergy() > 6;
+        return !this.attacker.isInWater() && !this.endFlag && !this.attacker.isBeingRidden() && this.attacker.getEnergy() > 6;
     }
 
     public void resetTask() {

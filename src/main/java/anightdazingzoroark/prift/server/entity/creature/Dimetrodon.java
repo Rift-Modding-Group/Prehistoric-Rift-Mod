@@ -99,11 +99,13 @@ public class Dimetrodon extends RiftCreature {
         this.targetTasks.addTask(3, new RiftPickUpItems(this, DimetrodonConfig.dimetrodonFavoriteFood, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftAttack(this, 1.0D, 0.52F, 0.52F));
-        this.tasks.addTask(3, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(4, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(5, new RiftWander(this, 1.0D));
-        this.tasks.addTask(6, new RiftLookAround(this));
+        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
+        this.tasks.addTask(3, new RiftAttack(this, 1.0D, 0.52F, 0.52F));
+        this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(5, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(6, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(7, new RiftWander(this, 1.0D));
+        this.tasks.addTask(8, new RiftLookAround(this));
     }
 
     @Override
@@ -287,7 +289,7 @@ public class Dimetrodon extends RiftCreature {
             this.oldScale = scale;
             this.removeParts();
             this.headPart = new RiftCreaturePart(this, 1.25f, 0, 0.45f, 0.5f * scale, 0.425f * scale, 1.5f);
-            this.bodyPart = new RiftMainBodyPart(this, 0, 0, 0.3f, scale, 0.5f * scale, 1f);
+            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.3f, scale, 0.5f * scale, 1f);
             this.neckPart = new RiftCreaturePart(this, 0.75f, 0, 0.45f, 0.375f * scale, 0.375f * scale, 1.5f);
             this.tail0Part = new RiftCreaturePart(this, -0.8f, 0, 0.4f, 0.375f * scale, 0.375f * scale, 0.5f);
             this.tail1Part = new RiftCreaturePart(this, -1.2f, 0, 0.35f, 0.375f * scale, 0.375f * scale, 0.5f);

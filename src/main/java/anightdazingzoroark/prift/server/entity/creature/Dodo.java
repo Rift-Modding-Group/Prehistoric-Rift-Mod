@@ -44,10 +44,12 @@ public class Dodo extends RiftCreature {
 
     protected void initEntityAI() {
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftHerdDistanceFromOtherMembers(this, 1.5D));
-        this.tasks.addTask(3, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(4, new RiftWander(this, 1.0D));
-        this.tasks.addTask(5, new RiftLookAround(this));
+        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
+        this.tasks.addTask(3, new RiftHerdDistanceFromOtherMembers(this, 1.5D));
+        this.tasks.addTask(4, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(5, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(6, new RiftWander(this, 1.0D));
+        this.tasks.addTask(7, new RiftLookAround(this));
     }
 
     @Override
@@ -67,7 +69,7 @@ public class Dodo extends RiftCreature {
         if (scale > this.oldScale) {
             this.oldScale = scale;
             this.removeParts();
-            this.bodyPart = new RiftMainBodyPart(this, 0, 0, 0.25f, scale,  0.55f * scale, 1f);
+            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.25f, scale,  0.55f * scale, 1f);
             this.headPart = new RiftCreaturePart(this, 0.35f, 0, 0.5f, 0.5f * scale,  0.5f * scale, 1f);
         }
     }

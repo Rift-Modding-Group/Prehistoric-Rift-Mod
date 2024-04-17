@@ -36,7 +36,7 @@ public class RiftControlledCharge extends EntityAIBase {
     @Override
     public boolean shouldExecute() {
         if (this.attacker.isBeingRidden()) {
-            return this.attacker.getRightClickCooldown() == 0 && this.attacker.getRightClickUse() > 0;
+            return this.attacker.getRightClickCooldown() == 0 && this.attacker.getRightClickUse() > 0 && !this.attacker.isInWater();
         }
         return false;
     }

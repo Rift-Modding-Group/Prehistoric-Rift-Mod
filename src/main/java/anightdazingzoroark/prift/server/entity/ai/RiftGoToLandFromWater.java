@@ -9,13 +9,13 @@ import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RiftGoToWater extends EntityAIBase {
+public class RiftGoToLandFromWater extends EntityAIBase {
     private final RiftCreature creature;
     private final int detectRange;
     private final double speed;
-    protected BlockPos waterBlockPos;
+    protected BlockPos landBlockPos;
 
-    public RiftGoToWater(RiftCreature creature, int detectRange, double speed) {
+    public RiftGoToLandFromWater(RiftCreature creature, int detectRange, double speed) {
         this.creature = creature;
         this.detectRange = detectRange;
         this.speed = speed;
@@ -24,37 +24,39 @@ public class RiftGoToWater extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (!this.creature.isInWater()) {
-            this.waterBlockPos = this.nearestWaterBlock();
-            if (!this.creature.isTamed()) return this.waterBlockPos != null;
-            else return this.waterBlockPos != null && this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden();
+        if (this.creature.isInWater()) {
+            this.landBlockPos = this.nearestLandBlock();
+            if (!this.creature.isTamed()) return this.landBlockPos != null;
+            else return this.landBlockPos != null && this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden();
         }
         return false;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return !this.creature.isInWater() && this.creature.getEnergy() > 0;
+        return this.creature.isInWater() && this.creature.getEnergy() > 0;
     }
 
     @Override
     public void resetTask() {
-        this.waterBlockPos = null;
+        this.landBlockPos = null;
     }
 
     @Override
     public void updateTask() {
-        this.creature.getMoveHelper().setMoveTo(this.waterBlockPos.getX(), this.waterBlockPos.getY(), this.waterBlockPos.getZ(), this.speed);
+        this.creature.getLookHelper().setLookPosition(this.landBlockPos.getX(), this.landBlockPos.getY(), this.landBlockPos.getZ(), 30, 30);
+        this.creature.getMoveHelper().setMoveTo(this.landBlockPos.getX(), this.landBlockPos.getY(), this.landBlockPos.getZ(), this.speed);
     }
 
-    private BlockPos nearestWaterBlock() {
+    //look for a land block with sufficient space on top to go to
+    private BlockPos nearestLandBlock() {
         //get all valid positions
         List<BlockPos> blockPosList = new ArrayList<>();
         for (int x = -this.detectRange/2; x <= this.detectRange/2; x++) {
             for (int y = -this.detectRange/2; y <= this.detectRange/2; y++) {
                 for (int z = -this.detectRange/2; z <= this.detectRange/2; z++) {
                     BlockPos tempPos = this.creature.getPosition().add(x, y, z);
-                    if (this.creature.world.getBlockState(tempPos).getMaterial() == Material.WATER) {
+                    if (this.creature.world.getBlockState(tempPos).getMaterial() == Material.AIR) {
                         if (canFitHitbox(tempPos)) blockPosList.add(tempPos);
                     }
                 }
@@ -79,11 +81,16 @@ public class RiftGoToWater extends EntityAIBase {
 
     private boolean canFitHitbox(BlockPos pos) {
         float width = Math.round(this.creature.width);
-        for (int x = -Math.round(width/2f); x <= Math.round(width/2f); x++) {
-            for (int z = -Math.round(width/2f); z <= Math.round(width/2f); z++) {
-                if (this.creature.world.getBlockState(pos.add(x, 0, z)).getMaterial() != Material.WATER) return false;
+        if (this.creature.world.getBlockState(pos.down()).getMaterial().isSolid()) {
+            for (int x = -Math.round(width/2f); x <= Math.round(width/2f); x++) {
+                for (int y = 0; y <= this.creature.height; y++) {
+                    for (int z = -Math.round(width/2f); z <= Math.round(width/2f); z++) {
+                        if (this.creature.world.getBlockState(pos.add(x, y, z)).getMaterial().isSolid()) return false;
+                    }
+                }
             }
+            return true;
         }
-        return true;
+        return false;
     }
 }
