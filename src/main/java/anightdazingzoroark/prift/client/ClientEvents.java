@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
@@ -9,11 +10,14 @@ import anightdazingzoroark.prift.server.message.RiftOpenInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftOpenWeaponInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 import org.lwjgl.opengl.GL11;
 
 public class ClientEvents {
@@ -63,6 +67,16 @@ public class ClientEvents {
                 GL11.glDisable(GL11.GL_BLEND);
                 GL11.glPopMatrix();
             }
+        }
+    }
+
+    //open journal when pressing the journal button
+    //player.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_INVENTORY, world, message.creatureId, 0, 0);
+    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
+    public void openJournal(InputEvent.KeyInputEvent event) {
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        if (RiftControls.openJournal.isKeyDown()) {
+            player.openGui(RiftInitialize.instance, ServerProxy.GUI_JOURNAL, player.world, 0, 0, 0);
         }
     }
 }

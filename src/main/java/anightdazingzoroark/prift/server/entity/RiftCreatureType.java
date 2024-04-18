@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
@@ -185,6 +186,10 @@ public enum RiftCreatureType {
             entity = new Tyrannosaurus(world);
         }
         return entity;
+    }
+
+    public String getTranslatedName() {
+        return I18n.format("entity."+this.name().toLowerCase()+".name");
     }
 
     public static void registerEggs() {

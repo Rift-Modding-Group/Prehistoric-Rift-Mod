@@ -43,7 +43,7 @@ public class RiftPopupFromRadial extends GuiContainer {
 
     @Override
     public void initGui() {
-        buttonList.clear();
+        this.buttonList.clear();
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
         if (this.popupFromRadial == PopupFromRadial.SET_HOME || this.popupFromRadial == PopupFromRadial.UNCLAIM || this.popupFromRadial == PopupFromRadial.CLAIM) {

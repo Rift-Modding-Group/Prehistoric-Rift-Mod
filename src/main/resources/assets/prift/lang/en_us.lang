@@ -220,5 +220,15 @@ turrettargeting.hostiles=%s will now target hostile mobs
 turrettargeting.all=%s will now target anything it deems unfriendly
 tametrait.level=Level %s
 
+type.creature.back=Back
+type.creature.all=All
+type.creature.dinosaur=Dinosaur
+type.creature.mammal=Mammal
+type.creature.reptile=Reptile
+type.creature.bird=Bird
+type.creature.fish=Fish
+type.creature.invertebrate=Invertebrate
+type.creature.amphibian=Amphibian
+
 tile.lead_powered_crank.name=Lead Powered Crank
 tile.blow_powered_turbine.name=Blow Powered Turbine

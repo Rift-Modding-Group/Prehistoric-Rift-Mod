@@ -98,6 +98,7 @@ public class ClientProxy extends ServerProxy {
             IInventory playerInventory = player.inventory;
             return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);
         }
+        else if (id == GUI_JOURNAL) return new RiftJournalScreen();
         return null;
     }
 
