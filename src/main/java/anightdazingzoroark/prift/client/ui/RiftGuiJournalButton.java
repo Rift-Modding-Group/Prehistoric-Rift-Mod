@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.client.ui;
 
-import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import net.minecraft.client.gui.GuiButton;
 
 public class RiftGuiJournalButton extends GuiButton {

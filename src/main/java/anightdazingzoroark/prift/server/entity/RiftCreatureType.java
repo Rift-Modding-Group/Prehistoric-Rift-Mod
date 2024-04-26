@@ -192,6 +192,15 @@ public enum RiftCreatureType {
         return I18n.format("entity."+this.name().toLowerCase()+".name");
     }
 
+    public static RiftCreatureType safeValOf(String string) {
+        for (RiftCreatureType creatureType : RiftCreatureType.values()) {
+            if (creatureType.name().equalsIgnoreCase(string)) {
+                return creatureType;
+            }
+        }
+        return null;
+    }
+
     public static void registerEggs() {
         for (RiftCreatureType creature : RiftCreatureType.values()) {
             if (creature.getCreatureCategory().equals(CreatureCategory.DINOSAUR) || creature.getCreatureCategory().equals(CreatureCategory.REPTILE) || creature.getCreatureCategory().equals(CreatureCategory.BIRD) || creature.equals(DIMETRODON)) {

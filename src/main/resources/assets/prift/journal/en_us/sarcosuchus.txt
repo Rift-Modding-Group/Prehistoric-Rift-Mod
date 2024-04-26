@@ -1,0 +1,6 @@
+Diet: Carnivore
+Behavior: Hostile
+
+Sarcosuchuses are more at water than on land. They prefer to hunt their prey when in water as that's where they're at their strongest and fastest, especially with their ability to spin to deal rapid amounts of damage while trapping them. Even if it's not their usual prey item, as long as where they prefer to swim in gets invaded, they will attack.
+
+As an extremely fast swimmer, Sarcosuchuses are perfect when it comes to water navigation, though such speed can cause problems when doing underwater combat. And while they can travel on land, it's where they tend to be vulnerable for the loss of speed.

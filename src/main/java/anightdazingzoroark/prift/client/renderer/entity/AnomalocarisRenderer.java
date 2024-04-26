@@ -18,7 +18,7 @@ public class AnomalocarisRenderer extends GeoEntityRenderer<RiftCreature> {
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
         Anomalocaris anomalocaris = (Anomalocaris) animatable;
         float scale = RiftUtil.setModelScale(anomalocaris, 1f, 2f);
-        float translucency = anomalocaris.isUsingInvisibility() ? 0.25f : 1f;
+        float translucency = anomalocaris.isUsingInvisibility() ? 0.2f : 1f;
 
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!anomalocaris.isSaddled());

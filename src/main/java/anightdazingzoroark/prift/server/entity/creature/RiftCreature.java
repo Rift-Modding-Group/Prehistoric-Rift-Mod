@@ -4,8 +4,10 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.SSRCompatUtils;
+import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
@@ -15,6 +17,7 @@ import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
+import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -727,6 +730,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setAttackTarget(null);
                     if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
                     this.world.setEntityState(this, (byte)7);
+                    EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class).unlockCreature(this.creatureType);
+                    player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
                     this.enablePersistence();
                 }
                 else {

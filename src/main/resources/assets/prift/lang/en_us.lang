@@ -153,6 +153,7 @@ reminder.crank_blocked=%s's path is being blocked! Make sure there's sufficient 
 reminder.cannot_place_turbine=Cannot place turbine! Make sure that there's a 3 block tall and 3 block wide area for the turbine to be placed on!
 reminder.incapacitated=%s has been incapacitated! Revive it or else it will perish!
 reminder.insufficient_light_blast_charge=%s does not have enough charge to do perform a light blast
+reminder.unlocked_journal_entry=You have unlocked the journal entry for the %s! Check it out by pressing %s!
 
 prift.egg.time=Time
 prift.egg.minutes=minute(s)
@@ -162,8 +163,18 @@ prift.egg.too_warm=Too warm for hatching!
 
 prift.notify.egg_hatched=Your Egg has hatched!
 
-priftcommands.bleed.usage=/riftbleed [player|entity] [seconds] [strength]
+priftcommands.bleed.usage=/priftbleed [player|entity] [seconds] [strength]
 priftcommands.bleed.successful=Applied bleed on %s
+priftcommands.journal.usage=/priftjournal [player] [unlock|clear] [entryname] OR /priftjournal [player] [unlockall|clearall]
+priftcommands.journal.add_all_success=All journal entries successfully added to %s
+priftcommands.journal.clear_all_success=All journal entries successfully cleared from %s
+priftcommands.journal.invalid_entry="%s" is not a valid journal entry
+priftcommands.journal.clear_entry_blank=Journal entry to be cleared cannot be blank
+priftcommands.journal.unlock_entry_blank=Journal entry to be unlocked cannot be blank
+priftcommands.journal.add_success=Journal entry for %s successfully added to %s
+priftcommands.journal.entry_already_exists=%s has already been unlocked for %s
+priftcommands.journal.clear_success=Journal entry for %s successfully cleared for %s
+priftcommands.journal.entry_already_cleared=%s has already been cleared for %s
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus growls
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus hurts
@@ -229,6 +240,13 @@ type.creature.bird=Bird
 type.creature.fish=Fish
 type.creature.invertebrate=Invertebrate
 type.creature.amphibian=Amphibian
+type.creature.dinosaur_plural=Dinosaurs
+type.creature.mammal_plural=Mammals
+type.creature.reptile_plural=Reptiles
+type.creature.bird_plural=Birds
+type.creature.fish_plural=Fishes
+type.creature.invertebrate_plural=Invertebrates
+type.creature.amphibian_plural=Amphibians
 
 tile.lead_powered_crank.name=Lead Powered Crank
 tile.blow_powered_turbine.name=Blow Powered Turbine

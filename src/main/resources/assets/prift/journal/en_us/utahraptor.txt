@@ -1,0 +1,6 @@
+Diet: Carnivore
+Behavior: Hostile
+
+Utahraptors may be quick, but are weak and frail. Their main source of strength comes in their numbers. Sometimes, before a hunt, a self-appointed leader will perform a battle cry to motivate them and push them to their limits. Their ability to climb walls and pounce over distances makes them even more dangerous.
+
+In the hands of a skilled rider, one may use the Utahraptor as most likely the most versatile traveling mount, owed to their skills in traversing the terrain. Most prefer their quick speed and stamina recharge, and as such they have become the most common mount for raiders.

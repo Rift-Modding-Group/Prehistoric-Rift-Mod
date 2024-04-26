@@ -26,7 +26,10 @@ import java.util.Iterator;
 
 public class RiftEntities {
     public static void registerEntities() {
+        //entity properties
         EntityPropertiesHandler.INSTANCE.registerProperties(RiftEntityProperties.class);
+        EntityPropertiesHandler.INSTANCE.registerProperties(PlayerJournalProgress.class);
+
         //creatures
         for (int x = 0; x < RiftCreatureType.values().length; x++) {
             RiftCreatureType creature = RiftCreatureType.values()[x];
