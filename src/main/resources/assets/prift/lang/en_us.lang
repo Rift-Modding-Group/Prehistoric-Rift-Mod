@@ -215,6 +215,14 @@ sounds.subtitle.sarcosuchus_idle=Sarcosuchus grunts
 sounds.subtitle.sarcosuchus_hurt=Sarcosuchus hurts
 sounds.subtitle.sarcosuchus_death=Sarcosuchus dies
 
+sounds.subtitle.anomalocaris_hurt=Anomalocaris hurts
+sounds.subtitle.anomalocaris_death=Anomalocaris dies
+
+sounds.subtitle.saurophaganax_idle=Saurophaganax grunts
+sounds.subtitle.saurophaganax_hurt=Saurophaganax hurts
+sounds.subtitle.saurophaganax_death=Saurophaganax dies
+sounds.subtitle.saurophaganax_light_blast=Saurophaganax emits a blast of light
+
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral
 tamebehavior.aggressive=%s is currently aggressive
@@ -250,3 +258,4 @@ type.creature.amphibian_plural=Amphibians
 
 tile.lead_powered_crank.name=Lead Powered Crank
 tile.blow_powered_turbine.name=Blow Powered Turbine
+tile.feeding_trough.name=Feeding Trough

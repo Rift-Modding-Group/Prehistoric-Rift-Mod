@@ -8,15 +8,19 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.inventory.CreatureContainer;
+import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
 import anightdazingzoroark.prift.server.inventory.WeaponContainer;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.recipes.RiftRecipes;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntities;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
 import com.charles445.simpledifficulty.api.temperature.TemperatureRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
@@ -40,6 +44,7 @@ public class ServerProxy implements IGuiHandler {
     public static final int GUI_MENU_FROM_RADIAL = 3;
     public static final int GUI_WEAPON_INVENTORY = 4;
     public static final int GUI_JOURNAL = 5;
+    public static final int GUI_FEEDING_TROUGH = 6;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
@@ -77,6 +82,7 @@ public class ServerProxy implements IGuiHandler {
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         Entity entity = world.getEntityByID(x);
+        TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
         if (id == GUI_CREATURE_INVENTORY) {
             if (entity instanceof RiftCreature) {
                 return new CreatureContainer((RiftCreature) entity, player);
@@ -88,6 +94,11 @@ public class ServerProxy implements IGuiHandler {
         else if (id == GUI_WEAPON_INVENTORY) {
             if (entity instanceof RiftLargeWeapon) {
                 return new WeaponContainer((RiftLargeWeapon) entity, player);
+            }
+        }
+        else if (id == GUI_FEEDING_TROUGH) {
+            if (tileEntity instanceof RiftTileEntityFeedingTrough) {
+                return new FeedingTroughContainer((RiftTileEntityFeedingTrough)tileEntity, player);
             }
         }
         return null;

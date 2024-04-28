@@ -22,6 +22,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -222,6 +223,11 @@ public class Saurophaganax extends RiftCreature {
         return new Vec3d(xOffset, this.posY + 0.35, zOffset);
     }
 
+    @Override
+    public boolean getCanSpawnHere() {
+        return super.getCanSpawnHere() && this.isBrightnessLevel(0, 7);
+    }
+
     @SideOnly(Side.CLIENT)
     public boolean shouldRender(ICamera camera) {
         return super.shouldRender(camera) || this.inFrustrum(camera, this.bodyFrontPart) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part);
@@ -388,5 +394,17 @@ public class Saurophaganax extends RiftCreature {
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.SAUROPHAGANAX_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.SAUROPHAGANAX_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.SAUROPHAGANAX_DEATH;
     }
 }

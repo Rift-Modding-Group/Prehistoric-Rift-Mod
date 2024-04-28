@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.server.entity.creature.Saurophaganax;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.EntityList;
@@ -44,6 +45,7 @@ public class RiftSaurophaganaxUseLightBlast extends EntityAIBase {
         this.animTime = 0;
         this.saurophaganax.setUsingLightBlast(true);
         this.saurophaganax.removeSpeed();
+        this.saurophaganax.playSound(RiftSounds.SAUROPHAGANAX_LIGHT_BLAST_BOOM, 2, 1);
     }
 
     @Override
@@ -52,7 +54,7 @@ public class RiftSaurophaganaxUseLightBlast extends EntityAIBase {
         this.saurophaganax.resetSpeed();
         this.saurophaganax.setLightBlastCharge(0);
         if (this.saurophaganax.isTamed()) this.saurophaganax.setEnergy(this.saurophaganax.getEnergy() - 6);
-        if (this.saurophaganax.isTamed() && this.saurophaganax.isBeingRidden()) this.saurophaganax.setRightClickCooldown(200);
+        if (this.saurophaganax.isTamed() && this.saurophaganax.isBeingRidden()) this.saurophaganax.setRightClickUse(0);
     }
 
     @Override

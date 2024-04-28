@@ -216,5 +216,49 @@
       "prift:entities/sarcosuchus/sarcosuchus_death"
     ],
     "subtitle": "sounds.subtitle.sarcosuchus_death"
+  },
+
+  "prift.anomalocaris.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/anomalocaris/anomalocaris_hurt"
+    ],
+    "subtitle": "sounds.subtitle.anomalocaris_hurt"
+  },
+  "prift.anomalocaris.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/anomalocaris/anomalocaris_death"
+    ],
+    "subtitle": "sounds.subtitle.anomalocaris_death"
+  },
+
+  "prift.saurophaganax.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/saurophaganax/saurophaganax_idle"
+    ],
+    "subtitle": "sounds.subtitle.saurophaganax_idle"
+  },
+  "prift.saurophaganax.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/saurophaganax/saurophaganax_hurt"
+    ],
+    "subtitle": "sounds.subtitle.saurophaganax_hurt"
+  },
+  "prift.saurophaganax.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/saurophaganax/saurophaganax_death"
+    ],
+    "subtitle": "sounds.subtitle.saurophaganax_death"
+  },
+  "prift.saurophaganax.light_blast_boom": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/saurophaganax/saurophaganax_light_blast_boom"
+    ],
+    "subtitle": "sounds.subtitle.saurophaganax_light_blast_boom"
   }
 }

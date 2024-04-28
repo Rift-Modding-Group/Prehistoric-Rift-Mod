@@ -169,41 +169,6 @@ public class RiftUtil {
         return flag || blockWeakerThanDirt(block, blockState) || blockWeakerThanDirt(block, blockState);
     }
 
-    public static boolean isEnergyRegenItem(Item item, CreatureDiet diet) {
-        List itemList = new ArrayList<>();
-        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
-        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
-
-        for (Object itemEntry : itemList) {
-            if (itemEntry instanceof String) {
-                String itemEntryStr = (String) itemEntry;
-                int first = itemEntryStr.indexOf(":");
-                int second = itemEntryStr.indexOf(":", first + 1);
-                int third = itemEntryStr.indexOf(":", second + 1);
-                int itemData = Integer.parseInt(itemEntryStr.substring(second + 1, third));
-                if (Item.getByNameOrId(itemEntryStr.substring(0, second)).equals(item) && (itemData == -1 || itemData == new ItemStack(item).getMetadata())) return true;
-            }
-        }
-        return false;
-    }
-
-    public static int getEnergyRegenItemValue(Item item, CreatureDiet diet) {
-        List<String> itemList = new ArrayList<>();
-        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
-        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
-
-        for (String itemEntry : itemList) {
-            int first = itemEntry.indexOf(":");
-            int second = itemEntry.indexOf(":", first + 1);
-            int third = itemEntry.indexOf(":", second + 1);
-            int itemData = Integer.parseInt(itemEntry.substring(second + 1, third));
-            if (Item.getByNameOrId(itemEntry.substring(0, second)).equals(item) && (itemData == -1 || itemData == new ItemStack(item).getMetadata())) {
-                return Integer.parseInt(itemEntry.substring(third + 1));
-            }
-        }
-        return 0;
-    }
-
     public static int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
     }

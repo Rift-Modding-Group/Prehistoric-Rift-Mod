@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "prift:feeding_trough" },
+    "facing=south": { "model": "prift:feeding_trough", "y": 180 },
+    "facing=west":  { "model": "prift:feeding_trough", "y": 270 },
+    "facing=east":  { "model": "prift:feeding_trough", "y": 90 }
+  }
+}

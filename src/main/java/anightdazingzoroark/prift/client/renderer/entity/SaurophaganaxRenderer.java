@@ -4,7 +4,11 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.model.entity.RiftCreatureModel;
 import anightdazingzoroark.prift.client.model.entity.GlowingLayerModel;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
+import anightdazingzoroark.prift.server.entity.creature.Saurophaganax;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
@@ -13,6 +17,12 @@ public class SaurophaganaxRenderer extends GeoEntityRenderer<RiftCreature> {
     public SaurophaganaxRenderer(RenderManager renderManager) {
         super(renderManager, new RiftCreatureModel());
         this.addLayer(new GlowingLayerModel<RiftCreature>(this, this.getGeoModelProvider()::getTextureLocation, this.getGeoModelProvider()::getModelLocation));
+    }
+
+    @Override
+    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
+        Saurophaganax saurophaganax = (Saurophaganax) livingEntity;
+        return super.shouldRender(saurophaganax, camera, camX, camY, camZ) || saurophaganax.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(saurophaganax);
     }
 
     @Override

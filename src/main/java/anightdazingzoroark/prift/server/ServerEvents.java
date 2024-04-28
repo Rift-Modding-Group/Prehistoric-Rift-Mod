@@ -188,7 +188,7 @@ public class ServerEvents {
             PlayerJournalProgress journalProgress = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class);
             if (!journalProgress.getUnlockedCreatures().contains(creature.creatureType)) {
                 journalProgress.unlockCreature(creature.creatureType);
-                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                if (!player.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
             }
         }
     }

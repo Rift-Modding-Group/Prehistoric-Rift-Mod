@@ -53,6 +53,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
@@ -67,6 +68,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -549,11 +551,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.eatFromInvCooldown++;
             for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
-                if (this.isFavoriteFood(itemInSlot) && this.eatFromInvCooldown > 60  && !RiftUtil.isEnergyRegenItem(itemInSlot.getItem(), this.creatureType.getCreatureDiet())) {
-                    this.heal((float) this.getFavoriteFoodHeal(itemInSlot));
-                    this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
-                    this.spawnItemCrackParticles(itemInSlot.getItem());
-                    itemInSlot.setCount(itemInSlot.getCount() - 1);
+                if (this.isFavoriteFood(itemInSlot) && this.eatFromInvCooldown > 60  && !this.isEnergyRegenItem(itemInSlot)) {
+                    this.eatFoodForHealing(itemInSlot);
                     this.eatFromInvCooldown = 0;
                 }
             }
@@ -564,11 +563,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.eatFromInvForEnergyCooldown++;
             for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
-                if (RiftUtil.isEnergyRegenItem(itemInSlot.getItem(), this.creatureType.getCreatureDiet()) && this.eatFromInvForEnergyCooldown > 60) {
-                    this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemInSlot.getItem(), this.creatureType.getCreatureDiet()));
-                    this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
-                    this.spawnItemCrackParticles(itemInSlot.getItem());
-                    itemInSlot.setCount(itemInSlot.getCount() - 1);
+                if (this.isEnergyRegenItem(itemInSlot) && this.eatFromInvForEnergyCooldown > 60) {
+                    this.eatFoodForEnergyRegen(itemInSlot);
                     this.eatFromInvForEnergyCooldown = 0;
                 }
             }
@@ -579,7 +575,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.eatFromInvForGrowthCooldown++;
             for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
-                if (this.isFavoriteFood(itemInSlot) && this.eatFromInvForGrowthCooldown > 60  && !RiftUtil.isEnergyRegenItem(itemInSlot.getItem(), this.creatureType.getCreatureDiet())) {
+                if (this.isFavoriteFood(itemInSlot) && this.eatFromInvForGrowthCooldown > 60  && !this.isEnergyRegenItem(itemInSlot)) {
                     this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemInSlot));
                     this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                     this.spawnItemCrackParticles(itemInSlot.getItem());
@@ -656,7 +652,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
-                    else if (this.isFavoriteFood(itemstack) && !RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getHealth() < this.getMaxHealth()) {
+                    else if (this.isFavoriteFood(itemstack) && !this.isEnergyRegenItem(itemstack) && this.getHealth() < this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.heal((float) this.getFavoriteFoodHeal(itemstack));
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
@@ -668,9 +664,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
-                    else if (RiftUtil.isEnergyRegenItem(itemstack.getItem(), this.creatureType.getCreatureDiet()) && this.getEnergy() < 20) {
+                    else if (this.isEnergyRegenItem(itemstack) && this.getEnergy() < 20) {
                         this.consumeItemFromStack(player, itemstack);
-                        this.setEnergy(this.getEnergy() + RiftUtil.getEnergyRegenItemValue(itemstack.getItem(), this.creatureType.getCreatureDiet()));
+                        this.setEnergy(this.getEnergy() + this.getEnergyRegenItemValue(itemstack));
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
@@ -731,7 +727,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
                     this.world.setEntityState(this, (byte)7);
                     EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class).unlockCreature(this.creatureType);
-                    player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                    if (!player.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
                     this.enablePersistence();
                 }
                 else {
@@ -840,6 +836,57 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         return 0;
+    }
+
+    public boolean isEnergyRegenItem(ItemStack stack) {
+        CreatureDiet diet = this.creatureType.getCreatureDiet();
+        List<String> itemList = new ArrayList<>();
+        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+
+        for (String foodItem : itemList) {
+            int first = foodItem.indexOf(":");
+            int second = foodItem.indexOf(":", first + 1);
+            int third = foodItem.indexOf(":", second + 1);
+            String itemId = foodItem.substring(0, second);
+            int itemData = Integer.parseInt(foodItem.substring(second + 1, third));
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId)) && (itemData == -1 || itemData == stack.getMetadata())) return true;
+        }
+
+        return false;
+    }
+
+    public int getEnergyRegenItemValue(ItemStack stack) {
+        CreatureDiet diet = this.creatureType.getCreatureDiet();
+        List<String> itemList = new ArrayList<>();
+        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+
+        for (String itemEntry : itemList) {
+            int first = itemEntry.indexOf(":");
+            int second = itemEntry.indexOf(":", first + 1);
+            int third = itemEntry.indexOf(":", second + 1);
+            String itemId = itemEntry.substring(0, second);
+            int itemData = Integer.parseInt(itemEntry.substring(second + 1, third));
+            if (stack.getItem().equals(Item.getByNameOrId(itemId)) && (itemData == -1 || itemData == stack.getMetadata())) {
+                return Integer.parseInt(itemEntry.substring(third + 1));
+            }
+        }
+        return 0;
+    }
+
+    public void eatFoodForHealing(ItemStack itemStack) {
+        this.heal((float) this.getFavoriteFoodHeal(itemStack));
+        this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+        this.spawnItemCrackParticles(itemStack.getItem());
+        itemStack.setCount(itemStack.getCount() - 1);
+    }
+
+    public void eatFoodForEnergyRegen(ItemStack itemStack) {
+        this.setEnergy(this.getEnergy() + this.getEnergyRegenItemValue(itemStack));
+        this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+        this.spawnItemCrackParticles(itemStack.getItem());
+        itemStack.setCount(itemStack.getCount() - 1);
     }
 
     private void showGrowthParticles() {
@@ -1051,6 +1098,27 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         });
         return creatureList.size() < this.densityLimit;
+    }
+
+    protected boolean isBrightnessLevel(int min, int max) {
+        if (min < max) {
+            BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+
+            if (this.world.getLightFor(EnumSkyBlock.SKY, blockpos) > this.rand.nextInt(32)) return false;
+            else {
+                int lightLevel = this.world.getLightFromNeighbors(blockpos);
+
+                if (this.world.isThundering()) {
+                    int originalSkylightSubtracted = this.world.getSkylightSubtracted();
+                    this.world.setSkylightSubtracted(10);
+                    lightLevel = this.world.getLightFromNeighbors(blockpos);
+                    this.world.setSkylightSubtracted(originalSkylightSubtracted);
+                }
+
+                return lightLevel >= min && lightLevel <= max;
+            }
+        }
+        else return false;
     }
 
     public boolean canBreatheUnderwater() {
@@ -1859,6 +1927,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
         }
+        this.setTameStatus(TameStatusType.STAND);
     }
 
     private void sendDeathMessage() {

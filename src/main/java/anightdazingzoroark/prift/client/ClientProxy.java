@@ -12,11 +12,15 @@ import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -87,6 +91,7 @@ public class ClientProxy extends ServerProxy {
     @SideOnly(Side.CLIENT)
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         Entity entity = world.getEntityByID(x);
+        TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
         if (id == GUI_EGG) return new RiftEggMenu();
         else if (id == GUI_DIAL) return new RiftDialMenu((RiftCreature) entity);
         else if (id == GUI_CREATURE_INVENTORY) {
@@ -99,6 +104,11 @@ public class ClientProxy extends ServerProxy {
             return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);
         }
         else if (id == GUI_JOURNAL) return new RiftJournalScreen();
+        else if (id == GUI_FEEDING_TROUGH) {
+            if (tileEntity instanceof RiftTileEntityFeedingTrough) {
+                return new RiftFeedingTroughInvMenu((RiftTileEntityFeedingTrough) tileEntity, player.inventory);
+            }
+        }
         return null;
     }
 
