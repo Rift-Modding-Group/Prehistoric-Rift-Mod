@@ -20,5 +20,6 @@ public class RiftJEI implements IModPlugin {
         blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectiles.THROWN_STEGOSAURUS_PLATE_TWO));
         blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectiles.THROWN_STEGOSAURUS_PLATE_THREE));
         blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectiles.THROWN_STEGOSAURUS_PLATE_FOUR));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectiles.THROWN_BOLA));
     }
 }

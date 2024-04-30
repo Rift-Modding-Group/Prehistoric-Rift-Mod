@@ -2,25 +2,22 @@ package anightdazingzoroark.prift;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.enums.CreatureDiet;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
-import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -29,7 +26,6 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -278,4 +274,35 @@ public class RiftUtil {
         else return wLList;
         return finalTargets;
     }
+
+    public static MobSize getMobSize(EntityLivingBase entity) {
+        List<String> verySmallSize = Arrays.asList(GeneralConfig.verySmallMobs);
+        List<String> smallSize = Arrays.asList(GeneralConfig.smallMobs);
+        List<String> mediumSize = Arrays.asList(GeneralConfig.mediumMobs);
+        List<String> largeSize = Arrays.asList(GeneralConfig.largeMobs);
+        List<String> veryLargeSize = Arrays.asList(GeneralConfig.veryLargeMobs);
+        String mobString = EntityList.getKey(entity).toString();
+
+        if (verySmallSize.contains(mobString)) return MobSize.VERY_SMALL;
+        else if (smallSize.contains(mobString)) return MobSize.SMALL;
+        else if (mediumSize.contains(mobString)) return MobSize.MEDIUM;
+        else if (largeSize.contains(mobString)) return MobSize.LARGE;
+        else if (veryLargeSize.contains(mobString)) return MobSize.VERY_LARGE;
+
+        return MobSize.MEDIUM;
+    }
+
+    public static boolean isAppropriateSize(EntityLivingBase entity, MobSize size) {
+        return getMobSize(entity).ordinal() <= size.ordinal();
+    }
+
+//    public static MobSize getLargerSize(MobSize size1, MobSize size2) {
+//        if (size1.ordinal() > size2.ordinal()) return size1;
+//        else return size2;
+//    }
+//
+//    public static MobSize getSmallSize(MobSize size1, MobSize size2) {
+//        if (size1.ordinal() < size2.ordinal()) return size1;
+//        else return size2;
+//    }
 }

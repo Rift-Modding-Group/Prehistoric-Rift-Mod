@@ -20,6 +20,8 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     public boolean settingCreatureWorkstation;
     public int creatureIdForWorkstation;
     public boolean isCaptured;
+    public boolean isTiedByBola;
+    public int bolaTiedCountdown;
 
     @Override
     public int getTrackingTime() {
@@ -41,6 +43,9 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.settingCreatureWorkstation = false;
         this.creatureIdForWorkstation = -1;
         this.isCaptured = false;
+
+        this.isTiedByBola = false;
+        this.bolaTiedCountdown = 0;
     }
 
     @Override
@@ -54,6 +59,9 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         compound.setBoolean("IsBleeding", this.isBleeding);
         compound.setInteger("BleedingStrength", this.bleedingStrength);
         compound.setInteger("TicksUntilStopBleeding", this.ticksUntilStopBleeding);
+
+        compound.setBoolean("IsTiedByBola", this.isTiedByBola);
+        compound.setInteger("BolaCountdown", this.bolaTiedCountdown);
     }
 
     @Override
@@ -67,6 +75,9 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.isBleeding = compound.getBoolean("IsBleeding");
         this.bleedingStrength = compound.getInteger("BleedingStrength");
         this.ticksUntilStopBleeding = compound.getInteger("TicksUntilStopBleeding");
+
+        this.isTiedByBola = compound.getBoolean("IsTiedByBola");
+        this.bolaTiedCountdown = compound.getInteger("BolaCountdown");
     }
 
     @Override
@@ -89,5 +100,15 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.isBleeding = false;
         this.bleedingStrength = -1;
         this.ticksUntilStopBleeding = 0;
+    }
+
+    public void setBolaCapture(int ticks) {
+        this.isTiedByBola = true;
+        this.bolaTiedCountdown = ticks;
+    }
+
+    public void resetBolaCapture() {
+        this.isTiedByBola = false;
+        this.bolaTiedCountdown = 0;
     }
 }

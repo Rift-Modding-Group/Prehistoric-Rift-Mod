@@ -13,6 +13,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
@@ -30,24 +31,21 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.biome.Biome;
-import net.minecraftforge.common.BiomeDictionary;
-import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -75,7 +73,7 @@ public class ServerEvents {
         EntityPlayer player = Minecraft.getMinecraft().player;
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
 
-        if (properties.isCaptured) {
+        if (properties.isCaptured || properties.isTiedByBola) {
             if (settings.keyBindForward.isKeyDown()) {
                 KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
             }
@@ -106,6 +104,8 @@ public class ServerEvents {
         //ensure that damage towards hitboxes is same damage to creature
         if (event.getTarget() instanceof RiftCreaturePart && event.getEntity() instanceof EntityPlayer) {
             event.setCanceled(true);
+
+            //for dealing damage
             RiftCreaturePart part = (RiftCreaturePart) event.getTarget();
             RiftCreature parent = part.getParent();
             ((EntityPlayer) event.getEntity()).attackTargetEntityWithCurrentItem(parent);
@@ -481,6 +481,13 @@ public class ServerEvents {
             }
             if (properties.ticksUntilStopBleeding <= 0) properties.resetBleeding();
 
+            //manage bola
+            if (properties.isTiedByBola) {
+                entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 255));
+                properties.bolaTiedCountdown--;
+            }
+            if (properties.bolaTiedCountdown <= 0) properties.resetBolaCapture();
+
             RiftCreature creature = null;
             if (entity instanceof RiftCreature) creature = (RiftCreature) entity;
             if (creature != null) {
@@ -501,6 +508,8 @@ public class ServerEvents {
                     }
                 }
             }
+
+
         }
 
         //make sure mobs dont fall when trapped
@@ -514,6 +523,7 @@ public class ServerEvents {
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
         properties.resetBleeding();
         properties.isCaptured = false;
+        properties.resetBolaCapture();
     }
 
     //manage cannon impacting stuff

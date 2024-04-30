@@ -45,6 +45,13 @@ public class GeneralConfig  extends RiftConfig {
     public static boolean pyrotechIntegration = true;
     public static boolean simpleDiffIntegration = true;
 
+    //creature size
+    public static String[] verySmallMobs = {"minecraft:bat", "minecraft:rabbit", "minecraft:silverfish", "minecraft:endermite", "minecraft:vex"};
+    public static String[] smallMobs = {"prift:dodo", "prift:coelacanth", "prift:megapiranha", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:spider", "minecraft:cave_spider", "minecraft:squid", "minecraft:ocelot", "minecraft:parrot", "minecraft:shulker", "minecraft:wolf"};
+    public static String[] mediumMobs = {"prift:utahraptor", "prift:parasaurolophus", "prift:dimetrodon", "prift:sarcosuchus", "prift:anomalocaris", "minecraft:player", "minecraft:blaze", "minecraft:cow", "minecraft:creeper", "minecraft:donkey", "minecraft:enderman", "minecraft:evocation_illager", "minecraft:guardian", "minecraft:horse", "minecraft:husk", "minecraft:llama", "minecraft:mooshroom", "minecraft:mule", "minecraft:polar_bear", "minecraft:skeleton", "minecraft:skeleton_horse", "minecraft:stray", "minecraft:villager", "minecraft:vindication_illager", "minecraft:witch", "minecraft:zombie", "minecraft:zombie_horse", "minecraft:zombie_pigman", "minecraft:zombie_villager"};
+    public static String[] largeMobs = {"prift:stegosaurus", "prift:triceratops", "prift:saurophaganax", "minecraft:elder_guardian", "minecraft:wither_skeleton", "minecraft:wither"};
+    public static String[] veryLargeMobs = {"prift:tyrannosaurus", "prift:apatosaurus", "minecraft:ghast", "minecraft:ender_dragon"};
+
     //debug
     public static boolean quickEggHatch = false;
 
@@ -92,6 +99,14 @@ public class GeneralConfig  extends RiftConfig {
         mmIntegration = config.getBoolean("Activate Mystical Mechanics Integration", "Mod Integration", true, "Whether or not additional features will be turned on if Mystical Mechanics is detected in the mods folder");
         pyrotechIntegration = config.getBoolean("Activate Pyrotech Integration", "Mod Integration", true, "Whether or not additional features will be turned on if Pyrotech is detected in the mods folder");
         simpleDiffIntegration = config.getBoolean("Activate Simple Difficulty Integration", "Mod Integration", true, "Whether or not additional features will be turned on if Simple Difficulty is detected in the mods folder");
+
+        //mob size
+        config.addCustomCategoryComment("Mob Size", "Order of sizes: very small -> small -> medium -> large -> very large. Mobs that are not listed amongst any of the sizes are automatically considered medium size.");
+        verySmallMobs = config.getStringList("Very Small Mobs", "Mob Size", new String[]{"minecraft:bat", "minecraft:rabbit", "minecraft:silverfish", "minecraft:endermite", "minecraft:vex"}, "Mobs that are to be of very small size");
+        smallMobs = config.getStringList("Small Mobs", "Mob Size", new String[]{"prift:dodo", "prift:coelacanth", "prift:megapiranha", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:spider", "minecraft:cave_spider", "minecraft:squid", "minecraft:ocelot", "minecraft:parrot", "minecraft:shulker", "minecraft:wolf"}, "Mobs that are to be of small size");
+        mediumMobs = config.getStringList("Medium Mobs", "Mob Size", new String[]{"prift:utahraptor", "prift:parasaurolophus", "prift:dimetrodon", "prift:sarcosuchus", "prift:anomalocaris", "minecraft:player", "minecraft:blaze", "minecraft:cow", "minecraft:creeper", "minecraft:donkey", "minecraft:enderman", "minecraft:evocation_illager", "minecraft:guardian", "minecraft:horse", "minecraft:husk", "minecraft:llama", "minecraft:mooshroom", "minecraft:mule", "minecraft:polar_bear", "minecraft:skeleton", "minecraft:skeleton_horse", "minecraft:stray", "minecraft:villager", "minecraft:vindication_illager", "minecraft:witch", "minecraft:zombie", "minecraft:zombie_horse", "minecraft:zombie_pigman", "minecraft:zombie_villager"}, "Mobs that are to be of medium size");
+        largeMobs = config.getStringList("Large Mobs", "Mob Size", new String[]{"prift:stegosaurus", "prift:triceratops", "prift:saurophaganax", "minecraft:elder_guardian", "minecraft:wither_skeleton", "minecraft:wither"}, "Mobs that are to be of large size");
+        veryLargeMobs = config.getStringList("Very Large Mobs", "Mob Size", new String[]{"prift:tyrannosaurus", "prift:apatosaurus", "minecraft:ghast", "minecraft:ender_dragon"}, "Mobs that are to be of very large size");
 
         //debug
         quickEggHatch = config.getBoolean("All eggs hatch quickly", "Debug", false, "Turning this on makes all eggs hatch within 5 seconds. Mainly here for testing purposes, idk i could have made this a gamerule or smth");

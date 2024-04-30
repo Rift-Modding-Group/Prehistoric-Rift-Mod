@@ -59,5 +59,12 @@ public class EntityRenderer {
             }
         });
         RiftProjectiles.CATAPULT_BOULDER.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CATAPULT));
+        RenderingRegistry.registerEntityRenderingHandler(ThrownBola.class, new IRenderFactory<ThrownBola>() {
+            @Override
+            public Render<? super ThrownBola> createRenderFor(RenderManager manager) {
+                return new ProjectileRenderer<ThrownBola>(manager, Minecraft.getMinecraft().getRenderItem(), null);
+            }
+        });
+        RiftProjectiles.THROWN_BOLA.setTileEntityItemStackRenderer(new ThrownBolaAnimatorRenderer());
     }
 }

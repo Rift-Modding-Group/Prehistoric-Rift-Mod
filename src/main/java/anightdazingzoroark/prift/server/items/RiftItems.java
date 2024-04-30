@@ -79,6 +79,7 @@ public class RiftItems {
 
     public static Item WRENCH;
     public static Item COMMAND_CONSOLE;
+    public static Item BOLA;
 
     public static void registerItems() {
         RAW_EXOTIC_MEAT = riftFoodItem("raw_exotic_meat", 4, 0.3f, true);
@@ -137,6 +138,7 @@ public class RiftItems {
 
         WRENCH = riftGenericItem("wrench", false);
         COMMAND_CONSOLE = riftGenericItem("command_console", false);
+        BOLA = registerItem(new RiftBola(), "bola");
 
         RiftCreatureType.registerEggs();
         RiftCreatureType.registerSacs();
