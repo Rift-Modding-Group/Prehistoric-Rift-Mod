@@ -38,7 +38,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -175,7 +174,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         this.targetTasks.addTask(2, new RiftGetTargets(this, false, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
-        this.targetTasks.addTask(3, new RiftPickUpItems(this, TyrannosaurusConfig.tyrannosaurusFavoriteFood, true));
+        this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 30f, 2.08f, 0.64f));
         this.tasks.addTask(1, new RiftLandDwellerSwim(this));

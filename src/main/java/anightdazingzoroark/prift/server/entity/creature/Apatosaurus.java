@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
 import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
@@ -662,8 +663,7 @@ public class Apatosaurus extends RiftCreature {
                 }
             })) {
                 for (int i = 0; i < 3 - passengerSize; i++) {
-                    List<String> blackList = Arrays.asList(ApatosaurusConfig.apatosaurusPassengerBlacklist);
-                    boolean canAccept = ApatosaurusConfig.apatosaurusPassengerWhitelist == blackList.contains(EntityList.getKey(entity).toString());
+                    boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(ApatosaurusConfig.apatosaurusPassengerMaxSize));
                     if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
                         entity.startRiding(this, true);
                         this.dismount = true;
@@ -690,8 +690,7 @@ public class Apatosaurus extends RiftCreature {
                     }
                 })) {
                     for (int i = 0; i < 3 - passengerSize; i++) {
-                        List<String> blackList = Arrays.asList(ApatosaurusConfig.apatosaurusPassengerBlacklist);
-                        boolean canAccept = ApatosaurusConfig.apatosaurusPassengerWhitelist == blackList.contains(EntityList.getKey(entity).toString());
+                        boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(ApatosaurusConfig.apatosaurusPassengerMaxSize));
                         if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
                             entity.startRiding(this, true);
                             this.dismount = true;

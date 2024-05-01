@@ -15,8 +15,7 @@ public class SarcosuchusConfig extends RiftConfig {
     public static String[] sarcosuchusTargets = {"minecraft:squid", "prift:megapiranha"};
     public static String[] sarcosuchusTargetBlacklist = {};
     public static String sarcosuchusSaddleItem = "minecraft:saddle:0";
-    public static String[] sarcosuchusSpinBlacklist = {"minecraft:ender_dragon", "minecraft:wither", "prift:tyrannosaurus", "prift:stegosaurus", "prift:triceratops", "prift:apatosaurus", "prift:sarcosuchus"};
-    public static boolean sarcosuchusSpinWhitelist = false;
+    public static String sarcosuchusSpinMaxSize = "MEDIUM";
 
     public SarcosuchusConfig(Configuration config) {
         super(config, new String[]{"biome:minecraft:river:10:1:1:WATER_CREATURE", "tag:swamp:15:1:1:WATER_CREATURE"});
@@ -39,8 +38,7 @@ public class SarcosuchusConfig extends RiftConfig {
         sarcosuchusTargets = config.getStringList("Sarcosuchus Targets", "General", new String[]{"minecraft:squid", "prift:megapiranha"}, "Identifiers of mobs that the Sarcosuchus will actively hunt, alongside the ones defined in the general config for all carnivores to target");
         sarcosuchusTargetBlacklist = config.getStringList("Sarcosuchus Target Blacklist", "General", new String[]{}, "Identifiers of mobs that are here, if they are in the general config for all carnivores to target, will not be targeted by Sarcosuchuses.");
         sarcosuchusSaddleItem = config.getString("Sarcosuchus Saddle Item", "General", "minecraft:saddle:0", "Item that counts as a saddle for this creature. To add an item add \"<insert item's identifier here>:<insert data id here>\"");
-        sarcosuchusSpinBlacklist = config.getStringList("Mobs immune to Sarcosuchus spin attack", "General", new String[]{"minecraft:ender_dragon", "minecraft:wither", "prift:tyrannosaurus", "prift:stegosaurus", "prift:triceratops", "prift:apatosaurus", "prift:sarcosuchus"}, "Sarcosuchuses cannot use their spin attack on mobs whose identifiers are in this list");
-        sarcosuchusSpinWhitelist = config.getBoolean("Use Sarcosuchus spin target blacklist as whitelist", "General", false, "Turn the blacklist of mobs the Sarcosuchus can use its spin attack on into a whitelist");
+        sarcosuchusSpinMaxSize = config.getString("Maximum size that the Sarcosuchus can use its spin attack on", "General", "MEDIUM", "Maximum size for creatures that can be affected by the Sarcosuchus's spin attack. Accepted values are 'VERY_SMALL', 'SMALL', 'MEDIUM', 'LARGE', and 'VERY_LARGE'");
     }
 
     public static double getMaxHealth() {

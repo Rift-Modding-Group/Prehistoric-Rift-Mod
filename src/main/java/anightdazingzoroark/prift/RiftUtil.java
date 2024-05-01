@@ -14,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -281,13 +282,22 @@ public class RiftUtil {
         List<String> mediumSize = Arrays.asList(GeneralConfig.mediumMobs);
         List<String> largeSize = Arrays.asList(GeneralConfig.largeMobs);
         List<String> veryLargeSize = Arrays.asList(GeneralConfig.veryLargeMobs);
-        String mobString = EntityList.getKey(entity).toString();
 
-        if (verySmallSize.contains(mobString)) return MobSize.VERY_SMALL;
-        else if (smallSize.contains(mobString)) return MobSize.SMALL;
-        else if (mediumSize.contains(mobString)) return MobSize.MEDIUM;
-        else if (largeSize.contains(mobString)) return MobSize.LARGE;
-        else if (veryLargeSize.contains(mobString)) return MobSize.VERY_LARGE;
+        if (entity instanceof EntityPlayer) {
+            if (verySmallSize.contains("minecraft:player")) return MobSize.VERY_SMALL;
+            else if (smallSize.contains("minecraft:player")) return MobSize.SMALL;
+            else if (mediumSize.contains("minecraft:player")) return MobSize.MEDIUM;
+            else if (largeSize.contains("minecraft:player")) return MobSize.LARGE;
+            else if (veryLargeSize.contains("minecraft:player")) return MobSize.VERY_LARGE;
+        }
+        else {
+            String mobString = EntityList.getKey(entity).toString();
+            if (verySmallSize.contains(mobString)) return MobSize.VERY_SMALL;
+            else if (smallSize.contains(mobString)) return MobSize.SMALL;
+            else if (mediumSize.contains(mobString)) return MobSize.MEDIUM;
+            else if (largeSize.contains(mobString)) return MobSize.LARGE;
+            else if (veryLargeSize.contains(mobString)) return MobSize.VERY_LARGE;
+        }
 
         return MobSize.MEDIUM;
     }

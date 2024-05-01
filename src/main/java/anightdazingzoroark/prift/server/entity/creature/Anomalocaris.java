@@ -4,13 +4,11 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.AnomalocarisConfig;
-import anightdazingzoroark.prift.config.ApatosaurusConfig;
-import anightdazingzoroark.prift.config.SarcosuchusConfig;
-import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftGrabberTargeting;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -18,7 +16,6 @@ import anightdazingzoroark.prift.server.message.RiftSetGrabTarget;
 import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.*;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -85,7 +82,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
-        this.targetTasks.addTask(3, new RiftPickUpItems(this, AnomalocarisConfig.anomalocarisFavoriteFood, true));
+        this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.36F));
@@ -184,26 +181,16 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
             if (!this.isActing()) {
                 if (this.getGrabVictim() == null) {
                     if (target != null && RiftUtil.isUsingSSR()) {
-                        System.out.println(target);
-                        List<String> blackList = Arrays.asList(AnomalocarisConfig.anomalocarisGrabBlacklist);
                         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
-                        boolean canGrabFlag = false;
+                        boolean canGrabFlag;
+
                         if (target instanceof EntityPlayer) {
-                            if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains("minecraft:player")) {
-                                canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
-                            }
-                            else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains("minecraft:player")) {
-                                canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
-                            }
+                            canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured && RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize));
                         }
                         else {
-                            if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains(EntityList.getKey(target).toString())) {
-                                canGrabFlag = !properties.isCaptured;
-                            }
-                            else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains(EntityList.getKey(target).toString())) {
-                                canGrabFlag = !properties.isCaptured;
-                            }
+                            canGrabFlag = !target.equals(this) && !properties.isCaptured && RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize));
                         }
+
                         if (canGrabFlag) {
                             RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, target));
                             EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class).isCaptured = true;
@@ -212,30 +199,19 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
                     }
                     else if (target == null && !RiftUtil.isUsingSSR()) {
                         UUID ownerID = this.getOwnerId();
-                        List<String> blackList = Arrays.asList(AnomalocarisConfig.anomalocarisGrabBlacklist);
                         List<EntityLivingBase> potGrabList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
                             @Override
                             public boolean apply(@Nullable EntityLivingBase input) {
                                 RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
                                 if (input instanceof EntityPlayer) {
-                                    if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains("minecraft:player")) {
-                                        return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
-                                    }
-                                    else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains("minecraft:player")) {
-                                        return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
-                                    }
+                                    return !input.getUniqueID().equals(ownerID) && !properties.isCaptured && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize));
                                 }
                                 else {
-                                    if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !blackList.contains(EntityList.getKey(input).toString())) {
-                                        return !properties.isCaptured;
-                                    }
-                                    else if (AnomalocarisConfig.anomalocarisGrabWhitelist && blackList.contains(EntityList.getKey(input).toString())) {
-                                        return !properties.isCaptured;
-                                    }
+                                    return !properties.isCaptured && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize));
                                 }
-                                return false;
                             }
                         });
+                        potGrabList.remove(this);
                         if (!potGrabList.isEmpty()) {
                             RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, potGrabList.get(0)));
                             EntityPropertiesHandler.INSTANCE.getProperties(potGrabList.get(0), RiftEntityProperties.class).isCaptured = true;
@@ -270,25 +246,10 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         if (entityIn.isEntityAlive() && entityIn instanceof EntityLivingBase && !playerRideFlag) {
             EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
             RiftEntityProperties entityProperties = EntityPropertiesHandler.INSTANCE.getProperties(entityLivingBase, RiftEntityProperties.class);
-            if (entityIn instanceof EntityPlayer) {
-                if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !this.blacklist().contains("minecraft:player") && !entityProperties.isCaptured) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
-                    entityProperties.isCaptured = true;
-                }
-                else if (AnomalocarisConfig.anomalocarisGrabWhitelist && this.blacklist().contains("minecraft:player") && !entityProperties.isCaptured) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
-                    entityProperties.isCaptured = true;
-                }
-            }
-            else {
-                if (!AnomalocarisConfig.anomalocarisGrabWhitelist && !this.blacklist().contains(EntityList.getKey(entityIn).toString()) && !entityProperties.isCaptured) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
-                    entityProperties.isCaptured = true;
-                }
-                else if (AnomalocarisConfig.anomalocarisGrabWhitelist && this.blacklist().contains(EntityList.getKey(entityIn).toString()) && !entityProperties.isCaptured) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
-                    entityProperties.isCaptured = true;
-                }
+
+            if (RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize))) {
+                RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
+                entityProperties.isCaptured = true;
             }
         }
         return super.attackEntityAsMob(entityIn);
@@ -394,11 +355,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
 
     public void setGrabVictim(EntityLivingBase entityLivingBase) {
         this.grabVictim = entityLivingBase;
-    }
-
-    @Override
-    public List<String> blacklist() {
-        return Arrays.asList(AnomalocarisConfig.anomalocarisGrabBlacklist);
     }
 
     @Override

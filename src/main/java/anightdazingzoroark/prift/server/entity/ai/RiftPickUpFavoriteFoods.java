@@ -13,24 +13,24 @@ import com.google.common.base.Predicate;
 
 import javax.annotation.Nullable;
 
-public class RiftPickUpItems extends EntityAIBase {
+public class RiftPickUpFavoriteFoods extends EntityAIBase {
     protected final RiftCreature mob;
     protected final Predicate<? super EntityItem> items;
     protected final boolean checkSight;
     protected final boolean onlyNearby;
 
-    public RiftPickUpItems(RiftCreature mob, String[] items, boolean checkSight) {
-        this(mob, items, checkSight, false);
+    public RiftPickUpFavoriteFoods(RiftCreature mob, boolean checkSight) {
+        this(mob, checkSight, false);
     }
 
-    public RiftPickUpItems(RiftCreature mob, String[] items, boolean checkSight, boolean onlyNearby) {
+    public RiftPickUpFavoriteFoods(RiftCreature mob, boolean checkSight, boolean onlyNearby) {
         this.mob = mob;
         this.checkSight = checkSight;
         this.onlyNearby = onlyNearby;
         this.items = new Predicate<EntityItem>() {
             @Override
             public boolean apply(@Nullable EntityItem entityItem) {
-                for (String itemString : items) {
+                for (String itemString : mob.favoriteFood) {
                     int itemIdFirst = itemString.indexOf(":");
                     int itemIdSecond = itemString.indexOf(":", itemIdFirst + 1);
                     int itemIdThird = itemString.indexOf(":", itemIdSecond + 1);

@@ -4,13 +4,11 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.config.DimetrodonConfig;
-import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
-import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
@@ -94,7 +92,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
-        this.targetTasks.addTask(3, new RiftPickUpItems(this, SarcosuchusConfig.sarcosuchusFavoriteFood, true));
+        this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.52F));
@@ -157,81 +155,46 @@ public class Sarcosuchus extends RiftWaterCreature {
                 EntityLivingBase target = (EntityLivingBase) SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                 if (target != null) {
                     RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
-                    List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
-                    boolean canSpinFlag = false;
+
+                    boolean canSpinFlag;
                     if (target instanceof EntityPlayer) {
-                        if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("minecraft:player")) {
-                            canSpinFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
-                        }
-                        else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("minecraft:player")) {
-                            canSpinFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
-                        }
+                        canSpinFlag = RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
                     }
                     else {
-                        if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getKey(target).toString())) {
-                            if (target instanceof EntityTameable) {
-                                EntityTameable inpTameable = (EntityTameable)target;
-                                if (inpTameable.isTamed()) {
-                                    canSpinFlag = !target.getUniqueID().equals(inpTameable.getOwnerId()) && !properties.isCaptured;
-                                }
-                                else canSpinFlag = !properties.isCaptured;
+                        if (target instanceof EntityTameable) {
+                            EntityTameable inpTameable = (EntityTameable)target;
+                            if (inpTameable.isTamed()) {
+                                canSpinFlag = RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !target.getUniqueID().equals(inpTameable.getOwnerId()) && !properties.isCaptured;
                             }
-                            else canSpinFlag = !properties.isCaptured;
+                            else canSpinFlag = RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !properties.isCaptured;
                         }
-                        else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(target).toString())) {
-                            if (target instanceof EntityTameable) {
-                                EntityTameable inpTameable = (EntityTameable)target;
-                                if (inpTameable.isTamed()) {
-                                    canSpinFlag = !target.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
-                                }
-                                else canSpinFlag = !properties.isCaptured;
-                            }
-                            else canSpinFlag = !properties.isCaptured;
-                        }
+                        else canSpinFlag = RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !properties.isCaptured;
                     }
                     if (canSpinFlag) this.forcedSpinVictim = target;
                 }
             }
             else {
                 UUID ownerID = this.getOwnerId();
-                List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
                 List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
                     @Override
                     public boolean apply(@Nullable EntityLivingBase input) {
                         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
                         if (input instanceof EntityPlayer) {
-                            if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("minecraft:player")) {
-                                return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
-                            }
-                            else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("minecraft:player")) {
-                                return !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
-                            }
+                            return RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
                         }
                         else {
-                            if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getKey(input).toString())) {
-                                if (input instanceof EntityTameable) {
-                                    EntityTameable inpTameable = (EntityTameable)input;
-                                    if (inpTameable.isTamed()) {
-                                        return !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
-                                    }
-                                    else return !properties.isCaptured;
+                            if (input instanceof EntityTameable) {
+                                EntityTameable inpTameable = (EntityTameable)input;
+                                if (inpTameable.isTamed()) {
+                                    return RiftUtil.isAppropriateSize(inpTameable, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
                                 }
-                                return !properties.isCaptured;
+                                else return RiftUtil.isAppropriateSize(inpTameable, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !properties.isCaptured;
                             }
-                            else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(input).toString())) {
-                                if (input instanceof EntityTameable) {
-                                    EntityTameable inpTameable = (EntityTameable)input;
-                                    if (inpTameable.isTamed()) {
-                                        return !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
-                                    }
-                                    else return !properties.isCaptured;
-                                }
-                                return !properties.isCaptured;
-                            }
+                            return RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !properties.isCaptured;
                         }
-                        return false;
                     }
                 });
+                potTargetListM.remove(this);
                 if (!potTargetListM.isEmpty()) this.forcedSpinVictim = potTargetListM.get(0);
             }
         }

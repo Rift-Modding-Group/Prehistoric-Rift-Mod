@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
@@ -299,30 +300,10 @@ public class RiftAttack extends EntityAIBase {
                         if (this.sarcosuchus.isTamed()) this.sarcosuchus.energyActionMod++;
 
                         if (enemy.isEntityAlive() && this.sarcosuchus.getEnergy() > 6 && !this.targetProperties.isCaptured) {
-                            List<String> blackList = Arrays.asList(SarcosuchusConfig.sarcosuchusSpinBlacklist);
-                            if (enemy instanceof EntityPlayer) {
-                                if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains("minecraft:player")) {
-                                    this.sarcosuchus.setIsSpinning(true);
-                                    this.spinVictim = enemy;
-                                    this.targetProperties.isCaptured = true;
-                                }
-                                else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains("minecraft:player")) {
-                                    this.sarcosuchus.setIsSpinning(true);
-                                    this.spinVictim = enemy;
-                                    this.targetProperties.isCaptured = true;
-                                }
-                            }
-                            else {
-                                if (!SarcosuchusConfig.sarcosuchusSpinWhitelist && !blackList.contains(EntityList.getKey(enemy).toString())) {
-                                    this.sarcosuchus.setIsSpinning(true);
-                                    this.spinVictim = enemy;
-                                    this.targetProperties.isCaptured = true;
-                                }
-                                else if (SarcosuchusConfig.sarcosuchusSpinWhitelist && blackList.contains(EntityList.getKey(enemy).toString())) {
-                                    this.sarcosuchus.setIsSpinning(true);
-                                    this.spinVictim = enemy;
-                                    this.targetProperties.isCaptured = true;
-                                }
+                            if (RiftUtil.isAppropriateSize(enemy, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize))) {
+                                this.sarcosuchus.setIsSpinning(true);
+                                this.spinVictim = enemy;
+                                this.targetProperties.isCaptured = true;
                             }
                         }
                         else this.sarcosuchus.resetSpeed();

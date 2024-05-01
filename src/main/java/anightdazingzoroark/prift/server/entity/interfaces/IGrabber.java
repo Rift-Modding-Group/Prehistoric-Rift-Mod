@@ -8,7 +8,6 @@ import java.util.List;
 public interface IGrabber {
     EntityLivingBase getGrabVictim();
     void setGrabVictim(EntityLivingBase entity);
-    List<String> blacklist();
     void manageGrabVictim();
     Vec3d grabLocation();
 }

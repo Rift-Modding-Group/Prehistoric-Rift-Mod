@@ -6,4 +6,13 @@ public enum MobSize {
     MEDIUM,
     LARGE,
     VERY_LARGE;
+
+    public static MobSize safeValueOf(String string) {
+        for (MobSize mobSize : MobSize.values()) {
+            if (mobSize.name().equalsIgnoreCase(string)) {
+                return mobSize;
+            }
+        }
+        return null;
+    }
 }

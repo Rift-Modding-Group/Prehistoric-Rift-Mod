@@ -3,9 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.SaurophaganaxConfig;
-import anightdazingzoroark.prift.config.TyrannosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -112,7 +110,7 @@ public class Saurophaganax extends RiftCreature {
         this.targetTasks.addTask(2, new RiftGetTargets(this, false, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
-        this.targetTasks.addTask(3, new RiftPickUpItems(this, SaurophaganaxConfig.saurophaganaxFavoriteFood, true));
+        this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftSleepAtDay(this));
         this.tasks.addTask(1, new RiftMate(this));

@@ -15,8 +15,7 @@ public class AnomalocarisConfig extends RiftConfig {
     public static String[] anomalocarisTargets = {"minecraft:squid", "prift:megapiranha"};
     public static String[] anomalocarisTargetBlacklist = {};
     public static String anomalocarisSaddleItem = "minecraft:saddle:0";
-    public static String[] anomalocarisGrabBlacklist = {"minecraft:ender_dragon", "minecraft:wither", "prift:tyrannosaurus", "prift:stegosaurus", "prift:triceratops", "prift:apatosaurus", "prift:anomalocaris"};
-    public static boolean anomalocarisGrabWhitelist = false;
+    public static String anomalocarisGrabMaxSize = "MEDIUM";
 
     public AnomalocarisConfig(Configuration config) {
         super(config, new String[]{"biome:minecraft:deep_ocean:5:1:1:WATER_CREATURE"});
@@ -39,8 +38,7 @@ public class AnomalocarisConfig extends RiftConfig {
         anomalocarisTargets = config.getStringList("Anomalocaris Targets", "General", new String[]{"minecraft:squid", "prift:megapiranha"}, "Identifiers of mobs that the Anomalocaris will actively hunt, alongside the ones defined in the general config for all carnivores to target");
         anomalocarisTargetBlacklist = config.getStringList("Anomalocaris Target Blacklist", "General", new String[]{}, "Identifiers of mobs that are here, if they are in the general config for all carnivores to target, will not be targeted by Anomalocarises.");
         anomalocarisSaddleItem = config.getString("Anomalocaris Saddle Item", "General", "minecraft:saddle:0", "Item that counts as a saddle for this creature. To add an item add \"<insert item's identifier here>:<insert data id here>\"");
-        anomalocarisGrabBlacklist = config.getStringList("Mobs immune to Anomalocaris grab", "General", new String[]{"minecraft:ender_dragon", "minecraft:wither", "prift:tyrannosaurus", "prift:stegosaurus", "prift:triceratops", "prift:apatosaurus", "prift:anomalocaris"}, "Anomalocarises cannot grab mobs whose identifiers are in this list");
-        anomalocarisGrabWhitelist = config.getBoolean("Use Anomalocaris grab blacklist as whitelist", "General", false, "Turn the blacklist of mobs the Anomalocaris can grab into a whitelist");
+        anomalocarisGrabMaxSize = config.getString("Minimun grab size for Anomalocaris", "General", "MEDIUM", "Maximum mob size that the Anomalocaris will grab. Accepted values are 'VERY_SMALL', 'SMALL', 'MEDIUM', 'LARGE', and 'VERY_LARGE'");
     }
 
     public static double getMaxHealth() {
