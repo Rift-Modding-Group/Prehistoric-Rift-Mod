@@ -1,21 +1,19 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalButton;
 import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiLabel;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -27,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -35,10 +32,8 @@ import java.util.stream.Collectors;
 
 @SideOnly(Side.CLIENT)
 public class RiftJournalScreen extends GuiScreen {
-    protected int xSize = 420;
-    protected int ySize = 225;
-    public final int xGui = 420;
-    public final int yGui = 225;
+    protected final int xSize = 420;
+    protected final int ySize = 225;
     protected int guiLeft;
     protected int guiTop;
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
@@ -57,6 +52,10 @@ public class RiftJournalScreen extends GuiScreen {
 
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
+
+        //reset scrollbars
+        this.entryScrollOffset = 0;
+        this.scrollSidebarOffset = 0;
 
         super.initGui();
     }
@@ -84,24 +83,23 @@ public class RiftJournalScreen extends GuiScreen {
         this.mc.getTextureManager().bindTexture(background);
         int k = (this.width - this.xSize) / 2;
         int l = (this.height - this.ySize) / 2;
-        drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, (float)this.xGui, (float)this.yGui);
+        drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, (float)this.xSize, (float)this.ySize);
     }
 
     protected void sidebarButtonListInit() {
         this.buttonList.clear();
         this.sidebarHeight = 0;
 
-
         PlayerJournalProgress progress = EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerJournalProgress.class);
         for (int x = 0; x < progress.getUnlockedCategories().size(); x++) {
-            this.buttonList.add(new RiftGuiJournalButton(progress.getUnlockedCategories().get(x).toString(), x, (-60 + this.xGui)/2 - 135, 26 + 25 * x, 96, 20, progress.getUnlockedCategories().get(x).getTranslatedName(true)));
+            this.buttonList.add(new RiftGuiJournalButton(progress.getUnlockedCategories().get(x).toString(), x, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 87 + (25 * x), 96, 20, progress.getUnlockedCategories().get(x).getTranslatedName(true)));
             this.sidebarHeight += 25;
         }
     }
 
     protected void setSidebarButtonList(CreatureCategory category) {
         this.buttonList.clear();
-        this.sidebarHeight = 0;
+        this.sidebarHeight = 25;
 
         PlayerJournalProgress progress = EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerJournalProgress.class);
         List<RiftCreatureType> creatureTypeList = progress.getUnlockedCreatures();
@@ -119,10 +117,10 @@ public class RiftJournalScreen extends GuiScreen {
                     .collect(Collectors.toList());
         }
         //add a back button
-        this.buttonList.add(new RiftGuiJournalButton("NULL", 0, (-60 + this.xGui)/2 - 135, 26, 96, 20, I18n.format("type.creature.back")));
+        this.buttonList.add(new RiftGuiJournalButton("NULL", 0, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 87, 96, 20, I18n.format("type.creature.back")));
         for (int x = 0; x < creatureTypeList.size(); x++) {
-            this.buttonList.add(new RiftGuiJournalButton(creatureTypeList.get(x).toString(), x + 1, (-60 + this.xGui)/2 - 135, 26 + 25 * (x + 1), 96, 20, creatureTypeList.get(x).getTranslatedName()));
-            this.sidebarHeight += 31;
+            this.buttonList.add(new RiftGuiJournalButton(creatureTypeList.get(x).toString(), x + 1, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 87 + (25 * (x + 1)), 96, 20, creatureTypeList.get(x).getTranslatedName()));
+            this.sidebarHeight += 25;
         }
     }
 
@@ -157,43 +155,45 @@ public class RiftJournalScreen extends GuiScreen {
     //managing journal entry and pic starts here
     private void placeJournalEntry() {
         //scrollability
-        int x = (-60 + this.xGui) / 2 - 3;
-        int y = (-60 + this.xGui) / 2 - 140;
-        int w = 250;
-        int h = this.height - y * 2;
+        int x = (this.width - 248)/2 + 60;
+        int y = (this.height - 200)/2;
+
+        // for scaling
+        int scaleFactor = new ScaledResolution(this.mc).getScaleFactor();
+
+        int scissorX = x * scaleFactor;
+        int scissorY = (this.height - y - 200) * scaleFactor;
+        int scissorW = 248 * scaleFactor;
+        int scissorH = 200 * scaleFactor;
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        ScaledResolution scaledResolution = new ScaledResolution(this.mc);
-        int scaleFactor = scaledResolution.getScaleFactor();
-        int scissorX = x * scaleFactor;
-        int scissorY = (scaledResolution.getScaledHeight() - (y + h)) * scaleFactor;
-        int scissorW = w * scaleFactor;
-        int scissorH = h * scaleFactor;
         GL11.glScissor(scissorX, scissorY, scissorW, scissorH);
-
         //image
         if (this.entryType != null) {
             this.mc.getTextureManager().bindTexture(this.getJournalPicLocation());
             final int imgWidth = 240;
             final int imgHeight = 180;
-            int k = (this.width - imgWidth) / 2 + 147;
-            int l = (this.height - imgHeight) / 2 + 25;
+            System.out.println("scale factor: "+scaleFactor);
+            System.out.println((int)(scaleFactor/0.75));
+            int k = (int)((this.width - imgWidth) / 2 + 130 * 0.75);
+            int l = (int)((this.height - imgHeight) / 2 + 10 * 0.75);
 
             GlStateManager.pushMatrix();
             GlStateManager.scale(0.75f, 0.75f, 0.75f);
-            drawModalRectWithCustomSizedTexture(k, l - (int)(this.entryScrollOffset / 0.75D), 0, 0, imgWidth, imgHeight, (float)imgWidth, (float)imgHeight);
+            drawModalRectWithCustomSizedTexture((int) (k / 0.75), (int) (l / 0.75) - (int)(this.entryScrollOffset / 0.75D), 0, 0, imgWidth, imgHeight, (float)imgWidth, (float)imgHeight);
             GlStateManager.popMatrix();
         }
         //text
-        int imgOffset = this.entryType != null ? 160 : 0;
-        this.fontRenderer.drawSplitString(this.getJournalEntry(), (-60 + this.xGui)/2 - 3, (-60 + this.xGui)/2 - 140 + imgOffset - this.entryScrollOffset, 248, 0x000000);
+        int imgOffset = this.entryType != null ? 160 : 10;
+        this.fontRenderer.drawSplitString(this.getJournalEntry(), (this.width - 248)/2 + 60, (this.height - 200)/2 + imgOffset - this.entryScrollOffset, 248, 0x000000);
+
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
         //get height of all content
         List<String> wrappedTextLines = this.fontRenderer.listFormattedStringToWidth(this.getJournalEntry(), 248);
         int lineHeight = this.fontRenderer.FONT_HEIGHT;
         int displayedTextHeight = wrappedTextLines.size() * lineHeight;
-        this.journalEntryHeight = (int)(0.5D * 180) + displayedTextHeight + imgOffset;
+        this.journalEntryHeight = 45 + displayedTextHeight + imgOffset;
     }
 
     private String getJournalEntry() {
@@ -238,29 +238,36 @@ public class RiftJournalScreen extends GuiScreen {
     }
 
     private boolean isMouseOverSidebar(int mouseX, int mouseY) {
-        return mouseX >= 40 && mouseX <= 149 && mouseY >= 22 && mouseY <= 229;
+        int minX = (this.width - 96) / 2 - 147;
+        int minY = (this.height - 200) / 2;
+        int maxX = (this.width - 96) / 2 - 51;
+        int maxY = (this.height - 200) / 2 + 200;
+        return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
     }
 
     private boolean isMouseOverEntry(int mouseX, int mouseY) {
-        return mouseX >= 158 && mouseY >= 17 && mouseX <= 442 && mouseY <= 228;
+        int minX = (this.width - 248)/2 + 60;
+        int maxX = (this.width - 248)/2 + 308;
+        int minY = (this.height - 200) / 2;
+        int maxY = (this.height - 200) / 2 + 200;
+        return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
     }
 
     //managing journal entry and pic ends here
 
-    //managing sidebar content
     protected void placeButtons(int mouseX, int mouseY, float partialTicks) {
-        int x = (-60 + this.xGui) / 2 - 280;
-        int y = (-60 + this.xGui) / 2 - 155;
-        int w = 250;
-        int h = this.height - y * 2;
+        int x = (this.width - 96) / 2 - 147;
+        int y = (this.height - 200) / 2;
+
+        // for scaling
+        int scaleFactor = new ScaledResolution(this.mc).getScaleFactor();
+
+        int scissorX = x * scaleFactor;
+        int scissorY = (this.height - y - 200) * scaleFactor;
+        int scissorW = (this.width - 96) * scaleFactor;
+        int scissorH = 200 * scaleFactor;
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        ScaledResolution scaledResolution = new ScaledResolution(this.mc);
-        int scaleFactor = scaledResolution.getScaleFactor();
-        int scissorX = x * scaleFactor;
-        int scissorY = (scaledResolution.getScaledHeight() - (y + h)) * scaleFactor;
-        int scissorW = w * scaleFactor;
-        int scissorH = h * scaleFactor;
         GL11.glScissor(scissorX, scissorY, scissorW, scissorH);
         for (GuiButton guiButton : this.buttonList) {
             guiButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
@@ -279,11 +286,12 @@ public class RiftJournalScreen extends GuiScreen {
         if (scroll != 0) {
             if (this.isMouseOverEntry(mouseX, mouseY)) {
                 this.entryScrollOffset += (scroll > 0) ? -10 : 10;
-                this.entryScrollOffset = Math.max(0, Math.min(this.entryScrollOffset, Math.max(0, this.journalEntryHeight - 250)));
+                this.entryScrollOffset = Math.max(0, Math.min(this.entryScrollOffset, Math.max(0, this.journalEntryHeight - 200)));
             }
             if (this.isMouseOverSidebar(mouseX, mouseY)) {
                 this.scrollSidebarOffset += (scroll > 0) ? -10 : 10;
-                this.scrollSidebarOffset = Math.max(0, Math.min(this.scrollSidebarOffset, Math.max(0, this.sidebarHeight - 250)));
+                this.scrollSidebarOffset = Math.max(0, Math.min(this.scrollSidebarOffset, Math.max(0, this.sidebarHeight - 200)));
+                System.out.println(Math.max(0, this.sidebarHeight - 200));
             }
         }
     }

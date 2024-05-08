@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.ui.elements;
 
 import net.minecraft.client.gui.GuiButton;
 
