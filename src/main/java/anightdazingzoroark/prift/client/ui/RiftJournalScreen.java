@@ -170,11 +170,9 @@ public class RiftJournalScreen extends GuiScreen {
         GL11.glScissor(scissorX, scissorY, scissorW, scissorH);
         //image
         if (this.entryType != null) {
-            this.mc.getTextureManager().bindTexture(this.getJournalPicLocation());
+            this.mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/journal/"+this.entryType.name().toLowerCase()+"_journal.png"));
             final int imgWidth = 240;
             final int imgHeight = 180;
-            System.out.println("scale factor: "+scaleFactor);
-            System.out.println((int)(scaleFactor/0.75));
             int k = (int)((this.width - imgWidth) / 2 + 130 * 0.75);
             int l = (int)((this.height - imgHeight) / 2 + 10 * 0.75);
 
@@ -193,7 +191,19 @@ public class RiftJournalScreen extends GuiScreen {
         List<String> wrappedTextLines = this.fontRenderer.listFormattedStringToWidth(this.getJournalEntry(), 248);
         int lineHeight = this.fontRenderer.FONT_HEIGHT;
         int displayedTextHeight = wrappedTextLines.size() * lineHeight;
-        this.journalEntryHeight = 45 + displayedTextHeight + imgOffset;
+        this.journalEntryHeight = displayedTextHeight + imgOffset;
+
+        //create scrollbar
+        if (this.journalEntryHeight > 200) {
+            int k = (this.width - 5) / 2 + 195;
+            int l = (this.height - 200) / 2;
+            //scrollbar background
+            drawRect(k, l, k + 5, l + 200, 0xFFA0A0A0);
+            //scrollbar progress
+            int thumbHeight = Math.max(10, (int)((float)200 * (200f / this.journalEntryHeight)));
+            int thumbPosition = (int)((float)this.entryScrollOffset / (this.journalEntryHeight - 200) * (200 - thumbHeight));
+            drawRect(k, l + thumbPosition, k + 5, l + thumbHeight + thumbPosition, 0xFFC0C0C0);
+        }
     }
 
     private String getJournalEntry() {
@@ -201,7 +211,7 @@ public class RiftJournalScreen extends GuiScreen {
         String languageCode = mc.gameSettings.language;
         String entryName = this.entryType != null ? this.entryType.name().toLowerCase() : "intro";
 
-        ResourceLocation entryLoc = this.getJournalResourceLocation(languageCode, entryName);
+        ResourceLocation entryLoc = new ResourceLocation(RiftInitialize.MODID, "journal/" + languageCode + "/" + entryName + ".txt");
         IResourceManager manager = mc.getResourceManager();
 
         try (InputStream inputStream = manager.getResource(entryLoc).getInputStream();
@@ -217,7 +227,7 @@ public class RiftJournalScreen extends GuiScreen {
     }
 
     private String getJournalEntry(String fallbackLanguageCode, String entryName) {
-        ResourceLocation entryLoc = this.getJournalResourceLocation(fallbackLanguageCode, entryName);
+        ResourceLocation entryLoc = new ResourceLocation(RiftInitialize.MODID, "journal/" + fallbackLanguageCode + "/" + entryName + ".txt");
         IResourceManager manager = Minecraft.getMinecraft().getResourceManager();
 
         try (InputStream inputStream = manager.getResource(entryLoc).getInputStream();
@@ -227,14 +237,6 @@ public class RiftJournalScreen extends GuiScreen {
         catch (IOException e) {
             return "Error reading journal entry: " + entryLoc;
         }
-    }
-
-    private ResourceLocation getJournalResourceLocation(String languageCode, String entryName) {
-        return new ResourceLocation(RiftInitialize.MODID, "journal/" + languageCode + "/" + entryName + ".txt");
-    }
-
-    private ResourceLocation getJournalPicLocation() {
-        return new ResourceLocation(RiftInitialize.MODID, "textures/journal/"+this.entryType.name().toLowerCase()+"_journal.png");
     }
 
     private boolean isMouseOverSidebar(int mouseX, int mouseY) {
@@ -273,6 +275,18 @@ public class RiftJournalScreen extends GuiScreen {
             guiButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
         }
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
+
+        //create scrollbar
+        if (this.sidebarHeight > 200) {
+            int k = (this.width - 1) / 2 - 97;
+            int l = (this.height - 200) / 2;
+            //scrollbar background
+            drawRect(k, l, k + 1, l + 200, 0xFFA0A0A0);
+            //scrollbar progress
+            int thumbHeight = Math.max(10, (int)((float)200 * (200f / this.sidebarHeight)));
+            int thumbPosition = (int)((float)this.scrollSidebarOffset / (this.sidebarHeight - 200) * (200 - thumbHeight));
+            drawRect(k, l + thumbPosition, k + 1, l + thumbHeight + thumbPosition, 0xFFC0C0C0);
+        }
     }
 
     //manage scrollability
@@ -291,7 +305,6 @@ public class RiftJournalScreen extends GuiScreen {
             if (this.isMouseOverSidebar(mouseX, mouseY)) {
                 this.scrollSidebarOffset += (scroll > 0) ? -10 : 10;
                 this.scrollSidebarOffset = Math.max(0, Math.min(this.scrollSidebarOffset, Math.max(0, this.sidebarHeight - 200)));
-                System.out.println(Math.max(0, this.sidebarHeight - 200));
             }
         }
     }

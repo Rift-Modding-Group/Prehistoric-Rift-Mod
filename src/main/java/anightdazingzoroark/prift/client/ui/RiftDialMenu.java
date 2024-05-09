@@ -80,6 +80,7 @@ public class RiftDialMenu extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
         int numItems = this.choices.size();
 
+        //for items in center
         String creatureTypeName = I18n.format("entity."+creature.creatureType.name().toLowerCase()+".name");
         String creatureName = creature.getCustomNameTag();
         String level = I18n.format("tametrait.level", this.creature.getLevel());
@@ -97,8 +98,8 @@ public class RiftDialMenu extends GuiScreen {
         float radiusOut = radiusIn * 3;
         float itemRadius = (radiusIn + radiusOut) / 1.625f;
 
-        int x = width / 2;
-        int y = height / 2;
+        int x = this.width / 2;
+        int y = this.height / 2;
 
         double a = Math.toDegrees(Math.atan2(mouseY - y, mouseX - x));
         double d = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
@@ -117,13 +118,13 @@ public class RiftDialMenu extends GuiScreen {
         BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
-        selectedItem = -1;
+        this.selectedItem = -1;
         for (int i = 0; i < numItems; i++) {
             float s = (((i - 0.5f) / (float) numItems) + 0.25f) * 360;
             float e = (((i + 0.5f) / (float) numItems) + 0.25f) * 360;
             if (a >= s && a < e && d >= radiusIn && d < radiusOut) {
                 if (a >= s && a < e && d >= radiusIn) {
-                    selectedItem = i;
+                    this.selectedItem = i;
                     break;
                 }
             }
@@ -133,7 +134,7 @@ public class RiftDialMenu extends GuiScreen {
         for (int i = 0; i < numItems; i++) {
             float s = (((i - 0.5f) / (float) numItems) + 0.25f) * 360;
             float e = (((i + 0.5f) / (float) numItems) + 0.25f) * 360;
-            if (selectedItem == i) {
+            if (this.selectedItem == i) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 255, 255, 255, 128);
             }
             else if (this.radialChoiceMenu == 1 && this.creature.getTameStatus().name().equals(this.choices.get(i).name())) {
