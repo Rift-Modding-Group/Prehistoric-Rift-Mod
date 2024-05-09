@@ -140,11 +140,9 @@ public class RiftChargeAttack extends EntityAIBase {
                     IBlockState state = this.attacker.world.getBlockState(new BlockPos(x, this.attacker.posY, z));
                     IBlockState stateUp = this.attacker.world.getBlockState(new BlockPos(x, this.attacker.posY + 1, z));
 
-                    if (state.getMaterial() != Material.AIR) {
-                        if (stateUp.getMaterial() != Material.AIR) {
-                            breakBlocksFlag = true;
-                            break breakBlocksLoop;
-                        }
+                    if (state.getMaterial() != Material.AIR && stateUp.getMaterial() != Material.AIR) {
+                        breakBlocksFlag = true;
+                        break breakBlocksLoop;
                     }
                 }
             }

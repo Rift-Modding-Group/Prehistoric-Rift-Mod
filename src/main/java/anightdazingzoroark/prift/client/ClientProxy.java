@@ -83,10 +83,6 @@ public class ClientProxy extends ServerProxy {
         if (particle != null) particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
     }
 
-    @SubscribeEvent
-    @SideOnly(Side.CLIENT)
-    public static void registerModels(ModelRegistryEvent event) {}
-
     @Override
     @SideOnly(Side.CLIENT)
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {

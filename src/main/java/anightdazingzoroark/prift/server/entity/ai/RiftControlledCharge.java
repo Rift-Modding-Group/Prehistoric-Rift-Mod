@@ -113,16 +113,14 @@ public class RiftControlledCharge extends EntityAIBase {
 
             //stop if it hits a block
             boolean breakBlocksFlag = false;
-            for (int x = MathHelper.floor(chargerHitbox.minX); x < MathHelper.ceil(chargerHitbox.maxX); x++) {
+            breakBlocksLoop: for (int x = MathHelper.floor(chargerHitbox.minX); x < MathHelper.ceil(chargerHitbox.maxX); x++) {
                 for (int z = MathHelper.floor(chargerHitbox.minZ); z < MathHelper.ceil(chargerHitbox.maxZ); z++) {
-                    BlockPos pos = new BlockPos(x, this.attacker.posY, z);
-                    IBlockState state = this.attacker.world.getBlockState(pos);
+                    IBlockState state = this.attacker.world.getBlockState(new BlockPos(x, this.attacker.posY, z));
+                    IBlockState stateUp = this.attacker.world.getBlockState(new BlockPos(x, this.attacker.posY + 1, z));
 
-                    if (!state.getBlock().isAir(state, this.attacker.world, pos)) {
-                        if (!state.getBlock().isAir(state, this.attacker.world, new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ()))) {
-                            breakBlocksFlag = true;
-                            break;
-                        }
+                    if (state.getMaterial() != Material.AIR && stateUp.getMaterial() != Material.AIR) {
+                        breakBlocksFlag = true;
+                        break breakBlocksLoop;
                     }
                 }
             }

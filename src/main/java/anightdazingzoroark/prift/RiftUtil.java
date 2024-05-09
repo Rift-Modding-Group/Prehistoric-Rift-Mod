@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.enums.EggTemperature;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -306,13 +307,15 @@ public class RiftUtil {
         return getMobSize(entity).ordinal() <= size.ordinal();
     }
 
-//    public static MobSize getLargerSize(MobSize size1, MobSize size2) {
-//        if (size1.ordinal() > size2.ordinal()) return size1;
-//        else return size2;
-//    }
-//
-//    public static MobSize getSmallSize(MobSize size1, MobSize size2) {
-//        if (size1.ordinal() < size2.ordinal()) return size1;
-//        else return size2;
-//    }
+    public static void drawCenteredString(FontRenderer fontRenderer, String string, int xPos, int yPos, int wrapWidth, int textColor) {
+        List<String> lines = fontRenderer.listFormattedStringToWidth(string, wrapWidth);
+        int currentY = yPos;
+
+        for (String line : lines) {
+            int lineWidth = fontRenderer.getStringWidth(line);
+            int lineX = xPos + (wrapWidth - lineWidth) / 2;
+            fontRenderer.drawString(line, lineX, currentY, textColor);
+            currentY += fontRenderer.FONT_HEIGHT;
+        }
+    }
 }

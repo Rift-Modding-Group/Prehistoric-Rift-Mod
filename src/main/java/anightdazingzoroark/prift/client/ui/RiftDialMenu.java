@@ -96,7 +96,6 @@ public class RiftDialMenu extends GuiScreen {
 
         float radiusIn = 40f;
         float radiusOut = radiusIn * 3;
-        float itemRadius = (radiusIn + radiusOut) / 1.625f;
 
         int x = this.width / 2;
         int y = this.height / 2;
@@ -220,9 +219,11 @@ public class RiftDialMenu extends GuiScreen {
             if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && (i == 1 || i == 4)) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 2 && this.creature.isUsingWorkstation() && i != 0 && i != 4) radialString = "["+radialString+"]";
 
+            //create text
             float angle1 = ((i / (float) numItems) + 0.25f) * 2 * (float) Math.PI;
-            float posX = x + 75 + itemRadius * (float) Math.cos(angle1) - (float)(this.fontRenderer.getStringWidth(radialString) / 2);
-            float posY = y + 40 + itemRadius * (float) Math.sin(angle1);
+//            float posX = ((float)x  - (float)this.fontRenderer.getStringWidth(radialString)) / 2 + 75 * (float) Math.cos(angle1);
+            float posX = ((float)this.width / 0.75f  - (float)this.fontRenderer.getStringWidth(radialString)) / 2 + 100 * (float)Math.cos(angle1);
+            float posY = (y / 0.75f) + 100 * (float)Math.sin(angle1);
 
             GlStateManager.pushMatrix();
             GlStateManager.scale(0.75f, 0.75f, 0.75f);

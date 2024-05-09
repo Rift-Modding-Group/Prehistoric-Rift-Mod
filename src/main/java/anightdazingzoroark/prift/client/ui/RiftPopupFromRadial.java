@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.PopupFromRadial;
@@ -10,6 +11,7 @@ import anightdazingzoroark.prift.server.message.RiftClearHomePosFromPopup;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftManageClaimCreature;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -23,20 +25,17 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import static net.minecraftforge.fml.common.StartupQuery.reset;
 
 @SideOnly(Side.CLIENT)
-public class RiftPopupFromRadial extends GuiContainer {
-    private RiftCreature creature;
+public class RiftPopupFromRadial extends GuiScreen {
+    private final RiftCreature creature;
     private GuiTextField textField;
     protected int xSize = 176;
     protected int ySize = 96;
-    public final int xGui = 176;
-    public final int yGui = 96;
     protected int guiLeft;
     protected int guiTop;
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/popup_from_radial.png");
     private PopupFromRadial popupFromRadial;
 
     public RiftPopupFromRadial(RiftCreature creature) {
-        super(new DummyContainer());
         this.creature = creature;
         this.popupFromRadial = (PopupFromRadial)ClientProxy.popupFromRadial;
     }
@@ -46,23 +45,25 @@ public class RiftPopupFromRadial extends GuiContainer {
         this.buttonList.clear();
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
+
+        //buttons and other things
         if (this.popupFromRadial == PopupFromRadial.SET_HOME || this.popupFromRadial == PopupFromRadial.UNCLAIM || this.popupFromRadial == PopupFromRadial.CLAIM) {
-            this.buttonList.add(new GuiButton(0, (-60 + this.xGui)/2 + 100, 150, 60, 20, I18n.format("radial.popup_button.yes")));
-            this.buttonList.add(new GuiButton(1, (-60 + this.xGui)/2 + 180, 150, 60, 20, I18n.format("radial.popup_button.no")));
+            this.buttonList.add(new GuiButton(0, (this.width - 60)/2 - 40, (this.height - 20)/2 + 30, 60, 20, I18n.format("radial.popup_button.yes")));
+            this.buttonList.add(new GuiButton(1, (this.width - 60)/2 + 40, (this.height - 20)/2 + 30, 60, 20, I18n.format("radial.popup_button.no")));
         }
         else if (this.popupFromRadial == PopupFromRadial.CHANGE_NAME) {
-            this.textField = new GuiTextField(0, fontRenderer, (-120 + this.xGui)/2 + 140, 120, 120, 20);
+            this.textField = new GuiTextField(0, fontRenderer, (this.width - 120)/2, (this.height - 20)/2 - 5, 120, 20);
             this.textField.setMaxStringLength(20);
             this.textField.setFocused(true);
-            this.buttonList.add(new GuiButton(0, (-60 + this.xGui)/2 + 100, 150, 60, 20, I18n.format("radial.popup_button.confirm")));
-            this.buttonList.add(new GuiButton(1, (-60 + this.xGui)/2 + 180, 150, 60, 20, I18n.format("radial.popup_button.cancel")));
+            this.buttonList.add(new GuiButton(0, (this.width - 60)/2 - 40, (this.height - 20)/2 + 30, 60, 20, I18n.format("radial.popup_button.confirm")));
+            this.buttonList.add(new GuiButton(1, (this.width - 60)/2 + 40, (this.height - 20)/2 + 30, 60, 20, I18n.format("radial.popup_button.cancel")));
         }
         super.initGui();
     }
 
     @Override
     public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_) {
-        if (mc != null && mc.world != null) this.drawDefaultBackground();
+        if (this.mc != null && mc.world != null) this.drawDefaultBackground();
         else return;
         int k = this.guiLeft;
         int l = this.guiTop;
@@ -81,6 +82,11 @@ public class RiftPopupFromRadial extends GuiContainer {
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.disableLighting();
+
+        //text
+        String s = I18n.format(I18n.format("radial.popup_choice."+this.popupFromRadial.name().toLowerCase()));
+        RiftUtil.drawCenteredString(this.fontRenderer, s, (this.xSize - 148)/ 2, (this.ySize) / 2 - 35, 148, 0x000000);
+
         GlStateManager.enableLighting();
         GlStateManager.popMatrix();
         GlStateManager.enableLighting();
@@ -111,24 +117,6 @@ public class RiftPopupFromRadial extends GuiContainer {
             }
         }
         this.mc.player.closeScreen();
-    }
-
-    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        reset();
-        GlStateManager.pushMatrix();
-        String s = I18n.format(I18n.format("radial.popup_choice."+this.popupFromRadial.name().toLowerCase()));
-        printFormattedStringXY(s, (-148 + this.xGui)/ 2, 50, 148, 0, 0, 0);
-        GlStateManager.popMatrix();
-    }
-
-    public void printStringXY(String str0, int x0, int y0, int r, int g, int b) {
-        int col = (r << 16) | (g << 8) | b;
-        this.fontRenderer.drawString(str0, x0, y0, col);
-    }
-
-    public void printFormattedStringXY(String str0, int x0, int y0, int xStrSize, int r, int g, int b) {
-        int col = (r << 16) | (g << 8) | b;
-        this.fontRenderer.drawSplitString(str0, x0, y0, xStrSize, col);
     }
 
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
