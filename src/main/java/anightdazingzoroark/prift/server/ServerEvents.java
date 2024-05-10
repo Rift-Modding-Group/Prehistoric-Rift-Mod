@@ -484,8 +484,8 @@ public class ServerEvents {
             //manage bola
             if (properties.isTiedByBola) {
                 entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 255));
-                entity.motionY -= 0.5;
-                entity.velocityChanged = true;
+//                entity.motionY -= 0.5;
+//                entity.velocityChanged = true;
                 properties.bolaTiedCountdown--;
             }
             if (properties.bolaTiedCountdown <= 0) properties.resetBolaCapture();
