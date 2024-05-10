@@ -14,25 +14,21 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftChangeHomePosFromMenu extends AbstractMessage<RiftChangeHomePosFromMenu> {
     private int creatureId;
-    private boolean setHome;
 
     public RiftChangeHomePosFromMenu() {}
 
-    public RiftChangeHomePosFromMenu(RiftCreature creature, boolean setHome) {
+    public RiftChangeHomePosFromMenu(RiftCreature creature) {
         this.creatureId = creature.getEntityId();
-        this.setHome = setHome;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.creatureId = buf.readInt();
-        this.setHome = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.creatureId);
-        buf.writeBoolean(this.setHome);
     }
 
     @Override
@@ -43,11 +39,7 @@ public class RiftChangeHomePosFromMenu extends AbstractMessage<RiftChangeHomePos
     @Override
     public void onServerReceived(MinecraftServer server, RiftChangeHomePosFromMenu message, EntityPlayer player, MessageContext messageContext) {
         RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
-        World world = player.world;
-        if (message.setHome) {
-            creature.setHomePos();
-            player.sendStatusMessage(new TextComponentTranslation("tameupdate.set_home", creature.getName(), creature.getHomePos().getX(), creature.getHomePos().getY(), creature.getHomePos().getZ()), false);
-        }
-        else player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_RADIAL, world, message.creatureId, 0, 0);
+        creature.setHomePos();
+        player.sendStatusMessage(new TextComponentTranslation("tameupdate.set_home", creature.getName(), creature.getHomePos().getX(), creature.getHomePos().getY(), creature.getHomePos().getZ()), false);
     }
 }

@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.client.ui;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
@@ -15,6 +17,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -392,22 +395,23 @@ public class RiftDialMenu extends GuiScreen {
                 else if (selectedItem == 1) {
                     if (!this.creature.isUsingWorkstation()) {
                         ClientProxy.popupFromRadial = PopupFromRadial.CHANGE_NAME;
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
                         this.mc.player.closeScreen();
+                        this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_RADIAL, this.mc.player.world, this.creature.getEntityId(), 0, 0);
                     }
                 }
                 else if (selectedItem == 2) {
                     if (!this.creature.isUsingWorkstation()) {
                         ClientProxy.popupFromRadial = PopupFromRadial.SET_HOME;
-                        RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature, !this.creature.getHasHomePos()));
                         this.mc.player.closeScreen();
+                        if (!this.creature.getHasHomePos()) RiftMessages.WRAPPER.sendToServer(new RiftChangeHomePosFromMenu(this.creature));
+                        else this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_RADIAL, this.mc.player.world, this.creature.getEntityId(), 0, 0);
                     }
                 }
                 else if (selectedItem == 3 && !this.creature.isBaby()) {
                     if (!this.creature.isUsingWorkstation()) {
                         ClientProxy.popupFromRadial = PopupFromRadial.UNCLAIM;
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this.creature));
                         this.mc.player.closeScreen();
+                        this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_RADIAL, this.mc.player.world, this.creature.getEntityId(), 0, 0);
                     }
                 }
                 else if (selectedItem == 4) {

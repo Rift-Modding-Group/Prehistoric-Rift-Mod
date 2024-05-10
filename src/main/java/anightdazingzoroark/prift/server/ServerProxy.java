@@ -88,9 +88,6 @@ public class ServerProxy implements IGuiHandler {
                 return new CreatureContainer((RiftCreature) entity, player);
             }
         }
-        else if (id == GUI_MENU_FROM_RADIAL) {
-            return new CreatureContainer((RiftCreature) entity, player);
-        }
         else if (id == GUI_WEAPON_INVENTORY) {
             if (entity instanceof RiftLargeWeapon) {
                 return new WeaponContainer((RiftLargeWeapon) entity, player);
