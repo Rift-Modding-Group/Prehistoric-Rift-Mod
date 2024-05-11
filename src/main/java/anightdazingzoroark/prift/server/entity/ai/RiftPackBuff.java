@@ -14,12 +14,14 @@ public class RiftPackBuff extends EntityAIBase {
     protected final RiftCreature attacker;
     private int animTick;
     protected final int animTime;
+    protected final int animSoundTime;
     protected final int cooldown;
     private List<RiftCreature> packMembers;
 
-    public RiftPackBuff(RiftCreature attackerIn, float animTimeIn, float cooldownIn) {
+    public RiftPackBuff(RiftCreature attackerIn, float animTimeIn, float animSoundTime, float cooldownIn) {
         this.attacker = attackerIn;
         this.animTime = (int)(animTimeIn * 20);
+        this.animSoundTime = (int)(animSoundTime * 20);
         this.cooldown = (int)(cooldownIn * 20);
 //        this.setMutexBits(3);
     }
@@ -54,7 +56,6 @@ public class RiftPackBuff extends EntityAIBase {
         for (PotionEffect effect : ((IPackHunter)this.attacker).packBuffEffect()) {
             this.attacker.addPotionEffect(effect);
         }
-        this.attacker.playSound(RiftSounds.UTAHRAPTOR_CALL, 2, 1);
     }
 
     public boolean shouldContinueExecuting() {
@@ -69,6 +70,7 @@ public class RiftPackBuff extends EntityAIBase {
     }
 
     public void updateTask() {
+        if (this.animTick == this.animSoundTime) this.attacker.playSound(((IPackHunter)this.attacker).getCallSound(), 2, 1);
         this.animTick++;
     }
 }

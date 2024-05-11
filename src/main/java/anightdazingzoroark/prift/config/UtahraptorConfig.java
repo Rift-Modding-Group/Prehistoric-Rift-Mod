@@ -19,7 +19,7 @@ public class UtahraptorConfig extends RiftConfig {
     public UtahraptorConfig(Configuration config) {
         super(config, new String[]{"tag:plains:10:2:4:CREATURE", "tag:forest:15:2:4:CREATURE", "tag:jungle:15:2:4:CREATURE", "-tag:savanna", "-tag:cold"});
         maxHealth = initMaxHealth = 30;
-        damage = initDamage = 6;
+        damage = initDamage = 4;
     }
 
     @Override

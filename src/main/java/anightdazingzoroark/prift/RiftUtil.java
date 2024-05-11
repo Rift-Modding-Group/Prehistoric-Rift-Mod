@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -317,5 +318,10 @@ public class RiftUtil {
             fontRenderer.drawString(line, lineX, currentY, textColor);
             currentY += fontRenderer.FONT_HEIGHT;
         }
+    }
+
+    public static boolean entityIsUnderwater(EntityLivingBase entityLivingBase) {
+        BlockPos highestWaterPos = entityLivingBase.getPosition().add(0, Math.ceil(entityLivingBase.height), 0);
+        return entityLivingBase.world.getBlockState(highestWaterPos).getMaterial() == Material.WATER;
     }
 }

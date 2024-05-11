@@ -90,7 +90,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     }
 
     protected void initEntityAI() {
-        this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
+        this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
@@ -98,7 +98,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftPackBuff(this, 1.68f, 90f));
+        this.tasks.addTask(3, new RiftPackBuff(this, 1.68f, 0f, 90f));
         this.tasks.addTask(4, new RiftControlledAttack(this, 0.28F, 0.28F));
         this.tasks.addTask(4, new RiftControlledPackBuff(this, 1.68f));
         this.tasks.addTask(5, new RiftLeapAttack(this, 6f, 160));
@@ -507,5 +507,9 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     protected SoundEvent getDeathSound() {
         return RiftSounds.UTAHRAPTOR_DEATH;
+    }
+
+    public SoundEvent getCallSound() {
+        return RiftSounds.UTAHRAPTOR_CALL;
     }
 }

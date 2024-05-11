@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.interfaces;
 
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.SoundEvent;
 
 import java.util.List;
 
@@ -10,4 +11,5 @@ public interface IPackHunter {
     List<PotionEffect> packBuffEffect();
     void setPackBuffCooldown(int value);
     int getPackBuffCooldown();
+    SoundEvent getCallSound();
 }

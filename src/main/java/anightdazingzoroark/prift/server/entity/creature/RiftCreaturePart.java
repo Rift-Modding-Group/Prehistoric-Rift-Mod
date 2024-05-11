@@ -61,7 +61,7 @@ public class RiftCreaturePart extends PartEntity {
 
     public boolean isUnderwater() {
         BlockPos thisPos = new BlockPos(this.posX, this.posY, this.posZ);
-        BlockPos abovePos = thisPos.add(0, 1, 0);
+        BlockPos abovePos = thisPos.up();
         return this.world.getBlockState(thisPos).getMaterial().isLiquid() && this.world.getBlockState(abovePos).getMaterial().isLiquid();
     }
 }

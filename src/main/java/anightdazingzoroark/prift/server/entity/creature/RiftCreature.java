@@ -346,9 +346,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (this.isBeingRidden()) {
             if (this.getControllingPassenger().equals(player)) {
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()));
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
                 RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 2, settings.keyBindJump.isKeyDown()));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 3, !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown()));
 
                 if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
                     if (RiftUtil.isUsingSSR()) {
@@ -390,7 +391,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 2));
                     }
                 }
-                else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown()) {
+                else if (settings.keyBindPickBlock.isKeyDown() && !this.isActing()) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 3));
+                }
+                else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()) {
                     Entity toBeAttacked = null;
                     if (RiftUtil.isUsingSSR()) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                     if (this.hasLeftClickChargeBar()) {
@@ -415,6 +419,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     if (this.hasSpacebarChargeBar()) {
                         if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 2, this.getSpacebarUse()));
+                    }
+                    if (this.getMiddleClickUse() > 0) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 3));
+                        this.setMiddleClickUse(0);
                     }
                 }
             }
