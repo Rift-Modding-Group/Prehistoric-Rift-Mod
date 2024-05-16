@@ -15,6 +15,10 @@ public class DirewolfConfig extends RiftConfig {
     public static String[] direwolfTargets = {};
     public static String[] direwolfTargetBlacklist = {};
     public static String direwolfSaddleItem = "minecraft:saddle:0";
+    public static String direwolfMaxSniffSize = "VERY_LARGE";
+    public static String[] direwolfSniffableBlocks = {"minecraft:chest:-1", "minecraft:trapped_chest:-1", "minecraft:ender_chest:-1"};
+    public static int direwolfMobSniffRange = 32;
+    public static int direwolfBlockSniffRange = 16;
 
     public DirewolfConfig(Configuration config) {
         super(config, new String[]{"tag:snowy:12:2:4:CREATURE"});
@@ -37,6 +41,11 @@ public class DirewolfConfig extends RiftConfig {
         direwolfTargets = config.getStringList("Direwolf Targets", "General", new String[]{}, "Identifiers of mobs that the Direwolf will actively hunt, alongside the ones defined in the general config for all carnivores to target");
         direwolfTargetBlacklist = config.getStringList("Direwolf Target Blacklist", "General", new String[]{}, "Identifiers of mobs that are here, if they are in the general config for all carnivores to target, will not be targeted by Direwolfves.");
         direwolfSaddleItem = config.getString("Direwolf Saddle Item", "General", "minecraft:saddle:0", "Item that counts as a saddle for this creature. To add an item add \"<insert item's identifier here>:<insert data id here>\"");
+
+        direwolfMaxSniffSize = config.getString("Maximum size that the Direwolf sniff can detect", "General", "VERY_LARGE", "Maximum size for creatures that can be detected by the Direwolf's sniff ability. Accepted values are 'VERY_SMALL', 'SMALL', 'MEDIUM', 'LARGE', and 'VERY_LARGE'");
+        direwolfSniffableBlocks = config.getStringList("Blocks that the Direwolf sniff can detect", "General", new String[]{"minecraft:chest:-1", "minecraft:trapped_chest:-1", "minecraft:ender_chest:-1"}, "Blocks that the Direwolf can sniff out. Don't add blocks that are way too common or you may risk hurting your eyes. To add blocks add \"block:<insert block's identifier here>:<insert data id here>\"");
+        direwolfMobSniffRange = config.getInt("Range in which the Direwolf sniff can detect mobs", "General", 32, 1, 69420666, "Range in blocks in which the Direwolf sniff can detect mobs. Note that larger values can cause more lag");
+        direwolfBlockSniffRange = config.getInt("Range in which the Direwolf sniff can detect blocks", "General", 16, 1, 69420666, "Range in blocks in which the Direwolf sniff can detect blocks. Note that larger values can cause more lag");
     }
 
     public static double getMaxHealth() {

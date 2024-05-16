@@ -115,6 +115,18 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.saurophaganax.light_blast_boom")
     public static final SoundEvent SAUROPHAGANAX_LIGHT_BLAST_BOOM = createSoundEvent("prift.saurophaganax.light_blast_boom");
 
+    @GameRegistry.ObjectHolder("prift.direwolf.idle")
+    public static final SoundEvent DIREWOLF_IDLE = createSoundEvent("prift.direwolf.idle");
+
+    @GameRegistry.ObjectHolder("prift.direwolf.hurt")
+    public static final SoundEvent DIREWOLF_HURT = createSoundEvent("prift.direwolf.hurt");
+
+    @GameRegistry.ObjectHolder("prift.direwolf.death")
+    public static final SoundEvent DIREWOLF_DEATH = createSoundEvent("prift.direwolf.death");
+
+    @GameRegistry.ObjectHolder("prift.direwolf.howl")
+    public static final SoundEvent DIREWOLF_HOWL = createSoundEvent("prift.direwolf.howl");
+
     private static SoundEvent createSoundEvent(String soundName) {
         ResourceLocation soundID = new ResourceLocation(RiftInitialize.MODID, soundName);
         return new SoundEvent(soundID).setRegistryName(soundID);

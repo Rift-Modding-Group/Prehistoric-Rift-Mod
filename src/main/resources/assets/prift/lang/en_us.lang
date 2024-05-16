@@ -20,6 +20,7 @@ entity.megapiranha.name=Megapiranha
 entity.sarcosuchus.name=Sarcosuchus
 entity.anomalocaris.name=Anomalocaris
 entity.saurophaganax.name=Saurophaganax
+entity.direwolf.name=Direwolf
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon
@@ -74,6 +75,7 @@ item.megapiranha_scales.name=Megapiranha Scales
 item.sarcosuchus_snout.name=Sarcosuchus Snout
 item.anomalocaris_appendage.name=Anomalocaris Appendage
 item.saurophaganax_eye.name=Saurophaganax Eye
+item.direwolf_tail.name=Direwolf Tail
 
 itemGroup.prift_items=Prehistoric Rift Items
 

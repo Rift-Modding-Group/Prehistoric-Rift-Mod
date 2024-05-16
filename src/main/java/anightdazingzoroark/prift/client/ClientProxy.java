@@ -1,9 +1,7 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.particle.RiftBleedParticle;
-import anightdazingzoroark.prift.client.particle.RiftParticleSpawner;
-import anightdazingzoroark.prift.client.particle.RiftSnowParticle;
+import anightdazingzoroark.prift.client.particle.*;
 import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.ui.*;
@@ -78,9 +76,21 @@ public class ClientProxy extends ServerProxy {
         World world = Minecraft.getMinecraft().world;
         Particle particle = null;
         if (world == null) return;
-        if (name.equals("bleed")) particle = new RiftBleedParticle(world, x, y, z, motX, motY, motZ);
-        else if (name.equals("snow")) particle = new RiftSnowParticle(world, x, y, z, motX, motY, motZ);
-        if (particle != null) particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
+        switch (name) {
+            case "bleed":
+                particle = new RiftBleedParticle(world, x, y, z, motX, motY, motZ);
+                break;
+            case "snow":
+                particle = new RiftSnowParticle(world, x, y, z, motX, motY, motZ);
+                break;
+            case "detect":
+                particle = new RiftDetectParticle(world, x, y, z);
+                break;
+            case "chest_detect":
+                particle = new RiftChestDetectParticle(world, x, y, z);
+                break;
+        }
+        if (particle != null) this.particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
     }
 
     @Override

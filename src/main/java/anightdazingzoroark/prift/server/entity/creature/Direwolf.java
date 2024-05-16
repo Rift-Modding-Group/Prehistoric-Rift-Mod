@@ -1,12 +1,20 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DirewolfConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
+import anightdazingzoroark.prift.server.enums.MobSize;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftSpawnChestDetectParticle;
+import anightdazingzoroark.prift.server.message.RiftSpawnDetectParticle;
 import com.google.common.base.Predicate;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,11 +23,15 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -33,6 +45,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Direwolf extends RiftCreature implements IPackHunter {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/direwolf"));
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
     private int packBuffCooldown;
     private int sniffCooldown;
@@ -48,7 +61,7 @@ public class Direwolf extends RiftCreature implements IPackHunter {
         this.tamingFood = DirewolfConfig.direwolfTamingFood;
         this.speed = 0.25D;
         this.isRideable = true;
-        this.attackWidth = 2f;
+        this.attackWidth = 2.5f;
         this.maxRightClickCooldown = 1800f;
         this.saddleItem = DirewolfConfig.direwolfSaddleItem;
         this.attackDamage = DirewolfConfig.damage;
@@ -85,7 +98,7 @@ public class Direwolf extends RiftCreature implements IPackHunter {
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftPackBuff(this, 2.28f, 0.76f, 90f));
         this.tasks.addTask(4, new RiftControlledAttack(this, 0.28F, 0.28F));
-        this.tasks.addTask(4, new RiftControlledPackBuff(this, 1.68f));
+        this.tasks.addTask(4, new RiftControlledPackBuff(this, 2.28f, 0.76f));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.6F, 0.48F));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
@@ -124,6 +137,10 @@ public class Direwolf extends RiftCreature implements IPackHunter {
     public void updateParts() {
         super.updateParts();
         if (this.hipsPart != null) this.hipsPart.onUpdate();
+
+        if (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden() && this.hipsPart != null) {
+            this.hipsPart.setPositionAndUpdate(this.hipsPart.posX, this.hipsPart.posY - 0.3f, this.hipsPart.posZ);
+        }
     }
 
     @Override
@@ -227,14 +244,39 @@ public class Direwolf extends RiftCreature implements IPackHunter {
         }
         if (control == 3 && this.sniffCooldown == 0 && this.headPart != null) {
             if (!this.headPart.isUnderwater()) {
-                this.sniffCooldown = 200;
-                //for all entities nearby (except those that are submerged
-                for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(16D), null)) {
-                    if (entityLivingBase != this && entityLivingBase != this.getOwner() && !RiftUtil.entityIsUnderwater(entityLivingBase)) System.out.println("hello");
+                this.sniffCooldown = 100;
+                //for all entities nearby (except those that are submerged)
+                AxisAlignedBB mobDetectAABB = new AxisAlignedBB(this.posX - DirewolfConfig.direwolfMobSniffRange, this.posY - DirewolfConfig.direwolfMobSniffRange, this.posZ - DirewolfConfig.direwolfMobSniffRange, this.posX + DirewolfConfig.direwolfMobSniffRange, this.posY + DirewolfConfig.direwolfMobSniffRange, this.posZ + DirewolfConfig.direwolfMobSniffRange);
+                for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, mobDetectAABB, null)) {
+                    if (entityLivingBase != this && entityLivingBase != this.getOwner() && !RiftUtil.entityIsUnderwater(entityLivingBase) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(DirewolfConfig.direwolfMaxSniffSize))) {
+                        RiftMessages.WRAPPER.sendToAll(new RiftSpawnDetectParticle((EntityPlayer)this.getControllingPassenger(), (int)entityLivingBase.posX, (int)entityLivingBase.posY, (int)entityLivingBase.posZ));
+                    }
                 }
-                //for all chests nearby
+                //for chests
+                for (int x = -DirewolfConfig.direwolfBlockSniffRange; x <= DirewolfConfig.direwolfBlockSniffRange; x++) {
+                    for (int y = -DirewolfConfig.direwolfBlockSniffRange; y <= DirewolfConfig.direwolfBlockSniffRange; y++) {
+                        for (int z = -DirewolfConfig.direwolfBlockSniffRange; z <= DirewolfConfig.direwolfBlockSniffRange; z++) {
+                            BlockPos pos = this.getPosition().add(x, y, z);
+                            if (this.isSniffableBlock(this.world.getBlockState(pos).getBlock(), this.world.getBlockState(pos))) {
+                                RiftMessages.WRAPPER.sendToAll(new RiftSpawnChestDetectParticle((EntityPlayer)this.getControllingPassenger(), pos.getX(), pos.getY(), pos.getZ()));
+                            }
+                        }
+                    }
+                }
             }
         }
+    }
+
+    private boolean isSniffableBlock(Block block, IBlockState blockState) {
+        boolean flag = false;
+        for (String blockEntry : DirewolfConfig.direwolfSniffableBlocks) {
+            if (flag) break;
+            int blockIdFirst = blockEntry.indexOf(":");
+            int blockIdSecond = blockEntry.indexOf(":", blockIdFirst + 1);
+            int blockData = Integer.parseInt(blockEntry.substring(blockIdSecond + 1));
+            flag = Block.getBlockFromName(blockEntry.substring(0, blockIdSecond)).equals(block) && (blockData == -1 || block.getMetaFromState(blockState) == blockData);
+        }
+        return flag;
     }
 
     @Override
@@ -250,6 +292,12 @@ public class Direwolf extends RiftCreature implements IPackHunter {
     @Override
     public boolean hasSpacebarChargeBar() {
         return false;
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
     }
 
     @Override
@@ -289,7 +337,21 @@ public class Direwolf extends RiftCreature implements IPackHunter {
         return PlayState.CONTINUE;
     }
 
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.DIREWOLF_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.DIREWOLF_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.DIREWOLF_DEATH;
+    }
+
     public SoundEvent getCallSound() {
-        return RiftSounds.UTAHRAPTOR_CALL;
+        return RiftSounds.DIREWOLF_HOWL;
     }
 }

@@ -16,6 +16,6 @@ public class RiftMMItems {
 
     public static Item riftBlowPoweredTurbineItem(String registryName) {
         final RiftBlowPoweredTurbinePlacer item = new RiftBlowPoweredTurbinePlacer();
-        return RiftItems.registerItem(item, registryName);
+        return RiftItems.registerItem(item, registryName, true);
     }
 }

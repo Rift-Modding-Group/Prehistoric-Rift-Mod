@@ -260,5 +260,39 @@
       "prift:entities/saurophaganax/saurophaganax_light_blast_boom"
     ],
     "subtitle": "sounds.subtitle.saurophaganax_light_blast_boom"
+  },
+
+
+  "prift.direwolf.idle": {
+    "category": "neutral",
+    "sounds": [
+      "mob/wolf/bark1",
+      "mob/wolf/bark2",
+      "mob/wolf/bark3"
+    ],
+    "subtitle": "sounds.subtitle.direwolf_idle"
+  },
+  "prift.direwolf.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "mob/wolf/hurt1",
+      "mob/wolf/hurt2",
+      "mob/wolf/hurt3"
+    ],
+    "subtitle": "sounds.subtitle.direwolf_hurt"
+  },
+  "prift.direwolf.death": {
+    "category": "neutral",
+    "sounds": [
+      "mob/wolf/death"
+    ],
+    "subtitle": "sounds.subtitle.direwolf_death"
+  },
+  "prift.direwolf.howl": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/direwolf/direwolf_howl"
+    ],
+    "subtitle": "sounds.subtitle.direwolf_howl"
   }
 }

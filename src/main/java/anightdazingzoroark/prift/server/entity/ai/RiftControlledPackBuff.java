@@ -15,11 +15,13 @@ public class RiftControlledPackBuff extends EntityAIBase {
     private final RiftCreature creature;
     private int animTick;
     protected final int animTime;
+    protected final int animSoundTime;
     private List<RiftCreature> packMembers;
 
-    public RiftControlledPackBuff(RiftCreature creature, float animTimeIn) {
+    public RiftControlledPackBuff(RiftCreature creature, float animTimeIn, float animSoundTime) {
         this.creature = creature;
         this.animTime = (int)(animTimeIn * 20);
+        this.animSoundTime = (int)(animSoundTime * 20);
     }
 
     @Override
@@ -50,7 +52,6 @@ public class RiftControlledPackBuff extends EntityAIBase {
         for (PotionEffect effect : ((IPackHunter)this.creature).packBuffEffect()) {
             this.creature.addPotionEffect(effect);
         }
-        this.creature.playSound(RiftSounds.UTAHRAPTOR_CALL, 2, 1);
     }
 
     public boolean shouldContinueExecuting() {
@@ -65,6 +66,7 @@ public class RiftControlledPackBuff extends EntityAIBase {
     }
 
     public void updateTask() {
+        if (this.animTick == this.animSoundTime) this.creature.playSound(((IPackHunter)this.creature).getCallSound(), 2, 1);
         this.animTick++;
     }
 }

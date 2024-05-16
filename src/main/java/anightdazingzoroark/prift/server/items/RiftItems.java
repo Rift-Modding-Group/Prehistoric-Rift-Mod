@@ -65,6 +65,7 @@ public class RiftItems {
     public static Item SARCOSUCHUS_SNOUT;
     public static Item ANOMALOCARIS_APPENDAGE;
     public static Item SAUROPHAGANAX_EYE;
+    public static Item DIREWOLF_TAIL;
 
     public static Item CHITIN;
 
@@ -80,6 +81,10 @@ public class RiftItems {
     public static Item WRENCH;
     public static Item COMMAND_CONSOLE;
     public static Item BOLA;
+
+    //not visible
+    public static Item DETECT_ALERT;
+    public static Item CHEST_DETECT_ALERT;
 
     public static void registerItems() {
         RAW_EXOTIC_MEAT = riftFoodItem("raw_exotic_meat", 4, 0.3f, true);
@@ -124,6 +129,7 @@ public class RiftItems {
         SARCOSUCHUS_SNOUT = riftGenericItem("sarcosuchus_snout", true);
         ANOMALOCARIS_APPENDAGE = riftGenericItem("anomalocaris_appendage", true);
         SAUROPHAGANAX_EYE = riftGenericItem("saurophaganax_eye", true);
+        DIREWOLF_TAIL = riftGenericItem("direwolf_tail", true);
 
         CHITIN = riftGenericItem("chitin", true);
 
@@ -138,7 +144,7 @@ public class RiftItems {
 
         WRENCH = riftGenericItem("wrench", false);
         COMMAND_CONSOLE = riftGenericItem("command_console", false);
-        BOLA = registerItem(new RiftBola(), "bola");
+        BOLA = registerItem(new RiftBola(), "bola", true);
 
         RiftCreatureType.registerEggs();
         RiftCreatureType.registerSacs();
@@ -148,6 +154,10 @@ public class RiftItems {
 
         //dont ask why this is here
         RiftProjectiles.registerProjectiles();
+
+        //to not be seen
+        DETECT_ALERT = riftUnusableGenericItem("detect_alert");
+        CHEST_DETECT_ALERT = riftUnusableGenericItem("chest_detect_alert");
     }
 
     public static void registerOreDicTags() {
@@ -179,49 +189,54 @@ public class RiftItems {
 
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {
         final Item item = new ItemFood(amount, saturation, isWolfFood);
-        return registerItem(item, registryName);
+        return registerItem(item, registryName, true);
     }
 
     public static Item riftFibrousFoodItem(String registryName, int amount, boolean isWolfFood) {
         final RiftFibrousFoodItem item = new RiftFibrousFoodItem(amount, isWolfFood);
-        return registerItem(item, registryName);
+        return registerItem(item, registryName, true);
     }
 
     public static Item riftSpecialMeatItem(String registryName, int amount, float saturation, PotionEffect eatenEffect) {
         final RiftSpecialMeatItem item = new RiftSpecialMeatItem(amount, saturation, eatenEffect);
         item.setAlwaysEdible();
-        return registerItem(item, registryName);
+        return registerItem(item, registryName, true);
     }
 
     public static Item riftGenericItem(String registryName, boolean stackable) {
         final Item item = new Item();
         if (!stackable) item.setMaxStackSize(1);
-        return registerItem(item, registryName);
+        return registerItem(item, registryName, true);
+    }
+
+    public static Item riftUnusableGenericItem(String registryName) {
+        final Item item = new Item();
+        return registerItem(item, registryName, false);
     }
 
     public static Item riftGlintedItem(String registryName, boolean stackable) {
         final RiftGlintedItem item = new RiftGlintedItem();
         if (!stackable) item.setMaxStackSize(1);
-        return registerItem(item, registryName);
+        return registerItem(item, registryName, true);
     }
 
     public static Item riftEggItem(String registryName, RiftCreatureType creature) {
         final Item item = new RiftEggItem(creature);
-        return registerItem(item, registryName);
+        return registerItem(item, registryName, true);
     }
 
     public static Item riftSacItem(String registryName, RiftCreatureType creature) {
         final Item item = new RiftSacItem(creature);
-        return registerItem(item, registryName);
+        return registerItem(item, registryName, true);
     }
 
     public static Item riftLargeWeaponItem(String registryName, RiftLargeWeaponType weaponType) {
         final RiftLargeWeaponItem item = new RiftLargeWeaponItem(weaponType);
-        return registerItem(item, registryName);
+        return registerItem(item, registryName, true);
     }
 
-    public static Item registerItem(Item item, String registryName) {
-        item.setCreativeTab(RiftCreativeTabs.creativeItemsTab);
+    public static Item registerItem(Item item, String registryName, boolean canBeInCreative) {
+        if (canBeInCreative) item.setCreativeTab(RiftCreativeTabs.creativeItemsTab);
         item.setRegistryName(registryName);
         item.setTranslationKey(registryName);
         ITEMS.add(item);

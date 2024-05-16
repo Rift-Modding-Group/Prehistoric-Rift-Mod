@@ -100,7 +100,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftPackBuff(this, 1.68f, 0f, 90f));
         this.tasks.addTask(4, new RiftControlledAttack(this, 0.28F, 0.28F));
-        this.tasks.addTask(4, new RiftControlledPackBuff(this, 1.68f));
+        this.tasks.addTask(4, new RiftControlledPackBuff(this, 1.68f, 0f));
         this.tasks.addTask(5, new RiftLeapAttack(this, 6f, 160));
         this.tasks.addTask(6, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
