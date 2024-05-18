@@ -6,8 +6,10 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DirewolfConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.interfaces.IMammal;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import anightdazingzoroark.prift.server.enums.MobSize;
+import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSpawnChestDetectParticle;
@@ -44,9 +46,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Direwolf extends RiftCreature implements IPackHunter {
+public class Direwolf extends RiftCreature implements IPackHunter, IMammal {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/direwolf"));
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Direwolf.class, DataSerializers.VARINT);
     private int packBuffCooldown;
     private int sniffCooldown;
     private RiftCreaturePart hipsPart;
@@ -77,6 +81,8 @@ public class Direwolf extends RiftCreature implements IPackHunter {
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(PACK_BUFFING, false);
+        this.dataManager.register(PREGNANT, false);
+        this.dataManager.register(PREGNANCY_TIMER, 0);
         this.setCanPickUpLoot(true);
     }
 
@@ -118,6 +124,26 @@ public class Direwolf extends RiftCreature implements IPackHunter {
 
         //manage sniffing cooldown
         if (this.sniffCooldown > 0) this.sniffCooldown--;
+
+        //manage birthin related stuff
+        System.out.println(this.getEntityId()+", "+this.getPregnancyTimer());
+        if (!this.world.isRemote) {
+            if (this.getPregnancyTimer() > 0) {
+                this.setPregnancyTimer(this.getPregnancyTimer() - 1);
+                if (this.getPregnancyTimer() == 0) {
+                    Direwolf direwolf = new Direwolf(this.world);
+                    direwolf.setHealth((float) (this.minCreatureHealth + (0.1) * (this.getLevel()) * (this.minCreatureHealth)));
+                    direwolf.setAgeInDays(0);
+                    direwolf.setTamed(true);
+                    direwolf.setOwnerId(this.getOwnerId());
+                    direwolf.setTameStatus(TameStatusType.SIT);
+                    direwolf.setTameBehavior(TameBehaviorType.PASSIVE);
+                    direwolf.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
+                    this.world.spawnEntity(direwolf);
+                    this.setPregnant(false, 0);
+                }
+            }
+        }
     }
 
     //sniffCooldown
@@ -186,6 +212,23 @@ public class Direwolf extends RiftCreature implements IPackHunter {
 
     public int getPackBuffCooldown() {
         return this.packBuffCooldown;
+    }
+
+    public void setPregnant(boolean value, int timer) {
+        this.dataManager.set(PREGNANT, value);
+        this.dataManager.set(PREGNANCY_TIMER, timer);
+    }
+
+    public boolean isPregnant() {
+        return this.dataManager.get(PREGNANT);
+    }
+
+    public void setPregnancyTimer(int value) {
+        this.dataManager.set(PREGNANCY_TIMER, value);
+    }
+
+    public int getPregnancyTimer() {
+        return this.dataManager.get(PREGNANCY_TIMER);
     }
 
     public List<PotionEffect> packBuffEffect() {

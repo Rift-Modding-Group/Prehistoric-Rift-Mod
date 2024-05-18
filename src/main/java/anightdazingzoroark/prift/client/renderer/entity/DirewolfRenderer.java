@@ -17,6 +17,9 @@ public class DirewolfRenderer extends GeoEntityRenderer<RiftCreature> {
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
         float scale = RiftUtil.setModelScale(animatable, 0.3f, 1.25f);
 
+        model.getBone("saddle").get().setHidden(!animatable.isSaddled());
+        model.getBone("headSaddle").get().setHidden(!animatable.isSaddled());
+
         GlStateManager.pushMatrix();
         GlStateManager.scale(scale, scale, scale);
         super.render(model, animatable, partialTicks, red, green, blue, alpha);

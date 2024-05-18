@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IMammal;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -56,6 +57,7 @@ public class RiftMate extends EntityAIBase {
             CreatureCategory category = this.creature.creatureType.getCreatureCategory();
             if (category.equals(CreatureCategory.DINOSAUR) || category.equals(CreatureCategory.REPTILE) || category.equals(CreatureCategory.BIRD) || this.creature.creatureType.equals(RiftCreatureType.DIMETRODON)) this.spawnEgg();
             else if (category.equals(CreatureCategory.INVERTEBRATE)) this.spawnSac();
+            else if (category.equals(CreatureCategory.MAMMAL)) this.setPregnant();
         }
     }
 
@@ -71,6 +73,19 @@ public class RiftMate extends EntityAIBase {
         }
 
         return riftCreature;
+    }
+
+    private void setPregnant() {
+        EntityPlayer player = this.creature.getLoveCause();
+        if (player == null && this.targetMate.getLoveCause() != null) player = this.targetMate.getLoveCause();
+        if (player != null) player.addStat(StatList.ANIMALS_BRED);
+        this.creature.resetInLove();
+        this.targetMate.resetInLove();
+        ((IMammal)this.creature).setPregnant(true, 1800);
+        Random random = this.creature.getRNG();
+        if (this.world.getGameRules().getBoolean("doMobLoot")) {
+            this.world.spawnEntity(new EntityXPOrb(this.world, this.creature.posX, this.creature.posY, this.creature.posZ, random.nextInt(7) + 1));
+        }
     }
 
     private void spawnEgg() {

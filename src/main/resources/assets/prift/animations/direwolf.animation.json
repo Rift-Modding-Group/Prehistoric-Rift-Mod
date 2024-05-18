@@ -209,6 +209,35 @@
 					"effect": "howl"
 				}
 			}
+		},
+		"animation.direwolf.incapacitated": {
+			"loop": true,
+			"bones": {
+				"base": {
+					"position": [0, -7, 0]
+				},
+				"neck": {
+					"rotation": [12.5, 0, 0]
+				},
+				"leftFrontLeg": {
+					"rotation": [-90, 15, 0]
+				},
+				"rightFrontLeg": {
+					"rotation": [-90, -15, 0]
+				},
+				"leftBackLeg": {
+					"rotation": [67.5, 0, 0]
+				},
+				"leftBackShin": {
+					"position": [0, -1, -2]
+				},
+				"rightBackLeg": {
+					"rotation": [67.5, 0, 0]
+				},
+				"rightBackShin": {
+					"position": [0, -1, -2]
+				}
+			}
 		}
 	}
 }
