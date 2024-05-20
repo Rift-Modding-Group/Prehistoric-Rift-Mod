@@ -17,6 +17,7 @@ import anightdazingzoroark.prift.server.message.RiftSpawnDetectParticle;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,6 +35,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -126,7 +129,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IMammal {
         if (this.sniffCooldown > 0) this.sniffCooldown--;
 
         //manage birthin related stuff
-        System.out.println(this.getEntityId()+", "+this.getPregnancyTimer());
         if (!this.world.isRemote) {
             if (this.getPregnancyTimer() > 0) {
                 this.setPregnancyTimer(this.getPregnancyTimer() - 1);
@@ -249,6 +251,11 @@ public class Direwolf extends RiftCreature implements IPackHunter, IMammal {
         float xOffset = (float)(this.posX + (-0.375f) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-0.375f) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY - 0.875, zOffset);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldRender(ICamera camera) {
+        return super.shouldRender(camera) || this.inFrustrum(camera, this.hipsPart);
     }
 
     @Override

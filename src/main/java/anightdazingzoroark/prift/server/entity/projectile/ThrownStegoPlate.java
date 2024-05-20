@@ -101,10 +101,6 @@ public class ThrownStegoPlate extends EntityArrow implements IRiftProjectile {
                         else damagesource = DamageSource.causeArrowDamage(this, this.shootingEntity);
 
                         if (entity.attackEntityFrom(damagesource, (float) i)) {
-//                            if (entity instanceof EntityLivingBase) {
-//                                EntityLivingBase entitylivingbase = (EntityLivingBase) entity;
-//                                this.arrowHit(entitylivingbase);
-//                            }
                             this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                         }
                         else {

@@ -77,7 +77,6 @@ public class PlayerJournalProgress extends EntityProperties<EntityPlayer> {
 
     public void resetEntries() {
         this.unlockedCreatures.clear();
-        System.out.println(this.unlockedCreatures);
     }
 
     public List<CreatureCategory> getUnlockedCategories() {

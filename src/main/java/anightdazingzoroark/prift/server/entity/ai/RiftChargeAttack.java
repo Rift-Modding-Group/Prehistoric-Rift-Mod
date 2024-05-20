@@ -2,10 +2,13 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
+import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.passive.EntityTameable;
@@ -15,6 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -108,30 +112,33 @@ public class RiftChargeAttack extends EntityAIBase {
 
             //stop if it hits a mob
             AxisAlignedBB chargerHitbox = this.attacker.getEntityBoundingBox().grow(1D);
-            List<EntityLivingBase> chargedIntoEntities = this.attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, chargerHitbox, null);
-            chargedIntoEntities.remove(this.attacker);
-            if (this.attacker.isTamed()) {
-                UUID ownerUUID = this.attacker.getOwnerId();
-                chargedIntoEntities.removeIf(entityLivingBase -> {
-                    if (entityLivingBase instanceof EntityPlayer) {
-                        if (entityLivingBase.getUniqueID().equals(ownerUUID)) return true;
-                    }
-                    if (entityLivingBase instanceof EntityTameable) {
-                        if (((EntityTameable)entityLivingBase).isTamed()) {
-                            return ((EntityTameable) entityLivingBase).getOwnerId().equals(ownerUUID);
+            List<Entity> chargedIntoEntities = this.attacker.world.getEntitiesWithinAABB(Entity.class, chargerHitbox, new Predicate<Entity>() {
+                @Override
+                public boolean apply(@Nullable Entity entity) {
+                    if (entity instanceof EntityPlayer) {
+                        if (!entity.getUniqueID().equals(attacker.getOwnerId())) {
+                            return true;
                         }
                     }
-                    return false;
-                });
-            }
-            else {
-                chargedIntoEntities.removeIf(entityLivingBase -> {
-                    if (entityLivingBase.getClass().isInstance(this.attacker)) {
-                        return ((RiftCreature) entityLivingBase).isTamed();
+                    else if (entity instanceof EntityTameable) {
+                        if ((((EntityTameable) entity).isTamed())) {
+                            if (attacker.getOwner() != null) {
+                                if (!((EntityTameable) entity).getOwner().equals(attacker.getOwner())) {
+                                    return true;
+                                }
+                            }
+                        }
+                        else return true;
                     }
+                    else if (entity instanceof RiftCreaturePart) {
+                        RiftCreature parent = ((RiftCreaturePart)entity).getParent();
+                        return parent != attacker;
+                    }
+                    else return entity instanceof EntityLivingBase;
                     return false;
-                });
-            }
+                }
+            });
+            chargedIntoEntities.remove(this.attacker);
 
             //stop if it hits a block
             boolean breakBlocksFlag = false;
@@ -148,7 +155,13 @@ public class RiftChargeAttack extends EntityAIBase {
             }
 
             if (breakBlocksFlag || !chargedIntoEntities.isEmpty() || this.atSpotToChargeTo()) {
-                if (!chargedIntoEntities.isEmpty()) for (EntityLivingBase entity : chargedIntoEntities) this.attacker.attackEntityAsMob(entity);
+                if (!chargedIntoEntities.isEmpty()) for (Entity entity : chargedIntoEntities) {
+                    if (entity instanceof RiftCreaturePart) {
+                        RiftCreature parent = ((RiftCreaturePart)entity).getParent();
+                        this.attacker.attackEntityAsMob(parent);
+                    }
+                    this.attacker.attackEntityAsMob(entity);
+                }
 
                 boolean canBreak = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.attacker.world, this.attacker);
                 if (breakBlocksFlag && canBreak) {

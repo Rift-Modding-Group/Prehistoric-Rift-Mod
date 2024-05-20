@@ -27,7 +27,8 @@ public enum RiftCreatureType {
     SARCOSUCHUS(Sarcosuchus.class, CreatureCategory.REPTILE, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL,  SarcosuchusRenderer::new, 2302246, 2627379, 300, 0.5f, EggTemperature.COLD),
     ANOMALOCARIS(Anomalocaris.class, CreatureCategory.INVERTEBRATE, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.DIRT, LevelupRate.NORMAL, AnomalocarisRenderer::new, 10892050, 12270358, 300, 1f, null),
     SAUROPHAGANAX(Saurophaganax.class, CreatureCategory.DINOSAUR, CreatureDiet.INSECTIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, SaurophaganaxRenderer::new, 986895, 16737280, 450, 1f, EggTemperature.COLD),
-    DIREWOLF(Direwolf.class, CreatureCategory.MAMMAL, CreatureDiet.CARNIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.FAST, BlockBreakTier.DIRT, LevelupRate.FAST, DirewolfRenderer::new, 8421504, 10066329, 0, 0, null);
+    DIREWOLF(Direwolf.class, CreatureCategory.MAMMAL, CreatureDiet.CARNIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.FAST, BlockBreakTier.DIRT, LevelupRate.FAST, DirewolfRenderer::new, 8421504, 10066329, 0, 0, null),
+    MEGALOCEROS(Megaloceros.class, CreatureCategory.MAMMAL, CreatureDiet.HERBIVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, MegalocerosRenderer::new, 6048296, 4666924, 0, 0, null);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;
