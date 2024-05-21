@@ -6,10 +6,9 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DirewolfConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
-import anightdazingzoroark.prift.server.entity.interfaces.IMammal;
+import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSpawnChestDetectParticle;
@@ -49,7 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Direwolf extends RiftCreature implements IPackHunter, IMammal {
+public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/direwolf"));
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
@@ -129,26 +128,8 @@ public class Direwolf extends RiftCreature implements IPackHunter, IMammal {
         if (this.sniffCooldown > 0) this.sniffCooldown--;
 
         //manage birthin related stuff
-        if (!this.world.isRemote) {
-            if (this.getPregnancyTimer() > 0) {
-                this.setPregnancyTimer(this.getPregnancyTimer() - 1);
-                if (this.getPregnancyTimer() == 0) {
-                    Direwolf direwolf = new Direwolf(this.world);
-                    direwolf.setHealth((float) (this.minCreatureHealth + (0.1) * (this.getLevel()) * (this.minCreatureHealth)));
-                    direwolf.setAgeInDays(0);
-                    direwolf.setTamed(true);
-                    direwolf.setOwnerId(this.getOwnerId());
-                    direwolf.setTameStatus(TameStatusType.SIT);
-                    direwolf.setTameBehavior(TameBehaviorType.PASSIVE);
-                    direwolf.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
-                    this.world.spawnEntity(direwolf);
-                    this.setPregnant(false, 0);
-                }
-            }
-        }
+        if (!this.world.isRemote) this.createBaby(this);
     }
-
-    //sniffCooldown
 
     @Override
     public void resetParts(float scale) {

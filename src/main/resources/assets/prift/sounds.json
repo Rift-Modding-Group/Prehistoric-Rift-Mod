@@ -262,7 +262,6 @@
     "subtitle": "sounds.subtitle.saurophaganax_light_blast_boom"
   },
 
-
   "prift.direwolf.idle": {
     "category": "neutral",
     "sounds": [
@@ -294,5 +293,27 @@
       "prift:entities/direwolf/direwolf_howl"
     ],
     "subtitle": "sounds.subtitle.direwolf_howl"
+  },
+
+  "prift.megaloceros.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/megaloceros/megaloceros_idle"
+    ],
+    "subtitle": "sounds.subtitle.megaloceros_idle"
+  },
+  "prift.megaloceros.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/megaloceros/megaloceros_hurt"
+    ],
+    "subtitle": "sounds.subtitle.megaloceros_hurt"
+  },
+  "prift.megaloceros.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/megaloceros/megaloceros_death"
+    ],
+    "subtitle": "sounds.subtitle.megaloceros_death"
   }
 }

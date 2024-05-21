@@ -184,9 +184,7 @@ public enum RiftCreatureType {
                 e.printStackTrace();
             }
         }
-        if (entity == null) {
-            entity = new Tyrannosaurus(world);
-        }
+        if (entity == null) entity = new Tyrannosaurus(world);
         return entity;
     }
 

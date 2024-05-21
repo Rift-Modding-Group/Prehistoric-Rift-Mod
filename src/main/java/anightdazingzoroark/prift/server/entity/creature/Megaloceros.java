@@ -1,21 +1,26 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.MegalocerosConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
-import anightdazingzoroark.prift.server.entity.interfaces.IMammal;
-import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -23,7 +28,10 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
-public class Megaloceros extends RiftCreature implements IChargingMob, IMammal {
+import javax.annotation.Nullable;
+
+public class Megaloceros extends RiftCreature implements IChargingMob, IImpregnable {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megaloceros"));
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Megaloceros.class, DataSerializers.VARINT);
     private RiftCreaturePart frontBodyPart;
@@ -82,25 +90,8 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IMammal {
         if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
         if (this.getRightClickCooldown() == 0) this.setCanCharge(true);
 
-
         //manage birthin related stuff
-        if (!this.world.isRemote) {
-            if (this.getPregnancyTimer() > 0) {
-                this.setPregnancyTimer(this.getPregnancyTimer() - 1);
-                if (this.getPregnancyTimer() == 0) {
-                    Megaloceros megaloceros = new Megaloceros(this.world);
-                    megaloceros.setHealth((float) (this.minCreatureHealth + (0.1) * (this.getLevel()) * (this.minCreatureHealth)));
-                    megaloceros.setAgeInDays(0);
-                    megaloceros.setTamed(true);
-                    megaloceros.setOwnerId(this.getOwnerId());
-                    megaloceros.setTameStatus(TameStatusType.SIT);
-                    megaloceros.setTameBehavior(TameBehaviorType.PASSIVE);
-                    megaloceros.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
-                    this.world.spawnEntity(megaloceros);
-                    this.setPregnant(false, 0);
-                }
-            }
-        }
+        if (!this.world.isRemote) this.createBaby(this);
     }
 
     @Override
@@ -253,6 +244,12 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IMammal {
     }
 
     @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
+    }
+
+    @Override
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::megalocerosMovement));
@@ -324,5 +321,19 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IMammal {
             }
         }
         return PlayState.STOP;
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.MEGALOCEROS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.MEGALOCEROS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.MEGALOCEROS_DEATH;
     }
 }

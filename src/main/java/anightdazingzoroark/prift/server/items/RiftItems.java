@@ -66,6 +66,7 @@ public class RiftItems {
     public static Item ANOMALOCARIS_APPENDAGE;
     public static Item SAUROPHAGANAX_EYE;
     public static Item DIREWOLF_TAIL;
+    public static Item MEGALOCEROS_ANTLER;
 
     public static Item CHITIN;
 
@@ -130,6 +131,7 @@ public class RiftItems {
         ANOMALOCARIS_APPENDAGE = riftGenericItem("anomalocaris_appendage", true);
         SAUROPHAGANAX_EYE = riftGenericItem("saurophaganax_eye", true);
         DIREWOLF_TAIL = riftGenericItem("direwolf_tail", true);
+        MEGALOCEROS_ANTLER = riftGenericItem("megaloceros_antler", true);
 
         CHITIN = riftGenericItem("chitin", true);
 

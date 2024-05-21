@@ -127,6 +127,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.direwolf.howl")
     public static final SoundEvent DIREWOLF_HOWL = createSoundEvent("prift.direwolf.howl");
 
+    @GameRegistry.ObjectHolder("prift.megaloceros.idle")
+    public static final SoundEvent MEGALOCEROS_IDLE = createSoundEvent("prift.megaloceros.idle");
+
+    @GameRegistry.ObjectHolder("prift.megaloceros.hurt")
+    public static final SoundEvent MEGALOCEROS_HURT = createSoundEvent("prift.megaloceros.hurt");
+
+    @GameRegistry.ObjectHolder("prift.megaloceros.death")
+    public static final SoundEvent MEGALOCEROS_DEATH = createSoundEvent("prift.megaloceros.death");
+
     private static SoundEvent createSoundEvent(String soundName) {
         ResourceLocation soundID = new ResourceLocation(RiftInitialize.MODID, soundName);
         return new SoundEvent(soundID).setRegistryName(soundID);

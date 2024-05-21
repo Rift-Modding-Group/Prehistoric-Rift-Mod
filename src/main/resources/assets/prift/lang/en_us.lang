@@ -77,6 +77,7 @@ item.sarcosuchus_snout.name=Sarcosuchus Snout
 item.anomalocaris_appendage.name=Anomalocaris Appendage
 item.saurophaganax_eye.name=Saurophaganax Eye
 item.direwolf_tail.name=Direwolf Tail
+item.megaloceros_antler.name=Megaloceros Antler
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -226,6 +227,15 @@ sounds.subtitle.saurophaganax_idle=Saurophaganax grunts
 sounds.subtitle.saurophaganax_hurt=Saurophaganax hurts
 sounds.subtitle.saurophaganax_death=Saurophaganax dies
 sounds.subtitle.saurophaganax_light_blast=Saurophaganax emits a blast of light
+
+sounds.subtitle.direwolf_idle=Direwolf grunts
+sounds.subtitle.direwolf_hurt=Direwolf hurts
+sounds.subtitle.direwolf_death=Direwolf dies
+sounds.subtitle.direwolf_howl=Direwolf howls
+
+sounds.subtitle.megaloceros_idle=Megaloceros grunts
+sounds.subtitle.megaloceros_hurt=Megaloceros hurts
+sounds.subtitle.megaloceros_death=Megaloceros dies
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral
