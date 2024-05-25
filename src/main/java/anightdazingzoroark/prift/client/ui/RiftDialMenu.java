@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.*;
@@ -50,9 +51,7 @@ public class RiftDialMenu extends GuiScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
-        if (this.creature.isDead) {
-            this.mc.player.closeScreen();
-        }
+        if (this.creature.isDead) this.mc.player.closeScreen();
     }
 
     @Override
@@ -148,6 +147,11 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) || this.creature.isUsingWorkstation() || this.creature.isSleeping()) && i == 2) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
+            else if (this.radialChoiceMenu == 0 && (i == 1 || i == 2 || i == 4) && this.creature instanceof IImpregnable) {
+                IImpregnable impregnable = (IImpregnable)this.creature;
+                if (impregnable.isPregnant()) drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+                else drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
+            }
             else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && i == 4) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
@@ -219,6 +223,12 @@ public class RiftDialMenu extends GuiScreen {
                     }
                 }
             }
+            if (this.radialChoiceMenu == 0 && (i == 1 || i == 2 || i == 4)) {
+                if (this.creature instanceof IImpregnable) {
+                    IImpregnable impregnable = (IImpregnable)this.creature;
+                    if (impregnable.isPregnant()) radialString = "["+radialString+"]";
+                }
+            }
             if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && (i == 1 || i == 4)) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 2 && this.creature.isUsingWorkstation() && i != 0 && i != 4) radialString = "["+radialString+"]";
 
@@ -240,6 +250,10 @@ public class RiftDialMenu extends GuiScreen {
         }
         else if (this.radialChoiceMenu == 0 && (this.creature.isUsingWorkstation() || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) && this.selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+        }
+        else if (this.radialChoiceMenu == 0 && (this.selectedItem == 1 || this.selectedItem == 2 || this.selectedItem == 4) && this.creature instanceof IImpregnable) {
+            IImpregnable impregnable = (IImpregnable) this.creature;
+            if (impregnable.isPregnant()) this.drawHoveringText(I18n.format("radial.note.is_pregnant"), mouseX, mouseY);
         }
         else if (this.radialChoiceMenu == 0 && this.creature.isSleeping() && this.selectedItem == 2) {
             this.drawHoveringText(I18n.format("radial.note.is_asleep"), mouseX, mouseY);
@@ -322,13 +336,29 @@ public class RiftDialMenu extends GuiScreen {
                     this.mc.player.closeScreen();
                 }
                 else if (selectedItem == 1 && !this.creature.isUsingWorkstation()) {
-                    this.choices = getState();
-                    this.radialChoiceMenu = 1;
+                    if (this.creature instanceof IImpregnable) {
+                        if (!((IImpregnable)this.creature).isPregnant()) {
+                            this.choices = getState();
+                            this.radialChoiceMenu = 1;
+                        }
+                    }
+                    else {
+                        this.choices = getState();
+                        this.radialChoiceMenu = 1;
+                    }
                 }
                 else if (selectedItem == 2) {
                     if (this.creature.isRideable && !this.creature.isSleeping() && !this.creature.isBaby() && !this.creature.isUsingWorkstation() && !this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.creature.isSaddled()) {
-                        this.mc.player.closeScreen();
-                        RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
+                        if (this.creature instanceof IImpregnable) {
+                            if (!((IImpregnable)this.creature).isPregnant()) {
+                                this.mc.player.closeScreen();
+                                RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
+                            }
+                        }
+                        else {
+                            this.mc.player.closeScreen();
+                            RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
+                        }
                     }
                     else if (!this.creature.isRideable) {
                         this.choices = getOptions();
@@ -361,8 +391,16 @@ public class RiftDialMenu extends GuiScreen {
                     }
                 }
                 else if (selectedItem == 4 && !this.creature.isBaby() && !this.creature.isUsingWorkstation()) {
-                    this.choices = getBehavior();
-                    this.radialChoiceMenu = 3;
+                    if (this.creature instanceof IImpregnable) {
+                        if (!((IImpregnable)this.creature).isPregnant()) {
+                            this.choices = getBehavior();
+                            this.radialChoiceMenu = 3;
+                        }
+                    }
+                    else {
+                        this.choices = getBehavior();
+                        this.radialChoiceMenu = 3;
+                    }
                 }
                 break;
             case 1:

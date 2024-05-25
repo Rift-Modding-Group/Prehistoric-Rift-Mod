@@ -4,6 +4,9 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
+import anightdazingzoroark.prift.server.entity.other.RiftEmbryo;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -19,23 +22,32 @@ import static net.minecraftforge.fml.common.StartupQuery.reset;
 
 @SideOnly(Side.CLIENT)
 public class RiftEggMenu extends GuiScreen {
-    protected int xSize = 176;
-    protected int ySize = 166;
     public final int xGui = 176;
     public final int yGui = 166;
     protected int guiLeft;
     protected int guiTop;
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/generic_screen.png");
     private String renderText = "";
+    private Object hatchable;
+    private float embryoRotation;
 
-    public RiftEggMenu() {
-        super();
+    public RiftEggMenu(RiftEgg egg) {
+        this.hatchable = egg;
+    }
+
+    public RiftEggMenu(RiftSac sac) {
+        this.hatchable = sac;
+    }
+
+    public RiftEggMenu(IImpregnable impregnable) {
+        this.hatchable = impregnable;
+        this.embryoRotation = 0;
     }
 
     @Override
     public void initGui() {
-        this.guiLeft = (this.width - this.xSize) / 2;
-        this.guiTop = (this.height - this.ySize) / 2;
+        this.guiLeft = (this.width - this.xGui) / 2;
+        this.guiTop = (this.height - this.yGui) / 2;
         super.initGui();
     }
 
@@ -50,16 +62,23 @@ public class RiftEggMenu extends GuiScreen {
         if (!this.mc.player.isEntityAlive() || this.mc.player.isDead) {
             this.mc.player.closeScreen();
         }
-        if (ClientProxy.EGG instanceof RiftEgg) {
-            RiftEgg egg = (RiftEgg) ClientProxy.EGG;
+        if (this.hatchable instanceof RiftEgg) {
+            RiftEgg egg = (RiftEgg) this.hatchable;
             if (egg.getHatchTime() <= 0) {
                 this.mc.player.closeScreen();
             }
             this.renderText = "";
         }
-        else if (ClientProxy.EGG instanceof RiftSac) {
-            RiftSac sac = (RiftSac) ClientProxy.EGG;
+        else if (this.hatchable instanceof RiftSac) {
+            RiftSac sac = (RiftSac) this.hatchable;
             if (sac.getHatchTime() <= 0) {
+                this.mc.player.closeScreen();
+            }
+            this.renderText = "";
+        }
+        else if (this.hatchable instanceof IImpregnable) {
+            IImpregnable impregnable = (IImpregnable) this.hatchable;
+            if (impregnable.getPregnancyTimer() <= 0) {
                 this.mc.player.closeScreen();
             }
             this.renderText = "";
@@ -99,8 +118,8 @@ public class RiftEggMenu extends GuiScreen {
 
     protected void drawGuiContainerForegroundLayer() {
         reset();
-        if (ClientProxy.EGG instanceof RiftEgg) {
-            RiftEgg egg = (RiftEgg) ClientProxy.EGG;
+        if (this.hatchable instanceof RiftEgg) {
+            RiftEgg egg = (RiftEgg) this.hatchable;
             GlStateManager.pushMatrix();
             String s = I18n.format(I18n.format("item."+egg.getCreatureType().name().toLowerCase()+"_egg.name"));
             printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 20, 0, 0, 0);
@@ -124,8 +143,8 @@ public class RiftEggMenu extends GuiScreen {
                 printStringXY(s1, (-this.fontRenderer.getStringWidth(s1) + this.xGui)/ 2, 140, 0, 0, 0);
             }
         }
-        else if (ClientProxy.EGG instanceof RiftSac) {
-            RiftSac sac = (RiftSac) ClientProxy.EGG;
+        else if (this.hatchable instanceof RiftSac) {
+            RiftSac sac = (RiftSac) this.hatchable;
             GlStateManager.pushMatrix();
             String s = I18n.format(I18n.format("item."+sac.getCreatureType().name().toLowerCase()+"_sac.name"));
             printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 20, 0, 0, 0);
@@ -142,6 +161,21 @@ public class RiftEggMenu extends GuiScreen {
                 printStringXY(s1, (-this.fontRenderer.getStringWidth(s1) + this.xGui)/ 2, 140, 0, 0, 0);
             }
         }
+        else if (this.hatchable instanceof IImpregnable) {
+            IImpregnable impregnable = (IImpregnable) this.hatchable;
+            GlStateManager.pushMatrix();
+            String s = I18n.format(I18n.format("prift.pregnancy.name"), ((RiftCreature)impregnable).getName(false));
+            printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 20, 0, 0, 0);
+            GlStateManager.popMatrix();
+            {
+                String s1;
+                int minutes = impregnable.getBirthTimeMinutes()[0];
+                int seconds = impregnable.getBirthTimeMinutes()[1];
+                String minutesString = minutes > 0 ? minutes + " " + I18n.format("prift.egg.minutes") : "";
+                s1 = I18n.format("prift.egg.time") + ": " + minutesString + " " + seconds + " " + I18n.format("prift.egg.seconds");
+                printStringXY(s1, (-this.fontRenderer.getStringWidth(s1) + this.xGui)/ 2, 140, 0, 0, 0);
+            }
+        }
     }
 
     public void printStringXY(String str0, int x0, int y0, int r, int g, int b) {
@@ -152,17 +186,17 @@ public class RiftEggMenu extends GuiScreen {
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         mc.getTextureManager().bindTexture(background);
-        int k = (this.width - this.xSize) / 2;
-        int l = (this.height - this.ySize) / 2;
-        drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, (176F), (166F));
+        int k = (this.width - this.xGui) / 2;
+        int l = (this.height - this.yGui) / 2;
+        drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xGui, this.yGui, (176F), (166F));
         GlStateManager.pushMatrix();
         renderEgg(k + 90, l + 120, 70, 0, 0);
         GlStateManager.popMatrix();
     }
 
-    public static void renderEgg(int posX, int posY, int scaleValue, float renderYaw, float renderPitch) {
-        if (ClientProxy.EGG instanceof RiftEgg) {
-            RiftEgg egg = (RiftEgg) ClientProxy.EGG;
+    public void renderEgg(int posX, int posY, int scaleValue, float renderYaw, float renderPitch) {
+        if (this.hatchable instanceof RiftEgg) {
+            RiftEgg egg = (RiftEgg) this.hatchable;
             GlStateManager.enableColorMaterial();
             GlStateManager.pushMatrix();
             GlStateManager.enableDepth();
@@ -184,8 +218,8 @@ public class RiftEggMenu extends GuiScreen {
             egg.rotationPitch = f4;
             GlStateManager.disableDepth();
         }
-        else if (ClientProxy.EGG instanceof RiftSac) {
-            RiftSac sac = (RiftSac) ClientProxy.EGG;
+        else if (this.hatchable instanceof RiftSac) {
+            RiftSac sac = (RiftSac) this.hatchable;
             GlStateManager.enableColorMaterial();
             GlStateManager.pushMatrix();
             GlStateManager.enableDepth();
@@ -205,6 +239,29 @@ public class RiftEggMenu extends GuiScreen {
             Minecraft.getMinecraft().getRenderManager().renderEntity(sac, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
             sac.rotationYaw = f3;
             sac.rotationPitch = f4;
+            GlStateManager.disableDepth();
+        }
+        else if (this.hatchable instanceof IImpregnable) {
+            RiftEmbryo embryo = new RiftEmbryo(((RiftCreature)this.hatchable).world);
+            GlStateManager.enableColorMaterial();
+            GlStateManager.pushMatrix();
+            GlStateManager.enableDepth();
+            GlStateManager.translate((float) posX, (float) posY, 50.0F);
+            GlStateManager.scale((float) (scaleValue), (float) scaleValue, (float) scaleValue);
+            float f3 = embryo.rotationYaw;
+            float f4 = embryo.rotationPitch;
+            GlStateManager.rotate(-45.0F, 0.0F, 1.0F, 0.0F);
+            RenderHelper.enableStandardItemLighting();
+            GlStateManager.rotate(-135.0F, 0.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(-((float) Math.atan(renderPitch / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
+            embryo.rotationYaw = (float) Math.atan(renderYaw / 40.0F) * 40.0F;
+            embryo.rotationPitch = -((float) Math.atan(renderPitch / 40.0F)) * 20.0F;
+            GlStateManager.translate(0.0F, (float) embryo.getYOffset(), 0.0F);
+            GlStateManager.rotate(this.embryoRotation++, 0.0F, 1.0F, 0.0F);
+            Minecraft.getMinecraft().getRenderManager().playerViewY = 180.0F;
+            Minecraft.getMinecraft().getRenderManager().renderEntity(embryo, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
+            embryo.rotationYaw = f3;
+            embryo.rotationPitch = f4;
             GlStateManager.disableDepth();
         }
 

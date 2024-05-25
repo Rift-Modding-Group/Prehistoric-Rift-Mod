@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.RiftConfig;
 import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
+import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
@@ -185,10 +186,12 @@ public class ServerEvents {
         if (event.getSource().getTrueSource() instanceof EntityPlayer && event.getEntityLiving() instanceof RiftCreature) {
             EntityPlayer player = (EntityPlayer)event.getSource().getTrueSource();
             RiftCreature creature = (RiftCreature)event.getEntityLiving();
-            PlayerJournalProgress journalProgress = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class);
-            if (!journalProgress.getUnlockedCreatures().contains(creature.creatureType)) {
-                journalProgress.unlockCreature(creature.creatureType);
-                if (!player.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+            if (!player.world.isRemote) {
+                PlayerJournalProgress journalProgress = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class);
+                if (!journalProgress.getUnlockedCreatures().contains(creature.creatureType)) {
+                    journalProgress.unlockCreature(creature.creatureType);
+                    player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                }
             }
         }
     }
@@ -469,14 +472,6 @@ public class ServerEvents {
             if (properties.isBleeding) {
                 if (isMoving) entity.attackEntityFrom(RiftDamage.RIFT_BLEED, (float)properties.bleedingStrength + 1F);
                 else entity.attackEntityFrom(RiftDamage.RIFT_BLEED, (float)(properties.bleedingStrength + 1) * 2F);
-
-                double motionY = RiftUtil.randomInRange(-0.75D, -0.25D);
-                double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
-                double f1 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) + entity.getEntityBoundingBox().minY;
-                double f2 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxZ - entity.getEntityBoundingBox().minZ) + entity.getEntityBoundingBox().minZ;
-
-                RiftInitialize.PROXY.spawnParticle("bleed", f, f1, f2, 0D, motionY, 0D);
-
                 properties.ticksUntilStopBleeding--;
             }
             if (properties.ticksUntilStopBleeding <= 0) properties.resetBleeding();
@@ -511,6 +506,25 @@ public class ServerEvents {
                 }
             }
 
+            //manage bleed particles
+            if (properties.isBleeding) {
+                double motionY = RiftUtil.randomInRange(1D, 1.5D);
+                double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
+                double f1 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) + entity.getEntityBoundingBox().minY;
+                double f2 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxZ - entity.getEntityBoundingBox().minZ) + entity.getEntityBoundingBox().minZ;
+                RiftInitialize.PROXY.spawnParticle("bleed", f, f1, f2, 0D, motionY, 0D);
+            }
+
+            //manage pregnancy particles
+            if (entity instanceof IImpregnable) {
+                if (((IImpregnable)entity).isPregnant()) {
+                    double motionY = RiftUtil.randomInRange(-0.25D, -0.125D);
+                    double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
+                    double f1 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) + entity.getEntityBoundingBox().minY;
+                    double f2 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxZ - entity.getEntityBoundingBox().minZ) + entity.getEntityBoundingBox().minZ;
+                    RiftInitialize.PROXY.spawnParticle("pregnancy", f, f1, f2, 0D, motionY, 0D);
+                }
+            }
 
         }
 

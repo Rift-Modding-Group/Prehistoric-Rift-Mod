@@ -99,8 +99,7 @@ public class RiftSac extends EntityTameable implements IAnimatable {
         else {
             try {
                 if (this.getOwnerId().equals(player.getUniqueID())) {
-                    ClientProxy.EGG = this;
-                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, (int) posX, (int) posY, (int) posZ);
+                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, this.getEntityId(), (int) posY, (int) posZ);
                     return true;
                 }
             }

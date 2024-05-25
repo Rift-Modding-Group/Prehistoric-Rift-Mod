@@ -8,7 +8,10 @@ import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
+import anightdazingzoroark.prift.server.entity.RiftEgg;
+import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
@@ -35,7 +38,6 @@ import static anightdazingzoroark.prift.client.renderer.ItemRenderer.registerIte
 @Mod.EventBusSubscriber
 public class ClientProxy extends ServerProxy {
     @Mod.Instance(RiftInitialize.MODID)
-    public static Object EGG;
     public static Object popupFromRadial;
     private int thirdPersonView = 0;
     private int previousViewType = 0;
@@ -89,6 +91,9 @@ public class ClientProxy extends ServerProxy {
             case "chest_detect":
                 particle = new RiftChestDetectParticle(world, x, y, z);
                 break;
+            case "pregnancy":
+                particle = new RiftPregnancyParticle(world, x, y, z, motX, motY, motZ);
+                break;
         }
         if (particle != null) this.particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
     }
@@ -98,7 +103,11 @@ public class ClientProxy extends ServerProxy {
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         Entity entity = world.getEntityByID(x);
         TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
-        if (id == GUI_EGG) return new RiftEggMenu();
+        if (id == GUI_EGG) {
+            if (entity instanceof RiftEgg) return new RiftEggMenu((RiftEgg)entity);
+            else if (entity instanceof RiftSac) return new RiftEggMenu((RiftSac)entity);
+            else if (entity instanceof IImpregnable) return new RiftEggMenu((IImpregnable)entity);
+        }
         else if (id == GUI_DIAL) return new RiftDialMenu((RiftCreature) entity);
         else if (id == GUI_CREATURE_INVENTORY) {
             IInventory playerInventory = player.inventory;

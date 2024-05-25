@@ -43,6 +43,7 @@ public class RiftEntities {
         int miscId = RiftLargeWeaponType.values().length + RiftCreatureType.values().length;
         registerEntity("egg", RiftEgg.class, miscId++, RiftInitialize.instance);
         registerEntity("sac", RiftSac.class, miscId++, RiftInitialize.instance);
+        registerEntity("embryo", RiftSac.class, miscId++, RiftInitialize.instance);
         registerEntity("thrown_stegosaurus_plate", ThrownStegoPlate.class, miscId++, RiftInitialize.instance);
         registerEntity("cannonball_projectile", RiftCannonball.class, miscId++, RiftInitialize.instance);
         registerEntity("mortar_shell_projectile", RiftMortarShell.class, miscId++, RiftInitialize.instance);

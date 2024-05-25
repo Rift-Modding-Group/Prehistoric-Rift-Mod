@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
+import anightdazingzoroark.prift.server.entity.other.RiftEmbryo;
 import anightdazingzoroark.prift.server.entity.projectile.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
@@ -26,6 +27,7 @@ public class EntityRenderer {
         RenderingRegistry.registerEntityRenderingHandler(RiftCannon.class, RiftLargeWeaponRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftMortar.class, RiftLargeWeaponRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftCatapult.class, RiftCatapultRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftEmbryo.class, RiftEmbryoRenderer::new);
 
         //projectiles
         RenderingRegistry.registerEntityRenderingHandler(ThrownStegoPlate.class, new IRenderFactory<ThrownStegoPlate>() {

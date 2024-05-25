@@ -216,7 +216,8 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
                                             d4 += d0 * 0.30000001192092896D;
                                             d6 += d1 * 0.30000001192092896D;
                                             d8 += d2 * 0.30000001192092896D;
-                                        } else {
+                                        }
+                                        else {
                                             // If a solid block is encountered, stop the propagation in this direction
                                             break;
                                         }
@@ -350,8 +351,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         else {
             try {
                 if (this.getOwnerId().equals(player.getUniqueID())) {
-                    ClientProxy.EGG = this;
-                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, (int) posX, (int) posY, (int) posZ);
+                    player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, this.getEntityId(), (int) posY, (int) posZ);
                     return true;
                 }
             }

@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
@@ -147,7 +148,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float rangedWidth;
     public float chargeWidth;
     public float leapWidth;
-    private int tickUse;
     private BlockPos homePosition;
     public double yFloatPos;
     public String[] favoriteFood;
@@ -191,7 +191,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.cannotUseRightClick = true;
         this.heal((float)maxCreatureHealth);
         this.herdCheckCountdown = 0;
-        this.tickUse = 0;
         this.yFloatPos = 0D;
         this.chargeCooldown = 0;
         this.maxRightClickCooldown = 100f;
@@ -693,10 +692,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.BUCKET))) player.dropItem(new ItemStack(Items.BUCKET), false);
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
-                        player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
+                        if (this instanceof IImpregnable) {
+                            if (((IImpregnable)this).isPregnant() && player.isSneaking()) player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, this.getEntityId() ,0, 0);
+                            else player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId(), 0, 0);
+                        }
+                        else player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isUsingWorkstation() && !this.isSleeping() && !this.getTameStatus().equals(TameStatusType.TURRET_MODE)) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
+                        if (this instanceof IImpregnable) {
+                            if (!((IImpregnable)this).isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
+                            else player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, this.getEntityId() ,0, 0);
+                        }
+                        else RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
                         player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
@@ -734,8 +741,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setAttackTarget(null);
                     if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
                     this.world.setEntityState(this, (byte)7);
-                    EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class).unlockCreature(this.creatureType);
-                    if (!player.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                    if (!player.world.isRemote) {
+                        PlayerJournalProgress journalProgress = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class);
+                        if (!journalProgress.getUnlockedCreatures().contains(this.creatureType)) {
+                            journalProgress.unlockCreature(this.creatureType);
+                            player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                        }
+                    }
                     this.enablePersistence();
                 }
                 else {
@@ -1421,7 +1433,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setLeftClickUse(int value) {
         this.dataManager.set(LEFT_CLICK_USE, value);
-        this.tickUse = 0;
     }
 
     public int getLeftClickCooldown() {
@@ -1454,7 +1465,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setRightClickUse(int value) {
         this.dataManager.set(RIGHT_CLICK_USE, value);
-        this.tickUse = 0;
     }
 
     public boolean alwaysShowRightClickUse() {
@@ -2059,6 +2069,39 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             for (int i = 0; i < getSizeInventory(); i++) {
                 setInventorySlotContents(i, contents[i]);
             }
+        }
+
+        @Override
+        public ItemStack addItem(ItemStack stack) {
+            ItemStack itemstack = stack.copy();
+            for (int i = canBeSaddled() ? 1 : 0; i < getSizeInventory(); ++i) {
+                ItemStack itemstack1 = this.getStackInSlot(i);
+
+                if (itemstack1.isEmpty()) {
+                    this.setInventorySlotContents(i, itemstack);
+                    this.markDirty();
+                    return ItemStack.EMPTY;
+                }
+
+                if (ItemStack.areItemsEqual(itemstack1, itemstack)) {
+                    int j = Math.min(this.getInventoryStackLimit(), itemstack1.getMaxStackSize());
+                    int k = Math.min(itemstack.getCount(), j - itemstack1.getCount());
+
+                    if (k > 0) {
+                        itemstack1.grow(k);
+                        itemstack.shrink(k);
+
+                        if (itemstack.isEmpty()) {
+                            this.markDirty();
+                            return ItemStack.EMPTY;
+                        }
+                    }
+                }
+            }
+
+            if (itemstack.getCount() != stack.getCount()) this.markDirty();
+
+            return itemstack;
         }
     }
 

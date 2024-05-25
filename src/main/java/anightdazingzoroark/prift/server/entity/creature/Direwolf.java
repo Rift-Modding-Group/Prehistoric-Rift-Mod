@@ -21,6 +21,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -159,6 +160,19 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable 
             this.world.removeEntityDangerously(this.hipsPart);
             this.hipsPart = null;
         }
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setInteger("PregnancyTime", this.getPregnancyTimer());
+        compound.setBoolean("IsPregnancy", this.isPregnant());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
     }
 
     @Override

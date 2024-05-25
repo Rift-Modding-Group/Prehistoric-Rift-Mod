@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -123,6 +124,19 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
             this.world.removeEntityDangerously(this.frontBodyPart);
             this.frontBodyPart = null;
         }
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setInteger("PregnancyTime", this.getPregnancyTimer());
+        compound.setBoolean("IsPregnancy", this.isPregnant());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
     }
 
     @Override

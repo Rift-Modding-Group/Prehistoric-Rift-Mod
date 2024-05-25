@@ -26,17 +26,14 @@ public class PlayerJournalProgress extends EntityProperties<EntityPlayer> {
     @Override
     public void saveNBTData(NBTTagCompound nbtTagCompound) {
         NBTTagList entryList = new NBTTagList();
-
         if (!this.unlockedCreatures.isEmpty()) {
             Set<Integer> uniqueCreatureOrdinals = new HashSet<>();
             for (RiftCreatureType creatureType : this.unlockedCreatures) {
                 uniqueCreatureOrdinals.add(creatureType.ordinal());
             }
-
             for (int ordinal : uniqueCreatureOrdinals) {
                 entryList.appendTag(new NBTTagInt(ordinal));
             }
-
             nbtTagCompound.setTag("UnlockedCreatures", entryList);
         }
         else nbtTagCompound.setTag("UnlockedCreatures", entryList);

@@ -132,8 +132,9 @@ radial.note.need_saddle=This creature needs a saddle to be ridden!
 radial.note.too_busy=This creature is too busy!
 radial.note.too_young_saddle=This creature is too young to be saddled!
 radial.note.too_young_unclaim=Babies cannot be unclaimed! >:(
-radial.note.too_young_behavior=This creature is too young to have its behavior tamed!
+radial.note.too_young_behavior=This creature is too young to have its behavior changed!
 radial.note.is_asleep=This creature is asleep!
+radial.note.is_pregnant=This creature is pregnant!
 
 radial.popup_choice.set_home=Are you sure you want to clear this creature's home position?
 radial.popup_choice.unclaim=Are you sure you want to unclaim this creature? It can be then claimed by anyone else, and if it remains unclaimed within 1 day, it becomes wild again.
@@ -167,6 +168,7 @@ prift.egg.too_cold=Too cold for hatching!
 prift.egg.too_warm=Too warm for hatching!
 
 prift.notify.egg_hatched=Your Egg has hatched!
+prift.notify.baby_birthed=%s has given birth!
 
 priftcommands.bleed.usage=/priftbleed [player|entity] [seconds] [strength]
 priftcommands.bleed.successful=Applied bleed on %s
