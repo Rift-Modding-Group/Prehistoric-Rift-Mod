@@ -161,6 +161,7 @@ reminder.incapacitated=%s has been incapacitated! Revive it or else it will peri
 reminder.insufficient_light_blast_charge=%s does not have enough charge to do perform a light blast
 reminder.unlocked_journal_entry=You have unlocked the journal entry for the %s! Check it out by pressing %s!
 
+prift.pregnancy.name=%s pregnancy
 prift.egg.time=Time
 prift.egg.minutes=minute(s)
 prift.egg.seconds=second(s)

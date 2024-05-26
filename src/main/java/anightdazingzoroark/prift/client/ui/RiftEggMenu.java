@@ -164,7 +164,7 @@ public class RiftEggMenu extends GuiScreen {
         else if (this.hatchable instanceof IImpregnable) {
             IImpregnable impregnable = (IImpregnable) this.hatchable;
             GlStateManager.pushMatrix();
-            String s = I18n.format(I18n.format("prift.pregnancy.name"), ((RiftCreature)impregnable).getName(false));
+            String s = I18n.format("prift.pregnancy.name", ((RiftCreature)impregnable).getName(false));
             printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 20, 0, 0, 0);
             GlStateManager.popMatrix();
             {
