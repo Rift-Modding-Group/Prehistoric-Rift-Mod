@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "prift:hand_crank" },
+    "facing=south": { "model": "prift:hand_crank", "y": 180 },
+    "facing=west":  { "model": "prift:hand_crank", "y": 270 },
+    "facing=east":  { "model": "prift:hand_crank", "y": 90 }
+  }
+}

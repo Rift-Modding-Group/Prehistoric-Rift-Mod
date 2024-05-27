@@ -1,0 +1,41 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.semi_manual_extruder.extrude": {
+			"animation_length": 2.08,
+			"bones": {
+				"spinAxle": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.52": [0, 90, 0],
+						"1.04": [0, 180, 0],
+						"1.56": [0, 270, 0],
+						"2.08": [0, 360, 0]
+					}
+				}
+			}
+		},
+		"animation.semi_manual_extruder.stuck": {
+			"loop": true
+		},
+		"animation.semi_manual_extruder.release": {
+			"animation_length": 0.48,
+			"bones": {
+				"stompArea": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.12": [-10, 0, 0],
+						"0.36": [-10, 0, 0],
+						"0.48": [0, 0, 0]
+					}
+				},
+				"spinAxle": {
+					"rotation": {
+						"0.24": [0, 0, 0],
+						"0.36": [0, 1800, 0]
+					}
+				}
+			}
+		}
+	}
+}

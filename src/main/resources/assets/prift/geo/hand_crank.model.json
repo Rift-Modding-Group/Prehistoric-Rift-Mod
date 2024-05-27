@@ -12,7 +12,13 @@
 			},
 			"bones": [
 				{
+					"name": "body",
+					"pivot": [0, 8, 0],
+					"rotation": [90, 0, 0]
+				},
+				{
 					"name": "crank",
+					"parent": "body",
 					"pivot": [0, 0, 0],
 					"cubes": [
 						{"origin": [-1, 0, -1], "size": [2, 8, 2], "uv": [0, 8]},

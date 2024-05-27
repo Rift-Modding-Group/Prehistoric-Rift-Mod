@@ -553,7 +553,6 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::tyrannosaurusMovement));
-//        data.addAnimationController(new AnimationController(this, "look", 0, this::tyrannosaurusLook));
         data.addAnimationController(new AnimationController(this, "attacking", 0, this::tyrannosaurusAttack));
         data.addAnimationController(new AnimationController(this, "roaring", 0, this::tyrannosaurusRoar));
         data.addAnimationController(new AnimationController(this, "controlled_roar", 0, this::tyrannosaurusControlledRoar));

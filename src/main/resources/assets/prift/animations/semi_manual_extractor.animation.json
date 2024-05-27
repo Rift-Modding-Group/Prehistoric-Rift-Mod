@@ -1,0 +1,46 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.semi_manual_extractor.stuck": {
+			"loop": true,
+			"bones": {
+				"squeezer": {
+					"position": [0, -14, 0]
+				},
+				"arm": {
+					"position": [0, -155, 0],
+					"scale": [1, 6, 1]
+				}
+			}
+		},
+		"animation.semi_manual_extractor.release": {
+			"animation_length": 0.48,
+			"bones": {
+				"squeezer": {
+					"position": {
+						"0.24": [0, -14, 0],
+						"0.36": [0, 0, 0]
+					}
+				},
+				"arm": {
+					"position": {
+						"0.24": [0, -155, 0],
+						"0.36": [0, 0, 0]
+					},
+					"scale": {
+						"0.24": [1, 6, 1],
+						"0.36": [1, 1, 1]
+					}
+				},
+				"stompArea": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.12": [-10, 0, 0],
+						"0.36": [-10, 0, 0],
+						"0.48": [0, 0, 0]
+					}
+				}
+			}
+		}
+	}
+}
