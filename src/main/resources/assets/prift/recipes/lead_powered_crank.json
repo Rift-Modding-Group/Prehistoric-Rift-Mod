@@ -1,16 +1,19 @@
 {
   "type": "forge:ore_shaped",
   "pattern": [
-    "#",
-    "X",
-    "#"
+    " # ",
+    "CXC",
+    " # "
   ],
   "key": {
-    "#": {
-      "type": "forge:ore_dict",
-      "ore": "slabWood"
-    },
     "X": {
+      "item": "prift:hand_crank"
+    },
+    "C": {
+      "type": "forge:ore_dict",
+      "ore": "string"
+    },
+    "#": {
       "type": "forge:ore_dict",
       "ore": "stickWood"
     }

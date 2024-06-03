@@ -22,17 +22,21 @@ public class RiftBlocks {
     public static Block FEEDING_TROUGH;
 
     public static void registerBlocks() {
-        FEEDING_TROUGH = registerBlock(new RiftFeedingTroughBlock(), "feeding_trough", true, false);
+        FEEDING_TROUGH = registerBlock(new RiftFeedingTroughBlock(), "feeding_trough", true, false, true);
 
         if (GeneralConfig.canUseMM()) RiftMMBlocks.registerMMBlocks();
     }
 
     public static Block registerBlock(Block block, String registryName, boolean includeItem) {
-        return registerBlock(block, registryName, includeItem, true);
+        return registerBlock(block, registryName, includeItem, true, true);
     }
 
     public static Block registerBlock(Block block, String registryName, boolean includeItem, boolean itemStackable) {
-        block.setCreativeTab(RiftCreativeTabs.creativeItemsTab);
+        return registerBlock(block, registryName, includeItem, itemStackable, true);
+    }
+
+    public static Block registerBlock(Block block, String registryName, boolean includeItem, boolean itemStackable, boolean showInCreative) {
+        if (showInCreative) block.setCreativeTab(RiftCreativeTabs.creativeItemsTab);
         block.setRegistryName(registryName);
         block.setTranslationKey(registryName);
         BLOCKS.add(block);

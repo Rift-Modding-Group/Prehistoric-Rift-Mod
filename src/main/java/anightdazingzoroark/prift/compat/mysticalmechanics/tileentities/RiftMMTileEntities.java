@@ -9,5 +9,7 @@ public class RiftMMTileEntities {
         GameRegistry.registerTileEntity(TileEntityLeadPoweredCrank.class, new ResourceLocation(RiftInitialize.MODID, "lead_powered_crank"));
         GameRegistry.registerTileEntity(TileEntityBlowPoweredTurbine.class, new ResourceLocation(RiftInitialize.MODID, "blow_powered_turbine"));
         GameRegistry.registerTileEntity(TileEntityHandCrank.class, new ResourceLocation(RiftInitialize.MODID, "hand_crank"));
+        GameRegistry.registerTileEntity(TileEntitySemiManualExtractor.class, new ResourceLocation(RiftInitialize.MODID, "semi_manual_extractor"));
+        GameRegistry.registerTileEntity(TileEntitySemiManualExtractorTop.class, new ResourceLocation(RiftInitialize.MODID, "semi_manual_extractor_top"));
     }
 }

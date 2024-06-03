@@ -130,9 +130,7 @@ public class RiftTileEntityFeedingTrough extends TileEntity implements IAnimatab
     }
 
     @Override
-    public void registerControllers(AnimationData animationData) {
-
-    }
+    public void registerControllers(AnimationData animationData) {}
 
     @Override
     public AnimationFactory getFactory() {

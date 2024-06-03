@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtractorContainer;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
@@ -45,11 +47,12 @@ public class ServerProxy implements IGuiHandler {
     public static final int GUI_WEAPON_INVENTORY = 4;
     public static final int GUI_JOURNAL = 5;
     public static final int GUI_FEEDING_TROUGH = 6;
+    public static final int GUI_SEMI_MANUAL_EXTRACTOR = 7;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
-        RiftItems.registerItems();
         RiftBlocks.registerBlocks();
+        RiftItems.registerItems();
         RiftTileEntities.registerTileEntities();
         RiftItems.registerOreDicTags();
         RiftRecipes.registerSmelting();
@@ -96,6 +99,11 @@ public class ServerProxy implements IGuiHandler {
         else if (id == GUI_FEEDING_TROUGH) {
             if (tileEntity instanceof RiftTileEntityFeedingTrough) {
                 return new FeedingTroughContainer((RiftTileEntityFeedingTrough)tileEntity, player);
+            }
+        }
+        else if (id == GUI_SEMI_MANUAL_EXTRACTOR) {
+            if (tileEntity instanceof TileEntitySemiManualExtractor) {
+                return new SemiManualExtractorContainer((TileEntitySemiManualExtractor)tileEntity, player);
             }
         }
         return null;

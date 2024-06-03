@@ -275,4 +275,5 @@ type.creature.amphibian_plural=Amphibians
 
 tile.lead_powered_crank.name=Lead Powered Crank
 tile.blow_powered_turbine.name=Blow Powered Turbine
+tile.hand_crank.name=Hand Crank
 tile.feeding_trough.name=Feeding Trough

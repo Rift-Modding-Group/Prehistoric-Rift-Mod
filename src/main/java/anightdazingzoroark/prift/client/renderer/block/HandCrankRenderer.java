@@ -28,7 +28,6 @@ public class HandCrankRenderer extends GeoBlockRenderer<TileEntityHandCrank> {
                 GlStateManager.rotate(90, 0, 1, 0);
                 break;
             case NORTH:
-                /* There is no need to rotate by 0 */
                 break;
             case EAST:
                 GlStateManager.rotate(270, 0, 1, 0);

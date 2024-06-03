@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "prift:semi_manual_extractor" },
+    "facing=south": { "model": "prift:semi_manual_extractor", "y": 180 },
+    "facing=west":  { "model": "prift:semi_manual_extractor", "y": 270 },
+    "facing=east":  { "model": "prift:semi_manual_extractor", "y": 90 }
+  }
+}

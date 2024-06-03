@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.client.particle.*;
 import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.ui.*;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
@@ -13,7 +14,6 @@ import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
-import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -23,13 +23,11 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -122,6 +120,11 @@ public class ClientProxy extends ServerProxy {
         else if (id == GUI_FEEDING_TROUGH) {
             if (tileEntity instanceof RiftTileEntityFeedingTrough) {
                 return new RiftFeedingTroughInvMenu((RiftTileEntityFeedingTrough) tileEntity, player.inventory);
+            }
+        }
+        else if (id == GUI_SEMI_MANUAL_EXTRACTOR) {
+            if (tileEntity instanceof TileEntitySemiManualExtractor) {
+                return new RiftSemiManualExtractorMenu((TileEntitySemiManualExtractor) tileEntity, player.inventory);
             }
         }
         return null;
