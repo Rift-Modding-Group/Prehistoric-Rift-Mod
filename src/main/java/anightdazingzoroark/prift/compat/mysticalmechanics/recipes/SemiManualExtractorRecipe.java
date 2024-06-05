@@ -1,20 +1,19 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.recipes;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 public class SemiManualExtractorRecipe extends SemiManualRecipeBase {
-    private final List<Ingredient> inputs = new ArrayList<>();
-    private final FluidStack output;
+    public final FluidStack output;
 
-    public SemiManualExtractorRecipe(ResourceLocation id, Collection<Ingredient> inputs, FluidStack output, double minPower, double time) {
-        super(id, minPower, time);
-        this.inputs.addAll(inputs);
+    public SemiManualExtractorRecipe(ResourceLocation id, Ingredient input, FluidStack output, double minPower) {
+        super(input, id, minPower);
         this.output = output;
+    }
+
+    public boolean matches(double powerIn, ItemStack itemIn) {
+        return powerIn >= this.getMinPower() && this.input.apply(itemIn);
     }
 }

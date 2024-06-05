@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtractorContainer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import net.minecraft.client.Minecraft;
@@ -20,6 +21,7 @@ import org.lwjgl.opengl.GL11;
 public class RiftSemiManualExtractorMenu extends GuiContainer {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_extractor.png");
     private static final ResourceLocation tankScale = new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_extractor_scale.png");
+    private static final ResourceLocation progressBar = new ResourceLocation(RiftInitialize.MODID, "textures/ui/progress_arrow.png");
     private final TileEntitySemiManualExtractor semiManualExtractor;
     private final IInventory playerInventory;
 
@@ -32,8 +34,9 @@ public class RiftSemiManualExtractorMenu extends GuiContainer {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.renderHoveredToolTip(mouseX, mouseY);
         this.drawTank();
+        this.drawProgressBar();
+        this.renderHoveredToolTip(mouseX, mouseY);
     }
 
     @Override
@@ -51,10 +54,10 @@ public class RiftSemiManualExtractorMenu extends GuiContainer {
     }
 
     private void drawTank() {
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         //for fluid
         FluidStack fluidStack = this.semiManualExtractor.getTank().getFluid();
         if (fluidStack != null) {
-            System.out.println(fluidStack.amount);
             float fluidHeight = ((float) fluidStack.amount / (float) this.semiManualExtractor.getTank().getCapacity()) * 52f;
             TextureAtlasSprite liquidIcon = this.mc.getTextureMapBlocks().getAtlasSprite(fluidStack.getFluid().getStill().toString());
             this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -64,9 +67,9 @@ public class RiftSemiManualExtractorMenu extends GuiContainer {
             int yPos = (this.height - this.ySize) / 2 + 70 - (int)fluidHeight;
             for (int i = 0; i < fluidHeight; i += 16) {
                 float drawHeight = Math.min(16f, (int)fluidHeight - i);
-                drawFluidTexture(liquidIcon, xPos, yPos + i, 16, (int)drawHeight);
-                drawFluidTexture(liquidIcon, xPos + 16, yPos + i, 16, (int)drawHeight);
-                drawFluidTexture(liquidIcon, xPos + 32, yPos + i, 2, (int)drawHeight);
+                this.drawFluidTexture(liquidIcon, xPos, yPos + i, 16, (int)drawHeight);
+                this.drawFluidTexture(liquidIcon, xPos + 16, yPos + i, 16, (int)drawHeight);
+                this.drawFluidTexture(liquidIcon, xPos + 32, yPos + i, 2, (int)drawHeight);
             }
             GlStateManager.disableBlend();
         }
@@ -77,6 +80,15 @@ public class RiftSemiManualExtractorMenu extends GuiContainer {
         this.mc.getTextureManager().bindTexture(tankScale);
         drawModalRectWithCustomSizedTexture((this.width - 34) / 2 + 26, (this.height - 52) / 2 - 39, 0, 0, 34, 52, 34, 52);
         GlStateManager.disableBlend();
+    }
+
+    private void drawProgressBar() {
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        float progress = (float)this.semiManualExtractor.getTopTEntity().getTimeHeld();
+        float max = (float)this.semiManualExtractor.getTopTEntity().getMaxRecipeTime();
+        float fill = progress / max * 21f;
+        this.mc.getTextureManager().bindTexture(progressBar);
+        drawModalRectWithCustomSizedTexture((this.width - 21)/2 - 9, (this.height - 14) /2 - 40, 0, 0, (int)fill, 14, 21, 14);
     }
 
     private void drawFluidTexture(TextureAtlasSprite sprite, int x, int y, int width, int height) {

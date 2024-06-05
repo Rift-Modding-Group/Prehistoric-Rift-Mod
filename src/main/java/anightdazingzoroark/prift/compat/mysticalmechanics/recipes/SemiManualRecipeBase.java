@@ -1,16 +1,17 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.recipes;
 
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 
 public abstract class SemiManualRecipeBase {
     private ResourceLocation id;
     private double minPower;
-    private double time; //time is in ticks
+    public final Ingredient input;
 
-    public SemiManualRecipeBase(ResourceLocation id, double minPower, double time) {
+    public SemiManualRecipeBase(Ingredient input, ResourceLocation id, double minPower) {
+        this.input = input;
         this.id = id;
         this.minPower = minPower;
-        this.time = time;
     }
 
     public String getId() {
@@ -19,9 +20,5 @@ public abstract class SemiManualRecipeBase {
 
     public double getMinPower() {
         return this.minPower;
-    }
-
-    public double getTime() {
-        return this.time;
     }
 }

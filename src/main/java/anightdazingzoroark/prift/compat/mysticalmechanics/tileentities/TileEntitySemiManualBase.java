@@ -7,6 +7,7 @@ import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -15,6 +16,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -88,6 +90,16 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
 
     public boolean canInteractWith(EntityPlayer playerIn) {
         return !isInvalid() && playerIn.getDistanceSq(pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
+    }
+
+    public ItemStack getInputItem() {
+        IItemHandler itemHandler = this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        if (itemHandler != null) return itemHandler.getStackInSlot(0);
+        return null;
+    }
+
+    public TileEntitySemiManualTopBase getTopTEntity() {
+        return (TileEntitySemiManualTopBase)this.world.getTileEntity(this.pos.up());
     }
 
     @Override

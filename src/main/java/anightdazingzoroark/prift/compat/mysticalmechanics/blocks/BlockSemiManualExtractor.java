@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractorTop;
 import anightdazingzoroark.prift.server.ServerProxy;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;

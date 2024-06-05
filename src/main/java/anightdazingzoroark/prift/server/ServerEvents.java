@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBaseTop;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfig;
 import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
@@ -222,7 +223,12 @@ public class ServerEvents {
                 if (canUseFlag) {
                     if (workstationUser.isWorkstation(event.getPos())) {
                         event.setCanceled(true);
-                        creature.setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
+                        if (iblockstate.getBlock() instanceof BlockSemiManualBaseTop) {
+                            creature.setUseWorkstation(event.getPos().getX(), event.getPos().down().getY(), event.getPos().getZ());
+                        }
+                        else {
+                            creature.setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
+                        }
                         creature.setTameStatus(TameStatusType.STAND);
                         event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_success"), false);
                     }

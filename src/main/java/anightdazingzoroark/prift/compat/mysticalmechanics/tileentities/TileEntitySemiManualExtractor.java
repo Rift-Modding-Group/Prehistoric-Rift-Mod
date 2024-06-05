@@ -1,5 +1,8 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtractorRecipe;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -32,12 +35,35 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
 
     @Override
     public void update() {
-        if (this.world.getTileEntity(this.pos.up()) instanceof TileEntitySemiManualExtractorTop) {
-            TileEntitySemiManualExtractorTop tileEntity = (TileEntitySemiManualExtractorTop) this.world.getTileEntity(this.pos.up());
-            if (tileEntity != null) {
-                if (tileEntity.getPower() > 0) {
-                    //for testing purposes
-                    this.tank.fillInternal(new FluidStack(FluidRegistry.WATER, 100), true);
+        if (this.getTopTEntity() != null) {
+            if (this.getTopTEntity().getPower() > 0) {
+                if (this.getTopTEntity().getCurrentRecipe() == null) {
+                    for (SemiManualExtractorRecipe recipe : RiftMMRecipes.smExtractorRecipes) {
+                        if (recipe.matches(this.getTopTEntity().getPower(), this.getInputItem())) {
+                            this.getTopTEntity().setCurrentRecipe(recipe);
+                        }
+                    }
+                }
+                else {
+                    if (!this.getTopTEntity().getMustBeReset()) {
+                        boolean tankUsability = this.tank.getFluid() == null || (this.tank.getFluid().getFluid() == this.getTopTEntity().getCurrentRecipe().output.getFluid() && this.tank.getFluid().amount < 4000);
+                        if (tankUsability) {
+                            if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
+                                this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);
+                            }
+                            else {
+                                this.tank.fillInternal(this.getTopTEntity().getCurrentRecipe().output, true);
+                                this.getInputItem().shrink(1);
+                                this.getTopTEntity().setTimeHeld(0);
+                                this.getTopTEntity().setMustBeReset(true);
+                            }
+                        }
+                        if (!this.getTopTEntity().getCurrentRecipe().matches(this.getTopTEntity().getPower(), this.getInputItem())) {
+                            this.getTopTEntity().setTimeHeld(0);
+                            this.getTopTEntity().setCurrentRecipe(null);
+                            this.getTopTEntity().setMustBeReset(true);
+                        }
+                    }
                 }
             }
         }
@@ -65,7 +91,7 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
     @Nullable
     @Override
     public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(this.tank);
+        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(this.tank);
         return super.getCapability(capability, facing);
     }
 

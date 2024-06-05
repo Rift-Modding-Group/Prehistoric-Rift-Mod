@@ -2,9 +2,11 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtractorContainer;
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.config.RiftConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
@@ -56,6 +58,7 @@ public class ServerProxy implements IGuiHandler {
         RiftTileEntities.registerTileEntities();
         RiftItems.registerOreDicTags();
         RiftRecipes.registerSmelting();
+        if (GeneralConfig.canUseMM()) RiftMMRecipes.registerRecipes();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
         MinecraftForge.EVENT_BUS.register(new RiftBlocks());
         RiftEntities.registerEntities();

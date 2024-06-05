@@ -4,6 +4,8 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBaseTop;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
@@ -15,11 +17,17 @@ import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockHorizontal;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -39,7 +47,8 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 
-public class Triceratops extends RiftCreature implements IChargingMob, ILeadWorkstationUser {
+public class Triceratops extends RiftCreature implements IChargingMob, IWorkstationUser, ILeadWorkstationUser {
+    private static final DataParameter<Boolean> STOMPING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/triceratops"));
     private RiftCreaturePart hipPart;
     private RiftCreaturePart leftBackLegPart;
@@ -68,6 +77,12 @@ public class Triceratops extends RiftCreature implements IChargingMob, ILeadWork
     }
 
     @Override
+    protected void entityInit() {
+        super.entityInit();
+        this.dataManager.register(STOMPING, false);
+    }
+
+    @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
@@ -80,6 +95,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, ILeadWork
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
+        this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 0.60f, 0.48f));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftControlledCharge(this, 1.75f, 0.24f, 4f));
@@ -174,6 +190,64 @@ public class Triceratops extends RiftCreature implements IChargingMob, ILeadWork
         float xOffset = (float)(this.posX + (-0.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-0.5) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY, zOffset);
+    }
+
+    public boolean isStomping() {
+        return this.dataManager.get(STOMPING);
+    }
+
+    public void setStomping(boolean value) {
+        this.dataManager.set(STOMPING, value);
+    }
+
+    @Override
+    public boolean canUseWorkstation() {
+        return GeneralConfig.canUseMM();
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
+        Block block = this.world.getBlockState(pos).getBlock();
+        Block blockBottom = this.world.getBlockState(pos.down()).getBlock();
+        if (GeneralConfig.canUseMM()) {
+            if (block instanceof BlockSemiManualBase) return true;
+            else if (blockBottom instanceof BlockSemiManualBaseTop) return this.isWorkstation(pos.down());
+        }
+        return false;
+    }
+
+    @Override
+    public BlockPos workstationUseFromPos() {
+        IBlockState blockState = this.world.getBlockState(this.getWorkstationPos());
+        if (blockState.getMaterial().isSolid()) {
+            EnumFacing direction = blockState.getValue(BlockHorizontal.FACING);
+            switch (direction) {
+                case NORTH:
+                    return this.getWorkstationPos().add(0, 0, 4);
+                case SOUTH:
+                    return this.getWorkstationPos().add(0, 0, -4);
+                case EAST:
+                    return this.getWorkstationPos().add(-4, 0, 0);
+                case WEST:
+                    return this.getWorkstationPos().add(4, 0, 0);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isUsingWorkAnim() {
+        return this.isStomping();
+    }
+
+    @Override
+    public void setUsingWorkAnim(boolean value) {
+        this.setStomping(value);
+    }
+
+    @Override
+    public SoundEvent useAnimSound() {
+        return null;
     }
 
     @Override
@@ -284,6 +358,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, ILeadWork
         data.addAnimationController(new AnimationController(this, "attack", 0, this::triceratopsAttack));
         data.addAnimationController(new AnimationController(this, "charge", 0, this::triceratopsCharge));
         data.addAnimationController(new AnimationController(this, "controlledCharge", 0, this::triceratopsControlledCharge));
+        data.addAnimationController(new AnimationController(this, "stomp", 0, this::triceratopsStomp));
     }
 
     private <E extends IAnimatable> PlayState triceratopsMovement(AnimationEvent<E> event) {
@@ -348,6 +423,15 @@ public class Triceratops extends RiftCreature implements IChargingMob, ILeadWork
                 }
             }
         }
+        return PlayState.STOP;
+    }
+
+    private <E extends IAnimatable> PlayState triceratopsStomp(AnimationEvent<E> event) {
+        if (this.isStomping()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.stomp", false));
+            return PlayState.CONTINUE;
+        }
+        else event.getController().clearAnimationCache();
         return PlayState.STOP;
     }
 

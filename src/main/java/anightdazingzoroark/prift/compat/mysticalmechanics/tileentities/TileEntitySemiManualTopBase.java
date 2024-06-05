@@ -1,21 +1,31 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtractorRecipe;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 
 public class TileEntitySemiManualTopBase extends TileEntity implements ITickable {
+    private SemiManualExtractorRecipe currentRecipe;
     private final IMechCapability mechPower;
-    private double heldPower; //max is 600, by that point the machine has to be reset
+    private int timeHeld;
+    private boolean mustBeReset = false;
 
     public TileEntitySemiManualTopBase() {
         this.mechPower = new ConsumerMechCapability() {
@@ -28,7 +38,17 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
 
     @Override
     public void update() {
-
+        if (this.world.isRemote) {
+            //add smoke particles when it needs to reset
+            Random rand = new Random();
+            double motionX = rand.nextGaussian() * 0.07D;
+            double motionY = rand.nextGaussian() * 0.07D;
+            double motionZ = rand.nextGaussian() * 0.07D;
+            float f = rand.nextFloat() + this.pos.getX();
+            float f1 = rand.nextFloat() + this.pos.getY();
+            float f2 = rand.nextFloat() + this.pos.getZ();
+            if (this.getMustBeReset()) this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, f, f1, f2, motionX, motionY, motionZ);
+        }
     }
 
     public EnumFacing getFacing() {
@@ -49,13 +69,107 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
         return super.getCapability(capability, facing);
     }
 
+    public SemiManualExtractorRecipe getCurrentRecipe() {
+        return this.currentRecipe;
+    }
+
+    public String getCurrentRecipeId() {
+        if (this.currentRecipe != null) return this.currentRecipe.getId();
+        return "";
+    }
+
+    public void setCurrentRecipe(SemiManualExtractorRecipe value) {
+        this.currentRecipe = value;
+        if (!this.world.isRemote) this.markDirty();
+    }
+
+    public int getMaxRecipeTime() {
+        //this estimates max time based on power input requires
+        //at min power required its the default 15 seconds, but the higher the power the lower
+        //the max time is until it reaches 5 seconds, which is 8x the min power
+        //note that output is in ticks
+        if (this.currentRecipe != null) {
+            double minPower = this.currentRecipe.getMinPower();
+            if (minPower <= this.getPower()) {
+                double result = -10D / (7D * minPower) * (this.getPower() - minPower) + 15D;
+                return (int)RiftUtil.clamp(result, 5D, 30D) * 20;
+            }
+        }
+        return -1;
+    }
+
     public double getPower() {
         return this.mechPower.getPower(null);
+    }
+
+    public int getTimeHeld() {
+        return this.timeHeld;
+    }
+
+    public void setTimeHeld(int value) {
+        this.timeHeld = value;
+        if (!this.world.isRemote) this.markDirty();
+    }
+
+    public boolean getMustBeReset() {
+        return this.mustBeReset;
+    }
+
+    public void setMustBeReset(boolean value) {
+        this.mustBeReset = value;
+        if (!this.world.isRemote) this.markDirty();
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        super.writeToNBT(compound);
+        compound.setDouble("power", this.getPower());
+        compound.setBoolean("mustBeReset", this.mustBeReset);
+        compound.setInteger("timeHeld", this.timeHeld);
+        compound.setString("currentRecipe", this.getCurrentRecipeId());
+        return compound;
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound compound) {
+        super.readFromNBT(compound);
+        this.mechPower.setPower(compound.getDouble("power"), null);
+        this.mustBeReset = compound.getBoolean("mustBeReset");
+        this.timeHeld = compound.getInteger("timeHeld");
+        this.currentRecipe = RiftMMRecipes.getSMExtractorRecipe(compound.getString("currentRecipe"));
+    }
+
+    @Override
+    @Nullable
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        NBTTagCompound nbtTag = new NBTTagCompound();
+        this.writeToNBT(nbtTag);
+        return new SPacketUpdateTileEntity(this.pos, 1, nbtTag);
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        this.readFromNBT(pkt.getNbtCompound());
+    }
+
+    @Override
+    public NBTTagCompound getUpdateTag() {
+        return this.writeToNBT(new NBTTagCompound());
+    }
+
+    @Override
+    public void handleUpdateTag(NBTTagCompound tag) {
+        this.mechPower.setPower(tag.getDouble("power"), null);
+        this.mustBeReset = tag.getBoolean("mustBeReset");
+        this.timeHeld = tag.getInteger("timeHeld");
+        this.currentRecipe = RiftMMRecipes.getSMExtractorRecipe(tag.getString("currentRecipe"));
     }
 
     @Override
     public void markDirty() {
         super.markDirty();
         Misc.syncTE(this, false);
+        IBlockState state = this.world.getBlockState(this.pos);
+        this.world.notifyBlockUpdate(this.pos, state, state, 3);
     }
 }
