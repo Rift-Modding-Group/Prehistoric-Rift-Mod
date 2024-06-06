@@ -66,18 +66,21 @@ public class RiftUseSemiManualMachine extends EntityAIBase {
                     if (tileEntity instanceof TileEntitySemiManualBase) {
                         TileEntitySemiManualBase semiManualBase = (TileEntitySemiManualBase) tileEntity;
                         if (this.creature.getEnergy() > 6) {
-                            if (this.animTime == 0 && semiManualBase.getTopTEntity().getMustBeReset()) {
+                            if (this.animTime == 0 && semiManualBase.getTopTEntity().getMustBeReset() && !semiManualBase.canDoResetAnim()) {
                                 this.user.setUsingWorkAnim(true);
                                 this.creature.playSound(this.user.useAnimSound(), 2, 1);
                             }
-                            if (this.animTime == this.animStompTime && semiManualBase.getTopTEntity().getMustBeReset()) semiManualBase.getTopTEntity().setMustBeReset(false);
+                            if (this.animTime == this.animStompTime && semiManualBase.getTopTEntity().getMustBeReset() && !semiManualBase.canDoResetAnim()) {
+                                semiManualBase.getTopTEntity().setMustBeReset(false);
+                                semiManualBase.setPlayResetAnim(true);
+                            }
                             if (this.animTime == this.animLength) {
                                 this.user.setUsingWorkAnim(false);
                                 this.creature.setEnergy(this.creature.getEnergy() - 3);
                                 this.creature.setXP(this.creature.getXP() + 5);
                                 this.animTime = -1;
                             }
-                            if (semiManualBase.getTopTEntity().getMustBeReset() || this.user.isUsingWorkAnim()) this.animTime++;
+                            if ((semiManualBase.getTopTEntity().getMustBeReset() || this.user.isUsingWorkAnim()) && !semiManualBase.canDoResetAnim()) this.animTime++;
                         }
                         else this.animTime = -1;
                     }

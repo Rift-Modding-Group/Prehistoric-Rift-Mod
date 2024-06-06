@@ -12,6 +12,10 @@ import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
@@ -35,6 +39,7 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
 
     @Override
     public void update() {
+        super.update();
         if (this.getTopTEntity() != null) {
             if (this.getTopTEntity().getPower() > 0) {
                 if (this.getTopTEntity().getCurrentRecipe() == null) {
@@ -45,7 +50,7 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
                     }
                 }
                 else {
-                    if (!this.getTopTEntity().getMustBeReset()) {
+                    if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
                         boolean tankUsability = this.tank.getFluid() == null || (this.tank.getFluid().getFluid() == this.getTopTEntity().getCurrentRecipe().output.getFluid() && this.tank.getFluid().amount < 4000);
                         if (tankUsability) {
                             if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
@@ -119,10 +124,5 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
 
     public FluidTank getTank() {
         return this.tank;
-    }
-
-    @Override
-    public void registerControllers(AnimationData animationData) {
-
     }
 }

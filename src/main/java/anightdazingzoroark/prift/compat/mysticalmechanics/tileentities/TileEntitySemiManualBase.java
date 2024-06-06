@@ -1,9 +1,6 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
-import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
-import mysticalmechanics.api.IMechCapability;
-import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,6 +16,10 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
@@ -32,9 +33,21 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
             TileEntitySemiManualBase.this.markDirty();
         }
     };
+    private boolean playResetAnim;
+    private int resetAnimTime;
 
     @Override
     public void update() {
+        //manage reset anim
+        if (!this.world.isRemote) {
+            if (this.canDoResetAnim()) {
+                this.setResetAnimTime(this.getResetAnimTime() + 1);
+                if (this.getResetAnimTime() >= 10) {
+                    this.setPlayResetAnim(false);
+                    this.setResetAnimTime(0);
+                }
+            }
+        }
     }
 
     public EnumFacing getFacing() {
@@ -48,12 +61,16 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
         if (compound.hasKey("items")) {
             this.itemStackHandler.deserializeNBT((NBTTagCompound) compound.getTag("items"));
         }
+        this.playResetAnim = compound.getBoolean("playResetAnim");
+        this.resetAnimTime = compound.getInteger("resetAnimTime");
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
         compound.setTag("items", this.itemStackHandler.serializeNBT());
+        compound.setBoolean("playResetAnim", this.playResetAnim);
+        compound.setInteger("resetAnimTime", this.resetAnimTime);
         return compound;
     }
 
@@ -68,6 +85,24 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
     public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(this.itemStackHandler);
         return super.getCapability(capability, facing);
+    }
+
+    public boolean canDoResetAnim() {
+        return this.playResetAnim;
+    }
+
+    public void setPlayResetAnim(boolean value) {
+        this.playResetAnim = value;
+        if (!this.world.isRemote) this.markDirty();
+    }
+
+    public int getResetAnimTime() {
+        return this.resetAnimTime;
+    }
+
+    public void setResetAnimTime(int value) {
+        this.resetAnimTime = value;
+        if (!this.world.isRemote) this.markDirty();
     }
 
     @Override
@@ -88,6 +123,12 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
         return this.writeToNBT(new NBTTagCompound());
     }
 
+    @Override
+    public void handleUpdateTag(NBTTagCompound tag) {
+        this.playResetAnim = tag.getBoolean("playResetAnim");
+        this.resetAnimTime = tag.getInteger("resetAnimTime");
+    }
+
     public boolean canInteractWith(EntityPlayer playerIn) {
         return !isInvalid() && playerIn.getDistanceSq(pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
     }
@@ -103,10 +144,29 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
     }
 
     @Override
-    public abstract void registerControllers(AnimationData animationData);
+    public void registerControllers(AnimationData animationData) {
+        animationData.addAnimationController(new AnimationController(this, "reset", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent animationEvent) {
+                if (canDoResetAnim()) {
+                    animationEvent.getController().setAnimation(new AnimationBuilder().addAnimation("animation.semi_manual_extractor.release", false));
+                    return PlayState.CONTINUE;
+                }
+                animationEvent.getController().clearAnimationCache();
+                return PlayState.STOP;
+            }
+        }));
+    }
 
     @Override
     public AnimationFactory getFactory() {
         return this.factory;
+    }
+
+    @Override
+    public void markDirty() {
+        super.markDirty();
+        IBlockState state = this.world.getBlockState(this.pos);
+        this.world.notifyBlockUpdate(this.pos, state, state, 3);
     }
 }
