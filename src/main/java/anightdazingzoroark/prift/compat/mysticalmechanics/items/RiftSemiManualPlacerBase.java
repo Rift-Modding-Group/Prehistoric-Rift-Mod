@@ -27,7 +27,7 @@ public class RiftSemiManualPlacerBase extends Item {
 
     @Override
     public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        boolean flag = this.placeSemiManMech(world, player, pos, player.getHeldItem(hand));
+        boolean flag = this.placeSemiManMech(world, player, pos, facing, player.getHeldItem(hand));
         if (flag && !player.capabilities.isCreativeMode) {
             player.getHeldItem(hand).shrink(1);
         }
@@ -37,21 +37,24 @@ public class RiftSemiManualPlacerBase extends Item {
         return flag ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
     }
 
-    protected boolean placeSemiManMech(World world, EntityPlayer player, BlockPos pos, ItemStack stack) {
-        EnumFacing facing = player.getHorizontalFacing().getOpposite();
-        BlockPos newPos = pos.offset(facing);
+    protected boolean placeSemiManMech(World world, EntityPlayer player, BlockPos pos, EnumFacing facing, ItemStack stack) {
+        EnumFacing playerFacing = player.getHorizontalFacing().getOpposite();
+        IBlockState iblockstate = world.getBlockState(pos);
+        Block oldBlock = iblockstate.getBlock();
+
+        if (!oldBlock.isReplaceable(world, pos)) pos = pos.offset(facing);
         boolean flag = true;
         if (!world.isRemote) {
             if (!world.isAirBlock(pos.up())) flag = false;
             if (flag) {
                 //bottom
-                IBlockState stateBottom = this.toPlace.getDefaultState().withProperty(BlockHorizontal.FACING, facing);
-                this.toPlace.onBlockPlacedBy(world, newPos, stateBottom, player, stack);
-                world.setBlockState(newPos, stateBottom);
+                IBlockState stateBottom = this.toPlace.getDefaultState().withProperty(BlockHorizontal.FACING, playerFacing);
+                this.toPlace.onBlockPlacedBy(world, pos, stateBottom, player, stack);
+                world.setBlockState(pos, stateBottom);
                 //top
-                IBlockState stateTop = this.topBlock.getDefaultState().withProperty(BlockHorizontal.FACING, facing);
-                this.toPlace.onBlockPlacedBy(world, newPos.up(), stateTop, player, stack);
-                world.setBlockState(newPos.up(), stateTop);
+                IBlockState stateTop = this.topBlock.getDefaultState().withProperty(BlockHorizontal.FACING, playerFacing);
+                this.toPlace.onBlockPlacedBy(world, pos.up(), stateTop, player, stack);
+                world.setBlockState(pos.up(), stateTop);
             }
         }
         return flag;

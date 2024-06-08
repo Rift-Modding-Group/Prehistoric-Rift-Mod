@@ -25,7 +25,12 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
@@ -323,5 +328,21 @@ public class RiftUtil {
     public static boolean entityIsUnderwater(EntityLivingBase entityLivingBase) {
         BlockPos highestWaterPos = entityLivingBase.getPosition().add(0, Math.ceil(entityLivingBase.height), 0);
         return entityLivingBase.world.getBlockState(highestWaterPos).getMaterial() == Material.WATER;
+    }
+
+    public static ItemStack getBucketForFluid(Fluid fluid) {
+        for (Item item : ForgeRegistries.ITEMS) {
+            ItemStack bucketStack = new ItemStack(item);
+            if (bucketStack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null)) {
+                IFluidHandlerItem fluidHandler = bucketStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+                if (fluidHandler != null) {
+                    FluidStack fluidStack = fluidHandler.drain(Fluid.BUCKET_VOLUME, false);
+                    if (fluidStack != null && fluidStack.getFluid() == fluid) {
+                        return bucketStack;
+                    }
+                }
+            }
+        }
+        return ItemStack.EMPTY;
     }
 }

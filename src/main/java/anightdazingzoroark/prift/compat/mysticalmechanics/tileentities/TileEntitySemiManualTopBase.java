@@ -16,6 +16,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
@@ -31,7 +33,7 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
         this.mechPower = new ConsumerMechCapability() {
             @Override
             public void onPowerChange() {
-                markDirty();
+                TileEntitySemiManualTopBase.this.markDirty();
             }
         };
     }
@@ -80,7 +82,11 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
 
     public void setCurrentRecipe(SemiManualExtractorRecipe value) {
         this.currentRecipe = value;
-        if (!this.world.isRemote) this.markDirty();
+        if (!this.world.isRemote) {
+            this.markDirty();
+            IBlockState state = this.world.getBlockState(this.pos);
+            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+        }
     }
 
     public int getMaxRecipeTime() {
@@ -108,7 +114,11 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
 
     public void setTimeHeld(int value) {
         this.timeHeld = value;
-        if (!this.world.isRemote) this.markDirty();
+        if (!this.world.isRemote) {
+            this.markDirty();
+            IBlockState state = this.world.getBlockState(this.pos);
+            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+        }
     }
 
     public boolean getMustBeReset() {
@@ -117,13 +127,22 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
 
     public void setMustBeReset(boolean value) {
         this.mustBeReset = value;
-        if (!this.world.isRemote) this.markDirty();
+        if (!this.world.isRemote) {
+            this.markDirty();
+            IBlockState state = this.world.getBlockState(this.pos);
+            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+        }
+    }
+
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
+        return oldState.getBlock() != newSate.getBlock();
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
-        compound.setDouble("power", this.getPower());
+        this.mechPower.writeToNBT(compound);
         compound.setBoolean("mustBeReset", this.mustBeReset);
         compound.setInteger("timeHeld", this.timeHeld);
         compound.setString("currentRecipe", this.getCurrentRecipeId());
@@ -133,7 +152,7 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        this.mechPower.setPower(compound.getDouble("power"), null);
+        this.mechPower.readFromNBT(compound);
         this.mustBeReset = compound.getBoolean("mustBeReset");
         this.timeHeld = compound.getInteger("timeHeld");
         this.currentRecipe = RiftMMRecipes.getSMExtractorRecipe(compound.getString("currentRecipe"));
@@ -142,9 +161,7 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
     @Override
     @Nullable
     public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound nbtTag = new NBTTagCompound();
-        this.writeToNBT(nbtTag);
-        return new SPacketUpdateTileEntity(this.pos, 1, nbtTag);
+        return new SPacketUpdateTileEntity(this.pos, 0, this.getUpdateTag());
     }
 
     @Override
@@ -159,7 +176,7 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
 
     @Override
     public void handleUpdateTag(NBTTagCompound tag) {
-        this.mechPower.setPower(tag.getDouble("power"), null);
+        this.mechPower.readFromNBT(tag);
         this.mustBeReset = tag.getBoolean("mustBeReset");
         this.timeHeld = tag.getInteger("timeHeld");
         this.currentRecipe = RiftMMRecipes.getSMExtractorRecipe(tag.getString("currentRecipe"));
@@ -169,7 +186,5 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
     public void markDirty() {
         super.markDirty();
         Misc.syncTE(this, false);
-        IBlockState state = this.world.getBlockState(this.pos);
-        this.world.notifyBlockUpdate(this.pos, state, state, 3);
     }
 }

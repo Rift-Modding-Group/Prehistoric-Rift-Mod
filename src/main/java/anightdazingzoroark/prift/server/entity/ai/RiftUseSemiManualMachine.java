@@ -71,8 +71,8 @@ public class RiftUseSemiManualMachine extends EntityAIBase {
                                 this.creature.playSound(this.user.useAnimSound(), 2, 1);
                             }
                             if (this.animTime == this.animStompTime && semiManualBase.getTopTEntity().getMustBeReset() && !semiManualBase.canDoResetAnim()) {
-                                semiManualBase.getTopTEntity().setMustBeReset(false);
                                 semiManualBase.setPlayResetAnim(true);
+                                semiManualBase.getTopTEntity().setMustBeReset(false);
                             }
                             if (this.animTime == this.animLength) {
                                 this.user.setUsingWorkAnim(false);

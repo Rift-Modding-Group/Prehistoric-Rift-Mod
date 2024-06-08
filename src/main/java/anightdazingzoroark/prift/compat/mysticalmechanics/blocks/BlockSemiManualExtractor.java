@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractorTop;
@@ -8,6 +9,7 @@ import anightdazingzoroark.prift.server.ServerProxy;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -15,6 +17,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import javax.annotation.Nullable;
 
@@ -28,7 +31,19 @@ public class BlockSemiManualExtractor extends BlockSemiManualBase {
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
-            playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_SEMI_MANUAL_EXTRACTOR, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            if (playerIn.getHeldItem(hand).hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null)) {
+                TileEntitySemiManualExtractor te = (TileEntitySemiManualExtractor) worldIn.getTileEntity(pos);
+                if (te != null) {
+                    if (te.getTank().getFluid() != null) {
+                        if (te.getTank().getFluid().amount >= 1000) {
+                            playerIn.getHeldItem(hand).shrink(1);
+                            playerIn.inventory.addItemStackToInventory(RiftUtil.getBucketForFluid(te.getTank().getFluid().getFluid()));
+                            te.drain(1000, true);
+                        }
+                    }
+                }
+            }
+            else playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_SEMI_MANUAL_EXTRACTOR, worldIn, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }

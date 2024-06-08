@@ -8,7 +8,7 @@ public class ConsumerMechCapability implements IMechCapability {
     public double[] power = new double[6];
     double maxPower;
     boolean dirty = true;
-    boolean additive = false; //Whether power input will be added together or the largest will be chosen
+    boolean additive = false;
 
     public void setAdditive(boolean additive) {
         this.additive = additive;

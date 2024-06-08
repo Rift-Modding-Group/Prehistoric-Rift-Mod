@@ -22,6 +22,10 @@ public abstract class BlockSemiManualBaseTop extends BlockSemiManualBase {
             Block bottomBlock = worldIn.getBlockState(pos.down()).getBlock();
 
             if (bottomBlock instanceof BlockSemiManualBase) {
+                //drop items from inventory
+                ((BlockSemiManualBase)bottomBlock).dropInventory(worldIn, pos.down());
+
+                //destroy block
                 worldIn.destroyBlock(pos.down(), false);
             }
         }

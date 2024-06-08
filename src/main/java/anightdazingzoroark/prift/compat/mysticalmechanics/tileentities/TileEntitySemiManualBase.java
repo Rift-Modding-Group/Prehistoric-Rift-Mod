@@ -11,6 +11,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.IItemHandler;
@@ -67,7 +68,7 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        super.writeToNBT(compound);
+        compound = super.writeToNBT(compound);
         compound.setTag("items", this.itemStackHandler.serializeNBT());
         compound.setBoolean("playResetAnim", this.playResetAnim);
         compound.setInteger("resetAnimTime", this.resetAnimTime);
@@ -93,7 +94,11 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
 
     public void setPlayResetAnim(boolean value) {
         this.playResetAnim = value;
-        if (!this.world.isRemote) this.markDirty();
+        if (!this.world.isRemote) {
+            this.markDirty();
+            IBlockState state = this.world.getBlockState(this.pos);
+            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+        }
     }
 
     public int getResetAnimTime() {
@@ -102,15 +107,17 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
 
     public void setResetAnimTime(int value) {
         this.resetAnimTime = value;
-        if (!this.world.isRemote) this.markDirty();
+        if (!this.world.isRemote) {
+            this.markDirty();
+            IBlockState state = this.world.getBlockState(this.pos);
+            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+        }
     }
 
     @Override
     @Nullable
     public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound nbtTag = new NBTTagCompound();
-        this.writeToNBT(nbtTag);
-        return new SPacketUpdateTileEntity(this.pos, 1, nbtTag);
+        return new SPacketUpdateTileEntity(this.pos, 1, this.getUpdateTag());
     }
 
     @Override
@@ -164,9 +171,7 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
     }
 
     @Override
-    public void markDirty() {
-        super.markDirty();
-        IBlockState state = this.world.getBlockState(this.pos);
-        this.world.notifyBlockUpdate(this.pos, state, state, 3);
+    public AxisAlignedBB getRenderBoundingBox() {
+        return new AxisAlignedBB(this.getPos().add(-1, 0, -1), this.getPos().add(1, 2, 1));
     }
 }

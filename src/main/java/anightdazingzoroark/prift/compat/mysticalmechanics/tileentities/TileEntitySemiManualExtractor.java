@@ -2,9 +2,11 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtractorRecipe;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -29,7 +31,7 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
             @Override
             protected void onContentsChanged() {
                 markDirty();
-                getWorld().notifyBlockUpdate(pos, getWorld().getBlockState(pos), getWorld().getBlockState(pos), 2);
+                if (!world.isRemote) getWorld().notifyBlockUpdate(pos, getWorld().getBlockState(pos), getWorld().getBlockState(pos), 2);
             }
         };
         this.tank.setTileEntity(this);
@@ -40,33 +42,38 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
     @Override
     public void update() {
         super.update();
-        if (this.getTopTEntity() != null) {
-            if (this.getTopTEntity().getPower() > 0) {
-                if (this.getTopTEntity().getCurrentRecipe() == null) {
-                    for (SemiManualExtractorRecipe recipe : RiftMMRecipes.smExtractorRecipes) {
-                        if (recipe.matches(this.getTopTEntity().getPower(), this.getInputItem())) {
-                            this.getTopTEntity().setCurrentRecipe(recipe);
+        System.out.println("has fluid: "+(this.tank.getFluid() != null));
+        //for updating in case of desync
+        FluidStack fluidStack;
+        if (!this.world.isRemote) {
+            if (this.getTopTEntity() != null) {
+                if (this.getTopTEntity().getPower() > 0) {
+                    if (this.getTopTEntity().getCurrentRecipe() == null) {
+                        for (SemiManualExtractorRecipe recipe : RiftMMRecipes.smExtractorRecipes) {
+                            if (recipe.matches(this.getTopTEntity().getPower(), this.getInputItem())) {
+                                this.getTopTEntity().setCurrentRecipe(recipe);
+                            }
                         }
                     }
-                }
-                else {
-                    if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
-                        boolean tankUsability = this.tank.getFluid() == null || (this.tank.getFluid().getFluid() == this.getTopTEntity().getCurrentRecipe().output.getFluid() && this.tank.getFluid().amount < 4000);
-                        if (tankUsability) {
-                            if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
-                                this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);
+                    else {
+                        if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
+                            boolean tankUsability = this.tank.getFluid() == null || (this.tank.getFluid().getFluid() == this.getTopTEntity().getCurrentRecipe().output.getFluid() && this.tank.getFluid().amount < 4000);
+                            if (tankUsability) {
+                                if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
+                                    this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);
+                                }
+                                else {
+                                    this.tank.fillInternal(this.getTopTEntity().getCurrentRecipe().output, true);
+                                    this.getInputItem().shrink(1);
+                                    this.getTopTEntity().setTimeHeld(0);
+                                    this.getTopTEntity().setMustBeReset(true);
+                                }
                             }
-                            else {
-                                this.tank.fillInternal(this.getTopTEntity().getCurrentRecipe().output, true);
-                                this.getInputItem().shrink(1);
+                            if (!this.getTopTEntity().getCurrentRecipe().matches(this.getTopTEntity().getPower(), this.getInputItem())) {
                                 this.getTopTEntity().setTimeHeld(0);
+                                this.getTopTEntity().setCurrentRecipe(null);
                                 this.getTopTEntity().setMustBeReset(true);
                             }
-                        }
-                        if (!this.getTopTEntity().getCurrentRecipe().matches(this.getTopTEntity().getPower(), this.getInputItem())) {
-                            this.getTopTEntity().setTimeHeld(0);
-                            this.getTopTEntity().setCurrentRecipe(null);
-                            this.getTopTEntity().setMustBeReset(true);
                         }
                     }
                 }
@@ -82,7 +89,7 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        super.writeToNBT(compound);
+        compound = super.writeToNBT(compound);
         this.tank.writeToNBT(compound);
         return compound;
     }
@@ -93,11 +100,28 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
         return super.hasCapability(capability, facing);
     }
 
+    @Override
+    public void onLoad() {
+        if (!this.world.isRemote) {
+            this.world.notifyBlockUpdate(this.pos, getWorld().getBlockState(this.pos), getWorld().getBlockState(this.pos), 2);
+        }
+        else {
+            this.markDirty();
+            this.world.markBlockRangeForRenderUpdate(this.pos, this.pos);
+        }
+    }
+
     @Nullable
     @Override
     public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
         if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(this.tank);
         return super.getCapability(capability, facing);
+    }
+
+    @Override
+    public void handleUpdateTag(NBTTagCompound tag) {
+        super.handleUpdateTag(tag);
+        this.tank.readFromNBT(tag);
     }
 
     @Override
