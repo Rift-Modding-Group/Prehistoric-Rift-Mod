@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.recipes;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 
@@ -20,5 +21,9 @@ public abstract class SemiManualRecipeBase {
 
     public double getMinPower() {
         return this.minPower;
+    }
+
+    public boolean matches(double powerIn, ItemStack itemIn) {
+        return powerIn >= this.getMinPower() && this.input.apply(itemIn);
     }
 }

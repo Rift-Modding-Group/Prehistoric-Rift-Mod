@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtractorRecipe;
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualRecipeBase;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
@@ -24,7 +25,7 @@ import javax.annotation.Nullable;
 import java.util.Random;
 
 public class TileEntitySemiManualTopBase extends TileEntity implements ITickable {
-    private SemiManualExtractorRecipe currentRecipe;
+    private SemiManualRecipeBase currentRecipe;
     private final IMechCapability mechPower;
     private int timeHeld;
     private boolean mustBeReset = false;
@@ -71,7 +72,7 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
         return super.getCapability(capability, facing);
     }
 
-    public SemiManualExtractorRecipe getCurrentRecipe() {
+    public SemiManualRecipeBase getCurrentRecipe() {
         return this.currentRecipe;
     }
 
@@ -80,7 +81,7 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
         return "";
     }
 
-    public void setCurrentRecipe(SemiManualExtractorRecipe value) {
+    public void setCurrentRecipe(SemiManualRecipeBase value) {
         this.currentRecipe = value;
         if (!this.world.isRemote) {
             this.markDirty();
@@ -155,7 +156,7 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
         this.mechPower.readFromNBT(compound);
         this.mustBeReset = compound.getBoolean("mustBeReset");
         this.timeHeld = compound.getInteger("timeHeld");
-        this.currentRecipe = RiftMMRecipes.getSMExtractorRecipe(compound.getString("currentRecipe"));
+        this.currentRecipe = RiftMMRecipes.getSMRecipe(compound.getString("currentRecipe"));
     }
 
     @Override
@@ -179,7 +180,7 @@ public class TileEntitySemiManualTopBase extends TileEntity implements ITickable
         this.mechPower.readFromNBT(tag);
         this.mustBeReset = tag.getBoolean("mustBeReset");
         this.timeHeld = tag.getInteger("timeHeld");
-        this.currentRecipe = RiftMMRecipes.getSMExtractorRecipe(tag.getString("currentRecipe"));
+        this.currentRecipe = RiftMMRecipes.getSMRecipe(tag.getString("currentRecipe"));
     }
 
     @Override

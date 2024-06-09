@@ -277,3 +277,5 @@ tile.lead_powered_crank.name=Lead Powered Crank
 tile.blow_powered_turbine.name=Blow Powered Turbine
 tile.hand_crank.name=Hand Crank
 tile.feeding_trough.name=Feeding Trough
+tile.semi_automatic_extractor.name=Semi Automatic Extractor
+tile.semi_automatic_presser.name=Semi Automatic Presser

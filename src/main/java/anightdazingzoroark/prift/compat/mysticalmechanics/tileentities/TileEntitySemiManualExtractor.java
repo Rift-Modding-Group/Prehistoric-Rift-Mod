@@ -42,9 +42,6 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
     @Override
     public void update() {
         super.update();
-        System.out.println("has fluid: "+(this.tank.getFluid() != null));
-        //for updating in case of desync
-        FluidStack fluidStack;
         if (!this.world.isRemote) {
             if (this.getTopTEntity() != null) {
                 if (this.getTopTEntity().getPower() > 0) {
@@ -57,13 +54,13 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
                     }
                     else {
                         if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
-                            boolean tankUsability = this.tank.getFluid() == null || (this.tank.getFluid().getFluid() == this.getTopTEntity().getCurrentRecipe().output.getFluid() && this.tank.getFluid().amount < 4000);
+                            boolean tankUsability = this.tank.getFluid() == null || (this.tank.getFluid().getFluid() == ((SemiManualExtractorRecipe)this.getTopTEntity().getCurrentRecipe()).output.getFluid() && this.tank.getFluid().amount < 4000);
                             if (tankUsability) {
                                 if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
                                     this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);
                                 }
                                 else {
-                                    this.tank.fillInternal(this.getTopTEntity().getCurrentRecipe().output, true);
+                                    this.tank.fillInternal(((SemiManualExtractorRecipe)this.getTopTEntity().getCurrentRecipe()).output, true);
                                     this.getInputItem().shrink(1);
                                     this.getTopTEntity().setTimeHeld(0);
                                     this.getTopTEntity().setMustBeReset(true);

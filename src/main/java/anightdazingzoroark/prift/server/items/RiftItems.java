@@ -187,6 +187,8 @@ public class RiftItems {
         OreDictionary.registerOre("listAllmeat", RiftItems.COOKED_FIBROUS_MEAT);
         OreDictionary.registerOre("listAllmeat", RiftItems.RAW_HADROSAUR_MEAT);
         OreDictionary.registerOre("listAllmeat", RiftItems.COOKED_HADROSAUR_MEAT);
+
+        if (GeneralConfig.canUseMM()) RiftMMItems.registerOreDicTags();
     }
 
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {

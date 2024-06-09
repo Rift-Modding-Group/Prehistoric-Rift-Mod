@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualPresser;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
@@ -125,6 +126,11 @@ public class ClientProxy extends ServerProxy {
         else if (id == GUI_SEMI_MANUAL_EXTRACTOR) {
             if (tileEntity instanceof TileEntitySemiManualExtractor) {
                 return new RiftSemiManualExtractorMenu((TileEntitySemiManualExtractor) tileEntity, player.inventory);
+            }
+        }
+        else if (id == GUI_SEMI_MANUAL_PRESSER) {
+            if (tileEntity instanceof TileEntitySemiManualPresser) {
+                return new RiftSemiManualPresserMenu((TileEntitySemiManualPresser) tileEntity, player.inventory);
             }
         }
         return null;

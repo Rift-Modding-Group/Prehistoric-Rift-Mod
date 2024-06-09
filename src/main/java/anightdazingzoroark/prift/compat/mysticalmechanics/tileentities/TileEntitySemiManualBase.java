@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 
 public abstract class TileEntitySemiManualBase extends TileEntity implements IAnimatable, ITickable {
     private final AnimationFactory factory = new AnimationFactory(this);
-    private final ItemStackHandler itemStackHandler = new ItemStackHandler(1) {
+    private final ItemStackHandler itemStackHandler = new ItemStackHandler(2) {
         @Override
         protected void onContentsChanged(int slot) {
             TileEntitySemiManualBase.this.markDirty();
@@ -132,6 +132,9 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
 
     @Override
     public void handleUpdateTag(NBTTagCompound tag) {
+        if (tag.hasKey("items")) {
+            this.itemStackHandler.deserializeNBT((NBTTagCompound) tag.getTag("items"));
+        }
         this.playResetAnim = tag.getBoolean("playResetAnim");
         this.resetAnimTime = tag.getInteger("resetAnimTime");
     }

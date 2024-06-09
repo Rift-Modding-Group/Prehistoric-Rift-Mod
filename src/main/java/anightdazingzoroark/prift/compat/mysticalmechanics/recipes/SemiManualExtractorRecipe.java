@@ -12,8 +12,4 @@ public class SemiManualExtractorRecipe extends SemiManualRecipeBase {
         super(input, id, minPower);
         this.output = output;
     }
-
-    public boolean matches(double powerIn, ItemStack itemIn) {
-        return powerIn >= this.getMinPower() && this.input.apply(itemIn);
-    }
 }

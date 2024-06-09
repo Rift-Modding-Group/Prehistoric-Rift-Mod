@@ -97,12 +97,15 @@ public abstract class BlockSemiManualBase extends Block implements ITileEntityPr
         TileEntity tileEntity = worldIn.getTileEntity(pos);
         if (tileEntity instanceof TileEntitySemiManualBase) {
             TileEntitySemiManualBase semiManualBase = (TileEntitySemiManualBase)tileEntity;
-            ItemStack stack = semiManualBase.getInputItem();
-            if (!stack.isEmpty()) {
-                EntityItem droppedItem = new EntityItem(worldIn);
-                droppedItem.setPosition(pos.getX(), pos.getY() + 1, pos.getZ());
-                droppedItem.setItem(stack);
-                worldIn.spawnEntity(droppedItem);
+            IItemHandler itemHandler = semiManualBase.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+            for (int x = 0; x < itemHandler.getSlots(); x++) {
+                ItemStack stack = itemHandler.getStackInSlot(x);
+                if (!stack.isEmpty()) {
+                    EntityItem droppedItem = new EntityItem(worldIn);
+                    droppedItem.setPosition(pos.getX(), pos.getY() + 1, pos.getZ());
+                    droppedItem.setItem(stack);
+                    worldIn.spawnEntity(droppedItem);
+                }
             }
         }
     }
