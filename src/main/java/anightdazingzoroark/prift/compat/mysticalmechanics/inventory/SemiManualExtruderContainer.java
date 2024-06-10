@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.inventory;
 
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualPresser;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtruder;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
@@ -11,17 +11,17 @@ import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
 
-public class SemiManualPresserContainer extends Container {
-    private TileEntitySemiManualPresser semiManualPresser;
+public class SemiManualExtruderContainer extends Container {
+    private final TileEntitySemiManualExtruder semiManualExtruder;
     private final EntityPlayer player;
 
-    public SemiManualPresserContainer(TileEntitySemiManualPresser semiManualPresser, EntityPlayer player) {
-        this.semiManualPresser = semiManualPresser;
+    public SemiManualExtruderContainer(TileEntitySemiManualExtruder semiManualExtruder, EntityPlayer player) {
+        this.semiManualExtruder = semiManualExtruder;
         this.player = player;
 
         //extractor inventory
         //item
-        IItemHandler itemHandler = this.semiManualPresser.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        IItemHandler itemHandler = this.semiManualExtruder.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
         this.addSlotToContainer(new SlotItemHandler(itemHandler, 0, 45, 36));
         this.addSlotToContainer(new SlotItemHandler(itemHandler, 1, 116, 36) {
             @Override
@@ -72,6 +72,6 @@ public class SemiManualPresserContainer extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        return this.semiManualPresser.canInteractWith(playerIn);
+        return this.semiManualExtruder.canInteractWith(playerIn);
     }
 }

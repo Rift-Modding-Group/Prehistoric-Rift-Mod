@@ -13,8 +13,11 @@ public class RiftMMItems {
     public static Item TURBINE_BLADE;
     public static Item SEMI_MANUAL_EXTRACTOR;
     public static Item SEMI_MANUAL_PRESSER;
+    public static Item SEMI_MANUAL_EXTRUDER;
     public static Item IRON_PLATE;
     public static Item GOLD_PLATE;
+    public static Item IRON_ROD;
+    public static Item GOLD_ROD;
 
     public static void registerMMItems() {
         BLOW_POWERED_TURBINE = riftBlowPoweredTurbineItem("blow_powered_turbine");
@@ -22,13 +25,18 @@ public class RiftMMItems {
         TURBINE_BLADE = RiftItems.riftGenericItem("turbine_blade", false);
         SEMI_MANUAL_EXTRACTOR = riftSemiManualPlacerItem("semi_manual_extractor", RiftMMBlocks.SEMI_MANUAL_EXTRACTOR, RiftMMBlocks.SEMI_MANUAL_EXTRACTOR_TOP);
         SEMI_MANUAL_PRESSER = riftSemiManualPlacerItem("semi_manual_presser", RiftMMBlocks.SEMI_MANUAL_PRESSER, RiftMMBlocks.SEMI_MANUAL_PRESSER_TOP);
+        SEMI_MANUAL_EXTRUDER = riftSemiManualPlacerItem("semi_manual_extruder", RiftMMBlocks.SEMI_MANUAL_EXTRUDER, RiftMMBlocks.SEMI_MANUAL_EXTRUDER_TOP);
         IRON_PLATE = RiftItems.riftGenericItem("iron_plate", true);
         GOLD_PLATE = RiftItems.riftGenericItem("gold_plate", true);
+        IRON_ROD = RiftItems.riftGenericItem("iron_rod", true);
+        GOLD_ROD = RiftItems.riftGenericItem("gold_rod", true);
     }
 
     public static void registerOreDicTags() {
         OreDictionary.registerOre("plateIron", IRON_PLATE);
         OreDictionary.registerOre("plateGold", GOLD_PLATE);
+        OreDictionary.registerOre("stickIron", IRON_ROD);
+        OreDictionary.registerOre("stickGold", GOLD_ROD);
     }
 
     public static Item riftBlowPoweredTurbineItem(String registryName) {

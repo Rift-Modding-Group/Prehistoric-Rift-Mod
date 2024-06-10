@@ -44,7 +44,7 @@ public class SemiManualExtractorRenderer extends GeoBlockRenderer<TileEntitySemi
             GL11.glPushMatrix();
             RenderHelper.enableStandardItemLighting();
             GlStateManager.enableLighting();
-            GL11.glTranslated(x + 0.5, y + 0.975, z + 0.5);
+            GL11.glTranslated(x + 0.5, y + 0.8, z + 0.5);
             GL11.glScaled(0.25, 0.25, 0.25);
             Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.NONE);
             GL11.glPopMatrix();

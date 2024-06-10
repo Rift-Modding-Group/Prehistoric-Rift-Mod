@@ -279,3 +279,4 @@ tile.hand_crank.name=Hand Crank
 tile.feeding_trough.name=Feeding Trough
 tile.semi_automatic_extractor.name=Semi Automatic Extractor
 tile.semi_automatic_presser.name=Semi Automatic Presser
+tile.semi_automatic_extruder.name=Semi Automatic Extruder

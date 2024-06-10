@@ -31,9 +31,4 @@ public abstract class BlockSemiManualBaseTop extends BlockSemiManualBase {
         }
         super.onBlockHarvested(worldIn, pos, state, player);
     }
-
-    @Override
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-        return null;
-    }
 }
