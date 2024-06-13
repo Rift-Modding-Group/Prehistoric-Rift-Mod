@@ -13,6 +13,7 @@ import anightdazingzoroark.prift.config.ParasaurolophusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
+import com.codetaylor.mc.pyrotech.modules.tech.bloomery.block.BlockBloomery;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustionWorkerStoneBase;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
 import com.google.common.base.Predicate;
@@ -366,6 +367,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         Block block = this.world.getBlockState(pos).getBlock();
         if (GeneralConfig.canUsePyrotech()) {
             if (block instanceof BlockCombustionWorkerStoneBase) return true;
+            if (block instanceof BlockBloomery) return true;
         }
         if (GeneralConfig.canUseMM()) {
             if (block instanceof BlockBlowPoweredTurbine) return true;

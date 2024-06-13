@@ -50,14 +50,13 @@ public class TileEntitySemiManualExtruder extends TileEntitySemiManualBase {
                             }
                         }
                     }
+
+                    //rotation update
+                    if (!this.getTopTEntity().getMustBeReset()) {
+                        this.setRotation(this.rotation + (float) this.getTopTEntity().getPower());
+                        if (this.getRotation() >= 360f) this.setRotation(this.rotation - 360f);
+                    }
                 }
-            }
-        }
-        //rotation update
-        if (this.getTopTEntity() != null) {
-            if (this.getTopTEntity().getPower() > 0) {
-                this.setRotation(this.rotation + (float) this.getTopTEntity().getPower());
-                if (this.getRotation() >= 360f) this.setRotation(this.rotation - 360f);
             }
         }
     }

@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import com.codetaylor.mc.pyrotech.IAirflowConsumerCapability;
 import com.codetaylor.mc.pyrotech.modules.core.ModuleCore;
+import com.codetaylor.mc.pyrotech.modules.tech.bloomery.tile.TileBloomery;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,7 +37,7 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
     public boolean shouldExecute() {
         TileEntity te = this.parasaur.world.getTileEntity(this.parasaur.getWorkstationPos());
         if (te != null) {
-            if (GeneralConfig.canUsePyrotech()) return te instanceof TileCombustionWorkerStoneBase && this.parasaur.isUsingWorkstation();
+            if (GeneralConfig.canUsePyrotech()) return (te instanceof TileCombustionWorkerStoneBase || te instanceof TileBloomery) && this.parasaur.isUsingWorkstation();
         }
         return false;
     }
@@ -72,6 +73,16 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
                     if (tileEntity instanceof TileCombustionWorkerStoneBase) {
                         TileCombustionWorkerStoneBase stoked = (TileCombustionWorkerStoneBase) tileEntity;
                         if (this.parasaur.getEnergy() > 6 && stoked.hasFuel() && stoked.workerIsActive() && stoked.hasInput()) {
+                            if (this.animTime == 0) {
+                                this.parasaur.setBlowing(true);
+                                this.parasaur.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);
+                            }
+                            if (this.animTime == this.animBlowTime) stoked.consumeAirflow(8f, false);
+                        }
+                    }
+                    if (tileEntity instanceof TileBloomery) {
+                        TileBloomery stoked = (TileBloomery) tileEntity;
+                        if (this.parasaur.getEnergy() > 6 && stoked.isActive()) {
                             if (this.animTime == 0) {
                                 this.parasaur.setBlowing(true);
                                 this.parasaur.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);

@@ -15,5 +15,7 @@ public class RiftMMTileEntities {
         GameRegistry.registerTileEntity(TileEntitySemiManualPresserTop.class, new ResourceLocation(RiftInitialize.MODID, "semi_manual_presser_top"));
         GameRegistry.registerTileEntity(TileEntitySemiManualExtruder.class, new ResourceLocation(RiftInitialize.MODID, "semi_manual_extruder"));
         GameRegistry.registerTileEntity(TileEntitySemiManualExtruderTop.class, new ResourceLocation(RiftInitialize.MODID, "semi_manual_extruder_top"));
+        GameRegistry.registerTileEntity(TileEntitySemiManualHammerer.class, new ResourceLocation(RiftInitialize.MODID, "semi_manual_hammerer"));
+        GameRegistry.registerTileEntity(TileEntitySemiManualHammererTop.class, new ResourceLocation(RiftInitialize.MODID, "semi_manual_hammerer_top"));
     }
 }

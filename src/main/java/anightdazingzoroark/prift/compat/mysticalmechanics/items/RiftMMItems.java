@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.items;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -14,6 +15,7 @@ public class RiftMMItems {
     public static Item SEMI_MANUAL_EXTRACTOR;
     public static Item SEMI_MANUAL_PRESSER;
     public static Item SEMI_MANUAL_EXTRUDER;
+    public static Item SEMI_MANUAL_HAMMERER;
     public static Item IRON_PLATE;
     public static Item GOLD_PLATE;
     public static Item IRON_ROD;
@@ -26,6 +28,7 @@ public class RiftMMItems {
         SEMI_MANUAL_EXTRACTOR = riftSemiManualPlacerItem("semi_manual_extractor", RiftMMBlocks.SEMI_MANUAL_EXTRACTOR, RiftMMBlocks.SEMI_MANUAL_EXTRACTOR_TOP);
         SEMI_MANUAL_PRESSER = riftSemiManualPlacerItem("semi_manual_presser", RiftMMBlocks.SEMI_MANUAL_PRESSER, RiftMMBlocks.SEMI_MANUAL_PRESSER_TOP);
         SEMI_MANUAL_EXTRUDER = riftSemiManualPlacerItem("semi_manual_extruder", RiftMMBlocks.SEMI_MANUAL_EXTRUDER, RiftMMBlocks.SEMI_MANUAL_EXTRUDER_TOP);
+        if (GeneralConfig.canUsePyrotech()) SEMI_MANUAL_HAMMERER = riftSemiManualPlacerItem("semi_manual_hammerer", RiftMMBlocks.SEMI_MANUAL_HAMMERER, RiftMMBlocks.SEMI_MANUAL_HAMMERER_TOP);
         IRON_PLATE = RiftItems.riftGenericItem("iron_plate", true);
         GOLD_PLATE = RiftItems.riftGenericItem("gold_plate", true);
         IRON_ROD = RiftItems.riftGenericItem("iron_rod", true);

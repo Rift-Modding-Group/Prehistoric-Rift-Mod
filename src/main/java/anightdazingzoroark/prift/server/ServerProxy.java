@@ -3,10 +3,12 @@ package anightdazingzoroark.prift.server;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtractorContainer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtruderContainer;
+import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualHammererContainer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualPresserContainer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtruder;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualHammerer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualPresser;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
 import anightdazingzoroark.prift.config.GeneralConfig;
@@ -56,6 +58,7 @@ public class ServerProxy implements IGuiHandler {
     public static final int GUI_SEMI_MANUAL_EXTRACTOR = 7;
     public static final int GUI_SEMI_MANUAL_PRESSER = 8;
     public static final int GUI_SEMI_MANUAL_EXTRUDER = 9;
+    public static final int GUI_SEMI_MANUAL_HAMMERER = 10;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
@@ -123,6 +126,11 @@ public class ServerProxy implements IGuiHandler {
         else if (id == GUI_SEMI_MANUAL_EXTRUDER) {
             if (tileEntity instanceof TileEntitySemiManualExtruder) {
                 return new SemiManualExtruderContainer((TileEntitySemiManualExtruder)tileEntity, player);
+            }
+        }
+        else if (id == GUI_SEMI_MANUAL_HAMMERER) {
+            if (tileEntity instanceof TileEntitySemiManualHammerer) {
+                return new SemiManualHammererContainer((TileEntitySemiManualHammerer)tileEntity, player);
             }
         }
         return null;
