@@ -103,6 +103,16 @@ item.catapult_boulder.name=Catapult Boulder
 item.wrench.name=Wrench
 item.command_console.name=Command Console
 
+item.iron_plate.name=Iron Plate
+item.gold_plate.name=Gold Plate
+item.iron_rod.name=Iron Rod
+item.gold_rod.name=Gold Rod
+
+item.semi_manual_extractor.name=Semi Automatic Extractor
+item.semi_manual_presser.name=Semi Automatic Presser
+item.semi_manual_extruder.name=Semi Automatic Extruder
+item.semi_manual_hammerer.name=Semi Automatic Hammerer
+
 radial.choice.ride=Ride
 radial.choice.state=State
 radial.choice.inventory=Inventory
@@ -280,3 +290,4 @@ tile.feeding_trough.name=Feeding Trough
 tile.semi_automatic_extractor.name=Semi Automatic Extractor
 tile.semi_automatic_presser.name=Semi Automatic Presser
 tile.semi_automatic_extruder.name=Semi Automatic Extruder
+tile.semi_automatic_hammerer.name=Semi Automatic Hammerer

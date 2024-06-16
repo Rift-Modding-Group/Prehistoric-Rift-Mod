@@ -39,7 +39,7 @@ public class RiftSemiManualExtruderMenu extends GuiContainer {
     }
 
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        this.fontRenderer.drawString(I18n.format("tile.semi_automatic_extruder.name"), 8, 6, 4210752);
+        this.fontRenderer.drawString(I18n.format("tile.semi_manual_extruder.name"), 8, 6, 4210752);
         this.fontRenderer.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
     }
 

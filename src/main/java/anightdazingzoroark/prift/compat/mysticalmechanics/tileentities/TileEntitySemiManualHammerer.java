@@ -33,10 +33,8 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
                         }
                     }
                     else {
-                        System.out.println("max time: "+hammerer.getMaxHammererTime());
-                        System.out.println("current time: "+hammerer.getTimeHeld());
                         if (!hammerer.getMustBeReset() && !this.canDoResetAnim()) {
-                            boolean outputUsability = (this.getOutpuItem().isEmpty() || Ingredient.fromStacks(BloomAnvilRecipe.getRecipe(this.getInputItem(), AnvilRecipe.EnumTier.OBSIDIAN, AnvilRecipe.EnumType.HAMMER).getOutput()).apply(this.getOutpuItem())) && this.getOutpuItem().getCount() < this.getOutpuItem().getMaxStackSize();
+                            boolean outputUsability = BloomAnvilRecipe.getRecipe(this.getInputItem(), AnvilRecipe.EnumTier.OBSIDIAN, AnvilRecipe.EnumType.HAMMER) != null && (this.getOutpuItem().isEmpty() || Ingredient.fromStacks(BloomAnvilRecipe.getRecipe(this.getInputItem(), AnvilRecipe.EnumTier.OBSIDIAN, AnvilRecipe.EnumType.HAMMER).getOutput()).apply(this.getOutpuItem())) && this.getOutpuItem().getCount() < this.getOutpuItem().getMaxStackSize();
                             if (outputUsability) {
                                 if (hammerer.getTimeHeld() < hammerer.getMaxHammererTime()) {
                                     hammerer.setTimeHeld(hammerer.getTimeHeld() + 1);
@@ -44,7 +42,7 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
                                 else {
                                     IItemHandler itemHandler = this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
                                     if (itemHandler != null) {
-                                        ItemStack outputStack = BloomAnvilRecipe.getRecipe(this.getInputItem(), AnvilRecipe.EnumTier.OBSIDIAN, AnvilRecipe.EnumType.HAMMER).getOutput().copy();
+                                        ItemStack outputStack = hammerer.getHammererRecipe().getOutput().copy();
                                         outputStack.setCount(16);
                                         ItemHandlerHelper.insertItemStacked(itemHandler, outputStack, false);
                                     }
@@ -53,8 +51,7 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
                                     hammerer.setMustBeReset(true);
                                 }
                             }
-                            System.out.println(hammerer.getHammererRecipe().getInput());
-                            if (!hammerer.getHammererRecipe().getInput().apply(this.getInputItem()) || hammerer.getPower() < 20D) {
+                            if (!Ingredient.fromStacks(hammerer.getHammererRecipe().getOutputBloom()).apply(this.getInputItem()) || hammerer.getPower() < 20D) {
                                 hammerer.setTimeHeld(0);
                                 hammerer.setHammererRecipe(null);
                                 hammerer.setMustBeReset(true);

@@ -97,7 +97,7 @@ repositories {
         url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
     }
     maven {
-        url "https://maven.mcmoddev.com/"
+        url "https://mmdmaven.blamejared.com/"
     }
     maven {
         // location of the maven that hosts JEI files
@@ -135,7 +135,8 @@ dependencies {
     }
     runtimeOnly 'com.cleanroommc:strip-latest-forge-requirements:1.0'
     implementation 'software.bernie.geckolib:geckolib-forge-1.12.2:3.0.31'
-    compileOnly "net.ilexiconn:llibrary:1.7.19-1.12.2"
+    //compileOnly "net.ilexiconn:llibrary:1.7.19-1.12.2"
+    compileOnly 'curse.maven:llibrary-243298:3116493'
     compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
     compileOnly "curse.maven:pyrotech-306676:4956838"
     compileOnly "curse.maven:athenaeum-284350:4633750"

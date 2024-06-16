@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualHammererTop;
 import anightdazingzoroark.prift.server.ServerProxy;
 import net.minecraft.block.state.IBlockState;
@@ -32,6 +33,6 @@ public class BlockSemiManualHammererTop extends BlockSemiManualBaseTop {
 
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-        return new ItemStack(RiftMMBlocks.SEMI_MANUAL_HAMMERER);
+        return new ItemStack(RiftMMItems.SEMI_MANUAL_HAMMERER);
     }
 }
