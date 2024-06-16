@@ -55,7 +55,6 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
                                 hammerer.setTimeHeld(0);
                                 hammerer.setHammererRecipe(null);
                                 hammerer.setMustBeReset(true);
-                                System.out.println("reset");
                             }
                         }
                     }
