@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "normal": { "model": "prift:blow_powered_turbine_part" }
+  }
+}

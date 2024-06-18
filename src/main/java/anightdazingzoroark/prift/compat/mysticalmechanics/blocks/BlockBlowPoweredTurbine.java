@@ -69,15 +69,6 @@ public class BlockBlowPoweredTurbine extends Block implements ITileEntityProvide
         return new TileEntityBlowPoweredTurbine();
     }
 
-    @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        double xMin = state.getValue(FACING).equals(EnumFacing.NORTH) || state.getValue(FACING).equals(EnumFacing.SOUTH) ? -1 : 0;
-        double xBreak = state.getValue(FACING).equals(EnumFacing.NORTH) || state.getValue(FACING).equals(EnumFacing.SOUTH) ? 3 : 1;
-        double zMin = state.getValue(FACING).equals(EnumFacing.EAST) || state.getValue(FACING).equals(EnumFacing.WEST) ? -1 : 0;
-        double zBreak = state.getValue(FACING).equals(EnumFacing.EAST) || state.getValue(FACING).equals(EnumFacing.WEST) ? 3 : 1;
-        return new AxisAlignedBB(xMin, -1, zMin, xMin + xBreak, 2, zMin + zBreak);
-    }
-
     public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
@@ -101,6 +92,16 @@ public class BlockBlowPoweredTurbine extends Block implements ITileEntityProvide
             //break turbine
             TileEntityBlowPoweredTurbine turbine = (TileEntityBlowPoweredTurbine) worldIn.getTileEntity(pos);
             if (turbine != null) turbine.onBreakTurbine();
+
+            //break all parts
+            for (int width = -1; width <= 1; width++) {
+                for (int height = -1; height <= 1; height++) {
+                    int widthX = state.getValue(BlockHorizontal.FACING).getAxis().equals(EnumFacing.Axis.Z) ? width : state.getValue(BlockHorizontal.FACING).getAxisDirection().equals(EnumFacing.AxisDirection.POSITIVE) ? -1 : 1;
+                    int widthZ = state.getValue(BlockHorizontal.FACING).getAxis().equals(EnumFacing.Axis.X) ? width : state.getValue(BlockHorizontal.FACING).getAxisDirection().equals(EnumFacing.AxisDirection.POSITIVE) ? -1 : 1;
+                    BlockPos destroyPos = pos.offset(state.getValue(BlockHorizontal.FACING)).add(widthX, height, widthZ);
+                    if (!destroyPos.equals(pos)) worldIn.destroyBlock(destroyPos, false);
+                }
+            }
 
             //drop item
             if (!player.isCreative()) {

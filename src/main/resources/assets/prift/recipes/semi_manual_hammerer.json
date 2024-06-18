@@ -1,0 +1,19 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    " X ",
+    "XIX",
+    " X "
+  ],
+  "key": {
+    "X": {
+      "item": "prift:semi_manual_machine_frame"
+    },
+    "I": {
+      "item": "prift:semi_manual_hammerer_core"
+    }
+  },
+  "result": {
+    "item": "prift:semi_manual_hammerer"
+  }
+}

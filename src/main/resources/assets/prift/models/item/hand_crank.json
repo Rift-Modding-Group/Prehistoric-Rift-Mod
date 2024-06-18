@@ -1,6 +1,89 @@
 {
-	"parent": "item/generated",
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"texture_size": [32, 32],
 	"textures": {
-		"layer0": "prift:items/hand_crank"
-	}
+		"0": "prift:blocks/hand_crank"
+	},
+	"display": {
+		"gui": {
+			"rotation": [ 30, 225, 0 ],
+			"translation": [ 0, 0, 0],
+			"scale":[ 1, 1, 1 ]
+		},
+		"thirdperson_righthand": {
+			"rotation": [ 75, 45, 0 ],
+			"translation": [ 0, 2.5, 0],
+			"scale": [ 0.725, 0.725, 0.725 ]
+		},
+		"firstperson_righthand": {
+			"rotation": [ 0, 45, 0 ],
+			"translation": [ -2, 4, 0 ],
+			"scale": [ 0.75, 0.75, 0.75 ]
+		},
+		"firstperson_lefthand": {
+			"rotation": [ 0, 225, 0 ],
+			"translation": [ 2, 4, 0 ],
+			"scale": [ 0.75, 0.75, 0.75 ]
+		}
+	},
+	"elements": [
+		{
+			"name": "crank",
+			"from": [7, 0, 7],
+			"to": [9, 8, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [1, 5, 2, 9], "texture": "#0"},
+				"east": {"uv": [0, 5, 1, 9], "texture": "#0"},
+				"south": {"uv": [3, 5, 4, 9], "texture": "#0"},
+				"west": {"uv": [2, 5, 3, 9], "texture": "#0"},
+				"up": {"uv": [2, 5, 1, 4], "texture": "#0"},
+				"down": {"uv": [3, 4, 2, 5], "texture": "#0"}
+			}
+		},
+		{
+			"name": "crank",
+			"from": [7.125, 6.125, 8.125],
+			"to": [8.875, 7.875, 13.875],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [3, 3, 4, 4], "texture": "#0"},
+				"east": {"uv": [0, 3, 3, 4], "texture": "#0"},
+				"south": {"uv": [7, 3, 8, 4], "texture": "#0"},
+				"west": {"uv": [4, 3, 7, 4], "texture": "#0"},
+				"up": {"uv": [4, 3, 3, 0], "texture": "#0"},
+				"down": {"uv": [5, 0, 4, 3], "texture": "#0"}
+			}
+		},
+		{
+			"name": "crank",
+			"from": [7.25, 7.25, 12.25],
+			"to": [8.75, 13.75, 13.75],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [5, 5, 6, 8.5], "texture": "#0"},
+				"east": {"uv": [4, 5, 5, 8.5], "texture": "#0"},
+				"south": {"uv": [7, 5, 8, 8.5], "texture": "#0"},
+				"west": {"uv": [6, 5, 7, 8.5], "texture": "#0"},
+				"up": {"uv": [6, 5, 5, 4], "texture": "#0"},
+				"down": {"uv": [7, 4, 6, 5], "texture": "#0"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "body",
+			"origin": [8, 8, 8],
+			"color": 0,
+			"children": [
+				{
+					"name": "crank",
+					"origin": [8, 0, 8],
+					"color": 1,
+					"children": [0, 1, 2]
+				}
+			]
+		}
+	]
 }

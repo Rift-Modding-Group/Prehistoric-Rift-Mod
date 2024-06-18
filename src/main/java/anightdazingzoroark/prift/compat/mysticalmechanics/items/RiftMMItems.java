@@ -12,6 +12,11 @@ public class RiftMMItems {
     public static Item BLOW_POWERED_TURBINE;
     public static Item TURBINE;
     public static Item TURBINE_BLADE;
+    public static Item SEMI_MANUAL_MACHINE_FRAME;
+    public static Item SEMI_MANUAL_EXTRACTOR_CORE;
+    public static Item SEMI_MANUAL_PRESSER_CORE;
+    public static Item SEMI_MANUAL_EXTRUDER_CORE;
+    public static Item SEMI_MANUAL_HAMMERER_CORE;
     public static Item SEMI_MANUAL_EXTRACTOR;
     public static Item SEMI_MANUAL_PRESSER;
     public static Item SEMI_MANUAL_EXTRUDER;
@@ -20,11 +25,17 @@ public class RiftMMItems {
     public static Item GOLD_PLATE;
     public static Item IRON_ROD;
     public static Item GOLD_ROD;
+    public static Item HAMMER;
 
     public static void registerMMItems() {
         BLOW_POWERED_TURBINE = riftBlowPoweredTurbineItem("blow_powered_turbine");
         TURBINE = RiftItems.riftGenericItem("turbine", false);
         TURBINE_BLADE = RiftItems.riftGenericItem("turbine_blade", false);
+        SEMI_MANUAL_MACHINE_FRAME = RiftItems.riftGenericItem("semi_manual_machine_frame", false);
+        SEMI_MANUAL_EXTRACTOR_CORE = RiftItems.riftGenericItem("semi_manual_extractor_core", false);
+        SEMI_MANUAL_PRESSER_CORE = RiftItems.riftGenericItem("semi_manual_presser_core", false);
+        SEMI_MANUAL_EXTRUDER_CORE = RiftItems.riftGenericItem("semi_manual_extruder_core", false);
+        if (GeneralConfig.canUsePyrotech()) SEMI_MANUAL_HAMMERER_CORE = RiftItems.riftGenericItem("semi_manual_hammerer_core", false);
         SEMI_MANUAL_EXTRACTOR = riftSemiManualPlacerItem("semi_manual_extractor", RiftMMBlocks.SEMI_MANUAL_EXTRACTOR, RiftMMBlocks.SEMI_MANUAL_EXTRACTOR_TOP);
         SEMI_MANUAL_PRESSER = riftSemiManualPlacerItem("semi_manual_presser", RiftMMBlocks.SEMI_MANUAL_PRESSER, RiftMMBlocks.SEMI_MANUAL_PRESSER_TOP);
         SEMI_MANUAL_EXTRUDER = riftSemiManualPlacerItem("semi_manual_extruder", RiftMMBlocks.SEMI_MANUAL_EXTRUDER, RiftMMBlocks.SEMI_MANUAL_EXTRUDER_TOP);
@@ -33,6 +44,7 @@ public class RiftMMItems {
         GOLD_PLATE = RiftItems.riftGenericItem("gold_plate", true);
         IRON_ROD = RiftItems.riftGenericItem("iron_rod", true);
         GOLD_ROD = RiftItems.riftGenericItem("gold_rod", true);
+        HAMMER = RiftItems.registerItem(new RiftHammer(), "hammer", true);
     }
 
     public static void registerOreDicTags() {

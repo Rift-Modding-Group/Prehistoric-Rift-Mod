@@ -1,0 +1,22 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "XRX",
+    "B B",
+    "XRX"
+  ],
+  "key": {
+    "X": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "B": {
+      "item": "mysticalmechanics:gear_iron"
+    }
+  },
+  "result": {
+    "item": "prift:semi_manual_extruder_core"
+  }
+}

@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.items;
 
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbinePart;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbinePart;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
@@ -42,22 +44,44 @@ public class RiftBlowPoweredTurbinePlacer extends Item {
             //should check for 3 x 1 x 3 space
             loop: for (int width = -1; width <= 1; width++) {
                 for (int height = -1; height <= 1; height++) {
-                    int widthX = facing.getAxis().equals(EnumFacing.Axis.X) ? width : 0;
-                    int widthZ = facing.getAxis().equals(EnumFacing.Axis.Z) ? width : 0;
+                    int widthX = facing.getAxis().equals(EnumFacing.Axis.Z) ? width : facing.getAxisDirection().equals(EnumFacing.AxisDirection.POSITIVE) ? -1 : 1;
+                    int widthZ = facing.getAxis().equals(EnumFacing.Axis.X) ? width : facing.getAxisDirection().equals(EnumFacing.AxisDirection.POSITIVE) ? -1 : 1;
                     BlockPos testPos = newPos.offset(facing).add(widthX, height, widthZ);
                     if (!world.isAirBlock(testPos)) {
+                        System.out.println(testPos);
                         flag = false;
                         break loop;
                     }
                 }
             }
 
-            //place block
             if (flag) {
+                //place block
                 Block turbine = RiftMMBlocks.BLOW_POWERED_TURBINE;
                 IBlockState state = turbine.getDefaultState().withProperty(BlockHorizontal.FACING, facing);
                 turbine.onBlockPlacedBy(world, newPos, state, player, stack);
                 world.setBlockState(newPos, state);
+
+                //place turbine parts
+                for (int width = -1; width <= 1; width++) {
+                    for (int height = -1; height <= 1; height++) {
+                        int widthX = facing.getAxis().equals(EnumFacing.Axis.Z) ? width : facing.getAxisDirection().equals(EnumFacing.AxisDirection.POSITIVE) ? -1 : 1;
+                        int widthZ = facing.getAxis().equals(EnumFacing.Axis.X) ? width : facing.getAxisDirection().equals(EnumFacing.AxisDirection.POSITIVE) ? -1 : 1;
+                        BlockPos placePos = newPos.offset(facing).add(widthX, height, widthZ);
+
+                        if (!newPos.equals(placePos)) {
+                            Block turbinePart = RiftMMBlocks.BLOW_POWERED_TURBINE_PART;
+                            IBlockState partState = turbinePart.getDefaultState();
+                            turbinePart.onBlockPlacedBy(world, placePos, partState, player, stack);
+                            world.setBlockState(placePos, partState);
+                            //for associated tile entity
+                            TileEntityBlowPoweredTurbinePart turbinePartTE = (TileEntityBlowPoweredTurbinePart)world.getTileEntity(placePos);
+                            if (turbinePartTE != null) {
+                                turbinePartTE.setCenterBlockPos(newPos);
+                            }
+                        }
+                    }
+                }
             }
         }
         return flag;
