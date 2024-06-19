@@ -29,11 +29,8 @@ public class TileEntitySemiManualPresser extends TileEntitySemiManualBase {
                                     this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);
                                 }
                                 else {
-                                    IItemHandler itemHandler = this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-                                    if (itemHandler != null) {
-                                        ItemStack outputStack = ((SemiManualPresserRecipe)this.getTopTEntity().getCurrentRecipe()).output.getMatchingStacks()[0].copy();
-                                        ItemHandlerHelper.insertItemStacked(itemHandler, outputStack, false);
-                                    }
+                                    ItemStack outputStack = ((SemiManualPresserRecipe)this.getTopTEntity().getCurrentRecipe()).output.getMatchingStacks()[0].copy();
+                                    this.insertItemToSlot(1, outputStack);
                                     this.getInputItem().shrink(1);
                                     this.getTopTEntity().setTimeHeld(0);
                                     this.getTopTEntity().setMustBeReset(true);

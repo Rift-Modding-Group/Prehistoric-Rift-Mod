@@ -23,14 +23,13 @@ public class SemiManualHammererContainer extends Container {
 
         //extractor inventory
         //item
-        IItemHandler itemHandler = this.semiManualHammerer.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        this.addSlotToContainer(new SlotItemHandler(itemHandler, 0, 45, 36) {
+        this.addSlotToContainer(new Slot(semiManualHammerer, 0, 45, 36) {
             @Override
             public boolean isItemValid(@Nonnull ItemStack stack) {
                 return stack.getItem() instanceof ItemBlock && ((ItemBlock)stack.getItem()).getBlock() instanceof BlockBloom;
             }
         });
-        this.addSlotToContainer(new SlotItemHandler(itemHandler, 1, 116, 36) {
+        this.addSlotToContainer(new Slot(semiManualHammerer, 1, 116, 36) {
             @Override
             public boolean isItemValid(@Nonnull ItemStack stack) {
                 return false;
@@ -79,6 +78,6 @@ public class SemiManualHammererContainer extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        return this.semiManualHammerer.canInteractWith(playerIn);
+        return this.semiManualHammerer.isUsableByPlayer(playerIn);
     }
 }

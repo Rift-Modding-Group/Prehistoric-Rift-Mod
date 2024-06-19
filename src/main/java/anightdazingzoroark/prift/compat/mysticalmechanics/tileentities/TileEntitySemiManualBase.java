@@ -1,9 +1,11 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
-import mysticalmechanics.util.Misc;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -11,11 +13,13 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -26,14 +30,9 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 
-public abstract class TileEntitySemiManualBase extends TileEntity implements IAnimatable, ITickable {
+public abstract class TileEntitySemiManualBase extends TileEntity implements IAnimatable, ITickable, ISidedInventory {
     private final AnimationFactory factory = new AnimationFactory(this);
-    private final ItemStackHandler itemStackHandler = new ItemStackHandler(2) {
-        @Override
-        protected void onContentsChanged(int slot) {
-            TileEntitySemiManualBase.this.markDirty();
-        }
-    };
+    private NonNullList<ItemStack> itemStackHandler = NonNullList.<ItemStack>withSize(2, ItemStack.EMPTY);
     private boolean playResetAnim;
     private int resetAnimTime;
 
@@ -59,9 +58,8 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        if (compound.hasKey("items")) {
-            this.itemStackHandler.deserializeNBT((NBTTagCompound) compound.getTag("items"));
-        }
+        this.itemStackHandler = NonNullList.<ItemStack>withSize(this.getSizeInventory(), ItemStack.EMPTY);
+        ItemStackHelper.loadAllItems(compound, this.itemStackHandler);
         this.playResetAnim = compound.getBoolean("playResetAnim");
         this.resetAnimTime = compound.getInteger("resetAnimTime");
     }
@@ -69,7 +67,7 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound = super.writeToNBT(compound);
-        compound.setTag("items", this.itemStackHandler.serializeNBT());
+        ItemStackHelper.saveAllItems(compound, this.itemStackHandler);
         compound.setBoolean("playResetAnim", this.playResetAnim);
         compound.setInteger("resetAnimTime", this.resetAnimTime);
         return compound;
@@ -84,7 +82,10 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
     @Nullable
     @Override
     public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(this.itemStackHandler);
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            if (facing == EnumFacing.DOWN) return (T) new SidedInvWrapper(this, EnumFacing.DOWN);
+            else return (T) new SidedInvWrapper(this, EnumFacing.UP);
+        }
         return super.getCapability(capability, facing);
     }
 
@@ -132,21 +133,127 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
 
     @Override
     public void handleUpdateTag(NBTTagCompound tag) {
-        if (tag.hasKey("items")) {
-            this.itemStackHandler.deserializeNBT((NBTTagCompound) tag.getTag("items"));
-        }
+        this.itemStackHandler = NonNullList.<ItemStack>withSize(this.getSizeInventory(), ItemStack.EMPTY);
+        ItemStackHelper.loadAllItems(tag, this.itemStackHandler);
         this.playResetAnim = tag.getBoolean("playResetAnim");
         this.resetAnimTime = tag.getInteger("resetAnimTime");
     }
 
-    public boolean canInteractWith(EntityPlayer playerIn) {
-        return !isInvalid() && playerIn.getDistanceSq(pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
+    //inventory stuff starts here
+    @Override
+    public int[] getSlotsForFace(EnumFacing side) {
+        if (side == EnumFacing.DOWN) return new int[]{1};
+        return new int[]{0};
     }
 
+    @Override
+    public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
+        return this.isItemValidForSlot(index, itemStackIn);
+    }
+
+    @Override
+    public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
+        if (index == 1) return direction == EnumFacing.DOWN;
+        return true;
+    }
+
+    @Override
+    public int getSizeInventory() {
+        return this.itemStackHandler.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for (ItemStack itemstack : this.itemStackHandler) {
+            if (!itemstack.isEmpty()) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public ItemStack getStackInSlot(int index) {
+        return this.itemStackHandler.get(index);
+    }
+
+    @Override
+    public ItemStack decrStackSize(int index, int count) {
+        return ItemStackHelper.getAndSplit(this.itemStackHandler, index, count);
+    }
+
+    @Override
+    public ItemStack removeStackFromSlot(int index) {
+        return ItemStackHelper.getAndRemove(this.itemStackHandler, index);
+    }
+
+    public void insertItemToSlot(int slot, ItemStack itemStack) {
+        int newCount = this.getStackInSlot(slot).getCount() + itemStack.getCount();
+        itemStack.setCount(newCount);
+        this.setInventorySlotContents(slot, itemStack);
+    }
+
+    @Override
+    public void setInventorySlotContents(int index, ItemStack stack) {
+        this.itemStackHandler.set(index, stack);
+
+        if (!stack.isEmpty() && stack.getCount() > this.getInventoryStackLimit()) {
+            stack.setCount(this.getInventoryStackLimit());
+        }
+
+        this.markDirty();
+    }
+
+    @Override
+    public int getInventoryStackLimit() {
+        return 64;
+    }
+
+    @Override
+    public boolean isUsableByPlayer(EntityPlayer player) {
+        return !isInvalid() && player.getDistanceSq(this.pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
+    }
+
+    @Override
+    public void openInventory(EntityPlayer player) {}
+
+    @Override
+    public void closeInventory(EntityPlayer player) {}
+
+    @Override
+    public boolean isItemValidForSlot(int index, ItemStack stack) {
+        return index != 1;
+    }
+
+    @Override
+    public int getField(int id) {
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value) {}
+
+    @Override
+    public int getFieldCount() {
+        return 0;
+    }
+
+    @Override
+    public void clear() {
+        this.itemStackHandler.clear();
+    }
+
+    @Override
+    public String getName() {
+        return "";
+    }
+
+    @Override
+    public boolean hasCustomName() {
+        return false;
+    }
+    //inventory stuff ends here
+
     public ItemStack getInputItem() {
-        IItemHandler itemHandler = this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        if (itemHandler != null) return itemHandler.getStackInSlot(0);
-        return null;
+        return this.getStackInSlot(0);
     }
 
     public TileEntitySemiManualTopBase getTopTEntity() {

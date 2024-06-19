@@ -2,9 +2,12 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtruderRecipe;
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualPresserRecipe;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -33,11 +36,8 @@ public class TileEntitySemiManualExtruder extends TileEntitySemiManualBase {
                                     this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);
                                 }
                                 else {
-                                    IItemHandler itemHandler = this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-                                    if (itemHandler != null) {
-                                        ItemStack outputStack = ((SemiManualExtruderRecipe)this.getTopTEntity().getCurrentRecipe()).output.getMatchingStacks()[0].copy();
-                                        ItemHandlerHelper.insertItemStacked(itemHandler, outputStack, false);
-                                    }
+                                    ItemStack outputStack = ((SemiManualExtruderRecipe)this.getTopTEntity().getCurrentRecipe()).output.getMatchingStacks()[0].copy();
+                                    this.insertItemToSlot(1, outputStack);
                                     this.getInputItem().shrink(1);
                                     this.getTopTEntity().setTimeHeld(0);
                                     this.getTopTEntity().setMustBeReset(true);

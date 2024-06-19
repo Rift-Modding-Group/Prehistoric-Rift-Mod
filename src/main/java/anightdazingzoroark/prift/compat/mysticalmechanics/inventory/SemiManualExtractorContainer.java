@@ -19,8 +19,7 @@ public class SemiManualExtractorContainer extends Container {
 
         //extractor inventory
         //item
-        IItemHandler itemHandler = this.semiManualExtractor.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        this.addSlotToContainer(new SlotItemHandler(itemHandler, 0, 45, 36));
+        this.addSlotToContainer(new Slot(semiManualExtractor, 0, 45, 36));
 
         //player inventory
         for (int l = 0; l < 3; ++l) {
@@ -64,6 +63,6 @@ public class SemiManualExtractorContainer extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        return this.semiManualExtractor.canInteractWith(playerIn);
+        return this.semiManualExtractor.isUsableByPlayer(playerIn);
     }
 }

@@ -21,9 +21,8 @@ public class SemiManualExtruderContainer extends Container {
 
         //extractor inventory
         //item
-        IItemHandler itemHandler = this.semiManualExtruder.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        this.addSlotToContainer(new SlotItemHandler(itemHandler, 0, 45, 36));
-        this.addSlotToContainer(new SlotItemHandler(itemHandler, 1, 116, 36) {
+        this.addSlotToContainer(new Slot(semiManualExtruder, 0, 45, 36));
+        this.addSlotToContainer(new Slot(semiManualExtruder, 1, 116, 36) {
             @Override
             public boolean isItemValid(@Nonnull ItemStack stack) {
                 return false;
@@ -72,6 +71,6 @@ public class SemiManualExtruderContainer extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        return this.semiManualExtruder.canInteractWith(playerIn);
+        return this.semiManualExtruder.isUsableByPlayer(playerIn);
     }
 }
