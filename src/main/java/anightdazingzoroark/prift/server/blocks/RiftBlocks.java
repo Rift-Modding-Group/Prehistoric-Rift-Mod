@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.blocks;
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -20,9 +21,13 @@ public class RiftBlocks {
     public static final List<ItemBlock> ITEM_BLOCKS = new ArrayList<>();
 
     public static Block FEEDING_TROUGH;
+    public static Block PYROBERRY_BUSH;
+    public static Block CRYOBERRY_BUSH;
 
     public static void registerBlocks() {
         FEEDING_TROUGH = registerBlock(new RiftFeedingTroughBlock(), "feeding_trough", true, false, true);
+        PYROBERRY_BUSH = registerBlock(new RiftPyroberryBush(), "pyroberry_bush", false);
+        CRYOBERRY_BUSH = registerBlock(new RiftCryoberryBush(), "cryoberry_bush", false);
 
         if (GeneralConfig.canUseMM()) RiftMMBlocks.registerMMBlocks();
     }

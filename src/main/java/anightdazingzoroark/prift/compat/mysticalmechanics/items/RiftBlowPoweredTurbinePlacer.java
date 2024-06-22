@@ -48,7 +48,6 @@ public class RiftBlowPoweredTurbinePlacer extends Item {
                     int widthZ = facing.getAxis().equals(EnumFacing.Axis.X) ? width : facing.getAxisDirection().equals(EnumFacing.AxisDirection.POSITIVE) ? -1 : 1;
                     BlockPos testPos = newPos.offset(facing).add(widthX, height, widthZ);
                     if (!world.isAirBlock(testPos)) {
-                        System.out.println(testPos);
                         flag = false;
                         break loop;
                     }

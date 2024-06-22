@@ -3,6 +3,8 @@ package anightdazingzoroark.prift.server.items;
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.server.blocks.RiftBerryBush;
+import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectiles;
@@ -51,6 +53,8 @@ public class RiftItems {
     public static Item EXTREME_FROST_STIMULANT;
     public static Item NEUTRAL_STIMULANT;
     public static Item REVIVAL_MIX;
+    public static Item PYROBERRY;
+    public static Item CRYOBERRY;
 
     public static Item TYRANNOSAURUS_ARM;
     public static Item STEGOSAURUS_PLATE;
@@ -112,6 +116,8 @@ public class RiftItems {
         EXTREME_FROST_STIMULANT = riftGlintedItem("extreme_frost_stimulant", false);
         NEUTRAL_STIMULANT = riftGenericItem("neutral_stimulant", false);
         REVIVAL_MIX = riftGenericItem("revival_mix", true);
+        PYROBERRY = registerItem(new RiftBerryItem(RiftBlocks.PYROBERRY_BUSH), "pyroberry", true);
+        CRYOBERRY = registerItem(new RiftBerryItem(RiftBlocks.CRYOBERRY_BUSH), "cryoberry", true);
 
         TRUFFLE = riftGenericItem("truffle", true);
 
@@ -190,6 +196,8 @@ public class RiftItems {
 
         if (GeneralConfig.canUseMM()) RiftMMItems.registerOreDicTags();
     }
+
+    public static void registerBerries() {}
 
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {
         final Item item = new ItemFood(amount, saturation, isWolfFood);

@@ -1,0 +1,6 @@
+{
+  "parent": "block/tinted_cross",
+  "textures": {
+    "cross": "prift:blocks/cryoberry_bush_1"
+  }
+}
