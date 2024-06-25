@@ -2,6 +2,8 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.recipes;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
+import anightdazingzoroark.prift.server.fluids.RiftFluids;
+import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -54,7 +56,8 @@ public class RiftMMRecipes {
 
     public static void registerRecipes() {
         //for semi manual extractor
-        smExtractorRecipes.add(new SemiManualExtractorRecipe(new ResourceLocation(RiftInitialize.MODID, "sme/cobbleToLava"), Ingredient.fromStacks(new ItemStack(Blocks.COBBLESTONE)), new FluidStack(FluidRegistry.LAVA, 1000), 10));
+        smExtractorRecipes.add(new SemiManualExtractorRecipe(new ResourceLocation(RiftInitialize.MODID, "sme/pyroberryToPyroberryJuice"), Ingredient.fromStacks(new ItemStack(RiftItems.PYROBERRY)), new FluidStack(RiftFluids.PYROBERRY_JUICE, 125), 10));
+        smExtractorRecipes.add(new SemiManualExtractorRecipe(new ResourceLocation(RiftInitialize.MODID, "sme/cryoberryToCryoberryJuice"), Ingredient.fromStacks(new ItemStack(RiftItems.CRYOBERRY)), new FluidStack(RiftFluids.CRYOBERRY_JUICE, 125), 10));
 
         //for semi manual presser
         smPresserRecipes.add(new SemiManualPresserRecipe(new ResourceLocation(RiftInitialize.MODID, "smp/ironIngotToPlate"), Ingredient.fromStacks(new ItemStack(Items.IRON_INGOT)), Ingredient.fromStacks(new ItemStack(RiftMMItems.IRON_PLATE)), 20));

@@ -27,6 +27,7 @@ public class RiftBerryItem extends ItemFood {
         if (flag && !player.capabilities.isCreativeMode) {
             player.getHeldItem(hand).shrink(1);
         }
+        //if (flag) player.swingArm(hand);
         return flag ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
     }
 

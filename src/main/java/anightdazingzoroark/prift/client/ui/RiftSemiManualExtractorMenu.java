@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtractorContainer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import net.minecraft.client.Minecraft;
@@ -17,6 +16,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 import org.lwjgl.opengl.GL11;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class RiftSemiManualExtractorMenu extends GuiContainer {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_extractor.png");
@@ -34,7 +36,7 @@ public class RiftSemiManualExtractorMenu extends GuiContainer {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawTank();
+        this.drawTank(mouseX, mouseY);
         this.drawProgressBar();
         this.renderHoveredToolTip(mouseX, mouseY);
     }
@@ -53,7 +55,7 @@ public class RiftSemiManualExtractorMenu extends GuiContainer {
         this.fontRenderer.drawString(this.playerInventory.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
     }
 
-    private void drawTank() {
+    private void drawTank(int mouseX, int mouseY) {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         //for fluid
         FluidStack fluidStack = this.semiManualExtractor.getTank().getFluid();
@@ -72,6 +74,12 @@ public class RiftSemiManualExtractorMenu extends GuiContainer {
                 this.drawFluidTexture(liquidIcon, xPos + 32, yPos + i, 2, (int)drawHeight);
             }
             GlStateManager.disableBlend();
+
+            //for overlay text
+            if (this.cursorOnTank(mouseX, mouseY)) {
+                List<String> hoverText = Arrays.asList(fluidStack.getLocalizedName(), fluidStack.amount+"/"+this.semiManualExtractor.getTank().getCapacity()+" mB");
+                this.drawHoveringText(hoverText, mouseX, mouseY);
+            }
         }
 
         //for tank scale
@@ -80,6 +88,14 @@ public class RiftSemiManualExtractorMenu extends GuiContainer {
         this.mc.getTextureManager().bindTexture(tankScale);
         drawModalRectWithCustomSizedTexture((this.width - 34) / 2 + 26, (this.height - 52) / 2 - 39, 0, 0, 34, 52, 34, 52);
         GlStateManager.disableBlend();
+    }
+
+    private boolean cursorOnTank(int mouseX, int mouseY) {
+        int minX = (this.width - 34) / 2 + 26;
+        int minY = (this.height - 52) / 2 - 39;
+        int maxX = minX + 34;
+        int maxY = minY + 52;
+        return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
     }
 
     private void drawProgressBar() {

@@ -1,11 +1,16 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtractorRecipe;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -43,6 +48,7 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
     public void update() {
         super.update();
         if (!this.world.isRemote) {
+            //for creating fluid
             if (this.getTopTEntity() != null) {
                 if (this.getTopTEntity().getPower() > 0) {
                     if (this.getTopTEntity().getCurrentRecipe() == null) {
@@ -73,6 +79,18 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
                             }
                         }
                     }
+                }
+            }
+
+            //for bucket filling
+            if (!this.getStackInSlot(1).isEmpty() && this.tank.getFluid() != null) {
+                ItemStack toBeFilled = this.getStackInSlot(1).copy();
+                toBeFilled.setCount(1);
+                ItemStack filledBucket = RiftUtil.fillBucketWithFluid(toBeFilled, this.tank.getFluid().getFluid());
+                if (this.getStackInSlot(2).isEmpty() && this.tank.getFluid().amount >= 1000) {
+                    this.insertItemToSlot(2, filledBucket);
+                    this.getStackInSlot(1).setCount(this.getStackInSlot(1).getCount() - 1);
+                    this.tank.drain(1000, true);
                 }
             }
         }
@@ -145,5 +163,44 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
 
     public FluidTank getTank() {
         return this.tank;
+    }
+
+    @Override
+    public int[] getSlotsForFace(EnumFacing side) {
+        if (side.getAxis().isHorizontal()) {
+            switch (this.getFacing()) {
+                case NORTH:
+                    if (side == EnumFacing.WEST) return new int[]{1};
+                    else return new int[]{0};
+                case SOUTH:
+                    if (side == EnumFacing.EAST) return new int[]{1};
+                    else return new int[]{0};
+                case EAST:
+                    if (side == EnumFacing.NORTH) return new int[]{1};
+                    else return new int[]{0};
+                case WEST:
+                    if (side == EnumFacing.SOUTH) return new int[]{1};
+                    else return new int[]{0};
+            }
+        }
+        else if (side == EnumFacing.DOWN) return new int[]{2};
+        return new int[]{0};
+    }
+
+    @Override
+    public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
+        if (index == 1) return itemStackIn.getItem() == Items.BUCKET;
+        return this.isItemValidForSlot(index, itemStackIn);
+    }
+
+    @Override
+    public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
+        if (index == 2) return direction == EnumFacing.DOWN;
+        return true;
+    }
+
+    @Override
+    public boolean isItemValidForSlot(int index, ItemStack stack) {
+        return index != 2;
     }
 }

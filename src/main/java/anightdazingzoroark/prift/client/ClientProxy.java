@@ -4,6 +4,8 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.particle.*;
 import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
+import anightdazingzoroark.prift.client.renderer.FluidRenderer;
+import anightdazingzoroark.prift.client.renderer.ItemRenderer;
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtruder;
@@ -48,6 +50,7 @@ public class ClientProxy extends ServerProxy {
     @Override
     public void preInit(FMLPreInitializationEvent e) {
         super.preInit(e);
+        FluidRenderer.registerRenderers();
         EntityRenderer.registerRenderers();
         BlockRenderer.registerRenderers();
         MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());
@@ -60,7 +63,7 @@ public class ClientProxy extends ServerProxy {
     @Override
     public void init(FMLInitializationEvent e) {
         super.init(e);
-        registerItemRenderer();
+        ItemRenderer.registerItemRenderer();
         MinecraftForge.EVENT_BUS.register(new ClientEvents());
         this.particleSpawner = new RiftParticleSpawner();
         Minecraft.getMinecraft().metadataSerializer.registerMetadataSectionType(new GlowingMetadataSectionSerializer(), GlowingMetadataSection.class);

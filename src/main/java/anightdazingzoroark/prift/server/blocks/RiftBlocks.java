@@ -3,11 +3,15 @@ package anightdazingzoroark.prift.server.blocks;
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.server.fluids.RiftFluids;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fluids.BlockFluidClassic;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -24,10 +28,17 @@ public class RiftBlocks {
     public static Block PYROBERRY_BUSH;
     public static Block CRYOBERRY_BUSH;
 
+    public static Block PYROBERRY_JUICE_FLUID;
+    public static Block CRYOBERRY_JUICE_FLUID;
+
     public static void registerBlocks() {
         FEEDING_TROUGH = registerBlock(new RiftFeedingTroughBlock(), "feeding_trough", true, false, true);
         PYROBERRY_BUSH = registerBlock(new RiftPyroberryBush(), "pyroberry_bush", false);
         CRYOBERRY_BUSH = registerBlock(new RiftCryoberryBush(), "cryoberry_bush", false);
+
+        //fluid shenanigans
+        PYROBERRY_JUICE_FLUID = registerBlock(new BlockFluidClassic(RiftFluids.PYROBERRY_JUICE, Material.WATER), "pyroberry_juice", true, true, true);
+        CRYOBERRY_JUICE_FLUID = registerBlock(new BlockFluidClassic(RiftFluids.CRYOBERRY_JUICE, Material.WATER), "cryoberry_juice", true, true, true);
 
         if (GeneralConfig.canUseMM()) RiftMMBlocks.registerMMBlocks();
     }

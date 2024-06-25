@@ -2,12 +2,15 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.inventory;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
+
+import javax.annotation.Nonnull;
 
 public class SemiManualExtractorContainer extends Container {
     private TileEntitySemiManualExtractor semiManualExtractor;
@@ -20,6 +23,18 @@ public class SemiManualExtractorContainer extends Container {
         //extractor inventory
         //item
         this.addSlotToContainer(new Slot(semiManualExtractor, 0, 45, 36));
+        this.addSlotToContainer(new Slot(semiManualExtractor, 1, 138, 18) {
+            @Override
+            public boolean isItemValid(@Nonnull ItemStack stack) {
+                return stack.getItem() == Items.BUCKET;
+            }
+        });
+        this.addSlotToContainer(new Slot(semiManualExtractor, 2, 138, 54) {
+            @Override
+            public boolean isItemValid(@Nonnull ItemStack stack) {
+                return false;
+            }
+        });
 
         //player inventory
         for (int l = 0; l < 3; ++l) {

@@ -17,8 +17,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
@@ -32,7 +30,7 @@ import javax.annotation.Nullable;
 
 public abstract class TileEntitySemiManualBase extends TileEntity implements IAnimatable, ITickable, ISidedInventory {
     private final AnimationFactory factory = new AnimationFactory(this);
-    private NonNullList<ItemStack> itemStackHandler = NonNullList.<ItemStack>withSize(2, ItemStack.EMPTY);
+    protected NonNullList<ItemStack> itemStackHandler = NonNullList.<ItemStack>withSize(3, ItemStack.EMPTY);
     private boolean playResetAnim;
     private int resetAnimTime;
 
@@ -84,7 +82,12 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
     public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             if (facing == EnumFacing.DOWN) return (T) new SidedInvWrapper(this, EnumFacing.DOWN);
-            else return (T) new SidedInvWrapper(this, EnumFacing.UP);
+            else if (facing == EnumFacing.UP)  return (T) new SidedInvWrapper(this, EnumFacing.UP);
+            else if (facing == EnumFacing.EAST)  return (T) new SidedInvWrapper(this, EnumFacing.EAST);
+            else if (facing == EnumFacing.WEST)  return (T) new SidedInvWrapper(this, EnumFacing.WEST);
+            else if (facing == EnumFacing.NORTH)  return (T) new SidedInvWrapper(this, EnumFacing.NORTH);
+            else if (facing == EnumFacing.SOUTH)  return (T) new SidedInvWrapper(this, EnumFacing.SOUTH);
+            else return (T) new SidedInvWrapper(this, EnumFacing.NORTH);
         }
         return super.getCapability(capability, facing);
     }

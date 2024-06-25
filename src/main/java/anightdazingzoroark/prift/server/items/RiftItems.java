@@ -197,8 +197,6 @@ public class RiftItems {
         if (GeneralConfig.canUseMM()) RiftMMItems.registerOreDicTags();
     }
 
-    public static void registerBerries() {}
-
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {
         final Item item = new ItemFood(amount, saturation, isWolfFood);
         return registerItem(item, registryName, true);

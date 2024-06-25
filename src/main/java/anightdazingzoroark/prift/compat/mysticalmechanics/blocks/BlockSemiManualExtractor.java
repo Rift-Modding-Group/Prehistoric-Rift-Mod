@@ -31,19 +31,7 @@ public class BlockSemiManualExtractor extends BlockSemiManualBase {
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
-            if (playerIn.getHeldItem(hand).hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null)) {
-                TileEntitySemiManualExtractor te = (TileEntitySemiManualExtractor) worldIn.getTileEntity(pos);
-                if (te != null) {
-                    if (te.getTank().getFluid() != null) {
-                        if (te.getTank().getFluid().amount >= 1000) {
-                            playerIn.getHeldItem(hand).shrink(1);
-                            playerIn.inventory.addItemStackToInventory(RiftUtil.getBucketForFluid(te.getTank().getFluid().getFluid()));
-                            te.drain(1000, true);
-                        }
-                    }
-                }
-            }
-            else playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_SEMI_MANUAL_EXTRACTOR, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_SEMI_MANUAL_EXTRACTOR, worldIn, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }

@@ -17,6 +17,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -330,19 +331,17 @@ public class RiftUtil {
         return entityLivingBase.world.getBlockState(highestWaterPos).getMaterial() == Material.WATER;
     }
 
-    public static ItemStack getBucketForFluid(Fluid fluid) {
-        for (Item item : ForgeRegistries.ITEMS) {
-            ItemStack bucketStack = new ItemStack(item);
-            if (bucketStack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null)) {
-                IFluidHandlerItem fluidHandler = bucketStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
-                if (fluidHandler != null) {
-                    FluidStack fluidStack = fluidHandler.drain(Fluid.BUCKET_VOLUME, false);
-                    if (fluidStack != null && fluidStack.getFluid() == fluid) {
-                        return bucketStack;
-                    }
+    public static ItemStack fillBucketWithFluid(ItemStack emptyBucket, Fluid fluid) {
+        if (emptyBucket.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null)) {
+            FluidStack fluidStack = new FluidStack(fluid, Fluid.BUCKET_VOLUME);
+            IFluidHandlerItem fluidHandler = emptyBucket.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+            if (fluidHandler != null) {
+                int filled = fluidHandler.fill(fluidStack, true);
+                if (filled == Fluid.BUCKET_VOLUME) {
+                    return fluidHandler.getContainer().copy();
                 }
             }
         }
-        return ItemStack.EMPTY;
+        return emptyBucket;
     }
 }

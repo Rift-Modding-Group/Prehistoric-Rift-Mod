@@ -17,6 +17,7 @@ import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import anightdazingzoroark.prift.server.fluids.RiftFluids;
 import anightdazingzoroark.prift.server.inventory.CreatureContainer;
 import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
 import anightdazingzoroark.prift.server.inventory.WeaponContainer;
@@ -62,6 +63,7 @@ public class ServerProxy implements IGuiHandler {
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
+        RiftFluids.registerFluids();
         RiftBlocks.registerBlocks();
         RiftItems.registerItems();
         RiftTileEntities.registerTileEntities();

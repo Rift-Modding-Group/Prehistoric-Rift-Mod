@@ -1,8 +1,6 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
-import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.ITileEntityProvider;
@@ -13,7 +11,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
@@ -31,6 +28,7 @@ public abstract class BlockSemiManualBase extends Block implements ITileEntityPr
 
     public BlockSemiManualBase() {
         super(Material.IRON);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
         this.setHardness(5.0F);
         this.setResistance(10.0F);
         this.setSoundType(SoundType.METAL);
