@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.compat.jei.category;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.jei.RiftJEI;
-import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMExtractorWrapper;
+import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMExtruderWrapper;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.*;
@@ -13,26 +13,25 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
-public class RiftJEISMExtractorCategory implements IRecipeCategory<RiftJEISMExtractorWrapper> {
+public class RiftJEISMExtruderCategory implements IRecipeCategory<RiftJEISMExtruderWrapper> {
     private final IDrawable background;
     private final IDrawableAnimated animatedArrow;
     private final IDrawable icon;
 
-    public RiftJEISMExtractorCategory(IGuiHelper guiHelper) {
-        IDrawableStatic staticArrow = guiHelper.createDrawable(new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_extractor.png"), 176, 0, 21, 14);
+    public RiftJEISMExtruderCategory(IGuiHelper guiHelper) {
+        IDrawableStatic staticArrow = guiHelper.createDrawable(new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_presser.png"), 176, 0, 21, 14);
         this.animatedArrow = guiHelper.createAnimatedDrawable(staticArrow, 200, IDrawableAnimated.StartDirection.LEFT, false);
-        this.icon = guiHelper.createDrawableIngredient(new ItemStack(RiftMMItems.SEMI_MANUAL_EXTRACTOR));
-        this.background = guiHelper.createDrawable(new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_extractor.png"), 4, 4, 168, 75);
+        this.icon = guiHelper.createDrawableIngredient(new ItemStack(RiftMMItems.SEMI_MANUAL_EXTRUDER));
+        this.background = guiHelper.createDrawable(new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_presser.png"), 4, 4, 168, 75);
     }
-
     @Override
     public String getUid() {
-        return RiftJEI.smExtractorCat;
+        return RiftJEI.smExtruderCat;
     }
 
     @Override
     public String getTitle() {
-        return I18n.format("tile.semi_manual_extractor.name");
+        return I18n.format("tile.semi_manual_extruder.name");
     }
 
     @Override
@@ -51,19 +50,14 @@ public class RiftJEISMExtractorCategory implements IRecipeCategory<RiftJEISMExtr
 
     @Override
     public void drawExtras(Minecraft minecraft) {
-        this.animatedArrow.draw(minecraft, 64, 32);
+        this.animatedArrow.draw(minecraft, 74, 32);
     }
 
     @Override
-    public void setRecipe(IRecipeLayout iRecipeLayout, RiftJEISMExtractorWrapper riftJEISMExtractorWrapper, IIngredients iIngredients) {
-        //for items
+    public void setRecipe(IRecipeLayout iRecipeLayout, RiftJEISMExtruderWrapper riftJEISMExtruderWrapper, IIngredients iIngredients) {
         IGuiItemStackGroup stacks = iRecipeLayout.getItemStacks();
         stacks.init(0, true, 40, 31);
+        stacks.init(1, false, 111, 31);
         stacks.set(iIngredients);
-
-        //for fluids
-        IGuiFluidStackGroup fluidStacks = iRecipeLayout.getFluidStacks();
-        fluidStacks.init(1, false, 93, 14, 34, 52, 4000, false, null);
-        fluidStacks.set(iIngredients);
     }
 }

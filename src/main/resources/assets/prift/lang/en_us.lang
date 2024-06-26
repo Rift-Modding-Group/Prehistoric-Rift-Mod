@@ -113,6 +113,8 @@ item.semi_manual_presser.name=Semi Automatic Presser
 item.semi_manual_extruder.name=Semi Automatic Extruder
 item.semi_manual_hammerer.name=Semi Automatic Hammerer
 
+jei.min_power=Minimum Power: %s R
+
 radial.choice.ride=Ride
 radial.choice.state=State
 radial.choice.inventory=Inventory
