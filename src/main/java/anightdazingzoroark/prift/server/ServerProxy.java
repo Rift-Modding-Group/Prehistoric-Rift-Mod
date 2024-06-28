@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.compat.crafttweaker.RiftCrafttweaker;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtractorContainer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtruderContainer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualHammererContainer;
@@ -70,6 +71,7 @@ public class ServerProxy implements IGuiHandler {
         RiftItems.registerOreDicTags();
         RiftRecipes.registerSmelting();
         if (GeneralConfig.canUseMM()) RiftMMRecipes.registerRecipes();
+        RiftCrafttweaker.loadCrafttweakerCompat();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
         MinecraftForge.EVENT_BUS.register(new RiftBlocks());
         RiftEntities.registerEntities();

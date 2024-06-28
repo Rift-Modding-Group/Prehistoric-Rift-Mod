@@ -23,12 +23,7 @@ public class SemiManualHammererContainer extends Container {
 
         //extractor inventory
         //item
-        this.addSlotToContainer(new Slot(semiManualHammerer, 0, 45, 36) {
-            @Override
-            public boolean isItemValid(@Nonnull ItemStack stack) {
-                return stack.getItem() instanceof ItemBlock && ((ItemBlock)stack.getItem()).getBlock() instanceof BlockBloom;
-            }
-        });
+        this.addSlotToContainer(new Slot(semiManualHammerer, 0, 45, 36));
         this.addSlotToContainer(new Slot(semiManualHammerer, 1, 116, 36) {
             @Override
             public boolean isItemValid(@Nonnull ItemStack stack) {

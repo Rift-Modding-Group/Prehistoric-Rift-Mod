@@ -4,6 +4,8 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManual
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import com.codetaylor.mc.pyrotech.ModPyrotechConfig;
+import com.codetaylor.mc.pyrotech.modules.tech.bloomery.ModuleTechBloomery;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.oredict.OreDictionary;
@@ -35,11 +37,11 @@ public class RiftMMItems {
         SEMI_MANUAL_EXTRACTOR_CORE = RiftItems.riftGenericItem("semi_manual_extractor_core", false);
         SEMI_MANUAL_PRESSER_CORE = RiftItems.riftGenericItem("semi_manual_presser_core", false);
         SEMI_MANUAL_EXTRUDER_CORE = RiftItems.riftGenericItem("semi_manual_extruder_core", false);
-        if (GeneralConfig.canUsePyrotech()) SEMI_MANUAL_HAMMERER_CORE = RiftItems.riftGenericItem("semi_manual_hammerer_core", false);
+        if (GeneralConfig.canUsePyrotech() && ModPyrotechConfig.MODULES.get(ModuleTechBloomery.MODULE_ID)) SEMI_MANUAL_HAMMERER_CORE = RiftItems.riftGenericItem("semi_manual_hammerer_core", false);
         SEMI_MANUAL_EXTRACTOR = riftSemiManualPlacerItem("semi_manual_extractor", RiftMMBlocks.SEMI_MANUAL_EXTRACTOR, RiftMMBlocks.SEMI_MANUAL_EXTRACTOR_TOP);
         SEMI_MANUAL_PRESSER = riftSemiManualPlacerItem("semi_manual_presser", RiftMMBlocks.SEMI_MANUAL_PRESSER, RiftMMBlocks.SEMI_MANUAL_PRESSER_TOP);
         SEMI_MANUAL_EXTRUDER = riftSemiManualPlacerItem("semi_manual_extruder", RiftMMBlocks.SEMI_MANUAL_EXTRUDER, RiftMMBlocks.SEMI_MANUAL_EXTRUDER_TOP);
-        if (GeneralConfig.canUsePyrotech()) SEMI_MANUAL_HAMMERER = riftSemiManualPlacerItem("semi_manual_hammerer", RiftMMBlocks.SEMI_MANUAL_HAMMERER, RiftMMBlocks.SEMI_MANUAL_HAMMERER_TOP);
+        if (GeneralConfig.canUsePyrotech() && ModPyrotechConfig.MODULES.get(ModuleTechBloomery.MODULE_ID)) SEMI_MANUAL_HAMMERER = riftSemiManualPlacerItem("semi_manual_hammerer", RiftMMBlocks.SEMI_MANUAL_HAMMERER, RiftMMBlocks.SEMI_MANUAL_HAMMERER_TOP);
         IRON_PLATE = RiftItems.riftGenericItem("iron_plate", true);
         GOLD_PLATE = RiftItems.riftGenericItem("gold_plate", true);
         IRON_ROD = RiftItems.riftGenericItem("iron_rod", true);

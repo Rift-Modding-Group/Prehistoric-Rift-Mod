@@ -16,11 +16,13 @@ import net.minecraft.util.ResourceLocation;
 public class RiftJEISMExtractorCategory implements IRecipeCategory<RiftJEISMExtractorWrapper> {
     private final IDrawable background;
     private final IDrawableAnimated animatedArrow;
+    private final IDrawableStatic scaleBar;
     private final IDrawable icon;
 
     public RiftJEISMExtractorCategory(IGuiHelper guiHelper) {
         IDrawableStatic staticArrow = guiHelper.createDrawable(new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_extractor.png"), 176, 0, 21, 14);
         this.animatedArrow = guiHelper.createAnimatedDrawable(staticArrow, 200, IDrawableAnimated.StartDirection.LEFT, false);
+        this.scaleBar = guiHelper.createDrawable(new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_extractor.png"), 176, 14, 34, 52);
         this.icon = guiHelper.createDrawableIngredient(new ItemStack(RiftMMItems.SEMI_MANUAL_EXTRACTOR));
         this.background = guiHelper.createDrawable(new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_extractor.png"), 4, 4, 168, 75);
     }
@@ -52,6 +54,7 @@ public class RiftJEISMExtractorCategory implements IRecipeCategory<RiftJEISMExtr
     @Override
     public void drawExtras(Minecraft minecraft) {
         this.animatedArrow.draw(minecraft, 64, 32);
+        this.scaleBar.draw(minecraft, 93, 14);
     }
 
     @Override

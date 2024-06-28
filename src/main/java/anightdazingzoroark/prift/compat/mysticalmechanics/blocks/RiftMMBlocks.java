@@ -2,6 +2,8 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
+import com.codetaylor.mc.pyrotech.ModPyrotechConfig;
+import com.codetaylor.mc.pyrotech.modules.tech.bloomery.ModuleTechBloomery;
 import net.minecraft.block.Block;
 
 public class RiftMMBlocks {
@@ -29,7 +31,7 @@ public class RiftMMBlocks {
         SEMI_MANUAL_PRESSER_TOP = RiftBlocks.registerBlock(new BlockSemiManualPresserTop(), "semi_manual_presser_top", false);
         SEMI_MANUAL_EXTRUDER = RiftBlocks.registerBlock(new BlockSemiManualExtruder(), "semi_manual_extruder", false);
         SEMI_MANUAL_EXTRUDER_TOP = RiftBlocks.registerBlock(new BlockSemiManualExtruderTop(), "semi_manual_extruder_top", false);
-        if (GeneralConfig.canUsePyrotech()) {
+        if (GeneralConfig.canUsePyrotech() && ModPyrotechConfig.MODULES.get(ModuleTechBloomery.MODULE_ID)) {
             SEMI_MANUAL_HAMMERER = RiftBlocks.registerBlock(new BlockSemiManualHammerer(), "semi_manual_hammerer", false);
             SEMI_MANUAL_HAMMERER_TOP = RiftBlocks.registerBlock(new BlockSemiManualHammererTop(), "semi_manual_hammerer_top", false);
         }

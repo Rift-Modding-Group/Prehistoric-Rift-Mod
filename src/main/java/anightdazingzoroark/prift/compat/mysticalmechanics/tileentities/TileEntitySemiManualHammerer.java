@@ -47,7 +47,7 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
                                 }
                                 else {
                                     ItemStack outputStack = hammerer.getHammererRecipe().getOutput().copy();
-                                    outputStack.setCount(hammerer.getHammererRecipe() instanceof WitherForgeRecipe ? 32 : 16);
+                                    outputStack.setCount(16);
                                     this.insertItemToSlot(1, outputStack);
 
                                     this.getInputItem().shrink(1);

@@ -4,21 +4,19 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
 import anightdazingzoroark.prift.server.items.RiftItems;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RiftMMRecipes {
-    public static ArrayList<SemiManualExtractorRecipe> smExtractorRecipes = new ArrayList<>();
-    public static ArrayList<SemiManualPresserRecipe> smPresserRecipes = new ArrayList<>();
-    public static ArrayList<SemiManualExtruderRecipe> smExtruderRecipes = new ArrayList<>();
+    public static List<SemiManualExtractorRecipe> smExtractorRecipes = new ArrayList<>();
+    public static List<SemiManualPresserRecipe> smPresserRecipes = new ArrayList<>();
+    public static List<SemiManualExtruderRecipe> smExtruderRecipes = new ArrayList<>();
 
     public static SemiManualRecipeBase getSMRecipe(String path) {
         for (SemiManualExtractorRecipe recipe : smExtractorRecipes) {
