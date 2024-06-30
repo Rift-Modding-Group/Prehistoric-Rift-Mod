@@ -28,6 +28,9 @@ entity.cannon_entity.name=Cannon
 entity.mortar_entity.name=Mortar
 entity.catapult_entity.name=Catapult
 
+fluid.pyroberry_juice=Pyroberry Juice
+fluid.cryoberry_juice=Cryoberry Juice
+
 inventory.gear=%s Gear
 inventory.inventory=%s Inventory
 
@@ -57,10 +60,24 @@ item.frost_stimulant.name=Frost Stimulant
 item.extreme_frost_stimulant.name=Extreme Frost Stimulant
 item.neutral_stimulant.name=Neutral Stimulant
 item.revival_mix.name=Revival Mix
+item.pyroberry.name=Pyroberry
+item.cryoberry.name=Cryoberry
+item.pyroberry_juice_bottle.name=Pyroberry Juice Bottle
+item.cryoberry_juice_bottle.name=Cryoberry Juice Bottle
 item.chitin.name=Chitin
 item.blow_powered_turbine.name=Blow Powered Turbine
 item.turbine.name=Turbine
 item.turbine_blade.name=Turbine Blade
+item.semi_manual_extractor.name=Semi Manual Extractor
+item.semi_manual_presser.name=Semi Manual Presser
+item.semi_manual_extruder.name=Semi Manual Extruder
+item.semi_manual_hammerer.name=Semi Manual Hammerer
+item.semi_manual_extractor_core.name=Semi Manual Extractor Core
+item.semi_manual_presser_core.name=Semi Manual Presser Core
+item.semi_manual_extruder_core.name=Semi Manual Extruder Core
+item.semi_manual_hammerer_core.name=Semi Manual Hammerer Core
+item.semi_manual_machine_frame.name=Semi Manual Machine Frame
+item.hammer.name=Hammer
 item.bola.name=Bola
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
@@ -107,11 +124,6 @@ item.iron_plate.name=Iron Plate
 item.gold_plate.name=Gold Plate
 item.iron_rod.name=Iron Rod
 item.gold_rod.name=Gold Rod
-
-item.semi_manual_extractor.name=Semi Automatic Extractor
-item.semi_manual_presser.name=Semi Automatic Presser
-item.semi_manual_extruder.name=Semi Automatic Extruder
-item.semi_manual_hammerer.name=Semi Automatic Hammerer
 
 jei.min_power=Minimum Power: %s R
 

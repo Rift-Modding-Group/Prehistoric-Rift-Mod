@@ -13,7 +13,6 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntit
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualPresser;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
 import anightdazingzoroark.prift.config.GeneralConfig;
-import anightdazingzoroark.prift.config.RiftConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
@@ -26,15 +25,18 @@ import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.recipes.RiftRecipes;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntities;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
+import anightdazingzoroark.prift.server.world.RiftPlantGenerator;
 import com.charles445.simpledifficulty.api.temperature.TemperatureRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -45,6 +47,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nullable;
 
@@ -80,6 +83,7 @@ public class ServerProxy implements IGuiHandler {
 
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ServerEvents());
+        GameRegistry.registerWorldGenerator(new RiftPlantGenerator(), 0);
     }
 
     public void postInit(FMLPostInitializationEvent event) {}

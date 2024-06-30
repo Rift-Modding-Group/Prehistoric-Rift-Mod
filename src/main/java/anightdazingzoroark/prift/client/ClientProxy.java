@@ -36,8 +36,6 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import static anightdazingzoroark.prift.client.renderer.ItemRenderer.registerItemRenderer;
-
 @Mod.EventBusSubscriber
 public class ClientProxy extends ServerProxy {
     @Mod.Instance(RiftInitialize.MODID)
@@ -50,7 +48,6 @@ public class ClientProxy extends ServerProxy {
     @Override
     public void preInit(FMLPreInitializationEvent e) {
         super.preInit(e);
-        FluidRenderer.registerRenderers();
         EntityRenderer.registerRenderers();
         BlockRenderer.registerRenderers();
         MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());

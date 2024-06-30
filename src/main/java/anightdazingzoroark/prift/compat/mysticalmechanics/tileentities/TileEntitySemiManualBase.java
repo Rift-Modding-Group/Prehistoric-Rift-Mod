@@ -30,9 +30,13 @@ import javax.annotation.Nullable;
 
 public abstract class TileEntitySemiManualBase extends TileEntity implements IAnimatable, ITickable, ISidedInventory {
     private final AnimationFactory factory = new AnimationFactory(this);
-    protected NonNullList<ItemStack> itemStackHandler = NonNullList.<ItemStack>withSize(3, ItemStack.EMPTY);
+    protected NonNullList<ItemStack> itemStackHandler;
     private boolean playResetAnim;
     private int resetAnimTime;
+
+    protected TileEntitySemiManualBase(int invSize) {
+        this.itemStackHandler = NonNullList.<ItemStack>withSize(invSize, ItemStack.EMPTY);
+    }
 
     @Override
     public void update() {

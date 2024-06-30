@@ -15,6 +15,7 @@
     }
   },
   "result": {
-    "item": "prift:basic_carnivore_meal"
+    "item": "prift:basic_carnivore_meal",
+    "count": 8
   }
 }

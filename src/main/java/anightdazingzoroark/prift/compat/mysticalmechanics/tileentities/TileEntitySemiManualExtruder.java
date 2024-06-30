@@ -15,6 +15,10 @@ import net.minecraftforge.items.ItemHandlerHelper;
 public class TileEntitySemiManualExtruder extends TileEntitySemiManualBase {
     private float rotation = 0f;
 
+    public TileEntitySemiManualExtruder() {
+        super(2);
+    }
+
     @Override
     public void update() {
         super.update();
@@ -30,7 +34,7 @@ public class TileEntitySemiManualExtruder extends TileEntitySemiManualBase {
                     }
                     else {
                         if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
-                            boolean outputUsability = (this.getOutpuItem().isEmpty() || ((SemiManualExtruderRecipe)this.getTopTEntity().getCurrentRecipe()).output.apply(this.getOutpuItem())) && this.getOutpuItem().getCount() < this.getOutpuItem().getMaxStackSize();
+                            boolean outputUsability = (this.getOutpuItem().isEmpty() || ((SemiManualExtruderRecipe)this.getTopTEntity().getCurrentRecipe()).output.apply(this.getOutpuItem())) && this.getOutpuItem().getCount() + ((SemiManualExtruderRecipe)this.getTopTEntity().getCurrentRecipe()).output.matchingStacks[0].getCount() < this.getOutpuItem().getMaxStackSize();
                             if (outputUsability) {
                                 if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
                                     this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);

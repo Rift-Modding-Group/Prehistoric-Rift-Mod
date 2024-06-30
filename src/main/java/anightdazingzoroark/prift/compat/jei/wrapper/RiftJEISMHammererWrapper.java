@@ -9,6 +9,7 @@ import mezz.jei.api.recipe.IRecipeWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import scala.actors.threadpool.Arrays;
 
 import java.awt.*;
 
@@ -23,8 +24,12 @@ public class RiftJEISMHammererWrapper implements IRecipeWrapper {
     public void getIngredients(IIngredients iIngredients) {
         iIngredients.setInput(VanillaTypes.ITEM, recipe.getOutputBloom());
         ItemStack newOutput = recipe.getOutput().copy();
-        newOutput.setCount(16);
-        iIngredients.setOutput(VanillaTypes.ITEM, newOutput);
+        newOutput.setCount(12);
+        ItemStack newSlagOutput = recipe.getSlagItemStack().copy();
+        newSlagOutput.setCount(2);
+        ItemStack failItem = recipe.getFailureItems()[0].getItemStack();
+        failItem.setCount(2);
+        iIngredients.setOutputs(VanillaTypes.ITEM, Arrays.asList(new ItemStack[]{newOutput, newSlagOutput, failItem}));
     }
 
     @Override

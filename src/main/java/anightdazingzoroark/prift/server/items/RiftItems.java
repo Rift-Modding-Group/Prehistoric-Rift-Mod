@@ -55,6 +55,8 @@ public class RiftItems {
     public static Item REVIVAL_MIX;
     public static Item PYROBERRY;
     public static Item CRYOBERRY;
+    public static Item PYROBERRY_JUICE_BOTTLE;
+    public static Item CRYOBERRY_JUICE_BOTTLE;
 
     public static Item TYRANNOSAURUS_ARM;
     public static Item STEGOSAURUS_PLATE;
@@ -118,6 +120,8 @@ public class RiftItems {
         REVIVAL_MIX = riftGenericItem("revival_mix", true);
         PYROBERRY = registerItem(new RiftBerryItem(RiftBlocks.PYROBERRY_BUSH), "pyroberry", true);
         CRYOBERRY = registerItem(new RiftBerryItem(RiftBlocks.CRYOBERRY_BUSH), "cryoberry", true);
+        PYROBERRY_JUICE_BOTTLE = registerItem(new RiftDrinkableBottleItem(), "pyroberry_juice_bottle", true);
+        CRYOBERRY_JUICE_BOTTLE = registerItem(new RiftDrinkableBottleItem(), "cryoberry_juice_bottle", true);
 
         TRUFFLE = riftGenericItem("truffle", true);
 

@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtruderRecipe;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualPresserRecipe;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -8,6 +9,10 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 public class TileEntitySemiManualPresser extends TileEntitySemiManualBase {
+    public TileEntitySemiManualPresser() {
+        super(2);
+    }
+
     @Override
     public void update() {
         super.update();
@@ -23,7 +28,7 @@ public class TileEntitySemiManualPresser extends TileEntitySemiManualBase {
                     }
                     else {
                         if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
-                            boolean outputUsability = (this.getOutpuItem().isEmpty() || ((SemiManualPresserRecipe)this.getTopTEntity().getCurrentRecipe()).output.apply(this.getOutpuItem())) && this.getOutpuItem().getCount() < this.getOutpuItem().getMaxStackSize();
+                            boolean outputUsability = (this.getOutpuItem().isEmpty() || ((SemiManualPresserRecipe)this.getTopTEntity().getCurrentRecipe()).output.apply(this.getOutpuItem())) && this.getOutpuItem().getCount() + ((SemiManualPresserRecipe)this.getTopTEntity().getCurrentRecipe()).output.matchingStacks[0].getCount() < this.getOutpuItem().getMaxStackSize();
                             if (outputUsability) {
                                 if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
                                     this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);

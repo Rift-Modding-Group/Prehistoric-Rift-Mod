@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.blocks;
 
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
+import anightdazingzoroark.prift.client.renderer.FluidRenderer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
@@ -37,8 +38,8 @@ public class RiftBlocks {
         CRYOBERRY_BUSH = registerBlock(new RiftCryoberryBush(), "cryoberry_bush", false);
 
         //fluid shenanigans
-        PYROBERRY_JUICE_FLUID = registerBlock(new BlockFluidClassic(RiftFluids.PYROBERRY_JUICE, Material.WATER), "pyroberry_juice", true, true, true);
-        CRYOBERRY_JUICE_FLUID = registerBlock(new BlockFluidClassic(RiftFluids.CRYOBERRY_JUICE, Material.WATER), "cryoberry_juice", true, true, true);
+        PYROBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.PYROBERRY_JUICE, Material.WATER), "pyroberry_juice", true, true, false);
+        CRYOBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.CRYOBERRY_JUICE, Material.WATER), "cryoberry_juice", true, true, false);
 
         if (GeneralConfig.canUseMM()) RiftMMBlocks.registerMMBlocks();
     }
@@ -70,6 +71,9 @@ public class RiftBlocks {
     public void onBlockRegistry(RegistryEvent.Register<Block> e) {
         IForgeRegistry<Block> reg = e.getRegistry();
         reg.registerAll(BLOCKS.toArray(new Block[0]));
+        //no tengo ni una puta idea de por que metiendo esto
+        //hace que se renderizan sin problemas los fluidos
+        FluidRenderer.registerRenderers();
     }
 
     @SubscribeEvent

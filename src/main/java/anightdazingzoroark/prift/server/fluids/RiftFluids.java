@@ -10,8 +10,8 @@ public class RiftFluids {
     public static Fluid CRYOBERRY_JUICE;
 
     public static void registerFluids() {
-        PYROBERRY_JUICE = registerFluid(new Fluid("pyroberry_juice", new ResourceLocation(RiftInitialize.MODID, "blocks/pyroberry_juice_still"), new ResourceLocation(RiftInitialize.MODID, "blocks/pyroberry_juice_flow")));
-        CRYOBERRY_JUICE = registerFluid(new Fluid("cryoberry_juice", new ResourceLocation(RiftInitialize.MODID, "blocks/cryoberry_juice_still"), new ResourceLocation(RiftInitialize.MODID, "blocks/cryoberry_juice_flow")));
+        PYROBERRY_JUICE = registerFluid(new RiftFluid("pyroberry_juice", new ResourceLocation(RiftInitialize.MODID, "blocks/pyroberry_juice_still"), new ResourceLocation(RiftInitialize.MODID, "blocks/pyroberry_juice_flow")));
+        CRYOBERRY_JUICE = registerFluid(new RiftFluid("cryoberry_juice", new ResourceLocation(RiftInitialize.MODID, "blocks/cryoberry_juice_still"), new ResourceLocation(RiftInitialize.MODID, "blocks/cryoberry_juice_flow")));
     }
 
     public static Fluid registerFluid(Fluid fluid) {

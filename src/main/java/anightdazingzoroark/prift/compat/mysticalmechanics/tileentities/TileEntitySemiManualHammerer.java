@@ -10,12 +10,17 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
+    public TileEntitySemiManualHammerer() {
+        super(4);
+    }
+
     @Override
     public void update() {
         super.update();
@@ -40,15 +45,28 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
                     }
                     else {
                         if (!hammerer.getMustBeReset() && !this.canDoResetAnim()) {
-                            boolean outputUsability = BloomAnvilRecipe.getRecipe(this.getInputItem(), AnvilRecipe.EnumTier.OBSIDIAN, AnvilRecipe.EnumType.HAMMER) != null && (this.getOutpuItem().isEmpty() || Ingredient.fromStacks(BloomAnvilRecipe.getRecipe(this.getInputItem(), AnvilRecipe.EnumTier.OBSIDIAN, AnvilRecipe.EnumType.HAMMER).getOutput()).apply(this.getOutpuItem())) && this.getOutpuItem().getCount() < this.getOutpuItem().getMaxStackSize() && hammerer.getMinPower() != -1D;
+                            boolean outputFull = this.getStackInSlot(1).getCount() + 12 < this.getStackInSlot(1).getMaxStackSize() && this.getStackInSlot(2).getCount() + 2 < this.getStackInSlot(2).getMaxStackSize() && this.getStackInSlot(3).getCount() + 2 < this.getStackInSlot(3).getMaxStackSize();
+                            boolean outputOneUsed = this.getStackInSlot(1).isEmpty() || Ingredient.fromStacks(BloomAnvilRecipe.getRecipe(this.getInputItem(), AnvilRecipe.EnumTier.OBSIDIAN, AnvilRecipe.EnumType.HAMMER).getOutput()).apply(this.getStackInSlot(1));
+                            boolean outputTwoUsed = this.getStackInSlot(2).isEmpty() || Ingredient.fromStacks(hammerer.getHammererRecipe().getSlagItemStack()).apply(this.getStackInSlot(2));
+                            boolean outputThreeUsed = this.getStackInSlot(3).isEmpty() || Ingredient.fromStacks(hammerer.getHammererRecipe().getFailureItems()[0].getItemStack()).apply(this.getStackInSlot(3));
+
+                            boolean outputUsability = BloomAnvilRecipe.getRecipe(this.getInputItem(), AnvilRecipe.EnumTier.OBSIDIAN, AnvilRecipe.EnumType.HAMMER) != null && outputOneUsed && outputTwoUsed && outputThreeUsed && outputFull && hammerer.getMinPower() != -1D;
                             if (outputUsability) {
                                 if (hammerer.getTimeHeld() < hammerer.getMaxHammererTime()) {
                                     hammerer.setTimeHeld(hammerer.getTimeHeld() + 1);
                                 }
                                 else {
                                     ItemStack outputStack = hammerer.getHammererRecipe().getOutput().copy();
-                                    outputStack.setCount(16);
+                                    outputStack.setCount(12);
                                     this.insertItemToSlot(1, outputStack);
+
+                                    ItemStack outputSlagStack = hammerer.getHammererRecipe().getSlagItemStack().copy();
+                                    outputSlagStack.setCount(2);
+                                    this.insertItemToSlot(2, outputSlagStack);
+
+                                    ItemStack failItem = hammerer.getHammererRecipe().getFailureItems()[0].getItemStack();
+                                    failItem.setCount(2);
+                                    this.insertItemToSlot(3, failItem);
 
                                     this.getInputItem().shrink(1);
                                     hammerer.setTimeHeld(0);
@@ -67,9 +85,20 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
         }
     }
 
-    public ItemStack getOutpuItem() {
-        IItemHandler itemHandler = this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        if (itemHandler != null) return itemHandler.getStackInSlot(1);
-        return null;
+    @Override
+    public int[] getSlotsForFace(EnumFacing side) {
+        if (side == EnumFacing.DOWN) return new int[]{1, 2, 3};
+        return new int[]{0};
+    }
+
+    @Override
+    public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
+        if (index != 0) return direction == EnumFacing.DOWN;
+        return true;
+    }
+
+    @Override
+    public boolean isItemValidForSlot(int index, ItemStack stack) {
+        return index == 0;
     }
 }

@@ -31,7 +31,7 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase impl
     private final FluidTank tank;
 
     public TileEntitySemiManualExtractor() {
-        super();
+        super(3);
         this.tank = new FluidTank(4000) {
             @Override
             protected void onContentsChanged() {

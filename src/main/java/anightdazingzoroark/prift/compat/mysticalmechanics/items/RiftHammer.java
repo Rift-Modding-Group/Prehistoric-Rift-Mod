@@ -17,16 +17,14 @@ public class RiftHammer extends Item {
 
     @Override
     public boolean hasContainerItem(ItemStack stack) {
-        return true; // This tells Minecraft that this item has a container item
+        return true;
     }
 
     @Override
     public ItemStack getContainerItem(ItemStack itemStack) {
-        // Create a copy of the item stack and reduce its durability
         ItemStack containerItem = itemStack.copy();
         containerItem.setItemDamage(containerItem.getItemDamage() + 1);
 
-        // If the item is completely damaged, return an empty item stack
         if (containerItem.getItemDamage() >= containerItem.getMaxDamage()) {
             return ItemStack.EMPTY;
         }

@@ -12,11 +12,13 @@ import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMExtractorWrapper;
 import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMExtruderWrapper;
 import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMHammererWrapper;
 import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMPresserWrapper;
+import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtractorRecipe;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtruderRecipe;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualPresserRecipe;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectiles;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import com.codetaylor.mc.pyrotech.ModPyrotechConfig;
@@ -108,20 +110,28 @@ public class RiftJEI implements IModPlugin {
         blacklist.addIngredientToBlacklist(new ItemStack(RiftItems.DETECT_ALERT));
         blacklist.addIngredientToBlacklist(new ItemStack(RiftItems.CHEST_DETECT_ALERT));
 
+        //hide fluids
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftBlocks.PYROBERRY_JUICE_FLUID));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftBlocks.CRYOBERRY_JUICE_FLUID));
+
         //add the custom recipes
         if (GeneralConfig.canUseMM()) {
             registry.addRecipes(this.semiManualExtractorWrappers(), smExtractorCat);
             registry.addRecipeClickArea(RiftSemiManualExtractorMenu.class, 64, 33, 21, 14, smExtractorCat);
+            registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_EXTRACTOR), smExtractorCat);
 
             registry.addRecipes(this.semiManualPresserWrappers(), smPresserCat);
             registry.addRecipeClickArea(RiftSemiManualPresserMenu.class, 74, 33, 21, 14, smPresserCat);
+            registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_PRESSER), smPresserCat);
 
             registry.addRecipes(this.semiManualExtruderWrappers(), smExtruderCat);
             registry.addRecipeClickArea(RiftSemiManualExtruderMenu.class, 74, 33, 21, 14, smExtruderCat);
+            registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_EXTRUDER), smExtruderCat);
 
             if (GeneralConfig.canUsePyrotech() && ModPyrotechConfig.MODULES.get(ModuleTechBloomery.MODULE_ID)) {
                 registry.addRecipes(this.semiManualHammererWrappers(), smHammererCat);
                 registry.addRecipeClickArea(RiftSemiManualHammererMenu.class, 74, 33, 21, 14, smHammererCat);
+                registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_HAMMERER), smHammererCat);
             }
         }
     }

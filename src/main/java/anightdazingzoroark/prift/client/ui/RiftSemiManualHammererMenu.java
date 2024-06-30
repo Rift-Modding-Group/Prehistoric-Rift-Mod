@@ -14,7 +14,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.util.ResourceLocation;
 
 public class RiftSemiManualHammererMenu extends GuiContainer {
-    private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_presser.png");
+    private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/semi_manual_hammerer.png");
     private static final ResourceLocation progressBar = new ResourceLocation(RiftInitialize.MODID, "textures/ui/progress_arrow.png");
     private final TileEntitySemiManualHammerer semiManualHammerer;
     private final IInventory playerInventory;
