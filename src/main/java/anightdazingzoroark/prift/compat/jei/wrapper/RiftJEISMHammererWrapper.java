@@ -22,13 +22,13 @@ public class RiftJEISMHammererWrapper implements IRecipeWrapper {
 
     @Override
     public void getIngredients(IIngredients iIngredients) {
-        iIngredients.setInput(VanillaTypes.ITEM, recipe.getOutputBloom());
-        ItemStack newOutput = recipe.getOutput().copy();
-        newOutput.setCount(12);
-        ItemStack newSlagOutput = recipe.getSlagItemStack().copy();
-        newSlagOutput.setCount(2);
-        ItemStack failItem = recipe.getFailureItems()[0].getItemStack();
-        failItem.setCount(2);
+        iIngredients.setInput(VanillaTypes.ITEM, this.recipe.getOutputBloom());
+        ItemStack newOutput = this.recipe.getOutput().copy();
+        newOutput.setCount(this.recipe instanceof BloomeryRecipe ? 12 : 36);
+        ItemStack newSlagOutput = this.recipe.getSlagItemStack().copy();
+        newSlagOutput.setCount(this.recipe instanceof BloomeryRecipe ? 2 : 6);
+        ItemStack failItem = this.recipe.getFailureItems()[0].getItemStack();
+        failItem.setCount(this.recipe instanceof BloomeryRecipe ? 2 : 6);
         iIngredients.setOutputs(VanillaTypes.ITEM, Arrays.asList(new ItemStack[]{newOutput, newSlagOutput, failItem}));
     }
 

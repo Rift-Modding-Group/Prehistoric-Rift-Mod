@@ -5,7 +5,6 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBaseTop;
 import anightdazingzoroark.prift.config.GeneralConfig;
-import anightdazingzoroark.prift.config.RiftConfig;
 import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
@@ -15,7 +14,6 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
-import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
@@ -26,9 +24,6 @@ import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.GameSettings;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
@@ -36,7 +31,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -48,9 +42,7 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 import javax.annotation.Nullable;
@@ -65,32 +57,6 @@ public class ServerEvents {
             message.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/qVWaKRMCRc"));
             message.getStyle().setUnderlined(true);
             event.player.sendMessage(message);
-        }
-    }
-
-    //make sure players cant move when trapped
-    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
-    public void noMoveWhileTrapped(InputEvent.KeyInputEvent event) {
-        GameSettings settings = Minecraft.getMinecraft().gameSettings;
-        EntityPlayer player = Minecraft.getMinecraft().player;
-        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
-
-        if (properties.isCaptured || properties.isTiedByBola) {
-            if (settings.keyBindForward.isKeyDown()) {
-                KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
-            }
-            if (settings.keyBindBack.isKeyDown()) {
-                KeyBinding.setKeyBindState(settings.keyBindBack.getKeyCode(), false);
-            }
-            if (settings.keyBindLeft.isKeyDown()) {
-                KeyBinding.setKeyBindState(settings.keyBindLeft.getKeyCode(), false);
-            }
-            if (settings.keyBindRight.isKeyDown()) {
-                KeyBinding.setKeyBindState(settings.keyBindRight.getKeyCode(), false);
-            }
-            if (settings.keyBindJump.isKeyDown()) {
-                KeyBinding.setKeyBindState(settings.keyBindJump.getKeyCode(), false);
-            }
         }
     }
 
@@ -287,32 +253,6 @@ public class ServerEvents {
                         }
                         break;
                     }
-                }
-            }
-        }
-    }
-
-    //for stopping creatures from being able to be controlled in water when they got no energy
-    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
-    public void stopControlledMoveInWater(InputEvent.KeyInputEvent event) {
-        GameSettings settings = Minecraft.getMinecraft().gameSettings;
-        EntityPlayer player = Minecraft.getMinecraft().player;
-
-        if (player.getRidingEntity() instanceof RiftCreature) {
-            RiftCreature creature = (RiftCreature) player.getRidingEntity();
-
-            if (creature.isInWater() && creature.getEnergy() == 0) {
-                if (settings.keyBindForward.isKeyDown()) {
-                    KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
-                }
-                else if (settings.keyBindBack.isKeyDown()) {
-                    KeyBinding.setKeyBindState(settings.keyBindBack.getKeyCode(), false);
-                }
-                else if (settings.keyBindLeft.isKeyDown()) {
-                    KeyBinding.setKeyBindState(settings.keyBindLeft.getKeyCode(), false);
-                }
-                else if (settings.keyBindRight.isKeyDown()) {
-                    KeyBinding.setKeyBindState(settings.keyBindRight.getKeyCode(), false);
                 }
             }
         }

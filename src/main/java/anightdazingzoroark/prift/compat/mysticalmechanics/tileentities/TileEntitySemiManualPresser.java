@@ -28,7 +28,7 @@ public class TileEntitySemiManualPresser extends TileEntitySemiManualBase {
                     }
                     else {
                         if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
-                            boolean outputUsability = (this.getOutpuItem().isEmpty() || ((SemiManualPresserRecipe)this.getTopTEntity().getCurrentRecipe()).output.apply(this.getOutpuItem())) && this.getOutpuItem().getCount() + ((SemiManualPresserRecipe)this.getTopTEntity().getCurrentRecipe()).output.matchingStacks[0].getCount() < this.getOutpuItem().getMaxStackSize();
+                            boolean outputUsability = (this.getOutpuItem().isEmpty() || ((SemiManualPresserRecipe)this.getTopTEntity().getCurrentRecipe()).output.apply(this.getOutpuItem())) && this.getOutpuItem().getCount() + ((SemiManualPresserRecipe)this.getTopTEntity().getCurrentRecipe()).output.matchingStacks[0].getCount() <= this.getOutpuItem().getMaxStackSize();
                             if (outputUsability) {
                                 if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
                                     this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);
@@ -54,8 +54,6 @@ public class TileEntitySemiManualPresser extends TileEntitySemiManualBase {
     }
 
     public ItemStack getOutpuItem() {
-        IItemHandler itemHandler = this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        if (itemHandler != null) return itemHandler.getStackInSlot(1);
-        return null;
+        return this.getStackInSlot(1);
     }
 }

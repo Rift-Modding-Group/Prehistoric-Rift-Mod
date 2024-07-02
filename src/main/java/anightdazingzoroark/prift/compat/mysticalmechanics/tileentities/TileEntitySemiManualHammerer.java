@@ -5,7 +5,9 @@ import com.codetaylor.mc.pyrotech.modules.tech.basic.recipe.AnvilRecipe;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.ModuleTechBloomery;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.block.BlockBloom;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.recipe.BloomAnvilRecipe;
+import com.codetaylor.mc.pyrotech.modules.tech.bloomery.recipe.BloomeryRecipe;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.recipe.WitherForgeRecipe;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
@@ -45,7 +47,9 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
                     }
                     else {
                         if (!hammerer.getMustBeReset() && !this.canDoResetAnim()) {
-                            boolean outputFull = this.getStackInSlot(1).getCount() + 12 < this.getStackInSlot(1).getMaxStackSize() && this.getStackInSlot(2).getCount() + 2 < this.getStackInSlot(2).getMaxStackSize() && this.getStackInSlot(3).getCount() + 2 < this.getStackInSlot(3).getMaxStackSize();
+                            int mainAmnt = hammerer.getHammererRecipe() instanceof BloomeryRecipe ? 12 : 36;
+                            int exAmnt = hammerer.getHammererRecipe() instanceof BloomeryRecipe ? 2 : 6;
+                            boolean outputFull = this.getStackInSlot(1).getCount() + mainAmnt <= this.getStackInSlot(1).getMaxStackSize() && this.getStackInSlot(2).getCount() + exAmnt <= this.getStackInSlot(2).getMaxStackSize() && this.getStackInSlot(3).getCount() + exAmnt <= this.getStackInSlot(3).getMaxStackSize();
                             boolean outputOneUsed = this.getStackInSlot(1).isEmpty() || Ingredient.fromStacks(BloomAnvilRecipe.getRecipe(this.getInputItem(), AnvilRecipe.EnumTier.OBSIDIAN, AnvilRecipe.EnumType.HAMMER).getOutput()).apply(this.getStackInSlot(1));
                             boolean outputTwoUsed = this.getStackInSlot(2).isEmpty() || Ingredient.fromStacks(hammerer.getHammererRecipe().getSlagItemStack()).apply(this.getStackInSlot(2));
                             boolean outputThreeUsed = this.getStackInSlot(3).isEmpty() || Ingredient.fromStacks(hammerer.getHammererRecipe().getFailureItems()[0].getItemStack()).apply(this.getStackInSlot(3));
@@ -57,15 +61,15 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
                                 }
                                 else {
                                     ItemStack outputStack = hammerer.getHammererRecipe().getOutput().copy();
-                                    outputStack.setCount(12);
+                                    outputStack.setCount(mainAmnt);
                                     this.insertItemToSlot(1, outputStack);
 
                                     ItemStack outputSlagStack = hammerer.getHammererRecipe().getSlagItemStack().copy();
-                                    outputSlagStack.setCount(2);
+                                    outputSlagStack.setCount(exAmnt);
                                     this.insertItemToSlot(2, outputSlagStack);
 
                                     ItemStack failItem = hammerer.getHammererRecipe().getFailureItems()[0].getItemStack();
-                                    failItem.setCount(2);
+                                    failItem.setCount(exAmnt);
                                     this.insertItemToSlot(3, failItem);
 
                                     this.getInputItem().shrink(1);
@@ -89,6 +93,12 @@ public class TileEntitySemiManualHammerer extends TileEntitySemiManualBase {
     public int[] getSlotsForFace(EnumFacing side) {
         if (side == EnumFacing.DOWN) return new int[]{1, 2, 3};
         return new int[]{0};
+    }
+
+    @Override
+    public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
+        if (index == 0) return itemStackIn.getItem() instanceof ItemBlock && ((ItemBlock)itemStackIn.getItem()).getBlock() instanceof BlockBloom;
+        return this.isItemValidForSlot(index, itemStackIn);
     }
 
     @Override

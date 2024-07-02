@@ -95,12 +95,6 @@ public class ServerProxy implements IGuiHandler {
         TemperatureRegistry.registerModifier(new ModifierDimetrodon());
     }
 
-    @SubscribeEvent
-    public static void registerBlocks(RegistryEvent.Register<Block> event) {}
-
-    @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {}
-
     @Nullable
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {

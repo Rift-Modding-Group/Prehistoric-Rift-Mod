@@ -28,11 +28,13 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -146,6 +148,12 @@ public class ClientProxy extends ServerProxy {
             }
         }
         return null;
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public static void registerModels(ModelRegistryEvent event) {
+        FluidRenderer.registerRenderers();
     }
 
     public void set3rdPersonView(int view) {

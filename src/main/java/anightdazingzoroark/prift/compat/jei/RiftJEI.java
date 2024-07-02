@@ -130,7 +130,7 @@ public class RiftJEI implements IModPlugin {
 
             if (GeneralConfig.canUsePyrotech() && ModPyrotechConfig.MODULES.get(ModuleTechBloomery.MODULE_ID)) {
                 registry.addRecipes(this.semiManualHammererWrappers(), smHammererCat);
-                registry.addRecipeClickArea(RiftSemiManualHammererMenu.class, 74, 33, 21, 14, smHammererCat);
+                registry.addRecipeClickArea(RiftSemiManualHammererMenu.class, 58, 33, 21, 14, smHammererCat);
                 registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_HAMMERER), smHammererCat);
             }
         }

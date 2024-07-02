@@ -2,15 +2,18 @@ package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftOpenWeaponInventory;
+import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
@@ -34,6 +37,58 @@ public class ClientEvents {
                     RiftInitialize.PROXY.setPreviousViewType(Minecraft.getMinecraft().gameSettings.thirdPersonView);
                     Minecraft.getMinecraft().gameSettings.thirdPersonView = 1;
                     RiftInitialize.PROXY.set3rdPersonView(2);
+                }
+            }
+        }
+    }
+
+    //make sure players cant move when trapped
+    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
+    public void noMoveWhileTrapped(InputEvent.KeyInputEvent event) {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
+
+        if (properties.isCaptured || properties.isTiedByBola) {
+            if (settings.keyBindForward.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
+            }
+            if (settings.keyBindBack.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindBack.getKeyCode(), false);
+            }
+            if (settings.keyBindLeft.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindLeft.getKeyCode(), false);
+            }
+            if (settings.keyBindRight.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindRight.getKeyCode(), false);
+            }
+            if (settings.keyBindJump.isKeyDown()) {
+                KeyBinding.setKeyBindState(settings.keyBindJump.getKeyCode(), false);
+            }
+        }
+    }
+
+    //for stopping creatures from being able to be controlled in water when they got no energy
+    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
+    public void stopControlledMoveInWater(InputEvent.KeyInputEvent event) {
+        GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        EntityPlayer player = Minecraft.getMinecraft().player;
+
+        if (player.getRidingEntity() instanceof RiftCreature) {
+            RiftCreature creature = (RiftCreature) player.getRidingEntity();
+
+            if (creature.isInWater() && creature.getEnergy() == 0) {
+                if (settings.keyBindForward.isKeyDown()) {
+                    KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
+                }
+                else if (settings.keyBindBack.isKeyDown()) {
+                    KeyBinding.setKeyBindState(settings.keyBindBack.getKeyCode(), false);
+                }
+                else if (settings.keyBindLeft.isKeyDown()) {
+                    KeyBinding.setKeyBindState(settings.keyBindLeft.getKeyCode(), false);
+                }
+                else if (settings.keyBindRight.isKeyDown()) {
+                    KeyBinding.setKeyBindState(settings.keyBindRight.getKeyCode(), false);
                 }
             }
         }

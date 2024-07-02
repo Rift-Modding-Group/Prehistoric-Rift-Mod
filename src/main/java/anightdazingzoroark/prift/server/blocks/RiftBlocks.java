@@ -71,9 +71,6 @@ public class RiftBlocks {
     public void onBlockRegistry(RegistryEvent.Register<Block> e) {
         IForgeRegistry<Block> reg = e.getRegistry();
         reg.registerAll(BLOCKS.toArray(new Block[0]));
-        //no tengo ni una puta idea de por que metiendo esto
-        //hace que se renderizan sin problemas los fluidos
-        FluidRenderer.registerRenderers();
     }
 
     @SubscribeEvent

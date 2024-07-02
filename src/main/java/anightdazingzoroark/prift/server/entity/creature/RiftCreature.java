@@ -638,11 +638,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public String getName(boolean includeLevel) {
-        if (this.hasCustomName()) return this.getCustomNameTag() + (includeLevel ? " ("+ I18n.format("tametrait.level", this.getLevel())+")" : "");
+        if (this.hasCustomName()) return this.getCustomNameTag() + (includeLevel ? " ("+ new TextComponentTranslation("tametrait.level", this.getLevel()).getFormattedText()+")" : "");
         else {
             String s = EntityList.getEntityString(this);
             if (s == null) s = "generic";
-            return I18n.format("entity." + s + ".name") + (includeLevel ? " ("+ I18n.format("tametrait.level", this.getLevel())+")" : "");
+            //new TextComponentTranslation("tametrait.level", this.getLevel()).getFormattedText()
+            return new TextComponentTranslation("entity." + s + ".name").getFormattedText() + (includeLevel ? " ("+ new TextComponentTranslation("tametrait.level", this.getLevel()).getFormattedText()+")" : "");
         }
     }
 
