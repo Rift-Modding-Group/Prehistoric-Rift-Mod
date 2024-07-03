@@ -72,6 +72,7 @@ public class ServerProxy implements IGuiHandler {
         RiftItems.registerItems();
         RiftTileEntities.registerTileEntities();
         RiftItems.registerOreDicTags();
+        RiftBlocks.registerOreDicTags();
         RiftRecipes.registerSmelting();
         if (GeneralConfig.canUseMM()) RiftMMRecipes.registerRecipes();
         RiftCrafttweaker.loadCrafttweakerCompat();

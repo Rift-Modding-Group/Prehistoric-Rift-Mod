@@ -53,6 +53,9 @@ public class RiftChargeAttack extends EntityAIBase {
         else if (!entitylivingbase.isEntityAlive()) return false;
         else {
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
+            System.out.println("min charge: "+this.getAttackReachSqr(entitylivingbase));
+            System.out.println("target dist: "+d0);
+            System.out.println("max charge: "+this.getChargeAttackReachSqr(entitylivingbase));
             return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr(entitylivingbase) && !this.attacker.isInWater();
         }
     }
@@ -198,7 +201,7 @@ public class RiftChargeAttack extends EntityAIBase {
     }
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
-        return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
+        return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width + 25);
     }
 
     protected double getChargeAttackReachSqr(EntityLivingBase attackTarget) {

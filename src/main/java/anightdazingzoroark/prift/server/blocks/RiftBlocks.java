@@ -14,6 +14,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import java.util.ArrayList;
@@ -42,6 +43,11 @@ public class RiftBlocks {
         CRYOBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.CRYOBERRY_JUICE, Material.WATER), "cryoberry_juice", true, true, false);
 
         if (GeneralConfig.canUseMM()) RiftMMBlocks.registerMMBlocks();
+    }
+
+    public static void registerOreDicTags() {
+        OreDictionary.registerOre("grass", RiftBlocks.PYROBERRY_BUSH);
+        OreDictionary.registerOre("grass", RiftBlocks.CRYOBERRY_BUSH);
     }
 
     public static Block registerBlock(Block block, String registryName, boolean includeItem) {

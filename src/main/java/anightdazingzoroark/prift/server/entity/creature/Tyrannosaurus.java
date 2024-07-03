@@ -176,7 +176,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 30f, 2.08f, 0.64f));
+        this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 180f, 2.08f, 0.64f));
         this.tasks.addTask(1, new RiftLandDwellerSwim(this));
         this.tasks.addTask(2, new RiftMate(this));
         this.tasks.addTask(3, new RiftResetAnimatedPose(this, 1.68F, 1));

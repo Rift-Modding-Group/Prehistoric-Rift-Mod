@@ -15,17 +15,17 @@ import net.minecraftforge.fluids.FluidUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class RiftIngredientBucketFluid extends Ingredient {
+public class RiftIngredientFluidStack extends Ingredient {
     private final FluidStack fluid;
     private ItemStack[] cachedStacks;
 
-    public RiftIngredientBucketFluid(FluidStack fluid) {
+    public RiftIngredientFluidStack(FluidStack fluid) {
 
         super(0);
         this.fluid = fluid;
     }
 
-    public RiftIngredientBucketFluid(Fluid fluid, int amount) {
+    public RiftIngredientFluidStack(Fluid fluid, int amount) {
 
         this(new FluidStack(fluid, amount));
     }

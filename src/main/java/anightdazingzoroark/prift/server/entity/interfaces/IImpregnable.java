@@ -26,7 +26,7 @@ public interface IImpregnable {
                 baby.setLocationAndAngles(parent.posX, parent.posY, parent.posZ, 0.0F, 0.0F);
                 parent.world.spawnEntity(baby);
                 this.setPregnant(false, 0);
-                ((EntityPlayer)parent.getOwner()).sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed", new TextComponentString(parent.getName())), false);
+                if (parent.getOwner() != null) ((EntityPlayer)parent.getOwner()).sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed", new TextComponentString(parent.getName())), false);
             }
         }
     }

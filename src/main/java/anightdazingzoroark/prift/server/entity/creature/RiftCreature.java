@@ -642,7 +642,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else {
             String s = EntityList.getEntityString(this);
             if (s == null) s = "generic";
-            //new TextComponentTranslation("tametrait.level", this.getLevel()).getFormattedText()
             return new TextComponentTranslation("entity." + s + ".name").getFormattedText() + (includeLevel ? " ("+ new TextComponentTranslation("tametrait.level", this.getLevel()).getFormattedText()+")" : "");
         }
     }
@@ -1708,7 +1707,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void updatePassenger(Entity passenger) {
-        if (this.canBeSteered()) {
+        if (this.canBeSteered() && !this.isCharging()) {
             this.rotationYaw = passenger.rotationYaw;
             this.prevRotationYaw = this.rotationYaw;
             this.rotationPitch = passenger.rotationPitch * 0.5f;
@@ -1868,11 +1867,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isSaddled() && this.isBeingRidden() && this.canBeSteered()) {
             EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();
             if (controller != null) {
-                this.rotationYaw = controller.rotationYaw;
-                this.prevRotationYaw = this.rotationYaw;
-                this.rotationPitch = controller.rotationPitch * 0.5f;
-                this.setRotation(this.rotationYaw, this.rotationPitch);
-                this.renderYawOffset = this.rotationYaw;
+                if (!this.isCharging()) {
+                    this.rotationYaw = controller.rotationYaw;
+                    this.prevRotationYaw = this.rotationYaw;
+                    this.rotationPitch = controller.rotationPitch * 0.5f;
+                    this.setRotation(this.rotationYaw, this.rotationPitch);
+                    this.renderYawOffset = this.rotationYaw;
+                }
                 strafe = controller.moveStrafing * 0.5f;
                 forward = controller.moveForward;
                 this.stepHeight = 1.0F;

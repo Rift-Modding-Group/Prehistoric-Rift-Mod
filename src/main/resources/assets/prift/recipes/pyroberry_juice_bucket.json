@@ -1,0 +1,36 @@
+{
+  "type": "forge:ore_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:bucket"
+    },
+    {
+      "item": "prift:pyroberry"
+    },
+    {
+      "item": "prift:pyroberry"
+    },
+    {
+      "item": "prift:pyroberry"
+    },
+    {
+      "item": "prift:pyroberry"
+    },
+    {
+      "item": "prift:pyroberry"
+    },
+    {
+      "item": "prift:pyroberry"
+    },
+    {
+      "item": "prift:pyroberry"
+    },
+    {
+      "item": "prift:pyroberry"
+    }
+  ],
+  "result": {
+    "item": "forge:bucketfilled",
+    "nbt": "{FluidName:\"pyroberry_juice\", Amount: 1000}"
+  }
+}

@@ -142,27 +142,29 @@ public class RiftAttack extends EntityAIBase {
 
         if (--this.attackCooldown <= 0) {
             if (distToEnemySqr <= d0) this.attacker.setAttacking(true);
-            if (this.animTime == 0) this.attacker.removeSpeed();
-            this.animTime++;
-            if (this.animTime == this.attackAnimTime) {
-                if (distToEnemySqr <= d0) this.attacker.attackEntityAsMob(enemy);
-            }
-            if (this.animTime > this.attackAnimLength + 1) {
-                this.animTime = 0;
-                this.attacker.setAttacking(false);
-                this.attackCooldown = 20;
-                this.attacker.resetSpeed();
-                if (this.attacker.isTamed()) this.attacker.energyActionMod++;
+            if (this.attacker.isAttacking()) {
+                this.animTime++;
+                if (this.animTime == this.attackAnimTime) {
+                    this.attacker.removeSpeed();
+                    if (distToEnemySqr <= d0) this.attacker.attackEntityAsMob(enemy);
+                }
+                if (this.animTime > this.attackAnimLength + 1) {
+                    this.animTime = 0;
+                    this.attacker.setAttacking(false);
+                    this.attackCooldown = 20;
+                    this.attacker.resetSpeed();
+                    if (this.attacker.isTamed()) this.attacker.energyActionMod++;
+                }
             }
         }
     }
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
-        return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
+        return (this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
     }
 
     protected double getRangedAttackReachSqr(EntityLivingBase attackTarget) {
-        if (this.attacker instanceof IRangedAttackMob) return (double)(this.attacker.rangedWidth * this.attacker.rangedWidth + attackTarget.width);
+        if (this.attacker instanceof IRangedAttackMob) return (double)(this.attacker.rangedWidth * this.attacker.rangedWidth + attackTarget.width + 25);
         return 0;
     }
 

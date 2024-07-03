@@ -207,10 +207,11 @@ public class RiftEggMenu extends GuiScreen {
             GlStateManager.rotate(-45.0F, 0.0F, 1.0F, 0.0F);
             RenderHelper.enableStandardItemLighting();
             GlStateManager.rotate(-135.0F, 0.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(-180.0F, 0.0F, 0.0F, 1.0F);
             GlStateManager.rotate(-((float) Math.atan(renderPitch / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
             egg.rotationYaw = (float) Math.atan(renderYaw / 40.0F) * 40.0F;
             egg.rotationPitch = -((float) Math.atan(renderPitch / 40.0F)) * 20.0F;
-            GlStateManager.translate(0.0F, (float) egg.getYOffset(), 0.0F);
+            GlStateManager.translate(0.0F, -0.125F, 0.0F);
             GlStateManager.rotate(egg.ticksExisted, 0.0F, 1.0F, 0.0F);
             Minecraft.getMinecraft().getRenderManager().playerViewY = 180.0F;
             Minecraft.getMinecraft().getRenderManager().renderEntity(egg, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
@@ -230,10 +231,12 @@ public class RiftEggMenu extends GuiScreen {
             GlStateManager.rotate(-45.0F, 0.0F, 1.0F, 0.0F);
             RenderHelper.enableStandardItemLighting();
             GlStateManager.rotate(-135.0F, 0.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(-180.0F, 0.0F, 0.0F, 1.0F);
             GlStateManager.rotate(-((float) Math.atan(renderPitch / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
             sac.rotationYaw = (float) Math.atan(renderYaw / 40.0F) * 40.0F;
             sac.rotationPitch = -((float) Math.atan(renderPitch / 40.0F)) * 20.0F;
             GlStateManager.translate(0.0F, (float) sac.getYOffset(), 0.0F);
+            GlStateManager.translate(0.0F, -0.125F, 0.0F);
             GlStateManager.rotate(sac.ticksExisted, 0.0F, 1.0F, 0.0F);
             Minecraft.getMinecraft().getRenderManager().playerViewY = 180.0F;
             Minecraft.getMinecraft().getRenderManager().renderEntity(sac, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
@@ -253,10 +256,12 @@ public class RiftEggMenu extends GuiScreen {
             GlStateManager.rotate(-45.0F, 0.0F, 1.0F, 0.0F);
             RenderHelper.enableStandardItemLighting();
             GlStateManager.rotate(-135.0F, 0.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(-180.0F, 0.0F, 0.0F, 1.0F);
             GlStateManager.rotate(-((float) Math.atan(renderPitch / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
             embryo.rotationYaw = (float) Math.atan(renderYaw / 40.0F) * 40.0F;
             embryo.rotationPitch = -((float) Math.atan(renderPitch / 40.0F)) * 20.0F;
             GlStateManager.translate(0.0F, (float) embryo.getYOffset(), 0.0F);
+            GlStateManager.translate(0.0F, -0.225F, 0.0F);
             GlStateManager.rotate(this.embryoRotation++, 0.0F, 1.0F, 0.0F);
             Minecraft.getMinecraft().getRenderManager().playerViewY = 180.0F;
             Minecraft.getMinecraft().getRenderManager().renderEntity(embryo, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);

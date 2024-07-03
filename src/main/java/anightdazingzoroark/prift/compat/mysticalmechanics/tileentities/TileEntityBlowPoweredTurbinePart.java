@@ -21,6 +21,10 @@ public class TileEntityBlowPoweredTurbinePart extends TileEntity {
         }
     }
 
+    public TileEntityBlowPoweredTurbine getTurbine() {
+        return (TileEntityBlowPoweredTurbine) this.world.getTileEntity(this.getCenterBlockPos());
+    }
+
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
@@ -34,6 +38,11 @@ public class TileEntityBlowPoweredTurbinePart extends TileEntity {
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         this.centerBlockPos = new BlockPos(compound.getInteger("centerPosX"), compound.getInteger("centerPosY"), compound.getInteger("centerPosZ"));
+    }
+
+    @Override
+    public NBTTagCompound getUpdateTag() {
+        return this.writeToNBT(new NBTTagCompound());
     }
 
     @Override

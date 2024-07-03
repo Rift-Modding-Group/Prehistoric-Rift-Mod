@@ -1,12 +1,8 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
-import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtruderRecipe;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualPresserRecipe;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 public class TileEntitySemiManualPresser extends TileEntitySemiManualBase {
     public TileEntitySemiManualPresser() {
