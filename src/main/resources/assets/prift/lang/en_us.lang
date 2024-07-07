@@ -78,6 +78,7 @@ item.semi_manual_extruder_core.name=Semi Manual Extruder Core
 item.semi_manual_hammerer_core.name=Semi Manual Hammerer Core
 item.semi_manual_machine_frame.name=Semi Manual Machine Frame
 item.hammer.name=Hammer
+item.file.name=File
 item.bola.name=Bola
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm

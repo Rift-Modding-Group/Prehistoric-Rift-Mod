@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.config.*;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
@@ -52,7 +54,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPredator, IWorkstationUser {
+public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus"));
     private static final Predicate<EntityLivingBase> WEAKNESS_BLACKLIST = new Predicate<EntityLivingBase>() {
         @Override
@@ -119,6 +121,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         }
     };
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> STOMPING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROAR = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     public int roarCooldownTicks;
     public int roarCharge;
@@ -157,6 +160,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(CAN_ROAR, true);
+        this.dataManager.register(STOMPING, false);
         this.dataManager.register(ROARING, false);
         this.setCanPickUpLoot(true);
     }
@@ -177,6 +181,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 180f, 2.08f, 0.64f));
+        this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 1.04f, 0.64f));
         this.tasks.addTask(1, new RiftLandDwellerSwim(this));
         this.tasks.addTask(2, new RiftMate(this));
         this.tasks.addTask(3, new RiftResetAnimatedPose(this, 1.68F, 1));
@@ -415,7 +420,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     public boolean isWorkstation(BlockPos pos) {
         Block block = this.world.getBlockState(pos).getBlock();
         if (GeneralConfig.canUseMM()) {
-            if (block instanceof BlockBlowPoweredTurbine) return true;
+            return block instanceof BlockBlowPoweredTurbine || block instanceof BlockSemiManualBase;
         }
         return false;
     }
@@ -423,33 +428,37 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     @Override
     public BlockPos workstationUseFromPos() {
         IBlockState blockState = this.world.getBlockState(this.getWorkstationPos());
+        TileEntity te = this.world.getTileEntity(this.getWorkstationPos());
         int downF = 0;
+        int dirF = te instanceof TileEntitySemiManualBase ? -1 : 1;
         if (GeneralConfig.canUseMM()) {
-            TileEntity te = this.world.getTileEntity(this.getWorkstationPos());
             if (te != null) downF = te instanceof TileEntityBlowPoweredTurbine ? -1 : 0;
         }
         if (blockState.getMaterial().isSolid()) {
             EnumFacing direction = blockState.getValue(BlockHorizontal.FACING);
             switch (direction) {
                 case NORTH:
-                    return this.getWorkstationPos().add(0, downF, -4);
+                    return this.getWorkstationPos().add(0, downF, -4 * dirF);
                 case SOUTH:
-                    return this.getWorkstationPos().add(0, downF, 4);
+                    return this.getWorkstationPos().add(0, downF, 4 * dirF);
                 case EAST:
-                    return this.getWorkstationPos().add(4, downF, 0);
+                    return this.getWorkstationPos().add(4 * dirF, downF, 0);
                 case WEST:
-                    return this.getWorkstationPos().add(-4, downF, 0);
+                    return this.getWorkstationPos().add(-4 * dirF, downF, 0);
             }
         }
         return null;
     }
 
     public boolean isUsingWorkAnim() {
-        return this.isRoaring();
+        if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntityBlowPoweredTurbine) return this.isRoaring();
+        else if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntitySemiManualBase) return this.isStomping();
+        return false;
     }
 
     public void setUsingWorkAnim(boolean value) {
-        this.setRoaring(value);
+        if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntityBlowPoweredTurbine) this.setRoaring(value);
+        else if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntitySemiManualBase) this.setStomping(value);
     }
 
     public SoundEvent useAnimSound() {
@@ -457,7 +466,8 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     }
 
     public void setRoaring(boolean value) {
-        this.dataManager.set(ROARING, Boolean.valueOf(value));
+        System.out.println("is roaring: "+value);
+        this.dataManager.set(ROARING, value);
         this.setActing(value);
     }
 
@@ -465,8 +475,18 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         return this.dataManager.get(ROARING);
     }
 
+    public void setStomping(boolean value) {
+        System.out.println("is stomping: "+value);
+        this.dataManager.set(STOMPING, value);
+        this.setActing(value);
+    }
+
+    public boolean isStomping() {
+        return this.dataManager.get(STOMPING);
+    }
+
     public void setCanRoar(boolean value) {
-        this.dataManager.set(CAN_ROAR, Boolean.valueOf(value));
+        this.dataManager.set(CAN_ROAR, value);
     }
 
     public boolean canRoar() {
@@ -555,6 +575,7 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
         data.addAnimationController(new AnimationController(this, "movement", 0, this::tyrannosaurusMovement));
         data.addAnimationController(new AnimationController(this, "attacking", 0, this::tyrannosaurusAttack));
         data.addAnimationController(new AnimationController(this, "roaring", 0, this::tyrannosaurusRoar));
+        data.addAnimationController(new AnimationController(this, "stomping", 0, this::tyrannosaurusStomp));
         data.addAnimationController(new AnimationController(this, "controlled_roar", 0, this::tyrannosaurusControlledRoar));
     }
 
@@ -589,6 +610,16 @@ public class Tyrannosaurus extends RiftCreature implements IAnimatable, IApexPre
     private <E extends IAnimatable> PlayState tyrannosaurusRoar(AnimationEvent<E> event) {
         if (this.isRoaring()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.roar", false));
+        }
+        else {
+            event.getController().clearAnimationCache();
+        }
+        return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState tyrannosaurusStomp(AnimationEvent<E> event) {
+        if (this.isStomping()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.stomp", false));
         }
         else {
             event.getController().clearAnimationCache();

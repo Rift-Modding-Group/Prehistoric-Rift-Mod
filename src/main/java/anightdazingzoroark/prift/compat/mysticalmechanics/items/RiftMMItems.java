@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.items;
 
-import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.items.RiftItems;
@@ -28,6 +27,7 @@ public class RiftMMItems {
     public static Item IRON_ROD;
     public static Item GOLD_ROD;
     public static Item HAMMER;
+    public static Item FILE;
 
     public static void registerMMItems() {
         BLOW_POWERED_TURBINE = riftBlowPoweredTurbineItem("blow_powered_turbine");
@@ -46,7 +46,8 @@ public class RiftMMItems {
         GOLD_PLATE = RiftItems.riftGenericItem("gold_plate", true);
         IRON_ROD = RiftItems.riftGenericItem("iron_rod", true);
         GOLD_ROD = RiftItems.riftGenericItem("gold_rod", true);
-        HAMMER = RiftItems.registerItem(new RiftHammer(), "hammer", true);
+        HAMMER = RiftItems.registerItem(new RiftMMCraftingTool(), "hammer", true);
+        FILE = RiftItems.registerItem(new RiftMMCraftingTool(), "file", true);
     }
 
     public static void registerOreDicTags() {

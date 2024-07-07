@@ -3,8 +3,8 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-public class RiftHammer extends Item {
-    public RiftHammer() {
+public class RiftMMCraftingTool extends Item {
+    public RiftMMCraftingTool() {
         super();
         this.setMaxStackSize(1);
         this.setMaxDamage(64);

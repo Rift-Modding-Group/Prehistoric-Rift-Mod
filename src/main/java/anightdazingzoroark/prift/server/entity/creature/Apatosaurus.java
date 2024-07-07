@@ -4,10 +4,16 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.config.ApatosaurusConfig;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
 import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
@@ -18,6 +24,9 @@ import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockHorizontal;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
@@ -31,11 +40,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -56,7 +64,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class Apatosaurus extends RiftCreature {
+public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/apatosaurus"));
     private static final DataParameter<Byte> WEAPON = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> LAUNCHING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
@@ -123,6 +131,7 @@ public class Apatosaurus extends RiftCreature {
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
+        this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 3f, 3f));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftApatosaurusControlledTailWhip(this, 0.6F, 0.4F));
@@ -377,6 +386,53 @@ public class Apatosaurus extends RiftCreature {
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         if (compound.hasKey("Weapon")) this.setWeapon(RiftLargeWeaponType.values()[compound.getByte("Weapon")]);
+    }
+
+    @Override
+    public boolean canUseWorkstation() {
+        return GeneralConfig.canUseMM();
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
+        Block block = this.world.getBlockState(pos).getBlock();
+        if (GeneralConfig.canUseMM()) {
+            return block instanceof BlockSemiManualBase;
+        }
+        return false;
+    }
+
+    @Override
+    public BlockPos workstationUseFromPos() {
+        IBlockState blockState = this.world.getBlockState(this.getWorkstationPos());
+        TileEntity te = this.world.getTileEntity(this.getWorkstationPos());
+        int dirF = te instanceof TileEntitySemiManualBase ? -1 : 1;
+        if (blockState.getMaterial().isSolid()) {
+            EnumFacing direction = blockState.getValue(BlockHorizontal.FACING);
+            switch (direction) {
+                case NORTH:
+                    return this.getWorkstationPos().add(0, 0, 5);
+                case SOUTH:
+                    return this.getWorkstationPos().add(0, 0, -5);
+                case EAST:
+                    return this.getWorkstationPos().add(-5, 0, 0);
+                case WEST:
+                    return this.getWorkstationPos().add(5, 0, 0);
+            }
+        }
+        return null;
+    }
+
+    public boolean isUsingWorkAnim() {
+        return this.isAttacking();
+    }
+
+    public void setUsingWorkAnim(boolean value) {
+        this.setAttacking(value);
+    }
+
+    public SoundEvent useAnimSound() {
+        return null;
     }
 
     public boolean isTameableByFeeding() {

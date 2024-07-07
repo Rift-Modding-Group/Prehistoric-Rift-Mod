@@ -191,7 +191,7 @@
 				{
 					"name": "leftShin",
 					"parent": "leftLeg",
-					"pivot": [0, 0, 0],
+					"pivot": [-6, 9.5, 14],
 					"cubes": [
 						{"origin": [-7.5, 1.5, 13], "size": [3, 9, 4], "inflate": -0.25, "uv": [0, 24]}
 					]

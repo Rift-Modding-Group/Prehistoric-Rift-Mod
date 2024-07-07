@@ -46,7 +46,6 @@ public class RiftSemiManualPresserMenu extends GuiContainer {
     private void drawProgressBar() {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         float progress = (float)this.semiManualPresser.getTopTEntity().getTimeHeld();
-        System.out.println("progress: "+progress);
         float max = (float)this.semiManualPresser.getTopTEntity().getMaxRecipeTime();
         float fill = progress / max * 21f;
         this.mc.getTextureManager().bindTexture(progressBar);
