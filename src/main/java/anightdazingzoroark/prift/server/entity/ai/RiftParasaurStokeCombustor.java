@@ -1,22 +1,14 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
-import com.codetaylor.mc.pyrotech.IAirflowConsumerCapability;
-import com.codetaylor.mc.pyrotech.modules.core.ModuleCore;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.tile.TileBloomery;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.common.Loader;
-
-import java.util.List;
 
 public class RiftParasaurStokeCombustor extends EntityAIBase {
     private Parasaurolophus parasaur;
@@ -77,7 +69,10 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
                                 this.parasaur.setBlowing(true);
                                 this.parasaur.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);
                             }
-                            if (this.animTime == this.animBlowTime) stoked.consumeAirflow(8f, false);
+                            if (this.animTime == this.animBlowTime) {
+                                stoked.consumeAirflow(8f, false);
+                                this.parasaur.setXP(this.parasaur.getXP() + 5);
+                            }
                         }
                     }
                     if (tileEntity instanceof TileBloomery) {
@@ -87,13 +82,15 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
                                 this.parasaur.setBlowing(true);
                                 this.parasaur.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);
                             }
-                            if (this.animTime == this.animBlowTime) stoked.consumeAirflow(8f, false);
+                            if (this.animTime == this.animBlowTime) {
+                                stoked.consumeAirflow(8f, false);
+                                this.parasaur.setXP(this.parasaur.getXP() + 5);
+                            }
                         }
                     }
                     if (this.animTime == this.animLength) {
                         this.parasaur.setBlowing(false);
-                        this.parasaur.setEnergy(this.parasaur.getEnergy() - 3);
-                        this.parasaur.setXP(this.parasaur.getXP() + 5);
+                        this.parasaur.energyActionMod++;
                     }
                     if (this.animTime > 120) {
                         this.animTime = -1;

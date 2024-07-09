@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;

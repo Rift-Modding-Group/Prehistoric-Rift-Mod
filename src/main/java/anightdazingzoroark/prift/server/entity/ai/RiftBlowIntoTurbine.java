@@ -1,17 +1,13 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
-import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.Loader;
 
 public class RiftBlowIntoTurbine extends EntityAIBase {
     private final RiftCreature creature;
@@ -80,7 +76,7 @@ public class RiftBlowIntoTurbine extends EntityAIBase {
                     }
                     if (this.animTime == this.animLength) {
                         this.user.setUsingWorkAnim(false);
-                        this.creature.setEnergy(this.creature.getEnergy() - 3);
+                        this.creature.energyActionMod++;
                         this.creature.setXP(this.creature.getXP() + 5);
                     }
                     if (this.animTime > 120) {

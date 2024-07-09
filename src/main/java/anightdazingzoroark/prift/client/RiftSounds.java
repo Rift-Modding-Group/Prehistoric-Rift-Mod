@@ -136,6 +136,12 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.megaloceros.death")
     public static final SoundEvent MEGALOCEROS_DEATH = createSoundEvent("prift.megaloceros.death");
 
+    @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
+    public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");
+
+    @GameRegistry.ObjectHolder("prift.semi_manual_machine.jammed")
+    public static final SoundEvent SEMI_MANUAL_MACHINE_JAMMED = createSoundEvent("prift.semi_manual_machine.jammed");
+
     private static SoundEvent createSoundEvent(String soundName) {
         ResourceLocation soundID = new ResourceLocation(RiftInitialize.MODID, soundName);
         return new SoundEvent(soundID).setRegistryName(soundID);

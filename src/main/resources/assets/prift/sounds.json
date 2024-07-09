@@ -315,5 +315,20 @@
       "prift:entities/megaloceros/megaloceros_death"
     ],
     "subtitle": "sounds.subtitle.megaloceros_death"
+  },
+
+  "prift.semi_manual_machine.reset": {
+    "category": "block",
+    "sounds": [
+      "prift:blocks/semi_manual_machine_reset"
+    ],
+    "subtitle": "sounds.subtitle.semi_manual_machine_reset"
+  },
+  "prift.semi_manual_machine.jammed": {
+    "category": "block",
+    "sounds": [
+      "prift:blocks/semi_manual_machine_jammed"
+    ],
+    "subtitle": "sounds.subtitle.semi_manual_machine_jammed"
   }
 }

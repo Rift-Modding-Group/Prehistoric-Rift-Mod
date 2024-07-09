@@ -462,11 +462,12 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     }
 
     public SoundEvent useAnimSound() {
-        return RiftSounds.TYRANNOSAURUS_ROAR;
+        if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntityBlowPoweredTurbine) return RiftSounds.TYRANNOSAURUS_ROAR;
+        else if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntitySemiManualBase) return RiftSounds.SEMI_MANUAL_MACHINE_RESET;
+        return null;
     }
 
     public void setRoaring(boolean value) {
-        System.out.println("is roaring: "+value);
         this.dataManager.set(ROARING, value);
         this.setActing(value);
     }
@@ -476,7 +477,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     }
 
     public void setStomping(boolean value) {
-        System.out.println("is stomping: "+value);
         this.dataManager.set(STOMPING, value);
         this.setActing(value);
     }
