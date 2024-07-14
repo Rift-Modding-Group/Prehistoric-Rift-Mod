@@ -12,3 +12,10 @@ The mod is for Minecraft Forge 1.12.2, and requires the following dependencies:
 * [LLibrary](https://www.curseforge.com/minecraft/mc-mods/llibrary)
 
 All the above dependencies require the latest versions of their 1.12.2 versions to work.
+
+Also has integrations with the following mods:
+* [Shoulder Surfing](https://www.curseforge.com/minecraft/mc-mods/shoulder-surfing-reloaded)
+* [Simple Difficulty](https://www.curseforge.com/minecraft/mc-mods/simpledifficulty)
+* [Pyrotech](https://www.curseforge.com/minecraft/mc-mods/pyrotech)
+* [Mystical Mechanics API](https://www.curseforge.com/minecraft/mc-mods/mysticalmechanics)
+* [Crafttweaker](https://www.curseforge.com/minecraft/mc-mods/crafttweaker)
