@@ -14,6 +14,8 @@ import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -331,6 +333,23 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
                 else this.attackEntityAsMobStrong(target);
             }
             else this.attackEntityAsMobStrong(target);
+        }
+
+        //break blocks
+        BlockPos pos = new BlockPos(this.posX, this.posY, this.posZ);
+        int height = (int)(Math.ceil(this.height)) + (this.isBeingRidden() ? (this.getControllingPassenger() != null ? (int)(Math.ceil(this.getControllingPassenger().height)) : 0) : 0);
+        int radius = (int)(Math.ceil(this.width)) + this.forcedBreakBlockRad;
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = 0; y <= height; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    BlockPos tempPos = pos.add(x, y, z);
+                    IBlockState iblockstate = this.world.getBlockState(tempPos);
+                    Block block = iblockstate.getBlock();
+                    if (iblockstate.getMaterial() != Material.AIR && this.checkBasedOnStrength(block, iblockstate)) {
+                        this.world.destroyBlock(tempPos, true);
+                    }
+                }
+            }
         }
     }
 

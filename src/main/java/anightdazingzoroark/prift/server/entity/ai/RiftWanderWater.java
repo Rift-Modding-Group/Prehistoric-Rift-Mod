@@ -23,9 +23,9 @@ public class RiftWanderWater extends EntityAIWander {
             else return false;
         }
         else {
-            if (this.waterCreature.isHerdLeader() && this.waterCreature.isInWater()) return super.shouldExecute();
+            if (this.waterCreature.isHerdLeader() && this.waterCreature.isInWater()) super.shouldExecute();
             else if (!this.waterCreature.isHerdLeader() && !this.waterCreature.hasHerdLeader() && this.waterCreature.isInWater()) return super.shouldExecute();
-            else return false;
+            return false;
         }
     }
 

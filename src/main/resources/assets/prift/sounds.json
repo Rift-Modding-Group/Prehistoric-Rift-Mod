@@ -317,6 +317,28 @@
     "subtitle": "sounds.subtitle.megaloceros_death"
   },
 
+  "prift.baryonyx.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/baryonyx/baryonyx_idle"
+    ],
+    "subtitle": "sounds.subtitle.baryonyx_idle"
+  },
+  "prift.baryonyx.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/baryonyx/baryonyx_hurt"
+    ],
+    "subtitle": "sounds.subtitle.baryonyx_hurt"
+  },
+  "prift.baryonyx.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/baryonyx/baryonyx_death"
+    ],
+    "subtitle": "sounds.subtitle.baryonyx_death"
+  },
+
   "prift.semi_manual_machine.reset": {
     "category": "block",
     "sounds": [

@@ -40,6 +40,7 @@ public class RiftGoToWater extends EntityAIBase {
     @Override
     public void resetTask() {
         this.waterBlockPos = null;
+        this.creature.getNavigator().clearPath();
     }
 
     @Override
@@ -79,9 +80,12 @@ public class RiftGoToWater extends EntityAIBase {
 
     private boolean canFitHitbox(BlockPos pos) {
         float width = Math.round(this.creature.width);
+        float height = Math.round(this.creature.height);
         for (int x = -Math.round(width/2f); x <= Math.round(width/2f); x++) {
-            for (int z = -Math.round(width/2f); z <= Math.round(width/2f); z++) {
-                if (this.creature.world.getBlockState(pos.add(x, 0, z)).getMaterial() != Material.WATER) return false;
+            for (int y = 0; y < height; y++) {
+                for (int z = -Math.round(width/2f); z <= Math.round(width/2f); z++) {
+                    if (this.creature.world.getBlockState(pos.add(x, y, z)).getMaterial() != Material.WATER) return false;
+                }
             }
         }
         return true;

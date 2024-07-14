@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public abstract class RiftWaterCreature extends RiftCreature {
     private static final DataParameter<Boolean> USING_SWIM_CONTROLS = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
     protected final float defaultWaterCost;
-    private final PathNavigateRiftWaterCreature waterNavigate;
+    private final PathNavigateSwimmer waterNavigate;
     private final PathNavigateGround landNavigate;
     private boolean amphibiousInWater;
     public RiftCreaturePart bodyPart;
@@ -55,7 +55,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
     public RiftWaterCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn, creatureType);
         this.moveHelper = new RiftWaterCreatureMoveHelper(this);
-        this.waterNavigate = new PathNavigateRiftWaterCreature(this, this.world);
+        this.waterNavigate = new PathNavigateSwimmer(this, this.world);
         this.landNavigate = new PathNavigateGround(this, this.world);
         this.amphibiousInWater = true;
         if (!this.isAmphibious()) {
@@ -264,6 +264,9 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
     @Override
     public boolean isInWater() {
+        if (this.bodyPart != null) {
+            return this.world.getBlockState(this.bodyPart.getPosition()).getMaterial() == Material.WATER;
+        }
         return this.world.getBlockState(this.getPosition()).getMaterial() == Material.WATER;
     }
 
@@ -274,14 +277,12 @@ public abstract class RiftWaterCreature extends RiftCreature {
     public abstract boolean isAmphibious();
 
     @Override
-    public boolean isPushedByWater()
-    {
+    public boolean isPushedByWater() {
         return false;
     }
 
     @Override
-    public boolean isNotColliding()
-    {
+    public boolean isNotColliding() {
         return this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this);
     }
 
@@ -365,10 +366,19 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 this.motionZ *= f4;
 
                 if (this.isAmphibious() && forward > 0) {
-                    BlockPos ahead = new BlockPos(this.posX + Math.sin(-rotationYaw * 0.017453292F), this.bodyPart.posY, this.posZ + Math.cos(rotationYaw * 0.017453292F));
-                    BlockPos above = ahead.up();
-                    if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
-                        this.setPosition(this.posX, this.posY + this.bodyPart.height + 1.0, this.posZ);
+                    if (this.bodyPart != null) {
+                        if (this.bodyPart.isInWater()) {
+                            if (this.posY >= RiftUtil.highestWaterPos(this) - 2 && this.posY <= RiftUtil.highestWaterPos(this) + 2) {
+                                double xMove = (this.width)*Math.sin(-Math.toRadians(this.rotationYaw));
+                                double zMove = (this.width)*Math.cos(Math.toRadians(this.rotationYaw));
+                                BlockPos ahead = new BlockPos(this.posX + xMove, RiftUtil.highestWaterPos(this), this.posZ + zMove);
+                                BlockPos above = ahead.up();
+                                if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                                    RiftMessages.WRAPPER.sendToServer(new RiftForceChangePos(this, this.posX + xMove, RiftUtil.highestWaterPos(this) + 1.0, this.posZ + zMove));
+
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -377,11 +387,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
         else {
             if (this.isInWater()) {
                 if (this.getTameStatus() == TameStatusType.SIT || this.getNavigator().noPath()) {
-                    this.moveRelative(0, 0, 0, 0.01f);
-                    this.move(MoverType.SELF, 0, 0, 0);
-                    this.motionX *= 0;
-                    this.motionY *= 0;
-                    this.motionZ *= 0;
+                    super.travel(0, 0, 0);
                 }
                 else {
                     this.moveRelative(strafe, vertical, forward, 0.01f);

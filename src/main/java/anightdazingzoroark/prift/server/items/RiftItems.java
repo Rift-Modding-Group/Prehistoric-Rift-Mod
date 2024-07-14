@@ -73,6 +73,7 @@ public class RiftItems {
     public static Item SAUROPHAGANAX_EYE;
     public static Item DIREWOLF_TAIL;
     public static Item MEGALOCEROS_ANTLER;
+    public static Item BARYONYX_CLAW;
 
     public static Item CHITIN;
 
@@ -142,6 +143,7 @@ public class RiftItems {
         SAUROPHAGANAX_EYE = riftGenericItem("saurophaganax_eye", true);
         DIREWOLF_TAIL = riftGenericItem("direwolf_tail", true);
         MEGALOCEROS_ANTLER = riftGenericItem("megaloceros_antler", true);
+        BARYONYX_CLAW = riftGenericItem("baryonyx_claw", true);
 
         CHITIN = riftGenericItem("chitin", true);
 

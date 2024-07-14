@@ -24,7 +24,8 @@ public enum RiftConfigList {
     ANOMALOCARIS(Anomalocaris.class, AnomalocarisConfig.class, true),
     SAUROPHAGANAX(Saurophaganax.class, SaurophaganaxConfig.class, false),
     DIREWOLF(Direwolf.class, DirewolfConfig.class, false),
-    MEGALOCEROS(Megaloceros.class, MegalocerosConfig.class, false);
+    MEGALOCEROS(Megaloceros.class, MegalocerosConfig.class, false),
+    BARYONYX(Baryonyx.class, BaryonyxConfig.class, true);
 
     private final Class<? extends RiftCreature> creatureClass;
     private final Class<? extends RiftWaterCreature> waterCreatureClass;

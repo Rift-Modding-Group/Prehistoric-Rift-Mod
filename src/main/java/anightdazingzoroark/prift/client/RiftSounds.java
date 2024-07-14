@@ -136,6 +136,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.megaloceros.death")
     public static final SoundEvent MEGALOCEROS_DEATH = createSoundEvent("prift.megaloceros.death");
 
+    @GameRegistry.ObjectHolder("prift.baryonyx.idle")
+    public static final SoundEvent BARYONYX_IDLE = createSoundEvent("prift.baryonyx.idle");
+
+    @GameRegistry.ObjectHolder("prift.baryonyx.hurt")
+    public static final SoundEvent BARYONYX_HURT = createSoundEvent("prift.baryonyx.hurt");
+
+    @GameRegistry.ObjectHolder("prift.baryonyx.death")
+    public static final SoundEvent BARYONYX_DEATH = createSoundEvent("prift.baryonyx.death");
+
     @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
     public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");
 

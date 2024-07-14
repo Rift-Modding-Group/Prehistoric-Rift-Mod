@@ -1,0 +1,412 @@
+package anightdazingzoroark.prift.server.entity.creature;
+
+import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.BaryonyxConfig;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.culling.ICamera;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib3.core.manager.AnimationData;
+
+import javax.annotation.Nullable;
+
+public class Baryonyx extends RiftWaterCreature {
+    private static final DataParameter<Boolean> LEFT_CLAW = EntityDataManager.<Boolean>createKey(Baryonyx.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> RIGHT_CLAW = EntityDataManager.<Boolean>createKey(Baryonyx.class, DataSerializers.BOOLEAN);
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/baryonyx"));
+    private RiftCreaturePart mainHeadPart;
+    private RiftCreaturePart neckPart;
+    private RiftCreaturePart frontBodyPart;
+    private RiftCreaturePart leftLegPart;
+    private RiftCreaturePart rightLegPart;
+    private RiftCreaturePart tail0Part;
+    private RiftCreaturePart tail1Part;
+    private RiftCreaturePart tail2Part;
+    private RiftCreaturePart tail3Part;
+    private RiftCreaturePart tail4Part;
+
+    public Baryonyx(World worldIn) {
+        super(worldIn, RiftCreatureType.BARYONYX);
+        this.setSize(1.25f, 2.75f);
+        this.minCreatureHealth = BaryonyxConfig.getMinHealth();
+        this.maxCreatureHealth = BaryonyxConfig.getMaxHealth();
+        this.experienceValue = 20;
+        this.favoriteFood = BaryonyxConfig.baryonyxFavoriteFood;
+        this.tamingFood = BaryonyxConfig.baryonyxTamingFood;
+        this.isRideable = true;
+        this.attackWidth = 6f;
+        this.saddleItem = BaryonyxConfig.baryonyxSaddleItem;
+        this.speed = 0.25D;
+        this.waterSpeed = 5D;
+        this.attackDamage = BaryonyxConfig.damage;
+        this.healthLevelMultiplier = BaryonyxConfig.healthMultiplier;
+        this.damageLevelMultiplier = BaryonyxConfig.damageMultiplier;
+        this.densityLimit = BaryonyxConfig.baryonyxDensityLimit;
+        this.targetList = RiftUtil.creatureTargets(BaryonyxConfig.baryonyxTargets, BaryonyxConfig.baryonyxTargetBlacklist, true);
+    }
+
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+        this.dataManager.register(LEFT_CLAW, false);
+        this.dataManager.register(RIGHT_CLAW, false);
+        this.setCanPickUpLoot(true);
+    }
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        //remove poison
+        if (this.getActivePotionEffect(MobEffects.POISON) != null) this.removePotionEffect(MobEffects.POISON);
+    }
+
+    protected void initEntityAI() {
+        this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
+        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
+        this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
+        this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
+        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
+        this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
+        this.tasks.addTask(2, new RiftBaryonyxControlledClawAttack(this));
+        this.tasks.addTask(3, new RiftAttack.BaryonyxAttack(this, 1.0D));
+        this.tasks.addTask(4, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
+        this.tasks.addTask(5, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(6, new RiftGoToWater(this, 16, 1.0D));
+        this.tasks.addTask(7, new RiftWanderWater(this, 1.0D));
+        this.tasks.addTask(8, new RiftWander(this, 1.0D));
+    }
+
+    @Override
+    protected void applyEntityAttributes() {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
+    }
+
+    @Override
+    public void resetParts(float scale) {
+        if (scale > this.oldScale) {
+            this.oldScale = scale;
+            this.removeParts();
+            this.bodyPart = new RiftCreaturePart(this, 0, 0, 1.25f, scale * 0.9f, scale, 1f);
+            this.headPart = new RiftCreaturePart(this, 4f, 0, 2.125f, scale * 0.75f, scale * 0.5f, 1.5f);
+            this.mainHeadPart = new RiftCreaturePart(this, 3, 0, 2.125f, scale * 0.625f, scale * 0.625f, 1.5f);
+            this.neckPart = new RiftCreaturePart(this, 2.25f, 0, 1.625f, scale * 0.5f, scale, 1.5f);
+            this.frontBodyPart = new RiftCreaturePart(this, 1.25f, 0, 1.25f, scale * 0.9f, scale * 0.9f, 1f);
+            this.leftLegPart = new RiftCreaturePart(this, 0.75f, -140f, 0, scale * 0.5f, scale * 1.3f, 0.5f);
+            this.rightLegPart = new RiftCreaturePart(this, 0.75f, 140f, 0, scale * 0.5f, scale * 1.3f, 0.5f);
+            this.tail0Part = new RiftCreaturePart(this, -1f, 0, 1.5f, scale * 0.6f, scale * 0.7f, 0.5f);
+            this.tail1Part = new RiftCreaturePart(this, -1.75f, 0, 1.5f, scale * 0.6f, scale * 0.7f, 0.5f);
+            this.tail2Part = new RiftCreaturePart(this, -2.5f, 0, 1.45f, scale * 0.5f, scale * 0.7f, 0.5f);
+            this.tail3Part = new RiftCreaturePart(this, -3.25f, 0, 1.45f, scale * 0.5f, scale * 0.6f, 0.5f);
+            this.tail4Part = new RiftCreaturePart(this, -4f, 0, 1.4f, scale * 0.5f, scale * 0.6f, 0.5f);
+        }
+    }
+
+    @Override
+    public void updateParts() {
+        super.updateParts();
+        if (this.mainHeadPart != null) this.mainHeadPart.onUpdate();
+        if (this.neckPart != null) this.neckPart.onUpdate();
+        if (this.frontBodyPart != null) this.frontBodyPart.onUpdate();
+        if (this.leftLegPart != null) this.leftLegPart.onUpdate();
+        if (this.rightLegPart != null) this.rightLegPart.onUpdate();
+        if (this.tail0Part != null) this.tail0Part.onUpdate();
+        if (this.tail1Part != null) this.tail1Part.onUpdate();
+        if (this.tail2Part != null) this.tail2Part.onUpdate();
+        if (this.tail3Part != null) this.tail3Part.onUpdate();
+        if (this.tail4Part != null) this.tail4Part.onUpdate();
+
+        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden() && !this.isInWater()) ? -0.75f : 0;
+        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
+        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
+        if (this.mainHeadPart != null) this.mainHeadPart.setPositionAndUpdate(this.mainHeadPart.posX, this.mainHeadPart.posY + sitOffset, this.mainHeadPart.posZ);
+        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
+        if (this.frontBodyPart != null) this.frontBodyPart.setPositionAndUpdate(this.frontBodyPart.posX, this.frontBodyPart.posY + sitOffset, this.frontBodyPart.posZ);
+        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
+        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
+        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
+        if (this.tail3Part != null) this.tail3Part.setPositionAndUpdate(this.tail3Part.posX, this.tail3Part.posY + sitOffset, this.tail3Part.posZ);
+        if (this.tail4Part != null) this.tail4Part.setPositionAndUpdate(this.tail4Part.posX, this.tail4Part.posY + sitOffset, this.tail4Part.posZ);
+    }
+
+    public void removeParts() {
+        super.removeParts();
+        if (this.mainHeadPart != null) {
+            this.world.removeEntityDangerously(this.mainHeadPart);
+            this.mainHeadPart = null;
+        }
+        if (this.neckPart != null) {
+            this.world.removeEntityDangerously(this.neckPart);
+            this.neckPart = null;
+        }
+        if (this.frontBodyPart != null) {
+            this.world.removeEntityDangerously(this.frontBodyPart);
+            this.frontBodyPart = null;
+        }
+        if (this.leftLegPart != null) {
+            this.world.removeEntityDangerously(this.leftLegPart);
+            this.leftLegPart = null;
+        }
+        if (this.rightLegPart != null) {
+            this.world.removeEntityDangerously(this.rightLegPart);
+            this.rightLegPart = null;
+        }
+        if (this.tail0Part != null) {
+            this.world.removeEntityDangerously(this.tail0Part);
+            this.tail0Part = null;
+        }
+        if (this.tail1Part != null) {
+            this.world.removeEntityDangerously(this.tail1Part);
+            this.tail1Part = null;
+        }
+        if (this.tail3Part != null) {
+            this.world.removeEntityDangerously(this.tail3Part);
+            this.tail3Part = null;
+        }
+        if (this.tail4Part != null) {
+            this.world.removeEntityDangerously(this.tail4Part);
+            this.tail4Part = null;
+        }
+    }
+
+    @Override
+    public boolean isAmphibious() {
+        return true;
+    }
+
+    public boolean attackUsingClaw(Entity entityIn) {
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()) / 2f);
+        if (flag) {
+            this.applyEnchantments(this, entityIn);
+            if (entityIn instanceof EntityLivingBase) ((EntityLivingBase)entityIn).addPotionEffect(new PotionEffect(MobEffects.POISON, 5 * 20, 1));
+        }
+        this.setLastAttackedEntity(entityIn);
+        return flag;
+    }
+
+    public boolean isUsingLeftClaw() {
+        return this.dataManager.get(LEFT_CLAW);
+    }
+
+    public void setUsingLeftClaw(boolean value) {
+        this.dataManager.set(LEFT_CLAW, value);
+        this.setActing(value);
+    }
+
+    public boolean isUsingRightClaw() {
+        return this.dataManager.get(RIGHT_CLAW);
+    }
+
+    public void setUsingRightClaw(boolean value) {
+        this.dataManager.set(RIGHT_CLAW, value);
+        this.setActing(value);
+    }
+
+    @Override
+    public boolean canBeSaddled() {
+        return true;
+    }
+
+    @Override
+    public int slotCount() {
+        return 27;
+    }
+
+    @Override
+    public float getRenderSizeModifier() {
+        return RiftUtil.setModelScale(this, 0.5f, 1.5f);
+    }
+
+    @Override
+    public Vec3d riderPos() {
+        return new Vec3d(this.posX, this.posY + 0.125f, this.posZ);
+    }
+
+    public void controlClawAttack() {
+        //attack entity
+        EntityLivingBase target;
+        if (this.ssrTarget == null) target = this.getControlAttackTargets(this.attackWidth);
+        else target = this.ssrTarget;
+        if (target != null) {
+            if (this.isTamed() && target instanceof EntityPlayer) {
+                if (!target.getUniqueID().equals(this.getOwnerId())) this.attackUsingClaw(target);
+            }
+            else if (this.isTamed() && target instanceof EntityTameable) {
+                if (((EntityTameable) target).isTamed()) {
+                    if (!((EntityTameable) target).getOwner().equals(this.getOwner())) this.attackUsingClaw(target);
+                }
+                else this.attackUsingClaw(target);
+            }
+            else this.attackUsingClaw(target);
+        }
+        this.ssrTarget = null;
+
+        //break blocks
+        BlockPos pos = new BlockPos(this.posX, this.posY, this.posZ);
+        int height = (int)(Math.ceil(this.height)) + (this.isBeingRidden() ? (this.getControllingPassenger() != null ? (int)(Math.ceil(this.getControllingPassenger().height)) : 0) : 0);
+        int radius = (int)(Math.ceil(this.width)) + this.forcedBreakBlockRad;
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = 0; y <= height; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    BlockPos tempPos = pos.add(x, y, z);
+                    IBlockState iblockstate = this.world.getBlockState(tempPos);
+                    Block block = iblockstate.getBlock();
+                    if (iblockstate.getMaterial() != Material.AIR && this.checkBasedOnStrength(block, iblockstate)) {
+                        this.world.destroyBlock(tempPos, true);
+                    }
+                }
+            }
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldRender(ICamera camera) {
+        return super.shouldRender(camera) || this.inFrustrum(camera, this.mainHeadPart) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.frontBodyPart) || this.inFrustrum(camera, this.leftLegPart) || this.inFrustrum(camera, this.rightLegPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part) || this.inFrustrum(camera, this.tail3Part) || this.inFrustrum(camera, this.tail4Part);
+    }
+
+    @Override
+    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+        if (control == 0) {
+            if (this.getEnergy() > 0) {
+                if (target == null) {
+                    if (!this.isActing()) this.setAttacking(true);
+                }
+                else {
+                    if (!this.isActing()) {
+                        this.ssrTarget = target;
+                        this.setAttacking(true);
+                    }
+                }
+            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
+        if (control == 1) {
+            if (this.getEnergy() > 0) {
+                if (target == null) {
+                    if (!this.isActing()) {
+                        if (RiftUtil.randomInRange(0, 1) == 0) this.setUsingLeftClaw(true);
+                        else this.setUsingRightClaw(true);
+                    }
+                }
+                else {
+                    if (!this.isActing()) {
+                        this.ssrTarget = target;
+                        if (RiftUtil.randomInRange(0, 1) == 0) this.setUsingLeftClaw(true);
+                        else this.setUsingRightClaw(true);
+                    }
+                }
+            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
+    }
+
+    @Override
+    public boolean hasLeftClickChargeBar() {
+        return false;
+    }
+
+    @Override
+    public boolean hasRightClickChargeBar() {
+        return false;
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
+    }
+
+    @Override
+    public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
+        data.addAnimationController(new AnimationController(this, "movement", 0, this::baryonyxMovement));
+        data.addAnimationController(new AnimationController(this, "attack", 0, this::baryonyxAttack));
+        data.addAnimationController(new AnimationController(this, "armPose", 0, this::baryonyxArmPose));
+    }
+
+    private <E extends IAnimatable> PlayState baryonyxMovement(AnimationEvent<E> event) {
+        if (this.isInWater()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.swim", true));
+            return PlayState.CONTINUE;
+        }
+        else {
+            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.sitting", true));
+                return PlayState.CONTINUE;
+            }
+            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.walk", true));
+                return PlayState.CONTINUE;
+            }
+            return PlayState.STOP;
+        }
+    }
+
+    private <E extends IAnimatable> PlayState baryonyxAttack(AnimationEvent<E> event) {
+        if (this.isAttacking()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.bite", false));
+        }
+        else if (this.isUsingLeftClaw()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.claw_two", false));
+        }
+        else if (this.isUsingRightClaw()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.claw_one", false));
+        }
+        else event.getController().clearAnimationCache();
+        return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState baryonyxArmPose(AnimationEvent<E> event) {
+        if (!this.isUsingLeftClaw() && !this.isUsingRightClaw() && this.isInWater()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.swim_arms", true));
+            return PlayState.CONTINUE;
+        }
+        else event.getController().clearAnimationCache();
+        return PlayState.STOP;
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.BARYONYX_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.BARYONYX_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.BARYONYX_DEATH;
+    }
+}

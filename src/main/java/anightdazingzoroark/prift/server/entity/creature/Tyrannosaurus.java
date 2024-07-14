@@ -592,11 +592,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         return PlayState.STOP;
     }
 
-    private <E extends IAnimatable> PlayState tyrannosaurusLook(AnimationEvent<E> event) {
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.look", true));
-        return PlayState.CONTINUE;
-    }
-
     private <E extends IAnimatable> PlayState tyrannosaurusAttack(AnimationEvent<E> event) {
         if (this.isAttacking()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", false));

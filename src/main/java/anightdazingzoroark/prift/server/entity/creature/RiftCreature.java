@@ -1904,7 +1904,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else {
-            //for surface mobs
             this.stepHeight = 0.5F;
             this.jumpMovementFactor = 0.02F;
             if (forward > 0) {

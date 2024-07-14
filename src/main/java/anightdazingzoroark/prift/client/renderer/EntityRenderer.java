@@ -35,6 +35,7 @@ public class EntityRenderer {
         RenderingRegistry.registerEntityRenderingHandler(Saurophaganax.class, SaurophaganaxRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(Direwolf.class, DirewolfRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(Megaloceros.class, MegalocerosRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(Baryonyx.class, BaryonyxRenderer::new);
 
         //everythin else
         RenderingRegistry.registerEntityRenderingHandler(RiftEgg.class, RiftEggRenderer::new);

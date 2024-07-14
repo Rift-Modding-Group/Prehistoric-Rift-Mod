@@ -33,7 +33,6 @@ public class PathNavigateRiftWaterCreature extends PathNavigateSwimmer {
                     this.currentPath.incrementPathIndex();
             }
 
-            this.debugPathFinding();
             if (!this.noPath() && this.currentPath != null) {
                 Vec3d pos = this.currentPath.getPosition(this.creature);
                 if (this.creature.isInWater()) {

@@ -28,7 +28,8 @@ public enum RiftCreatureType {
     ANOMALOCARIS(Anomalocaris.class, CreatureCategory.INVERTEBRATE, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.DIRT, LevelupRate.NORMAL, 10892050, 12270358, 300, 1f, null),
     SAUROPHAGANAX(Saurophaganax.class, CreatureCategory.DINOSAUR, CreatureDiet.INSECTIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 986895, 16737280, 450, 1f, EggTemperature.COLD),
     DIREWOLF(Direwolf.class, CreatureCategory.MAMMAL, CreatureDiet.CARNIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.FAST, BlockBreakTier.DIRT, LevelupRate.FAST, 8421504, 10066329, 0, 0, null),
-    MEGALOCEROS(Megaloceros.class, CreatureCategory.MAMMAL, CreatureDiet.HERBIVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 6048296, 4666924, 0, 0, null);
+    MEGALOCEROS(Megaloceros.class, CreatureCategory.MAMMAL, CreatureDiet.HERBIVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 6048296, 4666924, 0, 0, null),
+    BARYONYX(Baryonyx.class, CreatureCategory.DINOSAUR, CreatureDiet.PISCIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 1277213, 4674683, 300, 1f, EggTemperature.COLD);
 
     private final Class<? extends RiftCreature> creature;
     private final CreatureCategory creatureCategory;

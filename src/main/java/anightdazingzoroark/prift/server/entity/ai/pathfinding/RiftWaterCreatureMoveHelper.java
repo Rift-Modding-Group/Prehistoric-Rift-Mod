@@ -16,8 +16,8 @@ public class RiftWaterCreatureMoveHelper extends EntityMoveHelper {
 
     @Override
     public void onUpdateMoveHelper() {
-        if(this.creature.isInsideOfMaterial(Material.WATER)) this.creature.motionY += 0.005;
-        if(this.action == Action.MOVE_TO && !this.creature.getNavigator().noPath()) {
+        if (this.creature.isInsideOfMaterial(Material.WATER)) this.creature.motionY += 0.005;
+        if (this.action == Action.MOVE_TO && !this.creature.getNavigator().noPath()) {
             final double newSpeed = this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
             this.creature.setAIMoveSpeed(this.creature.getAIMoveSpeed() + (float)(newSpeed - this.creature.getAIMoveSpeed()) * 0.125f);
 

@@ -3,10 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
-import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
-import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
+import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
@@ -33,11 +30,11 @@ public class RiftAttack extends EntityAIBase {
     protected int attackAnimTime;
     protected int animTime;
     double speedTowardsTarget;
-    private Path path;
-    private int delayCounter;
-    private double targetX;
-    private double targetY;
-    private double targetZ;
+    protected Path path;
+    protected int delayCounter;
+    protected double targetX;
+    protected double targetY;
+    protected double targetZ;
     protected int attackCooldown;
 
     public RiftAttack(RiftCreature creature, double speedIn, float attackAnimLength, float attackAnimTime) {
@@ -84,9 +81,7 @@ public class RiftAttack extends EntityAIBase {
         else if (entitylivingbase == null) return false;
         else if (!entitylivingbase.isEntityAlive()) return false;
         else if (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(entitylivingbase))) return false;
-        else {
-            return !(entitylivingbase instanceof EntityPlayer) || !(((EntityPlayer)entitylivingbase).isSpectator() && ((EntityPlayer)entitylivingbase).isCreative());
-        }
+        else return !(entitylivingbase instanceof EntityPlayer) || !(((EntityPlayer)entitylivingbase).isSpectator() && ((EntityPlayer)entitylivingbase).isCreative());
     }
 
     @Override
@@ -179,7 +174,6 @@ public class RiftAttack extends EntityAIBase {
     }
 
     //subclasses for different creatures
-
     public static class ApatosaurusAttack extends RiftAttack {
         private final Apatosaurus apatosaurus;
         protected int whipAnimLength;
@@ -290,9 +284,9 @@ public class RiftAttack extends EntityAIBase {
             if (--this.attackCooldown <= 0) {
                 if (distToEnemySqr <= d0) this.sarcosuchus.setAttacking(true);
                 if (this.sarcosuchus.isAttacking()) {
-                    if (this.animTime == 0) this.sarcosuchus.removeSpeed();
                     this.animTime++;
                     if (this.animTime == this.attackAnimTime) {
+                        this.sarcosuchus.removeSpeed();
                         if (distToEnemySqr <= d0) this.sarcosuchus.attackEntityAsMob(enemy);
                     }
                     if (this.animTime > this.attackAnimLength + 1) {
@@ -325,6 +319,76 @@ public class RiftAttack extends EntityAIBase {
                 this.spinTime++;
             }
             else this.sarcosuchus.setIsSpinning(false);
+        }
+    }
+
+    public static class BaryonyxAttack extends RiftAttack {
+        private final Baryonyx baryonyx;
+        private final int clawAnimLength;
+        private final int clawAnimTime;
+        private int attackMode; //0 is bite, 1 is left claw attack, 2 is right claw attack
+
+        public BaryonyxAttack(RiftCreature creature, double speedIn) {
+            super(creature, speedIn, 0.52f, 0.24f);
+            this.baryonyx = (Baryonyx) creature;
+            this.clawAnimLength = (int)(20f * 0.48f);
+            this.clawAnimTime = (int)(20f * 0.24f);
+        }
+
+        @Override
+        public void startExecuting() {
+            super.startExecuting();
+            this.attackMode = RiftUtil.randomInRange(0, 2);
+        }
+
+        @Override
+        public void resetTask() {
+            super.resetTask();
+            this.baryonyx.setUsingLeftClaw(false);
+            this.baryonyx.setUsingRightClaw(false);
+        }
+
+        protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
+            double d0 = this.getAttackReachSqr(enemy);
+
+            if (--this.attackCooldown <= 0) {
+                if (distToEnemySqr <= d0) {
+                    if (this.attackMode == 0) this.attacker.setAttacking(true);
+                    else if (this.attackMode == 1) this.baryonyx.setUsingLeftClaw(true);
+                    else if (this.attackMode == 2) this.baryonyx.setUsingRightClaw(true);
+                }
+                if (this.attacker.isAttacking()) {
+                    this.animTime++;
+                    if (this.animTime == this.attackAnimTime) {
+                        this.attacker.removeSpeed();
+                        if (distToEnemySqr <= d0) this.attacker.attackEntityAsMob(enemy);
+                    }
+                    if (this.animTime > this.attackAnimLength + 1) {
+                        this.animTime = 0;
+                        this.attacker.setAttacking(false);
+                        this.attackCooldown = 20;
+                        this.attacker.resetSpeed();
+                        if (this.attacker.isTamed()) this.attacker.energyActionMod++;
+                        this.attackMode = RiftUtil.randomInRange(0, 2);
+                    }
+                }
+                else if (this.baryonyx.isUsingLeftClaw() || this.baryonyx.isUsingRightClaw()) {
+                    this.animTime++;
+                    if (this.animTime == this.clawAnimTime) {
+                        this.attacker.removeSpeed();
+                        if (distToEnemySqr <= d0) this.baryonyx.attackUsingClaw(enemy);
+                    }
+                    if (this.animTime > this.clawAnimLength + 1) {
+                        this.animTime = 0;
+                        this.baryonyx.setUsingLeftClaw(false);
+                        this.baryonyx.setUsingRightClaw(false);
+                        this.attackCooldown = 20;
+                        this.attacker.resetSpeed();
+                        if (this.attacker.isTamed()) this.attacker.energyActionMod++;
+                        this.attackMode = RiftUtil.randomInRange(0, 2);
+                    }
+                }
+            }
         }
     }
 }
