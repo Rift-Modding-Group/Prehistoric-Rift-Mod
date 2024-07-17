@@ -9,48 +9,41 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 
 public enum RiftConfigList {
-    GENERAL(null, GeneralConfig.class, false),
-    TYRANNOSAURUS(Tyrannosaurus.class, TyrannosaurusConfig.class, false),
-    STEGOSAURUS(Stegosaurus.class, StegosaurusConfig.class, false),
-    DODO(Dodo.class, DodoConfig.class, false),
-    TRICERATOPS(Triceratops.class, TriceratopsConfig.class, false),
-    UTAHRAPTOR(Utahraptor.class, UtahraptorConfig.class, false),
-    APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class, false),
-    PARASAUROLOPHUS(Parasaurolophus.class, ParasaurolophusConfig.class, false),
-    DIMETRODON(Dimetrodon.class, DimetrodonConfig.class, false),
-    COELACANTH(Coelacanth.class, CoelacanthConfig.class, true),
-    MEGAPIRANHA(Megapiranha.class, MegapiranhaConfig.class, true),
-    SARCOSUCHUS(Sarcosuchus.class, SarcosuchusConfig.class, true),
-    ANOMALOCARIS(Anomalocaris.class, AnomalocarisConfig.class, true),
-    SAUROPHAGANAX(Saurophaganax.class, SaurophaganaxConfig.class, false),
-    DIREWOLF(Direwolf.class, DirewolfConfig.class, false),
-    MEGALOCEROS(Megaloceros.class, MegalocerosConfig.class, false),
-    BARYONYX(Baryonyx.class, BaryonyxConfig.class, true);
+    GENERAL(null, GeneralConfig.class, null),
+    TYRANNOSAURUS(Tyrannosaurus.class, TyrannosaurusConfig.class, RiftSpawnType.LAND),
+    STEGOSAURUS(Stegosaurus.class, StegosaurusConfig.class, RiftSpawnType.LAND),
+    DODO(Dodo.class, DodoConfig.class, RiftSpawnType.LAND),
+    TRICERATOPS(Triceratops.class, TriceratopsConfig.class, RiftSpawnType.LAND),
+    UTAHRAPTOR(Utahraptor.class, UtahraptorConfig.class, RiftSpawnType.LAND),
+    APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class, RiftSpawnType.LAND),
+    PARASAUROLOPHUS(Parasaurolophus.class, ParasaurolophusConfig.class, RiftSpawnType.LAND),
+    DIMETRODON(Dimetrodon.class, DimetrodonConfig.class, RiftSpawnType.LAND),
+    COELACANTH(Coelacanth.class, CoelacanthConfig.class, RiftSpawnType.WATER),
+    MEGAPIRANHA(Megapiranha.class, MegapiranhaConfig.class, RiftSpawnType.WATER),
+    SARCOSUCHUS(Sarcosuchus.class, SarcosuchusConfig.class, RiftSpawnType.WATER),
+    ANOMALOCARIS(Anomalocaris.class, AnomalocarisConfig.class, RiftSpawnType.WATER),
+    SAUROPHAGANAX(Saurophaganax.class, SaurophaganaxConfig.class, RiftSpawnType.LAND),
+    DIREWOLF(Direwolf.class, DirewolfConfig.class, RiftSpawnType.LAND),
+    MEGALOCEROS(Megaloceros.class, MegalocerosConfig.class, RiftSpawnType.LAND),
+    BARYONYX(Baryonyx.class, BaryonyxConfig.class, RiftSpawnType.WATER),
+    PALAEOCASTOR(Palaeocastor.class, PalaeocastorConfig.class, RiftSpawnType.UNDERGROUND);
 
     private final Class<? extends RiftCreature> creatureClass;
-    private final Class<? extends RiftWaterCreature> waterCreatureClass;
     private final Class<? extends RiftConfig> configClass;
     private RiftConfig configInstance;
-    private boolean isWaterCreature;
+    private RiftSpawnType spawnType;
 
-    RiftConfigList(Class<? extends RiftCreature> creatureClass, Class<? extends RiftConfig> configClass, boolean isWaterCreature) {
+    RiftConfigList(Class<? extends RiftCreature> creatureClass, Class<? extends RiftConfig> configClass, RiftSpawnType spawnType) {
         this.creatureClass = creatureClass;
         this.configClass = configClass;
-        this.isWaterCreature = isWaterCreature;
-        if (isWaterCreature) this.waterCreatureClass = (Class<? extends RiftWaterCreature>)this.creatureClass;
-        else this.waterCreatureClass = null;
     }
 
     public Class<? extends RiftCreature> getCreatureClass() {
         return this.creatureClass;
     }
 
-    public Class<? extends RiftWaterCreature> getWaterCreatureClass() {
-        return this.waterCreatureClass;
-    }
-
-    public boolean getIsWaterCreature() {
-        return this.isWaterCreature;
+    public RiftSpawnType getSpawnType() {
+        return this.spawnType;
     }
 
     public void loadConfig(File directory) {
@@ -75,5 +68,11 @@ public enum RiftConfigList {
 
     public RiftConfig getConfigInstance() {
         return this.configInstance;
+    }
+
+    public enum RiftSpawnType {
+        LAND,
+        WATER,
+        UNDERGROUND;
     }
 }

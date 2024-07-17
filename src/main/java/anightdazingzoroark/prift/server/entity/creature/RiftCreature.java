@@ -257,6 +257,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20D);
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
 
     @Override
@@ -1148,7 +1149,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void refreshInventory() {
         ItemStack saddle = this.creatureInventory.getStackInSlot(0);
-        if (!this.world.isRemote) this.setSaddled(this.saddleItemEqual(saddle) && !saddle.isEmpty());
+        if (!this.world.isRemote && this.canBeSaddled()) this.setSaddled(this.saddleItemEqual(saddle) && !saddle.isEmpty());
     }
 
     //herdin stuff starts here

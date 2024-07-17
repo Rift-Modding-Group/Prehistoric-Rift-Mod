@@ -46,6 +46,8 @@ public class RiftItems {
     public static Item BASIC_CARNIVORE_MEAL;
     public static Item ADVANCED_HERBIVORE_MEAL;
     public static Item ADVANCED_CARNIVORE_MEAL;
+    public static Item BASIC_SAXUMAVORE_MEAL;
+    public static Item ADVANCED_SAXUMAVORE_MEAL;
     public static Item CREATIVE_MEAL;
     public static Item FLAME_STIMULANT;
     public static Item EXTREME_FLAME_STIMULANT;
@@ -110,8 +112,10 @@ public class RiftItems {
         COOKED_MEGAPIRANHA = riftSpecialMeatItem("cooked_megapiranha", 4, 0.6f, new PotionEffect(MobEffects.REGENERATION, 300));
         BASIC_HERBIVORE_MEAL = riftGenericItem("basic_herbivore_meal", true);
         BASIC_CARNIVORE_MEAL = riftGenericItem("basic_carnivore_meal", true);
+        BASIC_SAXUMAVORE_MEAL = riftGlintedItem("basic_saxumavore_meal", true);
         ADVANCED_HERBIVORE_MEAL = riftGlintedItem("advanced_herbivore_meal", true);
         ADVANCED_CARNIVORE_MEAL = riftGlintedItem("advanced_carnivore_meal", true);
+        ADVANCED_SAXUMAVORE_MEAL = riftGlintedItem("advanced_saxumavore_meal", true);
         CREATIVE_MEAL = riftGlintedItem("creative_meal", true);
         FLAME_STIMULANT = riftGenericItem("flame_stimulant", false);
         EXTREME_FLAME_STIMULANT = riftGlintedItem("extreme_flame_stimulant", false);

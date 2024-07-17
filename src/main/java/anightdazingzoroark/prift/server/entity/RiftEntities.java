@@ -130,7 +130,7 @@ public class RiftEntities {
                         }
                     }
                 }
-                if (RiftConfigList.values()[x].getIsWaterCreature()) {
+                if (RiftConfigList.values()[x].getSpawnType() == RiftConfigList.RiftSpawnType.WATER) {
                     EntitySpawnPlacementRegistry.setPlacementType(creatureClass, EntityLiving.SpawnPlacementType.IN_WATER);
                 }
             }

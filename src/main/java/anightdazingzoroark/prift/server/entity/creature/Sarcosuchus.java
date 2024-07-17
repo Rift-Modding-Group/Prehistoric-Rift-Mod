@@ -103,12 +103,6 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
-    }
-
-    @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
 

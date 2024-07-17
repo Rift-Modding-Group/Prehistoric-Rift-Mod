@@ -108,12 +108,6 @@ public class Baryonyx extends RiftWaterCreature {
     }
 
     @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
-    }
-
-    @Override
     public void resetParts(float scale) {
         if (scale > this.oldScale) {
             this.oldScale = scale;

@@ -49,12 +49,6 @@ public class Dodo extends RiftCreature {
         this.tasks.addTask(7, new RiftLookAround(this));
     }
 
-    @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
-    }
-
     public void onLivingUpdate() {
         super.onLivingUpdate();
         if (!this.onGround && this.motionY < 0.0D) {

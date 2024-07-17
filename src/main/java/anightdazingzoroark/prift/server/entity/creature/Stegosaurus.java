@@ -91,7 +91,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
     }
 
     protected void initEntityAI() {

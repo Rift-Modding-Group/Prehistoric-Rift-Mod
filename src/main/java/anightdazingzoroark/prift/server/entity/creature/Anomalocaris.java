@@ -71,12 +71,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         this.dataManager.register(INVISIBLE, true);
     }
 
-    @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
-    }
-
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));

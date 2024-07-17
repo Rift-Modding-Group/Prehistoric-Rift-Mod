@@ -86,12 +86,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.dataManager.register(CAN_BLOW, true);
     }
 
-    @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
-    }
-
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTurretModeTargeting(this, true));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));

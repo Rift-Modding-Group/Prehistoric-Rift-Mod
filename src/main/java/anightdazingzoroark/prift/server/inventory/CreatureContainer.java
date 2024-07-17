@@ -28,7 +28,7 @@ public class CreatureContainer extends Container {
         creatureInventory.openInventory(player);
 
         //creature saddle slot
-        if (!this.creature.isBaby()) {
+        if (!this.creature.isBaby() && this.creature.canBeSaddled()) {
             this.addSlotToContainer(new Slot(creature.creatureInventory, 0, 8, 18) {
                 @Override
                 public boolean isItemValid(ItemStack stack) {
