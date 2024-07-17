@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.config.PalaeocastorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
+import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,9 +21,13 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
-public class Palaeocastor extends RiftCreature implements IImpregnable {
-    public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
-    public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Megaloceros.class, DataSerializers.VARINT);
+import java.util.Arrays;
+import java.util.List;
+
+public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvestWhenWandering {
+    public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.VARINT);
+    public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
 
     public Palaeocastor(World worldIn) {
         super(worldIn, RiftCreatureType.PALAEOCASTOR);
@@ -44,6 +49,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable {
         super.entityInit();
         this.dataManager.register(PREGNANT, false);
         this.dataManager.register(PREGNANCY_TIMER, 0);
+        this.dataManager.register(HARVESTING, false);
     }
 
     protected void initEntityAI() {
@@ -54,6 +60,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable {
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new EntityAIAttackMelee(this, 1.0D, true));
+        this.tasks.addTask(3, new RiftHarvestOnWander(this, 1.25f, 1f));
         this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(5, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(6, new RiftGoToLandFromWater(this, 16, 1.0D));
@@ -106,6 +113,24 @@ public class Palaeocastor extends RiftCreature implements IImpregnable {
 
     }
 
+    @Override
+    public List<String> blocksToHarvest() {
+        return Arrays.asList("minecraft:coal_ore:0",
+                "minecraft:iron_ore:0",
+                "minecraft:lapis_ore:0",
+                "minecraft:gold_ore:0",
+                "minecraft:diamond_ore:0",
+                "minecraft:emerald_ore:0");
+    }
+
+    public void setHarvesting(boolean value) {
+        this.dataManager.set(HARVESTING, value);
+    }
+
+    public boolean isHarvesting() {
+        return this.dataManager.get(HARVESTING);
+    }
+
     public void setPregnant(boolean value, int timer) {
         this.dataManager.set(PREGNANT, value);
         this.dataManager.set(PREGNANCY_TIMER, timer);
@@ -147,6 +172,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable {
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::palaeocastorMovement));
+        data.addAnimationController(new AnimationController(this, "dig", 0, this::palaeocastorDig));
     }
 
     private <E extends IAnimatable> PlayState palaeocastorMovement(AnimationEvent<E> event) {
@@ -158,6 +184,15 @@ public class Palaeocastor extends RiftCreature implements IImpregnable {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.palaeocastor.walk", true));
             return PlayState.CONTINUE;
         }
+        return PlayState.STOP;
+    }
+
+    private <E extends IAnimatable> PlayState palaeocastorDig(AnimationEvent<E> event) {
+        if (this.isHarvesting()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.palaeocastor.dig", false));
+            return PlayState.CONTINUE;
+        }
+        event.getController().clearAnimationCache();
         return PlayState.STOP;
     }
 }
