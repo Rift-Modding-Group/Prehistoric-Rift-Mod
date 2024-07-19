@@ -44,7 +44,7 @@ public class CreatureContainer extends Container {
         //creature inventory
         for (int j = 0; j < this.rows; ++j) {
             for (int k = 0; k < 9; ++k) {
-                this.addSlotToContainer(new Slot(creature.creatureInventory, (k + 1) + (j * 9), 8 + k * 18, 50 + j * 18));
+                this.addSlotToContainer(new Slot(creature.creatureInventory, (k + (this.creature.canBeSaddled() ? 1 : 0)) + (j * 9), 8 + k * 18, 50 + j * 18));
             }
         }
 

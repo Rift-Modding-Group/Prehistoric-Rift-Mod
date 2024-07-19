@@ -344,18 +344,4 @@ public class RiftUtil {
         }
         return emptyBucket;
     }
-
-    public static boolean blockExposedToAir(World world, BlockPos pos) {
-        for (int x = -1; x <= 1 ; x++) {
-            for (int y = -1; y <= 1 ; y++) {
-                for (int z = -1; z <= 1 ; z++) {
-                    BlockPos newPos = pos.add(x, y, z);
-                    if (world.getBlockState(newPos).getMaterial() == Material.AIR) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
 }

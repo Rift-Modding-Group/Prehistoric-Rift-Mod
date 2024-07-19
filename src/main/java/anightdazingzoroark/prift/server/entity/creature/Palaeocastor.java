@@ -6,12 +6,16 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -121,6 +125,17 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
                 "minecraft:gold_ore:0",
                 "minecraft:diamond_ore:0",
                 "minecraft:emerald_ore:0");
+    }
+
+    public void harvestBlock(BlockPos pos) {
+        IBlockState blockState = this.world.getBlockState(pos);
+        Block block = blockState.getBlock();
+
+        //get drops
+        List<ItemStack> drops = block.getDrops(this.world, pos, blockState, 0);
+        for (ItemStack stack : drops) this.creatureInventory.addItem(stack);
+
+        this.world.destroyBlock(pos, false);
     }
 
     public void setHarvesting(boolean value) {
