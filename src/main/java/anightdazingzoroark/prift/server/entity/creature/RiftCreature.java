@@ -11,8 +11,10 @@ import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
@@ -1949,6 +1951,59 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         this.setTameStatus(TameStatusType.STAND);
     }
+
+    //start of radial menu stuff
+    public List<RiftTameRadialChoice> mainRadialChoices() {
+        List<RiftTameRadialChoice> list = new ArrayList<>();
+        list.add(RiftTameRadialChoice.INVENTORY);
+        list.add(RiftTameRadialChoice.STATE);
+        if (this.canBeSaddled() && this.isRideable) list.add(RiftTameRadialChoice.RIDE);
+        list.add(RiftTameRadialChoice.OPTIONS);
+        list.add(RiftTameRadialChoice.BEHAVIOR);
+        return list;
+    }
+
+    public List<RiftTameRadialChoice> stateRadialChoices() {
+        List<RiftTameRadialChoice> list = new ArrayList<>();
+        list.add(RiftTameRadialChoice.BACK);
+        list.add(RiftTameRadialChoice.STAND);
+        list.add(RiftTameRadialChoice.SIT);
+        list.add(RiftTameRadialChoice.WANDER);
+        if (this.canDoTurretMode()) list.add(RiftTameRadialChoice.TURRET_MODE);
+        return list;
+    }
+
+    public List<RiftTameRadialChoice> behaviorRadialChoices() {
+        List<RiftTameRadialChoice> list = new ArrayList<>();
+        list.add(RiftTameRadialChoice.BACK);
+        list.add(RiftTameRadialChoice.ASSIST);
+        list.add(RiftTameRadialChoice.NEUTRAL);
+        list.add(RiftTameRadialChoice.AGGRESSIVE);
+        list.add(RiftTameRadialChoice.PASSIVE);
+        return list;
+    }
+
+    public List<RiftTameRadialChoice> optionsRadialChoices() {
+        List<RiftTameRadialChoice> list = new ArrayList<>();
+        list.add(RiftTameRadialChoice.BACK);
+        list.add(RiftTameRadialChoice.CHANGE_NAME);
+        list.add(RiftTameRadialChoice.SET_HOME);
+        list.add(RiftTameRadialChoice.UNCLAIM);
+        if (this instanceof IWorkstationUser) list.add(RiftTameRadialChoice.SET_WORKSTATION);
+        if (this instanceof IHarvestWhenWandering) list.add(RiftTameRadialChoice.SET_WANDER_HARVEST);
+        return list;
+    }
+
+    public List<RiftTameRadialChoice> turretRadialChoices() {
+        List<RiftTameRadialChoice> list = new ArrayList<>();
+        list.add(RiftTameRadialChoice.BACK);
+        list.add(RiftTameRadialChoice.PLAYERS);
+        list.add(RiftTameRadialChoice.PLAYERS_AND_OTHER_TAMES);
+        list.add(RiftTameRadialChoice.HOSTILES);
+        list.add(RiftTameRadialChoice.ALL);
+        return list;
+    }
+    //end of radial menu stuff
 
     private void sendDeathMessage() {
         if (this.isTamed() && !this.world.isRemote && this.world.getGameRules().getBoolean("showDeathMessages") && this.getOwner() instanceof EntityPlayerMP) {

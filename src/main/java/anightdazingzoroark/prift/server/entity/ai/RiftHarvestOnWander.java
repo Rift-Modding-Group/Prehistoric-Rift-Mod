@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -54,7 +53,6 @@ public class RiftHarvestOnWander extends EntityAIBase {
                     this.creatureHarvester.setHarvesting(true);
                 }
                 if (this.animTime == this.harvestAnimTime) {
-                    //this.creature.world.destroyBlock(this.targetBlockPos, true);
                     this.creatureHarvester.harvestBlock(this.targetBlockPos);
                     this.creature.setXP(this.creature.getXP() + 5);
                 }

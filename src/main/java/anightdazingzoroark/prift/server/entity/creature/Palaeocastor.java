@@ -32,6 +32,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.VARINT);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
 
     public Palaeocastor(World worldIn) {
         super(worldIn, RiftCreatureType.PALAEOCASTOR);
@@ -54,6 +55,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         this.dataManager.register(PREGNANT, false);
         this.dataManager.register(PREGNANCY_TIMER, 0);
         this.dataManager.register(HARVESTING, false);
+        this.dataManager.register(CAN_HARVEST, false);
     }
 
     protected void initEntityAI() {
@@ -144,6 +146,14 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
 
     public boolean isHarvesting() {
         return this.dataManager.get(HARVESTING);
+    }
+
+    public void setCanHarvest(boolean value) {
+        this.dataManager.set(CAN_HARVEST, value);
+    }
+
+    public boolean canHarvest() {
+        return this.dataManager.get(CAN_HARVEST);
     }
 
     public void setPregnant(boolean value, int timer) {

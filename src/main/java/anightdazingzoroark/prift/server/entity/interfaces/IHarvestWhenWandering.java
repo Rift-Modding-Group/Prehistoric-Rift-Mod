@@ -1,9 +1,7 @@
 package anightdazingzoroark.prift.server.entity.interfaces;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -28,5 +26,7 @@ public interface IHarvestWhenWandering {
     }
     boolean isHarvesting();
     void setHarvesting(boolean value);
+    boolean canHarvest();
+    void setCanHarvest(boolean value);
     void harvestBlock(BlockPos pos);
 }

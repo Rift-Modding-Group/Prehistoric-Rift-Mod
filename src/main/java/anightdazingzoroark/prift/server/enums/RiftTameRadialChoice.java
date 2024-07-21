@@ -19,6 +19,7 @@ public enum RiftTameRadialChoice {
     SET_HOME,
     UNCLAIM,
     SET_WORKSTATION,
+    SET_WANDER_HARVEST,
     PLAYERS,
     PLAYERS_AND_OTHER_TAMES,
     HOSTILES,
