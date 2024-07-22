@@ -1,23 +1,25 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.PalaeocastorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -25,10 +27,12 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
 public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvestWhenWandering {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/palaeocastor"));
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.VARINT);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
@@ -66,18 +70,17 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new EntityAIAttackMelee(this, 1.0D, true));
-        this.tasks.addTask(3, new RiftHarvestOnWander(this, 1.25f, 1f));
-        this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(5, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(6, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(7, new RiftWander(this, 1.0D));
-        this.tasks.addTask(8, new RiftLookAround(this));
+        this.tasks.addTask(4, new RiftHarvestOnWander(this, 1.25f, 1f));
+        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(7, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(8, new RiftWander(this, 1.0D));
+        this.tasks.addTask(9, new RiftLookAround(this));
     }
 
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        //manage birthin related stuff
         if (!this.world.isRemote) this.createBaby(this);
     }
 
@@ -96,12 +99,14 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         super.writeEntityToNBT(compound);
         compound.setInteger("PregnancyTime", this.getPregnancyTimer());
         compound.setBoolean("IsPregnancy", this.isPregnant());
+        compound.setBoolean("CanHarvest", this.canHarvest());
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
+        this.setCanHarvest(compound.getBoolean("CanHarvest"));
     }
 
     @Override
@@ -121,23 +126,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
 
     @Override
     public List<String> blocksToHarvest() {
-        return Arrays.asList("minecraft:coal_ore:0",
-                "minecraft:iron_ore:0",
-                "minecraft:lapis_ore:0",
-                "minecraft:gold_ore:0",
-                "minecraft:diamond_ore:0",
-                "minecraft:emerald_ore:0");
-    }
-
-    public void harvestBlock(BlockPos pos) {
-        IBlockState blockState = this.world.getBlockState(pos);
-        Block block = blockState.getBlock();
-
-        //get drops
-        List<ItemStack> drops = block.getDrops(this.world, pos, blockState, 0);
-        for (ItemStack stack : drops) this.creatureInventory.addItem(stack);
-
-        this.world.destroyBlock(pos, false);
+        return Arrays.asList(PalaeocastorConfig.palaeocastorMineBlocks);
     }
 
     public void setHarvesting(boolean value) {
@@ -194,6 +183,12 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     }
 
     @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
+    }
+
+    @Override
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::palaeocastorMovement));
@@ -219,5 +214,19 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.PALAEOCASTOR_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.PALAEOCASTOR_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.PALAEOCASTOR_DEATH;
     }
 }

@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -21,6 +22,8 @@ import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -28,6 +31,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -43,9 +47,13 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
 
-public class Triceratops extends RiftCreature implements IChargingMob, IWorkstationUser, ILeadWorkstationUser {
+public class Triceratops extends RiftCreature implements IChargingMob, IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering {
     private static final DataParameter<Boolean> STOMPING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/triceratops"));
     private RiftCreaturePart hipPart;
     private RiftCreaturePart leftBackLegPart;
@@ -77,6 +85,8 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(STOMPING, false);
+        this.dataManager.register(HARVESTING, false);
+        this.dataManager.register(CAN_HARVEST, false);
     }
 
     @Override
@@ -98,13 +108,14 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.72F, 0.48F));
         this.tasks.addTask(4, new RiftChargeAttack(this, 1.75f, 0.24f, 4f, 8f));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.72F, 0.48F));
-        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(8, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(9, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(10, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(11, new RiftWander(this, 1.0D));
-        this.tasks.addTask(12, new RiftLookAround(this));
+        this.tasks.addTask(6, new RiftHarvestOnWander(this, 0.72F, 0.48F));
+        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(9, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(10, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(11, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(12, new RiftWander(this, 1.0D));
+        this.tasks.addTask(13, new RiftLookAround(this));
     }
 
     @Override
@@ -174,6 +185,18 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
             this.world.removeEntityDangerously(this.tail2Part);
             this.tail2Part = null;
         }
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setBoolean("CanHarvest", this.canHarvest());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.setCanHarvest(compound.getBoolean("CanHarvest"));
     }
 
     private void manageCanCharge() {
@@ -300,6 +323,36 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
                 this.setRightClickCooldown(0);
             }
         }
+    }
+
+    @Override
+    public List<String> blocksToHarvest() {
+        return Arrays.asList(TriceratopsConfig.triceratopsMineBlock);
+    }
+
+    public int harvestRange() {
+        return 5;
+    }
+
+    public void setHarvesting(boolean value) {
+        this.setAttacking(value);
+    }
+
+    public boolean isHarvesting() {
+        return this.isAttacking();
+    }
+
+    public void setCanHarvest(boolean value) {
+        this.dataManager.set(CAN_HARVEST, value);
+    }
+
+    public boolean canHarvest() {
+        return this.dataManager.get(CAN_HARVEST);
+    }
+
+    @Override
+    public AxisAlignedBB breakRange() {
+        return new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
     }
 
     @Override

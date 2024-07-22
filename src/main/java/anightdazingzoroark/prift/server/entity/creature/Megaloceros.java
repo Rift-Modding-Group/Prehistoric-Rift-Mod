@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.config.MegalocerosConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
@@ -18,6 +19,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -30,11 +32,15 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
 
-public class Megaloceros extends RiftCreature implements IChargingMob, IImpregnable {
+public class Megaloceros extends RiftCreature implements IChargingMob, IImpregnable, IHarvestWhenWandering {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megaloceros"));
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Megaloceros.class, DataSerializers.VARINT);
+    public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart frontBodyPart;
 
     public Megaloceros(World worldIn) {
@@ -61,6 +67,8 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         super.entityInit();
         this.dataManager.register(PREGNANT, false);
         this.dataManager.register(PREGNANCY_TIMER, 0);
+        this.dataManager.register(HARVESTING, false);
+        this.dataManager.register(CAN_HARVEST, false);
     }
 
     protected void initEntityAI() {
@@ -75,13 +83,14 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.36F));
         this.tasks.addTask(4, new RiftChargeAttack(this, 2f, 0.24f, 4f, 2f));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.36F));
-        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(9, new RiftHerdDistanceFromOtherMembers(this, 1D));
-        this.tasks.addTask(10, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(11, new RiftWander(this, 1.0D));
-        this.tasks.addTask(12, new RiftLookAround(this));
+        this.tasks.addTask(6, new RiftHarvestOnWander(this, 0.52F, 0.36F));
+        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));
+        this.tasks.addTask(11, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(12, new RiftWander(this, 1.0D));
+        this.tasks.addTask(13, new RiftLookAround(this));
     }
 
     @Override
@@ -131,12 +140,14 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         super.writeEntityToNBT(compound);
         compound.setInteger("PregnancyTime", this.getPregnancyTimer());
         compound.setBoolean("IsPregnancy", this.isPregnant());
+        compound.setBoolean("CanHarvest", this.canHarvest());
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
+        this.setCanHarvest(compound.getBoolean("CanHarvest"));
     }
 
     @Override
@@ -255,6 +266,36 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
             this.setSpacebarUse(0);
         }
+    }
+
+    @Override
+    public List<String> blocksToHarvest() {
+        return Arrays.asList(MegalocerosConfig.megalocerosMineBlock);
+    }
+
+    public int harvestRange() {
+        return 3;
+    }
+
+    public void setHarvesting(boolean value) {
+        this.setAttacking(value);
+    }
+
+    public boolean isHarvesting() {
+        return this.isAttacking();
+    }
+
+    public void setCanHarvest(boolean value) {
+        this.dataManager.set(CAN_HARVEST, value);
+    }
+
+    public boolean canHarvest() {
+        return this.dataManager.get(CAN_HARVEST);
+    }
+
+    @Override
+    public AxisAlignedBB breakRange() {
+        return new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
     }
 
     @Override

@@ -12,6 +12,12 @@ public class PalaeocastorConfig extends RiftConfig {
     public static int palaeocastorDensityLimit = 4;
     public static String[] palaeocastorFavoriteFood = {"minecraft:coal:0:0.05", "minecraft:cobblestone:0:0.025", "minecraft:stone:0:0.05", "minecraft:stone:1:0.05", "minecraft:stone:2:0.2", "minecraft:stone:3:0.05", "minecraft:stone:4:0.2", "minecraft:stone:5:0.05", "minecraft:stone:6:0.2"};
     public static String[] palaeocastorTamingFood = {"prift:basic_saxumavore_meal:0:0.10", "prift:advanced_saxumavore_meal:0:0.33"};
+    public static String[] palaeocastorMineBlocks = {"minecraft:coal_ore:0",
+            "minecraft:iron_ore:0",
+            "minecraft:lapis_ore:0",
+            "minecraft:gold_ore:0",
+            "minecraft:diamond_ore:0",
+            "minecraft:emerald_ore:0"};
 
     public PalaeocastorConfig(Configuration config) {
         super(config, new String[]{"all:10:1:1:CREATURE"});
@@ -31,6 +37,12 @@ public class PalaeocastorConfig extends RiftConfig {
 
         palaeocastorFavoriteFood = config.getStringList("Palaeocastor Favorite Food", "General", new String[]{"minecraft:coal:0:0.05", "minecraft:cobblestone:0:0.025", "minecraft:stone:0:0.05", "minecraft:stone:1:0.05", "minecraft:stone:2:0.2", "minecraft:stone:3:0.05", "minecraft:stone:4:0.2", "minecraft:stone:5:0.05", "minecraft:stone:6:0.2"}, "List of foods Palaeocastors will eat (when tamed) or pick up when on the ground. To add items add \"<insert item's identifier here>:<insert data id here>:<insert percentage of health that will be healed upon consumption here>\"");
         palaeocastorTamingFood = config.getStringList("Palaeocastor Taming Food", "General", new String[]{"prift:basic_saxumavore_meal:0:0.10", "prift:advanced_saxumavore_meal:0:0.33"}, "List of foods Palaeocastors must be fed to be tamed (if wild) or bred (if tamed). To add items add \"<insert item's identifier here>:<insert data id here>:<percentage of tame progress to fill up before taming>\"");
+        palaeocastorMineBlocks = config.getStringList("Palaeocastor Harvestable Blocks", "General", new String[]{"minecraft:coal_ore:0",
+                "minecraft:iron_ore:0",
+                "minecraft:lapis_ore:0",
+                "minecraft:gold_ore:0",
+                "minecraft:diamond_ore:0",
+                "minecraft:emerald_ore:0"}, "List of blocks that Palaeocastors when set to harvest on wander will mine. To add items add \"<insert item's identifier here>:<insert data id here>\"");
     }
 
     public static double getMaxHealth() {

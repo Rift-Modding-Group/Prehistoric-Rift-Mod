@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.config.StegosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -24,12 +25,15 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -47,10 +51,14 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
 
-public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob, ILeadWorkstationUser {
+public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob, ILeadWorkstationUser, IHarvestWhenWandering {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public int strongAttackCharge;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
@@ -85,6 +93,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(STRONG_ATTACKING, false);
+        this.dataManager.register(HARVESTING, false);
+        this.dataManager.register(CAN_HARVEST, false);
     }
 
     @Override
@@ -107,13 +117,14 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.96F, 0.36F));
         this.tasks.addTask(3, new RiftStegosaurusControlledStrongAttack(this, 0.72F, 0.12F));
         this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
-        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(6, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(7, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(10, new RiftWander(this, 1.0D));
-        this.tasks.addTask(11, new RiftLookAround(this));
+        this.tasks.addTask(5, new RiftHarvestOnWander(this, 0.96F, 0.36F));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(8, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(9, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(10, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(11, new RiftWander(this, 1.0D));
+        this.tasks.addTask(12, new RiftLookAround(this));
     }
 
     @Override
@@ -200,6 +211,18 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
             this.world.removeEntityDangerously(this.tail3Part);
             this.tail3Part = null;
         }
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setBoolean("CanHarvest", this.canHarvest());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.setCanHarvest(compound.getBoolean("CanHarvest"));
     }
 
     private void manageCanStrongAttack() {
@@ -296,6 +319,36 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("prift.notify.insufficient_energy", this.getName()), false);
         }
+    }
+
+    @Override
+    public List<String> blocksToHarvest() {
+        return Arrays.asList(StegosaurusConfig.stegosaurusMineBlock);
+    }
+
+    public int harvestRange() {
+        return 5;
+    }
+
+    public void setHarvesting(boolean value) {
+        this.setAttacking(value);
+    }
+
+    public boolean isHarvesting() {
+        return this.isAttacking();
+    }
+
+    public void setCanHarvest(boolean value) {
+        this.dataManager.set(CAN_HARVEST, value);
+    }
+
+    public boolean canHarvest() {
+        return this.dataManager.get(CAN_HARVEST);
+    }
+
+    @Override
+    public AxisAlignedBB breakRange() {
+        return new AxisAlignedBB(-1, 0, -1, 1, 0, 1);
     }
 
     @Override

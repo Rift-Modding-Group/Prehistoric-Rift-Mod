@@ -76,6 +76,7 @@ public class RiftItems {
     public static Item DIREWOLF_TAIL;
     public static Item MEGALOCEROS_ANTLER;
     public static Item BARYONYX_CLAW;
+    public static Item PALAEOCASTOR_TAIL;
 
     public static Item CHITIN;
 
@@ -148,6 +149,7 @@ public class RiftItems {
         DIREWOLF_TAIL = riftGenericItem("direwolf_tail", true);
         MEGALOCEROS_ANTLER = riftGenericItem("megaloceros_antler", true);
         BARYONYX_CLAW = riftGenericItem("baryonyx_claw", true);
+        PALAEOCASTOR_TAIL = riftGenericItem("palaeocastor_tail", true);
 
         CHITIN = riftGenericItem("chitin", true);
 

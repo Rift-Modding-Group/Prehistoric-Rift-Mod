@@ -25,6 +25,7 @@ entity.saurophaganax.name=Saurophaganax
 entity.direwolf.name=Direwolf
 entity.megaloceros.name=Megaloceros
 entity.baryonyx.name=Baryonyx
+entity.palaeocastor.name=Palaeocastor
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon
@@ -54,8 +55,10 @@ item.truffle.name=Truffle
 item.fiber_bar.name=Fiber Bar
 item.basic_herbivore_meal.name=Basic Herbivore Meal
 item.basic_carnivore_meal.name=Basic Carnivore Meal
+item.basic_saxumavore_meal.name=Basic Saxumavore Meal
 item.advanced_herbivore_meal.name=Advanced Herbivore Meal
 item.advanced_carnivore_meal.name=Advanced Carnivore Meal
+item.advanced_saxumavore_meal.name=Advanced Saxumavore Meal
 item.creative_meal.name=Creative Meal
 item.flame_stimulant.name=Flame Stimulant
 item.extreme_flame_stimulant.name=Extreme Flame Stimulant
@@ -100,6 +103,7 @@ item.saurophaganax_eye.name=Saurophaganax Eye
 item.direwolf_tail.name=Direwolf Tail
 item.megaloceros_antler.name=Megaloceros Antler
 item.baryonyx_claw.name=Baryonyx Claw
+item.palaeocastor_tail.name=Palaeocastor Tail
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -162,6 +166,7 @@ radial.note.need_saddle=This creature needs a saddle to be ridden!
 radial.note.too_busy=This creature is too busy!
 radial.note.too_young_saddle=This creature is too young to be saddled!
 radial.note.too_young_unclaim=Babies cannot be unclaimed! >:(
+radial.note.too_young_work=Babies cannot be made to work! >:(
 radial.note.too_young_behavior=This creature is too young to have its behavior changed!
 radial.note.is_asleep=This creature is asleep!
 radial.note.is_pregnant=This creature is pregnant!
@@ -275,6 +280,10 @@ sounds.subtitle.megaloceros_death=Megaloceros dies
 sounds.subtitle.baryonyx_idle=Baryonyx grunts
 sounds.subtitle.baryonyx_hurt=Baryonyx hurts
 sounds.subtitle.baryonyx_death=Baryonyx dies
+
+sounds.subtitle.palaeocastor_idle=Palaeocastor squeaks
+sounds.subtitle.palaeocastor_hurt=Palaeocastor hurts
+sounds.subtitle.palaeocastor_death=Palaeocastor dies
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral

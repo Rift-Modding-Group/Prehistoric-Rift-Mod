@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPowere
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.RiftInitialize;
@@ -24,6 +25,7 @@ import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -51,10 +53,12 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser {
+public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
     private static final DataParameter<Boolean> BLOWING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_BLOW = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart neckPart;
     private RiftCreaturePart tail0Part;
     private RiftCreaturePart tail1Part;
@@ -84,6 +88,8 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         super.entityInit();
         this.dataManager.register(BLOWING, false);
         this.dataManager.register(CAN_BLOW, true);
+        this.dataManager.register(HARVESTING, false);
+        this.dataManager.register(CAN_HARVEST, false);
     }
 
     protected void initEntityAI() {
@@ -100,13 +106,14 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.tasks.addTask(3, new RiftResetAnimatedPose(this, 1.52F, 1));
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.24F));
         this.tasks.addTask(4, new RiftParasaurolophusBlow(this));
-        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(6, new RiftHerdDistanceFromOtherMembers(this, 1.5D));
-        this.tasks.addTask(7, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(10, new RiftWander(this, 1.0D));
-        this.tasks.addTask(11, new RiftLookAround(this));
+        this.tasks.addTask(5, new RiftHarvestOnWander(this, 0.52F, 0.24F));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 1.5D));
+        this.tasks.addTask(8, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(9, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(10, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(11, new RiftWander(this, 1.0D));
+        this.tasks.addTask(12, new RiftLookAround(this));
     }
 
     @Override
@@ -171,6 +178,18 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
             this.world.removeEntityDangerously(this.tail3Part);
             this.tail3Part = null;
         }
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setBoolean("CanHarvest", this.canHarvest());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.setCanHarvest(compound.getBoolean("CanHarvest"));
     }
 
     private void manageCanBlow() {
@@ -324,6 +343,31 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
         }
+    }
+
+    @Override
+    public List<String> blocksToHarvest() {
+        return Arrays.asList(ParasaurolophusConfig.parasaurolophusMineBlock);
+    }
+
+    public int harvestRange() {
+        return 3;
+    }
+
+    public void setHarvesting(boolean value) {
+        this.setAttacking(value);
+    }
+
+    public boolean isHarvesting() {
+        return this.isAttacking();
+    }
+
+    public void setCanHarvest(boolean value) {
+        this.dataManager.set(CAN_HARVEST, value);
+    }
+
+    public boolean canHarvest() {
+        return this.dataManager.get(CAN_HARVEST);
     }
 
     @Override

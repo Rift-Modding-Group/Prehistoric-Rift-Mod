@@ -157,7 +157,7 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && onlySelected && this.choices.get(i) == RiftTameRadialChoice.BEHAVIOR) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
-            else if (this.radialChoiceMenu == 2 && this.creature.isBaby() && onlySelected && this.choices.get(i) == RiftTameRadialChoice.UNCLAIM) {
+            else if (this.radialChoiceMenu == 2 && this.creature.isBaby() && onlySelected && (this.choices.get(i) == RiftTameRadialChoice.UNCLAIM || this.choices.get(i) == RiftTameRadialChoice.SET_WORKSTATION || this.choices.get(i) == RiftTameRadialChoice.SET_WANDER_HARVEST)) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
             else if (this.radialChoiceMenu == 1 && onlySelected && this.choices.get(i) == RiftTameRadialChoice.TURRET_MODE && this.creature.isUsingWorkstation()) {
@@ -221,7 +221,7 @@ public class RiftDialMenu extends GuiScreen {
             //radialString.charAt(0) != '['
             if (this.radialChoiceMenu == 0 && this.creature.isRideable && this.choices.get(i) == RiftTameRadialChoice.RIDE && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled()) || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE) || this.creature.isUsingWorkstation() || this.creature.isSleeping())) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 0 && this.choices.get(i) == RiftTameRadialChoice.BEHAVIOR && this.creature.isBaby()) radialString = "["+radialString+"]";
-            if (this.radialChoiceMenu == 2 && this.choices.get(i) == RiftTameRadialChoice.UNCLAIM && this.creature.isBaby()) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 2 && (this.choices.get(i) == RiftTameRadialChoice.UNCLAIM || this.choices.get(i) == RiftTameRadialChoice.SET_WORKSTATION || this.choices.get(i) == RiftTameRadialChoice.SET_WANDER_HARVEST) && this.creature.isBaby()) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 1 && this.choices.get(i) == RiftTameRadialChoice.TURRET_MODE && this.creature.isUsingWorkstation()) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 0 && this.choices.get(i) == RiftTameRadialChoice.OPTIONS) {
                 if (this.creature instanceof ILeadWorkstationUser) {
@@ -252,39 +252,45 @@ public class RiftDialMenu extends GuiScreen {
         }
 
         //hover text
-        if (this.selectedItem > -1 && this.selectedItem < this.choices.size()) {
+        if (this.selectedItem > -1 && this.selectedItem < numItems) {
             if (this.radialChoiceMenu == 0 && this.creature.isBaby() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
                 this.drawHoveringText(I18n.format("radial.note.too_young_saddle"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 0 && (this.creature.isUsingWorkstation() || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
+            if (this.radialChoiceMenu == 0 && (this.creature.isUsingWorkstation() || this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
                 this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 0 && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) && this.creature instanceof IImpregnable) {
+            if (this.radialChoiceMenu == 0 && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) && this.creature instanceof IImpregnable) {
                 IImpregnable impregnable = (IImpregnable) this.creature;
                 if (impregnable.isPregnant()) this.drawHoveringText(I18n.format("radial.note.is_pregnant"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 0 && this.creature.isSleeping() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
+            if (this.radialChoiceMenu == 0 && this.creature.isSleeping() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
                 this.drawHoveringText(I18n.format("radial.note.is_asleep"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 0 && this.creature.isRideable && !this.creature.isSaddled() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
+            if (this.radialChoiceMenu == 0 && this.creature.isRideable && !this.creature.isSaddled() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
                 this.drawHoveringText(I18n.format("radial.note.need_saddle"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) {
+            if (this.radialChoiceMenu == 0 && this.creature.isBaby() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) {
                 this.drawHoveringText(I18n.format("radial.note.too_young_behavior"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 1 && this.creature.isUsingWorkstation() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.TURRET_MODE) {
+            if (this.radialChoiceMenu == 1 && this.creature.isUsingWorkstation() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.TURRET_MODE) {
                 this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE) {
+            if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE) {
                 this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) {
+            if (this.radialChoiceMenu == 0 && this.creature.isUsingWorkstation() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) {
                 this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 2 && this.creature.isUsingWorkstation() && this.choices.get(this.selectedItem) != RiftTameRadialChoice.BACK && this.choices.get(this.selectedItem) == RiftTameRadialChoice.SET_WORKSTATION) {
+            if (this.radialChoiceMenu == 2 && this.creature.isUsingWorkstation() && this.choices.get(this.selectedItem) != RiftTameRadialChoice.BACK && this.choices.get(this.selectedItem) == RiftTameRadialChoice.SET_WORKSTATION) {
                 this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
-            else if (this.radialChoiceMenu == 0 && this.choices.get(this.selectedItem) == RiftTameRadialChoice.OPTIONS) {
+            if (this.radialChoiceMenu == 2 && this.creature.isBaby() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.UNCLAIM) {
+                this.drawHoveringText(I18n.format("radial.note.too_young_unclaim"), mouseX, mouseY);
+            }
+            if (this.radialChoiceMenu == 2 && this.creature.isBaby() && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.SET_WORKSTATION || this.choices.get(this.selectedItem) == RiftTameRadialChoice.SET_WANDER_HARVEST)) {
+                this.drawHoveringText(I18n.format("radial.note.too_young_work"), mouseX, mouseY);
+            }
+            if (this.radialChoiceMenu == 0 && this.choices.get(this.selectedItem) == RiftTameRadialChoice.OPTIONS) {
                 if (this.creature instanceof ILeadWorkstationUser) {
                     ILeadWorkstationUser user = (ILeadWorkstationUser) this.creature;
                     if (user.isAttachableForWork(this.creature.getWorkstationPos())) {

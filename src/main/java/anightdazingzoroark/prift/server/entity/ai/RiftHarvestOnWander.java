@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -8,6 +9,9 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RiftHarvestOnWander extends EntityAIBase {
     private final RiftCreature creature;
@@ -27,7 +31,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.creature.isTamed() && this.creature.getTameStatus() == TameStatusType.WANDER && this.creature instanceof IHarvestWhenWandering;
+        return this.creature.isTamed() && this.creature.getTameStatus() == TameStatusType.WANDER && this.creature instanceof IHarvestWhenWandering && ((IHarvestWhenWandering)this.creature).canHarvest();
     }
 
     @Override
@@ -41,6 +45,8 @@ public class RiftHarvestOnWander extends EntityAIBase {
         this.creature.getNavigator().clearPath();
         this.targetBlockPos = null;
         this.path = null;
+        this.creature.resetSpeed();
+        this.creatureHarvester.setHarvesting(false);
     }
 
     @Override
@@ -48,12 +54,13 @@ public class RiftHarvestOnWander extends EntityAIBase {
         if (this.path != null) {
             //when not null, it will navigate towards target block
             //upon reaching target block, it will harvest
-            if (this.path.isFinished()) {
+            if (this.path.isFinished() || RiftUtil.entityAtLocation(this.creature, this.targetBlockPos, this.creatureHarvester.harvestRange())) {
                 if (this.animTime == 0) {
                     this.creatureHarvester.setHarvesting(true);
+                    this.creature.removeSpeed();
                 }
                 if (this.animTime == this.harvestAnimTime) {
-                    this.creatureHarvester.harvestBlock(this.targetBlockPos);
+                    this.creatureHarvester.harvestBlock(this.creature, this.targetBlockPos);
                     this.creature.setXP(this.creature.getXP() + 5);
                 }
                 if (this.animTime == this.harvestAnimLength) {
@@ -62,6 +69,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
                 }
                 if (this.animTime > 30) {
                     this.animTime = -1;
+                    this.creature.resetSpeed();
                     this.creatureHarvester.setHarvesting(false);
                     this.creature.getNavigator().clearPath();
                     this.targetBlockPos = null;
@@ -86,6 +94,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
     }
 
     private BlockPos calculatePos() {
+        List<BlockPos> posList = new ArrayList<>();
         int homePosMinX = this.creature.getHomePos().getX() - 16;
         int homePosMinY = this.creature.getHomePos().getY() - 7;
         int homePosMinZ = this.creature.getHomePos().getZ() - 16;
@@ -97,11 +106,23 @@ public class RiftHarvestOnWander extends EntityAIBase {
                         Path testPath = this.creature.getNavigator().getPathToPos(newPos);
                         if (testPath != null && testPath.getFinalPathPoint() != null) {
                             BlockPos finalTestPos = new BlockPos(testPath.getFinalPathPoint().x, testPath.getFinalPathPoint().y, testPath.getFinalPathPoint().z);
-                            if (this.blockPosClose(finalTestPos, newPos)) return newPos;
+                            if (this.blockPosClose(finalTestPos, newPos)) posList.add(newPos);
                         }
                     }
                 }
             }
+        }
+        if (!posList.isEmpty()) {
+            BlockPos closest = null;
+            for (BlockPos testPos : posList) {
+                if (closest == null) closest = testPos;
+                else {
+                    if (testPos.distanceSq(this.creature.posX, this.creature.posY, this.creature.posZ) <= closest.distanceSq(this.creature.posX, this.creature.posY, this.creature.posZ)) {
+                        closest = testPos;
+                    }
+                }
+            }
+            return closest;
         }
         return null;
     }

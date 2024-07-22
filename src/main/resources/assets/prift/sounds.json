@@ -339,6 +339,28 @@
     "subtitle": "sounds.subtitle.baryonyx_death"
   },
 
+  "prift.palaeocastor.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/palaeocastor/palaeocastor_idle"
+    ],
+    "subtitle": "sounds.subtitle.palaeocastor_idle"
+  },
+  "prift.palaeocastor.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/palaeocastor/palaeocastor_hurt"
+    ],
+    "subtitle": "sounds.subtitle.palaeocastor_hurt"
+  },
+  "prift.palaeocastor.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/palaeocastor/palaeocastor_death"
+    ],
+    "subtitle": "sounds.subtitle.palaeocastor_death"
+  },
+
   "prift.semi_manual_machine.reset": {
     "category": "block",
     "sounds": [
