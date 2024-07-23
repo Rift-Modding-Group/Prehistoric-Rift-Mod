@@ -1102,15 +1102,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public boolean getCanSpawnHere() {
+        return this.getCanSpawnOnBlock() && this.world.getLight(this.getPosition()) > 7 && !this.world.getBlockState(this.getPosition()).getMaterial().isLiquid() && this.testOtherCreatures();
+    }
+
+    protected boolean getCanSpawnOnBlock() {
         List<String> blockSpawn = Arrays.asList(GeneralConfig.universalSpawnBlocks);
         IBlockState belowState = this.world.getBlockState(this.getPosition().down());
+        boolean flag = false;
         for (String blockVal : blockSpawn) {
             int colData = blockVal.indexOf(":", blockVal.indexOf(":") + 1);
             int blockData = Integer.parseInt(blockVal.substring(colData + 1));
             String blockName = blockVal.substring(0, colData);
-            return Block.getBlockFromName(blockName) == belowState.getBlock() && (blockData == - 1 || belowState.getBlock().getMetaFromState(belowState) == blockData) && this.world.getLight(this.getPosition()) > 8 && !this.world.getBlockState(this.getPosition()).getMaterial().isLiquid() && this.testOtherCreatures();
+            if (!flag) flag = Block.getBlockFromName(blockName) == belowState.getBlock() && (blockData == - 1 || belowState.getBlock().getMetaFromState(belowState) == blockData);
         }
-        return false;
+        return flag;
     }
 
     protected boolean testOtherCreatures() {
@@ -1124,24 +1129,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     protected boolean isBrightnessLevel(int min, int max) {
-        if (min < max) {
-            BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
-
-            if (this.world.getLightFor(EnumSkyBlock.SKY, blockpos) > this.rand.nextInt(32)) return false;
-            else {
-                int lightLevel = this.world.getLightFromNeighbors(blockpos);
-
-                if (this.world.isThundering()) {
-                    int originalSkylightSubtracted = this.world.getSkylightSubtracted();
-                    this.world.setSkylightSubtracted(10);
-                    lightLevel = this.world.getLightFromNeighbors(blockpos);
-                    this.world.setSkylightSubtracted(originalSkylightSubtracted);
-                }
-
-                return lightLevel >= min && lightLevel <= max;
-            }
-        }
-        else return false;
+        return this.world.getLight(this.getPosition()) >= min && this.world.getLight(this.getPosition()) <= max;
     }
 
     public boolean canBreatheUnderwater() {
@@ -1678,19 +1666,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return Math.sqrt((this.motionX * this.motionX) + (fallMotion * fallMotion) + (this.motionZ * this.motionZ)) > 0;
     }
 
-    public boolean isUnderground() {
-        for (int y = this.getPosition().getY(); y < this.world.getActualHeight(); y++) {
-            BlockPos checkPos = new BlockPos(this.getPosition().getX(), y, this.getPosition().getZ());
-            IBlockState blockState = world.getBlockState(checkPos);
-            if (blockState.isOpaqueCube()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public boolean isInCave() {
-        return this.isUnderground() && this.posY <= 64;
+        BlockPos pos = new BlockPos(this);
+        return !this.world.canSeeSky(pos.up()) && pos.getY() <= 56;
     }
 
     public boolean canNaturalRegen() {

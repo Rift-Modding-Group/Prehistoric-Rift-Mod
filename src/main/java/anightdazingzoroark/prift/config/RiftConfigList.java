@@ -31,11 +31,12 @@ public enum RiftConfigList {
     private final Class<? extends RiftCreature> creatureClass;
     private final Class<? extends RiftConfig> configClass;
     private RiftConfig configInstance;
-    private RiftSpawnType spawnType;
+    private final RiftSpawnType spawnType;
 
     RiftConfigList(Class<? extends RiftCreature> creatureClass, Class<? extends RiftConfig> configClass, RiftSpawnType spawnType) {
         this.creatureClass = creatureClass;
         this.configClass = configClass;
+        this.spawnType = spawnType;
     }
 
     public Class<? extends RiftCreature> getCreatureClass() {

@@ -31,7 +31,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.creature.isTamed() && this.creature.getTameStatus() == TameStatusType.WANDER && this.creature instanceof IHarvestWhenWandering && ((IHarvestWhenWandering)this.creature).canHarvest();
+        return this.creature.isTamed() && this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden() && this.creature instanceof IHarvestWhenWandering && ((IHarvestWhenWandering)this.creature).canHarvest();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
 
     @Override
     public void updateTask() {
-        if (this.path != null) {
+        if (this.path != null && this.targetBlockPos != null) {
             //when not null, it will navigate towards target block
             //upon reaching target block, it will harvest
             if (this.path.isFinished() || RiftUtil.entityAtLocation(this.creature, this.targetBlockPos, this.creatureHarvester.harvestRange())) {

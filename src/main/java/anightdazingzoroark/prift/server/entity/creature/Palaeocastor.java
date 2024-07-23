@@ -3,11 +3,14 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.PalaeocastorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.nbt.NBTTagCompound;
@@ -17,6 +20,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -51,6 +55,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         this.experienceValue = 3;
         this.healthLevelMultiplier = PalaeocastorConfig.healthMultiplier;
         this.damageLevelMultiplier = PalaeocastorConfig.damageMultiplier;
+        this.densityLimit = PalaeocastorConfig.palaeocastorDensityLimit;
     }
 
     @Override
@@ -120,9 +125,12 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
-
+    public boolean getCanSpawnHere() {
+        return this.getCanSpawnOnBlock() && !this.world.getBlockState(this.getPosition()).getMaterial().isLiquid() && this.isInCave() && this.testOtherCreatures();
     }
+
+    @Override
+    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
 
     @Override
     public List<String> blocksToHarvest() {
