@@ -11,12 +11,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RiftMMRecipes {
     public static List<SemiManualExtractorRecipe> smExtractorRecipes = new ArrayList<>();
     public static List<SemiManualPresserRecipe> smPresserRecipes = new ArrayList<>();
     public static List<SemiManualExtruderRecipe> smExtruderRecipes = new ArrayList<>();
+    public static List<MillstoneRecipe> millstoneRecipes = new ArrayList<>();
 
     public static SemiManualRecipeBase getSMRecipe(String path) {
         for (SemiManualExtractorRecipe recipe : smExtractorRecipes) {
@@ -52,6 +54,13 @@ public class RiftMMRecipes {
         return null;
     }
 
+    public static MillstoneRecipe getMillstoneRecipe(String path) {
+        for (MillstoneRecipe recipe : millstoneRecipes) {
+            if (recipe.getId().equals(path)) return recipe;
+        }
+        return null;
+    }
+
     public static void registerRecipes() {
         //for semi manual extractor
         smExtractorRecipes.add(new SemiManualExtractorRecipe(new ResourceLocation(RiftInitialize.MODID, "sme/pyroberryToPyroberryJuice"), Ingredient.fromStacks(new ItemStack(RiftItems.PYROBERRY)), new FluidStack(RiftFluids.PYROBERRY_JUICE, 125), 10));
@@ -64,5 +73,9 @@ public class RiftMMRecipes {
         //for semi manual extruder
         smExtruderRecipes.add(new SemiManualExtruderRecipe(new ResourceLocation(RiftInitialize.MODID, "smex/ironIngotToRod"), Ingredient.fromStacks(new ItemStack(Items.IRON_INGOT)), Ingredient.fromStacks(new ItemStack(RiftMMItems.IRON_ROD, 2)), 20));
         smExtruderRecipes.add(new SemiManualExtruderRecipe(new ResourceLocation(RiftInitialize.MODID, "smex/goldIngotToRod"), Ingredient.fromStacks(new ItemStack(Items.GOLD_INGOT)), Ingredient.fromStacks(new ItemStack(RiftMMItems.GOLD_ROD, 2)), 20));
+
+        //for millstone
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/caneToSugar"), Ingredient.fromStacks(new ItemStack(Items.REEDS)), Ingredient.fromStacks(new ItemStack(Items.SUGAR)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/boneToBonemeal"), Ingredient.fromStacks(new ItemStack(Items.BONE)), Ingredient.fromStacks(new ItemStack(Items.DYE, 2, 15)), 10));
     }
 }

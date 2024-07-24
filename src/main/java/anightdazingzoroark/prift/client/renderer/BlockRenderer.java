@@ -15,5 +15,6 @@ public class BlockRenderer {
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySemiManualPresser.class, new SemiManualPresserRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySemiManualExtruder.class, new SemiManualExtruderRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySemiManualHammerer.class, new SemiManualHammererRenderer());
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMillstone.class, new MillstoneRenderer());
     }
 }

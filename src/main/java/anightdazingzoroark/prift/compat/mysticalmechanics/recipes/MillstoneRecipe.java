@@ -4,14 +4,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 
-public abstract class SemiManualRecipeBase {
+public class MillstoneRecipe {
     private final ResourceLocation id;
-    private final double minPower;
     public final Ingredient input;
+    public final Ingredient output;
+    private final double minPower;
 
-    public SemiManualRecipeBase(Ingredient input, ResourceLocation id, double minPower) {
-        this.input = input;
+    public MillstoneRecipe(ResourceLocation id, Ingredient input, Ingredient output, double minPower) {
         this.id = id;
+        this.input = input;
+        this.output = output;
         this.minPower = minPower;
     }
 

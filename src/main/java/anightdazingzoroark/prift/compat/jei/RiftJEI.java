@@ -1,22 +1,11 @@
 package anightdazingzoroark.prift.compat.jei;
 
-import anightdazingzoroark.prift.client.ui.RiftSemiManualExtractorMenu;
-import anightdazingzoroark.prift.client.ui.RiftSemiManualExtruderMenu;
-import anightdazingzoroark.prift.client.ui.RiftSemiManualHammererMenu;
-import anightdazingzoroark.prift.client.ui.RiftSemiManualPresserMenu;
-import anightdazingzoroark.prift.compat.jei.category.RiftJEISMExtractorCategory;
-import anightdazingzoroark.prift.compat.jei.category.RiftJEISMExtruderCategory;
-import anightdazingzoroark.prift.compat.jei.category.RiftJEISMHammererCategory;
-import anightdazingzoroark.prift.compat.jei.category.RiftJEISMPresserCategory;
-import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMExtractorWrapper;
-import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMExtruderWrapper;
-import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMHammererWrapper;
-import anightdazingzoroark.prift.compat.jei.wrapper.RiftJEISMPresserWrapper;
+import anightdazingzoroark.prift.client.ui.*;
+import anightdazingzoroark.prift.compat.jei.category.*;
+import anightdazingzoroark.prift.compat.jei.wrapper.*;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
-import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
-import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtractorRecipe;
-import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtruderRecipe;
-import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualPresserRecipe;
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectiles;
@@ -44,6 +33,7 @@ public class RiftJEI implements IModPlugin {
     public static final String smPresserCat = "prift.semi_manual_presser";
     public static final String smExtruderCat = "prift.semi_manual_extruder";
     public static final String smHammererCat = "prift.semi_manual_hammerer";
+    public static final String millstoneCat = "prift.semi_manual_hammer";
 
     //recipe makers
     private List<RiftJEISMExtractorWrapper> semiManualExtractorWrappers() {
@@ -81,6 +71,14 @@ public class RiftJEI implements IModPlugin {
         return list;
     }
 
+    private List<RiftJEIMillstoneWrapper> millstoneWrappers() {
+        List<RiftJEIMillstoneWrapper> list = new ArrayList<>();
+        for (MillstoneRecipe recipe : RiftMMRecipes.millstoneRecipes) {
+            list.add(new RiftJEIMillstoneWrapper(recipe));
+        }
+        return list;
+    }
+
     @Override
     public void registerCategories(IRecipeCategoryRegistration registry) {
         final IJeiHelpers helpers = registry.getJeiHelpers();
@@ -90,6 +88,7 @@ public class RiftJEI implements IModPlugin {
             registry.addRecipeCategories(new RiftJEISMPresserCategory(gui));
             registry.addRecipeCategories(new RiftJEISMExtruderCategory(gui));
             if (GeneralConfig.canUsePyrotech() && ModPyrotechConfig.MODULES.get(ModuleTechBloomery.MODULE_ID)) registry.addRecipeCategories(new RiftJEISMHammererCategory(gui));
+            registry.addRecipeCategories(new RiftJEIMillstoneCategory(gui));
         }
     }
 
@@ -133,6 +132,10 @@ public class RiftJEI implements IModPlugin {
                 registry.addRecipeClickArea(RiftSemiManualHammererMenu.class, 58, 33, 21, 14, smHammererCat);
                 registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_HAMMERER), smHammererCat);
             }
+
+            registry.addRecipes(this.millstoneWrappers(), millstoneCat);
+            registry.addRecipeClickArea(RiftMillstoneMenu.class, 81, 44, 14, 22, millstoneCat);
+            registry.addRecipeCatalyst(new ItemStack(RiftMMBlocks.MILLSTONE), millstoneCat);
         }
     }
 }

@@ -283,7 +283,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     }
 
     public int pullPower() {
-        return 5;
+        return 15;
     }
 
     @SideOnly(Side.CLIENT)

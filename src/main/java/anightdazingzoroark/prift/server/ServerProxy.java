@@ -2,15 +2,9 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.crafttweaker.RiftCrafttweaker;
-import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtractorContainer;
-import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualExtruderContainer;
-import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualHammererContainer;
-import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.SemiManualPresserContainer;
+import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtruder;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualHammerer;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualPresser;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
@@ -64,6 +58,7 @@ public class ServerProxy implements IGuiHandler {
     public static final int GUI_SEMI_MANUAL_PRESSER = 8;
     public static final int GUI_SEMI_MANUAL_EXTRUDER = 9;
     public static final int GUI_SEMI_MANUAL_HAMMERER = 10;
+    public static final int GUI_MILLSTONE = 11;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
@@ -134,6 +129,11 @@ public class ServerProxy implements IGuiHandler {
         else if (id == GUI_SEMI_MANUAL_HAMMERER) {
             if (tileEntity instanceof TileEntitySemiManualHammerer) {
                 return new SemiManualHammererContainer((TileEntitySemiManualHammerer)tileEntity, player);
+            }
+        }
+        else if (id == GUI_MILLSTONE) {
+            if (tileEntity instanceof TileEntityMillstone) {
+                return new MillstoneContainer((TileEntityMillstone)tileEntity, player);
             }
         }
         return null;

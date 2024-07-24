@@ -7,10 +7,7 @@ import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.renderer.FluidRenderer;
 import anightdazingzoroark.prift.client.renderer.ItemRenderer;
 import anightdazingzoroark.prift.client.ui.*;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtractor;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtruder;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualHammerer;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualPresser;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
@@ -145,6 +142,11 @@ public class ClientProxy extends ServerProxy {
         else if (id == GUI_SEMI_MANUAL_HAMMERER) {
             if (tileEntity instanceof TileEntitySemiManualHammerer) {
                 return new RiftSemiManualHammererMenu((TileEntitySemiManualHammerer) tileEntity, player.inventory);
+            }
+        }
+        else if (id == GUI_MILLSTONE) {
+            if (tileEntity instanceof TileEntityMillstone) {
+                return new RiftMillstoneMenu((TileEntityMillstone) tileEntity, player.inventory);
             }
         }
         return null;
