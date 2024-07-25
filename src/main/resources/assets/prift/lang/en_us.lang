@@ -136,6 +136,7 @@ item.iron_rod.name=Iron Rod
 item.gold_rod.name=Gold Rod
 
 jei.min_power=Minimum Power: %s R
+jei.chance=Chance: %s
 
 radial.choice.ride=Ride
 radial.choice.state=State
@@ -326,6 +327,8 @@ tile.semi_manual_extractor.name=Semi Automatic Extractor
 tile.semi_manual_presser.name=Semi Automatic Presser
 tile.semi_manual_extruder.name=Semi Automatic Extruder
 tile.semi_manual_hammerer.name=Semi Automatic Hammerer
+tile.millstone.name=Millstone
+tile.mechanical_filter.name=Mechanical Filter
 
 hwyla.health=Health: %s / %s
 hwyla.power_consumed=Power Consumed: %s

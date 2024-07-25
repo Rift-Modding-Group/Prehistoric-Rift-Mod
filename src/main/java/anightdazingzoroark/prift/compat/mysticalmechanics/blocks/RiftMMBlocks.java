@@ -20,6 +20,7 @@ public class RiftMMBlocks {
     public static Block SEMI_MANUAL_HAMMERER;
     public static Block SEMI_MANUAL_HAMMERER_TOP;
     public static Block MILLSTONE;
+    public static Block MECHANICAL_FILTER;
 
     public static void registerMMBlocks() {
         LEAD_POWERED_CRANK = RiftBlocks.registerBlock(new BlockLeadPoweredCrank(), "lead_powered_crank", true, false);
@@ -37,5 +38,6 @@ public class RiftMMBlocks {
             SEMI_MANUAL_HAMMERER_TOP = RiftBlocks.registerBlock(new BlockSemiManualHammererTop(), "semi_manual_hammerer_top", false);
         }
         MILLSTONE = RiftBlocks.registerBlock(new BlockMillstone(), "millstone", true, false);
+        MECHANICAL_FILTER = RiftBlocks.registerBlock(new BlockMechanicalFilter(), "mechanical_filter", true, false);
     }
 }

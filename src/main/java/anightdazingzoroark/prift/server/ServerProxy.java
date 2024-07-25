@@ -59,6 +59,7 @@ public class ServerProxy implements IGuiHandler {
     public static final int GUI_SEMI_MANUAL_EXTRUDER = 9;
     public static final int GUI_SEMI_MANUAL_HAMMERER = 10;
     public static final int GUI_MILLSTONE = 11;
+    public static final int GUI_MECHANICAL_FILTER = 12;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
@@ -134,6 +135,11 @@ public class ServerProxy implements IGuiHandler {
         else if (id == GUI_MILLSTONE) {
             if (tileEntity instanceof TileEntityMillstone) {
                 return new MillstoneContainer((TileEntityMillstone)tileEntity, player);
+            }
+        }
+        else if (id == GUI_MECHANICAL_FILTER) {
+            if (tileEntity instanceof TileEntityMechanicalFilter) {
+                return new MechanicalFilterContainer((TileEntityMechanicalFilter)tileEntity, player);
             }
         }
         return null;

@@ -33,7 +33,8 @@ public class RiftJEI implements IModPlugin {
     public static final String smPresserCat = "prift.semi_manual_presser";
     public static final String smExtruderCat = "prift.semi_manual_extruder";
     public static final String smHammererCat = "prift.semi_manual_hammerer";
-    public static final String millstoneCat = "prift.semi_manual_hammer";
+    public static final String millstoneCat = "prift.millstone";
+    public static final String mechFilterCat = "prift.mechanical_filter";
 
     //recipe makers
     private List<RiftJEISMExtractorWrapper> semiManualExtractorWrappers() {
@@ -79,6 +80,16 @@ public class RiftJEI implements IModPlugin {
         return list;
     }
 
+    private List<RiftJEIMechanicalFilterWrapper> mechanicalFilterWrappers() {
+        List<RiftJEIMechanicalFilterWrapper> list = new ArrayList<>();
+        for (MechanicalFilterRecipe recipe : RiftMMRecipes.mechanicalFilterRecipes) {
+            for (MechanicalFilterRecipe.MechanicalFilterOutput output : recipe.output) {
+                list.add(new RiftJEIMechanicalFilterWrapper(recipe, output));
+            }
+        }
+        return list;
+    }
+
     @Override
     public void registerCategories(IRecipeCategoryRegistration registry) {
         final IJeiHelpers helpers = registry.getJeiHelpers();
@@ -89,6 +100,7 @@ public class RiftJEI implements IModPlugin {
             registry.addRecipeCategories(new RiftJEISMExtruderCategory(gui));
             if (GeneralConfig.canUsePyrotech() && ModPyrotechConfig.MODULES.get(ModuleTechBloomery.MODULE_ID)) registry.addRecipeCategories(new RiftJEISMHammererCategory(gui));
             registry.addRecipeCategories(new RiftJEIMillstoneCategory(gui));
+            registry.addRecipeCategories(new RiftJEIMechanicalFilterCategory(gui));
         }
     }
 
@@ -136,6 +148,10 @@ public class RiftJEI implements IModPlugin {
             registry.addRecipes(this.millstoneWrappers(), millstoneCat);
             registry.addRecipeClickArea(RiftMillstoneMenu.class, 81, 44, 14, 22, millstoneCat);
             registry.addRecipeCatalyst(new ItemStack(RiftMMBlocks.MILLSTONE), millstoneCat);
+
+            registry.addRecipes(this.mechanicalFilterWrappers(), mechFilterCat);
+            registry.addRecipeClickArea(RiftMechanicalFilterMenu.class, 81, 44, 14, 22, mechFilterCat);
+            registry.addRecipeCatalyst(new ItemStack(RiftMMBlocks.MECHANICAL_FILTER), mechFilterCat);
         }
     }
 }

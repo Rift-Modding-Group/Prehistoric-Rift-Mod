@@ -2,6 +2,8 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability;
+import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockMechanicalFilter;
+import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.MechanicalFilterRecipe;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.MillstoneRecipe;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import mysticalmechanics.api.IMechCapability;
@@ -9,6 +11,7 @@ import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.ItemStackHelper;
@@ -18,7 +21,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -30,20 +36,23 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-public class TileEntityMillstone extends TileEntity implements IAnimatable, ITickable, ISidedInventory {
+public class TileEntityMechanicalFilter extends TileEntity implements ITickable, IAnimatable, ISidedInventory {
     private final AnimationFactory factory = new AnimationFactory(this);
     private final IMechCapability mechPower;
     private int timeHeld;
     protected NonNullList<ItemStack> itemStackHandler = NonNullList.<ItemStack>withSize(12, ItemStack.EMPTY);
-    private MillstoneRecipe currentRecipe;
+    private MechanicalFilterRecipe currentRecipe;
+    private ItemStack currentStack;
 
-    public TileEntityMillstone() {
+    public TileEntityMechanicalFilter() {
+        this.currentStack = ItemStack.EMPTY;
         this.mechPower = new ConsumerMechCapability() {
             @Override
             public void onPowerChange() {
-                TileEntityMillstone.this.markDirty();
+                TileEntityMechanicalFilter.this.markDirty();
             }
         };
     }
@@ -59,24 +68,32 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
         else {
             if (this.getPower() > 0) {
                 if (this.getCurrentRecipe() == null) {
-                    for (MillstoneRecipe recipe : RiftMMRecipes.millstoneRecipes) {
+                    for (MechanicalFilterRecipe recipe : RiftMMRecipes.mechanicalFilterRecipes) {
                         if (recipe.matches(this.getPower(), this.getInputItem())) {
                             this.setCurrentRecipe(recipe);
                         }
                     }
                 }
                 else {
-                    if (this.itemToInventoryTest(false, this.currentRecipe.output.matchingStacks[0], 3)) {
-                        this.setTimeHeld(this.getTimeHeld() + 1);
-                        if (this.getTimeHeld() >= this.getMaxRecipeTime()) {
-                            this.itemToInventoryTest(true, this.currentRecipe.output.matchingStacks[0], 3);
-                            this.getInputItem().shrink(1);
-                            this.setTimeHeld(0);
-                        }
+                    if (this.currentStack == ItemStack.EMPTY) {
+                        this.currentStack = this.chooseItemOutput().copy();
+                        System.out.println("stack: "+this.currentStack);
                     }
-                    if (!this.currentRecipe.matches(this.getPower(), this.getInputItem())) {
-                        this.setTimeHeld(0);
-                        this.setCurrentRecipe(null);
+                    else {
+                        if (this.itemToInventoryTest(false, this.currentStack, 3)) {
+                            this.setTimeHeld(this.getTimeHeld() + 1);
+                            if (this.getTimeHeld() >= this.getMaxRecipeTime()) {
+                                this.itemToInventoryTest(true, this.currentStack, 3);
+                                this.currentStack = this.chooseItemOutput().copy();
+                                this.getInputItem().shrink(1);
+                                this.setTimeHeld(0);
+                            }
+                        }
+                        if (!this.currentRecipe.matches(this.getPower(), this.getInputItem())) {
+                            this.setTimeHeld(0);
+                            this.setCurrentRecipe(null);
+                            this.currentStack = ItemStack.EMPTY;
+                        }
                     }
                 }
             }
@@ -91,7 +108,7 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
         ItemStackHelper.loadAllItems(compound, this.itemStackHandler);
         this.mechPower.readFromNBT(compound);
         this.timeHeld = compound.getInteger("timeHeld");
-        this.currentRecipe = RiftMMRecipes.getMillstoneRecipe(compound.getString("currentRecipe"));
+        this.currentRecipe = RiftMMRecipes.getMechanicalFilterRecipe(compound.getString("currentRecipe"));
     }
 
     @Override
@@ -107,7 +124,7 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
     @Override
     public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) return true;
-        else if (capability == MysticalMechanicsAPI.MECH_CAPABILITY && facing == EnumFacing.UP) return true;
+        else if (capability == MysticalMechanicsAPI.MECH_CAPABILITY && facing == this.getFacing().getOpposite()) return true;
         return super.hasCapability(capability, facing);
     }
 
@@ -123,11 +140,11 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
             else if (facing == EnumFacing.SOUTH)  return (T) new SidedInvWrapper(this, EnumFacing.SOUTH);
             else return (T) new SidedInvWrapper(this, EnumFacing.UP);
         }
-        else if (capability == MysticalMechanicsAPI.MECH_CAPABILITY && facing == EnumFacing.UP) return (T) this.mechPower;
+        else if (capability == MysticalMechanicsAPI.MECH_CAPABILITY && facing == this.getFacing().getOpposite()) return (T) this.mechPower;
         return super.getCapability(capability, facing);
     }
 
-    public MillstoneRecipe getCurrentRecipe() {
+    public MechanicalFilterRecipe getCurrentRecipe() {
         return this.currentRecipe;
     }
 
@@ -136,7 +153,7 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
         return "";
     }
 
-    public void setCurrentRecipe(MillstoneRecipe value) {
+    public void setCurrentRecipe(MechanicalFilterRecipe value) {
         this.currentRecipe = value;
         if (!this.world.isRemote) {
             this.markDirty();
@@ -158,6 +175,21 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
             }
         }
         return -1;
+    }
+
+    public ItemStack chooseItemOutput() {
+        if (this.currentRecipe != null) {
+            int totalWeight = this.currentRecipe.output.stream()
+                    .mapToInt(MechanicalFilterRecipe.MechanicalFilterOutput::getWeight)
+                    .sum();
+            int randomValue = RiftUtil.randomInRange(0, totalWeight);
+            System.out.println(randomValue);
+            for (MechanicalFilterRecipe.MechanicalFilterOutput output : this.currentRecipe.output) {
+                randomValue -= output.getWeight();
+                if (randomValue <= 0) return output.getOutput().matchingStacks[0];
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     public double getPower() {
@@ -199,7 +231,12 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
         ItemStackHelper.loadAllItems(tag, this.itemStackHandler);
         this.mechPower.readFromNBT(tag);
         this.timeHeld = tag.getInteger("timeHeld");
-        this.currentRecipe = RiftMMRecipes.getMillstoneRecipe(tag.getString("currentRecipe"));
+        this.currentRecipe = RiftMMRecipes.getMechanicalFilterRecipe(tag.getString("currentRecipe"));
+    }
+
+    public EnumFacing getFacing() {
+        IBlockState state = this.getWorld().getBlockState(this.getPos());
+        return state.getValue(BlockMechanicalFilter.FACING);
     }
 
     @Override

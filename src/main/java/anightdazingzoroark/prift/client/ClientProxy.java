@@ -149,6 +149,11 @@ public class ClientProxy extends ServerProxy {
                 return new RiftMillstoneMenu((TileEntityMillstone) tileEntity, player.inventory);
             }
         }
+        else if (id == GUI_MECHANICAL_FILTER) {
+            if (tileEntity instanceof TileEntityMechanicalFilter) {
+                return new RiftMechanicalFilterMenu((TileEntityMechanicalFilter) tileEntity, player.inventory);
+            }
+        }
         return null;
     }
 

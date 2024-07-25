@@ -19,5 +19,6 @@ public class RiftMMTileEntities {
         GameRegistry.registerTileEntity(TileEntitySemiManualHammerer.class, new ResourceLocation(RiftInitialize.MODID, "semi_manual_hammerer"));
         GameRegistry.registerTileEntity(TileEntitySemiManualHammererTop.class, new ResourceLocation(RiftInitialize.MODID, "semi_manual_hammerer_top"));
         GameRegistry.registerTileEntity(TileEntityMillstone.class, new ResourceLocation(RiftInitialize.MODID, "millstone"));
+        GameRegistry.registerTileEntity(TileEntityMechanicalFilter.class, new ResourceLocation(RiftInitialize.MODID, "mechanical_filter"));
     }
 }
