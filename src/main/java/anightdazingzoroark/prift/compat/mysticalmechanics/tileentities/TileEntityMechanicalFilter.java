@@ -43,6 +43,7 @@ public class TileEntityMechanicalFilter extends TileEntity implements ITickable,
     private final AnimationFactory factory = new AnimationFactory(this);
     private final IMechCapability mechPower;
     private int timeHeld;
+    private double compPerc;
     protected NonNullList<ItemStack> itemStackHandler = NonNullList.<ItemStack>withSize(12, ItemStack.EMPTY);
     private MechanicalFilterRecipe currentRecipe;
     private ItemStack currentStack;
@@ -75,13 +76,11 @@ public class TileEntityMechanicalFilter extends TileEntity implements ITickable,
                     }
                 }
                 else {
-                    if (this.currentStack == ItemStack.EMPTY) {
-                        this.currentStack = this.chooseItemOutput().copy();
-                        System.out.println("stack: "+this.currentStack);
-                    }
+                    if (this.currentStack == ItemStack.EMPTY) this.currentStack = this.chooseItemOutput().copy();
                     else {
                         if (this.itemToInventoryTest(false, this.currentStack, 3)) {
                             this.setTimeHeld(this.getTimeHeld() + 1);
+                            if (this.getMaxRecipeTime() != 69420666) this.setCompletionPercentage((double)this.getTimeHeld()/(double)this.getMaxRecipeTime());
                             if (this.getTimeHeld() >= this.getMaxRecipeTime()) {
                                 this.itemToInventoryTest(true, this.currentStack, 3);
                                 this.currentStack = this.chooseItemOutput().copy();
@@ -89,15 +88,25 @@ public class TileEntityMechanicalFilter extends TileEntity implements ITickable,
                                 this.setTimeHeld(0);
                             }
                         }
-                        if (!this.currentRecipe.matches(this.getPower(), this.getInputItem())) {
+                        if (!this.currentRecipe.input.apply(this.getInputItem())) {
                             this.setTimeHeld(0);
+                            this.setCompletionPercentage(0);
                             this.setCurrentRecipe(null);
                             this.currentStack = ItemStack.EMPTY;
                         }
                     }
                 }
             }
-            else this.setTimeHeld(0);
+            else {
+                if (this.getCurrentRecipe() != null) {
+                    if (!this.currentRecipe.input.apply(this.getInputItem())) {
+                        this.setTimeHeld(0);
+                        this.setCompletionPercentage(0);
+                        this.setCurrentRecipe(null);
+                        this.currentStack = ItemStack.EMPTY;
+                    }
+                }
+            }
         }
     }
 
@@ -109,6 +118,7 @@ public class TileEntityMechanicalFilter extends TileEntity implements ITickable,
         this.mechPower.readFromNBT(compound);
         this.timeHeld = compound.getInteger("timeHeld");
         this.currentRecipe = RiftMMRecipes.getMechanicalFilterRecipe(compound.getString("currentRecipe"));
+        this.compPerc = compound.getDouble("completionPercentage");
     }
 
     @Override
@@ -118,6 +128,7 @@ public class TileEntityMechanicalFilter extends TileEntity implements ITickable,
         this.mechPower.writeToNBT(compound);
         compound.setInteger("timeHeld", this.timeHeld);
         compound.setString("currentRecipe", this.getCurrentRecipeId());
+        compound.setDouble("completionPercentage", this.getCompletionPercentage());
         return compound;
     }
 
@@ -164,17 +175,17 @@ public class TileEntityMechanicalFilter extends TileEntity implements ITickable,
 
     public int getMaxRecipeTime() {
         //this estimates max time based on power input requires
-        //at min power required its the default 15 seconds, but the higher the power the lower
-        //the max time is until it reaches 5 seconds, which is 8x the min power
+        //at min power required its the default 10 seconds, but the higher the power the lower
+        //the max time is until it reaches 3 seconds, which is 8x the min power
         //note that output is in ticks
         if (this.currentRecipe != null) {
             double minPower = this.currentRecipe.getMinPower();
             if (minPower <= this.getPower()) {
-                double result = -10D / (7D * minPower) * (this.getPower() - minPower) + 15D;
+                double result = -1D / minPower * (this.getPower() - minPower) + 10D;
                 return (int) RiftUtil.clamp(result, 5D, 30D) * 20;
             }
         }
-        return -1;
+        return 69420666;
     }
 
     public ItemStack chooseItemOutput() {
@@ -209,6 +220,19 @@ public class TileEntityMechanicalFilter extends TileEntity implements ITickable,
         }
     }
 
+    public double getCompletionPercentage() {
+        return this.compPerc;
+    }
+
+    public void setCompletionPercentage(double value) {
+        this.compPerc = value;
+        if (!this.world.isRemote) {
+            this.markDirty();
+            IBlockState state = this.world.getBlockState(this.pos);
+            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+        }
+    }
+
     @Override
     @Nullable
     public SPacketUpdateTileEntity getUpdatePacket() {
@@ -232,6 +256,7 @@ public class TileEntityMechanicalFilter extends TileEntity implements ITickable,
         this.mechPower.readFromNBT(tag);
         this.timeHeld = tag.getInteger("timeHeld");
         this.currentRecipe = RiftMMRecipes.getMechanicalFilterRecipe(tag.getString("currentRecipe"));
+        this.compPerc = tag.getDouble("completionPercentage");
     }
 
     public EnumFacing getFacing() {

@@ -1,0 +1,20 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "#I#",
+    "# #",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "type": "forge:ore_dict",
+      "ore": "plankWood"
+    },
+    "I": {
+      "item": "minecraft:ladder"
+    }
+  },
+  "result": {
+    "item": "prift:mechanical_filter"
+  }
+}

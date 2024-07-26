@@ -40,9 +40,7 @@ public class RiftMechanicalFilterMenu extends GuiContainer {
         this.drawTexturedModalRect(i, j, 0, 0, this.xSize, this.ySize);
 
         //progress bar
-        float progress = (float)this.mechanicalFilter.getTimeHeld();
-        float max = (float)this.mechanicalFilter.getMaxRecipeTime();
-        float fill = progress / max * 22f;
+        float fill = (float) this.mechanicalFilter.getCompletionPercentage() * 22f;
         int k = (this.width - 14) / 2 - 1;
         int l = (this.height - 22) / 2 - 38;
         this.drawTexturedModalRect(k, l,176, 0, 14, (int)fill);

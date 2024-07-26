@@ -14,6 +14,7 @@ public class RiftCrafttweaker {
                 CraftTweakerAPI.registerClass(RiftCrafttweakerSemiManualPresser.class);
                 CraftTweakerAPI.registerClass(RiftCrafttweakerSemiManualExtruder.class);
                 CraftTweakerAPI.registerClass(RiftCrafttweakerMillstone.class);
+                CraftTweakerAPI.registerClass(RiftCrafttweakerMechanicalFilter.class);
             }
         }
     }

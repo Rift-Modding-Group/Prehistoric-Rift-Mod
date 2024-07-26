@@ -75,7 +75,7 @@ public class BlockHandCrank extends Block implements ITileEntityProvider {
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         TileEntityHandCrank handCrank = (TileEntityHandCrank) worldIn.getTileEntity(pos);
         if (handCrank != null) {
-            if (!worldIn.isRemote) handCrank.setPower(5f);
+            if (!worldIn.isRemote) handCrank.setPower(15f);
         }
         return true;
     }
