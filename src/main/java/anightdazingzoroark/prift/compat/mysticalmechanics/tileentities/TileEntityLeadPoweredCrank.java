@@ -223,20 +223,22 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
     }
 
     public void setWorker(RiftCreature creature) {
-        this.worker = creature;
-        this.worker.setUseWorkstation(this.pos.getX(), this.pos.getY(), this.pos.getZ());
-        this.setHasLead(true);
+        if (creature instanceof ILeadWorkstationUser) {
+            this.worker = creature;
+            ((ILeadWorkstationUser)this.worker).setLeadAttachPos(this.pos.getX(), this.pos.getY(), this.pos.getZ());
+            this.setHasLead(true);
 
-        NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        UUID uuid = this.worker.getUniqueID();
-        nbtTagCompound.setUniqueId("workerUUID", uuid);
-        this.workerNBT = nbtTagCompound;
+            NBTTagCompound nbtTagCompound = new NBTTagCompound();
+            UUID uuid = this.worker.getUniqueID();
+            nbtTagCompound.setUniqueId("workerUUID", uuid);
+            this.workerNBT = nbtTagCompound;
 
-        this.markDirty();
+            this.markDirty();
+        }
     }
 
     public void removeWorker() {
-        this.worker.clearWorkstation(false);
+        ((ILeadWorkstationUser)this.worker).clearLeadAttachPos(false);
         this.setHasLead(false);
         this.worker = null;
 

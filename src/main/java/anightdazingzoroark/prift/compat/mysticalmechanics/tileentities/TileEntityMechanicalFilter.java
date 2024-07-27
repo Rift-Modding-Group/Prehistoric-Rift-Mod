@@ -194,7 +194,6 @@ public class TileEntityMechanicalFilter extends TileEntity implements ITickable,
                     .mapToInt(MechanicalFilterRecipe.MechanicalFilterOutput::getWeight)
                     .sum();
             int randomValue = RiftUtil.randomInRange(0, totalWeight);
-            System.out.println(randomValue);
             for (MechanicalFilterRecipe.MechanicalFilterOutput output : this.currentRecipe.output) {
                 randomValue -= output.getWeight();
                 if (randomValue <= 0) return output.getOutput().matchingStacks[0];

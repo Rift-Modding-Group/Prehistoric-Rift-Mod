@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
@@ -21,10 +20,10 @@ import net.minecraft.util.math.Vec3d;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class RiftChargeAttack extends EntityAIBase {
     protected final RiftCreature attacker;
+    protected IChargingMob charger;
     protected final double chargeBoost;
     protected final int initAnimLength;
     protected final int chargeTime;
@@ -47,17 +46,18 @@ public class RiftChargeAttack extends EntityAIBase {
     public boolean shouldExecute() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
-        if (!this.attacker.canCharge()) return false;
-        else if (this.attacker.isBeingRidden()) return false;
-        else if (entitylivingbase == null) return false;
-        else if (!entitylivingbase.isEntityAlive()) return false;
-        else {
-            double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
-            System.out.println("min charge: "+this.getAttackReachSqr(entitylivingbase));
-            System.out.println("target dist: "+d0);
-            System.out.println("max charge: "+this.getChargeAttackReachSqr(entitylivingbase));
-            return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr(entitylivingbase) && !this.attacker.isInWater();
+        if (this.attacker instanceof IChargingMob) {
+            this.charger = (IChargingMob) this.attacker;
+            if (!this.charger.canCharge()) return false;
+            else if (this.attacker.isBeingRidden()) return false;
+            else if (entitylivingbase == null) return false;
+            else if (!entitylivingbase.isEntityAlive()) return false;
+            else {
+                double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
+                return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getChargeAttackReachSqr(entitylivingbase) && !this.attacker.isInWater();
+            }
         }
+        return false;
     }
 
     public void startExecuting() {
@@ -71,7 +71,7 @@ public class RiftChargeAttack extends EntityAIBase {
         this.endFlag = false;
 
         this.animTick = 0;
-        this.attacker.setLowerHead(true);
+        this.charger.setLowerHead(true);
         this.attacker.setActing(true);
     }
 
@@ -83,33 +83,33 @@ public class RiftChargeAttack extends EntityAIBase {
         this.chargeVector = null;
         this.attacker.resetSpeed();
         this.attacker.setActing(false);
-        this.attacker.setLowerHead(false);
-        this.attacker.setStartCharging(false);
-        this.attacker.setIsCharging(false);
-        this.attacker.setEndCharging(false);
+        this.charger.setLowerHead(false);
+        this.charger.setStartCharging(false);
+        this.charger.setIsCharging(false);
+        this.charger.setEndCharging(false);
     }
 
     public void updateTask() {
         this.attacker.getLookHelper().setLookPosition(this.finalChargePos.getX(), this.finalChargePos.getY(), this.finalChargePos.getZ(), 30, 30);
-        if (this.animTick >= this.initAnimLength && this.attacker.isLoweringHead()) {
-            this.attacker.setLowerHead(false);
-            this.attacker.setStartCharging(true);
+        if (this.animTick >= this.initAnimLength && this.charger.isLoweringHead()) {
+            this.charger.setLowerHead(false);
+            this.charger.setStartCharging(true);
             this.animTick = 0;
         }
-        else if (this.attacker.isLoweringHead()) {
+        else if (this.charger.isLoweringHead()) {
             this.animTick++;
         }
 
-        if (this.animTick >= this.chargeTime && this.attacker.isStartCharging()) {
-            this.attacker.setStartCharging(false);
-            this.attacker.setIsCharging(true);
+        if (this.animTick >= this.chargeTime && this.charger.isStartCharging()) {
+            this.charger.setStartCharging(false);
+            this.charger.setIsCharging(true);
             this.animTick = 0;
         }
-        else if (this.attacker.isStartCharging()) {
+        else if (this.charger.isStartCharging()) {
             this.animTick++;
         }
 
-        if (this.attacker.isCharging()) {
+        if (this.charger.isCharging()) {
             this.attacker.motionX = this.chargeVector.x * this.chargeBoost;
             this.attacker.motionZ = this.chargeVector.z * this.chargeBoost;
 
@@ -185,19 +185,19 @@ public class RiftChargeAttack extends EntityAIBase {
                     for (BlockPos blockPos : toBreak) this.attacker.world.destroyBlock(blockPos, false);
                 }
 
-                this.attacker.setIsCharging(false);
-                this.attacker.setEndCharging(true);
+                this.charger.setIsCharging(false);
+                this.charger.setEndCharging(true);
             }
         }
 
-        if (this.animTick >= this.initAnimLength && this.attacker.isEndCharging()) {
-            this.attacker.setEndCharging(false);
+        if (this.animTick >= this.initAnimLength && this.charger.isEndCharging()) {
+            this.charger.setEndCharging(false);
             this.attacker.setRightClickCooldown(this.cooldownTime);
             if (this.attacker.isTamed()) this.attacker.setEnergy(this.attacker.getEnergy() - 6);
-            this.attacker.setCanCharge(false);
+            this.charger.setCanCharge(false);
             this.endFlag = true;
         }
-        else if (this.attacker.isEndCharging()) this.animTick++;
+        else if (this.charger.isEndCharging()) this.animTick++;
     }
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
@@ -205,7 +205,7 @@ public class RiftChargeAttack extends EntityAIBase {
     }
 
     protected double getChargeAttackReachSqr(EntityLivingBase attackTarget) {
-        if (this.attacker instanceof IChargingMob) return (double)(this.attacker.chargeWidth * this.attacker.chargeWidth + attackTarget.width);
+        if (this.attacker instanceof IChargingMob) return (double)(this.charger.chargeWidth() * this.charger.chargeWidth() + attackTarget.width);
         return 0;
     }
 

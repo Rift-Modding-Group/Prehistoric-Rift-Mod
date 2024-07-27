@@ -142,7 +142,7 @@ public class BlockLeadPoweredCrank extends Block implements ITileEntityProvider 
         if (!worldIn.isRemote) {
             TileEntityLeadPoweredCrank leadPoweredCrank = (TileEntityLeadPoweredCrank)worldIn.getTileEntity(pos);
             if (leadPoweredCrank.getWorker() != null) {
-                leadPoweredCrank.getWorker().clearWorkstation(true);
+                ((ILeadWorkstationUser)leadPoweredCrank.getWorker()).clearLeadAttachPos(true);
                 leadPoweredCrank.onBreakCrank();
 
                 //drop lead

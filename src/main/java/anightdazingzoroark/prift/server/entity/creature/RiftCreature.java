@@ -81,11 +81,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> RANGED_ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> LOWER_HEAD = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> CAN_CHARGE = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> START_CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> END_CHARGING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
@@ -120,10 +115,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> WORKSTATION_Z_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -148,7 +139,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected int herdCheckCountdown;
     public float attackWidth;
     public float rangedWidth;
-    public float chargeWidth;
     public float leapWidth;
     private BlockPos homePosition;
     public double yFloatPos;
@@ -209,11 +199,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(XP, 0);
         this.dataManager.register(ATTACKING, false);
         this.dataManager.register(RANGED_ATTACKING, false);
-        this.dataManager.register(LOWER_HEAD, false);
-        this.dataManager.register(CAN_CHARGE, true);
-        this.dataManager.register(START_CHARGING, false);
-        this.dataManager.register(CHARGING, false);
-        this.dataManager.register(END_CHARGING, false);
         this.dataManager.register(LEAPING, false);
         this.dataManager.register(VARIANT, rand.nextInt(4));
         this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
@@ -248,10 +233,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(SLEEPING, false);
         this.dataManager.register(UNCLAIM_TIMER, 0);
         this.dataManager.register(CLIMBING, false);
-        this.dataManager.register(USING_WORKSTATION, false);
-        this.dataManager.register(WORKSTATION_X_POS, 0);
-        this.dataManager.register(WORKSTATION_Y_POS, 0);
-        this.dataManager.register(WORKSTATION_Z_POS, 0);
     }
 
     @Override
@@ -701,10 +682,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                         else player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
-                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isUsingWorkstation() && !this.isSleeping() && !this.getTameStatus().equals(TameStatusType.TURRET_MODE)) {
+                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && !this.getTameStatus().equals(TameStatusType.TURRET_MODE)) {
                         if (this instanceof IImpregnable) {
                             if (!((IImpregnable)this).isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                             else player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, this.getEntityId() ,0, 0);
+                        }
+                        else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {
+                            boolean usingWorkstation = this instanceof IWorkstationUser && ((IWorkstationUser) this).isUsingWorkstation();
+                            boolean usingLeadForWork = this instanceof ILeadWorkstationUser && ((ILeadWorkstationUser) this).isUsingLeadForWork();
+                            if (!usingWorkstation && !usingLeadForWork) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                         }
                         else RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                     }
@@ -1018,12 +1004,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setBoolean("Unclaimed", this.isUnclaimed());
         compound.setInteger("UnclaimTimer", this.getUnclaimTimer());
         compound.setBoolean("Incapacitated", this.isIncapacitated());
-        compound.setBoolean("UsingWorkstation", this.isUsingWorkstation());
-        if (compound.getBoolean("UsingWorkstation")) {
-            compound.setInteger("WorkstationX", this.getWorkstationPos().getX());
-            compound.setInteger("WorkstationY", this.getWorkstationPos().getY());
-            compound.setInteger("WorkstationZ", this.getWorkstationPos().getZ());
-        }
     }
 
     @Override
@@ -1065,7 +1045,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setUnclaimTimer(compound.getInteger("UnclaimTimer"));
         this.setIncapacitated(compound.getBoolean("Incapacitated"));
         if (this.isUnclaimed()) this.setTamed(true);
-        if (compound.getBoolean("UsingWorkstation")) this.setUseWorkstation(compound.getInteger("WorkstationX"), compound.getInteger("WorkstationY"), compound.getInteger("WorkstationZ"));
     }
 
     private void initInventory() {
@@ -1272,46 +1251,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setActing(value);
     }
 
-    public boolean isLoweringHead() {
-        return this.dataManager.get(LOWER_HEAD);
-    }
-
-    public void setLowerHead(boolean value) {
-        this.dataManager.set(LOWER_HEAD, value);
-    }
-
-    public boolean canCharge() {
-        return this.dataManager.get(CAN_CHARGE);
-    }
-
-    public void setCanCharge(boolean value) {
-        this.dataManager.set(CAN_CHARGE, value);
-    }
-
-    public boolean isStartCharging() {
-        return this.dataManager.get(START_CHARGING);
-    }
-
-    public void setStartCharging(boolean value) {
-        this.dataManager.set(START_CHARGING, value);
-    }
-
-    public boolean isCharging() {
-        return this.dataManager.get(CHARGING);
-    }
-
-    public void setIsCharging(boolean value) {
-        this.dataManager.set(CHARGING, value);
-    }
-
-    public boolean isEndCharging() {
-        return this.dataManager.get(END_CHARGING);
-    }
-
-    public void setEndCharging(boolean value) {
-        this.dataManager.set(END_CHARGING, value);
-    }
-
     public boolean isLeaping() {
         return this.dataManager.get(LEAPING);
     }
@@ -1319,10 +1258,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setLeaping(boolean value) {
         this.dataManager.set(LEAPING, value);
         this.setActing(value);
-    }
-
-    public boolean isUtilizingCharging() {
-        return this.isLoweringHead() || this.isStartCharging() || this.isCharging() || this.isEndCharging();
     }
 
     public TameStatusType getTameStatus() {
@@ -1630,35 +1565,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.homePosition;
     }
 
+    public boolean busyAtWork() {
+        boolean usingWorkstation = (this instanceof IWorkstationUser) && ((IWorkstationUser)this).isUsingWorkstation();
+        boolean usingLeadForWork = (this instanceof ILeadWorkstationUser) && ((ILeadWorkstationUser)this).isUsingLeadForWork();
+        return  usingWorkstation || usingLeadForWork;
+    }
+
     public boolean isBaby() {
         return this.getAgeInDays() < 1;
-    }
-
-    public void setUseWorkstation(double x, double y, double z) {
-        this.dataManager.set(USING_WORKSTATION, true);
-        this.dataManager.set(WORKSTATION_X_POS, (int)x);
-        this.dataManager.set(WORKSTATION_Y_POS, (int)y);
-        this.dataManager.set(WORKSTATION_Z_POS, (int)z);
-    }
-
-    public void clearWorkstation(boolean destroyed) {
-        this.dataManager.set(USING_WORKSTATION, false);
-        this.dataManager.set(WORKSTATION_X_POS, 0);
-        this.dataManager.set(WORKSTATION_Y_POS, 0);
-        this.dataManager.set(WORKSTATION_Z_POS, 0);
-        EntityPlayer owner = (EntityPlayer) this.getOwner();
-        if (!this.world.isRemote) {
-            if (destroyed) owner.sendStatusMessage(new TextComponentTranslation("action.creature_workstation_destroyed"), false);
-            else owner.sendStatusMessage(new TextComponentTranslation("action.clear_creature_workstation"), false);
-        }
-    }
-
-    public boolean isUsingWorkstation() {
-        return this.dataManager.get(USING_WORKSTATION);
-    }
-
-    public BlockPos getWorkstationPos() {
-        return new BlockPos(this.dataManager.get(WORKSTATION_X_POS), this.dataManager.get(WORKSTATION_Y_POS), this.dataManager.get(WORKSTATION_Z_POS));
     }
 
     public boolean isMoving(boolean includeY) {
@@ -1688,7 +1602,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void updatePassenger(Entity passenger) {
-        if (this.canBeSteered() && !this.isCharging()) {
+        if (this.canBeSteered()) {
             this.rotationYaw = passenger.rotationYaw;
             this.prevRotationYaw = this.rotationYaw;
             this.rotationPitch = passenger.rotationPitch * 0.5f;
@@ -1848,7 +1762,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isSaddled() && this.isBeingRidden() && this.canBeSteered()) {
             EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();
             if (controller != null) {
-                if (!this.isCharging()) {
+                if (!this.canBeSteered()) {
                     this.rotationYaw = controller.rotationYaw;
                     this.prevRotationYaw = this.rotationYaw;
                     this.rotationPitch = controller.rotationPitch * 0.5f;
@@ -1863,7 +1777,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 float moveSpeedMod = (this.getEnergy() > 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
-                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : moveSpeed);
 
                 if (forward > 0) {
                     if (this.bodyPart != null) {
@@ -1909,8 +1823,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public boolean canBeLeashedTo(EntityPlayer player) {
         boolean leashOperatingFlag = true;
-        if (this instanceof ILeadWorkstationUser) {
-            leashOperatingFlag = !this.isUsingWorkstation();
+        if (this instanceof IWorkstationUser) {
+            leashOperatingFlag = !((IWorkstationUser)this).isUsingWorkstation();
         }
         return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && !this.getTameStatus().equals(TameStatusType.TURRET_MODE) && leashOperatingFlag;
     }

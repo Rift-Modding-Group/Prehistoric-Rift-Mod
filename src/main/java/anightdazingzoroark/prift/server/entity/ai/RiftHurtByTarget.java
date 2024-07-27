@@ -26,7 +26,7 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
             else return super.shouldExecute();
         }
         else {
-            if (this.creature.getTameBehavior() != TameBehaviorType.PASSIVE && !this.creature.isBeingRidden() && !this.creature.isUsingWorkstation()) super.shouldExecute();
+            if (this.creature.getTameBehavior() != TameBehaviorType.PASSIVE && !this.creature.isBeingRidden() && !this.creature.busyAtWork()) super.shouldExecute();
             else return false;
         }
         return false;

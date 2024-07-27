@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class RiftBlowIntoTurbine extends EntityAIBase {
     private final RiftCreature creature;
+    private IWorkstationUser workstationUser;
     private final float blowPower;
     private final int animLength;
     private final int animBlowTime;
@@ -29,23 +30,26 @@ public class RiftBlowIntoTurbine extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        TileEntity te = this.creature.world.getTileEntity(this.creature.getWorkstationPos());
-        if (te != null) {
-            if (GeneralConfig.canUseMM()) return te instanceof TileEntityBlowPoweredTurbine && this.creature.isUsingWorkstation() && this.creature instanceof IWorkstationUser;
+        if (this.creature instanceof IWorkstationUser) {
+            this.workstationUser = (IWorkstationUser) this.creature;
+            TileEntity te = this.creature.world.getTileEntity(this.workstationUser.getWorkstationPos());
+            if (te != null) {
+                if (GeneralConfig.canUseMM()) return te instanceof TileEntityBlowPoweredTurbine && this.workstationUser.isUsingWorkstation();
+            }
         }
         return false;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.creature.isUsingWorkstation() && !this.destroyedFlag;
+        return this.workstationUser.isUsingWorkstation() && !this.destroyedFlag;
     }
 
     @Override
     public void startExecuting() {
         this.animTime = 0;
         this.destroyedFlag = false;
-        this.workstationPos = this.creature.getWorkstationPos();
+        this.workstationPos = this.workstationUser.getWorkstationPos();
         this.user = (IWorkstationUser)this.creature;
         this.user.setUsingWorkAnim(false);
     }
@@ -53,16 +57,16 @@ public class RiftBlowIntoTurbine extends EntityAIBase {
     @Override
     public void resetTask() {
         this.user.setUsingWorkAnim(false);
-        if (this.destroyedFlag) this.creature.clearWorkstation(true);
+        if (this.destroyedFlag) this.workstationUser.clearWorkstation(true);
     }
 
     @Override
     public void updateTask() {
         if (this.user.workstationUseFromPos() != null) {
-            this.creature.getLookHelper().setLookPosition(this.creature.getWorkstationPos().getX(), this.creature.getWorkstationPos().getY(), this.creature.getWorkstationPos().getZ(), 30, 30);
+            this.creature.getLookHelper().setLookPosition(this.workstationUser.getWorkstationPos().getX(), this.workstationUser.getWorkstationPos().getY(), this.workstationUser.getWorkstationPos().getZ(), 30, 30);
             if (RiftUtil.entityAtLocation(this.creature, this.user.workstationUseFromPos(), 0.5)) {
                 //use workstation
-                TileEntity tileEntity = this.creature.world.getTileEntity(this.creature.getWorkstationPos());
+                TileEntity tileEntity = this.creature.world.getTileEntity(this.workstationUser.getWorkstationPos());
                 if (tileEntity != null) {
                     if (tileEntity instanceof TileEntityBlowPoweredTurbine) {
                         TileEntityBlowPoweredTurbine turbine = (TileEntityBlowPoweredTurbine) tileEntity;

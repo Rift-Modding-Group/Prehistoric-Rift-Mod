@@ -182,7 +182,7 @@ public class ServerEvents {
                     }
                 });
                 for (RiftCreature creature1 : workstationUsers) {
-                    if (creature1.getWorkstationPos().equals(event.getPos())) {
+                    if (((IWorkstationUser)creature1).getWorkstationPos().equals(event.getPos())) {
                         canUseFlag = false;
                         break;
                     }
@@ -192,10 +192,10 @@ public class ServerEvents {
                     if (workstationUser.isWorkstation(event.getPos())) {
                         event.setCanceled(true);
                         if (iblockstate.getBlock() instanceof BlockSemiManualBaseTop) {
-                            creature.setUseWorkstation(event.getPos().getX(), event.getPos().down().getY(), event.getPos().getZ());
+                            ((IWorkstationUser)creature).setUseWorkstation(event.getPos().getX(), event.getPos().down().getY(), event.getPos().getZ());
                         }
                         else {
-                            creature.setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
+                            ((IWorkstationUser)creature).setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
                         }
                         creature.setTameStatus(TameStatusType.STAND);
                         event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_success"), false);

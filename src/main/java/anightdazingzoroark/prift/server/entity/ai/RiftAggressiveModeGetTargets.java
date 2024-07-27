@@ -47,7 +47,7 @@ public class RiftAggressiveModeGetTargets extends EntityAITarget {
         else if (this.creature.isSleeping()) return false;
         else if (this.creature.isBeingRidden()) return false;
         else if (!this.creature.getTameBehavior().equals(TameBehaviorType.AGGRESSIVE)) return false;
-        else if (this.creature.isUsingWorkstation()) return false;
+        else if (this.creature.busyAtWork()) return false;
         else if (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) return false;
         else {
             if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {

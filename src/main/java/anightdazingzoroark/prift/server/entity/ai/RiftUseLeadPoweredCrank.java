@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityLeadPoweredCrank;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public class RiftUseLeadPoweredCrank extends EntityAIBase {
     private final RiftCreature creature;
+    private ILeadWorkstationUser leadWorkstationUser;
     private final double radius;
     private int posMark; //is values from 0 to 7
     private boolean restFlag;
@@ -28,16 +30,19 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        TileEntity te = this.creature.world.getTileEntity(this.creature.getWorkstationPos());
-        if (te != null) {
-            return te instanceof TileEntityLeadPoweredCrank && this.creature.isUsingWorkstation();
+        if (this.creature instanceof ILeadWorkstationUser) {
+            this.leadWorkstationUser = (ILeadWorkstationUser) this.creature;
+            TileEntity te = this.creature.world.getTileEntity(this.leadWorkstationUser.getLeadWorkPos());
+            if (te != null) {
+                return te instanceof TileEntityLeadPoweredCrank && this.leadWorkstationUser.isUsingLeadForWork();
+            }
         }
         return false;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.creature.isUsingWorkstation() && this.creature.world.getBlockState(this.creature.getWorkstationPos()).getMaterial().isSolid();
+        return this.leadWorkstationUser.isUsingLeadForWork() && this.creature.world.getBlockState(this.leadWorkstationUser.getLeadWorkPos()).getMaterial().isSolid();
     }
 
     @Override
@@ -57,8 +62,8 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
         if (this.creature.getEnergy() > 6 && !this.restFlag) {
             if (this.hasMoveSpace()) {
                 double markAngle = Math.toRadians((this.posMark * 45) - 90);
-                double xPos = (this.radius * Math.cos(markAngle)) + this.creature.getWorkstationPos().getX();
-                double zPos = (this.radius * Math.sin(markAngle)) + this.creature.getWorkstationPos().getZ();
+                double xPos = (this.radius * Math.cos(markAngle)) + this.leadWorkstationUser.getLeadWorkPos().getX();
+                double zPos = (this.radius * Math.sin(markAngle)) + this.leadWorkstationUser.getLeadWorkPos().getZ();
                 BlockPos newPos = new BlockPos(xPos, this.yRotPos, zPos);
 
                 this.creature.getNavigator().tryMoveToXYZ(newPos.getX(), newPos.getY(), newPos.getZ(), 1);
@@ -93,8 +98,8 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
 
         for (int i = 0; i < 8; i++) {
             double markAngle = Math.toRadians((i * 45) - 90);
-            double xPos = (this.radius * Math.cos(markAngle)) + this.creature.getWorkstationPos().getX();
-            double zPos = (this.radius * Math.sin(markAngle)) + this.creature.getWorkstationPos().getZ();
+            double xPos = (this.radius * Math.cos(markAngle)) + this.leadWorkstationUser.getLeadWorkPos().getX();
+            double zPos = (this.radius * Math.sin(markAngle)) + this.leadWorkstationUser.getLeadWorkPos().getZ();
             double xDist = xPos - this.creature.posX;
             double zDist = zPos - this.creature.posZ;
             double dist = Math.sqrt(xDist * xDist + zDist * zDist);
@@ -108,13 +113,13 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
 
     private boolean hasMoveSpace() {
         final int xzBound = 3 + Math.round(this.creature.width);
-        final int lowerY = (int)(this.creature.posY - this.creature.getWorkstationPos().getY());
-        final int boundY = 3 + (int)(this.creature.height + Math.abs(this.yRotPos - this.creature.getWorkstationPos().getY()));
+        final int lowerY = (int)(this.creature.posY - this.leadWorkstationUser.getLeadWorkPos().getY());
+        final int boundY = 3 + (int)(this.creature.height + Math.abs(this.yRotPos - this.leadWorkstationUser.getLeadWorkPos().getY()));
 
         for (double x = -xzBound; x <= xzBound; x++) {
             for (int y = lowerY; y <= boundY; y++) {
                 for (double z = -xzBound; z <= xzBound; z++) {
-                    BlockPos spacePos = this.creature.getWorkstationPos().add(x, y, z);
+                    BlockPos spacePos = this.leadWorkstationUser.getLeadWorkPos().add(x, y, z);
                     if (x == 0 && z == 0) continue;
                     if (this.creature.world.getBlockState(spacePos).getMaterial() != Material.AIR) return false;
                 }

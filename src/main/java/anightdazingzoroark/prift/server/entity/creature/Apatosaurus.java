@@ -68,6 +68,10 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     private static final DataParameter<Boolean> TAIL_WHIPPING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<String> PASSENGER_ONE_UUID = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.STRING);
     private static final DataParameter<String> PASSENGER_TWO_UUID = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.STRING);
+    private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> WORKSTATION_Z_POS = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.VARINT);
     private int launchTick;
     public boolean dismount = false;
     private RiftCreaturePart neck0Part;
@@ -112,6 +116,10 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         this.dataManager.register(TAIL_WHIPPING, false);
         this.dataManager.register(PASSENGER_ONE_UUID, RiftUtil.nilUUID.toString());
         this.dataManager.register(PASSENGER_TWO_UUID, RiftUtil.nilUUID.toString());
+        this.dataManager.register(USING_WORKSTATION, false);
+        this.dataManager.register(WORKSTATION_X_POS, 0);
+        this.dataManager.register(WORKSTATION_Y_POS, 0);
+        this.dataManager.register(WORKSTATION_Z_POS, 0);
     }
 
     @Override
@@ -374,12 +382,14 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         compound.setByte("Weapon", (byte) this.getWeapon().ordinal());
+        this.writeWorkstationDataToNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         if (compound.hasKey("Weapon")) this.setWeapon(RiftLargeWeaponType.values()[compound.getByte("Weapon")]);
+        this.readWorkstationDataFromNBT(compound);
     }
 
     @Override
@@ -427,6 +437,30 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
 
     public SoundEvent useAnimSound() {
         return RiftSounds.SEMI_MANUAL_MACHINE_RESET;
+    }
+
+    public void setUseWorkstation(double x, double y, double z) {
+        this.dataManager.set(USING_WORKSTATION, true);
+        this.dataManager.set(WORKSTATION_X_POS, (int)x);
+        this.dataManager.set(WORKSTATION_Y_POS, (int)y);
+        this.dataManager.set(WORKSTATION_Z_POS, (int)z);
+    }
+
+    public void clearWorkstation(boolean destroyed) {
+        this.dataManager.set(USING_WORKSTATION, false);
+        this.dataManager.set(WORKSTATION_X_POS, 0);
+        this.dataManager.set(WORKSTATION_Y_POS, 0);
+        this.dataManager.set(WORKSTATION_Z_POS, 0);
+        EntityPlayer owner = (EntityPlayer) this.getOwner();
+        if (!this.world.isRemote) this.clearWorkstationMessage(destroyed, owner);
+    }
+
+    public boolean isUsingWorkstation() {
+        return this.dataManager.get(USING_WORKSTATION);
+    }
+
+    public BlockPos getWorkstationPos() {
+        return new BlockPos(this.dataManager.get(WORKSTATION_X_POS), this.dataManager.get(WORKSTATION_Y_POS), this.dataManager.get(WORKSTATION_Z_POS));
     }
 
     public boolean isTameableByFeeding() {

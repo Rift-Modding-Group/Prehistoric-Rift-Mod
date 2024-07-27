@@ -5,24 +5,18 @@ import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
-import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.math.BlockPos;
-import org.w3c.dom.Entity;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class RiftAttack extends EntityAIBase {
     protected RiftCreature attacker;
@@ -61,7 +55,7 @@ public class RiftAttack extends EntityAIBase {
                     return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof IChargingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isUtilizingCharging() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && ((IChargingMob) this.attacker).isNotUtilizingCharging() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof ILeapingMob) {
                     return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isLeaping() && !this.attacker.isActing();
@@ -76,7 +70,7 @@ public class RiftAttack extends EntityAIBase {
 
         if (this.attacker.getEnergy() == 0) return false;
         else if (this.attacker.isBeingRidden()) return false;
-        else if (this.attacker.isUtilizingCharging()) return false;
+        else if (this.attacker instanceof IChargingMob && !((IChargingMob) this.attacker).isNotUtilizingCharging()) return false;
         else if (this.attacker.isLeaping()) return false;
         else if (entitylivingbase == null) return false;
         else if (!entitylivingbase.isEntityAlive()) return false;
@@ -164,7 +158,9 @@ public class RiftAttack extends EntityAIBase {
     }
 
     protected double getChargeReachSqr(EntityLivingBase attackTarget) {
-        if (this.attacker instanceof IChargingMob) return (double)(this.attacker.chargeWidth * this.attacker.chargeWidth + attackTarget.width);
+        if (this.attacker instanceof IChargingMob) {
+            return (double) (((IChargingMob)this.attacker).chargeWidth() * ((IChargingMob)this.attacker).chargeWidth() + attackTarget.width);
+        }
         return 0;
     }
 

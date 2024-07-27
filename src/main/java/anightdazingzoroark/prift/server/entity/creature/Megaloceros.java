@@ -41,6 +41,11 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Megaloceros.class, DataSerializers.VARINT);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> LOWER_HEAD = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CAN_CHARGE = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> START_CHARGING = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CHARGING = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> END_CHARGING = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart frontBodyPart;
 
     public Megaloceros(World worldIn) {
@@ -54,7 +59,6 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         this.speed = 0.35D;
         this.isRideable = true;
         this.attackWidth = 2.5f;
-        this.chargeWidth = 20f;
         this.saddleItem = MegalocerosConfig.megalocerosSaddleItem;
         this.attackDamage = MegalocerosConfig.damage;
         this.healthLevelMultiplier = MegalocerosConfig.healthMultiplier;
@@ -69,6 +73,11 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         this.dataManager.register(PREGNANCY_TIMER, 0);
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
+        this.dataManager.register(LOWER_HEAD, false);
+        this.dataManager.register(CAN_CHARGE, true);
+        this.dataManager.register(START_CHARGING, false);
+        this.dataManager.register(CHARGING, false);
+        this.dataManager.register(END_CHARGING, false);
     }
 
     protected void initEntityAI() {
@@ -296,6 +305,50 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     @Override
     public AxisAlignedBB breakRange() {
         return new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
+    }
+
+    public boolean isLoweringHead() {
+        return this.dataManager.get(LOWER_HEAD);
+    }
+
+    public void setLowerHead(boolean value) {
+        this.dataManager.set(LOWER_HEAD, value);
+    }
+
+    public boolean canCharge() {
+        return this.dataManager.get(CAN_CHARGE);
+    }
+
+    public void setCanCharge(boolean value) {
+        this.dataManager.set(CAN_CHARGE, value);
+    }
+
+    public boolean isStartCharging() {
+        return this.dataManager.get(START_CHARGING);
+    }
+
+    public void setStartCharging(boolean value) {
+        this.dataManager.set(START_CHARGING, value);
+    }
+
+    public boolean isCharging() {
+        return this.dataManager.get(CHARGING);
+    }
+
+    public void setIsCharging(boolean value) {
+        this.dataManager.set(CHARGING, value);
+    }
+
+    public boolean isEndCharging() {
+        return this.dataManager.get(END_CHARGING);
+    }
+
+    public void setEndCharging(boolean value) {
+        this.dataManager.set(END_CHARGING, value);
+    }
+
+    public float chargeWidth() {
+        return 20f;
     }
 
     @Override

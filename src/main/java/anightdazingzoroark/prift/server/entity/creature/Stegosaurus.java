@@ -59,6 +59,10 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_LEAD_FOR_WORK = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> LEAD_WORK_X_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> LEAD_WORK_Y_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     public int strongAttackCharge;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
@@ -95,6 +99,10 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.dataManager.register(STRONG_ATTACKING, false);
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
+        this.dataManager.register(USING_LEAD_FOR_WORK, false);
+        this.dataManager.register(LEAD_WORK_X_POS, 0);
+        this.dataManager.register(LEAD_WORK_Y_POS, 0);
+        this.dataManager.register(LEAD_WORK_Z_POS, 0);
     }
 
     @Override
@@ -217,12 +225,14 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         compound.setBoolean("CanHarvest", this.canHarvest());
+        this.writeLeadWorkDataToNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         this.setCanHarvest(compound.getBoolean("CanHarvest"));
+        this.readLeadWorkDataFromNBT(compound);
     }
 
     private void manageCanStrongAttack() {
@@ -344,6 +354,30 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     public boolean canHarvest() {
         return this.dataManager.get(CAN_HARVEST);
+    }
+
+    public boolean isUsingLeadForWork() {
+        return this.dataManager.get(USING_LEAD_FOR_WORK);
+    }
+
+    public void setLeadAttachPos(double x, double y, double z) {
+        this.dataManager.set(USING_LEAD_FOR_WORK, true);
+        this.dataManager.set(LEAD_WORK_X_POS, (int)x);
+        this.dataManager.set(LEAD_WORK_Y_POS, (int)y);
+        this.dataManager.set(LEAD_WORK_Z_POS, (int)z);
+    }
+
+    public BlockPos getLeadWorkPos() {
+        return new BlockPos(this.dataManager.get(LEAD_WORK_X_POS), this.dataManager.get(LEAD_WORK_Y_POS), this.dataManager.get(LEAD_WORK_Z_POS));
+    }
+
+    public void clearLeadAttachPos(boolean destroyed) {
+        this.dataManager.set(USING_LEAD_FOR_WORK, false);
+        this.dataManager.set(LEAD_WORK_X_POS, 0);
+        this.dataManager.set(LEAD_WORK_Y_POS, 0);
+        this.dataManager.set(LEAD_WORK_Z_POS, 0);
+        EntityPlayer player = (EntityPlayer)this.getOwner();
+        if (!this.world.isRemote) this.clearLeadAttachPosMessage(destroyed, player);
     }
 
     @Override

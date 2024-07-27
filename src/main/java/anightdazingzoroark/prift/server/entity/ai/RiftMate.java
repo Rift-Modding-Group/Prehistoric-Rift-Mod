@@ -33,7 +33,7 @@ public class RiftMate extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (!this.creature.isInLove() || this.creature.isUsingWorkstation()) return false;
+        if (!this.creature.isInLove() || this.creature.busyAtWork()) return false;
         else {
             this.targetMate = this.getNearbyMate();
             return this.targetMate != null;

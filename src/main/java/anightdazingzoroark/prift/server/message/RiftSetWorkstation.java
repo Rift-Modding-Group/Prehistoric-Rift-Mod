@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
@@ -49,7 +50,7 @@ public class RiftSetWorkstation extends AbstractMessage<RiftSetWorkstation> {
                 properties.creatureIdForWorkstation = message.creatureId;
                 player.sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_start"), false);
             }
-            else creature.clearWorkstation(false);
+            else ((IWorkstationUser)creature).clearWorkstation(false);
         }
     }
 }

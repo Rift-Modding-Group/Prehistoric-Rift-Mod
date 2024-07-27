@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
+import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -22,13 +23,13 @@ import java.util.List;
 import java.util.UUID;
 
 public class RiftControlledCharge extends EntityAIBase {
-    protected RiftCreature attacker;
+    protected final RiftCreature attacker;
+    protected IChargingMob charger;
     protected final double chargeBoost;
     protected final int initAnimLength;
     protected final int chargeTime;
     protected int animTick;
     private boolean endFlag;
-    private int cooldownTime;
 
     public RiftControlledCharge(RiftCreature attacker, float chargeBoost, float initAnimLength, float chargeTime) {
         this.attacker = attacker;
@@ -39,8 +40,11 @@ public class RiftControlledCharge extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.attacker.isBeingRidden()) {
-            return this.attacker.getRightClickCooldown() == 0 && this.attacker.getRightClickUse() > 0 && !this.attacker.isInWater();
+        if (this.attacker instanceof IChargingMob) {
+            this.charger = (IChargingMob) this.attacker;
+            if (this.attacker.isBeingRidden()) {
+                return this.attacker.getRightClickCooldown() == 0 && this.attacker.getRightClickUse() > 0 && !this.attacker.isInWater();
+            }
         }
         return false;
     }
@@ -49,7 +53,7 @@ public class RiftControlledCharge extends EntityAIBase {
         this.attacker.removeSpeed();
         this.attacker.setCanBeSteered(false);
         this.animTick = 0;
-        this.attacker.setLowerHead(true);
+        this.charger.setLowerHead(true);
         this.endFlag = false;
     }
 
@@ -64,26 +68,26 @@ public class RiftControlledCharge extends EntityAIBase {
         this.attacker.setCanBeSteered(true);
         this.attacker.resetSpeed();
         this.attacker.setActing(false);
-        this.attacker.setLowerHead(false);
-        this.attacker.setStartCharging(false);
-        this.attacker.setIsCharging(false);
-        this.attacker.setEndCharging(false);
+        this.charger.setLowerHead(false);
+        this.charger.setStartCharging(false);
+        this.charger.setIsCharging(false);
+        this.charger.setEndCharging(false);
     }
 
     public void updateTask() {
-        if (this.animTick >= this.initAnimLength && this.attacker.isLoweringHead()) {
-            this.attacker.setLowerHead(false);
-            this.attacker.setStartCharging(true);
+        if (this.animTick >= this.initAnimLength && this.charger.isLoweringHead()) {
+            this.charger.setLowerHead(false);
+            this.charger.setStartCharging(true);
         }
-        else if (this.attacker.isLoweringHead()) this.animTick++;
+        else if (this.charger.isLoweringHead()) this.animTick++;
 
-        if (!this.attacker.isUsingRightClick() && this.attacker.isStartCharging()) {
-            this.attacker.setStartCharging(false);
-            this.attacker.setIsCharging(true);
+        if (!this.attacker.isUsingRightClick() && this.charger.isStartCharging()) {
+            this.charger.setStartCharging(false);
+            this.charger.setIsCharging(true);
             this.animTick = 0;
         }
 
-        if (this.attacker.isCharging()) {
+        if (this.charger.isCharging()) {
             this.attacker.forcedChargePower--;
             this.attacker.motionX = this.attacker.getLookVec().x * this.chargeBoost;
             this.attacker.motionZ = this.attacker.getLookVec().z * this.chargeBoost;
@@ -160,20 +164,20 @@ public class RiftControlledCharge extends EntityAIBase {
                     for (BlockPos blockPos : toBreak) this.attacker.world.destroyBlock(blockPos, false);
                 }
 
-                this.attacker.setIsCharging(false);
-                this.attacker.setEndCharging(true);
+                this.charger.setIsCharging(false);
+                this.charger.setEndCharging(true);
             }
         }
 
-        if (this.animTick >= this.initAnimLength && this.attacker.isEndCharging()) {
+        if (this.animTick >= this.initAnimLength && this.charger.isEndCharging()) {
             this.attacker.setRightClickUse(0);
-            this.attacker.setEndCharging(false);
+            this.charger.setEndCharging(false);
             this.attacker.setRightClickCooldown(this.attacker.chargeCooldown * 2);
             this.attacker.forcedChargePower = 0;
-            this.attacker.setCanCharge(false);
+            this.charger.setCanCharge(false);
             this.attacker.setEnergy(this.attacker.getEnergy() - (int)(0.06d * (double)Math.min(this.attacker.chargeCooldown/2, 100) + 6d));
             this.endFlag = true;
         }
-        else if (this.attacker.isEndCharging()) this.animTick++;
+        else if (this.charger.isEndCharging()) this.animTick++;
     }
 }
