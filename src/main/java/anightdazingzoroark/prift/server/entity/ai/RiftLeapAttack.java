@@ -13,9 +13,9 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class RiftLeapAttack extends EntityAIBase {
-    protected RiftCreature attacker;
+    private final RiftCreature attacker;
+    private ILeapingMob leapingMob;
     private EntityLivingBase target;
-    private boolean endFlag;
     private boolean leapAttackFlag;
     protected float leapHeight;
     private int cooldown;
@@ -31,20 +31,24 @@ public class RiftLeapAttack extends EntityAIBase {
     public boolean shouldExecute() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
-        if (this.attacker.leapCooldown > 0) return false;
-        else if (!this.attacker.onGround) return false;
-        else if (this.attacker.isBeingRidden()) return false;
-        else if (entitylivingbase == null) return false;
-        else if (!entitylivingbase.isEntityAlive()) return false;
-        else if (!this.attacker.canEntityBeSeen(entitylivingbase)) return false;
-        else if (entitylivingbase.posY - this.attacker.posY > this.leapHeight) return false;
-        else {
-            double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
-            if (this.attacker instanceof IPackHunter) {
-                return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && !((IPackHunter)this.attacker).isPackBuffing() && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
+        if (this.attacker instanceof ILeapingMob) {
+            this.leapingMob = (ILeapingMob) this.attacker;
+            if (this.attacker.leapCooldown > 0) return false;
+            else if (!this.attacker.onGround) return false;
+            else if (this.attacker.isBeingRidden()) return false;
+            else if (entitylivingbase == null) return false;
+            else if (!entitylivingbase.isEntityAlive()) return false;
+            else if (!this.attacker.canEntityBeSeen(entitylivingbase)) return false;
+            else if (entitylivingbase.posY - this.attacker.posY > this.leapHeight) return false;
+            else {
+                double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
+                if (this.attacker instanceof IPackHunter) {
+                    return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && !((IPackHunter)this.attacker).isPackBuffing() && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
+                }
+                return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
             }
-            return this.attacker.getEnergy() > 6 && d0 > this.getAttackReachSqr(entitylivingbase) && d0 <= this.getLeapAttackReachSqr(entitylivingbase) && this.attacker.canMove() && this.canLeapToArea(entitylivingbase);
         }
+        return false;
     }
 
     @Override
@@ -97,8 +101,7 @@ public class RiftLeapAttack extends EntityAIBase {
     }
 
     protected double getLeapAttackReachSqr(EntityLivingBase attackTarget) {
-        if (this.attacker instanceof ILeapingMob) return (double)(this.attacker.leapWidth * this.attacker.leapWidth + attackTarget.width);
-        return 0;
+        return (double)(this.leapingMob.leapWidth() * this.leapingMob.leapWidth() + attackTarget.width);
     }
 
     protected boolean canLeapToArea(EntityLivingBase entitylivingbase) {
@@ -109,8 +112,8 @@ public class RiftLeapAttack extends EntityAIBase {
         double velY = Math.sqrt(2 * g * this.leapHeight);
         double totalTime = velY / g;
 
-        for (int i = 0; i <= this.attacker.leapWidth; i++) {
-            double fraction = (double) i / this.attacker.leapWidth;
+        for (int i = 0; i <= this.leapingMob.leapWidth(); i++) {
+            double fraction = (double) i / this.leapingMob.leapWidth();
             double time = fraction * totalTime;
             double xToCheck = this.attacker.posX + dx * fraction;
             double zToCheck = this.attacker.posZ + dz * fraction;

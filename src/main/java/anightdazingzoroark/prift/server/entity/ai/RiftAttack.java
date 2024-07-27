@@ -165,7 +165,9 @@ public class RiftAttack extends EntityAIBase {
     }
 
     protected double getLeapReachSqr(EntityLivingBase attackTarget) {
-        if (this.attacker instanceof IChargingMob) return (double)(this.attacker.leapWidth * this.attacker.leapWidth + attackTarget.width);
+        if (this.attacker instanceof ILeapingMob) {
+            return (double) (((ILeapingMob)this.attacker).leapWidth() * ((ILeapingMob)this.attacker).leapWidth() + attackTarget.width);
+        }
         return 0;
     }
 

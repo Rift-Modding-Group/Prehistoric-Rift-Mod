@@ -147,16 +147,15 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setInteger("PregnancyTime", this.getPregnancyTimer());
-        compound.setBoolean("IsPregnancy", this.isPregnant());
-        compound.setBoolean("CanHarvest", this.canHarvest());
+        this.writePregnancyDataToNBT(compound);
+        this.writeHarvestWanderDataToNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
-        this.setCanHarvest(compound.getBoolean("CanHarvest"));
+        this.readPregnancyDataFromNBT(compound);
+        this.readHarvestWanderDataFromNBT(compound);
     }
 
     @Override

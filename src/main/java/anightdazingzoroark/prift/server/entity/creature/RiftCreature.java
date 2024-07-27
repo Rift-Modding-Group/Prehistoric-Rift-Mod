@@ -139,7 +139,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected int herdCheckCountdown;
     public float attackWidth;
     public float rangedWidth;
-    public float leapWidth;
     private BlockPos homePosition;
     public double yFloatPos;
     public String[] favoriteFood;

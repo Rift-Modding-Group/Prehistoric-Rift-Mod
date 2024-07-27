@@ -199,7 +199,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setBoolean("CanHarvest", this.canHarvest());
+        this.writeHarvestWanderDataToNBT(compound);
         this.writeWorkstationDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);
     }
@@ -207,7 +207,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        this.setCanHarvest(compound.getBoolean("CanHarvest"));
+        this.readHarvestWanderDataFromNBT(compound);
         this.readWorkstationDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
     }

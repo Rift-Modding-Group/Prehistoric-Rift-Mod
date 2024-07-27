@@ -215,7 +215,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setBoolean("CanHarvest", this.canHarvest());
+        this.writeHarvestWanderDataToNBT(compound);
         this.writeWorkstationDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);
     }
@@ -223,7 +223,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        this.setCanHarvest(compound.getBoolean("CanHarvest"));
+        this.readHarvestWanderDataFromNBT(compound);
         this.readWorkstationDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
     }

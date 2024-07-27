@@ -224,14 +224,14 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setBoolean("CanHarvest", this.canHarvest());
+        this.writeHarvestWanderDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        this.setCanHarvest(compound.getBoolean("CanHarvest"));
+        this.readHarvestWanderDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
     }
 

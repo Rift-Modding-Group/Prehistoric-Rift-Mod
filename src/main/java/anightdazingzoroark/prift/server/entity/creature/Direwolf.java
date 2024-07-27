@@ -159,14 +159,13 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setInteger("PregnancyTime", this.getPregnancyTimer());
-        compound.setBoolean("IsPregnancy", this.isPregnant());
+        this.writePregnancyDataToNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
+        this.readPregnancyDataFromNBT(compound);
     }
 
     @Override

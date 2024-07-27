@@ -64,7 +64,6 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.speed = 0.35D;
         this.isRideable = true;
         this.attackWidth = 2f;
-        this.leapWidth = 16f;
         this.packBuffCooldown = 0;
         this.contLeapAttackFlag = true;
         this.maxRightClickCooldown = 1800f;
@@ -124,7 +123,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
                     if (leapedEntities.contains(this.contLeapTarget)) {
                         this.attackEntityAsMob(this.contLeapTarget);
                         this.contLeapAttackFlag = false;
-                        this.contLeapTarget = null;
+                        this.setControlledLeapTarget(null);
                     }
                 }
             }
@@ -204,73 +203,16 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         return new PathNavigateRiftClimber(this, worldIn);
     }
 
-    private void leapToControlledTargetLoc() {
-        if (!this.world.isRemote) {
-            this.setLeaping(true);
-            UUID ownerID =  this.getOwnerId();
-            List<EntityLivingBase> potTargetListL = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.leapWidth), new Predicate<EntityLivingBase>() {
-                @Override
-                public boolean apply(@Nullable EntityLivingBase input) {
-                    if (input instanceof EntityTameable) {
-                        EntityTameable inpTameable = (EntityTameable)input;
-                        if (inpTameable.isTamed()) {
-                            return !ownerID.equals(inpTameable.getOwnerId());
-                        }
-                        else return true;
-                    }
-                    return true;
-                }
-            });
-            potTargetListL.remove(this);
-            potTargetListL.remove(this.getControllingPassenger());
-
-            if (!potTargetListL.isEmpty()) {
-                this.contLeapTarget = RiftUtil.findClosestEntity(this, potTargetListL);
-                double dx = this.contLeapTarget.posX - this.posX;
-                double dz = this.contLeapTarget.posZ - this.posZ;
-                double dist = Math.sqrt(dx * dx + dz * dz);
-
-                double velY = Math.sqrt(2 * RiftUtil.gravity * 6f);
-                double totalTime = velY / RiftUtil.gravity;
-                double velXZ = dist * 2 / totalTime;
-
-                double angleToTarget = Math.atan2(dz, dx);
-
-                this.motionX = velXZ * Math.cos(angleToTarget);
-                this.motionZ = velXZ * Math.sin(angleToTarget);
-                this.motionY = velY;
-            }
-            else this.setAttacking(true);
-        }
+    public float leapWidth() {
+        return 16f;
     }
 
-    private void leapToControlledTargetLoc(EntityLivingBase target) {
-        if (!this.world.isRemote) {
-            this.setLeaping(true);
-            boolean canLeapFlag = true;
+    public EntityLivingBase getControlledLeapTarget() {
+        return this.contLeapTarget;
+    }
 
-            if (target instanceof EntityTameable) {
-                canLeapFlag = ((EntityTameable)target).isTamed();
-            }
-
-            if (canLeapFlag) {
-                this.contLeapTarget = target;
-
-                double dx = this.contLeapTarget.posX - this.posX;
-                double dz = this.contLeapTarget.posZ - this.posZ;
-                double dist = Math.sqrt(dx * dx + dz * dz);
-
-                double velY = Math.sqrt(2 * RiftUtil.gravity * 6f);
-                double totalTime = velY / RiftUtil.gravity;
-                double velXZ = dist * 2 / totalTime;
-
-                double angleToTarget = Math.atan2(dz, dx);
-
-                this.motionX = velXZ * Math.cos(angleToTarget);
-                this.motionZ = velXZ * Math.sin(angleToTarget);
-                this.motionY = velY;
-            }
-        }
+    public void setControlledLeapTarget(EntityLivingBase value) {
+        this.contLeapTarget = value;
     }
 
     @Override
@@ -347,7 +289,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
                         potTargetListM.remove(this.getControllingPassenger());
 
                         if (!potTargetListM.isEmpty()) this.setAttacking(true);
-                        else if (this.onGround) this.leapToControlledTargetLoc();
+                        else if (this.onGround) this.leapToControlledTargetLoc(this);
                     }
                 }
                 else {
@@ -373,7 +315,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
                             this.ssrTarget = target;
                             this.setAttacking(true);
                         }
-                        else if (this.onGround) this.leapToControlledTargetLoc(target);
+                        else if (this.onGround) this.leapToControlledTargetLoc(this, target);
                     }
                 }
             }

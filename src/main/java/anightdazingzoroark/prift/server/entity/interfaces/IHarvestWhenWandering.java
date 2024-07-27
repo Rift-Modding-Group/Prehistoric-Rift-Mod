@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -58,5 +59,11 @@ public interface IHarvestWhenWandering {
     }
     default AxisAlignedBB breakRange() {
         return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+    }
+    default void writeHarvestWanderDataToNBT(NBTTagCompound compound) {
+        compound.setBoolean("CanHarvest", this.canHarvest());
+    }
+    default void readHarvestWanderDataFromNBT(NBTTagCompound compound) {
+        this.setCanHarvest(compound.getBoolean("CanHarvest"));
     }
 }

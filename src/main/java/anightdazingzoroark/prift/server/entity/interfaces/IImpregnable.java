@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -36,5 +37,14 @@ public interface IImpregnable {
         int seconds = (int)((float)this.getPregnancyTimer() / 20F);
         seconds = seconds - (minutes * 60);
         return new int[]{minutes, seconds};
+    }
+
+    default void writePregnancyDataToNBT(NBTTagCompound compound) {
+        compound.setInteger("PregnancyTime", this.getPregnancyTimer());
+        compound.setBoolean("IsPregnancy", this.isPregnant());
+    }
+
+    default void readPregnancyDataFromNBT(NBTTagCompound compound) {
+        this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
     }
 }
