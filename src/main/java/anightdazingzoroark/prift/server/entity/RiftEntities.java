@@ -52,11 +52,11 @@ public class RiftEntities {
     }
 
     public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {
-        EntityRegistry.registerModEntity(new ResourceLocation(RiftInitialize.MODID, ""+ name), entityClass, name, id, mod, 64, 3, true);
+        EntityRegistry.registerModEntity(new ResourceLocation(RiftInitialize.MODID, name), entityClass, name, id, mod, 64, 1, true);
     }
 
     public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod,  int eggPrimary, int eggSecondary) {
-        EntityRegistry.registerModEntity(new ResourceLocation(RiftInitialize.MODID, ""+ name), entityClass, name, id, mod, 64, 3, true, eggPrimary, eggSecondary);
+        EntityRegistry.registerModEntity(new ResourceLocation(RiftInitialize.MODID, name), entityClass, name, id, mod, 64, 1, true, eggPrimary, eggSecondary);
     }
 
     public static void registerSpawn() {

@@ -633,8 +633,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         if (this.isTamed() && !this.isIncapacitated()) {
-            try {
-                if (this.getOwnerId().equals(player.getUniqueID())) {
+            if (this.getOwner() != null) {
+                if (this.isOwner(player)) {
                     if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
@@ -697,15 +697,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
                 }
-            }
-            catch (Exception e) {
-                if (this.getOwnerId() == null) {
-                    ClientProxy.popupFromRadial = PopupFromRadial.CLAIM;
-                    RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this));
-                }
                 else {
                     player.sendStatusMessage(new TextComponentTranslation("reminder.not_creature_owner", this.getOwner().getName()), false);
                 }
+            }
+            else {
+                ClientProxy.popupFromRadial = PopupFromRadial.CLAIM;
+                RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this));
             }
             return true;
         }
@@ -1909,7 +1907,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     protected void onDeathUpdate() {
-        try {
+        if (GeneralConfig.minRevivalDiff.equals("PEACEFUL") || GeneralConfig.minRevivalDiff.equals("EASY") || GeneralConfig.minRevivalDiff.equals("NORMAL") || GeneralConfig.minRevivalDiff.equals("HARD")) {
             EnumDifficulty diff = EnumDifficulty.valueOf(GeneralConfig.minRevivalDiff);
             if (this.world.getDifficulty().getId() < diff.getId()) {
                 if (this.isTamed()) {
@@ -1934,7 +1932,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 super.onDeathUpdate();
             }
         }
-        catch (Exception e) {
+        else {
             if (GeneralConfig.minRevivalDiff.equals("NONE")) {
                 if (this.isTamed()) {
                     if (this.getIncapTimer() > 0) {
