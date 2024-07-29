@@ -1,0 +1,22 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X#X",
+    "#A#",
+    "X#X"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:cobblestone"
+    },
+    "X": {
+      "item": "minecraft:gold_ingot"
+    },
+    "A": {
+      "item": "prift:basic_saxumavore_meal"
+    }
+  },
+  "result": {
+    "item": "prift:advanced_saxumavore_meal"
+  }
+}

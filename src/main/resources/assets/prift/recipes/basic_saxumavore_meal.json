@@ -1,0 +1,21 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X#X",
+    "###",
+    "X#X"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:coal",
+      "data": 0
+    },
+    "X": {
+      "item": "minecraft:cobblestone"
+    }
+  },
+  "result": {
+    "item": "prift:basic_saxumavore_meal",
+    "count": 8
+  }
+}

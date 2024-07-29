@@ -19,7 +19,6 @@ import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
-import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -164,6 +163,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
+        this.ignoreFrustumCheck = true;
         this.creatureType = creatureType;
         this.setSpeed(0f);
         this.setWaterSpeed(1f);
@@ -974,7 +974,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
         compound.setByte("TurretTargeting", (byte) this.getTurretTargeting().ordinal());
         compound.setBoolean("Saddled", this.isSaddled());
-        if (creatureType != null) {
+        if (this.creatureType != null) {
             NBTTagList nbttaglist = new NBTTagList();
             for (int i = 0; i < this.creatureInventory.getSizeInventory(); ++i) {
                 ItemStack itemstack = this.creatureInventory.getStackInSlot(i);
@@ -1013,7 +1013,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
         if (this.canDoTurretMode() && compound.hasKey("TurretTargeting")) this.setTurretModeTargeting(TurretModeTargeting.values()[compound.getByte("TurretTargeting")]);
         this.setSaddled(compound.getBoolean("Saddled"));
-        if (creatureInventory != null) {
+        if (this.creatureInventory != null) {
             NBTTagList nbtTagList = compound.getTagList("Items", 10);
             this.initInventory();
             for (int i = 0; i < nbtTagList.tagCount(); ++i) {
@@ -1759,6 +1759,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isSaddled() && this.isBeingRidden() && this.canBeSteered()) {
             EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();
             if (controller != null) {
+                if (this.getAttackTarget() != null) {
+                    this.setAttackTarget(null);
+                    this.getNavigator().clearPath();
+                }
                 if (!this.canBeSteered()) {
                     this.rotationYaw = controller.rotationYaw;
                     this.prevRotationYaw = this.rotationYaw;

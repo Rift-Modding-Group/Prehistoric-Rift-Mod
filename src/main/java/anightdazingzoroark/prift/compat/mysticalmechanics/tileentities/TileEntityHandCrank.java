@@ -28,6 +28,7 @@ public class TileEntityHandCrank extends TileEntity implements IAnimatable, ITic
     public IMechCapability mechPower;
     private float power;
     private float rotation = 0;
+    private int atMaxPowerTimer;
 
     public TileEntityHandCrank() {
         this.mechPower = new DefaultMechCapability() {
@@ -58,8 +59,15 @@ public class TileEntityHandCrank extends TileEntity implements IAnimatable, ITic
     public void update() {
         if (!this.world.isRemote) {
             if (this.power > 0) {
-                this.mechPower.setPower(this.power, null);
-                this.setPower(this.power - 0.05f);
+                if (this.atMaxPowerTimer > 0) {
+                    this.mechPower.setPower(this.power, null);
+                    this.setPower(this.power);
+                    this.atMaxPowerTimer--;
+                }
+                else {
+                    this.mechPower.setPower(this.power, null);
+                    this.setPower(this.power - 0.05f);
+                }
             }
             else this.mechPower.setPower(0, null);
             this.updateNeighbors();
@@ -135,6 +143,14 @@ public class TileEntityHandCrank extends TileEntity implements IAnimatable, ITic
             IBlockState state = this.world.getBlockState(this.pos);
             this.world.notifyBlockUpdate(this.pos, state, state, 3);
         }
+    }
+
+    public void setMaxPowerTimer(int value) {
+        this.atMaxPowerTimer = value;
+    }
+
+    public int getAtMaxPowerTimer() {
+        return this.atMaxPowerTimer;
     }
 
     @Override

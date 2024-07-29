@@ -33,7 +33,10 @@ public class GeneralConfig  extends RiftConfig {
     public static String[] truffleAmntRange = {"1", "3"};
 
     //plant stuff
-
+    public static String[] pyroberryBiomes = {"tag:plains"};
+    public static int pyroberryWeight = 100;
+    public static String[] cryoberryBiomes = {"tag:snowy"};
+    public static int cryoberryWeight = 100;
 
     //creature leveling
     public static int levelingRadius = 800;
@@ -50,9 +53,9 @@ public class GeneralConfig  extends RiftConfig {
 
     //creature size
     public static String[] verySmallMobs = {"minecraft:bat", "minecraft:rabbit", "minecraft:silverfish", "minecraft:endermite", "minecraft:vex"};
-    public static String[] smallMobs = {"prift:dodo", "prift:coelacanth", "prift:megapiranha", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:spider", "minecraft:cave_spider", "minecraft:squid", "minecraft:ocelot", "minecraft:parrot", "minecraft:shulker", "minecraft:wolf"};
+    public static String[] smallMobs = {"prift:dodo", "prift:coelacanth", "prift:megapiranha", "prift:palaeocastor", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:spider", "minecraft:cave_spider", "minecraft:squid", "minecraft:ocelot", "minecraft:parrot", "minecraft:shulker", "minecraft:wolf"};
     public static String[] mediumMobs = {"prift:utahraptor", "prift:parasaurolophus", "prift:dimetrodon", "prift:sarcosuchus", "prift:anomalocaris", "prift:direwolf", "prift:megaloceros", "minecraft:player", "minecraft:blaze", "minecraft:cow", "minecraft:creeper", "minecraft:donkey", "minecraft:enderman", "minecraft:evocation_illager", "minecraft:guardian", "minecraft:horse", "minecraft:husk", "minecraft:llama", "minecraft:mooshroom", "minecraft:mule", "minecraft:polar_bear", "minecraft:skeleton", "minecraft:skeleton_horse", "minecraft:stray", "minecraft:villager", "minecraft:vindication_illager", "minecraft:witch", "minecraft:zombie", "minecraft:zombie_horse", "minecraft:zombie_pigman", "minecraft:zombie_villager"};
-    public static String[] largeMobs = {"prift:stegosaurus", "prift:triceratops", "prift:saurophaganax", "minecraft:elder_guardian", "minecraft:wither_skeleton", "minecraft:wither"};
+    public static String[] largeMobs = {"prift:stegosaurus", "prift:triceratops", "prift:saurophaganax", "prift:baryonyx", "minecraft:elder_guardian", "minecraft:wither_skeleton", "minecraft:wither"};
     public static String[] veryLargeMobs = {"prift:tyrannosaurus", "prift:apatosaurus", "minecraft:ghast", "minecraft:ender_dragon"};
 
     //debug
@@ -94,6 +97,10 @@ public class GeneralConfig  extends RiftConfig {
         truffleAmntRange = config.getStringList("Range for amount of truffles dropped", "Truffle Spawning Stuff", new String[]{"1", "3"}, "The range for the amount of truffles that can spawn from breaking blocks.");
 
         //plant stuff
+        pyroberryBiomes = config.getStringList("Pyroberry Biomes", "Plant Stuff", new String[]{"tag:plains"}, "The biomes that Pyroberries will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
+        pyroberryWeight = config.getInt("Pyroberry Spawn Weight", "Plant Stuff", 100, 1, 69420666, "The weight representing how likely Pyroberries spawn. Higher values mean higher amounts of Pyroberries");
+        cryoberryBiomes = config.getStringList("Cryoberry Biomes", "Plant Stuff", new String[]{"tag:snowy"}, "The biomes that Pyroberries will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
+        cryoberryWeight = config.getInt("Cryoberry Spawn Weight", "Plant Stuff", 100, 1, 69420666, "The weight representing how likely Cryoberries spawn. Higher values mean higher amounts of Pyroberries");
 
         //creature leveling
         levelingRadius = config.getInt("Level based on distance from (0, 0)", "Creature Leveling", 1600, 0, 69420666, "Distance from (0, 0) from which creature levels get increased. This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");
@@ -108,9 +115,9 @@ public class GeneralConfig  extends RiftConfig {
         //mob size
         config.addCustomCategoryComment("Mob Size", "Order of sizes: very small -> small -> medium -> large -> very large. Mobs that are not listed amongst any of the sizes are automatically considered medium size.");
         verySmallMobs = config.getStringList("Very Small Mobs", "Mob Size", new String[]{"minecraft:bat", "minecraft:rabbit", "minecraft:silverfish", "minecraft:endermite", "minecraft:vex"}, "Mobs that are to be of very small size");
-        smallMobs = config.getStringList("Small Mobs", "Mob Size", new String[]{"prift:dodo", "prift:coelacanth", "prift:megapiranha", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:spider", "minecraft:cave_spider", "minecraft:squid", "minecraft:ocelot", "minecraft:parrot", "minecraft:shulker", "minecraft:wolf"}, "Mobs that are to be of small size");
+        smallMobs = config.getStringList("Small Mobs", "Mob Size", new String[]{"prift:dodo", "prift:coelacanth", "prift:megapiranha", "prift:palaeocastor", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:spider", "minecraft:cave_spider", "minecraft:squid", "minecraft:ocelot", "minecraft:parrot", "minecraft:shulker", "minecraft:wolf"}, "Mobs that are to be of small size");
         mediumMobs = config.getStringList("Medium Mobs", "Mob Size", new String[]{"prift:utahraptor", "prift:parasaurolophus", "prift:dimetrodon", "prift:sarcosuchus", "prift:anomalocaris", "prift:direwolf", "prift:megaloceros", "minecraft:player", "minecraft:blaze", "minecraft:cow", "minecraft:creeper", "minecraft:donkey", "minecraft:enderman", "minecraft:evocation_illager", "minecraft:guardian", "minecraft:horse", "minecraft:husk", "minecraft:llama", "minecraft:mooshroom", "minecraft:mule", "minecraft:polar_bear", "minecraft:skeleton", "minecraft:skeleton_horse", "minecraft:stray", "minecraft:villager", "minecraft:vindication_illager", "minecraft:witch", "minecraft:zombie", "minecraft:zombie_horse", "minecraft:zombie_pigman", "minecraft:zombie_villager"}, "Mobs that are to be of medium size");
-        largeMobs = config.getStringList("Large Mobs", "Mob Size", new String[]{"prift:stegosaurus", "prift:triceratops", "prift:saurophaganax", "minecraft:elder_guardian", "minecraft:wither_skeleton", "minecraft:wither"}, "Mobs that are to be of large size");
+        largeMobs = config.getStringList("Large Mobs", "Mob Size", new String[]{"prift:stegosaurus", "prift:triceratops", "prift:saurophaganax", "prift:baryonyx", "minecraft:elder_guardian", "minecraft:wither_skeleton", "minecraft:wither"}, "Mobs that are to be of large size");
         veryLargeMobs = config.getStringList("Very Large Mobs", "Mob Size", new String[]{"prift:tyrannosaurus", "prift:apatosaurus", "minecraft:ghast", "minecraft:ender_dragon"}, "Mobs that are to be of very large size");
 
         //debug
