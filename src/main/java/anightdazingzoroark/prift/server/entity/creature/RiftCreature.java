@@ -11,14 +11,12 @@ import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
-import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
-import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
-import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
+import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
+import crafttweaker.api.block.IMaterial;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -80,7 +78,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> RANGED_ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> LEAPING = EntityDataManager.<Boolean>createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
@@ -198,7 +195,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(XP, 0);
         this.dataManager.register(ATTACKING, false);
         this.dataManager.register(RANGED_ATTACKING, false);
-        this.dataManager.register(LEAPING, false);
         this.dataManager.register(VARIANT, rand.nextInt(4));
         this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
@@ -400,7 +396,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                     }
                     if (this.hasSpacebarChargeBar()) {
-                        if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToAll(new RiftMountControl(this, -1, 2, this.getSpacebarUse()));
+                        if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 2, this.getSpacebarUse()));
                     }
                     if (this.getMiddleClickUse() > 0) {
                         RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 3));
@@ -1248,15 +1244,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setActing(value);
     }
 
-    public boolean isLeaping() {
-        return this.dataManager.get(LEAPING);
-    }
-
-    public void setLeaping(boolean value) {
-        this.dataManager.set(LEAPING, value);
-        this.setActing(value);
-    }
-
     public TameStatusType getTameStatus() {
         return TameStatusType.values()[this.dataManager.get(STATUS).byteValue()];
     }
@@ -1577,6 +1564,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return Math.sqrt((this.motionX * this.motionX) + (fallMotion * fallMotion) + (this.motionZ * this.motionZ)) > 0;
     }
 
+    public boolean onGround() {
+        IBlockState blockState = this.world.getBlockState(this.getPosition().down());
+        return blockState.getMaterial() != Material.AIR && blockState.getMaterial() != Material.WATER;
+    }
+
     public boolean isInCave() {
         BlockPos pos = new BlockPos(this);
         return !this.world.canSeeSky(pos.up()) && pos.getY() <= 56;
@@ -1767,14 +1759,32 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 strafe = controller.moveStrafing * 0.5f;
                 forward = controller.moveForward;
+
+                //movement
                 this.stepHeight = 1.0F;
                 this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1F;
                 this.fallDistance = 0;
                 float moveSpeedMod = (this.getEnergy() > 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
+                if (this instanceof ILeapingMob) {
+                    ILeapingMob leapingMob = (ILeapingMob) this;
+                    if (!leapingMob.isLeaping() && leapingMob.getLeapPower() > 0) {
+                        leapingMob.setLeaping(true);
+                        this.motionY = leapingMob.getLeapPower();
+                        if (forward > 0) {
+                            double dx = (24 * Math.sin(-Math.toRadians(this.rotationYaw)));
+                            double dz = (24 * Math.cos(Math.toRadians(this.rotationYaw)));
+                            double totalTime = leapingMob.getLeapPower() / RiftUtil.gravity;
+                            this.motionX += dx / totalTime;
+                            this.motionZ += dz / totalTime;
+                        }
+                        leapingMob.setLeapPower(0);
+                    }
+                }
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : moveSpeed);
 
+                //get out of 2 block or more deep pits
                 if (forward > 0) {
                     if (this.bodyPart != null) {
                         if (this.bodyPart.isInWater()) {
@@ -1785,12 +1795,34 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                                 BlockPos above = ahead.up();
                                 if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
                                     RiftMessages.WRAPPER.sendToServer(new RiftForceChangePos(this, this.posX + xMove, RiftUtil.highestWaterPos(this) + 1.0, this.posZ + zMove));
-
                                 }
                             }
                         }
                     }
                 }
+
+                //leap to target for leap attackers
+                if (this instanceof ILeapAttackingMob && ((ILeapAttackingMob)this).startLeapingToTarget()) {
+                    ILeapAttackingMob leapAttackingMob = (ILeapAttackingMob)this;
+                    leapAttackingMob.setLeaping(true);
+
+                    double dx = leapAttackingMob.getControlledLeapTarget().posX - this.posX;
+                    double dz = leapAttackingMob.getControlledLeapTarget().posZ - this.posZ;
+                    double dist = Math.sqrt(dx * dx + dz * dz);
+
+                    double velY = Math.sqrt(2 * RiftUtil.gravity * 6f);
+                    double totalTime = velY / RiftUtil.gravity;
+                    double velXZ = dist * 2 / totalTime;
+
+                    double angleToTarget = Math.atan2(dz, dx);
+
+                    this.motionX = velXZ * Math.cos(angleToTarget);
+                    this.motionZ = velXZ * Math.sin(angleToTarget);
+                    this.motionY = velY;
+                    this.velocityChanged = true;
+                    leapAttackingMob.setStartLeapToTarget(false);
+                }
+
                 super.travel(strafe, vertical, forward);
             }
         }

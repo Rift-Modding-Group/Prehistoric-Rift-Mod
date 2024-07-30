@@ -7,12 +7,11 @@ import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
-import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
@@ -41,11 +40,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter {
+public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPackHunter {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/utahraptor"));
+    private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Utahraptor.class, DataSerializers.BOOLEAN);
     private int packBuffCooldown;
-    private boolean contLeapAttackFlag;
+    private float leapPower;
+    private boolean startLeapingToTarget;
     private EntityLivingBase contLeapTarget;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
@@ -65,7 +66,6 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.isRideable = true;
         this.attackWidth = 2f;
         this.packBuffCooldown = 0;
-        this.contLeapAttackFlag = true;
         this.maxRightClickCooldown = 1800f;
         this.saddleItem = UtahraptorConfig.utahraptorSaddleItem;
         this.attackDamage = UtahraptorConfig.damage;
@@ -78,6 +78,7 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     @Override
     protected void entityInit() {
         super.entityInit();
+        this.dataManager.register(LEAPING, false);
         this.dataManager.register(PACK_BUFFING, false);
         this.setCanPickUpLoot(true);
     }
@@ -112,17 +113,16 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         this.manageCanPackBuff();
         if (!this.world.isRemote) {
             this.setClimbing(this.collidedHorizontally);
-            if (this.onGround && this.isLeaping() && this.isActing()) {
+            if (this.onGround() && this.isLeaping()) {
                 this.setLeaping(false);
-                this.contLeapAttackFlag = true;
+                this.setControlledLeapTarget(null);
             }
-            if (!this.onGround && this.isLeaping() && this.isBeingRidden()) {
-                if (this.contLeapAttackFlag) {
+            if (!this.onGround() && this.isLeaping() && this.isBeingRidden()) {
+                if (this.contLeapTarget != null) {
                     AxisAlignedBB leapHithbox = this.getEntityBoundingBox().grow(0.75D);
                     List<EntityLivingBase> leapedEntities = this.world.getEntitiesWithinAABB(EntityLivingBase.class, leapHithbox, null);
                     if (leapedEntities.contains(this.contLeapTarget)) {
                         this.attackEntityAsMob(this.contLeapTarget);
-                        this.contLeapAttackFlag = false;
                         this.setControlledLeapTarget(null);
                     }
                 }
@@ -203,6 +203,23 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         return new PathNavigateRiftClimber(this, worldIn);
     }
 
+    public boolean isLeaping() {
+        return this.dataManager.get(LEAPING);
+    }
+
+    public void setLeaping(boolean value) {
+        this.dataManager.set(LEAPING, value);
+        this.setActing(value);
+    }
+
+    public float getLeapPower() {
+        return this.leapPower;
+    }
+
+    public void setLeapPower(float value) {
+        this.leapPower = value;
+    }
+
     public float leapWidth() {
         return 16f;
     }
@@ -213,6 +230,14 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
 
     public void setControlledLeapTarget(EntityLivingBase value) {
         this.contLeapTarget = value;
+    }
+
+    public boolean startLeapingToTarget() {
+        return this.startLeapingToTarget;
+    }
+
+    public void setStartLeapToTarget(boolean value) {
+        this.startLeapingToTarget = value;
     }
 
     @Override
@@ -270,52 +295,12 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (target == null) {
-                    if (!this.isActing()) {
-                        UUID ownerID =  this.getOwnerId();
-                        List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(this.attackWidth, this.attackWidth, this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
-                            @Override
-                            public boolean apply(@Nullable EntityLivingBase input) {
-                                if (input instanceof EntityTameable) {
-                                    EntityTameable inpTameable = (EntityTameable)input;
-                                    if (inpTameable.isTamed()) {
-                                        return !ownerID.equals(inpTameable.getOwnerId());
-                                    }
-                                    else return true;
-                                }
-                                return true;
-                            }
-                        });
-                        potTargetListM.remove(this);
-                        potTargetListM.remove(this.getControllingPassenger());
-
-                        if (!potTargetListM.isEmpty()) this.setAttacking(true);
-                        else if (this.onGround) this.leapToControlledTargetLoc(this);
-                    }
+                    if (!this.isActing()) this.setAttacking(true);
                 }
                 else {
                     if (!this.isActing()) {
-                        UUID ownerID =  this.getOwnerId();
-                        List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(this.attackWidth, this.attackWidth, this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
-                            @Override
-                            public boolean apply(@Nullable EntityLivingBase input) {
-                                if (input instanceof EntityTameable) {
-                                    EntityTameable inpTameable = (EntityTameable)input;
-                                    if (inpTameable.isTamed()) {
-                                        return !ownerID.equals(inpTameable.getOwnerId());
-                                    }
-                                    else return true;
-                                }
-                                return true;
-                            }
-                        });
-                        potTargetListM.remove(this);
-                        potTargetListM.remove(this.getControllingPassenger());
-
-                        if (!potTargetListM.isEmpty()) {
-                            this.ssrTarget = target;
-                            this.setAttacking(true);
-                        }
-                        else if (this.onGround) this.leapToControlledTargetLoc(this, target);
+                        this.ssrTarget = target;
+                        this.setAttacking(true);
                     }
                 }
             }
@@ -341,24 +326,57 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
         }
         if (control == 2) {
             final float leapHeight = Math.min(6f, 0.25f * holdAmount + 1);
-            final float g = 0.08f;
-            if (this.getEnergy() > 6) {
-                if (this.isMoving(false)) {
-                    double dx = (16 * Math.sin(-Math.toRadians(this.rotationYaw)));
-                    double dz = (16 * Math.cos(Math.toRadians(this.rotationYaw)));
-
-                    double velY = Math.sqrt(2 * g * leapHeight);
-                    double totalTime = velY / g;
-
-                    this.motionX = this.motionX + dx / totalTime;
-                    this.motionZ = this.motionZ + dz / totalTime;
-                    this.motionY = velY;
-                }
-                else this.motionY = Math.sqrt(2 * g * leapHeight);
+            if (this.getEnergy() > 6 && !this.isLeaping()) {
+                this.setLeapPower((float) Math.sqrt(2f * leapHeight * RiftUtil.gravity));
                 this.setEnergy(this.getEnergy() - Math.min(6, (int)(0.25D * holdAmount + 1D)));
             }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+            else if (this.getEnergy() <= 6) ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
             this.setSpacebarUse(0);
+        }
+        if (control == 3) {
+            if (this.getEnergy() >= 6) {
+                if (target == null) {
+                    if (!this.isActing() && this.onGround() && !this.isMoving(false)) {
+                        UUID ownerID =  this.getOwnerId();
+                        List<EntityLivingBase> potTargetListL = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.leapWidth()), new Predicate<EntityLivingBase>() {
+                            @Override
+                            public boolean apply(@Nullable EntityLivingBase input) {
+                                if (input instanceof EntityTameable) {
+                                    EntityTameable inpTameable = (EntityTameable)input;
+                                    if (inpTameable.isTamed()) {
+                                        return !ownerID.equals(inpTameable.getOwnerId());
+                                    }
+                                    else return true;
+                                }
+                                return true;
+                            }
+                        });
+                        potTargetListL.remove(this);
+                        potTargetListL.remove(this.getControllingPassenger());
+                        if (!potTargetListL.isEmpty()) {
+                            this.setControlledLeapTarget(RiftUtil.findClosestEntity(this, potTargetListL));
+                            this.setStartLeapToTarget(true);
+                            this.setEnergy(this.getEnergy() - 3);
+                        }
+                    }
+                }
+                else {
+                    if (!this.isActing() && this.onGround() && !this.isMoving(false)) {
+                        boolean canLeapFlag = true;
+
+                        if (target instanceof EntityTameable) {
+                            canLeapFlag = !((EntityTameable)target).isTamed();
+                        }
+
+                        if (canLeapFlag) {
+                            this.setControlledLeapTarget(target);
+                            this.setStartLeapToTarget(true);
+                            this.setEnergy(this.getEnergy() - 3);
+                        }
+                    }
+                }
+            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
         }
     }
 
@@ -397,11 +415,11 @@ public class Utahraptor extends RiftCreature implements ILeapingMob, IPackHunter
     }
 
     private <E extends IAnimatable> PlayState utahraptorMovement(AnimationEvent<E> event) {
-        if (event.isMoving() && this.onGround) {
+        if (event.isMoving() && this.onGround()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.walk", true));
             return PlayState.CONTINUE;
         }
-        else if (event.isMoving() && !this.onGround && !this.isSitting()) {
+        else if (event.isMoving() && !this.onGround() && !this.isSitting()) {
             event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.pounce", true));
             return PlayState.CONTINUE;
         }

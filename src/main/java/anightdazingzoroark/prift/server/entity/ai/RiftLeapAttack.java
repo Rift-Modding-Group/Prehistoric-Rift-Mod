@@ -79,12 +79,12 @@ public class RiftLeapAttack extends EntityAIBase {
     }
 
     public void resetTask() {
-        this.attacker.setLeaping(false);
+        this.leapingMob.setLeaping(false);
         this.attacker.leapCooldown = cooldown;
     }
 
     public void updateTask() {
-        this.attacker.setLeaping(!this.attacker.onGround);
+        this.leapingMob.setLeaping(!this.attacker.onGround);
         if (!this.leapAttackFlag) {
             AxisAlignedBB leapHithbox = this.attacker.getEntityBoundingBox().grow(0.75D);
             List<EntityLivingBase> leapedEntities = this.attacker.world.getEntitiesWithinAABB(EntityLivingBase.class, leapHithbox, null);

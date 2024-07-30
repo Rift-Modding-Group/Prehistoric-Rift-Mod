@@ -58,7 +58,7 @@ public class RiftAttack extends EntityAIBase {
                     return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && ((IChargingMob) this.attacker).isNotUtilizingCharging() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof ILeapingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isLeaping() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !((ILeapingMob)this.attacker).isLeaping() && !this.attacker.isActing();
                 }
                 return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE);
             }
@@ -71,7 +71,7 @@ public class RiftAttack extends EntityAIBase {
         if (this.attacker.getEnergy() == 0) return false;
         else if (this.attacker.isBeingRidden()) return false;
         else if (this.attacker instanceof IChargingMob && !((IChargingMob) this.attacker).isNotUtilizingCharging()) return false;
-        else if (this.attacker.isLeaping()) return false;
+        else if (this.attacker instanceof ILeapingMob && ((ILeapingMob) this.attacker).isLeaping()) return false;
         else if (entitylivingbase == null) return false;
         else if (!entitylivingbase.isEntityAlive()) return false;
         else if (!this.attacker.isWithinHomeDistanceFromPosition(new BlockPos(entitylivingbase))) return false;

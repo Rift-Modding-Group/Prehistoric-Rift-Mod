@@ -21,7 +21,7 @@ public class RiftControlledAttack extends EntityAIBase  {
     @Override
     public boolean shouldExecute() {
         if (this.attacker instanceof ILeapingMob) {
-            return this.attacker.isTamed() && this.attacker.isBeingRidden() && this.attacker.isAttacking() && !this.attacker.isLeaping();
+            return this.attacker.isTamed() && this.attacker.isBeingRidden() && this.attacker.isAttacking() && !((ILeapingMob)this.attacker).isLeaping();
         }
         return this.attacker.isTamed() && this.attacker.isBeingRidden() && this.attacker.isAttacking();
     }
