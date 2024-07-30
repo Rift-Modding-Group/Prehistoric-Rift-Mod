@@ -400,7 +400,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                     }
                     if (this.hasSpacebarChargeBar()) {
-                        if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 2, this.getSpacebarUse()));
+                        if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToAll(new RiftMountControl(this, -1, 2, this.getSpacebarUse()));
                     }
                     if (this.getMiddleClickUse() > 0) {
                         RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 3));
@@ -1725,11 +1725,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void controlRangedAttack(double strength) {}
-
-    @Override
-    public boolean canPassengerSteer() {
-        return false;
-    }
 
     @Override
     public boolean canBeSteered() {

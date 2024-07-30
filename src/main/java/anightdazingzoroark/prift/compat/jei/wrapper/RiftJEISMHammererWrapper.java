@@ -9,7 +9,8 @@ import mezz.jei.api.recipe.IRecipeWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import scala.actors.threadpool.Arrays;
+
+import java.util.Arrays;
 
 import java.awt.*;
 
@@ -29,7 +30,7 @@ public class RiftJEISMHammererWrapper implements IRecipeWrapper {
         newSlagOutput.setCount(this.recipe instanceof BloomeryRecipe ? 2 : 6);
         ItemStack failItem = this.recipe.getFailureItems()[0].getItemStack();
         failItem.setCount(this.recipe instanceof BloomeryRecipe ? 2 : 6);
-        iIngredients.setOutputs(VanillaTypes.ITEM, Arrays.asList(new ItemStack[]{newOutput, newSlagOutput, failItem}));
+        iIngredients.setOutputs(VanillaTypes.ITEM, Arrays.asList(newOutput, newSlagOutput, failItem));
     }
 
     @Override
