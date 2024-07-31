@@ -113,6 +113,8 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         this.manageCanPackBuff();
         if (!this.world.isRemote) {
             this.setClimbing(this.collidedHorizontally);
+
+            //manage leaping
             if (this.onGround() && this.isLeaping()) {
                 this.setLeaping(false);
                 this.setControlledLeapTarget(null);

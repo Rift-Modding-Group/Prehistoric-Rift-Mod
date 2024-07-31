@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,8 +36,9 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
-public class Megaloceros extends RiftCreature implements IChargingMob, IImpregnable, IHarvestWhenWandering {
+public class Megaloceros extends RiftCreature implements IChargingMob, IImpregnable, IHarvestWhenWandering, ILeapingMob {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megaloceros"));
+    private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Megaloceros.class, DataSerializers.VARINT);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
@@ -47,6 +49,7 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> END_CHARGING = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart frontBodyPart;
+    private float leapPower;
 
     public Megaloceros(World worldIn) {
         super(worldIn, RiftCreatureType.MEGALOCEROS);
@@ -69,6 +72,7 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     @Override
     protected void entityInit() {
         super.entityInit();
+        this.dataManager.register(LEAPING, false);
         this.dataManager.register(PREGNANT, false);
         this.dataManager.register(PREGNANCY_TIMER, 0);
         this.dataManager.register(HARVESTING, false);
@@ -88,7 +92,7 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
 
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftControlledCharge(this, 2f, 0.24f, 4f));
+        this.tasks.addTask(3, new RiftControlledCharge(this, 0.24f, 4f));
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.36F));
         this.tasks.addTask(4, new RiftChargeAttack(this, 2f, 0.24f, 4f, 2f));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.36F));
@@ -109,8 +113,13 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
         if (this.getRightClickCooldown() == 0) this.setCanCharge(true);
 
-        //manage birthin related stuff
-        if (!this.world.isRemote) this.createBaby(this);
+        if (!this.world.isRemote) {
+            //manage birthin related stuff
+            this.createBaby(this);
+
+            //manage leaping
+            if (this.onGround() && this.isLeaping()) this.setLeaping(false);
+        }
     }
 
     @Override
@@ -189,6 +198,23 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         return new Vec3d(xOffset, this.posY - 0.75, zOffset);
     }
 
+    public boolean isLeaping() {
+        return this.dataManager.get(LEAPING);
+    }
+
+    public void setLeaping(boolean value) {
+        this.dataManager.set(LEAPING, value);
+        this.setActing(value);
+    }
+
+    public float getLeapPower() {
+        return this.leapPower;
+    }
+
+    public void setLeapPower(float value) {
+        this.leapPower = value;
+    }
+
     public void setPregnant(boolean value, int timer) {
         this.dataManager.set(PREGNANT, value);
         this.dataManager.set(PREGNANCY_TIMER, timer);
@@ -255,23 +281,11 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         }
         if (control == 2) {
             final float leapHeight = Math.min(6f, 0.25f * holdAmount + 1);
-            final float g = 0.08f;
-            if (this.getEnergy() > 6) {
-                if (this.isMoving(false)) {
-                    double dx = (16 * Math.sin(-Math.toRadians(this.rotationYaw)));
-                    double dz = (16 * Math.cos(Math.toRadians(this.rotationYaw)));
-
-                    double velY = Math.sqrt(2 * g * leapHeight);
-                    double totalTime = velY / g;
-
-                    this.motionX = this.motionX + dx / totalTime;
-                    this.motionZ = this.motionZ + dz / totalTime;
-                    this.motionY = velY;
-                }
-                else this.motionY = Math.sqrt(2 * g * leapHeight);
+            if (this.getEnergy() > 6 && !this.isLeaping()) {
+                this.setLeapPower((float) Math.sqrt(2f * leapHeight * RiftUtil.gravity));
                 this.setEnergy(this.getEnergy() - Math.min(6, (int)(0.25D * holdAmount + 1D)));
             }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+            else if (this.getEnergy() <= 6) ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
             this.setSpacebarUse(0);
         }
     }
@@ -344,6 +358,10 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
 
     public void setEndCharging(boolean value) {
         this.dataManager.set(END_CHARGING, value);
+    }
+
+    public double chargeBoost() {
+        return 2D;
     }
 
     public float chargeWidth() {

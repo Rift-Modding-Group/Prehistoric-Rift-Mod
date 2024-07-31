@@ -16,7 +16,6 @@ import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
-import crafttweaker.api.block.IMaterial;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -1591,7 +1590,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void updatePassenger(Entity passenger) {
-        if (this.canBeSteered()) {
+        boolean canRotate = !(this instanceof IChargingMob) || ((IChargingMob) this).isNotUtilizingCharging();
+        if (this.canBeSteered() && canRotate) {
             this.rotationYaw = passenger.rotationYaw;
             this.prevRotationYaw = this.rotationYaw;
             this.rotationPitch = passenger.rotationPitch * 0.5f;
@@ -1750,15 +1750,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setAttackTarget(null);
                     this.getNavigator().clearPath();
                 }
-                if (!this.canBeSteered()) {
-                    this.rotationYaw = controller.rotationYaw;
-                    this.prevRotationYaw = this.rotationYaw;
-                    this.rotationPitch = controller.rotationPitch * 0.5f;
-                    this.setRotation(this.rotationYaw, this.rotationPitch);
-                    this.renderYawOffset = this.rotationYaw;
-                }
+
                 strafe = controller.moveStrafing * 0.5f;
                 forward = controller.moveForward;
+
+                if (forward <= 0.0F) forward *= 0.25F;
 
                 //movement
                 this.stepHeight = 1.0F;
@@ -1773,8 +1769,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         leapingMob.setLeaping(true);
                         this.motionY = leapingMob.getLeapPower();
                         if (forward > 0) {
-                            double dx = (24 * Math.sin(-Math.toRadians(this.rotationYaw)));
-                            double dz = (24 * Math.cos(Math.toRadians(this.rotationYaw)));
+                            double dx = (48 * Math.sin(-Math.toRadians(this.rotationYaw)));
+                            double dz = (48 * Math.cos(Math.toRadians(this.rotationYaw)));
                             double totalTime = leapingMob.getLeapPower() / RiftUtil.gravity;
                             this.motionX += dx / totalTime;
                             this.motionZ += dz / totalTime;
@@ -1821,6 +1817,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.motionY = velY;
                     this.velocityChanged = true;
                     leapAttackingMob.setStartLeapToTarget(false);
+                }
+
+                //charge for charging mobs
+                if (this instanceof IChargingMob && ((IChargingMob)this).isCharging()) {
+                    this.motionX = this.getLookVec().x * ((IChargingMob)this).chargeBoost();
+                    this.motionZ = this.getLookVec().z * ((IChargingMob)this).chargeBoost();
                 }
 
                 super.travel(strafe, vertical, forward);

@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import net.minecraft.entity.ai.EntityAIBase;
 
 public class RiftControlledAttack extends EntityAIBase  {
@@ -20,8 +20,8 @@ public class RiftControlledAttack extends EntityAIBase  {
 
     @Override
     public boolean shouldExecute() {
-        if (this.attacker instanceof ILeapingMob) {
-            return this.attacker.isTamed() && this.attacker.isBeingRidden() && this.attacker.isAttacking() && !((ILeapingMob)this.attacker).isLeaping();
+        if (this.attacker instanceof ILeapAttackingMob) {
+            return this.attacker.isTamed() && this.attacker.isBeingRidden() && this.attacker.isAttacking() && !((ILeapAttackingMob)this.attacker).isLeaping();
         }
         return this.attacker.isTamed() && this.attacker.isBeingRidden() && this.attacker.isAttacking();
     }

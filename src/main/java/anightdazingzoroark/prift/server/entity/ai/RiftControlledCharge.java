@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
@@ -20,20 +19,17 @@ import net.minecraft.util.math.MathHelper;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class RiftControlledCharge extends EntityAIBase {
     protected final RiftCreature attacker;
     protected IChargingMob charger;
-    protected final double chargeBoost;
     protected final int initAnimLength;
     protected final int chargeTime;
     protected int animTick;
     private boolean endFlag;
 
-    public RiftControlledCharge(RiftCreature attacker, float chargeBoost, float initAnimLength, float chargeTime) {
+    public RiftControlledCharge(RiftCreature attacker, float initAnimLength, float chargeTime) {
         this.attacker = attacker;
-        this.chargeBoost = chargeBoost;
         this.initAnimLength = (int)(initAnimLength * 20);
         this.chargeTime = (int)(chargeTime * 20);
     }
@@ -89,8 +85,6 @@ public class RiftControlledCharge extends EntityAIBase {
 
         if (this.charger.isCharging()) {
             this.attacker.forcedChargePower--;
-            this.attacker.motionX = this.attacker.getLookVec().x * this.chargeBoost;
-            this.attacker.motionZ = this.attacker.getLookVec().z * this.chargeBoost;
 
             //stop if it hits a mob
             AxisAlignedBB chargerHitbox = this.attacker.getEntityBoundingBox().grow(1D, 2D, 1D);

@@ -129,7 +129,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 0.60f, 0.48f));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftControlledCharge(this, 1.75f, 0.24f, 4f));
+        this.tasks.addTask(3, new RiftControlledCharge(this, 0.24f, 4f));
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.72F, 0.48F));
         this.tasks.addTask(4, new RiftChargeAttack(this, 1.75f, 0.24f, 4f, 8f));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.72F, 0.48F));
@@ -470,6 +470,10 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
 
     public void setEndCharging(boolean value) {
         this.dataManager.set(END_CHARGING, value);
+    }
+
+    public double chargeBoost() {
+        return 1.75D;
     }
 
     public float chargeWidth() {

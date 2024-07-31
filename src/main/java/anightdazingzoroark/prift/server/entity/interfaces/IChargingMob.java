@@ -14,5 +14,6 @@ public interface IChargingMob {
     default boolean isNotUtilizingCharging() {
         return !this.isLoweringHead() && !this.isStartCharging() && !this.isCharging() && !this.isEndCharging();
     }
+    double chargeBoost();
     float chargeWidth();
 }

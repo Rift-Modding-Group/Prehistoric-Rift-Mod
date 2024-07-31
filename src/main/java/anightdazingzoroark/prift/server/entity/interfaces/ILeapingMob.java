@@ -9,5 +9,4 @@ public interface ILeapingMob {
     void setLeaping(boolean value);
     float getLeapPower();
     void setLeapPower(float value);
-    float leapWidth();
 }

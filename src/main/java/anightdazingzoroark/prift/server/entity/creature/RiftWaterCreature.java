@@ -45,7 +45,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class RiftWaterCreature extends RiftCreature {
-    private static final DataParameter<Boolean> USING_SWIM_CONTROLS = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> ASCENDING = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> DESCENDING = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
     protected final float defaultWaterCost;
     private final PathNavigateSwimmer waterNavigate;
     private final PathNavigateGround landNavigate;
@@ -68,7 +69,8 @@ public abstract class RiftWaterCreature extends RiftCreature {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(USING_SWIM_CONTROLS, false);
+        this.dataManager.register(ASCENDING, false);
+        this.dataManager.register(DESCENDING, false);
     }
 
     @Override
@@ -108,7 +110,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
                 RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 0, RiftControls.mountAscend.isKeyDown() && !RiftControls.mountDescend.isKeyDown()));
                 RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 1, RiftControls.mountDescend.isKeyDown() && !RiftControls.mountAscend.isKeyDown()));
-                RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, 2, RiftControls.mountDescend.isKeyDown() || RiftControls.mountAscend.isKeyDown()));
 
                 if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
                     if (RiftUtil.isUsingSSR()) {
@@ -248,17 +249,12 @@ public abstract class RiftWaterCreature extends RiftCreature {
         }
 
         //for not sinkin in certain conditions
-        if (this.isBeingRidden() && this.isInWater() && !this.isUsingSwimControls()) {
-            this.motionY *= 0;
-        }
-        if (this.isInWater() && this.getTameStatus() == TameStatusType.SIT) {
-            this.motionY *= 0;
-        }
+        if (this.isBeingRidden() && this.isInWater() && !this.isUsingSwimControls()) this.motionY *= 0;
+        if (!this.isBeingRidden() && this.isInWater() && this.getTameStatus() == TameStatusType.SIT) this.motionY *= 0;
     }
 
     @Override
-    public boolean canBreatheUnderwater()
-    {
+    public boolean canBreatheUnderwater() {
         return true;
     }
 
@@ -319,11 +315,23 @@ public abstract class RiftWaterCreature extends RiftCreature {
     }
 
     public boolean isUsingSwimControls() {
-        return this.dataManager.get(USING_SWIM_CONTROLS);
+        return this.getIsAscending() || this.getIsDescending();
     }
 
-    public void setUsingSwimControls(boolean value) {
-        this.dataManager.set(USING_SWIM_CONTROLS, value);
+    public boolean getIsAscending() {
+        return this.dataManager.get(ASCENDING);
+    }
+
+    public void setIsAscending(boolean value) {
+        this.dataManager.set(ASCENDING, value);
+    }
+
+    public boolean getIsDescending() {
+        return this.dataManager.get(DESCENDING);
+    }
+
+    public void setIsDescending(boolean value) {
+        this.dataManager.set(DESCENDING, value);
     }
 
     @SideOnly(Side.CLIENT)
@@ -333,14 +341,9 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
-        if (this.isSaddled() && this.isBeingRidden() && this.canBeSteered()) {
+        if (this.isSaddled() && this.isBeingRidden()) {
             EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();
             if (controller != null && this.isInWater()) {
-                this.rotationYaw = controller.rotationYaw;
-                this.prevRotationYaw = this.rotationYaw;
-                this.rotationPitch = controller.rotationPitch * 0.5f;
-                this.setRotation(this.rotationYaw, this.rotationPitch);
-                this.renderYawOffset = this.rotationYaw;
                 strafe = controller.moveStrafing * 0.5f;
                 forward = controller.moveForward;
                 this.stepHeight = 1.0F;
@@ -349,6 +352,10 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 float moveSpeedMod = (this.getEnergy() > 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
+
+                if (this.getIsAscending()) this.motionY = 0.25D;
+                else if (this.getIsDescending()) this.motionY = -0.25D;
+
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
 
                 this.moveRelative(strafe, this.isUsingSwimControls() ? vertical : 0, forward, 0.05F);
@@ -386,7 +393,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
         }
         else {
             if (this.isInWater()) {
-                if (this.getTameStatus() == TameStatusType.SIT || this.getNavigator().noPath()) {
+                if ((this.getTameStatus() == TameStatusType.SIT && this.getAttackTarget() == null) || this.getNavigator().noPath()) {
                     this.motionX = 0;
                     this.motionY = 0;
                     this.motionZ = 0;

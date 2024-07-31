@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class RiftLeapAttack extends EntityAIBase {
     private final RiftCreature attacker;
-    private ILeapingMob leapingMob;
+    private ILeapAttackingMob leapingMob;
     private EntityLivingBase target;
     private boolean leapAttackFlag;
     protected float leapHeight;
@@ -31,8 +31,8 @@ public class RiftLeapAttack extends EntityAIBase {
     public boolean shouldExecute() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
 
-        if (this.attacker instanceof ILeapingMob) {
-            this.leapingMob = (ILeapingMob) this.attacker;
+        if (this.attacker instanceof ILeapAttackingMob) {
+            this.leapingMob = (ILeapAttackingMob) this.attacker;
             if (this.attacker.leapCooldown > 0) return false;
             else if (!this.attacker.onGround) return false;
             else if (this.attacker.isBeingRidden()) return false;

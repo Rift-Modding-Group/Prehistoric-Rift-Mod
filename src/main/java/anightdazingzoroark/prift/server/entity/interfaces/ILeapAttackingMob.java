@@ -7,4 +7,5 @@ public interface ILeapAttackingMob extends ILeapingMob {
     void setControlledLeapTarget(EntityLivingBase value);
     boolean startLeapingToTarget();
     void setStartLeapToTarget(boolean value);
+    float leapWidth();
 }
