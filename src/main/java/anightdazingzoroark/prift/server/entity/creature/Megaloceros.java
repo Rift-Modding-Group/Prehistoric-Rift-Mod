@@ -281,7 +281,7 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         }
         if (control == 2) {
             final float leapHeight = Math.min(6f, 0.25f * holdAmount + 1);
-            if (this.getEnergy() > 6 && !this.isLeaping()) {
+            if (this.getEnergy() > 6 && !this.isLeaping() && !this.isInWater()) {
                 this.setLeapPower((float) Math.sqrt(2f * leapHeight * RiftUtil.gravity));
                 this.setEnergy(this.getEnergy() - Math.min(6, (int)(0.25D * holdAmount + 1D)));
             }

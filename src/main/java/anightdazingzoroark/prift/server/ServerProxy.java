@@ -76,6 +76,9 @@ public class ServerProxy implements IGuiHandler {
         MinecraftForge.EVENT_BUS.register(new RiftBlocks());
         RiftEntities.registerEntities();
         if (GeneralConfig.canUseSimpleDiff()) loadTemperatureRegistry();
+
+        //load modded recipes
+        if (GeneralConfig.canUseMM() && Loader.isModLoaded(RiftInitialize.HARVESTCRAFT_MOD_ID)) RiftMMRecipes.registerHarvestCraftRecipes();
     }
 
     public void init(FMLInitializationEvent event) {

@@ -49,12 +49,9 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.*;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -156,6 +153,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public double damageLevelMultiplier;
     protected int densityLimit;
     protected List<String> targetList;
+    public boolean isFloatingOnWater;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -185,6 +183,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.changeSitFlag = false;
         this.healthRegen = 0;
         this.resetParts(0);
+        this.isFloatingOnWater = false;
     }
 
     @Override
@@ -795,45 +794,51 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isTamingFood(ItemStack stack) {
-        for (String foodItem : this.tamingFood) {
-            int itemIdFirst = foodItem.indexOf(":");
-            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-            String itemId = foodItem.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == -1);
+        if (this.tamingFood != null) {
+            for (String foodItem : this.tamingFood) {
+                int itemIdFirst = foodItem.indexOf(":");
+                int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
+                int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
+                String itemId = foodItem.substring(0, itemIdSecond);
+                int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
+                if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == -1);
+            }
         }
         return false;
     }
 
     public int getTamingFoodAdd(ItemStack stack) {
-        for (String foodItem : this.tamingFood) {
-            int itemIdFirst = foodItem.indexOf(":");
-            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-            String itemId = foodItem.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            int adder = (int)(Double.parseDouble(foodItem.substring(itemIdThird + 1)) * 100);
-            int levelMod = (int)Math.ceil((double)this.getLevel() / 10D);
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == -1) return adder / levelMod;
-                else if (stack.getMetadata() == itemData) return adder / levelMod;
+        if (this.tamingFood != null) {
+            for (String foodItem : this.tamingFood) {
+                int itemIdFirst = foodItem.indexOf(":");
+                int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
+                int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
+                String itemId = foodItem.substring(0, itemIdSecond);
+                int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
+                int adder = (int)(Double.parseDouble(foodItem.substring(itemIdThird + 1)) * 100);
+                int levelMod = (int)Math.ceil((double)this.getLevel() / 10D);
+                if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
+                    if (itemData == -1) return adder / levelMod;
+                    else if (stack.getMetadata() == itemData) return adder / levelMod;
+                }
             }
         }
         return !stack.isEmpty() && stack.getItem() == RiftItems.CREATIVE_MEAL ? 100 : 0;
     }
 
     public int getFavoriteFoodGrowth(ItemStack stack) {
-        for (String foodItem : this.favoriteFood) {
-            int itemIdFirst = foodItem.indexOf(":");
-            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-            String itemId = foodItem.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1)) / 2D;
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == -1) return (int)(24000 * percentage);
-                else if (stack.getMetadata() == itemData) return (int)(24000 * percentage);
+        if (this.favoriteFood != null) {
+            for (String foodItem : this.favoriteFood) {
+                int itemIdFirst = foodItem.indexOf(":");
+                int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
+                int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
+                String itemId = foodItem.substring(0, itemIdSecond);
+                int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
+                double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1)) / 2D;
+                if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
+                    if (itemData == -1) return (int)(24000 * percentage);
+                    else if (stack.getMetadata() == itemData) return (int)(24000 * percentage);
+                }
             }
         }
         return 0;
@@ -1780,7 +1785,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : moveSpeed);
 
-                //get out of 2 block or more deep pits
+                //get out of 2 block or more deep water pits
                 if (forward > 0) {
                     if (this.bodyPart != null) {
                         if (this.bodyPart.isInWater()) {
@@ -1825,12 +1830,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.motionZ = this.getLookVec().z * ((IChargingMob)this).chargeBoost();
                 }
 
+                //float above water
+                if (this.isFloatingOnWater) {
+                    System.out.println("floating");
+                    this.motionY += 0.1D;
+                }
+
                 super.travel(strafe, vertical, forward);
             }
         }
         else {
             this.stepHeight = 0.5F;
             this.jumpMovementFactor = 0.02F;
+
+            //get out of 2 block or more deep water pits
             if (forward > 0) {
                 if (this.bodyPart != null) {
                     if (this.bodyPart.isInWater()) {
@@ -1846,6 +1859,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
             }
+
+            //float above water
+            if (this.isFloatingOnWater) this.motionY += 0.1D;
+
             super.travel(strafe, vertical, forward);
         }
     }

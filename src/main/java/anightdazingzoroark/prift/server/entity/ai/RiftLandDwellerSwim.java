@@ -26,7 +26,13 @@ public class RiftLandDwellerSwim extends EntityAIBase {
         else return false;
     }
 
-    public void updateTask() {
-        this.creature.motionY += 0.03;
+    @Override
+    public void startExecuting() {
+        this.creature.isFloatingOnWater = true;
+    }
+
+    @Override
+    public void resetTask() {
+        this.creature.isFloatingOnWater = false;
     }
 }

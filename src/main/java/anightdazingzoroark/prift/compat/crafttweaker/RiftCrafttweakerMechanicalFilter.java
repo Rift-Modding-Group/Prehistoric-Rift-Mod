@@ -34,8 +34,15 @@ public class RiftCrafttweakerMechanicalFilter {
     }
 
     @ZenMethod
+    public static void removeOutputFromRecipe(IItemStack input, IItemStack output) {
+        RiftMMRecipes.mechanicalFilterRecipes.stream()
+                .filter(recipe -> recipe.input.apply(CraftTweakerMC.getItemStack(input)))
+                .forEach(recipe -> recipe.output.removeIf(mechanicalFilterOutput -> mechanicalFilterOutput.getOutput().apply(CraftTweakerMC.getItemStack(output))));
+    }
+
+    @ZenMethod
     public static void removeRecipeByInput(IItemStack input) {
-        RiftMMRecipes.millstoneRecipes = RiftMMRecipes.millstoneRecipes.stream()
+        RiftMMRecipes.mechanicalFilterRecipes = RiftMMRecipes.mechanicalFilterRecipes.stream()
                 .filter(recipe -> !recipe.input.apply(CraftTweakerMC.getItemStack(input)))
                 .collect(Collectors.toList());
     }

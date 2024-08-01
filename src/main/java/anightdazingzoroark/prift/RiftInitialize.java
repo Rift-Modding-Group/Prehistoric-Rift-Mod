@@ -19,13 +19,14 @@ import software.bernie.geckolib3.GeckoLib;
 
 import java.io.File;
 
-@Mod(modid = RiftInitialize.MODID, name = RiftInitialize.MODNAME, version = RiftInitialize.MODVERSION, dependencies = "required-after:forge@[11.16.0.1865,);required-after:llibrary@[1.7.19,);required-after:geckolib3@[3.0.19,)")
+@Mod(modid = RiftInitialize.MODID, name = RiftInitialize.MODNAME, version = RiftInitialize.MODVERSION, dependencies = "required-after:forge@[11.16.0.1865,);required-after:llibrary@[1.7.19,);required-after:geckolib3@[3.0.19,);after:harvestcraft@[1.12.2zb,);")
 public class RiftInitialize {
     public static final String MODID = "prift";
     public static final String SSR_MOD_ID = "shouldersurfing";
     public static final String PYROTECH_MOD_ID = "pyrotech";
     public static final String SIMPLE_DIFFICULTY_MOD_ID = "simpledifficulty";
     public static final String MYSTICAL_MECHANICS_MOD_ID = "mysticalmechanics";
+    public static final String HARVESTCRAFT_MOD_ID = "harvestcraft";
     public static final String MODNAME = "Prehistoric Rift";
     public static final String MODVERSION= "0.0.12";
     @SidedProxy(clientSide = "anightdazingzoroark.prift.client.ClientProxy", serverSide = "anightdazingzoroark.prift.server.ServerProxy")

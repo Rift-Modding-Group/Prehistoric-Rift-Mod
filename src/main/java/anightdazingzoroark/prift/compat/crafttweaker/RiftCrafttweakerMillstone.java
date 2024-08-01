@@ -20,6 +20,13 @@ public class RiftCrafttweakerMillstone {
     }
 
     @ZenMethod
+    public static void removeRecipeByInput(IItemStack input) {
+        RiftMMRecipes.millstoneRecipes = RiftMMRecipes.millstoneRecipes.stream()
+                .filter(recipe -> !recipe.input.apply(CraftTweakerMC.getItemStack(input)))
+                .collect(Collectors.toList());
+    }
+
+    @ZenMethod
     public static void removeRecipeByOutput(IItemStack output) {
         RiftMMRecipes.millstoneRecipes = RiftMMRecipes.millstoneRecipes.stream()
                 .filter(recipe -> !recipe.output.apply(CraftTweakerMC.getItemStack(output)))

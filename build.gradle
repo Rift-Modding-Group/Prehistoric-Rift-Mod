@@ -143,6 +143,7 @@ dependencies {
     compileOnly "curse.maven:mysticalmechanics-300742:3006392"
     compileOnly "mezz.jei:jei_${mc_version}:${jei_version}:api"
     compileOnly "curse.maven:crafttweaker-239197:5354089"
+    compileOnly "curse.maven:pams-harvestcraft-221857:2904825"
     compileOnly files("libs/Hwyla-1.8.26-B41_1.12.2-api.jar")
     implementation "mezz.jei:jei_${mc_version}:${jei_version}"
 }
