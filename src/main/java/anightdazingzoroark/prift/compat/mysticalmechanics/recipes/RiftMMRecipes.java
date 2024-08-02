@@ -95,6 +95,22 @@ public class RiftMMRecipes {
 
         //for millstone
         millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/caneToSugar"), Ingredient.fromStacks(new ItemStack(Items.REEDS)), Ingredient.fromStacks(new ItemStack(Items.SUGAR)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/woolToString"), Ingredient.fromStacks(new ItemStack(Blocks.WOOL)), Ingredient.fromStacks(new ItemStack(Items.STRING, 4)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/beetrootToRoseRed"), Ingredient.fromStacks(new ItemStack(Items.BEETROOT)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 1)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/redTulipToRoseRed"), Ingredient.fromStacks(new ItemStack(Blocks.RED_FLOWER, 1, 4)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 1)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/roseBushToRoseRed"), Ingredient.fromStacks(new ItemStack(Blocks.DOUBLE_PLANT, 1, 4)), Ingredient.fromStacks(new ItemStack(Items.DYE, 2, 1)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/poppyToRoseRed"), Ingredient.fromStacks(new ItemStack(Blocks.RED_FLOWER, 1, 0)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 1)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/whiteTulipToLightGrayDye"), Ingredient.fromStacks(new ItemStack(Blocks.RED_FLOWER, 1, 6)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 7)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/azureBluetToLightGrayDye"), Ingredient.fromStacks(new ItemStack(Blocks.RED_FLOWER, 1, 3)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 7)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/oxeyeDaisyToLightGrayDye"), Ingredient.fromStacks(new ItemStack(Blocks.RED_FLOWER, 1, 8)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 7)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/pinkTulipToPinkDye"), Ingredient.fromStacks(new ItemStack(Blocks.RED_FLOWER, 1, 7)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 9)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/peonyToPinkDye"), Ingredient.fromStacks(new ItemStack(Blocks.DOUBLE_PLANT, 1, 5)), Ingredient.fromStacks(new ItemStack(Items.DYE, 2, 9)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/sunflowerToDandelionYellow"), Ingredient.fromStacks(new ItemStack(Blocks.DOUBLE_PLANT, 1, 0)), Ingredient.fromStacks(new ItemStack(Items.DYE, 2, 11)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/dandelionToDandelionYellow"), Ingredient.fromStacks(new ItemStack(Blocks.YELLOW_FLOWER, 1, 0)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 11)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/blueOrchidToLightBlueDye"), Ingredient.fromStacks(new ItemStack(Blocks.RED_FLOWER, 1, 1)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 12)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/alliumToMagentaDye"), Ingredient.fromStacks(new ItemStack(Blocks.RED_FLOWER, 1, 2)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 13)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/lilacToMagentaDye"), Ingredient.fromStacks(new ItemStack(Blocks.DOUBLE_PLANT, 1, 1)), Ingredient.fromStacks(new ItemStack(Items.DYE, 2, 13)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/orangeTulipToOrangeDye"), Ingredient.fromStacks(new ItemStack(Blocks.RED_FLOWER, 1, 5)), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 14)), 10));
         millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/boneToBonemeal"), Ingredient.fromStacks(new ItemStack(Items.BONE)), Ingredient.fromStacks(new ItemStack(Items.DYE, 2, 15)), 10));
 
         //for mechanical filter
@@ -145,6 +161,13 @@ public class RiftMMRecipes {
         millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/bananaToFlour"), Ingredient.fromStacks(new ItemStack(FruitRegistry.getFood(FruitRegistry.BANANA))), Ingredient.fromStacks(new ItemStack(ItemRegistry.flourItem)), 20));
         millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/amaranthToFlour"), Ingredient.fromStacks(new ItemStack(CropRegistry.getFood(CropRegistry.AMARANTH))), Ingredient.fromStacks(new ItemStack(ItemRegistry.flourItem)), 10));
         millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/almondToFlour"), Ingredient.fromStacks(new ItemStack(FruitRegistry.getFood(FruitRegistry.ALMOND))), Ingredient.fromStacks(new ItemStack(ItemRegistry.flourItem)), 20));
+
+        //other plant stuff
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/nutmegToNutmegPowder"), Ingredient.fromStacks(new ItemStack(FruitRegistry.getFood(FruitRegistry.NUTMEG))), Ingredient.fromStacks(new ItemStack(ItemRegistry.groundnutmegItem)), 15));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/nutmegToNutmegPowder"), Ingredient.fromStacks(new ItemStack(FruitRegistry.getFood(FruitRegistry.CINNAMON))), Ingredient.fromStacks(new ItemStack(ItemRegistry.groundcinnamonItem)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/nutmegToNutmegPowder"), Ingredient.fromStacks(new ItemStack(CropRegistry.getFood(CropRegistry.CORN))), Ingredient.fromStacks(new ItemStack(ItemRegistry.cornmealItem)), 10));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/nutmegToNutmegPowder"), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, 3)), Ingredient.fromStacks(new ItemStack(ItemRegistry.cocoapowderItem)), 15));
+        millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/nutmegToNutmegPowder"), Ingredient.fromStacks(new ItemStack(FruitRegistry.getFood(FruitRegistry.PEPPERCORN))), Ingredient.fromStacks(new ItemStack(ItemRegistry.blackpepperItem)), 10));
 
         //make ground meat
         millstoneRecipes.add(new MillstoneRecipe(new ResourceLocation(RiftInitialize.MODID, "millstone/makeGroundChicken"), Ingredient.fromStacks(new ItemStack(ItemRegistry.harvestchickenItem)), Ingredient.fromStacks(new ItemStack(ItemRegistry.groundchickenItem, 2)), 20));
