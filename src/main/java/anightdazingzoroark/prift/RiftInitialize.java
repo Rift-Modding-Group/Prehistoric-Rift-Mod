@@ -2,9 +2,11 @@ package anightdazingzoroark.prift;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigList;
+import anightdazingzoroark.prift.configNew.*;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
 import anightdazingzoroark.prift.server.commands.RiftJournalCommand;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -18,6 +20,8 @@ import org.apache.logging.log4j.Logger;
 import software.bernie.geckolib3.GeckoLib;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 @Mod(modid = RiftInitialize.MODID, name = RiftInitialize.MODNAME, version = RiftInitialize.MODVERSION, dependencies = "required-after:forge@[11.16.0.1865,);required-after:llibrary@[1.7.19,);required-after:geckolib3@[3.0.19,);after:harvestcraft@[1.12.2zb,);")
 public class RiftInitialize {
@@ -28,7 +32,7 @@ public class RiftInitialize {
     public static final String MYSTICAL_MECHANICS_MOD_ID = "mysticalmechanics";
     public static final String HARVESTCRAFT_MOD_ID = "harvestcraft";
     public static final String MODNAME = "Prehistoric Rift";
-    public static final String MODVERSION= "0.0.12";
+    public static final String MODVERSION= "0.0.12.1";
     @SidedProxy(clientSide = "anightdazingzoroark.prift.client.ClientProxy", serverSide = "anightdazingzoroark.prift.server.ServerProxy")
     public static ServerProxy PROXY;
     @Mod.Instance(MODID)
@@ -49,6 +53,12 @@ public class RiftInitialize {
         for (RiftConfigList configVal : RiftConfigList.values()) {
             configVal.loadConfig(directory);
         }
+
+        Map<String, Class<? extends RiftCreatureConfig>> configClasses = new HashMap<>();
+        for (RiftCreatureType creatureType : RiftCreatureType.values()) {
+            if (creatureType.getConfig() != null) configClasses.put(creatureType.name().toLowerCase(), creatureType.getConfig());
+        }
+        RiftConfigHandler.init(new File(event.getModConfigurationDirectory(), "prift/creatures/"), configClasses);
 
         RiftEntities.registerSpawn();
     }
@@ -72,6 +82,8 @@ public class RiftInitialize {
                 cfg.save();
             }
         }
+
+        RiftConfigHandler.saveAllConfigs();
 
         //crash game if some config stuff is wrong
         if (!GeneralConfig.minRevivalDiff.equals("PEACEFUL") && !GeneralConfig.minRevivalDiff.equals("EASY") && !GeneralConfig.minRevivalDiff.equals("NORMAL") && !GeneralConfig.minRevivalDiff.equals("HARD") && !GeneralConfig.minRevivalDiff.equals("NONE")) {

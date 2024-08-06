@@ -344,4 +344,10 @@ public class RiftUtil {
         }
         return emptyBucket;
     }
+
+    public static <T> List<T> uniteTwoLists(List<T> listOne, List<T> listTwo) {
+        List<T> outputList = listOne;
+        for (T item : listTwo) outputList.add(item);
+        return outputList;
+    }
 }

@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.*;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.configNew.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IApexPredator;
@@ -205,6 +206,9 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
+        //test the new config system
+        //System.out.println("health: "+RiftConfigHandler.getConfig("tyrannosaurus").stats.baseHealth);
+        System.out.println("json target blacklist: "+( ( (anightdazingzoroark.prift.configNew.TyrannosaurusConfig) RiftConfigHandler.getConfig("tyrannosaurus") ).general.affectedByRoarBlacklist ) );
         this.manageCanRoar();
         if (!this.isBaby()) this.manageApplyApexEffect();
     }
