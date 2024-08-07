@@ -53,6 +53,8 @@ public class RiftCreatureConfigDefaults {
             new RiftCreatureConfig.Food("minecraft:fish:0", 0.05),
             new RiftCreatureConfig.Food("minecraft:fish:1", 0.05),
             new RiftCreatureConfig.Food("minecraft:fish:2", 0.05),
-            new RiftCreatureConfig.Food("minecraft:cooked_fish", 0.075)
+            new RiftCreatureConfig.Food("minecraft:cooked_fish", 0.075),
+            new RiftCreatureConfig.Food("prift:raw_megapiranha", 0.05),
+            new RiftCreatureConfig.Food("prift:cooked_megapiranha", 0.075)
     );
 }

@@ -19,8 +19,8 @@ public class DimetrodonConfig extends RiftCreatureConfig {
         this.stats.damageMultiplier = 0.5;
         this.general.favoriteFood = RiftCreatureConfigDefaults.defaultCarnivoreFoods;
         this.general.favoriteMeals = Arrays.asList(
-                new Meal("prift:basic_carnivore_meal", 0),
-                new Meal("prift:advanced_carnivore_meal", 0)
+                new Meal("prift:basic_carnivore_meal", 0.10),
+                new Meal("prift:advanced_carnivore_meal", 0.33)
         );
         this.general.targetWhitelist = Arrays.asList();
         this.general.targetBlacklist = Arrays.asList(

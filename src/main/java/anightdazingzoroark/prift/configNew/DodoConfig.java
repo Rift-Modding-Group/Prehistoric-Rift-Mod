@@ -7,12 +7,11 @@ import java.util.List;
 
 public class DodoConfig extends RiftCreatureConfig {
     @SerializedName("general")
-    public DodoGeneral general;
+    public DodoGeneral general = new DodoGeneral();
 
     public DodoConfig() {
         this.stats.baseHealth = 6;
         this.stats.healthMultiplier = 0.1;
-        this.general = new DodoGeneral();
         this.general.breedingFood = Arrays.asList(
                 "minecraft:wheat_seeds",
                 "minecraft:pumpkin_seeds",
