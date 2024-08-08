@@ -3,7 +3,9 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.config.*;
+import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
@@ -21,7 +23,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -58,20 +59,14 @@ public class Dimetrodon extends RiftCreature {
 
     public Dimetrodon(World worldIn) {
         super(worldIn, RiftCreatureType.DIMETRODON);
-        this.minCreatureHealth = DimetrodonConfig.getMinHealth();
-        this.maxCreatureHealth = DimetrodonConfig.getMaxHealth();
         this.setSize(1f, 1f);
-        this.favoriteFood = DimetrodonConfig.dimetrodonFavoriteFood;
-        this.tamingFood = DimetrodonConfig.dimetrodonTamingFood;
+        this.favoriteFood = ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.experienceValue = 10;
         this.speed = 0.20D;
         this.isRideable = false;
         this.attackWidth = 3f;
-        this.attackDamage = DimetrodonConfig.damage;
-        this.healthLevelMultiplier = DimetrodonConfig.healthMultiplier;
-        this.damageLevelMultiplier = DimetrodonConfig.damageMultiplier;
-        this.densityLimit = DimetrodonConfig.dimetrodonDensityLimit;
-        this.targetList = RiftUtil.creatureTargets(DimetrodonConfig.dimetrodonTargets, DimetrodonConfig.dimetrodonTargetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
     @Override
@@ -371,48 +366,36 @@ public class Dimetrodon extends RiftCreature {
     }
 
     private boolean isTemperatureSettingItem (ItemStack itemstack) {
-        for (String item : DimetrodonConfig.dimetrodonForcedTemperatureItems) {
-            int itemIdFirst = item.indexOf(":");
-            int itemIdSecond = item.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = item.indexOf(":", itemIdSecond + 1);
-            String itemId = item.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(item.substring(itemIdSecond + 1, itemIdThird));
-            if (!itemstack.isEmpty() && itemstack.getItem().equals(Item.getByNameOrId(itemId)) && ((itemstack.getMetadata() == itemData) || (itemData == -1))) {
-                return true;
-            }
+        boolean flag = false;
+        for (DimetrodonConfig.TemperatureChangingItem item : ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.temperatureChangingItems) {
+            if (!flag) flag = RiftUtil.itemStackEqualToString(itemstack, item.itemId);
         }
-        return false;
+        return flag;
     }
 
     private EggTemperature getTemperatureFromItem(ItemStack itemstack) {
-        for (String item : DimetrodonConfig.dimetrodonForcedTemperatureItems) {
-            int itemIdFirst = item.indexOf(":");
-            int itemIdSecond = item.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = item.indexOf(":", itemIdSecond + 1);
-            int itemIdFourth = item.indexOf(":", itemIdThird + 1);
-            String itemId = item.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(item.substring(itemIdSecond + 1, itemIdThird));
-            String temperatureType = item.substring(itemIdFourth + 1);
-            if (!itemstack.isEmpty() && itemstack.getItem().equals(Item.getByNameOrId(itemId)) && (itemstack.getMetadata() == itemData) || (itemData == -1)) {
-                return EggTemperature.valueOf(temperatureType);
+        DimetrodonConfig.TemperatureChangingItem itemToGet = new DimetrodonConfig.TemperatureChangingItem("", "NEUTRAL", 0);
+        boolean flag = false;
+        for (DimetrodonConfig.TemperatureChangingItem item : ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.temperatureChangingItems) {
+            if (!flag) {
+                flag = RiftUtil.itemStackEqualToString(itemstack, item.itemId);
+                itemToGet = item;
             }
         }
+        if (flag) return EggTemperature.valueOf(itemToGet.temperatureMode);
         return null;
     }
 
     private int getTemperatureTimeFromItem(ItemStack itemstack) {
-        for (String item : DimetrodonConfig.dimetrodonForcedTemperatureItems) {
-            int itemIdFirst = item.indexOf(":");
-            int itemIdSecond = item.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = item.indexOf(":", itemIdSecond + 1);
-            int itemIdFourth = item.indexOf(":", itemIdThird + 1);
-            String itemId = item.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(item.substring(itemIdSecond + 1, itemIdThird));
-            int time = Integer.parseInt(item.substring(itemIdThird + 1, itemIdFourth));
-            if (!itemstack.isEmpty() && itemstack.getItem().equals(Item.getByNameOrId(itemId)) && (itemstack.getMetadata() == itemData) || (itemData == -1)) {
-                return time;
+        DimetrodonConfig.TemperatureChangingItem itemToGet = new DimetrodonConfig.TemperatureChangingItem("", "NEUTRAL", 0);
+        boolean flag = false;
+        for (DimetrodonConfig.TemperatureChangingItem item : ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.temperatureChangingItems) {
+            if (!flag) {
+                flag = RiftUtil.itemStackEqualToString(itemstack, item.itemId);
+                itemToGet = item;
             }
         }
+        if (flag) return itemToGet.ticks;
         return 0;
     }
 

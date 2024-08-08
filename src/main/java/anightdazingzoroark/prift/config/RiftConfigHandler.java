@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.configNew;
+package anightdazingzoroark.prift.config;
 
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import com.google.gson.Gson;
@@ -54,7 +54,8 @@ public class RiftConfigHandler {
         }
     }
 
-    public static RiftCreatureConfig getConfig(String configName) {
+    public static RiftCreatureConfig getConfig(RiftCreatureType creatureType) {
+        String configName = creatureType.name().toLowerCase();
         return configs.get(configName);
     }
 

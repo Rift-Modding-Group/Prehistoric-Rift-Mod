@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.BaryonyxConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -58,21 +59,15 @@ public class Baryonyx extends RiftWaterCreature {
     public Baryonyx(World worldIn) {
         super(worldIn, RiftCreatureType.BARYONYX);
         this.setSize(1.25f, 2.75f);
-        this.minCreatureHealth = BaryonyxConfig.getMinHealth();
-        this.maxCreatureHealth = BaryonyxConfig.getMaxHealth();
         this.experienceValue = 20;
-        this.favoriteFood = BaryonyxConfig.baryonyxFavoriteFood;
-        this.tamingFood = BaryonyxConfig.baryonyxTamingFood;
+        this.favoriteFood = ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.isRideable = true;
         this.attackWidth = 6f;
-        this.saddleItem = BaryonyxConfig.baryonyxSaddleItem;
+        this.saddleItem = ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.speed = 0.25D;
         this.waterSpeed = 5D;
-        this.attackDamage = BaryonyxConfig.damage;
-        this.healthLevelMultiplier = BaryonyxConfig.healthMultiplier;
-        this.damageLevelMultiplier = BaryonyxConfig.damageMultiplier;
-        this.densityLimit = BaryonyxConfig.baryonyxDensityLimit;
-        this.targetList = RiftUtil.creatureTargets(BaryonyxConfig.baryonyxTargets, BaryonyxConfig.baryonyxTargetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
     @Override

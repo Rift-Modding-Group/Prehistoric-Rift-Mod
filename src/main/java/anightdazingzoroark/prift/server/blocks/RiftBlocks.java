@@ -1,18 +1,14 @@
 package anightdazingzoroark.prift.server.blocks;
 
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
-import anightdazingzoroark.prift.client.renderer.FluidRenderer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
-import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fluids.BlockFluidClassic;
-import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistry;

@@ -16,8 +16,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -31,7 +31,6 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
@@ -267,20 +266,18 @@ public class RiftUtil {
         return false;
     }
 
-    public static List<String> creatureTargets(String[] whiteList) {
-        return creatureTargets(whiteList, new String[]{}, false);
+    public static List<String> creatureTargets(List<String> whiteList) {
+        return creatureTargets(whiteList, new ArrayList<>(), false);
     }
 
-    public static List<String> creatureTargets(String[] whiteList, String[] blackList, boolean useCUniversal) {
+    public static List<String> creatureTargets(List<String> whiteList, List<String> blackList, boolean useCUniversal) {
         List<String> finalTargets = new ArrayList<>();
-        List<String> wLList = Arrays.asList(whiteList);
-        List<String> bLList = Arrays.asList(blackList);
         List<String> baseTargetList = new ArrayList<>(Arrays.asList(GeneralConfig.universalCarnivoreTargets));
         if (useCUniversal) {
-            baseTargetList.removeIf(bLList::contains);
-            finalTargets = Stream.concat(wLList.stream(), baseTargetList.stream()).collect(Collectors.toList());
+            baseTargetList.removeIf(blackList::contains);
+            finalTargets = Stream.concat(whiteList.stream(), baseTargetList.stream()).collect(Collectors.toList());
         }
-        else return wLList;
+        else return whiteList;
         return finalTargets;
     }
 
@@ -311,7 +308,8 @@ public class RiftUtil {
     }
 
     public static boolean isAppropriateSize(EntityLivingBase entity, MobSize size) {
-        return getMobSize(entity).ordinal() <= size.ordinal();
+        if (size != null) return getMobSize(entity).ordinal() <= size.ordinal();
+        else return true;
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, String string, int xPos, int yPos, int wrapWidth, int textColor) {
@@ -343,6 +341,48 @@ public class RiftUtil {
             }
         }
         return emptyBucket;
+    }
+
+    public static boolean itemStackEqualToString(ItemStack itemStack, String string) {
+        int colonOne = string.indexOf(":");
+        int colonTwo = string.indexOf(":", colonOne + 1);
+        if (colonTwo != -1) {
+            Item item = Item.getByNameOrId(string.substring(0, colonTwo));
+            int metadata = Integer.parseInt(string.substring(colonTwo + 1));
+            return itemStack.getItem().equals(item) && itemStack.getMetadata() == metadata;
+
+        }
+        else {
+            Item item = Item.getByNameOrId(string);
+            return itemStack.getItem().equals(item) && itemStack.getMetadata() == 0;
+        }
+    }
+
+    public static ItemStack getItemStackFromString(String string) {
+        int colonOne = string.indexOf(":");
+        int colonTwo = string.indexOf(":", colonOne + 1);
+        if (colonTwo != -1) {
+            Item item = Item.getByNameOrId(string.substring(0, colonTwo));
+            int metadata = Integer.parseInt(string.substring(colonTwo + 1));
+            return new ItemStack(item, 1, metadata);
+
+        }
+        else {
+            Item item = Item.getByNameOrId(string);
+            return new ItemStack(item);
+        }
+    }
+
+    public static boolean checkForNoAssociations(RiftCreature user, EntityLivingBase target) {
+        if (target instanceof EntityPlayer) return !user.isOwner(target);
+        else if (target instanceof EntityTameable) {
+            EntityTameable tameable = (EntityTameable) target;
+            if (tameable.isTamed()) {
+                if (user.getOwner() != null) return !tameable.isOwner(user.getOwner());
+            }
+            else return true;
+        }
+        return true;
     }
 
     public static <T> List<T> uniteTwoLists(List<T> listOne, List<T> listTwo) {

@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;

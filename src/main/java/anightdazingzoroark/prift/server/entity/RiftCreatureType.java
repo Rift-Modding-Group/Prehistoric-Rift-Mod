@@ -1,16 +1,14 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.renderer.entity.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
-import anightdazingzoroark.prift.configNew.*;
+import anightdazingzoroark.prift.config.*;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.client.registry.IRenderFactory;
 
 import java.util.Locale;
 

@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
@@ -60,23 +61,17 @@ public class Sarcosuchus extends RiftWaterCreature {
     public Sarcosuchus(World worldIn) {
         super(worldIn, RiftCreatureType.SARCOSUCHUS);
         this.setSize(1.25f, 1.25f);
-        this.minCreatureHealth = SarcosuchusConfig.getMinHealth();
-        this.maxCreatureHealth = SarcosuchusConfig.getMaxHealth();
         this.experienceValue = 10;
-        this.favoriteFood = SarcosuchusConfig.sarcosuchusFavoriteFood;
-        this.tamingFood = SarcosuchusConfig.sarcosuchusTamingFood;
+        this.favoriteFood = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.isRideable = true;
         this.attackWidth = 3f;
-        this.saddleItem = SarcosuchusConfig.sarcosuchusSaddleItem;
+        this.saddleItem = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.speed = 0.2D;
         this.waterSpeed = 10D;
         this.spinTime = 0;
         this.messageSent = true;
-        this.attackDamage = SarcosuchusConfig.damage;
-        this.healthLevelMultiplier = SarcosuchusConfig.healthMultiplier;
-        this.damageLevelMultiplier = SarcosuchusConfig.damageMultiplier;
-        this.densityLimit = SarcosuchusConfig.sarcosuchusDensityLimit;
-        this.targetList = RiftUtil.creatureTargets(SarcosuchusConfig.sarcosuchusTargets, SarcosuchusConfig.sarcosuchusTargetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
     @Override
@@ -143,6 +138,7 @@ public class Sarcosuchus extends RiftWaterCreature {
             }
         }
         else {
+            MobSize spinMaxSize = MobSize.safeValueOf(((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.maximumSpinAttackTargetSize);
             if (RiftUtil.isUsingSSR()) {
                 EntityLivingBase target = (EntityLivingBase) SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
                 if (target != null) {
@@ -150,17 +146,17 @@ public class Sarcosuchus extends RiftWaterCreature {
 
                     boolean canSpinFlag;
                     if (target instanceof EntityPlayer) {
-                        canSpinFlag = RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
+                        canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
                     }
                     else {
                         if (target instanceof EntityTameable) {
                             EntityTameable inpTameable = (EntityTameable)target;
                             if (inpTameable.isTamed()) {
-                                canSpinFlag = RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !target.getUniqueID().equals(inpTameable.getOwnerId()) && !properties.isCaptured;
+                                canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !target.getUniqueID().equals(inpTameable.getOwnerId()) && !properties.isCaptured;
                             }
-                            else canSpinFlag = RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !properties.isCaptured;
+                            else canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !properties.isCaptured;
                         }
-                        else canSpinFlag = RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !properties.isCaptured;
+                        else canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !properties.isCaptured;
                     }
                     if (canSpinFlag) this.forcedSpinVictim = target;
                 }
@@ -172,17 +168,17 @@ public class Sarcosuchus extends RiftWaterCreature {
                     public boolean apply(@Nullable EntityLivingBase input) {
                         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
                         if (input instanceof EntityPlayer) {
-                            return RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                            return RiftUtil.isAppropriateSize(input, spinMaxSize) && !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
                         }
                         else {
                             if (input instanceof EntityTameable) {
                                 EntityTameable inpTameable = (EntityTameable)input;
                                 if (inpTameable.isTamed()) {
-                                    return RiftUtil.isAppropriateSize(inpTameable, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
+                                    return RiftUtil.isAppropriateSize(inpTameable, spinMaxSize) && !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
                                 }
-                                else return RiftUtil.isAppropriateSize(inpTameable, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !properties.isCaptured;
+                                else return RiftUtil.isAppropriateSize(inpTameable, spinMaxSize) && !properties.isCaptured;
                             }
-                            return RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize)) && !properties.isCaptured;
+                            return RiftUtil.isAppropriateSize(input, spinMaxSize) && !properties.isCaptured;
                         }
                     }
                 });

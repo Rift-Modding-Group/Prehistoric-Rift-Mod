@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.StegosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
@@ -25,7 +26,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -51,7 +51,6 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 
 public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob, ILeadWorkstationUser, IHarvestWhenWandering {
@@ -75,22 +74,16 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
-        this.minCreatureHealth = StegosaurusConfig.getMinHealth();
-        this.maxCreatureHealth = StegosaurusConfig.getMaxHealth();
         this.setSize(2.125f, 2.5f);
-        this.favoriteFood = StegosaurusConfig.stegosaurusFavoriteFood;
-        this.tamingFood = StegosaurusConfig.stegosaurusTamingFood;
+        this.favoriteFood = ((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.experienceValue = 20;
         this.speed = 0.175D;
         this.isRideable = true;
         this.attackWidth = 7.5f;
         this.rangedWidth = 12f;
         this.strongAttackCharge = 0;
-        this.saddleItem = StegosaurusConfig.stegosaurusSaddleItem;
-        this.attackDamage = StegosaurusConfig.damage;
-        this.healthLevelMultiplier = StegosaurusConfig.healthMultiplier;
-        this.damageLevelMultiplier = StegosaurusConfig.damageMultiplier;
-        this.densityLimit = StegosaurusConfig.stegosaurusDensityLimit;
+        this.saddleItem = ((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
     }
 
     @Override
@@ -333,7 +326,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     @Override
     public List<String> blocksToHarvest() {
-        return Arrays.asList(StegosaurusConfig.stegosaurusMineBlock);
+        return ((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
     }
 
     public int harvestRange() {
@@ -455,7 +448,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         if (flag) {
             RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entityIn, RiftEntityProperties.class);
             this.applyEnchantments(this, entityIn);
-            if (StegosaurusConfig.stegosaurusCanInflictBleed) properties.setBleeding(0, 200);
+            if (((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.canInflictBleed) properties.setBleeding(0, 200);
         }
         return flag;
     }

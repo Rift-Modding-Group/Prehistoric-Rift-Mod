@@ -1,13 +1,9 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
-import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityLeadPoweredCrank;
-import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
-import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
-import mysticalmechanics.block.BlockGearbox;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.SoundType;
@@ -15,7 +11,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,8 +28,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
 
 public class BlockLeadPoweredCrank extends Block implements ITileEntityProvider {
     public static final PropertyDirection FACING = PropertyDirection.create("facing");

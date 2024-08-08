@@ -3,10 +3,10 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.MegapiranhaConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import net.minecraft.util.ResourceLocation;
@@ -28,18 +28,12 @@ public class Megapiranha extends RiftWaterCreature {
     public Megapiranha(World worldIn) {
         super(worldIn, RiftCreatureType.MEGAPIRANHA);
         this.setSize(0.5f, 0.75f);
-        this.minCreatureHealth = MegapiranhaConfig.getMinHealth();
-        this.maxCreatureHealth = MegapiranhaConfig.getMaxHealth();
         this.experienceValue = 3;
-        this.favoriteFood = MegapiranhaConfig.megapiranhaFavoriteFood;
+        this.favoriteFood = ((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
         this.speed = 0.35D;
         this.waterSpeed = 4D;
         this.attackWidth = 2f;
-        this.attackDamage = MegapiranhaConfig.damage;
-        this.healthLevelMultiplier = MegapiranhaConfig.healthMultiplier;
-        this.damageLevelMultiplier = MegapiranhaConfig.damageMultiplier;
-        this.densityLimit = MegapiranhaConfig.megapiranhaDensityLimit;
-        this.targetList = RiftUtil.creatureTargets(MegapiranhaConfig.megapiranhaTargets, MegapiranhaConfig.megapiranhaTargetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
     @Override

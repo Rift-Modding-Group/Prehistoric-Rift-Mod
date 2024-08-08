@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPowere
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -75,20 +76,14 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     public Parasaurolophus(World worldIn) {
         super(worldIn, RiftCreatureType.PARASAUROLOPHUS);
-        this.minCreatureHealth = ParasaurolophusConfig.getMinHealth();
-        this.maxCreatureHealth = ParasaurolophusConfig.getMaxHealth();
         this.setSize(2f, 2f);
-        this.favoriteFood = ParasaurolophusConfig.parasaurolophusFavoriteFood;
-        this.tamingFood = ParasaurolophusConfig.parasaurolophusTamingFood;
+        this.favoriteFood = ((ParasaurolophusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((ParasaurolophusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.experienceValue = 20;
         this.speed = 0.25D;
         this.isRideable = true;
         this.attackWidth = 3.5f;
-        this.saddleItem = ParasaurolophusConfig.parasaurolophusSaddleItem;
-        this.attackDamage = ParasaurolophusConfig.damage;
-        this.healthLevelMultiplier = ParasaurolophusConfig.healthMultiplier;
-        this.damageLevelMultiplier = ParasaurolophusConfig.damageMultiplier;
-        this.densityLimit = ParasaurolophusConfig.parasaurolophusDensityLimit;
+        this.saddleItem = ((ParasaurolophusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
     }
 
     @Override
@@ -367,7 +362,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     @Override
     public List<String> blocksToHarvest() {
-        return Arrays.asList(ParasaurolophusConfig.parasaurolophusMineBlock);
+        return ((ParasaurolophusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
     }
 
     public int harvestRange() {

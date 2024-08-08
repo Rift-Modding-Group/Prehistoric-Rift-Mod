@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DirewolfConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
@@ -18,7 +19,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.nbt.NBTTagCompound;
@@ -60,24 +60,18 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable 
 
     public Direwolf(World worldIn) {
         super(worldIn, RiftCreatureType.DIREWOLF);
-        this.minCreatureHealth = DirewolfConfig.getMinHealth();
-        this.maxCreatureHealth = DirewolfConfig.getMaxHealth();
         this.setSize(1f, 1.55f);
         this.experienceValue = 10;
-        this.favoriteFood = DirewolfConfig.direwolfFavoriteFood;
-        this.tamingFood = DirewolfConfig.direwolfTamingFood;
+        this.favoriteFood = ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.speed = 0.25D;
         this.isRideable = true;
         this.attackWidth = 2.5f;
         this.maxRightClickCooldown = 1800f;
-        this.saddleItem = DirewolfConfig.direwolfSaddleItem;
-        this.attackDamage = DirewolfConfig.damage;
-        this.healthLevelMultiplier = DirewolfConfig.healthMultiplier;
-        this.damageLevelMultiplier = DirewolfConfig.damageMultiplier;
-        this.densityLimit = DirewolfConfig.direwolfDensityLimit;
+        this.saddleItem = ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.packBuffCooldown = 0;
         this.sniffCooldown = 0;
-        this.targetList = RiftUtil.creatureTargets(DirewolfConfig.direwolfTargets, DirewolfConfig.direwolfTargetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
     @Override
@@ -284,16 +278,18 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable 
             if (!this.headPart.isUnderwater()) {
                 this.sniffCooldown = 100;
                 //for all entities nearby (except those that are submerged)
-                AxisAlignedBB mobDetectAABB = new AxisAlignedBB(this.posX - DirewolfConfig.direwolfMobSniffRange, this.posY - DirewolfConfig.direwolfMobSniffRange, this.posZ - DirewolfConfig.direwolfMobSniffRange, this.posX + DirewolfConfig.direwolfMobSniffRange, this.posY + DirewolfConfig.direwolfMobSniffRange, this.posZ + DirewolfConfig.direwolfMobSniffRange);
+                int mobSniffRange = ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.mobSniffRange;
+                AxisAlignedBB mobDetectAABB = new AxisAlignedBB(this.posX - mobSniffRange, this.posY - mobSniffRange, this.posZ - mobSniffRange, this.posX + mobSniffRange, this.posY + mobSniffRange, this.posZ + mobSniffRange);
                 for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, mobDetectAABB, null)) {
-                    if (entityLivingBase != this && entityLivingBase != this.getOwner() && !RiftUtil.entityIsUnderwater(entityLivingBase) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(DirewolfConfig.direwolfMaxSniffSize))) {
+                    if (entityLivingBase != this && entityLivingBase != this.getOwner() && !RiftUtil.entityIsUnderwater(entityLivingBase) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumMobSniffSize))) {
                         RiftMessages.WRAPPER.sendToAll(new RiftSpawnDetectParticle((EntityPlayer)this.getControllingPassenger(), (int)entityLivingBase.posX, (int)entityLivingBase.posY, (int)entityLivingBase.posZ));
                     }
                 }
                 //for chests
-                for (int x = -DirewolfConfig.direwolfBlockSniffRange; x <= DirewolfConfig.direwolfBlockSniffRange; x++) {
-                    for (int y = -DirewolfConfig.direwolfBlockSniffRange; y <= DirewolfConfig.direwolfBlockSniffRange; y++) {
-                        for (int z = -DirewolfConfig.direwolfBlockSniffRange; z <= DirewolfConfig.direwolfBlockSniffRange; z++) {
+                int blockSniffRange = ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.blockSniffRange;
+                for (int x = -blockSniffRange; x <= blockSniffRange; x++) {
+                    for (int y = -blockSniffRange; y <= blockSniffRange; y++) {
+                        for (int z = -blockSniffRange; z <= blockSniffRange; z++) {
                             BlockPos pos = this.getPosition().add(x, y, z);
                             if (this.isSniffableBlock(this.world.getBlockState(pos).getBlock(), this.world.getBlockState(pos))) {
                                 RiftMessages.WRAPPER.sendToAll(new RiftSpawnChestDetectParticle((EntityPlayer)this.getControllingPassenger(), pos.getX(), pos.getY(), pos.getZ()));
@@ -307,7 +303,7 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable 
 
     private boolean isSniffableBlock(Block block, IBlockState blockState) {
         boolean flag = false;
-        for (String blockEntry : DirewolfConfig.direwolfSniffableBlocks) {
+        for (String blockEntry : ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.sniffableBlocks) {
             if (flag) break;
             int blockIdFirst = blockEntry.indexOf(":");
             int blockIdSecond = blockEntry.indexOf(":", blockIdFirst + 1);

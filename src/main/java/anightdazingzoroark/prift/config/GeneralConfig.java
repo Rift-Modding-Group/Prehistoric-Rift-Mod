@@ -3,8 +3,9 @@ package anightdazingzoroark.prift.config;
 import anightdazingzoroark.prift.RiftInitialize;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
+import org.apache.logging.log4j.Level;
 
-public class GeneralConfig  extends RiftConfig {
+public class GeneralConfig {
     //general
     public static boolean showDiscordMessage = true;
     public static String[] weakerThanDirt = {"oreDic:treeSapling", "oreDic:treeLeaves", "oreDic:vine", "oreDic:dirt", "oreDic:grass", "oreDic:gravel", "oreDic:sand", "oreDic:torch", "oreDic:blockSlime", "oreDic:blockGlassColorless", "oreDic:blockGlass", "oreDic:paneGlassColorless", "oreDic:paneGlass", "oreDic:wool", "oreDic:cropWheat", "oreDic:cropPotato", "oreDic:cropCarrot", "oreDic:cropNetherWart", "oreDic:sugarcane", "oreDic:blockCactus"};
@@ -61,12 +62,21 @@ public class GeneralConfig  extends RiftConfig {
     //debug
     public static boolean quickEggHatch = false;
 
-    public GeneralConfig(Configuration config) {
-        super(config, null);
+    public static void readConfig() {
+        Configuration config = RiftInitialize.configMain;
+        try {
+            config.load();
+            init(config);
+        }
+        catch (Exception e1) {
+            RiftInitialize.logger.log(Level.ERROR, "Problem loading config file!", e1);
+        }
+        finally {
+            if (config.hasChanged()) config.save();
+        }
     }
 
-    @Override
-    public void init() {
+    public static void init(Configuration config) {
         //general
         showDiscordMessage = config.getBoolean("Show a message to join the Discord upon joining", "General", true, "JOIN THE DISCORD JOIN THE DISCORD JOIN THE DISCORD JOIN THE DISCORD JOIN THE DISCORD JOIN THE DISCORD JOIN THE DISCORD. pls don't set to false or i will be sad :(");
 

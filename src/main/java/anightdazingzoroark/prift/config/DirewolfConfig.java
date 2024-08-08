@@ -1,58 +1,51 @@
 package anightdazingzoroark.prift.config;
 
-import net.minecraftforge.common.config.Configuration;
+import com.google.gson.annotations.SerializedName;
 
-public class DirewolfConfig extends RiftConfig {
-    private static int maxHealth;
-    private static int initMaxHealth;
-    public static int damage;
-    private static int initDamage;
-    public static double healthMultiplier = 0.1;
-    public static double damageMultiplier = 0.5;
-    public static int direwolfDensityLimit = 16;
-    public static String[] direwolfFavoriteFood = {"minecraft:beef:0:0.05", "minecraft:cooked_beef:0:0.075", "minecraft:porkchop:0:0.05", "minecraft:cooked_porkchop:0:0.075", "minecraft:chicken:0:0.05", "minecraft:cooked_chicken:0:0.075", "minecraft:mutton:0:0.05", "minecraft:cooked_mutton:0:0.075", "minecraft:rabbit:0:0.05", "minecraft:cooked_rabbit:0:0.075", "prift:raw_exotic_meat:0:0.05", "prift:cooked_exotic_meat:0:0.075", "prift:raw_fibrous_meat:0:0", "prift:cooked_fibrous_meat:0:0", "prift:raw_hadrosaur_meat:0:0.05", "prift:cooked_hadrosaur_meat:0:0.075"};
-    public static String[] direwolfTamingFood = {"prift:basic_carnivore_meal:0:0.10", "prift:advanced_carnivore_meal:0:0.33"};
-    public static String[] direwolfTargets = {};
-    public static String[] direwolfTargetBlacklist = {};
-    public static String direwolfSaddleItem = "minecraft:saddle:0";
-    public static String direwolfMaxSniffSize = "VERY_LARGE";
-    public static String[] direwolfSniffableBlocks = {"minecraft:chest:-1", "minecraft:trapped_chest:-1", "minecraft:ender_chest:-1"};
-    public static int direwolfMobSniffRange = 32;
-    public static int direwolfBlockSniffRange = 16;
+import java.util.Arrays;
+import java.util.List;
 
-    public DirewolfConfig(Configuration config) {
-        super(config, new String[]{"tag:snowy:12:2:4:CREATURE"});
-        maxHealth = initMaxHealth = 30;
-        damage = initDamage = 6;
+public class DirewolfConfig extends RiftCreatureConfig {
+    @SerializedName("general")
+    public DirewolfGeneral general = new DirewolfGeneral();
+
+    public DirewolfConfig() {
+        this.stats.baseHealth = 30;
+        this.stats.baseDamage = 6;
+        this.stats.healthMultiplier = 0.1;
+        this.stats.damageMultiplier = 0.5;
+        this.general.saddleItem = "minecraft:saddle";
+        this.general.favoriteFood = RiftCreatureConfigDefaults.defaultCarnivoreFoods;
+        this.general.favoriteMeals = Arrays.asList(
+                new Meal("prift:basic_carnivore_meal", 0.10),
+                new Meal("prift:advanced_carnivore_meal", 0.33)
+        );
+        this.general.targetWhitelist = Arrays.asList();
+        this.general.targetBlacklist = Arrays.asList();
+        this.general.sniffableBlocks = Arrays.asList(
+                "minecraft:chest:-1",
+                "minecraft:trapped_chest:-1",
+                "minecraft:ender_chest:-1"
+        );
+        this.general.blockSniffRange = 16;
+        this.general.maximumMobSniffSize = "VERY_LARGE";
+        this.general.mobSniffRange = 32;
+        this.spawnRules = Arrays.asList(
+                new SpawnRule().setCategory("LAND").setWeight(12).setSpawnAmntRange(2, 4).setDensityLimit(16).setBiomes(Arrays.asList("tag:snowy"))
+        );
     }
 
-    @Override
-    public void init() {
-        super.init();
-        maxHealth = config.getInt(RiftConfig.healthConfigName, "Creature Stats", initMaxHealth, 1, 69420666, RiftConfig.healthConfigMessage);
-        damage = config.getInt(RiftConfig.damageConfigName, "Creature Stats", initDamage, 0, 69420666, RiftConfig.damageConfigMessage);
-        healthMultiplier = config.getFloat(RiftConfig.healthMultiplierConfigName, "Creature Stats", 0.1f, 0, 1f, RiftConfig.healthMultiplierConfigMessage);
-        damageMultiplier = config.getFloat(RiftConfig.damageMultiplierConfigName, "Creature Stats", 0.5f, 0, 1f, RiftConfig.damageMultiplierConfigMessage);
+    public static class DirewolfGeneral extends PredatorGeneral {
+        @SerializedName("sniffableBlocks")
+        public List<String> sniffableBlocks;
 
-        direwolfDensityLimit = config.getInt("Density Limit", "Spawning", 16, 1, 69420666, "Maximum amount of creatures of this type in a 64 x 64 x 64 area");
+        @SerializedName("blockSniffRange")
+        public int blockSniffRange;
 
-        direwolfFavoriteFood = config.getStringList("Direwolf Favorite Food", "General", new String[]{"minecraft:beef:0:0.05", "minecraft:cooked_beef:0:0.075", "minecraft:porkchop:0:0.05", "minecraft:cooked_porkchop:0:0.075", "minecraft:chicken:0:0.05", "minecraft:cooked_chicken:0:0.075", "minecraft:mutton:0:0.05", "minecraft:cooked_mutton:0:0.075", "minecraft:rabbit:0:0.05", "minecraft:cooked_rabbit:0:0.075", "prift:raw_exotic_meat:0:0.05", "prift:cooked_exotic_meat:0:0.075", "prift:raw_fibrous_meat:0:0", "prift:cooked_fibrous_meat:0:0", "prift:raw_hadrosaur_meat:0:0.05", "prift:cooked_hadrosaur_meat:0:0.075"}, "List of foods Direwolfves will eat (when tamed) or pick up when on the ground. To add items add \"<insert item's identifier here>:<insert data id here>:<insert percentage of health that will be healed upon consumption here>\"");
-        direwolfTamingFood = config.getStringList("Direwolf Taming Food", "General", new String[]{"prift:basic_carnivore_meal:0:0.10", "prift:advanced_carnivore_meal:0:0.33"}, "List of foods Direwolfves must be fed to be tamed (if wild) or bred (if tamed). To add items add \"<insert item's identifier here>:<insert data id here>:0\"");
-        direwolfTargets = config.getStringList("Direwolf Targets", "General", new String[]{}, "Identifiers of mobs that the Direwolf will actively hunt, alongside the ones defined in the general config for all carnivores to target");
-        direwolfTargetBlacklist = config.getStringList("Direwolf Target Blacklist", "General", new String[]{}, "Identifiers of mobs that are here, if they are in the general config for all carnivores to target, will not be targeted by Direwolfves.");
-        direwolfSaddleItem = config.getString("Direwolf Saddle Item", "General", "minecraft:saddle:0", "Item that counts as a saddle for this creature. To add an item add \"<insert item's identifier here>:<insert data id here>\"");
+        @SerializedName("maximumMobSniffSize")
+        public String maximumMobSniffSize;
 
-        direwolfMaxSniffSize = config.getString("Maximum size that the Direwolf sniff can detect", "General", "VERY_LARGE", "Maximum size for creatures that can be detected by the Direwolf's sniff ability. Accepted values are 'VERY_SMALL', 'SMALL', 'MEDIUM', 'LARGE', and 'VERY_LARGE'");
-        direwolfSniffableBlocks = config.getStringList("Blocks that the Direwolf sniff can detect", "General", new String[]{"minecraft:chest:-1", "minecraft:trapped_chest:-1", "minecraft:ender_chest:-1"}, "Blocks that the Direwolf can sniff out. Don't add blocks that are way too common or you may risk hurting your eyes. To add blocks add \"block:<insert block's identifier here>:<insert data id here>\"");
-        direwolfMobSniffRange = config.getInt("Range in which the Direwolf sniff can detect mobs", "General", 32, 1, 69420666, "Range in blocks in which the Direwolf sniff can detect mobs. Note that larger values can cause more lag");
-        direwolfBlockSniffRange = config.getInt("Range in which the Direwolf sniff can detect blocks", "General", 16, 1, 69420666, "Range in blocks in which the Direwolf sniff can detect blocks. Note that larger values can cause more lag");
-    }
-
-    public static double getMaxHealth() {
-        return maxHealth;
-    }
-
-    public static double getMinHealth() {
-        return ((double)maxHealth)/8D;
+        @SerializedName("mobSniffRange")
+        public int mobSniffRange;
     }
 }

@@ -2,9 +2,9 @@ package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -44,7 +44,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fml.common.Loader;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -231,16 +230,16 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
                         if (blockPos.equals(this.getPosition())) {
                             switch (dimetrodon.getTemperature()) {
                                 case VERY_COLD:
-                                    temperatureValue += this.changeTempByDistance(DimetrodonConfig.dimetrodonVeryColdValue, dimetrodon.getPosition());
+                                    temperatureValue += this.changeTempByDistance(((DimetrodonConfig) RiftConfigHandler.getConfig(RiftCreatureType.DIMETRODON)).simpleDifficulty.veryColdTemperatureValue, dimetrodon.getPosition());
                                     break;
                                 case COLD:
-                                    temperatureValue += this.changeTempByDistance(DimetrodonConfig.dimetrodonColdValue, dimetrodon.getPosition());
+                                    temperatureValue += this.changeTempByDistance(((DimetrodonConfig) RiftConfigHandler.getConfig(RiftCreatureType.DIMETRODON)).simpleDifficulty.coldTemperatureValue, dimetrodon.getPosition());
                                     break;
                                 case WARM:
-                                    temperatureValue += this.changeTempByDistance(DimetrodonConfig.dimetrodonWarmValue, dimetrodon.getPosition());
+                                    temperatureValue += this.changeTempByDistance(((DimetrodonConfig) RiftConfigHandler.getConfig(RiftCreatureType.DIMETRODON)).simpleDifficulty.warmTemperatureValue, dimetrodon.getPosition());
                                     break;
                                 case VERY_WARM:
-                                    temperatureValue += this.changeTempByDistance(DimetrodonConfig.dimetrodonVeryWarmValue, dimetrodon.getPosition());
+                                    temperatureValue += this.changeTempByDistance(((DimetrodonConfig) RiftConfigHandler.getConfig(RiftCreatureType.DIMETRODON)).simpleDifficulty.veryWarmTemperatureValue, dimetrodon.getPosition());
                                     break;
                             }
                         }

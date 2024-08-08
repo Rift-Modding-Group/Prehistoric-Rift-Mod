@@ -4,10 +4,10 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DodoConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -28,15 +28,11 @@ public class Dodo extends RiftCreature {
 
     public Dodo(World worldIn) {
         super(worldIn, RiftCreatureType.DODO);
-        this.minCreatureHealth = DodoConfig.getMinHealth();
-        this.maxCreatureHealth = DodoConfig.getMaxHealth();
         this.setSize(0.75f, 0.75f);
-        this.tamingFood = DodoConfig.dodoBreedingFood;
+        this.breedingFood = ((DodoConfig)RiftConfigHandler.getConfig(this.creatureType)).general.breedingFood;
         this.experienceValue = 3;
         this.speed = 0.25D;
         this.isRideable = false;
-        this.healthLevelMultiplier = DodoConfig.healthMultiplier;
-        this.densityLimit = DodoConfig.dodoDensityLimit;
     }
 
     protected void initEntityAI() {

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.SaurophaganaxConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -51,20 +52,14 @@ public class Saurophaganax extends RiftCreature {
     public Saurophaganax(World worldIn) {
         super(worldIn, RiftCreatureType.SAUROPHAGANAX);
         this.setSize(2f, 3f);
-        this.minCreatureHealth = SaurophaganaxConfig.getMinHealth();
-        this.maxCreatureHealth = SaurophaganaxConfig.getMaxHealth();
-        this.favoriteFood = SaurophaganaxConfig.saurophaganaxFavoriteFood;
-        this.tamingFood = SaurophaganaxConfig.saurophaganaxTamingFood;
+        this.favoriteFood = ((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.experienceValue = 20;
         this.isRideable = true;
-        this.saddleItem = SaurophaganaxConfig.saurophaganaxSaddleItem;
+        this.saddleItem = ((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.speed = 0.25D;
         this.attackWidth = 3.5F;
-        this.attackDamage = SaurophaganaxConfig.damage;
-        this.healthLevelMultiplier = SaurophaganaxConfig.healthMultiplier;
-        this.damageLevelMultiplier = SaurophaganaxConfig.damageMultiplier;
-        this.densityLimit = SaurophaganaxConfig.saurophaganaxDensityLimit;
-        this.targetList = RiftUtil.creatureTargets(SaurophaganaxConfig.saurophaganaxTargets);
+        this.targetList = RiftUtil.creatureTargets(((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist);
     }
 
     @Override

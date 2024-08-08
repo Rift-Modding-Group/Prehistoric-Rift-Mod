@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPowere
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBaseTop;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -22,7 +23,6 @@ import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -47,7 +47,6 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 
 public class Triceratops extends RiftCreature implements IChargingMob, IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering {
@@ -77,20 +76,14 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
 
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
-        this.minCreatureHealth = TriceratopsConfig.getMinHealth();
-        this.maxCreatureHealth = TriceratopsConfig.getMaxHealth();
         this.setSize(2f, 2f);
-        this.favoriteFood = TriceratopsConfig.triceratopsFavoriteFood;
-        this.tamingFood = TriceratopsConfig.triceratopsTamingFood;
+        this.favoriteFood = ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.experienceValue = 20;
         this.speed = 0.15D;
         this.isRideable = true;
         this.attackWidth = 4.875f;
-        this.saddleItem = TriceratopsConfig.triceratopsSaddleItem;
-        this.attackDamage = TriceratopsConfig.damage;
-        this.healthLevelMultiplier = TriceratopsConfig.healthMultiplier;
-        this.damageLevelMultiplier = TriceratopsConfig.damageMultiplier;
-        this.densityLimit = TriceratopsConfig.triceratopsDensityLimit;
+        this.saddleItem = ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
     }
 
     @Override
@@ -404,7 +397,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
 
     @Override
     public List<String> blocksToHarvest() {
-        return Arrays.asList(TriceratopsConfig.triceratopsMineBlock);
+        return ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
     }
 
     public int harvestRange() {

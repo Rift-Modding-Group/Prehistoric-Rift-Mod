@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
@@ -15,8 +14,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RiftGetTargets extends EntityAITarget {
     protected final int targetChance;

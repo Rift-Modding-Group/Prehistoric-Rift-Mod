@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.MegalocerosConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
@@ -33,7 +34,6 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 
 public class Megaloceros extends RiftCreature implements IChargingMob, IImpregnable, IHarvestWhenWandering, ILeapingMob {
@@ -53,20 +53,14 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
 
     public Megaloceros(World worldIn) {
         super(worldIn, RiftCreatureType.MEGALOCEROS);
-        this.minCreatureHealth = MegalocerosConfig.getMinHealth();
-        this.maxCreatureHealth = MegalocerosConfig.getMaxHealth();
         this.setSize(1f, 1.5f);
-        this.favoriteFood = MegalocerosConfig.megalocerosFavoriteFood;
-        this.tamingFood = MegalocerosConfig.megalocerosTamingFood;
+        this.favoriteFood = ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.experienceValue = 10;
         this.speed = 0.35D;
         this.isRideable = true;
         this.attackWidth = 2.5f;
-        this.saddleItem = MegalocerosConfig.megalocerosSaddleItem;
-        this.attackDamage = MegalocerosConfig.damage;
-        this.healthLevelMultiplier = MegalocerosConfig.healthMultiplier;
-        this.damageLevelMultiplier = MegalocerosConfig.damageMultiplier;
-        this.densityLimit = MegalocerosConfig.megalocerosDensityLimit;
+        this.saddleItem = ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
     }
 
     @Override
@@ -292,7 +286,7 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
 
     @Override
     public List<String> blocksToHarvest() {
-        return Arrays.asList(MegalocerosConfig.megalocerosMineBlock);
+        return ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
     }
 
     public int harvestRange() {

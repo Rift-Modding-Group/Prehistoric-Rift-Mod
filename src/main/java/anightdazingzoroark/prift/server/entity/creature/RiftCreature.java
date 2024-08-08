@@ -6,6 +6,8 @@ import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -133,8 +135,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float rangedWidth;
     private BlockPos homePosition;
     public double yFloatPos;
-    public String[] favoriteFood;
-    public String[] tamingFood;
+    public List<RiftCreatureConfig.Food> favoriteFood;
+    public List<RiftCreatureConfig.Meal> tamingFood;
+    public List<String> breedingFood;
     public int chargeCooldown;
     public int forcedChargePower;
     public int leapCooldown;
@@ -157,6 +160,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
+        this.minCreatureHealth = ((double) RiftConfigHandler.getConfig(creatureType).stats.baseHealth)/8;
+        this.maxCreatureHealth = RiftConfigHandler.getConfig(creatureType).stats.baseHealth;
+        this.attackDamage = RiftConfigHandler.getConfig(creatureType).stats.baseDamage;
+        this.healthLevelMultiplier = RiftConfigHandler.getConfig(creatureType).stats.healthMultiplier;
+        this.damageLevelMultiplier = RiftConfigHandler.getConfig(creatureType).stats.damageMultiplier;
         this.ignoreFrustumCheck = true;
         this.creatureType = creatureType;
         this.setSpeed(0f);
@@ -763,84 +771,73 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isFavoriteFood(ItemStack stack) {
-        int matches = 0;
-        for (String foodItem : this.favoriteFood) {
-            int itemIdFirst = foodItem.indexOf(":");
-            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-            String itemId = foodItem.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId)) && (stack.getMetadata() == itemData) || (itemData == -1)) matches++;
+        boolean flag = false;
+        for (RiftCreatureConfig.Food food : this.favoriteFood) {
+            if (!flag) flag = RiftUtil.itemStackEqualToString(stack, food.itemId);
         }
-        return matches > 0;
+        return flag;
     }
 
     public int getFavoriteFoodHeal(ItemStack stack) {
-        for (String foodItem : this.favoriteFood) {
-            int itemIdFirst = foodItem.indexOf(":");
-            int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-            int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-            String itemId = foodItem.substring(0, itemIdSecond);
-            int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-            double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1));
-            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                if (itemData == -1) return (int) (Math.ceil(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage));
-                else if (stack.getMetadata() == itemData) {
-                    return (int) (Math.ceil(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue() * percentage));
-                }
+        RiftCreatureConfig.Food foodToHeal = new RiftCreatureConfig.Food("", 0);
+        boolean flag = false;
+        for (RiftCreatureConfig.Food food : this.favoriteFood) {
+            if (!flag) {
+                flag = RiftUtil.itemStackEqualToString(stack, food.itemId);
+                foodToHeal = food;
             }
         }
+        if (flag) return (int)Math.ceil(this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getBaseValue() * foodToHeal.percentageHeal);
         return 0;
     }
 
     public boolean isTamingFood(ItemStack stack) {
+        boolean flag = false;
         if (this.tamingFood != null) {
-            for (String foodItem : this.tamingFood) {
-                int itemIdFirst = foodItem.indexOf(":");
-                int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-                int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-                String itemId = foodItem.substring(0, itemIdSecond);
-                int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-                if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) return (stack.getMetadata() == itemData) || (itemData == -1);
+            for (RiftCreatureConfig.Meal meal : this.tamingFood) {
+                if (!flag) flag = RiftUtil.itemStackEqualToString(stack, meal.itemId);
             }
         }
-        return false;
+        else if (this.breedingFood != null) {
+            for (String food : this.breedingFood) {
+                if (!flag) flag = RiftUtil.itemStackEqualToString(stack, food);
+            }
+        }
+        return flag;
     }
 
     public int getTamingFoodAdd(ItemStack stack) {
-        if (this.tamingFood != null) {
-            for (String foodItem : this.tamingFood) {
-                int itemIdFirst = foodItem.indexOf(":");
-                int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-                int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-                String itemId = foodItem.substring(0, itemIdSecond);
-                int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-                int adder = (int)(Double.parseDouble(foodItem.substring(itemIdThird + 1)) * 100);
-                int levelMod = (int)Math.ceil((double)this.getLevel() / 10D);
-                if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                    if (itemData == -1) return adder / levelMod;
-                    else if (stack.getMetadata() == itemData) return adder / levelMod;
+        if (stack.getItem() == RiftItems.CREATIVE_MEAL) return 100;
+        else {
+            RiftCreatureConfig.Meal mealToTame = new RiftCreatureConfig.Meal("", 0);
+            boolean flag = false;
+            if (this.tamingFood != null) {
+                for (RiftCreatureConfig.Meal meal : this.tamingFood) {
+                    if (!flag) {
+                        flag = RiftUtil.itemStackEqualToString(stack, meal.itemId);
+                        mealToTame = meal;
+                    }
+                }
+                if (flag) {
+                    int levelMod = (int)Math.ceil((double)this.getLevel() / 10D);
+                    int adder = (int)(mealToTame.tameMultiplier * 100);
+                    return adder / levelMod;
                 }
             }
+            return 0;
         }
-        return !stack.isEmpty() && stack.getItem() == RiftItems.CREATIVE_MEAL ? 100 : 0;
     }
 
     public int getFavoriteFoodGrowth(ItemStack stack) {
-        if (this.favoriteFood != null) {
-            for (String foodItem : this.favoriteFood) {
-                int itemIdFirst = foodItem.indexOf(":");
-                int itemIdSecond = foodItem.indexOf(":", itemIdFirst + 1);
-                int itemIdThird = foodItem.indexOf(":", itemIdSecond + 1);
-                String itemId = foodItem.substring(0, itemIdSecond);
-                int itemData = Integer.parseInt(foodItem.substring(itemIdSecond + 1, itemIdThird));
-                double percentage = Double.parseDouble(foodItem.substring(itemIdThird + 1)) / 2D;
-                if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId))) {
-                    if (itemData == -1) return (int)(24000 * percentage);
-                    else if (stack.getMetadata() == itemData) return (int)(24000 * percentage);
-                }
+        RiftCreatureConfig.Food foodToGrow = new RiftCreatureConfig.Food("", 0);
+        boolean flag = false;
+        for (RiftCreatureConfig.Food food : this.favoriteFood) {
+            if (!flag) {
+                flag = RiftUtil.itemStackEqualToString(stack, food.itemId);
+                foodToGrow = food;
             }
         }
+        if (flag) return (int)Math.ceil(24000 * foodToGrow.percentageHeal);
         return 0;
     }
 
@@ -931,23 +928,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    public Item getSaddleItem() {
-        int itemIdFirst = this.saddleItem.indexOf(":");
-        int itemIdSecond = this.saddleItem.indexOf(":", itemIdFirst + 1);
-        String itemId = this.saddleItem.substring(0, itemIdSecond);
-        return Item.getByNameOrId(itemId);
-    }
-
-    public int getSaddleItemData() {
-        int itemIdFirst = this.saddleItem.indexOf(":");
-        int itemIdSecond = this.saddleItem.indexOf(":", itemIdFirst + 1);
-        return Integer.parseInt(this.saddleItem.substring(itemIdSecond + 1));
-    }
-
     public boolean saddleItemEqual(ItemStack itemStack) {
-        int itemStackId = itemStack.getMetadata();
-        if (this.getSaddleItemData() == -1) return itemStack.getItem().equals(this.getSaddleItem());
-        else return this.getSaddleItemData() == itemStackId && itemStack.getItem().equals(this.getSaddleItem());
+        return RiftUtil.itemStackEqualToString(itemStack, this.saddleItem);
     }
 
     @Override

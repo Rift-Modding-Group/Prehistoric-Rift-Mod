@@ -2,25 +2,19 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.recipes;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
-import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
 import anightdazingzoroark.prift.server.items.RiftItems;
-import com.codetaylor.mc.pyrotech.modules.core.ModuleCore;
-import com.codetaylor.mc.pyrotech.modules.core.block.BlockRock;
-import com.codetaylor.mc.pyrotech.modules.core.item.ItemRock;
 import com.pam.harvestcraft.blocks.CropRegistry;
 import com.pam.harvestcraft.blocks.FruitRegistry;
 import com.pam.harvestcraft.config.ConfigHandler;
 import com.pam.harvestcraft.item.ItemRegistry;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Optional;
-import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
 import java.util.List;

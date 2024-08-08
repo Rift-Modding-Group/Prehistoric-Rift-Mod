@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
@@ -294,7 +296,7 @@ public class RiftAttack extends EntityAIBase {
                         if (this.sarcosuchus.isTamed()) this.sarcosuchus.energyActionMod++;
 
                         if (enemy.isEntityAlive() && this.sarcosuchus.getEnergy() > 6 && !this.targetProperties.isCaptured) {
-                            if (RiftUtil.isAppropriateSize(enemy, MobSize.safeValueOf(SarcosuchusConfig.sarcosuchusSpinMaxSize))) {
+                            if (RiftUtil.isAppropriateSize(enemy, MobSize.safeValueOf(((SarcosuchusConfig) RiftConfigHandler.getConfig(RiftCreatureType.SARCOSUCHUS)).general.maximumSpinAttackTargetSize))) {
                                 this.sarcosuchus.setIsSpinning(true);
                                 this.spinVictim = enemy;
                                 this.targetProperties.isCaptured = true;

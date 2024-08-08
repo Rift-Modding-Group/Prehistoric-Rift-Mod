@@ -1,6 +1,4 @@
-package anightdazingzoroark.prift.configNew;
-
-import anightdazingzoroark.prift.RiftUtil;
+package anightdazingzoroark.prift.config;
 
 import java.util.Arrays;
 import java.util.List;

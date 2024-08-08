@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -56,23 +57,17 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
 
     public Utahraptor(World worldIn) {
         super(worldIn, RiftCreatureType.UTAHRAPTOR);
-        this.minCreatureHealth = UtahraptorConfig.getMinHealth();
-        this.maxCreatureHealth = UtahraptorConfig.getMaxHealth();
         this.setSize(1.25f, 1.5f);
         this.experienceValue = 10;
-        this.favoriteFood = UtahraptorConfig.utahraptorFavoriteFood;
-        this.tamingFood = UtahraptorConfig.utahraptorTamingFood;
+        this.favoriteFood = ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.speed = 0.35D;
         this.isRideable = true;
         this.attackWidth = 2f;
         this.packBuffCooldown = 0;
         this.maxRightClickCooldown = 1800f;
-        this.saddleItem = UtahraptorConfig.utahraptorSaddleItem;
-        this.attackDamage = UtahraptorConfig.damage;
-        this.healthLevelMultiplier = UtahraptorConfig.healthMultiplier;
-        this.damageLevelMultiplier = UtahraptorConfig.damageMultiplier;
-        this.densityLimit = UtahraptorConfig.utahraptorDensityLimit;
-        this.targetList = RiftUtil.creatureTargets(UtahraptorConfig.utahraptorTargets, UtahraptorConfig.utahraptorTargetBlacklist, true);
+        this.saddleItem = ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.targetList = RiftUtil.creatureTargets(((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
     @Override

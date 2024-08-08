@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManual
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.config.ApatosaurusConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -89,21 +90,15 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
 
     public Apatosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.APATOSAURUS);
-        this.minCreatureHealth = ApatosaurusConfig.getMinHealth();
-        this.maxCreatureHealth = ApatosaurusConfig.getMaxHealth();
         this.setSize(4f, 3f);
-        this.favoriteFood = ApatosaurusConfig.apatosaurusFavoriteFood;
-        this.tamingFood = ApatosaurusConfig.apatosaurusBreedingFood;
+        this.favoriteFood = ((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.experienceValue = 50;
         this.speed = 0.15D;
         this.isRideable = true;
         this.attackWidth = 6f;
         this.launchTick = 0;
-        this.saddleItem = ApatosaurusConfig.apatosaurusSaddleItem;
-        this.attackDamage = ApatosaurusConfig.damage;
-        this.healthLevelMultiplier = ApatosaurusConfig.healthMultiplier;
-        this.damageLevelMultiplier = ApatosaurusConfig.damageMultiplier;
-        this.densityLimit = ApatosaurusConfig.apatosaurusDensityLimit;
+        this.saddleItem = ((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
     }
 
     @Override
@@ -747,7 +742,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
                 }
             })) {
                 for (int i = 0; i < 3 - passengerSize; i++) {
-                    boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(ApatosaurusConfig.apatosaurusPassengerMaxSize));
+                    boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf( ((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumPassengerSize ));
                     if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
                         entity.startRiding(this, true);
                         this.dismount = true;
@@ -774,7 +769,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
                     }
                 })) {
                     for (int i = 0; i < 3 - passengerSize; i++) {
-                        boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(ApatosaurusConfig.apatosaurusPassengerMaxSize));
+                        boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumPassengerSize));
                         if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
                             entity.startRiding(this, true);
                             this.dismount = true;

@@ -3,14 +3,12 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.PalaeocastorConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,7 +18,6 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -32,7 +29,6 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 
 public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvestWhenWandering {
@@ -45,17 +41,12 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     public Palaeocastor(World worldIn) {
         super(worldIn, RiftCreatureType.PALAEOCASTOR);
         this.setSize(0.75f, 0.75f);
-        this.minCreatureHealth = PalaeocastorConfig.getMinHealth();
-        this.maxCreatureHealth = PalaeocastorConfig.getMaxHealth();
-        this.favoriteFood = PalaeocastorConfig.palaeocastorFavoriteFood;
-        this.tamingFood = PalaeocastorConfig.palaeocastorTamingFood;
+        this.favoriteFood = ((PalaeocastorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((PalaeocastorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.speed = 0.25D;
         this.attackWidth = 2f;
-        this.attackDamage = PalaeocastorConfig.damage;
+        this.attackDamage = RiftConfigHandler.getConfig(this.creatureType).stats.baseDamage;
         this.experienceValue = 3;
-        this.healthLevelMultiplier = PalaeocastorConfig.healthMultiplier;
-        this.damageLevelMultiplier = PalaeocastorConfig.damageMultiplier;
-        this.densityLimit = PalaeocastorConfig.palaeocastorDensityLimit;
     }
 
     @Override
@@ -133,7 +124,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
 
     @Override
     public List<String> blocksToHarvest() {
-        return Arrays.asList(PalaeocastorConfig.palaeocastorMineBlocks);
+        return ((PalaeocastorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
     }
 
     public void setHarvesting(boolean value) {

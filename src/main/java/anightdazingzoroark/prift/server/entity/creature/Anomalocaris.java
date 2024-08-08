@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.AnomalocarisConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -48,21 +49,15 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     public Anomalocaris(World worldIn) {
         super(worldIn, RiftCreatureType.ANOMALOCARIS);
         this.setSize(2f, 0.75f);
-        this.minCreatureHealth = AnomalocarisConfig.getMinHealth();
-        this.maxCreatureHealth = AnomalocarisConfig.getMaxHealth();
-        this.favoriteFood = AnomalocarisConfig.anomalocarisFavoriteFood;
-        this.tamingFood = AnomalocarisConfig.anomalocarisTamingFood;
+        this.favoriteFood = ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.tamingFood = ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.experienceValue = 10;
         this.isRideable = true;
-        this.saddleItem = AnomalocarisConfig.anomalocarisSaddleItem;
+        this.saddleItem = ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.speed = 0.2D;
         this.waterSpeed = 5D;
         this.attackWidth = 3f;
-        this.attackDamage = AnomalocarisConfig.damage;
-        this.healthLevelMultiplier = AnomalocarisConfig.healthMultiplier;
-        this.damageLevelMultiplier = AnomalocarisConfig.damageMultiplier;
-        this.densityLimit = AnomalocarisConfig.anomalocarisDensityLimit;
-        this.targetList = RiftUtil.creatureTargets(AnomalocarisConfig.anomalocarisTargets, AnomalocarisConfig.anomalocarisTargetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
     @Override
@@ -178,10 +173,10 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
                         boolean canGrabFlag;
 
                         if (target instanceof EntityPlayer) {
-                            canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured && RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize));
+                            canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured && RiftUtil.isAppropriateSize(target, MobSize.safeValueOf( ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize ));
                         }
                         else {
-                            canGrabFlag = !target.equals(this) && !properties.isCaptured && RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize));
+                            canGrabFlag = !target.equals(this) && !properties.isCaptured && RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize));
                         }
 
                         if (canGrabFlag) {
@@ -197,10 +192,10 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
                             public boolean apply(@Nullable EntityLivingBase input) {
                                 RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
                                 if (input instanceof EntityPlayer) {
-                                    return !input.getUniqueID().equals(ownerID) && !properties.isCaptured && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize));
+                                    return !input.getUniqueID().equals(ownerID) && !properties.isCaptured && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(creatureType)).general.maximumGrabTargetSize));
                                 }
                                 else {
-                                    return !properties.isCaptured && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize));
+                                    return !properties.isCaptured && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(creatureType)).general.maximumGrabTargetSize));
                                 }
                             }
                         });
@@ -240,7 +235,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
             EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
             RiftEntityProperties entityProperties = EntityPropertiesHandler.INSTANCE.getProperties(entityLivingBase, RiftEntityProperties.class);
 
-            if (RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(AnomalocarisConfig.anomalocarisGrabMaxSize))) {
+            if (RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize))) {
                 RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
                 entityProperties.isCaptured = true;
             }

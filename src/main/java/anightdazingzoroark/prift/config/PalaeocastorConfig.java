@@ -1,55 +1,50 @@
 package anightdazingzoroark.prift.config;
 
-import net.minecraftforge.common.config.Configuration;
+import com.google.gson.annotations.SerializedName;
 
-public class PalaeocastorConfig extends RiftConfig {
-    private static int maxHealth;
-    private static int initMaxHealth;
-    public static int damage;
-    private static int initDamage;
-    public static double healthMultiplier = 0.1;
-    public static double damageMultiplier = 0.2;
-    public static int palaeocastorDensityLimit = 4;
-    public static String[] palaeocastorFavoriteFood = {"minecraft:coal:0:0.05", "minecraft:cobblestone:0:0.025", "minecraft:stone:0:0.05", "minecraft:stone:1:0.05", "minecraft:stone:2:0.2", "minecraft:stone:3:0.05", "minecraft:stone:4:0.2", "minecraft:stone:5:0.05", "minecraft:stone:6:0.2"};
-    public static String[] palaeocastorTamingFood = {"prift:basic_saxumavore_meal:0:0.10", "prift:advanced_saxumavore_meal:0:0.33"};
-    public static String[] palaeocastorMineBlocks = {"minecraft:coal_ore:0",
-            "minecraft:iron_ore:0",
-            "minecraft:lapis_ore:0",
-            "minecraft:gold_ore:0",
-            "minecraft:diamond_ore:0",
-            "minecraft:emerald_ore:0"};
+import java.util.Arrays;
+import java.util.List;
 
-    public PalaeocastorConfig(Configuration config) {
-        super(config, new String[]{"all:10:1:1:CREATURE"});
-        maxHealth = initMaxHealth = 6;
-        damage = initDamage = 4;
-    }
+public class PalaeocastorConfig extends RiftCreatureConfig {
+    @SerializedName("general")
+    public PalaeocastorGeneral general = new PalaeocastorGeneral();
 
-    @Override
-    public void init() {
-        super.init();
-        maxHealth = config.getInt(RiftConfig.healthConfigName, "Creature Stats", initMaxHealth, 1, 69420666, RiftConfig.healthConfigMessage);
-        damage = config.getInt(RiftConfig.damageConfigName, "Creature Stats", initDamage, 0, 69420666, RiftConfig.damageConfigMessage);
-        healthMultiplier = config.getFloat(RiftConfig.healthMultiplierConfigName, "Creature Stats", 0.1f, 0, 1f, RiftConfig.healthMultiplierConfigMessage);
-        damageMultiplier = config.getFloat(RiftConfig.damageMultiplierConfigName, "Creature Stats", 0.2f, 0, 1f, RiftConfig.damageMultiplierConfigMessage);
-
-        palaeocastorDensityLimit = config.getInt("Density Limit", "Spawning", 4, 1, 69420666, "Maximum amount of creatures of this type in a 64 x 64 x 64 area");
-
-        palaeocastorFavoriteFood = config.getStringList("Palaeocastor Favorite Food", "General", new String[]{"minecraft:coal:0:0.05", "minecraft:cobblestone:0:0.025", "minecraft:stone:0:0.05", "minecraft:stone:1:0.05", "minecraft:stone:2:0.2", "minecraft:stone:3:0.05", "minecraft:stone:4:0.2", "minecraft:stone:5:0.05", "minecraft:stone:6:0.2"}, "List of foods Palaeocastors will eat (when tamed) or pick up when on the ground. To add items add \"<insert item's identifier here>:<insert data id here>:<insert percentage of health that will be healed upon consumption here>\"");
-        palaeocastorTamingFood = config.getStringList("Palaeocastor Taming Food", "General", new String[]{"prift:basic_saxumavore_meal:0:0.10", "prift:advanced_saxumavore_meal:0:0.33"}, "List of foods Palaeocastors must be fed to be tamed (if wild) or bred (if tamed). To add items add \"<insert item's identifier here>:<insert data id here>:<percentage of tame progress to fill up before taming>\"");
-        palaeocastorMineBlocks = config.getStringList("Palaeocastor Harvestable Blocks", "General", new String[]{"minecraft:coal_ore:0",
+    public PalaeocastorConfig() {
+        this.stats.baseHealth = 20;
+        this.stats.baseDamage = 5;
+        this.stats.healthMultiplier = 0.1;
+        this.stats.damageMultiplier = 0.5;
+        this.general.favoriteFood = Arrays.asList(
+                new RiftCreatureConfig.Food("minecraft:coal:0", 0.05),
+                new RiftCreatureConfig.Food("minecraft:cobblestone", 0.025),
+                new RiftCreatureConfig.Food("minecraft:stone:0", 0.05),
+                new RiftCreatureConfig.Food("minecraft:stone:1", 0.05),
+                new RiftCreatureConfig.Food("minecraft:stone:2", 0.2),
+                new RiftCreatureConfig.Food("minecraft:stone:3", 0.05),
+                new RiftCreatureConfig.Food("minecraft:stone:4", 0.2),
+                new RiftCreatureConfig.Food("minecraft:stone:5", 0.05),
+                new RiftCreatureConfig.Food("minecraft:stone:6", 0.2)
+        );
+        this.general.favoriteMeals = Arrays.asList(
+                new Meal("prift:basic_saxumavore_meal", 0.10),
+                new Meal("prift:advanced_saxumavore_meal", 0.33)
+        );
+        this.general.harvestableBlocks = Arrays.asList(
+                "minecraft:coal_ore:0",
                 "minecraft:iron_ore:0",
                 "minecraft:lapis_ore:0",
                 "minecraft:gold_ore:0",
                 "minecraft:diamond_ore:0",
-                "minecraft:emerald_ore:0"}, "List of blocks that Palaeocastors when set to harvest on wander will mine. To add items add \"<insert item's identifier here>:<insert data id here>\"");
+                "minecraft:emerald_ore:0",
+                "minecraft:cobblestone:0"
+        );
+        this.spawnRules = Arrays.asList(
+                new SpawnRule().setCategory("CAVE").setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes(Arrays.asList("all"))
+        );
     }
 
-    public static double getMaxHealth() {
-        return maxHealth;
-    }
-
-    public static double getMinHealth() {
-        return ((double)maxHealth)/8D;
+    public static class PalaeocastorGeneral extends General {
+        @SerializedName("harvestableBlocks")
+        public List<String> harvestableBlocks;
     }
 }

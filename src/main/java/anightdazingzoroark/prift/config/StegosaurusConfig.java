@@ -1,49 +1,27 @@
 package anightdazingzoroark.prift.config;
 
-import net.minecraftforge.common.config.Configuration;
+import com.google.gson.annotations.SerializedName;
 
-public class StegosaurusConfig extends RiftConfig {
-    private static int maxHealth;
-    private static int initMaxHealth;
-    public static int damage;
-    private static int initDamage;
-    public static double healthMultiplier = 0.1;
-    public static double damageMultiplier = 0.5;
-    public static int stegosaurusDensityLimit = 12;
-    public static String[] stegosaurusFavoriteFood = {"minecraft:apple:0:0.025", "minecraft:wheat:0:0.05", "minecraft:carrot:0:0.05", "minecraft:potato:0:0.05", "minecraft:beetroot:0:0.05"};
-    public static String[] stegosaurusTamingFood = {"prift:basic_herbivore_meal:0:0.10", "prift:advanced_herbivore_meal:0:33"};
-    public static String[] stegosaurusMineBlock = {
-            "minecraft:wheat:7",
-            "minecraft:carrots:7",
-            "minecraft:potatoes:7",
-            "minecraft:beetroots:3",
-            "prift:pyroberry_bush:2",
-            "prift:pyroberry_bush:3",
-            "prift:cryoberry_bush:2",
-            "prift:cryoberry_bush:3"
-    };
-    public static boolean stegosaurusCanInflictBleed = true;
-    public static String stegosaurusSaddleItem = "minecraft:saddle:0";
+import java.util.Arrays;
+import java.util.List;
 
-    public StegosaurusConfig(Configuration config) {
-        super(config, new String[]{"tag:plains:10:4:6:CREATURE", "-tag:savanna"});
-        maxHealth = initMaxHealth = 100;
-        damage = initDamage = 30;
-    }
+public class StegosaurusConfig extends RiftCreatureConfig {
+    @SerializedName("general")
+    public StegosaurusGeneral general = new StegosaurusGeneral();
 
-    @Override
-    public void init() {
-        super.init();
-        maxHealth = config.getInt(RiftConfig.healthConfigName, "Creature Stats", initMaxHealth, 1, 69420666, RiftConfig.healthConfigMessage);
-        damage = config.getInt(RiftConfig.damageConfigName, "Creature Stats", initDamage, 0, 69420666, RiftConfig.damageConfigMessage);
-        healthMultiplier = config.getFloat(RiftConfig.healthMultiplierConfigName, "Creature Stats", 0.1f, 0, 1f, RiftConfig.healthMultiplierConfigMessage);
-        damageMultiplier = config.getFloat(RiftConfig.damageMultiplierConfigName, "Creature Stats", 0.5f, 0, 1f, RiftConfig.damageMultiplierConfigMessage);
-
-        stegosaurusDensityLimit = config.getInt("Density Limit", "Spawning", 12, 1, 69420666, "Maximum amount of creatures of this type in a 64 x 64 x 64 area");
-
-        stegosaurusFavoriteFood = config.getStringList("Stegosaurus Favorite Food", "General", new String[]{"minecraft:apple:0:0.025", "minecraft:wheat:0:0.05", "minecraft:carrot:0:0.05", "minecraft:potato:0:0.05", "minecraft:beetroot:0:0.05"}, "List of foods Stegosauruses will eat. To add items add \"<insert item's identifier here>:<insert data id here>:<insert percentage of health that will be healed upon consumption here>\"");
-        stegosaurusTamingFood = config.getStringList("Stegosaurus Taming Food", "General", new String[]{"prift:basic_herbivore_meal:0:0.10", "prift:advanced_herbivore_meal:0:33"}, "List of foods Stegosauruses must be fed to be tamed (if wild) or bred (if tamed). To add items add \"<insert item's identifier here>:<insert data id here>:<percentage of tame progress to fill up before taming>\"");
-        stegosaurusMineBlock = config.getStringList("Stegosaurus Harvestable Blocks", "General", new String[]{
+    public StegosaurusConfig() {
+        this.stats.baseHealth = 100;
+        this.stats.baseDamage = 30;
+        this.stats.healthMultiplier = 0.1;
+        this.stats.damageMultiplier = 0.5;
+        this.general.saddleItem = "minecraft:saddle";
+        this.general.favoriteFood = RiftCreatureConfigDefaults.defaultHerbivoreFoods;
+        this.general.favoriteMeals = Arrays.asList(
+                new Meal("prift:basic_herbivore_meal", 0.1),
+                new Meal("prift:advanced_herbivore_meal", 0.33)
+        );
+        this.general.canInflictBleed = false;
+        this.general.harvestableBlocks = Arrays.asList(
                 "minecraft:wheat:7",
                 "minecraft:carrots:7",
                 "minecraft:potatoes:7",
@@ -52,16 +30,17 @@ public class StegosaurusConfig extends RiftConfig {
                 "prift:pyroberry_bush:3",
                 "prift:cryoberry_bush:2",
                 "prift:cryoberry_bush:3"
-        }, "List of blocks that Stegosauruses when set to harvest on wander will mine. To add items add \"<insert item's identifier here>:<insert data id here>\"");
-        stegosaurusCanInflictBleed = config.getBoolean("Stegosaurus Can Inflict Bleed", "General", true, "Whether or not Stegosauruses can inflict bleed using their strong attack");
-        stegosaurusSaddleItem = config.getString("Stegosaurus Saddle Item", "General", "minecraft:saddle:0", "Item that counts as a saddle for this creature. To add an item add \"<insert item's identifier here>:<insert data id here>\"");
+        );
+        this.spawnRules = Arrays.asList(
+                new SpawnRule().setCategory("LAND").setWeight(10).setSpawnAmntRange(4, 6).setDensityLimit(12).setBiomes(Arrays.asList("tag:plains", "-tag:savanna"))
+        );
     }
 
-    public static double getMaxHealth() {
-        return maxHealth;
-    }
+    public static class StegosaurusGeneral extends General {
+        @SerializedName("canInflictBleed")
+        public boolean canInflictBleed;
 
-    public static double getMinHealth() {
-        return ((double)maxHealth)/8D;
+        @SerializedName("harvestableBlocks")
+        public List<String> harvestableBlocks;
     }
 }

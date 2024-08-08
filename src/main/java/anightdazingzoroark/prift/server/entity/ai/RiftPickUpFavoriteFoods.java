@@ -1,10 +1,11 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 
@@ -30,17 +31,12 @@ public class RiftPickUpFavoriteFoods extends EntityAIBase {
         this.items = new Predicate<EntityItem>() {
             @Override
             public boolean apply(@Nullable EntityItem entityItem) {
-                for (String itemString : mob.favoriteFood) {
-                    int itemIdFirst = itemString.indexOf(":");
-                    int itemIdSecond = itemString.indexOf(":", itemIdFirst + 1);
-                    int itemIdThird = itemString.indexOf(":", itemIdSecond + 1);
-                    String itemId = itemString.substring(0, itemIdSecond);
-                    int itemData = Integer.parseInt(itemString.substring(itemIdSecond + 1, itemIdThird));
-                    if (entityItem != null && !entityItem.getItem().isEmpty() && entityItem.getItem().getItem().equals(Item.getByNameOrId(itemId))) {
-                        return (entityItem.getItem().getMetadata() == itemData) || (itemData == -1);
-                    }
+                ItemStack stackFromEntityItem = entityItem.getItem();
+                boolean flag = false;
+                for (RiftCreatureConfig.Food food : mob.favoriteFood) {
+                    if (!flag) flag = RiftUtil.itemStackEqualToString(stackFromEntityItem, food.itemId);
                 }
-                return false;
+                return flag;
             }
         };
         this.setMutexBits(1);

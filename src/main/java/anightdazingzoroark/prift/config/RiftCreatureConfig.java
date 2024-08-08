@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.configNew;
+package anightdazingzoroark.prift.config;
 
 import com.google.gson.annotations.SerializedName;
 

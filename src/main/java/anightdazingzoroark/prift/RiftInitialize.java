@@ -1,13 +1,11 @@
 package anightdazingzoroark.prift;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
-import anightdazingzoroark.prift.config.RiftConfigList;
-import anightdazingzoroark.prift.configNew.*;
+import anightdazingzoroark.prift.config.*;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
 import anightdazingzoroark.prift.server.commands.RiftJournalCommand;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftEntities;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -38,6 +36,7 @@ public class RiftInitialize {
     @Mod.Instance(MODID)
     public static RiftInitialize instance;
     public static Logger logger;
+    public static Configuration configMain;
 
     static {
         FluidRegistry.enableUniversalBucket();
@@ -48,19 +47,17 @@ public class RiftInitialize {
         logger = event.getModLog();
         PROXY.preInit(event);
 
-        //for config
+        //for general config
         File directory = event.getModConfigurationDirectory();
-        for (RiftConfigList configVal : RiftConfigList.values()) {
-            configVal.loadConfig(directory);
-        }
+        configMain = new Configuration(new File(directory.getPath(), "prift/general.cfg"));
+        GeneralConfig.readConfig();
 
+        //for creature config
         Map<String, Class<? extends RiftCreatureConfig>> configClasses = new HashMap<>();
         for (RiftCreatureType creatureType : RiftCreatureType.values()) {
             if (creatureType.getConfig() != null) configClasses.put(creatureType.name().toLowerCase(), creatureType.getConfig());
         }
         RiftConfigHandler.init(new File(event.getModConfigurationDirectory(), "prift/creatures/"), configClasses);
-
-        RiftEntities.registerSpawn();
     }
 
     @Mod.EventHandler
@@ -75,14 +72,10 @@ public class RiftInitialize {
     public void postInit(FMLPostInitializationEvent event) {
         PROXY.postInit(event);
 
-        //for config
-        for (RiftConfigList configVal : RiftConfigList.values()) {
-            Configuration cfg = configVal.getConfigInstance().config;
-            if (cfg.hasChanged()) {
-                cfg.save();
-            }
-        }
+        //for general config
+        if (configMain.hasChanged()) configMain.save();
 
+        //for creature config
         RiftConfigHandler.saveAllConfigs();
 
         //crash game if some config stuff is wrong

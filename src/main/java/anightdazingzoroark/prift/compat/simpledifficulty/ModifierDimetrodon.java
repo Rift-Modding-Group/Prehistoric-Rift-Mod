@@ -2,6 +2,8 @@ package anightdazingzoroark.prift.compat.simpledifficulty;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import com.charles445.simpledifficulty.temperature.ModifierBase;
 import com.google.common.base.Predicate;
@@ -75,16 +77,16 @@ public class ModifierDimetrodon extends ModifierBase {
                     if (blockPos.equals(pos)) {
                         switch (dimetrodon.getTemperature()) {
                             case VERY_COLD:
-                                temperature += this.changeByDistance(DimetrodonConfig.dimetrodonVeryColdValue, dimetrodon.getPosition(), pos);
+                                temperature += this.changeByDistance(((DimetrodonConfig) RiftConfigHandler.getConfig(RiftCreatureType.DIMETRODON)).simpleDifficulty.veryColdTemperatureValue, dimetrodon.getPosition(), pos);
                                 break;
                             case COLD:
-                                temperature += this.changeByDistance(DimetrodonConfig.dimetrodonColdValue, dimetrodon.getPosition(), pos);
+                                temperature += this.changeByDistance(((DimetrodonConfig) RiftConfigHandler.getConfig(RiftCreatureType.DIMETRODON)).simpleDifficulty.coldTemperatureValue, dimetrodon.getPosition(), pos);
                                 break;
                             case WARM:
-                                temperature += this.changeByDistance(DimetrodonConfig.dimetrodonWarmValue, dimetrodon.getPosition(), pos);
+                                temperature += this.changeByDistance(((DimetrodonConfig) RiftConfigHandler.getConfig(RiftCreatureType.DIMETRODON)).simpleDifficulty.warmTemperatureValue, dimetrodon.getPosition(), pos);
                                 break;
                             case VERY_WARM:
-                                temperature += this.changeByDistance(DimetrodonConfig.dimetrodonVeryWarmValue, dimetrodon.getPosition(), pos);
+                                temperature += this.changeByDistance(((DimetrodonConfig) RiftConfigHandler.getConfig(RiftCreatureType.DIMETRODON)).simpleDifficulty.veryWarmTemperatureValue, dimetrodon.getPosition(), pos);
                                 break;
                         }
                     }
