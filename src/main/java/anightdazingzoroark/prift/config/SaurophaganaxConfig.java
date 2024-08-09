@@ -55,11 +55,9 @@ public class SaurophaganaxConfig extends RiftCreatureConfig {
                 "minecraft:zombie",
                 "minecraft:zombie_villager"
         );
-        this.spawnRules.spawnAmntRange = Arrays.asList(1, 1);
-        this.spawnRules.densityLimit = 1;
-        this.spawnRules.spawnType = "LAND";
-        this.spawnRules.spawnBiomes = Arrays.asList(
-                new SpawnBiomes(Arrays.asList("all"), 90)
+        this.spawnRules = Arrays.asList(
+                new SpawnRule().setCategory("NOCTURNAL_LAND").setWeight(15).setSpawnAmntRange(1, 1).setDensityLimit(1).setBiomes(Arrays.asList("all")),
+                new SpawnRule().setCategory("CAVE").setWeight(15).setSpawnAmntRange(1, 1).setDensityLimit(1).setBiomes(Arrays.asList("all"))
         );
     }
 }

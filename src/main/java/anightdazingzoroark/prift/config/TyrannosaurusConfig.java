@@ -28,12 +28,9 @@ public class TyrannosaurusConfig extends RiftCreatureConfig {
                 "prift:apatosaurus"
         );
         this.general.useRoarBlacklistAsWhitelist = false;
-        this.spawnRules.spawnAmntRange = Arrays.asList(1, 1);
-        this.spawnRules.densityLimit = 4;
-        this.spawnRules.spawnType = "LAND";
-        this.spawnRules.spawnBiomes = Arrays.asList(
-                new SpawnBiomes(Arrays.asList("tag:plains", "-tag:savanna"), 7),
-                new SpawnBiomes(Arrays.asList("tag:mountain"), 10)
+        this.spawnRules = Arrays.asList(
+                new SpawnRule().setCategory("LAND").setWeight(7).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes(Arrays.asList("tag:plains", "tag:mountain", "-tag:savanna", "-tag:cold")),
+                new SpawnRule().setCategory("LAND").setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes(Arrays.asList("tag:mountain", "-tag:cold"))
         );
     }
 

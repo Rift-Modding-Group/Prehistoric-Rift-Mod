@@ -1086,7 +1086,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return creatureList.size() < this.densityLimit;
     }
 
-    public boolean isBrightnessLevel(int min, int max) {
+    protected boolean isBrightnessLevel(int min, int max) {
         return this.world.getLight(this.getPosition()) >= min && this.world.getLight(this.getPosition()) <= max;
     }
 

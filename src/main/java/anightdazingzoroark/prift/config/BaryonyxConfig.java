@@ -21,11 +21,8 @@ public class BaryonyxConfig extends RiftCreatureConfig {
         );
         this.general.targetWhitelist = Arrays.asList();
         this.general.targetBlacklist = Arrays.asList();
-        this.spawnRules.spawnAmntRange = Arrays.asList(1, 1);
-        this.spawnRules.densityLimit = 2;
-        this.spawnRules.spawnType = "WATER";
-        this.spawnRules.spawnBiomes = Arrays.asList(
-                new SpawnBiomes(Arrays.asList("tag:swamp"), 10)
+        this.spawnRules = Arrays.asList(
+                new SpawnRule().setCategory("AMPHIBIOUS").setWeight(15).setSpawnAmntRange(1, 1).setDensityLimit(2).setBiomes(Arrays.asList("tag:swamp"))
         );
     }
 }

@@ -40,11 +40,8 @@ public class DimetrodonConfig extends RiftCreatureConfig {
         this.simpleDifficulty.coldTemperatureValue = -5.0f;
         this.simpleDifficulty.warmTemperatureValue = 5.0f;
         this.simpleDifficulty.veryWarmTemperatureValue = 10.0f;
-        this.spawnRules.spawnAmntRange = Arrays.asList(1, 1);
-        this.spawnRules.densityLimit = 4;
-        this.spawnRules.spawnType = "LAND";
-        this.spawnRules.spawnBiomes = Arrays.asList(
-                new SpawnBiomes(Arrays.asList("tag:sandy", "tag:savanna"), 10)
+        this.spawnRules = Arrays.asList(
+                new SpawnRule().setCategory("LAND").setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes(Arrays.asList("tag:sandy", "tag:savanna"))
         );
     }
 
