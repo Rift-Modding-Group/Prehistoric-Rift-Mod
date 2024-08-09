@@ -21,9 +21,14 @@ public class UtahraptorConfig extends RiftCreatureConfig {
         );
         this.general.targetWhitelist = Arrays.asList();
         this.general.targetBlacklist = Arrays.asList();
-        this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("LAND").setWeight(10).setSpawnAmntRange(2, 4).setDensityLimit(16).setBiomes(Arrays.asList("tag:plains", "-tag:savanna")),
-                new SpawnRule().setCategory("LAND").setWeight(15).setSpawnAmntRange(2, 4).setDensityLimit(16).setBiomes(Arrays.asList("tag:forest", "tag:jungle", "-tag:cold"))
+        this.spawnRules.spawnAmntRange = Arrays.asList(2, 4);
+        this.spawnRules.densityLimit = 16;
+        this.spawnRules.spawnType = "LAND";
+        this.spawnRules.spawnBiomes = Arrays.asList(
+                new SpawnBiomes(Arrays.asList("tag:plains", "-tag:savanna"), 7),
+                new SpawnBiomes(Arrays.asList("tag:plains", "-tag:savanna"), 120).setSpawnAtNightOnly(),
+                new SpawnBiomes(Arrays.asList("tag:forest", "tag:jungle", "-tag:cold"), 15),
+                new SpawnBiomes(Arrays.asList("tag:forest", "tag:jungle", "-tag:cold"), 120).setSpawnAtNightOnly()
         );
     }
 }

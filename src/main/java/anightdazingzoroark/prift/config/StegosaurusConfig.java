@@ -31,8 +31,11 @@ public class StegosaurusConfig extends RiftCreatureConfig {
                 "prift:cryoberry_bush:2",
                 "prift:cryoberry_bush:3"
         );
-        this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("LAND").setWeight(10).setSpawnAmntRange(4, 6).setDensityLimit(12).setBiomes(Arrays.asList("tag:plains", "-tag:savanna"))
+        this.spawnRules.spawnAmntRange = Arrays.asList(4, 6);
+        this.spawnRules.densityLimit = 12;
+        this.spawnRules.spawnType = "LAND";
+        this.spawnRules.spawnBiomes = Arrays.asList(
+                new SpawnBiomes(Arrays.asList("tag:plains", "-tag:savanna"), 10)
         );
     }
 

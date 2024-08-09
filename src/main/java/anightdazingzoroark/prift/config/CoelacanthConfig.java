@@ -6,8 +6,11 @@ public class CoelacanthConfig extends RiftCreatureConfig {
     public CoelacanthConfig() {
         this.stats.baseHealth = 6;
         this.stats.healthMultiplier = 0.1;
-        this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("WATER").setWeight(15).setSpawnAmntRange(4, 6).setDensityLimit(16).setBiomes(Arrays.asList("biome:minecraft:deep_ocean"))
+        this.spawnRules.spawnAmntRange = Arrays.asList(4, 6);
+        this.spawnRules.densityLimit = 16;
+        this.spawnRules.spawnType = "WATER";
+        this.spawnRules.spawnBiomes = Arrays.asList(
+                new SpawnBiomes(Arrays.asList("biome:minecraft:deep_ocean"), 15)
         );
     }
 }

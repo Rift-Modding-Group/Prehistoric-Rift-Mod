@@ -38,8 +38,11 @@ public class PalaeocastorConfig extends RiftCreatureConfig {
                 "minecraft:emerald_ore:0",
                 "minecraft:cobblestone:0"
         );
-        this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("CAVE").setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes(Arrays.asList("all"))
+        this.spawnRules.spawnAmntRange = Arrays.asList(1, 1);
+        this.spawnRules.densityLimit = 4;
+        this.spawnRules.spawnType = "CAVE";
+        this.spawnRules.spawnBiomes = Arrays.asList(
+                new SpawnBiomes(Arrays.asList("all"), 100)
         );
     }
 

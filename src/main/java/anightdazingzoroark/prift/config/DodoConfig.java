@@ -18,8 +18,11 @@ public class DodoConfig extends RiftCreatureConfig {
                 "minecraft:melon_seeds",
                 "minecraft:beetroot_seeds"
         );
-        this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("LAND").setWeight(15).setSpawnAmntRange(2, 3).setDensityLimit(16).setBiomes(Arrays.asList("tag:plains", "tag:sandy", "tag:forest"))
+        this.spawnRules.spawnAmntRange = Arrays.asList(2, 3);
+        this.spawnRules.densityLimit = 16;
+        this.spawnRules.spawnType = "LAND";
+        this.spawnRules.spawnBiomes = Arrays.asList(
+                new SpawnBiomes(Arrays.asList("tag:plains", "tag:sandy", "tag:forest"), 15)
         );
     }
 

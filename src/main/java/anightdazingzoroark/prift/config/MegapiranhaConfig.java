@@ -24,8 +24,11 @@ public class MegapiranhaConfig extends RiftCreatureConfig {
                 "minecraft:squid"
         );
         this.general.targetBlacklist = Arrays.asList();
-        this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("WATER").setWeight(25).setSpawnAmntRange(4, 6).setDensityLimit(16).setBiomes(Arrays.asList("all", "-tag:ocean", "-tag:beach"))
+        this.spawnRules.spawnAmntRange = Arrays.asList(4, 6);
+        this.spawnRules.densityLimit = 16;
+        this.spawnRules.spawnType = "WATER";
+        this.spawnRules.spawnBiomes = Arrays.asList(
+                new SpawnBiomes(Arrays.asList("all", "-tag:ocean", "-tag:beach"), 25)
         );
     }
 }
