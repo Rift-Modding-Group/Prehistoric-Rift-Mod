@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.config;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class RiftCreatureConfig {
@@ -9,7 +10,7 @@ public abstract class RiftCreatureConfig {
     public Stats stats = new Stats();
 
     @SerializedName("spawnRules")
-    public SpawnRules spawnRules = new SpawnRules();
+    public List<SpawnRule> spawnRules;
 
     public static class Stats {
         @SerializedName("baseHealth")
@@ -72,7 +73,24 @@ public abstract class RiftCreatureConfig {
         }
     }
 
-    public static class SpawnRules {
+    public static class SpawnRule {
+        //this is the spawning category that determines the bulk of where a creature should spawn in
+        //values are:
+        //LAND: land creatures at day
+        //NOCTURNAL_LAND: land creatures at night
+        //WATER: aquatic creatures
+        //AMPHIBIOUS: for amphibious creatures, will count as both land and water
+        //AIR: for flying creatures
+        //CAVE:  cave creatures
+        @SerializedName("category")
+        public String category;
+
+        //among all the creatures within the biome the player is in and the spawning category,
+        //the weight will be used to determine what creatures will spawn
+        //higher values means higher chance
+        @SerializedName("weight")
+        public int weight;
+
         //an array w a size of 2 and only 2
         //is for how many creatures will be placed
         //during the spawning phase
@@ -80,7 +98,7 @@ public abstract class RiftCreatureConfig {
         @SerializedName("spawnAmntRange")
         public List<Integer> spawnAmntRange;
 
-        //how many creatures of this type within a 64 x 64 x 64 range
+        //how many creatures of this type within a 64 x 64 x 64
         //should exist
         @SerializedName("densityLimit")
         public int densityLimit;
@@ -89,14 +107,14 @@ public abstract class RiftCreatureConfig {
         @SerializedName("spawnBlocks")
         public List<String> spawnBlocks;
 
-        @SerializedName("spawnType")
-        public String spawnType;
+        //whether or not a creature should spawn on rain
+        @SerializedName("inRain")
+        public boolean inRain;
 
-        //spawn biomes
-        @SerializedName("spawnBiomes")
-        public List<SpawnBiomes> spawnBiomes;
+        //obviously the biomes a creature should be in
+        @SerializedName("biomes")
+        public List<String> biomes;
 
-        /*
         //if gamestages is installed, make it so that this creature
         //will only spawn in certain gamestages
         @SerializedName("gamestage")
@@ -106,29 +124,39 @@ public abstract class RiftCreatureConfig {
         //will only spawn during this season
         @SerializedName("season")
         public String season;
-        */
-    }
 
-    public static class SpawnBiomes {
-        //obviously the biomes a creature should be in
-        @SerializedName("biomes")
-        public List<String> biomes;
-
-        //weight for mob spawning
-        @SerializedName("weight")
-        public int weight;
-
-        //whether or not it will only spawn at night
-        @SerializedName("spawnAtNightOnly")
-        public boolean spawnAtNightOnly;
-
-        public SpawnBiomes(List<String> biomes, int weight) {
-            this.biomes = biomes;
-            this.weight = weight;
+        public SpawnRule setCategory(String value) {
+            this.category = value;
+            return this;
         }
 
-        public SpawnBiomes setSpawnAtNightOnly() {
-            this.spawnAtNightOnly = true;
+        public SpawnRule setWeight(int value) {
+             this.weight = value;
+             return this;
+        }
+
+        public SpawnRule setSpawnAmntRange(int min, int max) {
+            this.spawnAmntRange = Arrays.asList(min, max);
+            return this;
+        }
+
+        public SpawnRule setDensityLimit(int value) {
+            this.densityLimit = value;
+            return this;
+        }
+
+        public SpawnRule setSpawnBlocks(List<String> values) {
+            this.spawnBlocks = values;
+            return this;
+        }
+
+        public SpawnRule setSpawnInRain() {
+            this.inRain = true;
+            return this;
+        }
+
+        public SpawnRule setBiomes(List<String> values) {
+            this.biomes = values;
             return this;
         }
     }
