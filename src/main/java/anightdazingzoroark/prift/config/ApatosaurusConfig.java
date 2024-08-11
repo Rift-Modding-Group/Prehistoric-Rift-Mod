@@ -24,7 +24,7 @@ public class ApatosaurusConfig extends RiftCreatureConfig {
         );
         this.general.maximumPassengerSize = "MEDIUM";
         this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("LAND").setWeight(7).setSpawnAmntRange(1, 3).setDensityLimit(4).setBiomes(Arrays.asList("tag:plains", "-tag:savanna"))
+                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(7).setSpawnAmntRange(1, 3).setDensityLimit(4).setBiomes("tag:plains", "-tag:savanna")
         );
     }
 

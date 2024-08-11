@@ -74,14 +74,10 @@ public abstract class RiftCreatureConfig {
     }
 
     public static class SpawnRule {
-        //this is the spawning category that determines the bulk of where a creature should spawn in
-        //values are:
-        //LAND: land creatures at day
-        //NOCTURNAL_LAND: land creatures at night
-        //WATER: aquatic creatures
-        //AMPHIBIOUS: for amphibious creatures, will count as both land and water
-        //AIR: for flying creatures
-        //CAVE:  cave creatures
+        //spawn categories
+        //these only affect the spawn group its in
+        //valid values are:
+        //LAND, WATER, CAVE, and AIR
         @SerializedName("category")
         public String category;
 
@@ -103,13 +99,48 @@ public abstract class RiftCreatureConfig {
         @SerializedName("densityLimit")
         public int densityLimit;
 
-        //blocks that a creature will usually spawn on
-        @SerializedName("spawnBlocks")
-        public List<String> spawnBlocks;
+        //additional blocks that a creature will usually spawn on
+        @SerializedName("spawnBlocksWhitelist")
+        public List<String> spawnBlocksWhitelist;
 
-        //whether or not a creature should spawn on rain
+        //additional blocks that a creature will usually spawn on
+        @SerializedName("spawnBlocksBlacklist")
+        public List<String> spawnBlocksBlacklist;
+
+        //whether or not a creature should spawn
+        //during rain
         @SerializedName("inRain")
         public boolean inRain;
+
+        //whether or not a creature should spawn on land
+        @SerializedName("onLand")
+        public boolean onLand;
+
+        //whether or not a creature should spawn in water
+        @SerializedName("inWater")
+        public boolean inWater;
+
+        //whether or not a creature should spawn in air
+        @SerializedName("inAir")
+        public boolean inAir;
+
+        //whether or not a creature should
+        //spawn underground
+        @SerializedName("mustSeeSky")
+        public boolean mustSeeSky;
+
+        //time range in which a mob can spawn in
+        @SerializedName("timeRange")
+        public List<Integer> timeRange = Arrays.asList(0, 24000);
+
+        //y level range
+        @SerializedName("yLevelRange")
+        public List<Integer> yLevelRange = Arrays.asList(0, 256);
+
+        //dimension id that the creature can only spawn in
+        //by default its the overworld only
+        @SerializedName("dimensionId")
+        public int dimensionId = 0;
 
         //obviously the biomes a creature should be in
         @SerializedName("biomes")
@@ -145,8 +176,13 @@ public abstract class RiftCreatureConfig {
             return this;
         }
 
-        public SpawnRule setSpawnBlocks(List<String> values) {
-            this.spawnBlocks = values;
+        public SpawnRule setSpawnBlocksWhitelist(String... values) {
+            this.spawnBlocksWhitelist = Arrays.asList(values);
+            return this;
+        }
+
+        public SpawnRule setSpawnBlocksBlacklist(String... values) {
+            this.spawnBlocksBlacklist = Arrays.asList(values);
             return this;
         }
 
@@ -155,8 +191,43 @@ public abstract class RiftCreatureConfig {
             return this;
         }
 
-        public SpawnRule setBiomes(List<String> values) {
-            this.biomes = values;
+        public SpawnRule setSpawnOnLand() {
+            this.onLand = true;
+            return this;
+        }
+
+        public SpawnRule setSpawnInWater() {
+            this.inWater = true;
+            return this;
+        }
+
+        public SpawnRule setSpawnInAir() {
+            this.inAir = true;
+            return this;
+        }
+
+        public SpawnRule setMustSeeSky() {
+            this.mustSeeSky = true;
+            return this;
+        }
+
+        public SpawnRule setTimeRange(int min, int max) {
+            if (max >= min) this.timeRange = Arrays.asList(Math.max(0, min), Math.min(24000, max));
+            return this;
+        }
+
+        public SpawnRule setYLevelRange(int min, int max) {
+            if (max >= min) this.yLevelRange = Arrays.asList(Math.max(0, min), Math.min(256, max));
+            return this;
+        }
+
+        public SpawnRule setDimensionId(int value) {
+            this.dimensionId = value;
+            return this;
+        }
+
+        public SpawnRule setBiomes(String... values) {
+            this.biomes = Arrays.asList(values);
             return this;
         }
     }

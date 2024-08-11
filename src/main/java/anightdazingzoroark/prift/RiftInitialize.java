@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.config.*;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
 import anightdazingzoroark.prift.server.commands.RiftJournalCommand;
+import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawnLists;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.FluidRegistry;

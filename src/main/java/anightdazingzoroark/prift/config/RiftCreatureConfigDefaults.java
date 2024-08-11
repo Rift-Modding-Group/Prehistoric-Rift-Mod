@@ -55,4 +55,6 @@ public class RiftCreatureConfigDefaults {
             new RiftCreatureConfig.Food("prift:raw_megapiranha", 0.05),
             new RiftCreatureConfig.Food("prift:cooked_megapiranha", 0.075)
     );
+    public static List<Integer> daytimeRange = Arrays.asList(0, 12000);
+    public static List<Integer> defaultYRange = Arrays.asList(64, 256);
 }

@@ -26,7 +26,7 @@ public class AnomalocarisConfig extends RiftCreatureConfig {
         this.general.targetBlacklist = Arrays.asList();
         this.general.maximumGrabTargetSize = "MEDIUM";
         this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("WATER").setWeight(5).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes(Arrays.asList("biome:minecraft:deep_ocean"))
+                new SpawnRule().setCategory("WATER").setSpawnInWater().setMustSeeSky().setYLevelRange(0, 64).setWeight(5).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("biome:minecraft:deep_ocean")
         );
     }
 

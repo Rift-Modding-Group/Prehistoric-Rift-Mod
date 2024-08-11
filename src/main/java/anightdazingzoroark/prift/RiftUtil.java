@@ -373,6 +373,13 @@ public class RiftUtil {
         }
     }
 
+    public static boolean blockstateEqualToString(IBlockState state, String string) {
+        int colData = string.indexOf(":", string.indexOf(":") + 1);
+        int blockData = Integer.parseInt(string.substring(colData + 1));
+        String blockName = string.substring(0, colData);
+        return Block.getBlockFromName(blockName) == state.getBlock() && (blockData == - 1 || state.getBlock().getMetaFromState(state) == blockData);
+    }
+
     public static boolean checkForNoAssociations(RiftCreature user, EntityLivingBase target) {
         if (target instanceof EntityPlayer) return !user.isOwner(target);
         else if (target instanceof EntityTameable) {
@@ -386,8 +393,7 @@ public class RiftUtil {
     }
 
     public static <T> List<T> uniteTwoLists(List<T> listOne, List<T> listTwo) {
-        List<T> outputList = listOne;
-        for (T item : listTwo) outputList.add(item);
-        return outputList;
+        if (listTwo != null && !listTwo.isEmpty()) for (T item : listTwo) listOne.add(item);
+        return listOne;
     }
 }

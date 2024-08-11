@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
+import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawning;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
@@ -77,6 +78,7 @@ public class ServerProxy implements IGuiHandler {
 
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ServerEvents());
+        MinecraftForge.EVENT_BUS.register(new RiftCreatureSpawning());
         GameRegistry.registerWorldGenerator(new RiftPlantGenerator(), 0);
     }
 

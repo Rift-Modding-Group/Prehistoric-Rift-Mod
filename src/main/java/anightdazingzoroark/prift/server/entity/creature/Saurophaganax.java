@@ -215,11 +215,6 @@ public class Saurophaganax extends RiftCreature {
         return new Vec3d(xOffset, this.posY + 0.35, zOffset);
     }
 
-    @Override
-    public boolean getCanSpawnHere() {
-        return super.getCanSpawnHere() && this.isBrightnessLevel(0, 7);
-    }
-
     @SideOnly(Side.CLIENT)
     public boolean shouldRender(ICamera camera) {
         return super.shouldRender(camera) || this.inFrustrum(camera, this.bodyFrontPart) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part);

@@ -29,8 +29,8 @@ public class TyrannosaurusConfig extends RiftCreatureConfig {
         );
         this.general.useRoarBlacklistAsWhitelist = false;
         this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("LAND").setWeight(7).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes(Arrays.asList("tag:plains", "tag:mountain", "-tag:savanna", "-tag:cold")),
-                new SpawnRule().setCategory("LAND").setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes(Arrays.asList("tag:mountain", "-tag:cold"))
+                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(7).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("tag:plains", "-tag:savanna", "-tag:cold"),
+                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("tag:mountain", "-tag:cold")
         );
     }
 

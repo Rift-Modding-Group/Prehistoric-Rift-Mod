@@ -39,7 +39,7 @@ public class PalaeocastorConfig extends RiftCreatureConfig {
                 "minecraft:cobblestone:0"
         );
         this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("CAVE").setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes(Arrays.asList("all"))
+                new SpawnRule().setCategory("CAVE").setSpawnOnLand().setYLevelRange(0, 56).setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("all")
         );
     }
 

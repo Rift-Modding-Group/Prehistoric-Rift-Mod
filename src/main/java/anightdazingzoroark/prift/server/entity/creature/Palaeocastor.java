@@ -115,11 +115,6 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     }
 
     @Override
-    public boolean getCanSpawnHere() {
-        return this.getCanSpawnOnBlock() && !this.world.getBlockState(this.getPosition()).getMaterial().isLiquid() && this.isInCave() && this.testOtherCreatures();
-    }
-
-    @Override
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
 
     @Override
