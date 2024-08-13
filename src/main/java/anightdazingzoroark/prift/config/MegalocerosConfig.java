@@ -26,7 +26,7 @@ public class MegalocerosConfig extends RiftCreatureConfig {
                 "minecraft:leaves2:-1"
         );
         this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(10).setSpawnAmntRange(4, 6).setDensityLimit(10).setBiomes("tag:snowy", "-tag:forest")
+                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(15).setSpawnAmntRange(4, 6).setDensityLimit(10).setBiomes("tag:snowy", "-tag:forest")
         );
     }
 

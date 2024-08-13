@@ -192,6 +192,10 @@ public enum RiftCreatureType {
         return I18n.format("entity."+this.name().toLowerCase()+".name");
     }
 
+    public String getIdentifier() {
+        return "prift:"+this.name().toLowerCase();
+    }
+
     public static RiftCreatureType safeValOf(String string) {
         for (RiftCreatureType creatureType : RiftCreatureType.values()) {
             if (creatureType.name().equalsIgnoreCase(string)) {

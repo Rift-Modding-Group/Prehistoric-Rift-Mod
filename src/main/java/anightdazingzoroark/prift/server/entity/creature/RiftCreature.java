@@ -609,7 +609,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     protected boolean canDespawn() {
-        return false;
+        return !this.isTamed();
     }
 
     @Override

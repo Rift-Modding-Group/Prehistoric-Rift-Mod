@@ -46,6 +46,18 @@ public class GeneralConfig {
 
     //spawning
     public static String[] universalSpawnBlocks = {"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1", "minecraft:stained_hardened_clay:-1"};
+    public static int dangerSpawnPreventRadius = 64;
+    public static String[] dangerousMobs = {
+            "prift:tyrannosaurus",
+            "prift:utahraptor",
+            "prift:megapiranha",
+            "prift:sarcosuchus",
+            "prift:direwolf",
+            "prift:baryonyx"
+    };
+    public static int daysUntilDangerSpawnNearWSpawn = 3;
+    public static int spawnAroundPlayerRad = 16;
+    public static int spawnInterval = 400;
 
     //mod integration
     public static boolean mmIntegration = true;
@@ -94,10 +106,24 @@ public class GeneralConfig {
         canDropFromCreatureKill = config.getBoolean("Mobs killed by wild creatures drop loot", "General", false, "Mostly to try manage lag. This manages if mobs killed by wild creatures from this mod will drop their loot.");
         universalCarnivoreTargets = config.getStringList("List of mobs carnivores will attack", "General", new String[]{"minecraft:player", "minecraft:pig", "minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:ocelot", "minecraft:wolf", "minecraft:rabbit", "minecraft:horse", "minecraft:donkey", "minecraft:mule", "minecraft:llama", "minecraft:villager", "prift:stegosaurus", "prift:dodo", "prift:triceratops", "prift:parasaurolophus", "prift:megaloceros"}, "Identifiers of mobs that all carnivores will actively hunt");
         turretModeHostileTargets = config.getStringList("Hostile mobs targeted by mobs in turret mode", "General", new String[]{"minecraft:cave_spider", "minecraft:enderman", "minecraft:spider", "minecraft:zombie_pigman", "minecraft:blaze", "minecraft:creeper", "minecraft:elder_guardian", "minecraft:endermite", "minecraft:evoker", "minecraft:ghast", "minecraft:guardian", "minecraft:husk", "minecraft:magma_cube", "minecraft:shulker", "minecraft:silverfish", "minecraft:skeleton", "minecraft:slime", "minecraft:stray", "minecraft:vex", "minecraft:vindicator", "minecraft:witch", "minecraft:wither_skeleton", "minecraft:zombie", "minecraft:zombie_villager", "prift:tyrannosaurus", "prift:utahraptor", "prift:direwolf"}, "Identifiers of mobs that creatures in turret mode will attack, if their targeting is set to \"Attack Hostiles\"");
-        universalSpawnBlocks = config.getStringList("List of blocks creatures can spawn on", "General", new String[]{"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1", "minecraft:stained_hardened_clay:-1"}, "Identifiers of blocks that creatures from the mod can spawn on (water creatures don't count). To add blocks add \"block:<insert block's identifier here>:<insert data id here>\"");
         dropHemolymph = config.getBoolean("Let Arthropods drop Hemolymph and Chitin", "General", true, "Whether or not arthropods that are not added by Prehistoric Rift (basically anything Bane of Arthropods works on) will drop some Hemolymph and Chitin");
         putDropsInCreatureInv = config.getBoolean("Put drops of mobs killed by tamed creatures in their inventories", "General", true, "Whether or not items dropped by mobs killed by tamed creatures will automatically go to the inventory of whatever killed it");
         minRevivalDiff = config.getString("Minimum Difficulty for Creature Revival", "General", "HARD", "Minimum difficulty in which creatures can be incapacitated. If the difficulty is set to this or above, killed mobs just get killed. Usable values: PEACEFUL, EASY, NORMAL, HARD, NONE (tamed creatures can be revived regardless of difficulty).");
+
+        //spawning
+        universalSpawnBlocks = config.getStringList("List of blocks creatures can spawn on", "Spawning", new String[]{"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1", "minecraft:stained_hardened_clay:-1"}, "Identifiers of blocks that creatures from the mod can spawn on (water creatures don't count). To add blocks add \"block:<insert block's identifier here>:<insert data id here>\"");
+        dangerSpawnPreventRadius = config.getInt("Minimum radius from world spawn where dangerous creatures will not spawn in", "Spawning", 64, 1, 69420666, "To prevent new players from constant spawnkills on their first day, dangerous carnivores will not spawn in a certain radius (as defined here) surrounding spawn as defined here for some time");
+        dangerousMobs = config.getStringList("Dangerous mobs to not spawn near world spawn", "Spawning", new String[]{
+                "prift:tyrannosaurus",
+                "prift:utahraptor",
+                "prift:megapiranha",
+                "prift:sarcosuchus",
+                "prift:direwolf",
+                "prift:baryonyx"
+        }, "Mobs in this list will not spawn in a radius around world spawn for some time");
+        daysUntilDangerSpawnNearWSpawn = config.getInt("Days until dangerous creatures can spawn near world spawn", "Spawning", 3, 1, 69420666, "Creatures will not spawn near world spawn for the following value in days");
+        spawnAroundPlayerRad = config.getInt("Radius from players that new creatures spawn in", "Spawning", 16, 1, 69420666, "Creatures will not spawn in a radius of this value around the player");
+        spawnInterval = config.getInt("Spawning Interval", "Spawning", 400, 1, 69420666, "Interval in ticks new creatures can spawn around players");
 
         //truffle stuff
         truffleSpawning = config.getBoolean("Truffles can spawn", "Truffle Spawning Stuff", true, "Whether or not truffles can drop by breaking blocks in certain biomes");

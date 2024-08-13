@@ -17,94 +17,33 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RiftCreatureSpawnLists {
-    public static List<BiomeSpawner> landBiomeSpawnerList = new ArrayList<>();
-    public static List<BiomeSpawner> waterBiomeSpawnerList = new ArrayList<>();
-    public static List<BiomeSpawner> caveBiomeSpawnerList = new ArrayList<>();
-    public static List<BiomeSpawner> airBiomeSpawnerList = new ArrayList<>();
-
-    public static void createSpawnerList(List<Biome> biomeList, World world) {
-        landBiomeSpawnerList.clear();
-        waterBiomeSpawnerList.clear();
-        caveBiomeSpawnerList.clear();
-        airBiomeSpawnerList.clear();
-
+    public static List<BiomeSpawner> createSpawnerList(List<Biome> biomeList, World world, String category) {
+        List<BiomeSpawner> biomeSpawners = new ArrayList<>();
         int timeOfDay = (int)(world.getWorldTime() % 24000L);
         for (Biome biomeToTest : biomeList) {
-            List<Spawner> landSpawnerList = new ArrayList<>();
-            List<Spawner> waterSpawnerList = new ArrayList<>();
-            List<Spawner> caveSpawnerList = new ArrayList<>();
-            List<Spawner> airSpawnerList = new ArrayList<>();
+            List<Spawner> spawnerList = new ArrayList<>();
             for (RiftCreatureType creatureType : RiftCreatureType.values()) {
                 for (RiftCreatureConfig.SpawnRule spawnRule: RiftConfigHandler.getConfig(creatureType).spawnRules) {
                     List<Biome> configBiomeList = getBiomeList(spawnRule);
-                    if (configBiomeList.contains(biomeToTest) && timeOfDay >= spawnRule.timeRange.get(0) && timeOfDay <= spawnRule.timeRange.get(1)) {
-                        switch (spawnRule.category) {
-                            case "LAND":
-                                landSpawnerList.add(new Spawner(spawnRule.weight, creatureType)
-                                        .setSpawnAmntRange(spawnRule.spawnAmntRange.get(0), spawnRule.spawnAmntRange.get(1))
-                                        .setDensityLimit(spawnRule.densityLimit)
-                                        .setSpawnBlocksWhitelist(spawnRule.spawnBlocksWhitelist)
-                                        .setMustSpawnInRain(spawnRule.inRain)
-                                        .setSpawnOnLand(spawnRule.onLand)
-                                        .setSpawnInWater(spawnRule.inWater)
-                                        .setSpawnInAir(spawnRule.inAir)
-                                        .setMustSeeSky(spawnRule.mustSeeSky)
-                                        .setYLevelRange(spawnRule.yLevelRange)
-                                        .setDimensionId(spawnRule.dimensionId)
-                                );
-                                break;
-                            case "WATER":
-                                waterSpawnerList.add(new Spawner(spawnRule.weight, creatureType)
-                                        .setSpawnAmntRange(spawnRule.spawnAmntRange.get(0), spawnRule.spawnAmntRange.get(1))
-                                        .setDensityLimit(spawnRule.densityLimit)
-                                        .setSpawnBlocksWhitelist(spawnRule.spawnBlocksWhitelist)
-                                        .setMustSpawnInRain(spawnRule.inRain)
-                                        .setSpawnOnLand(spawnRule.onLand)
-                                        .setSpawnInWater(spawnRule.inWater)
-                                        .setSpawnInAir(spawnRule.inAir)
-                                        .setMustSeeSky(spawnRule.mustSeeSky)
-                                        .setYLevelRange(spawnRule.yLevelRange)
-                                        .setDimensionId(spawnRule.dimensionId)
-                                );
-                                break;
-                            case "AIR":
-                                airSpawnerList.add(new Spawner(spawnRule.weight, creatureType)
-                                        .setSpawnAmntRange(spawnRule.spawnAmntRange.get(0), spawnRule.spawnAmntRange.get(1))
-                                        .setDensityLimit(spawnRule.densityLimit)
-                                        .setSpawnBlocksWhitelist(spawnRule.spawnBlocksWhitelist)
-                                        .setMustSpawnInRain(spawnRule.inRain)
-                                        .setSpawnOnLand(spawnRule.onLand)
-                                        .setSpawnInWater(spawnRule.inWater)
-                                        .setSpawnInAir(spawnRule.inAir)
-                                        .setMustSeeSky(spawnRule.mustSeeSky)
-                                        .setYLevelRange(spawnRule.yLevelRange)
-                                        .setDimensionId(spawnRule.dimensionId)
-                                );
-                                break;
-                            case "CAVE":
-                                caveSpawnerList.add(new Spawner(spawnRule.weight, creatureType)
-                                        .setSpawnAmntRange(spawnRule.spawnAmntRange.get(0), spawnRule.spawnAmntRange.get(1))
-                                        .setDensityLimit(spawnRule.densityLimit)
-                                        .setSpawnBlocksWhitelist(spawnRule.spawnBlocksWhitelist)
-                                        .setMustSpawnInRain(spawnRule.inRain)
-                                        .setSpawnOnLand(spawnRule.onLand)
-                                        .setSpawnInWater(spawnRule.inWater)
-                                        .setSpawnInAir(spawnRule.inAir)
-                                        .setMustSeeSky(spawnRule.mustSeeSky)
-                                        .setYLevelRange(spawnRule.yLevelRange)
-                                        .setDimensionId(spawnRule.dimensionId)
-                                );
-                                break;
-                        }
+                    if (configBiomeList.contains(biomeToTest) && timeOfDay >= spawnRule.timeRange.get(0) && timeOfDay <= spawnRule.timeRange.get(1) && spawnRule.category.equals(category)) {
+                        spawnerList.add(new Spawner(spawnRule.weight, creatureType)
+                                .setSpawnAmntRange(spawnRule.spawnAmntRange.get(0), spawnRule.spawnAmntRange.get(1))
+                                .setDensityLimit(spawnRule.densityLimit)
+                                .setSpawnBlocksWhitelist(spawnRule.spawnBlocksWhitelist)
+                                .setMustSpawnInRain(spawnRule.inRain)
+                                .setSpawnOnLand(spawnRule.onLand)
+                                .setSpawnInWater(spawnRule.inWater)
+                                .setSpawnInAir(spawnRule.inAir)
+                                .setMustSeeSky(spawnRule.mustSeeSky)
+                                .setYLevelRange(spawnRule.yLevelRange)
+                                .setDimensionId(spawnRule.dimensionId)
+                        );
                     }
                 }
             }
-            if (!landSpawnerList.isEmpty()) landBiomeSpawnerList.add(new BiomeSpawner(biomeToTest, landSpawnerList));
-            if (!waterSpawnerList.isEmpty()) waterBiomeSpawnerList.add(new BiomeSpawner(biomeToTest, waterSpawnerList));
-            if (!airSpawnerList.isEmpty()) airBiomeSpawnerList.add(new BiomeSpawner(biomeToTest, airSpawnerList));
-            if (!caveSpawnerList.isEmpty()) caveBiomeSpawnerList.add(new BiomeSpawner(biomeToTest, caveSpawnerList));
-            System.out.println(waterBiomeSpawnerList);
+            if (!spawnerList.isEmpty()) biomeSpawners.add(new BiomeSpawner(biomeToTest, spawnerList));
         }
+        return biomeSpawners;
     }
 
     private static boolean spawnerListHasBiome(List<BiomeSpawner> biomeSpawnerList, Biome biome) {

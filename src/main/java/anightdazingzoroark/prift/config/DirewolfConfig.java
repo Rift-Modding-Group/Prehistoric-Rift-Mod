@@ -31,8 +31,8 @@ public class DirewolfConfig extends RiftCreatureConfig {
         this.general.maximumMobSniffSize = "VERY_LARGE";
         this.general.mobSniffRange = 32;
         this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(12).setSpawnAmntRange(2, 4).setDensityLimit(16).setBiomes("tag:snowy"),
-                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(12000, 24000).setWeight(24).setSpawnAmntRange(2, 4).setDensityLimit(16).setBiomes("tag:snowy")
+                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(10).setSpawnAmntRange(2, 4).setDensityLimit(16).setBiomes("tag:snowy"),
+                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(12000, 24000).setWeight(24).setSpawnAmntRange(2, 4).setDensityLimit(24).setBiomes("tag:snowy")
         );
     }
 

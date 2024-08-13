@@ -94,11 +94,6 @@ public class Megapiranha extends RiftWaterCreature {
     }
 
     @Override
-    protected boolean canDespawn() {
-        return true;
-    }
-
-    @Override
     public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
 
     @Override

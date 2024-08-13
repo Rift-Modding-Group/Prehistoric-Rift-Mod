@@ -19,7 +19,7 @@ public class DodoConfig extends RiftCreatureConfig {
                 "minecraft:beetroot_seeds"
         );
         this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(15).setSpawnAmntRange(2, 3).setDensityLimit(16).setBiomes("tag:plains", "tag:sandy", "tag:forest")
+                new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(10).setSpawnAmntRange(2, 3).setDensityLimit(16).setBiomes("tag:plains", "tag:sandy", "tag:forest")
         );
     }
 

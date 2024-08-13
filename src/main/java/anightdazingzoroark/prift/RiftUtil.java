@@ -396,4 +396,10 @@ public class RiftUtil {
         if (listTwo != null && !listTwo.isEmpty()) for (T item : listTwo) listOne.add(item);
         return listOne;
     }
+
+    public static double getDistNoHeight(BlockPos pos1, BlockPos pos2) {
+        double xDiff = pos1.getX() - pos2.getX();
+        double zDiff = pos1.getZ() - pos2.getZ();
+        return Math.sqrt(xDiff * xDiff + zDiff * zDiff);
+    }
 }

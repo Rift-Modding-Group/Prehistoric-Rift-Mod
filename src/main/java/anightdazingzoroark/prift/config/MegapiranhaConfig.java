@@ -25,7 +25,8 @@ public class MegapiranhaConfig extends RiftCreatureConfig {
         );
         this.general.targetBlacklist = Arrays.asList();
         this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("WATER").setSpawnInWater().setYLevelRange(0, 64).setWeight(25).setSpawnAmntRange(4, 6).setDensityLimit(16).setBiomes("all", "-tag:ocean", "-tag:beach")
+                new SpawnRule().setCategory("WATER").setSpawnInWater().setMustSeeSky().setYLevelRange(56, 64).setWeight(25).setSpawnAmntRange(4, 6).setDensityLimit(16).setBiomes("all", "-tag:ocean", "-tag:beach"),
+                new SpawnRule().setCategory("CAVE").setSpawnInWater().setYLevelRange(0, 56).setWeight(10).setSpawnAmntRange(4, 6).setDensityLimit(16).setBiomes("all", "-tag:ocean", "-tag:beach")
         );
     }
 }
