@@ -87,6 +87,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
         //underwater breathing
         if (this.isEntityAlive() && !this.isInWater() && !this.isAmphibious()) {
+            System.out.println("is not in water?: "+!this.isInWater());
             --i;
             this.setAir(i);
 

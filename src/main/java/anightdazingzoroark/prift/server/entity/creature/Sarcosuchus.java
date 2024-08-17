@@ -60,7 +60,7 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     public Sarcosuchus(World worldIn) {
         super(worldIn, RiftCreatureType.SARCOSUCHUS);
-        this.setSize(1.25f, 1.25f);
+        this.setSize(1.25f, 0.5f);
         this.experienceValue = 10;
         this.favoriteFood = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
         this.tamingFood = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;

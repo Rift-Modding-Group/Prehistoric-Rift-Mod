@@ -28,7 +28,7 @@ public class Coelacanth extends RiftWaterCreature {
 
     public Coelacanth(World worldIn) {
         super(worldIn, RiftCreatureType.COELACANTH);
-        this.setSize(0.5f, 1f);
+        this.setSize(0.5f, 0.5f);
         this.experienceValue = 3;
         this.speed = 0.5D;
     }
@@ -43,6 +43,7 @@ public class Coelacanth extends RiftWaterCreature {
         if (scale > this.oldScale) {
             this.oldScale = scale;
             this.removeParts();
+            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0f, 0.5f * scale, scale, 1f);
             this.bodyFront0 = new RiftCreaturePart(this, 1.1f, 0, 0.15f, 0.375f * scale, 0.8f * scale, 1f);
             this.bodyFront1 = new RiftCreaturePart(this, 0.72f, 0, 0.15f, 0.375f * scale, 0.8f * scale, 1f);
             this.bodyFront2 = new RiftCreaturePart(this, 0.36f, 0, 0.15f, 0.375f * scale, 0.8f * scale, 1f);
@@ -54,6 +55,7 @@ public class Coelacanth extends RiftWaterCreature {
 
     @Override
     public void updateParts() {
+        super.updateParts();
         if (this.bodyFront0 != null) this.bodyFront0.onUpdate();
         if (this.bodyFront1 != null) this.bodyFront1.onUpdate();
         if (this.bodyFront2 != null) this.bodyFront2.onUpdate();
@@ -64,6 +66,7 @@ public class Coelacanth extends RiftWaterCreature {
 
     @Override
     public void removeParts() {
+        super.removeParts();
         if (this.bodyFront0 != null) {
             this.world.removeEntityDangerously(this.bodyFront0);
             this.bodyFront0 = null;
@@ -103,9 +106,6 @@ public class Coelacanth extends RiftWaterCreature {
     public float getRenderSizeModifier() {
         return 1f;
     }
-
-    @Override
-    public float getEyeHeight() { return this.height * 0.05f; }
 
     @Override
     public Vec3d riderPos() {

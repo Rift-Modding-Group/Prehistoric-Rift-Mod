@@ -46,7 +46,7 @@ public class Megapiranha extends RiftWaterCreature {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this, true));
-        this.tasks.addTask(1, new EntityAIAvoidEntity(this, Sarcosuchus.class, 8.0F, 4.0D, 4D));
+        this.tasks.addTask(1, new EntityAIAvoidEntity<>(this, Sarcosuchus.class, 8.0F, 4.0D, 4D));
         this.tasks.addTask(2, new EntityAIAttackMelee(this, 4.0D, true));
         this.tasks.addTask(4, new RiftHerdMemberFollow(this));
         this.tasks.addTask(5, new RiftWanderWater(this, 1.0D));
