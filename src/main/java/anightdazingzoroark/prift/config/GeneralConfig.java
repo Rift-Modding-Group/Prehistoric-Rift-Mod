@@ -46,7 +46,7 @@ public class GeneralConfig {
 
     //spawning
     public static String[] universalSpawnBlocks = {"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1", "minecraft:stained_hardened_clay:-1"};
-    public static int dangerSpawnPreventRadius = 64;
+    public static int dangerSpawnPreventRadius = 512;
     public static String[] dangerousMobs = {
             "prift:tyrannosaurus",
             "prift:utahraptor",
@@ -56,7 +56,7 @@ public class GeneralConfig {
             "prift:baryonyx"
     };
     public static int daysUntilDangerSpawnNearWSpawn = 3;
-    public static int spawnAroundPlayerRad = 16;
+    public static int spawnAroundPlayerRad = 24;
     public static int spawnInterval = 400;
 
     //mod integration
@@ -73,6 +73,7 @@ public class GeneralConfig {
 
     //debug
     public static boolean quickEggHatch = false;
+    public static boolean spawnCreatureNotify = false;
 
     public static void readConfig() {
         Configuration config = RiftInitialize.configMain;
@@ -111,8 +112,9 @@ public class GeneralConfig {
         minRevivalDiff = config.getString("Minimum Difficulty for Creature Revival", "General", "HARD", "Minimum difficulty in which creatures can be incapacitated. If the difficulty is set to this or above, killed mobs just get killed. Usable values: PEACEFUL, EASY, NORMAL, HARD, NONE (tamed creatures can be revived regardless of difficulty).");
 
         //spawning
+        config.addCustomCategoryComment("Spawning", "This mod uses its own spawning system, hence, the presence of this section. Further spawn related stuff can be edited in the creature's individual config files");
         universalSpawnBlocks = config.getStringList("List of blocks creatures can spawn on", "Spawning", new String[]{"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1", "minecraft:stained_hardened_clay:-1"}, "Identifiers of blocks that creatures from the mod can spawn on (water creatures don't count). To add blocks add \"block:<insert block's identifier here>:<insert data id here>\"");
-        dangerSpawnPreventRadius = config.getInt("Minimum radius from world spawn where dangerous creatures will not spawn in", "Spawning", 64, 1, 69420666, "To prevent new players from constant spawnkills on their first day, dangerous carnivores will not spawn in a certain radius (as defined here) surrounding spawn as defined here for some time");
+        dangerSpawnPreventRadius = config.getInt("Minimum radius from world spawn where dangerous creatures will not spawn in", "Spawning", 512, 1, 69420666, "To prevent new players from constant spawnkills on their first day, dangerous carnivores will not spawn in a certain radius (as defined here) surrounding spawn as defined here for some time");
         dangerousMobs = config.getStringList("Dangerous mobs to not spawn near world spawn", "Spawning", new String[]{
                 "prift:tyrannosaurus",
                 "prift:utahraptor",
@@ -122,7 +124,7 @@ public class GeneralConfig {
                 "prift:baryonyx"
         }, "Mobs in this list will not spawn in a radius around world spawn for some time");
         daysUntilDangerSpawnNearWSpawn = config.getInt("Days until dangerous creatures can spawn near world spawn", "Spawning", 3, 1, 69420666, "Creatures will not spawn near world spawn for the following value in days");
-        spawnAroundPlayerRad = config.getInt("Radius from players that new creatures spawn in", "Spawning", 16, 1, 69420666, "Creatures will not spawn in a radius of this value around the player");
+        spawnAroundPlayerRad = config.getInt("Radius from players that new creatures spawn in", "Spawning", 24, 1, 69420666, "Creatures will not spawn in a radius of this value around the player");
         spawnInterval = config.getInt("Spawning Interval", "Spawning", 400, 1, 69420666, "Interval in ticks new creatures can spawn around players");
 
         //truffle stuff
@@ -158,6 +160,7 @@ public class GeneralConfig {
 
         //debug
         quickEggHatch = config.getBoolean("All eggs hatch quickly", "Debug", false, "Turning this on makes all eggs hatch within 5 seconds. Mainly here for testing purposes, idk i could have made this a gamerule or smth");
+        spawnCreatureNotify = config.getBoolean("Show what creature was spawned in the log", "Debug", false, "Turning this on will reveal the creatures that are being spawned in and their locations in the log");
     }
 
     public static boolean canUseMM() {

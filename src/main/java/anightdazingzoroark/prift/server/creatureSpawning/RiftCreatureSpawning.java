@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
@@ -24,6 +25,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public class RiftCreatureSpawning {
@@ -41,32 +43,25 @@ public class RiftCreatureSpawning {
 
             //add positions
             for (Map.Entry<Long, Chunk> entry : chunkProvider.loadedChunks.entrySet()) {
-                Chunk chunk = entry.getValue();
-                spawnPositions.add(this.getRandomChunkPosition(world, chunk.x, chunk.z));
+                for (int x = 0; x < 10; x++) {
+                    Chunk chunk = entry.getValue();
+                    spawnPositions.add(this.getRandomChunkPosition(world, chunk.x, chunk.z));
+                }
             }
 
             //remove positions too close to players
             List<BlockPos> playerPositions = new ArrayList<>();
-            for (EntityPlayer player : world.playerEntities) {
-                playerPositions.add(player.getPosition());
-            }
+            for (EntityPlayer player : world.playerEntities) playerPositions.add(player.getPosition());
 
             Iterator<BlockPos> iterator = spawnPositions.iterator();
             while (iterator.hasNext()) {
                 BlockPos pos = iterator.next();
-                boolean tooClose = playerPositions.stream().anyMatch(refPos -> pos.distanceSq(refPos) <= (GeneralConfig.spawnAroundPlayerRad * GeneralConfig.spawnAroundPlayerRad));
-                if (tooClose) {
-                    iterator.remove();
-                }
-            }
-
-            //now do the same with the world spawn
-            if (world.getTotalWorldTime() < 24000L * GeneralConfig.daysUntilDangerSpawnNearWSpawn && world.provider.getDimension() == 0) {
-                while (iterator.hasNext()) {
-                    BlockPos pos = iterator.next();
-                    boolean tooClose = RiftUtil.getDistNoHeight(pos, world.getSpawnPoint()) <= GeneralConfig.dangerSpawnPreventRadius;
-                    if (tooClose) iterator.remove();
-                }
+                boolean tooClose = playerPositions.stream().anyMatch(refPos -> {
+                    double minDist = GeneralConfig.spawnAroundPlayerRad;
+                    double maxDistance = Minecraft.getMinecraft().gameSettings.renderDistanceChunks * 16;
+                    return pos.distanceSq(refPos) <= Math.pow(minDist, 2) || pos.distanceSq(refPos) >= Math.pow(maxDistance, 2);
+                });
+                if (tooClose) iterator.remove();
             }
 
             //first get list of biomes of all loaded chunks
@@ -96,31 +91,22 @@ public class RiftCreatureSpawning {
 
         WorldServer world = (WorldServer) event.getWorld();
 
+        if (world == null) return;
+
         if (!world.getGameRules().getBoolean("doMobSpawning")) return;
 
         List<BlockPos> spawnPositions = new ArrayList<>();
-        for (int x = 0; x < 3; x++) spawnPositions.add(this.getRandomChunkPosition(world, event.getChunk().x, event.getChunk().z));
+        for (int x = 0; x < 10; x++) spawnPositions.add(this.getRandomChunkPosition(world, event.getChunk().x, event.getChunk().z));
 
         //remove positions too close to players
         List<BlockPos> playerPositions = new ArrayList<>();
-        for (EntityPlayer player : world.playerEntities) {
-            playerPositions.add(player.getPosition());
-        }
+        for (EntityPlayer player : world.playerEntities) playerPositions.add(player.getPosition());
 
         Iterator<BlockPos> iterator = spawnPositions.iterator();
         while (iterator.hasNext()) {
             BlockPos pos = iterator.next();
-            boolean tooClose = playerPositions.stream().anyMatch(refPos -> pos.distanceSq(refPos) <= (GeneralConfig.spawnAroundPlayerRad * GeneralConfig.spawnAroundPlayerRad));
+            boolean tooClose = playerPositions.stream().anyMatch(refPos -> pos.distanceSq(refPos) <= Math.pow(GeneralConfig.spawnAroundPlayerRad, 2));
             if (tooClose) iterator.remove();
-        }
-
-        //now do the same with the world spawn
-        if (world.getTotalWorldTime() < 24000L * GeneralConfig.daysUntilDangerSpawnNearWSpawn && world.provider.getDimension() == 0) {
-            while (iterator.hasNext()) {
-                BlockPos pos = iterator.next();
-                boolean tooClose = RiftUtil.getDistNoHeight(pos, world.getSpawnPoint()) <= GeneralConfig.dangerSpawnPreventRadius;
-                if (tooClose) iterator.remove();
-            }
         }
 
         //first get list of biomes of all loaded chunks
@@ -149,28 +135,26 @@ public class RiftCreatureSpawning {
         for (BlockPos pos : spawnPositions) {
             for (RiftCreatureSpawnLists.BiomeSpawner biomeSpawner : biomeSpawners) {
                 if (world.getBiome(pos).equals(biomeSpawner.biome)) {
-                    RiftCreatureSpawnLists.Spawner spawnerToSpawn = biomeSpawner.getSpawnerRandomly();
+                    //make biome spawner based on position
+                    RiftCreatureSpawnLists.BiomeSpawner newBiomeSpawner = biomeSpawner.changeSpawnerBasedOnPos(world, pos);
+                    if (newBiomeSpawner.spawnerList.isEmpty()) continue;
+                    RiftCreatureSpawnLists.Spawner spawnerToSpawn = newBiomeSpawner.getSpawnerRandomly();
+
+                    //now spawn a creature
                     int spawnAmnt = spawnerToSpawn.getSpawnAmnt();
                     for (int x = 0; x < spawnAmnt; x++) {
+                        //create creature
                         RiftCreature creatureToSpawn = spawnerToSpawn.getCreatureType().invokeClass(world);
                         creatureToSpawn.setPosition(pos.getX(), pos.getY(), pos.getZ());
                         creatureToSpawn.onInitialSpawn(world.getDifficultyForLocation(pos), null);
 
-                        boolean spawnSeeSky = spawnerToSpawn.getMustSeeSky() == this.canSeeSkySpawn(creatureToSpawn.world, creatureToSpawn.getPosition());
-                        boolean spawnInRain = !spawnerToSpawn.getMustSpawnInRain() || world.isRaining();
-
                         if (this.canFitInArea(creatureToSpawn, spawnerToSpawn)
                                 && this.otherCreaturesFarAway(creatureToSpawn)
                                 && this.testOtherCreatures(creatureToSpawn, spawnerToSpawn.getDensityLimit())
-                                && this.canSpawnAtPos(creatureToSpawn, spawnerToSpawn)
                                 && this.testForDangerNearSpawn(creatureToSpawn)
-                                && spawnerToSpawn.getYLevelRange().get(0) <= creatureToSpawn.getPosition().getY()
-                                && spawnerToSpawn.getYLevelRange().get(1) >= creatureToSpawn.getPosition().getY()
-                                && world.provider.getDimension() == spawnerToSpawn.getDimensionId()
-                                && spawnSeeSky
-                                && spawnInRain) {
-                            //System.out.println(creatureToSpawn);
+                        ) {
                             world.spawnEntity(creatureToSpawn);
+                            if (GeneralConfig.spawnCreatureNotify) RiftInitialize.logger.info("Spawned "+creatureToSpawn.getName()+" at x=: "+pos.getX()+", y="+pos.getY()+", z="+pos.getZ());
                             if (!flag) flag = true;
                         }
                     }

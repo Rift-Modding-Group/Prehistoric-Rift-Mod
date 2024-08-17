@@ -1,20 +1,22 @@
 package anightdazingzoroark.prift.server.creatureSpawning;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import com.google.common.base.Predicate;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeProvider;
 import net.minecraftforge.common.BiomeDictionary;
-import net.minecraftforge.common.DimensionManager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RiftCreatureSpawnLists {
     public static List<BiomeSpawner> createSpawnerList(List<Biome> biomeList, World world, String category) {
@@ -108,16 +110,6 @@ public class RiftCreatureSpawnLists {
         return biomeList;
     }
 
-    public static boolean biomeInDimension(Biome biome, int dimensionId) {
-        WorldServer world = DimensionManager.getWorld(dimensionId);
-        if (world != null) {
-            WorldProvider provider = world.provider;
-            BiomeProvider biomeProvider = provider.getBiomeProvider();
-            return biomeProvider.getBiomesToSpawnIn().contains(biome);
-        }
-        return false;
-    }
-
     public static class BiomeSpawner {
         public final Biome biome;
         public final List<Spawner> spawnerList;
@@ -125,6 +117,68 @@ public class RiftCreatureSpawnLists {
         public BiomeSpawner(Biome biome, List<Spawner> spawnerList) {
             this.biome = biome;
             this.spawnerList = spawnerList;
+        }
+
+        public BiomeSpawner changeSpawnerBasedOnPos(World world, BlockPos pos) {
+            List<Spawner> tempSpawnerList = this.spawnerList;
+
+            //System.out.println("before: "+tempSpawnerList);
+
+            //change spawnerList based on whether or not a creature can spawn in at a certain place
+            //based on whether it can spawn on land, air, or in water
+            tempSpawnerList = tempSpawnerList.stream().filter(
+                    spawner -> {
+                        boolean spawnAboveBlock = spawner.getCanSpawnOnLand() && this.canSpawnAboveBlock(world, pos, spawner.getSpawnBlocksWhitelist());
+                        boolean spawnInWater = spawner.getCanSpawnInWater() && world.getBlockState(pos).getMaterial() == Material.WATER;
+                        boolean spawnInAir = spawner.getCanSpawnInAir() && world.getBlockState(pos).getMaterial() == Material.AIR;
+                        return spawnAboveBlock || spawnInWater || spawnInAir;
+                    }
+            ).collect(Collectors.toList());
+
+            //change spawnerList based on dist from spawn and whether or not a creature can spawn there
+            tempSpawnerList = tempSpawnerList.stream().filter(
+                    spawner -> {
+                        boolean isInDangerousMobsList = Arrays.asList(GeneralConfig.dangerousMobs).contains(spawner.creatureType.getIdentifier());
+                        boolean isWithinDistance = RiftUtil.getDistNoHeight(pos, world.getSpawnPoint()) <= GeneralConfig.dangerSpawnPreventRadius;
+                        boolean isBeforeStartSpawn = world.getTotalWorldTime() < 24000L * GeneralConfig.daysUntilDangerSpawnNearWSpawn;
+                        return !isInDangerousMobsList || !isWithinDistance || !isBeforeStartSpawn || world.provider.getDimension() != 0;
+                    }
+            ).collect(Collectors.toList());
+
+            //change spawnerList based on y position
+            tempSpawnerList = tempSpawnerList.stream().filter(
+                    spawner -> pos.getY() >= spawner.getYLevelRange().get(0) && pos.getY() <= spawner.getYLevelRange().get(1)
+            ).collect(Collectors.toList());
+
+            //change spawnerList based on dimension
+            tempSpawnerList = tempSpawnerList.stream().filter(
+                    spawner -> spawner.getDimensionId() == world.provider.getDimension()
+            ).collect(Collectors.toList());
+
+            //change spawnerList based on whether or not the position is not below a block
+            //note that glass and leaves are considered the same as air blocks
+            tempSpawnerList = tempSpawnerList.stream().filter(
+                    spawner -> {
+                        boolean flag = true;
+                        for (int y = pos.getY(); y <= 256; y++) {
+                            if (flag) {
+                                BlockPos newPos = new BlockPos(pos.getX(), y, pos.getZ());
+                                flag = world.getBlockState(newPos).getMaterial() == Material.AIR || world.getBlockState(newPos).getMaterial() == Material.LEAVES || world.getBlockState(newPos).getMaterial() == Material.GLASS || world.getBlockState(newPos).getMaterial() == Material.WATER;
+                            }
+                            else break;
+                        }
+                        return flag == spawner.getMustSeeSky();
+                    }
+            ).collect(Collectors.toList());
+
+            //change spawnerList based on whether or not its raining
+            tempSpawnerList = tempSpawnerList.stream().filter(
+                    spawner -> !spawner.getMustSpawnInRain() || world.isRaining()
+            ).collect(Collectors.toList());
+
+            //System.out.println("after: "+tempSpawnerList);
+
+            return new BiomeSpawner(this.biome, tempSpawnerList);
         }
 
         public String toString() {
@@ -141,6 +195,16 @@ public class RiftCreatureSpawnLists {
                 if (randomValue <= 0) return spawnerToChoose;
             }
             return null;
+        }
+
+        private boolean canSpawnAboveBlock(World world, BlockPos pos, List<String> whitelist) {
+            boolean flag = false;
+            IBlockState blockState = world.getBlockState(pos.down());
+            List<String> blockList = RiftUtil.uniteTwoLists(Arrays.asList(GeneralConfig.universalSpawnBlocks), whitelist);
+            for (String blockString : blockList) {
+                if (!flag) flag = RiftUtil.blockstateEqualToString(blockState, blockString);
+            }
+            return flag;
         }
     }
 
