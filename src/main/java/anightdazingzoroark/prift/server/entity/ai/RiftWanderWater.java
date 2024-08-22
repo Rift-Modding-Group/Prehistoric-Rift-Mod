@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIWander;
@@ -9,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class RiftWanderWater extends EntityAIWander {
-    private RiftWaterCreature waterCreature;
+    private final RiftWaterCreature waterCreature;
 
     public RiftWanderWater(RiftWaterCreature creatureIn, double speedIn) {
         super(creatureIn, speedIn, 1);
@@ -23,15 +24,19 @@ public class RiftWanderWater extends EntityAIWander {
             else return false;
         }
         else {
-            if (this.waterCreature.isHerdLeader() && this.waterCreature.isInWater()) super.shouldExecute();
-            else if (!this.waterCreature.isHerdLeader() && !this.waterCreature.hasHerdLeader() && this.waterCreature.isInWater()) return super.shouldExecute();
+            boolean isHerdLeader = this.waterCreature instanceof IHerder ? ((IHerder)this.waterCreature).isHerdLeader() : false;
+            boolean isStrayFromHerd = this.waterCreature instanceof IHerder ? !((IHerder)this.waterCreature).isHerdLeader() && !((IHerder)this.waterCreature).hasHerdLeader() : true;
+
+            if (isHerdLeader && this.waterCreature.isInWater()) return super.shouldExecute();
+            else if (isStrayFromHerd && this.waterCreature.isInWater()) return super.shouldExecute();
             return false;
         }
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.waterCreature.getEnergy() > 0 && !this.waterCreature.hasHerdLeader() && this.waterCreature.isInWater() && super.shouldContinueExecuting();
+        boolean hasNoHerdLeader = this.waterCreature instanceof IHerder ? !((IHerder)this.waterCreature).hasHerdLeader() : true;
+        return this.waterCreature.getEnergy() > 0 && hasNoHerdLeader && this.waterCreature.isInWater() && super.shouldContinueExecuting();
     }
 
     @Override

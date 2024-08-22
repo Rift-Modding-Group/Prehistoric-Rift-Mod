@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntit
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.RiftInitialize;
@@ -54,7 +55,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering {
+public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
     private static final DataParameter<Boolean> BLOWING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_BLOW = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
@@ -73,6 +74,8 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     private RiftCreaturePart tail1Part;
     private RiftCreaturePart tail2Part;
     private RiftCreaturePart tail3Part;
+    protected int herdSize = 1;
+    protected RiftCreature herdLeader;
 
     public Parasaurolophus(World worldIn) {
         super(worldIn, RiftCreatureType.PARASAUROLOPHUS);
@@ -531,6 +534,26 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
+    }
+
+    public RiftCreature getHerder() {
+        return this;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
     }
 
     public double followRange() {

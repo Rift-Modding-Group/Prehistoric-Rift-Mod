@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -41,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPackHunter {
+public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPackHunter, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/utahraptor"));
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Utahraptor.class, DataSerializers.BOOLEAN);
@@ -54,6 +55,8 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     private RiftCreaturePart tail0Part;
     private RiftCreaturePart tail1Part;
     private RiftCreaturePart tail2Part;
+    protected int herdSize = 1;
+    protected RiftCreature herdLeader;
 
     public Utahraptor(World worldIn) {
         super(worldIn, RiftCreatureType.UTAHRAPTOR);
@@ -240,6 +243,26 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
+    }
+
+    public RiftCreature getHerder() {
+        return this;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
     }
 
     public double followRange() {

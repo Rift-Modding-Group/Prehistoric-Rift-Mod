@@ -301,15 +301,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         return false;
     }
 
-    //herding modifications
-    public void followLeader() {
-        if (this.hasHerdLeader()) {
-            if (!this.getEntityBoundingBox().intersects(this.herdLeader.getEntityBoundingBox().grow(this.followRange()))) {
-                this.navigator.tryMoveToEntityLiving(this.herdLeader, 1D);
-            }
-        }
-    }
-
     public boolean isUsingSwimControls() {
         return this.getIsAscending() || this.getIsDescending();
     }

@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
@@ -16,6 +17,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class RiftGetTargets extends EntityAITarget {
+    protected final RiftCreature creature;
     protected final int targetChance;
     protected final RiftGetTargets.Sorter sorter;
     protected final Predicate <? super EntityLivingBase > targetEntitySelector;
@@ -32,6 +34,7 @@ public class RiftGetTargets extends EntityAITarget {
 
     public RiftGetTargets(EntityCreature creature, boolean alertOthers, int chance, boolean checkSight, boolean onlyNearby, @Nullable final Predicate <? super EntityLivingBase > targetSelector) {
         super(creature, checkSight, onlyNearby);
+        this.creature = (RiftCreature)creature;
         this.targetChance = chance;
         this.sorter = new RiftGetTargets.Sorter(creature);
         this.setMutexBits(1);
@@ -50,20 +53,19 @@ public class RiftGetTargets extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        RiftCreature creature = (RiftCreature) this.taskOwner;
-        if (creature.isSleeping()) return false;
-        else if (creature.isTamed()) return false;
+        if (this.creature.isSleeping()) return false;
+        else if (this.creature.isTamed()) return false;
         else {
             List<EntityLivingBase> list = new ArrayList<>();
-            for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
+            for (EntityLivingBase entity : this.creature.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
                 if (entity instanceof EntityPlayer) {
-                    if (creature.getTargetList().contains("minecraft:player")) {
+                    if (this.creature.getTargetList().contains("minecraft:player")) {
                         EntityPlayer player = (EntityPlayer) entity;
-                        if (!player.isSneaking() || !creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
+                        if (!player.isSneaking() || !this.creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
                     }
                 }
                 else {
-                    if (creature.getTargetList().contains(EntityList.getKey(entity).toString())) {
+                    if (this.creature.getTargetList().contains(EntityList.getKey(entity).toString())) {
                         list.add(entity);
                     }
                 }
@@ -79,14 +81,14 @@ public class RiftGetTargets extends EntityAITarget {
     }
 
     protected AxisAlignedBB getTargetableArea(double targetDistance) {
-        return this.taskOwner.getEntityBoundingBox().grow(targetDistance, 4.0D, targetDistance);
+        return this.creature.getEntityBoundingBox().grow(targetDistance, 4.0D, targetDistance);
     }
 
     public void startExecuting() {
-        RiftCreature creature = (RiftCreature)this.taskOwner;
-        this.taskOwner.setAttackTarget(this.targetEntity);
-        if (this.alertOthers && creature.canDoHerding() && creature.isHerdLeader()) {
-            List<RiftCreature> allyList = creature.world.getEntitiesWithinAABB(creature.getClass(), creature.herdBoundingBox(), new Predicate<RiftCreature>() {
+        IHerder herder = (IHerder)this.creature;
+        this.creature.setAttackTarget(this.targetEntity);
+        if (this.alertOthers && herder.canDoHerding() && herder.isHerdLeader()) {
+            List<RiftCreature> allyList = creature.world.getEntitiesWithinAABB(this.creature.getClass(), herder.herdBoundingBox(), new Predicate<RiftCreature>() {
                 @Override
                 public boolean apply(@Nullable RiftCreature input) {
                     return !input.isTamed();
@@ -129,22 +131,21 @@ public class RiftGetTargets extends EntityAITarget {
 
         @Override
         public boolean shouldExecute() {
-            if (this.taskOwner.isInWater()) {
-                RiftCreature creature = (RiftCreature) this.taskOwner;
-                if (creature.isTamed()) return false;
+            if (this.creature.isInWater()) {
+                if (this.creature.isTamed()) return false;
                 else {
                     List<EntityLivingBase> list = new ArrayList<>();
 
-                    for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
+                    for (EntityLivingBase entity : this.creature.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
                         if ((!RiftUtil.isRidingBoat(entity) && entity.isInWater()) || RiftUtil.isRidingBoat(entity)) {
                             if (entity instanceof EntityPlayer) {
-                                if (creature.getTargetList().contains("minecraft:player")) {
+                                if (this.creature.getTargetList().contains("minecraft:player")) {
                                     EntityPlayer player = (EntityPlayer) entity;
-                                    if (!player.isSneaking() || !creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
+                                    if (!player.isSneaking() || !this.creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
                                 }
                             }
                             else {
-                                if (creature.getTargetList().contains(EntityList.getKey(entity).toString())) {
+                                if (this.creature.getTargetList().contains(EntityList.getKey(entity).toString())) {
                                     list.add(entity);
                                 }
                             }

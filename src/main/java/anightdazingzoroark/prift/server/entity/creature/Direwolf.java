@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.config.DirewolfConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import anightdazingzoroark.prift.server.enums.MobSize;
@@ -49,7 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable {
+public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/direwolf"));
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
@@ -57,6 +58,8 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable 
     private int packBuffCooldown;
     private int sniffCooldown;
     private RiftCreaturePart hipsPart;
+    protected int herdSize = 1;
+    protected RiftCreature herdLeader;
 
     public Direwolf(World worldIn) {
         super(worldIn, RiftCreatureType.DIREWOLF);
@@ -165,6 +168,26 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable 
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
+    }
+
+    public RiftCreature getHerder() {
+        return this;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
     }
 
     public double followRange() {

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
@@ -17,7 +18,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 
-public class Coelacanth extends RiftWaterCreature {
+public class Coelacanth extends RiftWaterCreature implements IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/coelacanth"));
     private RiftCreaturePart bodyFront0;
     private RiftCreaturePart bodyFront1;
@@ -25,6 +26,8 @@ public class Coelacanth extends RiftWaterCreature {
     private RiftCreaturePart bodyBack0;
     private RiftCreaturePart bodyBack1;
     private RiftCreaturePart bodyBack2;
+    protected int herdSize = 1;
+    protected RiftCreature herdLeader;
 
     public Coelacanth(World worldIn) {
         super(worldIn, RiftCreatureType.COELACANTH);
@@ -96,6 +99,26 @@ public class Coelacanth extends RiftWaterCreature {
     @Override
     public boolean canDoHerding() {
         return this.isInWater();
+    }
+
+    public RiftCreature getHerder() {
+        return this;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
     }
 
     public double followRange() {

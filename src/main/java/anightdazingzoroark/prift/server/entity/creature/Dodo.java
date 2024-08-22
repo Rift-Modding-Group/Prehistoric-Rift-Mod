@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.config.DodoConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -23,8 +24,10 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 
-public class Dodo extends RiftCreature {
+public class Dodo extends RiftCreature implements IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dodo"));
+    protected int herdSize = 1;
+    protected RiftCreature herdLeader;
 
     public Dodo(World worldIn) {
         super(worldIn, RiftCreatureType.DODO);
@@ -66,6 +69,26 @@ public class Dodo extends RiftCreature {
     @Override
     public boolean canDoHerding() {
         return true;
+    }
+
+    public RiftCreature getHerder() {
+        return this;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
     }
 
     public double followRange() {

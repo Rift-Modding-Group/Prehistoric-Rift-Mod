@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -25,9 +26,9 @@ public class RiftControlledPackBuff extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature.isTamed()) {
+        if (this.creature.isTamed() && this.creature instanceof IHerder) {
             UUID ownerID =  this.creature.getOwnerId();
-            this.packMembers = this.creature.world.getEntitiesWithinAABB(this.creature.getClass(), this.creature.herdBoundingBox(), new Predicate<RiftCreature>() {
+            this.packMembers = this.creature.world.getEntitiesWithinAABB(this.creature.getClass(), ((IHerder)this.creature).herdBoundingBox(), new Predicate<RiftCreature>() {
                 @Override
                 public boolean apply(@Nullable RiftCreature input) {
                     if (input.isTamed()) return ownerID.equals(input.getOwnerId());

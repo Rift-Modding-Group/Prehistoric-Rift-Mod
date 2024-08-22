@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -27,18 +28,22 @@ public class RiftPackBuff extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.attacker.isTamed()) return false;
-        else if (this.attacker.getAttackTarget() == null) return false;
-        else {
-            this.packMembers = this.attacker.world.getEntitiesWithinAABB(this.attacker.getClass(), this.attacker.herdBoundingBox(), new Predicate<RiftCreature>() {
-                @Override
-                public boolean apply(@Nullable RiftCreature input) {
-                    return !input.isTamed();
-                }
-            });
-            this.packMembers.remove(this.attacker);
-            return this.attacker.isHerdLeader() && this.packMembers.size() >= 2 && ((IPackHunter)this.attacker).getPackBuffCooldown() == 0;
+        if (this.attacker instanceof IHerder) {
+            IHerder herder = (IHerder) this.attacker;
+            if (this.attacker.isTamed()) return false;
+            else if (this.attacker.getAttackTarget() == null) return false;
+            else {
+                this.packMembers = this.attacker.world.getEntitiesWithinAABB(this.attacker.getClass(), herder.herdBoundingBox(), new Predicate<RiftCreature>() {
+                    @Override
+                    public boolean apply(@Nullable RiftCreature input) {
+                        return !input.isTamed();
+                    }
+                });
+                this.packMembers.remove(this.attacker);
+                return herder.isHerdLeader() && this.packMembers.size() >= 2 && ((IPackHunter)this.attacker).getPackBuffCooldown() == 0;
+            }
         }
+        return false;
     }
 
     @Override

@@ -149,8 +149,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float oldScale;
     public boolean changeSitFlag;
     private int healthRegen;
-    protected int herdSize = 1;
-    protected RiftCreature herdLeader;
     protected double attackDamage;
     public double healthLevelMultiplier;
     public double damageLevelMultiplier;
@@ -253,9 +251,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         double distFromCenter = Math.sqrt(this.posX * this.posX + this.posZ * this.posZ);
         double level = Math.floor((distFromCenter / GeneralConfig.levelingRadius)) * GeneralConfig.levelingRadisIncrement + RiftUtil.randomInRange(1, 10) + this.levelAddFromDifficulty();
         this.setLevel(RiftUtil.clamp((int) level, 0, 100));
-        if (this.canDoHerding()) {
-            if (!(livingdata instanceof HerdData)) return new HerdData(this);
-            this.addToHerdLeader(((HerdData)livingdata).herdLeader);
+        if (this instanceof IHerder &&  ((IHerder)this).canDoHerding()) {
+            if (!(livingdata instanceof IHerder.HerdData)) return new IHerder.HerdData(this);
+            ((IHerder)this).addToHerdLeader(((IHerder.HerdData)livingdata).herdLeader);
         }
         return livingdata;
     }
@@ -319,7 +317,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         if (this.world.isRemote) this.setControls();
-        if (this.canDoHerding()) this.manageHerding();
+        if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
     }
@@ -1099,89 +1097,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         ItemStack saddle = this.creatureInventory.getStackInSlot(0);
         if (!this.world.isRemote && this.canBeSaddled()) this.setSaddled(this.saddleItemEqual(saddle) && !saddle.isEmpty());
     }
-
-    //herdin stuff starts here
-    public boolean canDoHerding() {
-        return false;
-    }
-
-    public boolean hasHerdLeader() {
-        return this.herdLeader != null && this.herdLeader.isEntityAlive();
-    }
-
-    public boolean hasNoHerdLeader() {
-        return !this.hasHerdLeader();
-    }
-
-    public void addToHerdLeader(RiftCreature creature) {
-        this.herdLeader = creature;
-        this.herdLeader.herdSize++;
-    }
-
-    public void separateFromHerdLeader() {
-        this.herdLeader.herdSize--;
-        this.herdLeader = null;
-    }
-
-    private void manageHerding() {
-        if (this.isHerdLeader() && !this.world.isRemote && this.rand.nextInt(200) == 1) {
-            if (this.world.getEntitiesWithinAABB(this.getClass(), this.herdBoundingBox()).size() <= 1) {
-                this.herdSize = 1;
-            }
-        }
-    }
-
-    public AxisAlignedBB herdBoundingBox() {
-        return this.getEntityBoundingBox().grow(12D);
-    }
-
-    public boolean isHerdLeader() {
-        return this.herdSize > 1;
-    }
-
-    public boolean canAddToHerd() {
-        return this.isHerdLeader() && this.herdSize < this.maxHerdSize() && this.canDoHerding();
-    }
-
-    public boolean isNearHerdLeader() {
-        return this.getDistanceSq(this.herdLeader) <= 144;
-    }
-
-    public void addCreatureToHerd(@Nonnull Stream<RiftCreature> stream) {
-        try {
-            stream.limit(this.maxHerdSize() - this.herdSize).filter(creature -> creature != this).forEach(creature -> creature.addToHerdLeader(this));
-        }
-        catch (Exception e) {}
-    }
-
-    public double followRange() {
-        return 0.5D;
-    }
-
-    public void followLeader() {
-        if (this.hasHerdLeader()) {
-            if (!this.getEntityBoundingBox().intersects(this.herdLeader.getEntityBoundingBox().grow(this.followRange()))) {
-                this.getMoveHelper().setMoveTo(this.herdLeader.posX, this.herdLeader.posY, this.herdLeader.posZ, 1D);
-            }
-        }
-    }
-
-    public RiftCreature getHerdLeader() {
-        return this.herdLeader;
-    }
-
-    public int maxHerdSize() {
-        return 5;
-    }
-
-    public static class HerdData implements IEntityLivingData {
-        public final RiftCreature herdLeader;
-
-        public HerdData(@Nonnull RiftCreature creature) {
-            this.herdLeader = creature;
-        }
-    }
-    //herdin stuff stops here
 
     public int getLevel() {
         return this.dataManager.get(LEVEL);

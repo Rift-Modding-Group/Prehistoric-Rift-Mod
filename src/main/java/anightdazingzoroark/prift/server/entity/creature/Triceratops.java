@@ -11,10 +11,7 @@ import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
-import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
-import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
-import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
+import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -49,7 +46,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Triceratops extends RiftCreature implements IChargingMob, IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering {
+public class Triceratops extends RiftCreature implements IChargingMob, IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
     private static final DataParameter<Boolean> STOMPING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
@@ -73,6 +70,8 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     private RiftCreaturePart tail0Part;
     private RiftCreaturePart tail1Part;
     private RiftCreaturePart tail2Part;
+    protected int herdSize = 1;
+    protected RiftCreature herdLeader;
 
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
@@ -496,6 +495,26 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
+    }
+
+    public RiftCreature getHerder() {
+        return this;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
     }
 
     public double followRange() {

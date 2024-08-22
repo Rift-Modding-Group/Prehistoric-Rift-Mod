@@ -7,10 +7,7 @@ import anightdazingzoroark.prift.config.MegalocerosConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
-import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
-import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
-import anightdazingzoroark.prift.server.entity.interfaces.ILeapingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,7 +33,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Megaloceros extends RiftCreature implements IChargingMob, IImpregnable, IHarvestWhenWandering, ILeapingMob {
+public class Megaloceros extends RiftCreature implements IChargingMob, IImpregnable, IHarvestWhenWandering, ILeapingMob, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megaloceros"));
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
@@ -50,6 +47,8 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     private static final DataParameter<Boolean> END_CHARGING = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart frontBodyPart;
     private float leapPower;
+    protected int herdSize = 1;
+    protected RiftCreature herdLeader;
 
     public Megaloceros(World worldIn) {
         super(worldIn, RiftCreatureType.MEGALOCEROS);
@@ -164,6 +163,26 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
+    }
+
+    public RiftCreature getHerder() {
+        return this;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
     }
 
     public double followRange() {

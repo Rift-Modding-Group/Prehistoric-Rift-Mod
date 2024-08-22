@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.entity.ai.EntityAIAvoidEntity;
@@ -22,8 +23,10 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 
-public class Megapiranha extends RiftWaterCreature {
+public class Megapiranha extends RiftWaterCreature implements IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megapiranha"));
+    protected int herdSize = 1;
+    protected RiftCreature herdLeader;
 
     public Megapiranha(World worldIn) {
         super(worldIn, RiftCreatureType.MEGAPIRANHA);
@@ -58,6 +61,26 @@ public class Megapiranha extends RiftWaterCreature {
     @Override
     public boolean canDoHerding() {
         return this.isInWater();
+    }
+
+    public RiftCreature getHerder() {
+        return this;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
     }
 
     public double followRange() {

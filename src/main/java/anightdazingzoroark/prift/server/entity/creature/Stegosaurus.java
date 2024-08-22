@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -53,7 +54,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob, ILeadWorkstationUser, IHarvestWhenWandering {
+public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
@@ -71,6 +72,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     private RiftCreaturePart tail1Part;
     private RiftCreaturePart tail2Part;
     private RiftCreaturePart tail3Part;
+    protected int herdSize = 1;
+    protected RiftCreature herdLeader;
 
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
@@ -456,6 +459,26 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
+    }
+
+    public RiftCreature getHerder() {
+        return this;
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
     }
 
     public double followRange() {

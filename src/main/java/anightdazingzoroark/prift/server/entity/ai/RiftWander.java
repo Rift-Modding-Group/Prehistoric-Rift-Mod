@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityCreature;
@@ -36,14 +37,16 @@ public class RiftWander extends EntityAIWander {
             }
         }
         else {
+            boolean isHerdLeader = this.creature instanceof IHerder ? ((IHerder)this.creature).isHerdLeader() : false;
+            boolean isStrayFromHerd = this.creature instanceof IHerder ? !((IHerder)this.creature).isHerdLeader() && !((IHerder)this.creature).hasHerdLeader() : true;
             if (this.creature instanceof RiftWaterCreature) {
-                if (this.creature.isHerdLeader() && !this.creature.isInWater()) return super.shouldExecute();
-                else if (!this.creature.isHerdLeader() && !this.creature.hasHerdLeader() && !this.creature.isInWater()) return super.shouldExecute();
+                if (isHerdLeader && !this.creature.isInWater()) return super.shouldExecute();
+                else if (isStrayFromHerd && !this.creature.isInWater()) return super.shouldExecute();
                 else return false;
             }
             else {
-                if (this.creature.isHerdLeader()) return super.shouldExecute();
-                else if (!this.creature.isHerdLeader() && !this.creature.hasHerdLeader()) return super.shouldExecute();
+                if (isHerdLeader) return super.shouldExecute();
+                else if (isStrayFromHerd) return super.shouldExecute();
                 else return false;
             }
         }
@@ -51,7 +54,9 @@ public class RiftWander extends EntityAIWander {
 
     @Override
     public boolean shouldContinueExecuting() {
-        if (this.creature instanceof RiftWaterCreature) return this.creature.getEnergy() > 0 && !this.creature.hasHerdLeader() && super.shouldContinueExecuting() && !this.creature.isInWater();
-        return this.creature.getEnergy() > 0 && !this.creature.hasHerdLeader() && super.shouldContinueExecuting();
+        boolean isNotInWater = this.creature instanceof RiftWaterCreature ? !this.creature.isInWater() : true;
+        boolean hasNoHerdLeader = this.creature instanceof IHerder ? !((IHerder)this.creature).hasHerdLeader() : true;
+
+        return this.creature.getEnergy() > 0 && hasNoHerdLeader && isNotInWater && super.shouldContinueExecuting();
     }
 }
