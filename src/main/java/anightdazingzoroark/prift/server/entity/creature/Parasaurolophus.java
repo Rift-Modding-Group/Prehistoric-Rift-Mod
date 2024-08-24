@@ -85,7 +85,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.experienceValue = 20;
         this.speed = 0.25D;
         this.isRideable = true;
-        this.attackWidth = 3.5f;
         this.saddleItem = ((ParasaurolophusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
     }
 
@@ -321,6 +320,14 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
     //blowing stuff ends here
 
+    public float attackWidth() {
+        return 3.5f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 1.5f;
+    }
+
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY - 0.35, this.posZ);
@@ -332,17 +339,13 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing()) this.setAttacking(true);
-                }
-                else {
-                    if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
-                    }
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    this.setAttacking(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

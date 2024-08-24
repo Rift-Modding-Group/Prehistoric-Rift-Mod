@@ -29,7 +29,7 @@ public class RiftMountEnergyBar {
         Entity entity = player.getRidingEntity();
 
         if (entity instanceof RiftCreature) {
-            if (event.getType() == RenderGameOverlayEvent.ElementType.AIR) {
+            if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                 RiftCreature creature = (RiftCreature) entity;
                 int energy = creature.getEnergy();
                 ScaledResolution resolution = event.getResolution();

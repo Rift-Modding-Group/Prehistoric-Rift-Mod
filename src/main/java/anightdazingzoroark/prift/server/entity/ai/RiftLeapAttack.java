@@ -97,7 +97,7 @@ public class RiftLeapAttack extends EntityAIBase {
     }
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
-        return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
+        return Math.pow(this.attacker.attackWidth(), 2) + attackTarget.width;
     }
 
     protected double getLeapAttackReachSqr(EntityLivingBase attackTarget) {

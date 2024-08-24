@@ -87,7 +87,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
         //underwater breathing
         if (this.isEntityAlive() && !this.isInWater() && !this.isAmphibious()) {
-            System.out.println("is not in water?: "+!this.isInWater());
             --i;
             this.setAir(i);
 
@@ -114,51 +113,22 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
                 if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
                     if (RiftUtil.isUsingSSR()) {
-                        Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                        if (this.hasLeftClickChargeBar()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                        }
-                        else {
-                            if (toBeAttacked != null) {
-                                int targetId = toBeAttacked.getEntityId();
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
-                            }
-                            else {
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
-                            }
-                        }
+                        SSRCompatUtils.SSRHitResult hitResult = SSRCompatUtils.createHitResult(this);
+
+                        if (this.hasLeftClickChargeBar()) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                        else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, 0, hitResult.entity, hitResult.blockPos));
                     }
                     else {
-                        if (this.hasLeftClickChargeBar()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                        }
-                        else {
-                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
-                        }
+                        if (this.hasLeftClickChargeBar()) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                        else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, 0));
                     }
                 }
                 else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.getRightClickCooldown() == 0 && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
-                    if (RiftUtil.isUsingSSR()) {
-                        Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                        if (this.hasRightClickChargeBar()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
-                        }
-                        else {
-                            if (toBeAttacked != null) {
-                                int targetId = toBeAttacked.getEntityId();
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,1));
-                            }
-                            else {
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,1));
-                            }
-                        }
+                    if (this.hasRightClickChargeBar()) {
+                        if (this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, this.getRightClickUse()));
+                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
                     }
-                    else {
-                        if (this.hasRightClickChargeBar()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
-                        }
-                        else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, 0));
-                    }
+                    else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, 0));
                 }
                 else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
@@ -167,28 +137,24 @@ public abstract class RiftWaterCreature extends RiftCreature {
                     RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 3));
                 }
                 else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()) {
-                    Entity toBeAttacked = null;
-                    if (RiftUtil.isUsingSSR()) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                    if (this.hasLeftClickChargeBar()) {
-                        if (this.getLeftClickUse() > 0) {
-                            if (toBeAttacked != null) {
-                                int targetId = toBeAttacked.getEntityId();
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0, this.getLeftClickUse()));
-                            }
-                            else {
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0, this.getLeftClickUse()));
-                            }
+                    if (RiftUtil.isUsingSSR()) {
+                        SSRCompatUtils.SSRHitResult hitResult = SSRCompatUtils.createHitResult(this);
+                        if (this.hasLeftClickChargeBar()) {
+                            if (this.getLeftClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, this.getLeftClickUse(), hitResult.entity, hitResult.blockPos));
+                        }
+                        if (this.hasRightClickChargeBar()) {
+                            if (this.getRightClickUse() > 0 && !this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, this.getRightClickUse(), hitResult.entity, hitResult.blockPos));
                         }
                     }
-                    if (this.hasRightClickChargeBar()) {
-                        if (this.getRightClickUse() > 0) {
-                            if (toBeAttacked != null) {
-                                int targetId = toBeAttacked.getEntityId();
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId, 1, this.getRightClickUse()));
-                            }
-                            else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
+                    else {
+                        if (this.hasLeftClickChargeBar()) {
+                            if (this.getLeftClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, this.getLeftClickUse()));
+                        }
+                        if (this.hasRightClickChargeBar()) {
+                            if (this.getRightClickUse() > 0 && !this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, this.getRightClickUse()));
                         }
                     }
+
                     if (this.getMiddleClickUse() > 0) {
                         RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 3));
                         this.setMiddleClickUse(0);

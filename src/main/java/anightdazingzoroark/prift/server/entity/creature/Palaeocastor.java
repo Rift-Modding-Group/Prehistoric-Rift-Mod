@@ -18,6 +18,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -44,7 +45,6 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         this.favoriteFood = ((PalaeocastorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
         this.tamingFood = ((PalaeocastorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.speed = 0.25D;
-        this.attackWidth = 2f;
         this.attackDamage = RiftConfigHandler.getConfig(this.creatureType).stats.baseDamage;
         this.experienceValue = 3;
     }
@@ -109,13 +109,21 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         return RiftUtil.setModelScale(this, 0.25f, 1f);
     }
 
+    public float attackWidth() {
+        return 2f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 0;
+    }
+
     @Override
     public Vec3d riderPos() {
         return null;
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {}
 
     @Override
     public List<String> blocksToHarvest() {

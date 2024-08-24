@@ -27,6 +27,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -65,7 +66,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.favoriteFood = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
         this.tamingFood = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.isRideable = true;
-        this.attackWidth = 3f;
         this.saddleItem = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.speed = 0.2D;
         this.waterSpeed = 10D;
@@ -140,7 +140,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         else {
             MobSize spinMaxSize = MobSize.safeValueOf(((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.maximumSpinAttackTargetSize);
             if (RiftUtil.isUsingSSR()) {
-                EntityLivingBase target = (EntityLivingBase) SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
+                EntityLivingBase target = (EntityLivingBase) SSRCompatUtils.getEntities(this).entityHit;
                 if (target != null) {
                     RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
 
@@ -163,7 +163,7 @@ public class Sarcosuchus extends RiftWaterCreature {
             }
             else {
                 UUID ownerID = this.getOwnerId();
-                List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
+                List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth()).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
                     @Override
                     public boolean apply(@Nullable EntityLivingBase input) {
                         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
@@ -302,6 +302,14 @@ public class Sarcosuchus extends RiftWaterCreature {
         if (this.getAttackTarget() != null) EntityPropertiesHandler.INSTANCE.getProperties(this.getAttackTarget(), RiftEntityProperties.class).isCaptured = false;
     }
 
+    public float attackWidth() {
+        return 3f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 1.5f;
+    }
+
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX - (0.3) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
@@ -340,17 +348,13 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing() && !this.isUsingRightClick()) this.setAttacking(true);
-                }
-                else {
-                    if (!this.isActing() && !this.isUsingRightClick()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
-                    }
+                if (!this.isActing() && !this.isUsingRightClick()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    this.setAttacking(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

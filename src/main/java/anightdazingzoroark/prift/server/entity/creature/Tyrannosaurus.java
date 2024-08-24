@@ -144,7 +144,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
         this.setSize(3.25f, 4f);
-        this.forcedBreakBlockRad = 3;
         this.favoriteFood = ((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
         this.tamingFood = ((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.experienceValue = 50;
@@ -152,7 +151,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.roarCooldownTicks = 0;
         this.roarCharge = 0;
         this.isRideable = true;
-        this.attackWidth = 6.5f;
         this.saddleItem = ((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
@@ -406,7 +404,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
                                     Block block = iblockstate.getBlock();
 
                                     if (iblockstate.getMaterial() != Material.AIR) {
-                                        if (this.checkBasedOnStrength(block, iblockstate)) f -= 0.24F;
+                                        if (this.checkBasedOnStrength(iblockstate)) f -= 0.24F;
                                         else f -= (1200F + 0.3F) * 0.3F;
 
                                         if (f > 0.0F) set.add(blockpos);
@@ -547,6 +545,14 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         return 54;
     }
 
+    public float attackWidth() {
+        return 6.5f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 3f;
+    }
+
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY + 2.125, this.posZ);
@@ -558,17 +564,13 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing()) this.setAttacking(true);
-                }
-                else {
-                    if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
-                    }
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    this.setAttacking(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

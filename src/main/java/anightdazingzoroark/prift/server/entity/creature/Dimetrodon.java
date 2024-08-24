@@ -30,6 +30,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.*;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -65,7 +66,6 @@ public class Dimetrodon extends RiftCreature {
         this.experienceValue = 10;
         this.speed = 0.20D;
         this.isRideable = false;
-        this.attackWidth = 3f;
         this.targetList = RiftUtil.creatureTargets(((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
@@ -426,6 +426,14 @@ public class Dimetrodon extends RiftCreature {
         return RiftUtil.setModelScale(this, 0.4f, 1.25f);
     }
 
+    public float attackWidth() {
+        return 3f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 0;
+    }
+
     @Override
     public Vec3d riderPos() {
         return null;
@@ -437,7 +445,7 @@ public class Dimetrodon extends RiftCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {}
 
     @Override
     public boolean hasLeftClickChargeBar() {

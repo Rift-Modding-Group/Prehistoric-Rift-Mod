@@ -34,7 +34,7 @@ public class RiftRightClickChargeBar {
 
         if (entity instanceof RiftCreature) {
             if (((RiftCreature)entity).hasRightClickChargeBar()) {
-                if (event.getType() == RenderGameOverlayEvent.ElementType.AIR) {
+                if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                     RiftCreature creature = (RiftCreature) entity;
                     ScaledResolution resolution = event.getResolution();
 

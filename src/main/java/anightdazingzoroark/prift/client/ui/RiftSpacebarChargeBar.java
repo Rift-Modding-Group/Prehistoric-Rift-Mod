@@ -34,7 +34,7 @@ public class RiftSpacebarChargeBar {
 
         if (entity instanceof RiftCreature) {
             if (((RiftCreature)entity).hasSpacebarChargeBar()) {
-                if (event.getType() == RenderGameOverlayEvent.ElementType.AIR) {
+                if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                     RiftCreature creature = (RiftCreature) entity;
                     ScaledResolution resolution = event.getResolution();
 

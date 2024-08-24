@@ -13,6 +13,7 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
+import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
@@ -54,7 +55,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttackMob, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
+public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttacker, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
@@ -83,8 +84,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.experienceValue = 20;
         this.speed = 0.175D;
         this.isRideable = true;
-        this.attackWidth = 7.5f;
-        this.rangedWidth = 12f;
         this.strongAttackCharge = 0;
         this.saddleItem = ((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
     }
@@ -239,6 +238,10 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
     }
 
+    public float rangedWidth() {
+        return 12f;
+    }
+
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
         ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this);
         double d0 = target.posX - this.posX;
@@ -252,7 +255,13 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.world.spawnEntity(thrownStegoPlate);
     }
 
-    public void setSwingingArms(boolean swingingArms) {}
+    public float attackWidth() {
+        return 7.5f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 3f;
+    }
 
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-1) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
@@ -282,29 +291,18 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return super.shouldRender(camera) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.hipPart) || this.inFrustrum(camera, this.leftBackLegPart) || this.inFrustrum(camera, this.rightBackLegPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part) || this.inFrustrum(camera, this.tail3Part);
     }
 
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (this.getLeftClickCooldown() == 0) {
-                    if (target == null) {
-                        if (!this.isActing()) {
-                            if (holdAmount <= 10)  this.setAttacking(true);
-                            else {
-                                this.setIsStrongAttacking(true);
-                                this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
-                                this.setRightClickCooldown(Math.max(60, holdAmount * 2));
-                            }
-                        }
-                    }
-                    else {
-                        if (!this.isActing()) {
-                            this.ssrTarget = target;
-                            if (holdAmount <= 10) this.setAttacking(true);
-                            else {
-                                this.setIsStrongAttacking(true);
-                                this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
-                                this.setRightClickCooldown(Math.max(60, holdAmount * 2));
-                            }
+                    if (!this.isActing()) {
+                        this.forcedAttackTarget = target;
+                        this.forcedBreakPos = pos;
+                        if (holdAmount <= 10) this.setAttacking(true);
+                        else {
+                            this.setIsStrongAttacking(true);
+                            this.strongAttackCharge = RiftUtil.clamp(holdAmount, 10, 100);
+                            this.setRightClickCooldown(Math.max(60, holdAmount * 2));
                         }
                     }
                 }
@@ -401,38 +399,34 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
 
     public void strongControlAttack() {
-        EntityLivingBase target;
-        if (this.ssrTarget == null) target = this.getControlAttackTargets(this.attackWidth);
-        else target = this.ssrTarget;
-        if (target != null) {
-            if (this.isTamed() && target instanceof EntityPlayer) {
-                if (!target.getUniqueID().equals(this.getOwnerId())) this.attackEntityAsMobStrong(target);
-            }
-            else if (this.isTamed() && target instanceof EntityTameable) {
-                if (((EntityTameable) target).isTamed()) {
-                    if (!((EntityTameable) target).getOwner().equals(this.getOwner())) this.attackEntityAsMobStrong(target);
-                }
-                else this.attackEntityAsMobStrong(target);
-            }
-            else this.attackEntityAsMobStrong(target);
+        boolean breakFlag = false;
+
+        //attack entity
+        if (this.forcedAttackTarget != null && RiftUtil.checkForNoAssociations(this, this.forcedAttackTarget)) {
+            breakFlag = this.attackEntityAsMobStrong(this.forcedAttackTarget);
         }
 
         //break blocks
-        BlockPos pos = new BlockPos(this.posX, this.posY, this.posZ);
-        int height = (int)(Math.ceil(this.height)) + (this.isBeingRidden() ? (this.getControllingPassenger() != null ? (int)(Math.ceil(this.getControllingPassenger().height)) : 0) : 0);
-        int radius = (int)(Math.ceil(this.width)) + this.forcedBreakBlockRad;
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = 0; y <= height; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    BlockPos tempPos = pos.add(x, y, z);
-                    IBlockState iblockstate = this.world.getBlockState(tempPos);
-                    Block block = iblockstate.getBlock();
-                    if (iblockstate.getMaterial() != Material.AIR && this.checkBasedOnStrength(block, iblockstate)) {
-                        this.world.destroyBlock(tempPos, true);
+        if (this.forcedBreakPos != null && !breakFlag) {
+            IBlockState blockState = this.world.getBlockState(this.forcedBreakPos);
+            if (blockState.getMaterial() != Material.AIR && this.checkBasedOnStrength(blockState)) {
+                for (int x = -1; x <= 1; x++) {
+                    for (int y = -1; y <= 1; y++) {
+                        for (int z = -1; z <= 1; z++) {
+                            BlockPos toBreakPos = this.forcedBreakPos.add(x, y, z);
+                            IBlockState toBreakState = this.world.getBlockState(toBreakPos);
+                            if (toBreakState.getMaterial() != Material.AIR && this.checkBasedOnStrength(toBreakState)) {
+                                this.world.destroyBlock(toBreakPos, true);
+                            }
+                        }
                     }
                 }
             }
         }
+
+        //reset
+        this.forcedAttackTarget = null;
+        this.forcedBreakPos = null;
     }
 
     @Override

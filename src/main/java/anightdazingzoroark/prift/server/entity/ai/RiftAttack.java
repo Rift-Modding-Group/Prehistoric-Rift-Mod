@@ -8,13 +8,13 @@ import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
+import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.Path;
@@ -53,7 +53,7 @@ public class RiftAttack extends EntityAIBase {
 
             if (this.path != null) return this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE);
             else {
-                if (this.attacker instanceof IRangedAttackMob) {
+                if (this.attacker instanceof IRangedAttacker) {
                     return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof IChargingMob) {
@@ -151,11 +151,11 @@ public class RiftAttack extends EntityAIBase {
     }
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
-        return (this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
+        return (this.attacker.attackWidth() * this.attacker.attackWidth() + attackTarget.width);
     }
 
     protected double getRangedAttackReachSqr(EntityLivingBase attackTarget) {
-        if (this.attacker instanceof IRangedAttackMob) return (double)(this.attacker.rangedWidth * this.attacker.rangedWidth + attackTarget.width + 25);
+        if (this.attacker instanceof IRangedAttacker) return Math.pow(((IRangedAttacker)this.attacker).rangedWidth(), 2) + attackTarget.width + 25;
         return 0;
     }
 

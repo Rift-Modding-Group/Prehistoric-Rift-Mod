@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIBase;
 
 public class RiftRangedAttack extends EntityAIBase {
@@ -102,7 +102,7 @@ public class RiftRangedAttack extends EntityAIBase {
                     if (!this.canMoveWhenShooting) this.attacker.removeSpeed();
                     this.animTime++;
                     if (this.animTime == this.shootAnimTime) {
-                        ((IRangedAttackMob) (this.attacker)).attackEntityWithRangedAttack(entitylivingbase, 1F);
+                        ((IRangedAttacker) (this.attacker)).attackEntityWithRangedAttack(entitylivingbase, 1F);
                     }
                     if (this.animTime > this.shootAnimLength) {
                         this.animTime = 0;
@@ -118,11 +118,11 @@ public class RiftRangedAttack extends EntityAIBase {
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
         if (this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE)) return 0;
-        return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width);
+        return Math.pow(this.attacker.attackWidth(), 2) + attackTarget.width;
     }
 
     protected double getRangedAttackReachSqr() {
-        if (this.attacker instanceof IRangedAttackMob) return (double)(this.attacker.rangedWidth * this.attacker.rangedWidth);
+        if (this.attacker instanceof IRangedAttacker) return Math.pow(((IRangedAttacker)this.attacker).rangedWidth(), 2);
         return 0;
     }
 }

@@ -19,6 +19,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -58,7 +59,6 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         this.experienceValue = 10;
         this.speed = 0.35D;
         this.isRideable = true;
-        this.attackWidth = 2.5f;
         this.saddleItem = ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
     }
 
@@ -204,6 +204,14 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         return RiftUtil.setModelScale(this, 0.3f, 1.125f);
     }
 
+    public float attackWidth() {
+        return 2.5f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 1.5f;
+    }
+
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-0.125f) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
@@ -261,17 +269,13 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing()) this.setAttacking(true);
-                }
-                else {
-                    if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
-                    }
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    this.setAttacking(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

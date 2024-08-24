@@ -26,6 +26,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -66,7 +67,6 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         this.tamingFood = ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.speed = 0.35D;
         this.isRideable = true;
-        this.attackWidth = 2f;
         this.packBuffCooldown = 0;
         this.maxRightClickCooldown = 1800f;
         this.saddleItem = ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
@@ -303,6 +303,14 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         return packBuffEffects;
     }
 
+    public float attackWidth() {
+        return 2f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 1.5f;
+    }
+
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (0.05) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
@@ -311,17 +319,13 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing()) this.setAttacking(true);
-                }
-                else {
-                    if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
-                    }
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    this.setAttacking(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

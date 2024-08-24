@@ -25,6 +25,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -56,7 +57,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         this.saddleItem = ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.speed = 0.2D;
         this.waterSpeed = 5D;
-        this.attackWidth = 3f;
         this.targetList = RiftUtil.creatureTargets(((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
@@ -132,6 +132,14 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         return RiftUtil.setModelScale(this, 1f, 2f);
     }
 
+    public float attackWidth() {
+        return 3f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 1.5f;
+    }
+
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY - 1.75, this.posZ);
@@ -144,7 +152,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (target == null && this.grabVictim == null) {
@@ -152,13 +160,14 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
                 }
                 else if (target != null && this.grabVictim == null) {
                     if (!this.isActing() && !this.isUsingRightClick()) {
-                        this.ssrTarget = target;
+                        this.forcedAttackTarget = target;
+                        this.forcedBreakPos = pos;
                         this.setAttacking(true);
                     }
                 }
                 else {
                     if (!this.isActing() && !this.isUsingRightClick()) {
-                        this.ssrTarget = this.grabVictim;
+                        this.forcedAttackTarget = this.grabVictim;
                         this.setAttacking(true);
                     }
                 }
@@ -187,7 +196,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
                     }
                     else if (target == null && !RiftUtil.isUsingSSR()) {
                         UUID ownerID = this.getOwnerId();
-                        List<EntityLivingBase> potGrabList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
+                        List<EntityLivingBase> potGrabList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth()).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
                             @Override
                             public boolean apply(@Nullable EntityLivingBase input) {
                                 RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);

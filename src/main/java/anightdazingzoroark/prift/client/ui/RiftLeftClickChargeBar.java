@@ -40,7 +40,7 @@ public class RiftLeftClickChargeBar {
 
         if (entity instanceof RiftCreature) {
             if (((RiftCreature)entity).hasLeftClickChargeBar()) {
-                if (event.getType() == RenderGameOverlayEvent.ElementType.AIR) {
+                if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                     RiftCreature creature = (RiftCreature) entity;
                     ScaledResolution resolution = event.getResolution();
 
@@ -52,7 +52,7 @@ public class RiftLeftClickChargeBar {
             }
         }
         if (entity instanceof RiftLargeWeapon) {
-            if (event.getType() == RenderGameOverlayEvent.ElementType.AIR) {
+            if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                 RiftLargeWeapon weapon = (RiftLargeWeapon) entity;
                 ScaledResolution resolution = event.getResolution();
 

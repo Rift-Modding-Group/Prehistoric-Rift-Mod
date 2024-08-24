@@ -41,7 +41,6 @@ public class RiftHerdMemberFollow extends EntityAIBase {
                         .orElse(this.creature);
                 ((IHerder)herdLeader).addCreatureToHerd(nearbyCreatures.stream()
                         .filter(testCreature -> !((IHerder)testCreature).hasHerdLeader()));
-                System.out.println("test");
                 return this.herder.hasHerdLeader() && !this.creature.isTamed();
             }
         }
@@ -58,8 +57,6 @@ public class RiftHerdMemberFollow extends EntityAIBase {
     }
 
     public void updateTask() {
-        System.out.println("is not herd leader: "+(!this.herder.isHerdLeader()));
-        System.out.println("has herd leader: "+(this.herder.hasHerdLeader()));
         if (!this.herder.isHerdLeader() && this.herder.hasHerdLeader()) this.herder.followLeader();
     }
 }

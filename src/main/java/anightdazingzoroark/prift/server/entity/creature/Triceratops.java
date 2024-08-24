@@ -81,7 +81,6 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         this.experienceValue = 20;
         this.speed = 0.15D;
         this.isRideable = true;
-        this.attackWidth = 4.875f;
         this.saddleItem = ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
     }
 
@@ -225,6 +224,14 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         if (this.getRightClickCooldown() == 0) this.setCanCharge(true);
     }
 
+    public float attackWidth() {
+        return 5f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 4f;
+    }
+
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-0.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
@@ -361,17 +368,13 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing()) this.setAttacking(true);
-                }
-                else {
-                    if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
-                    }
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    this.setAttacking(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

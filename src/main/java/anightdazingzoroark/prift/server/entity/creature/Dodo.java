@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -95,13 +96,21 @@ public class Dodo extends RiftCreature implements IHerder {
         return 3D;
     }
 
+    public float attackWidth() {
+        return 0;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 0;
+    }
+
     @Override
     public Vec3d riderPos() {
         return null;
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {}
 
     @Override
     public boolean canNaturalRegen() {

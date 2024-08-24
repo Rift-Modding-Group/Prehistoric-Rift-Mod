@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -130,6 +131,14 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
         return 1f;
     }
 
+    public float attackWidth() {
+        return 0;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 0;
+    }
+
     @Override
     public Vec3d riderPos() {
         return null;
@@ -155,7 +164,7 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {}
 
     @Override
     @Nullable

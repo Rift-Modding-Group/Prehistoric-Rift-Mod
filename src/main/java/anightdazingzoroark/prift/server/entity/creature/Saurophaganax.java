@@ -22,6 +22,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -58,7 +59,6 @@ public class Saurophaganax extends RiftCreature {
         this.isRideable = true;
         this.saddleItem = ((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.speed = 0.25D;
-        this.attackWidth = 3.5F;
         this.targetList = RiftUtil.creatureTargets(((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist);
     }
 
@@ -208,6 +208,14 @@ public class Saurophaganax extends RiftCreature {
         return 27;
     }
 
+    public float attackWidth() {
+        return 3.5f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 2f;
+    }
+
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (0.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
@@ -221,17 +229,13 @@ public class Saurophaganax extends RiftCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing()) this.setAttacking(true);
-                }
-                else {
-                    if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
-                    }
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    this.setAttacking(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

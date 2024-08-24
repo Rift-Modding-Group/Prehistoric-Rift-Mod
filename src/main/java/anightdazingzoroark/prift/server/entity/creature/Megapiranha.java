@@ -11,6 +11,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -35,7 +36,6 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
         this.favoriteFood = ((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
         this.speed = 0.35D;
         this.waterSpeed = 4D;
-        this.attackWidth = 2f;
         this.targetList = RiftUtil.creatureTargets(((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
     }
 
@@ -92,6 +92,14 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
         return 1f;
     }
 
+    public float attackWidth() {
+        return 2f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 0;
+    }
+
     @Override
     public Vec3d riderPos() {
         return null;
@@ -117,7 +125,7 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {}
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {}
 
     @Override
     public void registerControllers(AnimationData data) {

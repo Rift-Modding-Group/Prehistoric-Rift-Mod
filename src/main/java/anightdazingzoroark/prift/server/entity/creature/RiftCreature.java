@@ -125,14 +125,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
     private boolean steerable = true;
-    protected EntityLivingBase ssrTarget;
+    protected EntityLivingBase forcedAttackTarget;
+    protected BlockPos forcedBreakPos;
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
     protected double speed;
     protected double waterSpeed = 1.5D;
     protected int herdCheckCountdown;
-    public float attackWidth;
-    public float rangedWidth;
     private BlockPos homePosition;
     public double yFloatPos;
     public List<RiftCreatureConfig.Food> favoriteFood;
@@ -143,7 +142,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public int leapCooldown;
     public float maxRightClickCooldown;
     public String saddleItem;
-    public int forcedBreakBlockRad = 0;
     public RiftCreaturePart headPart;
     public RiftCreaturePart bodyPart;
     public float oldScale;
@@ -335,35 +333,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
                 if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
                     if (RiftUtil.isUsingSSR()) {
-                        Entity toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                        if (this.hasLeftClickChargeBar()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                        }
-                        else {
-                            if (toBeAttacked != null) {
-                                int targetId = toBeAttacked.getEntityId();
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0));
-                            }
-                            else {
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0));
-                            }
-                        }
+                        SSRCompatUtils.SSRHitResult hitResult = SSRCompatUtils.createHitResult(this);
+
+                        if (this.hasLeftClickChargeBar()) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                        else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, 0, hitResult.entity, hitResult.blockPos));
                     }
                     else {
-                        if (this.hasLeftClickChargeBar()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                        }
-                        else {
-                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 0));
-                        }
+                        if (this.hasLeftClickChargeBar()) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
+                        else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, 0));
                     }
                 }
                 else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.getRightClickCooldown() == 0 && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
                     if (this.hasRightClickChargeBar()) {
-                        if (this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
+                        if (this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, this.getRightClickUse()));
                         RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
                     }
-                    else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, 0));
+                    else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, 0));
                 }
                 else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
                     RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
@@ -377,33 +362,29 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 3));
                 }
                 else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()) {
-                    Entity toBeAttacked = null;
-                    if (RiftUtil.isUsingSSR()) toBeAttacked = SSRCompatUtils.getEntities(this.attackWidth * (64D/39D)).entityHit;
-                    if (this.hasLeftClickChargeBar()) {
-                        if (this.getLeftClickUse() > 0) {
-                            if (toBeAttacked != null) {
-                                int targetId = toBeAttacked.getEntityId();
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId,0, this.getLeftClickUse()));
-                            }
-                            else {
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1,0, this.getLeftClickUse()));
-                            }
+                    if (RiftUtil.isUsingSSR()) {
+                        SSRCompatUtils.SSRHitResult hitResult = SSRCompatUtils.createHitResult(this);
+                        if (this.hasLeftClickChargeBar()) {
+                            if (this.getLeftClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, this.getLeftClickUse(), hitResult.entity, hitResult.blockPos));
+                        }
+                        if (this.hasRightClickChargeBar()) {
+                            if (this.getRightClickUse() > 0 && !this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, this.getRightClickUse(), hitResult.entity, hitResult.blockPos));
                         }
                     }
-                    if (this.hasRightClickChargeBar()) {
-                        if (this.getRightClickUse() > 0 && !this.alwaysShowRightClickUse()) {
-                            if (toBeAttacked != null) {
-                                int targetId = toBeAttacked.getEntityId();
-                                RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, targetId, 1, this.getRightClickUse()));
-                            }
-                            else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 1, this.getRightClickUse()));
+                    else {
+                        if (this.hasLeftClickChargeBar()) {
+                            if (this.getLeftClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, this.getLeftClickUse()));
+                        }
+                        if (this.hasRightClickChargeBar()) {
+                            if (this.getRightClickUse() > 0 && !this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, this.getRightClickUse()));
                         }
                     }
+
                     if (this.hasSpacebarChargeBar()) {
-                        if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 2, this.getSpacebarUse()));
+                        if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 2, this.getSpacebarUse()));
                     }
                     if (this.getMiddleClickUse() > 0) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, -1, 3));
+                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 3, 0));
                         this.setMiddleClickUse(0);
                     }
                 }
@@ -1507,9 +1488,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isDead) passenger.dismountRidingEntity();
     }
 
+    public abstract float attackWidth();
+
+    public abstract float forcedBreakBlockRad();
+
     public abstract Vec3d riderPos();
 
-    public abstract void controlInput(int control, int holdAmount, EntityLivingBase target);
+    //this is for when shoulder surfing is not utilized
+    public void controlInput(int control, int holdAmount) {
+        this.controlInput(control, holdAmount, this.getControlAttackTargets(), this.getControlBlockPosToBreak());
+    }
+
+    //this is for when shoulder surfing is utilized
+    public abstract void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos);
 
     public abstract boolean hasLeftClickChargeBar();
 
@@ -1521,7 +1512,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return false;
     }
 
-    public boolean checkBasedOnStrength(Block block, IBlockState blockState) {
+    public boolean checkBasedOnStrength(IBlockState blockState) {
+        Block block = blockState.getBlock();
         switch (this.creatureType.getBlockBreakTier()) {
             case DIRT:
                 return RiftUtil.blockWeakerThanDirt(block, blockState);
@@ -1534,72 +1526,66 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void controlAttack() {
+        boolean breakFlag = false;
         //attack entity
-        EntityLivingBase target;
-        if (this.ssrTarget == null) target = this.getControlAttackTargets(this.attackWidth);
-        else target = this.ssrTarget;
-        if (target != null) {
-            if (this.isTamed() && target instanceof EntityPlayer) {
-                if (!target.getUniqueID().equals(this.getOwnerId())) this.attackEntityAsMob(target);
-            }
-            else if (this.isTamed() && target instanceof EntityTameable) {
-                if (((EntityTameable) target).isTamed()) {
-                    if (!((EntityTameable) target).getOwner().equals(this.getOwner())) this.attackEntityAsMob(target);
-                }
-                else this.attackEntityAsMob(target);
-            }
-            else this.attackEntityAsMob(target);
+        if (this.forcedAttackTarget != null && RiftUtil.checkForNoAssociations(this, this.forcedAttackTarget)) {
+            breakFlag = this.attackEntityAsMob(this.forcedAttackTarget);
         }
-        this.ssrTarget = null;
 
         //break blocks
-        BlockPos pos = new BlockPos(this.posX, this.posY, this.posZ);
-        int height = (int)(Math.ceil(this.height)) + (this.isBeingRidden() ? (this.getControllingPassenger() != null ? (int)(Math.ceil(this.getControllingPassenger().height)) : 0) : 0);
-        int radius = (int)(Math.ceil(this.width)) + this.forcedBreakBlockRad;
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = 0; y <= height; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    BlockPos tempPos = pos.add(x, y, z);
-                    IBlockState iblockstate = this.world.getBlockState(tempPos);
-                    Block block = iblockstate.getBlock();
-                    if (iblockstate.getMaterial() != Material.AIR && this.checkBasedOnStrength(block, iblockstate)) {
-                        this.world.destroyBlock(tempPos, true);
+        if (this.forcedBreakPos != null && !breakFlag) {
+            IBlockState blockState = this.world.getBlockState(this.forcedBreakPos);
+            if (blockState.getMaterial() != Material.AIR && this.checkBasedOnStrength(blockState)) {
+                for (int x = -1; x <= 1; x++) {
+                    for (int y = -1; y <= 1; y++) {
+                        for (int z = -1; z <= 1; z++) {
+                            BlockPos toBreakPos = this.forcedBreakPos.add(x, y, z);
+                            IBlockState toBreakState = this.world.getBlockState(toBreakPos);
+                            if (toBreakState.getMaterial() != Material.AIR && this.checkBasedOnStrength(toBreakState)) {
+                                this.world.destroyBlock(toBreakPos, true);
+                            }
+                        }
                     }
                 }
             }
         }
+
+        //reset
+        this.forcedAttackTarget = null;
+        this.forcedBreakPos = null;
     }
 
-    public EntityLivingBase getControlAttackTargets(double attackDetectWidth) {
-        if (RiftUtil.isUsingSSR()) return null;
-        double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + attackDetectWidth;
-        Vec3d vec3d = this.getPositionEyes(1.0F);
-        Vec3d vec3d1 = this.getLook(1.0F);
-        Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
-        double d1 = dist;
+    //to based on where the player is looking
+    public EntityLivingBase getControlAttackTargets() {
+        final int reach = 64; //8 squared, for players
+        double creatureReach = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + this.attackWidth();
+
+        Vec3d eyePos = this.getControllingPassenger().getPositionEyes(1.0F);
+        Vec3d viewVector = this.getControllingPassenger().getLook(1.0F);
+        Vec3d viewVectorMax = eyePos.add(viewVector.x * reach, viewVector.y * reach, viewVector.z * reach);
         Entity pointedEntity = null;
         Entity rider = this.getControllingPassenger();
         List<Entity> passengers = this.getPassengers();
-        List<Entity> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(1.0D, 1.0D, 1.0D), new Predicate<Entity>() {
+        List<Entity> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(viewVectorMax.x, viewVectorMax.y, viewVectorMax.z).grow(1.0D), new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
-                return !passengers.contains(entity);
+                return !passengers.contains(entity) && getDistanceSq(entity.getPosition()) <= creatureReach * creatureReach;
             }
         });
-        double d2 = d1;
+        double d2 = reach;
         for (Entity potentialTarget : list) {
             AxisAlignedBB axisalignedbb = potentialTarget.getEntityBoundingBox().grow((double) potentialTarget.getCollisionBorderSize() + 2F);
-            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
+            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(eyePos, viewVectorMax);
 
             if (potentialTarget != this && potentialTarget != rider) {
-                if (axisalignedbb.contains(vec3d)) {
+                if (axisalignedbb.contains(eyePos)) {
                     if (d2 >= 0.0D) {
                         pointedEntity = potentialTarget;
                         d2 = 0.0D;
                     }
                 }
                 else if (raytraceresult != null) {
-                    double d3 = vec3d.distanceTo(raytraceresult.hitVec);
+                    double d3 = eyePos.distanceTo(raytraceresult.hitVec);
 
                     if (d3 < d2 || d2 == 0.0D) {
                         if (potentialTarget.getLowestRidingEntity() == rider.getLowestRidingEntity() && !rider.canRiderInteract()) {
@@ -1616,6 +1602,26 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         return (EntityLivingBase) pointedEntity;
+    }
+
+    //to based on where the player is looking
+    public BlockPos getControlBlockPosToBreak() {
+        final int reach = 64; //8 squared, for players
+        double creatureReach = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + this.attackWidth();
+
+        Vec3d eyePos = this.getControllingPassenger().getPositionEyes(1.0F);
+        Vec3d viewVector = this.getControllingPassenger().getLook(1.0F);
+        Vec3d viewVectorMax = eyePos.add(viewVector.x * reach, viewVector.y * reach, viewVector.z * reach);
+
+        RayTraceResult rayTraceResult = world.rayTraceBlocks(eyePos, viewVectorMax, false, false, false);
+
+        if (rayTraceResult != null
+                && rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK
+                && this.getDistanceSq(rayTraceResult.getBlockPos()) <= creatureReach * creatureReach) {
+            return rayTraceResult.getBlockPos();
+        }
+
+        return null;
     }
 
     public void controlRangedAttack(double strength) {}
@@ -1728,10 +1734,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
 
                 //float above water
-                if (this.isFloatingOnWater) {
-                    System.out.println("floating");
-                    this.motionY += 0.1D;
-                }
+                if (this.isFloatingOnWater) this.motionY += 0.1D;
 
                 super.travel(strafe, vertical, forward);
             }

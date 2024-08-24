@@ -177,7 +177,7 @@ public class RiftChargeAttack extends EntityAIBase {
                                 Block block = iblockstate.getBlock();
 
                                 if (iblockstate.getMaterial() != Material.AIR && y >= this.attacker.posY) {
-                                    if (this.attacker.checkBasedOnStrength(block, iblockstate)) toBreak.add(blockpos);
+                                    if (this.attacker.checkBasedOnStrength(iblockstate)) toBreak.add(blockpos);
                                 }
                             }
                         }
@@ -201,7 +201,7 @@ public class RiftChargeAttack extends EntityAIBase {
     }
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
-        return (double)(this.attacker.attackWidth * this.attacker.attackWidth + attackTarget.width + 25);
+        return Math.pow(this.attacker.attackWidth(), 2) + attackTarget.width + 25;
     }
 
     protected double getChargeAttackReachSqr(EntityLivingBase attackTarget) {

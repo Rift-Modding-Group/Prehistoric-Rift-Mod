@@ -63,7 +63,6 @@ public class Baryonyx extends RiftWaterCreature {
         this.favoriteFood = ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
         this.tamingFood = ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.isRideable = true;
-        this.attackWidth = 6f;
         this.saddleItem = ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.speed = 0.25D;
         this.waterSpeed = 5D;
@@ -237,46 +236,48 @@ public class Baryonyx extends RiftWaterCreature {
         return RiftUtil.setModelScale(this, 0.5f, 1.5f);
     }
 
+    public float attackWidth() {
+        return 6f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 3f;
+    }
+
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY + 0.125f, this.posZ);
     }
 
     public void controlClawAttack() {
+        boolean breakFlag = false;
+
         //attack entity
-        EntityLivingBase target;
-        if (this.ssrTarget == null) target = this.getControlAttackTargets(this.attackWidth);
-        else target = this.ssrTarget;
-        if (target != null) {
-            if (this.isTamed() && target instanceof EntityPlayer) {
-                if (!target.getUniqueID().equals(this.getOwnerId())) this.attackUsingClaw(target);
-            }
-            else if (this.isTamed() && target instanceof EntityTameable) {
-                if (((EntityTameable) target).isTamed()) {
-                    if (!((EntityTameable) target).getOwner().equals(this.getOwner())) this.attackUsingClaw(target);
-                }
-                else this.attackUsingClaw(target);
-            }
-            else this.attackUsingClaw(target);
+        if (this.forcedAttackTarget != null && RiftUtil.checkForNoAssociations(this, this.forcedAttackTarget)) {
+            breakFlag = this.attackUsingClaw(this.forcedAttackTarget);
         }
-        this.ssrTarget = null;
 
         //break blocks
-        BlockPos pos = new BlockPos(this.posX, this.posY, this.posZ);
-        int height = (int)(Math.ceil(this.height)) + (this.isBeingRidden() ? (this.getControllingPassenger() != null ? (int)(Math.ceil(this.getControllingPassenger().height)) : 0) : 0);
-        int radius = (int)(Math.ceil(this.width)) + this.forcedBreakBlockRad;
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = 0; y <= height; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    BlockPos tempPos = pos.add(x, y, z);
-                    IBlockState iblockstate = this.world.getBlockState(tempPos);
-                    Block block = iblockstate.getBlock();
-                    if (iblockstate.getMaterial() != Material.AIR && this.checkBasedOnStrength(block, iblockstate)) {
-                        this.world.destroyBlock(tempPos, true);
+        if (this.forcedBreakPos != null && !breakFlag) {
+            IBlockState blockState = this.world.getBlockState(this.forcedBreakPos);
+            if (blockState.getMaterial() != Material.AIR && this.checkBasedOnStrength(blockState)) {
+                for (int x = -1; x <= 1; x++) {
+                    for (int y = -1; y <= 1; y++) {
+                        for (int z = -1; z <= 1; z++) {
+                            BlockPos toBreakPos = this.forcedBreakPos.add(x, y, z);
+                            IBlockState toBreakState = this.world.getBlockState(toBreakPos);
+                            if (toBreakState.getMaterial() != Material.AIR && this.checkBasedOnStrength(toBreakState)) {
+                                this.world.destroyBlock(toBreakPos, true);
+                            }
+                        }
                     }
                 }
             }
         }
+
+        //reset
+        this.forcedAttackTarget = null;
+        this.forcedBreakPos = null;
     }
 
     @SideOnly(Side.CLIENT)
@@ -285,35 +286,24 @@ public class Baryonyx extends RiftWaterCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing()) this.setAttacking(true);
-                }
-                else {
-                    if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
-                    }
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    this.setAttacking(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
         }
         if (control == 1) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing()) {
-                        if (RiftUtil.randomInRange(0, 1) == 0) this.setUsingLeftClaw(true);
-                        else this.setUsingRightClaw(true);
-                    }
-                }
-                else {
-                    if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        if (RiftUtil.randomInRange(0, 1) == 0) this.setUsingLeftClaw(true);
-                        else this.setUsingRightClaw(true);
-                    }
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    if (RiftUtil.randomInRange(0, 1) == 0) this.setUsingLeftClaw(true);
+                    else this.setUsingRightClaw(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);

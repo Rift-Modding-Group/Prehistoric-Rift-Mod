@@ -69,7 +69,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
         this.tamingFood = ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
         this.speed = 0.25D;
         this.isRideable = true;
-        this.attackWidth = 2.5f;
         this.maxRightClickCooldown = 1800f;
         this.saddleItem = ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.packBuffCooldown = 0;
@@ -251,6 +250,14 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
         return RiftUtil.setModelScale(this, 0.3f, 1.25f);
     }
 
+    public float attackWidth() {
+        return 2.5f;
+    }
+
+    public float forcedBreakBlockRad() {
+        return 1.5f;
+    }
+
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-0.375f) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
@@ -264,17 +271,13 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target) {
+    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
-                if (target == null) {
-                    if (!this.isActing()) this.setAttacking(true);
-                }
-                else {
-                    if (!this.isActing()) {
-                        this.ssrTarget = target;
-                        this.setAttacking(true);
-                    }
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    this.setAttacking(true);
                 }
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
@@ -313,9 +316,9 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
                 for (int x = -blockSniffRange; x <= blockSniffRange; x++) {
                     for (int y = -blockSniffRange; y <= blockSniffRange; y++) {
                         for (int z = -blockSniffRange; z <= blockSniffRange; z++) {
-                            BlockPos pos = this.getPosition().add(x, y, z);
-                            if (this.isSniffableBlock(this.world.getBlockState(pos).getBlock(), this.world.getBlockState(pos))) {
-                                RiftMessages.WRAPPER.sendToAll(new RiftSpawnChestDetectParticle((EntityPlayer)this.getControllingPassenger(), pos.getX(), pos.getY(), pos.getZ()));
+                            BlockPos testPos = this.getPosition().add(x, y, z);
+                            if (this.isSniffableBlock(this.world.getBlockState(testPos))) {
+                                RiftMessages.WRAPPER.sendToAll(new RiftSpawnChestDetectParticle((EntityPlayer)this.getControllingPassenger(), testPos.getX(), testPos.getY(), testPos.getZ()));
                             }
                         }
                     }
@@ -324,7 +327,8 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
         }
     }
 
-    private boolean isSniffableBlock(Block block, IBlockState blockState) {
+    private boolean isSniffableBlock(IBlockState blockState) {
+        Block block = blockState.getBlock();
         boolean flag = false;
         for (String blockEntry : ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.sniffableBlocks) {
             if (flag) break;
