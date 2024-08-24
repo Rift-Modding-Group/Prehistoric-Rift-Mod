@@ -324,10 +324,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         return 3.5f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 1.5f;
-    }
-
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY - 0.35, this.posZ);

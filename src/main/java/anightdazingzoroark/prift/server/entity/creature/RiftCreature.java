@@ -1490,8 +1490,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public abstract float attackWidth();
 
-    public abstract float forcedBreakBlockRad();
-
     public abstract Vec3d riderPos();
 
     //this is for when shoulder surfing is not utilized

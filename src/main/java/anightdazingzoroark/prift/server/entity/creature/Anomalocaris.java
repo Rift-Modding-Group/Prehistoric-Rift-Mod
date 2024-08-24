@@ -136,10 +136,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         return 3f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 1.5f;
-    }
-
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY - 1.75, this.posZ);

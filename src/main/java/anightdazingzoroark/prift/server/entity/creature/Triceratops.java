@@ -228,10 +228,6 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         return 5f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 4f;
-    }
-
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-0.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));

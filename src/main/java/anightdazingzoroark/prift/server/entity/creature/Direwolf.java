@@ -254,10 +254,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
         return 2.5f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 1.5f;
-    }
-
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-0.375f) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));

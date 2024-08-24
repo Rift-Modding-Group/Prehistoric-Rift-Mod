@@ -135,10 +135,6 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
         return 0;
     }
 
-    public float forcedBreakBlockRad() {
-        return 0;
-    }
-
     @Override
     public Vec3d riderPos() {
         return null;

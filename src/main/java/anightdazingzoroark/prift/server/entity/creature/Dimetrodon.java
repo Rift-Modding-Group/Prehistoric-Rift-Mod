@@ -430,10 +430,6 @@ public class Dimetrodon extends RiftCreature {
         return 3f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 0;
-    }
-
     @Override
     public Vec3d riderPos() {
         return null;

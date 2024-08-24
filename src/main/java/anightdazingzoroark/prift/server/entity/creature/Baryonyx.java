@@ -240,10 +240,6 @@ public class Baryonyx extends RiftWaterCreature {
         return 6f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 3f;
-    }
-
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY + 0.125f, this.posZ);

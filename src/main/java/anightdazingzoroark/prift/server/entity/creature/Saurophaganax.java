@@ -212,10 +212,6 @@ public class Saurophaganax extends RiftCreature {
         return 3.5f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 2f;
-    }
-
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (0.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));

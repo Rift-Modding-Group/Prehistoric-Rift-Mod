@@ -259,10 +259,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return 7.5f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 3f;
-    }
-
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-1) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-1) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));

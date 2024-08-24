@@ -96,10 +96,6 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
         return 2f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 0;
-    }
-
     @Override
     public Vec3d riderPos() {
         return null;

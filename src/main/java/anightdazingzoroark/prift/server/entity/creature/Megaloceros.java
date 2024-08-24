@@ -208,10 +208,6 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         return 2.5f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 1.5f;
-    }
-
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-0.125f) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));

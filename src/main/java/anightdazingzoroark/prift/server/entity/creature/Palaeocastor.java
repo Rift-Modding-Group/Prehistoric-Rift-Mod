@@ -113,10 +113,6 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         return 2f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 0;
-    }
-
     @Override
     public Vec3d riderPos() {
         return null;

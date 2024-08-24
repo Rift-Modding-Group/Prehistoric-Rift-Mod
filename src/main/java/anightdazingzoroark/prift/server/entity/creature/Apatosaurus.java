@@ -500,10 +500,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         return 6f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 3f;
-    }
-
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (1) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));

@@ -307,10 +307,6 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         return 2f;
     }
 
-    public float forcedBreakBlockRad() {
-        return 1.5f;
-    }
-
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (0.05) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
