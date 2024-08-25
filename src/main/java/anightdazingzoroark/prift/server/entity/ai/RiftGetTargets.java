@@ -85,16 +85,18 @@ public class RiftGetTargets extends EntityAITarget {
     }
 
     public void startExecuting() {
-        IHerder herder = (IHerder)this.creature;
         this.creature.setAttackTarget(this.targetEntity);
-        if (this.alertOthers && herder.canDoHerding() && herder.isHerdLeader()) {
-            List<RiftCreature> allyList = creature.world.getEntitiesWithinAABB(this.creature.getClass(), herder.herdBoundingBox(), new Predicate<RiftCreature>() {
-                @Override
-                public boolean apply(@Nullable RiftCreature input) {
-                    return !input.isTamed();
-                }
-            });
-            for (RiftCreature ally : allyList) ally.setAttackTarget(this.targetEntity);
+        if (this.creature instanceof IHerder) {
+            IHerder herder = (IHerder)this.creature;
+            if (this.alertOthers && herder.canDoHerding() && herder.isHerdLeader()) {
+                List<RiftCreature> allyList = creature.world.getEntitiesWithinAABB(this.creature.getClass(), herder.herdBoundingBox(), new Predicate<RiftCreature>() {
+                    @Override
+                    public boolean apply(@Nullable RiftCreature input) {
+                        return !input.isTamed();
+                    }
+                });
+                for (RiftCreature ally : allyList) ally.setAttackTarget(this.targetEntity);
+            }
         }
         super.startExecuting();
     }

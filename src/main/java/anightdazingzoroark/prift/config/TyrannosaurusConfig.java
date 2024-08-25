@@ -21,7 +21,7 @@ public class TyrannosaurusConfig extends RiftCreatureConfig {
                 new Meal("prift:basic_carnivore_meal", 0),
                 new Meal("prift:advanced_carnivore_meal", 0)
         );
-        this.general.targetWhitelist = Arrays.asList("prift:apatosaurus");
+        this.general.targetWhitelist = Arrays.asList("prift:apatosaurus", "prift:ankylosaurus");
         this.general.targetBlacklist = Arrays.asList();
         this.general.affectedByRoarBlacklist = Arrays.asList(
                 "prift:tyrannosaurus",
