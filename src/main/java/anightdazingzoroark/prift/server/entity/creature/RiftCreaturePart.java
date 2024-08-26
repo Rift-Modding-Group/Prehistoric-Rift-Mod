@@ -1,62 +1,65 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftMultipartInteract;
-import net.ilexiconn.llibrary.server.entity.multipart.PartEntity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
+import anightdazingzoroark.prift.server.entity.interfaces.IRiftMultipart;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 
-public class RiftCreaturePart extends PartEntity {
-    public RiftCreaturePart(RiftCreature parent, float radius, float angleYaw, float offsetY, float sizeX, float sizeY, float damageMultiplier) {
-        super(parent, radius, angleYaw, offsetY, sizeX, sizeY, damageMultiplier);
+import java.util.List;
+
+public class RiftCreaturePart extends MultiPartEntityPart {
+    private final RiftCreature partParent;
+    private final float radius;
+    private final float angleYaw;
+    private final float offsetY;
+    private final float damageMultiplier;
+
+    public RiftCreaturePart(IRiftMultipart parent, float radius, float angleYaw, float offsetY, float width, float height, float damageMultiplier) {
+        super(parent, "", width, height);
+        this.partParent = parent.getPartParent();
+        this.radius = radius;
+        this.angleYaw = (angleYaw + 90.0F) * 0.017453292F;
+        this.offsetY = offsetY;
+        this.damageMultiplier = damageMultiplier;
+    }
+
+    public RiftCreaturePart setInvulnerable() {
+        this.setEntityInvulnerable(true);
+        return this;
     }
 
     @Override
-    public void collideWithNearbyEntities() {}
+    public void onUpdate() {
+        this.setPositionAndUpdate(this.partParent.posX + this.radius * Math.cos(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw), this.partParent.posY + this.offsetY, this.partParent.posZ + this.radius * Math.sin(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw));
+        if (!this.world.isRemote) this.collideWithNearbyEntities();
+        if (this.partParent.isDead) this.world.removeEntityDangerously(this);
 
-    @Override
-    public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-        if (!this.parent.isBeingRidden()) {
-            if (this.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftMultipartInteract((RiftCreature) this.parent, -1));
-            return ((RiftCreature)this.parent).processInteract(player, hand) || this.parent.processInitialInteract(player, hand);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean attackEntityFrom(DamageSource source, float damage) {
-        if (this.world.isRemote) {
-            if (source.getTrueSource() != null) {
-                if (source.getTrueSource().equals(this.parent)) return false;
-                else if (source.getTrueSource() instanceof EntityPlayer) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftMultipartInteract((RiftCreature) this.parent, damage * this.damageMultiplier));
-                }
-            }
-        }
-        return this.parent.attackEntityFrom(source, damage * this.damageMultiplier);
-    }
-
-    public RiftCreature getParent() {
-        return (RiftCreature) this.parent;
+        super.onUpdate();
     }
 
     public void resize(float width, float height) {
         this.setSize(width, height);
     }
 
-    @Override
-    public void onUpdate() {
-        super.onUpdate();
-        if (this.parent == null || this.shouldNotExist()) {
-            this.world.removeEntityDangerously(this);
-        }
+    public void resize(float scale) {
+        this.setSize(this.width * scale, this.height * scale);
     }
 
-    public boolean shouldNotExist() {
-        return !this.parent.isEntityAlive();
+    public void collideWithNearbyEntities() {
+        List<Entity> entities = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
+        entities.stream().filter(entity -> entity != this.partParent && !(entity instanceof MultiPartEntityPart) && entity.canBePushed()).forEach(entity -> entity.applyEntityCollision(this.partParent));
+    }
+
+    public float getDamageMultiplier() {
+        return this.damageMultiplier;
+    }
+
+    public RiftCreature getParent() {
+        return this.partParent;
+    }
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        return super.attackEntityFrom(source, amount);
     }
 
     public boolean isUnderwater() {

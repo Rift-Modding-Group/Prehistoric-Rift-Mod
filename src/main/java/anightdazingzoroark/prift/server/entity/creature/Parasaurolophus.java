@@ -86,6 +86,23 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.speed = 0.25D;
         this.isRideable = true;
         this.saddleItem = ((ParasaurolophusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+
+        this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.48f, 0.625f, 0.5f, 1.5f);
+        this.bodyPart = new RiftCreaturePart(this, 1.375f, 0, 0.8f, 0.75f, 0.8f, 1f);
+        this.neckPart = new RiftCreaturePart(this, 2.125f, 0, 1.125f, 0.5f, 0.7f, 1.5f);
+        this.tail0Part = new RiftCreaturePart(this, -1.125f, 0, 1f, 0.4f, 0.6f, 0.5f);
+        this.tail1Part = new RiftCreaturePart(this, -1.625f, 0, 1.1f, 0.4f, 0.45f, 0.5f);
+        this.tail2Part = new RiftCreaturePart(this, -2.125f, 0, 1.05f, 0.4f, 0.45f, 0.5f);
+        this.tail3Part = new RiftCreaturePart(this, -2.875f, 0, 1.1f, 0.5f, 0.35f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.headPart,
+            this.bodyPart,
+            this.neckPart,
+            this.tail0Part,
+            this.tail1Part,
+            this.tail2Part,
+            this.tail3Part
+        };
     }
 
     @Override
@@ -135,28 +152,9 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.manageCanBlow();
     }
 
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.48f, 0.625f * scale, 0.5f * scale, 1.5f);
-            this.bodyPart = new RiftCreaturePart(this, 1.375f, 0, 0.8f, 0.75f * scale, 0.8f * scale, 1f);
-            this.neckPart = new RiftCreaturePart(this, 2.125f, 0, 1.125f, 0.5f * scale, 0.7f * scale, 1.5f);
-            this.tail0Part = new RiftCreaturePart(this, -1.125f, 0, 1f, 0.4f * scale, 0.6f * scale, 0.5f);
-            this.tail1Part = new RiftCreaturePart(this, -1.625f, 0, 1.1f, 0.4f * scale, 0.45f * scale, 0.5f);
-            this.tail2Part = new RiftCreaturePart(this, -2.125f, 0, 1.05f, 0.4f * scale, 0.45f * scale, 0.5f);
-            this.tail3Part = new RiftCreaturePart(this, -2.875f, 0, 1.1f, 0.5f * scale, 0.35f * scale, 0.5f);
-        }
-    }
-
     @Override
     public void updateParts() {
         super.updateParts();
-        if (this.neckPart != null) this.neckPart.onUpdate();
-        if (this.tail0Part != null) this.tail0Part.onUpdate();
-        if (this.tail1Part != null) this.tail1Part.onUpdate();
-        if (this.tail2Part != null) this.tail2Part.onUpdate();
-        if (this.tail3Part != null) this.tail3Part.onUpdate();
 
         float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.6f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
@@ -327,11 +325,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY - 0.35, this.posZ);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        return super.shouldRender(camera) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part) || this.inFrustrum(camera, this.tail3Part);
     }
 
     @Override

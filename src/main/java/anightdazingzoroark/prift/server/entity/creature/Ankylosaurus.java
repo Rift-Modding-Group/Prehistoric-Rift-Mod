@@ -44,6 +44,31 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
         this.speed = 0.15D;
         this.isRideable = true;
         this.saddleItem = ((AnkylosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+
+        this.headPart = new RiftCreaturePart(this, 2f, 0, 0.7f, 0.5f, 0.5f, 1.5f);
+        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.5f, 1.25f, 0.9f, 0.5f);
+        this.leftFrontLegPart = new RiftCreaturePart(this, 1.5f, 30f, 0, 0.35f, 0.7f, 0.5f);
+        this.rightFrontLegPart = new RiftCreaturePart(this, 1.5f, -30f, 0, 0.35f, 0.7f, 0.5f);
+        this.leftBackLegPart = new RiftCreaturePart(this, 1.5f, 150f, 0, 0.35f, 0.7f, 0.5f);
+        this.rightBackLegPart = new RiftCreaturePart(this, 1.5f, -150f, 0, 0.35f, 0.7f, 0.5f);
+        this.tail0 = new RiftCreaturePart(this, -1.75f, 0, 0.7f, 0.5f, 0.5f, 0.5f);
+        this.tail1 = new RiftCreaturePart(this, -2.625f, 0, 0.75f, 0.4f, 0.4f, 0.5f);
+        this.tail2 = new RiftCreaturePart(this, -3.375f, 0, 0.8f, 0.35f, 0.35f, 0.5f);
+        this.tail3 = new RiftCreaturePart(this, -4f, 0, 0.75f, 0.3f, 0.3f, 0.5f);
+        this.tailClub = new RiftCreaturePart(this, -4.375f, 0, 0.7f, 0.35f, 0.35f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+                this.headPart,
+                this.bodyPart,
+                this.leftFrontLegPart,
+                this.rightFrontLegPart,
+                this.leftBackLegPart,
+                this.rightBackLegPart,
+                this.tail0,
+                this.tail1,
+                this.tail2,
+                this.tail3,
+                this.tailClub
+        };
     }
 
     @Override
@@ -77,36 +102,8 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
     }
 
     @Override
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.headPart = new RiftCreaturePart(this, 2f, 0, 0.7f, 0.5f * scale, 0.5f * scale, 1.5f);
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.5f, 1.25f * scale, 0.9f * scale, 0.5f);
-            this.leftFrontLegPart = new RiftCreaturePart(this, 1.5f, 30f, 0, 0.35f * scale, 0.7f * scale, 0.5f);
-            this.rightFrontLegPart = new RiftCreaturePart(this, 1.5f, -30f, 0, 0.35f * scale, 0.7f * scale, 0.5f);
-            this.leftBackLegPart = new RiftCreaturePart(this, 1.5f, 150f, 0, 0.35f * scale, 0.7f * scale, 0.5f);
-            this.rightBackLegPart = new RiftCreaturePart(this, 1.5f, -150f, 0, 0.35f * scale, 0.7f * scale, 0.5f);
-            this.tail0 = new RiftCreaturePart(this, -1.75f, 0, 0.7f, 0.5f * scale, 0.5f * scale, 0.5f);
-            this.tail1 = new RiftCreaturePart(this, -2.625f, 0, 0.75f, 0.4f * scale, 0.4f * scale, 0.5f);
-            this.tail2 = new RiftCreaturePart(this, -3.375f, 0, 0.8f, 0.35f * scale, 0.35f * scale, 0.5f);
-            this.tail3 = new RiftCreaturePart(this, -4f, 0, 0.75f, 0.3f * scale, 0.3f * scale, 0.5f);
-            this.tailClub = new RiftCreaturePart(this, -4.375f, 0, 0.7f, 0.35f * scale, 0.35f * scale, 0.5f);
-        }
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
-        if (this.leftFrontLegPart != null) this.leftFrontLegPart.onUpdate();
-        if (this.rightFrontLegPart != null) this.rightFrontLegPart.onUpdate();
-        if (this.leftBackLegPart != null) this.leftBackLegPart.onUpdate();
-        if (this.rightBackLegPart != null) this.rightBackLegPart.onUpdate();
-        if (this.tail0 != null) this.tail0.onUpdate();
-        if (this.tail1 != null) this.tail1.onUpdate();
-        if (this.tail2 != null) this.tail2.onUpdate();
-        if (this.tail3 != null) this.tail3.onUpdate();
-        if (this.tailClub != null) this.tailClub.onUpdate();
     }
 
     @Override

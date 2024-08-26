@@ -60,6 +60,15 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         this.speed = 0.35D;
         this.isRideable = true;
         this.saddleItem = ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+
+        this.headPart = new RiftCreaturePart(this, 1.4f, 0, 1.3f, 0.7f, 0.6f, 1.5f);
+        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.75f, 1f, 0.75f, 1f);
+        this.frontBodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.75f, 0.75f, 0.75f, 1f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.headPart,
+            this.bodyPart,
+            this.frontBodyPart
+        };
     }
 
     @Override
@@ -116,20 +125,8 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     }
 
     @Override
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.headPart = new RiftCreaturePart(this, 1.4f, 0, 1.3f, 0.7f * scale, 0.6f * scale, 1.5f);
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.75f, scale, 0.75f * scale, 1f);
-            this.frontBodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.75f, scale * 0.75f, scale * 0.75f, 1f);
-        }
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
-        if (this.frontBodyPart != null) this.frontBodyPart.onUpdate();
 
         float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.55f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);

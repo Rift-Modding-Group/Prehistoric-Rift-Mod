@@ -8,14 +8,12 @@ import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.network.datasync.DataParameter;
@@ -67,6 +65,33 @@ public class Baryonyx extends RiftWaterCreature {
         this.speed = 0.25D;
         this.waterSpeed = 5D;
         this.targetList = RiftUtil.creatureTargets(((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+
+        this.bodyPart = new RiftCreaturePart(this, 0, 0, 1.25f, 0.9f, 1f, 1f);
+        this.headPart = new RiftCreaturePart(this, 4f, 0, 2.125f, 0.75f, 0.5f, 1.5f);
+        this.mainHeadPart = new RiftCreaturePart(this, 3, 0, 2.125f, 0.625f, 0.625f, 1.5f);
+        this.neckPart = new RiftCreaturePart(this, 2.25f, 0, 1.625f, 0.5f, 1f, 1.5f);
+        this.frontBodyPart = new RiftCreaturePart(this, 1.25f, 0, 1.25f, 0.9f, 0.9f, 1f);
+        this.leftLegPart = new RiftCreaturePart(this, 0.75f, -140f, 0, 0.5f, 1.3f, 0.5f);
+        this.rightLegPart = new RiftCreaturePart(this, 0.75f, 140f, 0, 0.5f, 1.3f, 0.5f);
+        this.tail0Part = new RiftCreaturePart(this, -1f, 0, 1.5f, 0.6f, 0.7f, 0.5f);
+        this.tail1Part = new RiftCreaturePart(this, -1.75f, 0, 1.5f, 0.6f, 0.7f, 0.5f);
+        this.tail2Part = new RiftCreaturePart(this, -2.5f, 0, 1.45f, 0.5f, 0.7f, 0.5f);
+        this.tail3Part = new RiftCreaturePart(this, -3.25f, 0, 1.45f, 0.5f, 0.6f, 0.5f);
+        this.tail4Part = new RiftCreaturePart(this, -4f, 0, 1.4f, 0.5f, 0.6f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.bodyPart,
+            this.headPart,
+            this.mainHeadPart,
+            this.neckPart,
+            this.frontBodyPart,
+            this.leftLegPart,
+            this.rightLegPart,
+            this.tail0Part,
+            this.tail1Part,
+            this.tail2Part,
+            this.tail3Part,
+            this.tail4Part
+        };
     }
 
     @Override
@@ -102,38 +127,8 @@ public class Baryonyx extends RiftWaterCreature {
     }
 
     @Override
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 1.25f, scale * 0.9f, scale, 1f);
-            this.headPart = new RiftCreaturePart(this, 4f, 0, 2.125f, scale * 0.75f, scale * 0.5f, 1.5f);
-            this.mainHeadPart = new RiftCreaturePart(this, 3, 0, 2.125f, scale * 0.625f, scale * 0.625f, 1.5f);
-            this.neckPart = new RiftCreaturePart(this, 2.25f, 0, 1.625f, scale * 0.5f, scale, 1.5f);
-            this.frontBodyPart = new RiftCreaturePart(this, 1.25f, 0, 1.25f, scale * 0.9f, scale * 0.9f, 1f);
-            this.leftLegPart = new RiftCreaturePart(this, 0.75f, -140f, 0, scale * 0.5f, scale * 1.3f, 0.5f);
-            this.rightLegPart = new RiftCreaturePart(this, 0.75f, 140f, 0, scale * 0.5f, scale * 1.3f, 0.5f);
-            this.tail0Part = new RiftCreaturePart(this, -1f, 0, 1.5f, scale * 0.6f, scale * 0.7f, 0.5f);
-            this.tail1Part = new RiftCreaturePart(this, -1.75f, 0, 1.5f, scale * 0.6f, scale * 0.7f, 0.5f);
-            this.tail2Part = new RiftCreaturePart(this, -2.5f, 0, 1.45f, scale * 0.5f, scale * 0.7f, 0.5f);
-            this.tail3Part = new RiftCreaturePart(this, -3.25f, 0, 1.45f, scale * 0.5f, scale * 0.6f, 0.5f);
-            this.tail4Part = new RiftCreaturePart(this, -4f, 0, 1.4f, scale * 0.5f, scale * 0.6f, 0.5f);
-        }
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
-        if (this.mainHeadPart != null) this.mainHeadPart.onUpdate();
-        if (this.neckPart != null) this.neckPart.onUpdate();
-        if (this.frontBodyPart != null) this.frontBodyPart.onUpdate();
-        if (this.leftLegPart != null) this.leftLegPart.onUpdate();
-        if (this.rightLegPart != null) this.rightLegPart.onUpdate();
-        if (this.tail0Part != null) this.tail0Part.onUpdate();
-        if (this.tail1Part != null) this.tail1Part.onUpdate();
-        if (this.tail2Part != null) this.tail2Part.onUpdate();
-        if (this.tail3Part != null) this.tail3Part.onUpdate();
-        if (this.tail4Part != null) this.tail4Part.onUpdate();
 
         float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden() && !this.isInWater()) ? -0.75f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
@@ -274,11 +269,6 @@ public class Baryonyx extends RiftWaterCreature {
         //reset
         this.forcedAttackTarget = null;
         this.forcedBreakPos = null;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        return super.shouldRender(camera) || this.inFrustrum(camera, this.mainHeadPart) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.frontBodyPart) || this.inFrustrum(camera, this.leftLegPart) || this.inFrustrum(camera, this.rightLegPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part) || this.inFrustrum(camera, this.tail3Part) || this.inFrustrum(camera, this.tail4Part);
     }
 
     @Override

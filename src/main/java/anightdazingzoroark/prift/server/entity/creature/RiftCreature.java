@@ -69,9 +69,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
-public abstract class RiftCreature extends EntityTameable implements IAnimatable {
+public abstract class RiftCreature extends EntityTameable implements IAnimatable, IRiftMultipart {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -144,6 +143,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public String saddleItem;
     public RiftCreaturePart headPart;
     public RiftCreaturePart bodyPart;
+    public RiftCreaturePart[] hitboxArray;
     public float oldScale;
     public boolean changeSitFlag;
     private int healthRegen;
@@ -316,6 +316,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         if (this.world.isRemote) this.setControls();
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
+
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
     }
@@ -408,11 +409,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void updateParts() {
-        if (this.headPart != null) this.headPart.onUpdate();
-        if (this.bodyPart != null) this.bodyPart.onUpdate();
+        for (RiftCreaturePart creaturePart : this.hitboxArray) {
+            if (creaturePart != null) creaturePart.onUpdate();
+        }
     }
 
-    public abstract void resetParts(float scale);
+    public void resetParts(float scale) {
+        if (scale > this.oldScale) {
+            this.oldScale = scale;
+            for (RiftCreaturePart creaturePart : this.hitboxArray) {
+                if (creaturePart != null) creaturePart.resize(scale);
+            }
+        }
+    }
 
     public void removeParts() {
         if (this.headPart != null) {
@@ -1025,7 +1034,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @SideOnly(Side.CLIENT)
     public boolean shouldRender(ICamera camera) {
-        return this.inFrustrum(camera, this.headPart) || this.inFrustrum(camera, this.bodyPart);
+        for (RiftCreaturePart creaturePart : this.hitboxArray) return this.inFrustrum(camera, creaturePart);
+        return false;
     }
 
     public boolean inFrustrum(ICamera camera, Entity entity) {
@@ -1186,6 +1196,29 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
         this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
     }
+
+    //for multi hitbox stuff
+    public World getWorld() {
+        return this.world;
+    }
+
+    public boolean attackEntityFromPart(MultiPartEntityPart part, DamageSource source, float damage) {
+        RiftCreaturePart riftPart = (RiftCreaturePart) part;
+        if (damage > 0.0f) {
+            float newDamage = riftPart.getDamageMultiplier() * damage;
+            return this.attackEntityFrom(source, newDamage);
+        }
+        return false;
+    }
+
+    public RiftCreature getPartParent() {
+        return this;
+    }
+
+    public Entity[] getParts() {
+        return this.hitboxArray;
+    }
+    //end of multi hitbox stuff
 
     public boolean isSaddled() {
         return this.dataManager.get(SADDLED);

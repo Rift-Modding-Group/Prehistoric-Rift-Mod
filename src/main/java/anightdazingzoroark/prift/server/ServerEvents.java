@@ -68,17 +68,6 @@ public class ServerEvents {
                 event.setCanceled(true);
             }
         }
-
-        //ensure that damage towards hitboxes is same damage to creature
-        if (event.getTarget() instanceof RiftCreaturePart && event.getEntity() instanceof EntityPlayer) {
-            event.setCanceled(true);
-
-            //for dealing damage
-            RiftCreaturePart part = (RiftCreaturePart) event.getTarget();
-            RiftCreature parent = part.getParent();
-            ((EntityPlayer) event.getEntity()).attackTargetEntityWithCurrentItem(parent);
-            RiftMessages.WRAPPER.sendToServer(new RiftOnHitMultipart(parent));
-        }
     }
 
     //prevent players from breaking blocks while ridin

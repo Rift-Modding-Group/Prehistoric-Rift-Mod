@@ -37,6 +37,13 @@ public class Dodo extends RiftCreature implements IHerder {
         this.experienceValue = 3;
         this.speed = 0.25D;
         this.isRideable = false;
+
+        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.25f, 1f,  0.55f, 1f);
+        this.headPart = new RiftCreaturePart(this, 0.35f, 0, 0.5f, 0.5f,  0.5f, 1f);
+        this.hitboxArray = new RiftCreaturePart[]{
+                this.headPart,
+                this.bodyPart,
+        };
     }
 
     protected void initEntityAI() {
@@ -53,15 +60,6 @@ public class Dodo extends RiftCreature implements IHerder {
         super.onLivingUpdate();
         if (!this.onGround && this.motionY < 0.0D) {
             this.motionY *= 0.6D;
-        }
-    }
-
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.25f, scale,  0.55f * scale, 1f);
-            this.headPart = new RiftCreaturePart(this, 0.35f, 0, 0.5f, 0.5f * scale,  0.5f * scale, 1f);
         }
     }
 

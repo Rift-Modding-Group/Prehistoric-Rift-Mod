@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.client.renderer;
 
 import anightdazingzoroark.prift.client.renderer.entity.*;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
@@ -46,6 +45,7 @@ public class EntityRenderer {
         RenderingRegistry.registerEntityRenderingHandler(RiftMortar.class, RiftLargeWeaponRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftCatapult.class, RiftCatapultRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftEmbryo.class, RiftEmbryoRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftCreaturePart.class, new CreaturePartRenderer.Factory());
 
         //projectiles
         RenderingRegistry.registerEntityRenderingHandler(ThrownStegoPlate.class, new IRenderFactory<ThrownStegoPlate>() {

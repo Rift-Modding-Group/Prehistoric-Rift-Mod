@@ -1,17 +1,13 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.*;
-import com.google.common.base.Predicate;
-import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -35,14 +31,8 @@ import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class RiftWaterCreature extends RiftCreature {
     private static final DataParameter<Boolean> ASCENDING = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
@@ -164,11 +154,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         }
     }
 
-    public void updateParts() {
-        if (this.bodyPart != null) this.bodyPart.onUpdate();
-        if (this.headPart != null) this.headPart.onUpdate();
-    }
-
     public void removeParts() {
         if (this.bodyPart != null) {
             this.world.removeEntityDangerously(this.bodyPart);
@@ -285,11 +270,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
     public void setIsDescending(boolean value) {
         this.dataManager.set(DESCENDING, value);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        return this.inFrustrum(camera, this.headPart);
     }
 
     @Override

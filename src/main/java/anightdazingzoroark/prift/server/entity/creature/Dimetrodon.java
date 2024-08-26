@@ -67,6 +67,21 @@ public class Dimetrodon extends RiftCreature {
         this.speed = 0.20D;
         this.isRideable = false;
         this.targetList = RiftUtil.creatureTargets(((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+
+        this.headPart = new RiftCreaturePart(this, 1.25f, 0, 0.45f, 0.5f, 0.425f, 1.5f);
+        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.3f, 1f, 0.5f, 1f);
+        this.neckPart = new RiftCreaturePart(this, 0.75f, 0, 0.45f, 0.375f, 0.375f, 1.5f);
+        this.tail0Part = new RiftCreaturePart(this, -0.8f, 0, 0.4f, 0.375f, 0.375f, 0.5f);
+        this.tail1Part = new RiftCreaturePart(this, -1.2f, 0, 0.35f, 0.375f, 0.375f, 0.5f);
+        this.tail2Part = new RiftCreaturePart(this, -1.6f, 0, 0.3f, 0.375f, 0.375f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.headPart,
+            this.bodyPart,
+            this.neckPart,
+            this.tail0Part,
+            this.tail1Part,
+            this.tail2Part
+        };
     }
 
     @Override
@@ -271,26 +286,8 @@ public class Dimetrodon extends RiftCreature {
     //simple difficulty compat ends here
 
     @Override
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.headPart = new RiftCreaturePart(this, 1.25f, 0, 0.45f, 0.5f * scale, 0.425f * scale, 1.5f);
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.3f, scale, 0.5f * scale, 1f);
-            this.neckPart = new RiftCreaturePart(this, 0.75f, 0, 0.45f, 0.375f * scale, 0.375f * scale, 1.5f);
-            this.tail0Part = new RiftCreaturePart(this, -0.8f, 0, 0.4f, 0.375f * scale, 0.375f * scale, 0.5f);
-            this.tail1Part = new RiftCreaturePart(this, -1.2f, 0, 0.35f, 0.375f * scale, 0.375f * scale, 0.5f);
-            this.tail2Part = new RiftCreaturePart(this, -1.6f, 0, 0.3f, 0.375f * scale, 0.375f * scale, 0.5f);
-        }
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
-        if (this.neckPart != null) this.neckPart.onUpdate();
-        if (this.tail0Part != null) this.tail0Part.onUpdate();
-        if (this.tail1Part != null) this.tail1Part.onUpdate();
-        if (this.tail2Part != null) this.tail2Part.onUpdate();
 
         float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.25f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
@@ -321,7 +318,6 @@ public class Dimetrodon extends RiftCreature {
             this.tail2Part = null;
         }
     }
-
 
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {

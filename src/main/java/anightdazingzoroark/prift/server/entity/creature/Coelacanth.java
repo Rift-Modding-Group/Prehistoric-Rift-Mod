@@ -35,6 +35,23 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
         this.setSize(0.5f, 0.5f);
         this.experienceValue = 3;
         this.speed = 0.5D;
+
+        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0f, 0.5f, 1f, 1f);
+        this.bodyFront0 = new RiftCreaturePart(this, 1.1f, 0, 0.15f, 0.375f, 0.8f, 1f);
+        this.bodyFront1 = new RiftCreaturePart(this, 0.72f, 0, 0.15f, 0.375f, 0.8f, 1f);
+        this.bodyFront2 = new RiftCreaturePart(this, 0.36f, 0, 0.15f, 0.375f, 0.8f, 1f);
+        this.bodyBack0 = new RiftCreaturePart(this, -1.1f, 0, 0.15f, 0.375f, 0.8f, 1f);
+        this.bodyBack1 = new RiftCreaturePart(this, -0.72f, 0, 0.15f, 0.375f, 0.8f, 1f);
+        this.bodyBack2 = new RiftCreaturePart(this, -0.36f, 0, 0.15f, 0.375f, 0.8f, 1f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.bodyPart,
+            this.bodyFront0,
+            this.bodyFront1,
+            this.bodyFront2,
+            this.bodyBack0,
+            this.bodyBack1,
+            this.bodyBack2
+        };
     }
 
     protected void initEntityAI() {
@@ -43,29 +60,8 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
     }
 
     @Override
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0f, 0.5f * scale, scale, 1f);
-            this.bodyFront0 = new RiftCreaturePart(this, 1.1f, 0, 0.15f, 0.375f * scale, 0.8f * scale, 1f);
-            this.bodyFront1 = new RiftCreaturePart(this, 0.72f, 0, 0.15f, 0.375f * scale, 0.8f * scale, 1f);
-            this.bodyFront2 = new RiftCreaturePart(this, 0.36f, 0, 0.15f, 0.375f * scale, 0.8f * scale, 1f);
-            this.bodyBack0 = new RiftCreaturePart(this, -1.1f, 0, 0.15f, 0.375f * scale, 0.8f * scale, 1f);
-            this.bodyBack1 = new RiftCreaturePart(this, -0.72f, 0, 0.15f, 0.375f * scale, 0.8f * scale, 1f);
-            this.bodyBack2 = new RiftCreaturePart(this, -0.36f, 0, 0.15f, 0.375f * scale, 0.8f * scale, 1f);
-        }
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
-        if (this.bodyFront0 != null) this.bodyFront0.onUpdate();
-        if (this.bodyFront1 != null) this.bodyFront1.onUpdate();
-        if (this.bodyFront2 != null) this.bodyFront2.onUpdate();
-        if (this.bodyBack0 != null) this.bodyBack0.onUpdate();
-        if (this.bodyBack1 != null) this.bodyBack1.onUpdate();
-        if (this.bodyBack2 != null) this.bodyBack2.onUpdate();
     }
 
     @Override

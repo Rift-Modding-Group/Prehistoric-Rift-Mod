@@ -98,6 +98,37 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         this.isRideable = true;
         this.launchTick = 0;
         this.saddleItem = ((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+
+        this.headPart = new RiftCreaturePart(this, 6.625f, 0, 4.5125f, 0.625f, 0.5f, 2f);
+        this.bodyPart = new RiftCreaturePart(this, -0.75f, 0, 1.35f, 1.65f, 1f, 1f);
+        this.neck0Part = new RiftCreaturePart(this, 5.75f, 0, 4.25f, 0.5f, 0.5f, 1.5f);
+        this.neck1Part = new RiftCreaturePart(this, 5f, 0, 3.75f, 0.5f, 0.5f, 1.5f);
+        this.neck2Part = new RiftCreaturePart(this, 4.25f, 0, 3.25f, 0.5f, 0.5f, 1.5f);
+        this.neck3Part = new RiftCreaturePart(this, 3.5f, 0, 2.75f, 0.5f, 0.625f, 1.5f);
+        this.neck4Part = new RiftCreaturePart(this, 2.75f, 0, 2.5f, 0.5f, 0.625f, 1.5f);
+        this.neck5Part = new RiftCreaturePart(this, 1.75f, 0, 2.25f, 0.625f, 0.625f, 1.5f);
+        this.leftBackLegPart = new RiftCreaturePart(this, 2.375f, -150, 0, 0.625f, 1.25f, 0.5f);
+        this.rightBackLegPart = new RiftCreaturePart(this, 2.375f, 150, 0, 0.625f, 1.25f, 0.5f);
+        this.tail0Part = new RiftCreaturePart(this, -3.25f, 0, 1.9f, 0.675f, 0.625f, 0.5f);
+        this.tail1Part = new RiftCreaturePart(this, -4.75f, 0, 1.8f, 0.625f, 0.6f, 0.5f);
+        this.tail2Part = new RiftCreaturePart(this, -6f, 0, 1.7f, 0.625f, 0.6f, 0.5f);
+        this.tail3Part = new RiftCreaturePart(this, -7.25f, 0, 1.7f, 0.625f, 0.45f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.headPart,
+            this.bodyPart,
+            this.neck0Part,
+            this.neck1Part,
+            this.neck2Part,
+            this.neck3Part,
+            this.neck4Part,
+            this.neck5Part,
+            this.leftBackLegPart,
+            this.rightBackLegPart,
+            this.tail0Part,
+            this.tail1Part,
+            this.tail2Part,
+            this.tail3Part
+        };
     }
 
     @Override
@@ -150,42 +181,9 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         else if (this.getPassengers().size() > 1) this.dismount = true;
     }
 
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.headPart = new RiftCreaturePart(this, 6.625f, 0, 4.5125f, 0.625f * scale, 0.5f * scale, 2f);
-            this.bodyPart = new RiftCreaturePart(this, -0.75f, 0, 1.35f, 1.65f * scale, scale, 1f);
-            this.neck0Part = new RiftCreaturePart(this, 5.75f, 0, 4.25f, 0.5f * scale, 0.5f * scale, 1.5f);
-            this.neck1Part = new RiftCreaturePart(this, 5f, 0, 3.75f, 0.5f * scale, 0.5f * scale, 1.5f);
-            this.neck2Part = new RiftCreaturePart(this, 4.25f, 0, 3.25f, 0.5f * scale, 0.5f * scale, 1.5f);
-            this.neck3Part = new RiftCreaturePart(this, 3.5f, 0, 2.75f, 0.5f * scale, 0.625f * scale, 1.5f);
-            this.neck4Part = new RiftCreaturePart(this, 2.75f, 0, 2.5f, 0.5f * scale, 0.625f * scale, 1.5f);
-            this.neck5Part = new RiftCreaturePart(this, 1.75f, 0, 2.25f, 0.625f * scale, 0.625f * scale, 1.5f);
-            this.leftBackLegPart = new RiftCreaturePart(this, 2.375f, -150, 0, 0.625f * scale, 1.25f * scale, 0.5f);
-            this.rightBackLegPart = new RiftCreaturePart(this, 2.375f, 150, 0, 0.625f * scale, 1.25f * scale, 0.5f);
-            this.tail0Part = new RiftCreaturePart(this, -3.25f, 0, 1.9f, 0.675f * scale, 0.625f * scale, 0.5f);
-            this.tail1Part = new RiftCreaturePart(this, -4.75f, 0, 1.8f, 0.625f * scale, 0.6f * scale, 0.5f);
-            this.tail2Part = new RiftCreaturePart(this, -6f, 0, 1.7f, 0.625f * scale, 0.6f * scale, 0.5f);
-            this.tail3Part = new RiftCreaturePart(this, -7.25f, 0, 1.7f, 0.625f * scale, 0.45f * scale, 0.5f);
-        }
-    }
-
     @Override
     public void updateParts() {
         super.updateParts();
-        if (this.neck0Part != null) this.neck0Part.onUpdate();
-        if (this.neck1Part != null) this.neck1Part.onUpdate();
-        if (this.neck2Part != null) this.neck2Part.onUpdate();
-        if (this.neck3Part != null) this.neck3Part.onUpdate();
-        if (this.neck4Part != null) this.neck4Part.onUpdate();
-        if (this.neck5Part != null) this.neck5Part.onUpdate();
-        if (this.leftBackLegPart != null) this.leftBackLegPart.onUpdate();
-        if (this.rightBackLegPart != null) this.rightBackLegPart.onUpdate();
-        if (this.tail0Part != null) this.tail0Part.onUpdate();
-        if (this.tail1Part != null) this.tail1Part.onUpdate();
-        if (this.tail2Part != null) this.tail2Part.onUpdate();
-        if (this.tail3Part != null) this.tail3Part.onUpdate();
 
         float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -1.125f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
@@ -517,11 +515,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         float seatTwoX = (float)(this.posX + (-2) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float seatTwoZ = (float)(this.posZ + (-2) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(seatTwoX, this.posY + 2.25, seatTwoZ);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        return super.shouldRender(camera) || this.inFrustrum(camera, this.neck0Part) || this.inFrustrum(camera, this.neck1Part) || this.inFrustrum(camera, this.neck2Part) || this.inFrustrum(camera, this.neck3Part) || this.inFrustrum(camera, this.neck4Part) || this.inFrustrum(camera, this.neck5Part) || this.inFrustrum(camera, this.leftBackLegPart) || this.inFrustrum(camera, this.rightBackLegPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part) || this.inFrustrum(camera, this.tail3Part);
     }
 
     @Override

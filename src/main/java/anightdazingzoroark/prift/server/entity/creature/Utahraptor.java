@@ -71,6 +71,23 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         this.maxRightClickCooldown = 1800f;
         this.saddleItem = ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+
+        this.headPart = new RiftCreaturePart(this, 2f, 0, 1.7f, 1f, 0.6f, 1.5f);
+        this.bodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.9f, 1f, 0.8f, 1f);
+        this.neckPart = new RiftCreaturePart(this, 1.5f, 0, 1.2f, 0.7f, 0.7f, 1.5f);
+        this.hipPart = new RiftCreaturePart(this, 0, 0, 0.7f, 1f, 1f, 1f);
+        this.tail0Part = new RiftCreaturePart(this, -0.9f, 0, 1f, 0.7f, 0.6f, 0.5f);
+        this.tail1Part = new RiftCreaturePart(this, -1.5f, 0, 0.95f, 0.6f, 0.6f, 0.5f);
+        this.tail2Part = new RiftCreaturePart(this, -2.1f, 0, 0.9f, 0.6f, 0.6f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.headPart,
+            this.bodyPart,
+            this.neckPart,
+            this.hipPart,
+            this.tail0Part,
+            this.tail1Part,
+            this.tail2Part
+        };
     }
 
     @Override
@@ -130,28 +147,9 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         }
     }
 
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.headPart = new RiftCreaturePart(this, 2f, 0, 1.7f, scale, 0.6f * scale, 1.5f);
-            this.bodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.9f, scale, 0.8f * scale, 1f);
-            this.neckPart = new RiftCreaturePart(this, 1.5f, 0, 1.2f, 0.7f * scale, 0.7f * scale, 1.5f);
-            this.hipPart = new RiftCreaturePart(this, 0, 0, 0.7f, scale, scale, 1f);
-            this.tail0Part = new RiftCreaturePart(this, -0.9f, 0, 1f, 0.7f * scale, 0.6f * scale, 0.5f);
-            this.tail1Part = new RiftCreaturePart(this, -1.5f, 0, 0.95f, 0.6f * scale, 0.6f * scale, 0.5f);
-            this.tail2Part = new RiftCreaturePart(this, -2.1f, 0, 0.9f, 0.6f * scale, 0.6f * scale, 0.5f);
-        }
-    }
-
     @Override
     public void updateParts() {
         super.updateParts();
-        if (this.neckPart != null) this.neckPart.onUpdate();
-        if (this.hipPart != null) this.hipPart.onUpdate();
-        if (this.tail0Part != null) this.tail0Part.onUpdate();
-        if (this.tail1Part != null) this.tail1Part.onUpdate();
-        if (this.tail2Part != null) this.tail2Part.onUpdate();
 
         float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.45f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);

@@ -82,6 +82,25 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         this.speed = 0.15D;
         this.isRideable = true;
         this.saddleItem = ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+
+        this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.2f, 1f, 1.25f, 1f).setInvulnerable();
+        this.bodyPart = new RiftCreaturePart(this, 1.125f, 0, 0.8f, 1f, 0.875f, 1f);
+        this.hipPart = new RiftCreaturePart(this, -0.25f, 0, 0.7f, 1f, 1f, 1f);
+        this.leftBackLegPart = new RiftCreaturePart(this, 0.9f, -115, 0, 0.6f, 1.125f, 0.5f);
+        this.rightBackLegPart = new RiftCreaturePart(this, 0.9f, 115, 0, 0.6f, 1.125f, 0.5f);
+        this.tail0Part = new RiftCreaturePart(this, -1.5f, 0, 0.8f, 0.8f, 0.75f, 0.5f);
+        this.tail1Part = new RiftCreaturePart(this, -2.5f, 0, 1f, 0.6f, 0.6f, 0.5f);
+        this.tail2Part = new RiftCreaturePart(this, -3.375f, 0, 0.9f, 0.6f, 0.5f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.headPart,
+            this.bodyPart,
+            this.hipPart,
+            this.leftBackLegPart,
+            this.rightBackLegPart,
+            this.tail0Part,
+            this.tail1Part,
+            this.tail2Part
+        };
     }
 
     @Override
@@ -140,30 +159,9 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         this.manageCanCharge();
     }
 
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.2f, scale, 1.25f * scale, 0f);
-            this.bodyPart = new RiftCreaturePart(this, 1.125f, 0, 0.8f, scale, 0.875f * scale, 1f);
-            this.hipPart = new RiftCreaturePart(this, -0.25f, 0, 0.7f, scale, scale, 1f);
-            this.leftBackLegPart = new RiftCreaturePart(this, 0.9f, -115, 0, 0.6f * scale, 1.125f * scale, 0.5f);
-            this.rightBackLegPart = new RiftCreaturePart(this, 0.9f, 115, 0, 0.6f * scale, 1.125f * scale, 0.5f);
-            this.tail0Part = new RiftCreaturePart(this, -1.5f, 0, 0.8f, 0.8f * scale, 0.75f * scale, 0.5f);
-            this.tail1Part = new RiftCreaturePart(this, -2.5f, 0, 1f, 0.6f * scale, 0.6f * scale, 0.5f);
-            this.tail2Part = new RiftCreaturePart(this, -3.375f, 0, 0.9f, 0.6f * scale, 0.5f * scale, 0.5f);
-        }
-    }
-
     @Override
     public void updateParts() {
         super.updateParts();
-        if (this.hipPart != null) this.hipPart.onUpdate();
-        if (this.leftBackLegPart != null) this.leftBackLegPart.onUpdate();
-        if (this.rightBackLegPart != null) this.rightBackLegPart.onUpdate();
-        if (this.tail0Part != null) this.tail0Part.onUpdate();
-        if (this.tail1Part != null) this.tail1Part.onUpdate();
-        if (this.tail2Part != null) this.tail2Part.onUpdate();
 
         float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.65f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);

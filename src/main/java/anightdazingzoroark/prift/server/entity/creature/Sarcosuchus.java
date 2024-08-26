@@ -72,6 +72,27 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.spinTime = 0;
         this.messageSent = true;
         this.targetList = RiftUtil.creatureTargets(((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+
+        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.125f, 0.75f, 0.675f, 1f);
+        this.headPart = new RiftCreaturePart(this, 1.625f, 0, 0.125f, 0.625f, 0.625f, 1.5f);
+        this.snoutPart = new RiftCreaturePart(this, 2.5f, 0, 0.2f, 0.55f, 0.5f, 1.5f);
+        this.frontBodyPart = new RiftCreaturePart(this, 0.75f, 0, 0.125f, 0.75f, 0.65f, 1f);
+        this.tail0 = new RiftCreaturePart(this, -0.75f, 0, 0.125f, 0.75f, 0.65f, 0.5f);
+        this.tail1 = new RiftCreaturePart(this, -1.625f, 0, 0.2f, 0.575f, 0.525f, 0.5f);
+        this.tail2 = new RiftCreaturePart(this, -2.375f, 0, 0.225f, 0.525f, 0.475f, 0.5f);
+        this.tail3 = new RiftCreaturePart(this, -3.125f, 0, 0.225f, 0.525f, 0.475f, 0.5f);
+        this.tail4 = new RiftCreaturePart(this, -3.75f, 0, 0.25f, 0.475f, 0.425f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.bodyPart,
+            this.headPart,
+            this.snoutPart,
+            this.frontBodyPart,
+            this.tail0,
+            this.tail1,
+            this.tail2,
+            this.tail3,
+            this.tail4
+        };
     }
 
     @Override
@@ -188,32 +209,9 @@ public class Sarcosuchus extends RiftWaterCreature {
         }
     }
 
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.125f, scale * 0.75f, scale * 0.675f, 1f);
-            this.headPart = new RiftCreaturePart(this, 1.625f, 0, 0.125f, scale * 0.625f, scale * 0.625f, 1.5f);
-            this.snoutPart = new RiftCreaturePart(this, 2.5f, 0, 0.2f, scale * 0.55f, scale * 0.5f, 1.5f);
-            this.frontBodyPart = new RiftCreaturePart(this, 0.75f, 0, 0.125f, scale * 0.75f, scale * 0.65f, 1f);
-            this.tail0 = new RiftCreaturePart(this, -0.75f, 0, 0.125f, scale * 0.75f, scale * 0.65f, 0.5f);
-            this.tail1 = new RiftCreaturePart(this, -1.625f, 0, 0.2f, scale * 0.575f, scale * 0.525f, 0.5f);
-            this.tail2 = new RiftCreaturePart(this, -2.375f, 0, 0.225f, scale * 0.525f, scale * 0.475f, 0.5f);
-            this.tail3 = new RiftCreaturePart(this, -3.125f, 0, 0.225f, scale * 0.525f, scale * 0.475f, 0.5f);
-            this.tail4 = new RiftCreaturePart(this, -3.75f, 0, 0.25f, scale * 0.475f, scale * 0.425f, 0.5f);
-        }
-    }
-
     @Override
     public void updateParts() {
         super.updateParts();
-        if (this.snoutPart != null) this.snoutPart.onUpdate();
-        if (this.frontBodyPart != null) this.frontBodyPart.onUpdate();
-        if (this.tail0 != null) this.tail0.onUpdate();
-        if (this.tail1 != null) this.tail1.onUpdate();
-        if (this.tail2 != null) this.tail2.onUpdate();
-        if (this.tail3 != null) this.tail3.onUpdate();
-        if (this.tail4 != null) this.tail4.onUpdate();
 
         float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.175f : 0;
         if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
@@ -336,11 +334,6 @@ public class Sarcosuchus extends RiftWaterCreature {
     @Override
     public int slotCount() {
         return 27;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        return super.shouldRender(camera) || this.inFrustrum(camera, this.snoutPart) || this.inFrustrum(camera, this.frontBodyPart) || this.inFrustrum(camera, this.tail0) || this.inFrustrum(camera, this.tail1) || this.inFrustrum(camera, this.tail2) || this.inFrustrum(camera, this.tail3) || this.inFrustrum(camera, this.tail4);
     }
 
     @Override

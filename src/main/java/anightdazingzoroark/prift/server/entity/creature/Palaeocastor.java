@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.nbt.NBTTagCompound;
@@ -38,6 +39,8 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.VARINT);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
+    public RiftCreaturePart neckPart;
+    public RiftCreaturePart tailPart;
 
     public Palaeocastor(World worldIn) {
         super(worldIn, RiftCreatureType.PALAEOCASTOR);
@@ -47,6 +50,17 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         this.speed = 0.25D;
         this.attackDamage = RiftConfigHandler.getConfig(this.creatureType).stats.baseDamage;
         this.experienceValue = 3;
+
+        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.125f, 0.625f, 0.625f, 1f);
+        this.headPart = new RiftCreaturePart(this, 0.75f, 0, 0.25f, 0.5f, 0.5f, 1.5f);
+        this.neckPart = new RiftCreaturePart(this, 0.5f, 0, 0.25f, 0.4f, 0.4f, 1.5f);
+        this.tailPart = new RiftCreaturePart(this, -0.6f, 0, 0.25f, 0.5f, 0.5f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.bodyPart,
+            this.headPart,
+            this.neckPart,
+            this.tailPart
+        };
     }
 
     @Override
@@ -81,13 +95,8 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     }
 
     @Override
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.125f, scale * 0.625f, scale * 0.625f, 1f);
-            this.headPart = new RiftCreaturePart(this, 0.75f, 0, 0.25f, scale * 0.5f, scale * 0.5f, 1.5f);
-        }
+    public void updateParts() {
+        super.updateParts();
     }
 
     @Override

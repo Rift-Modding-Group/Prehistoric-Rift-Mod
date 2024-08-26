@@ -74,6 +74,15 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
         this.packBuffCooldown = 0;
         this.sniffCooldown = 0;
         this.targetList = RiftUtil.creatureTargets(((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((DirewolfConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+
+        this.headPart = new RiftCreaturePart(this, 1f, 0, 0.8f, 0.7f, 0.7f, 1.5f);
+        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.6f, 1f, 0.7f, 1f);
+        this.hipsPart = new RiftCreaturePart(this, -0.9f, 0, 0.6f, 0.9f, 0.7f, 1f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.headPart,
+            this.bodyPart,
+            this.hipsPart
+        };
     }
 
     @Override
@@ -123,20 +132,8 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
     }
 
     @Override
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            this.removeParts();
-            this.headPart = new RiftCreaturePart(this, 1f, 0, 0.8f, 0.7f * scale, 0.7f * scale, 1.5f);
-            this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.6f, scale, 0.7f * scale, 1f);
-            this.hipsPart = new RiftCreaturePart(this, -0.9f, 0, 0.6f, 0.9f * scale, 0.7f * scale, 1f);
-        }
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
-        if (this.hipsPart != null) this.hipsPart.onUpdate();
 
         if (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden() && this.hipsPart != null) {
             this.hipsPart.setPositionAndUpdate(this.hipsPart.posX, this.hipsPart.posY - 0.3f, this.hipsPart.posZ);
@@ -259,11 +256,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
         float xOffset = (float)(this.posX + (-0.375f) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-0.375f) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY - 0.875, zOffset);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        return super.shouldRender(camera) || this.inFrustrum(camera, this.hipsPart);
     }
 
     @Override

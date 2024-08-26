@@ -37,6 +37,11 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
         this.speed = 0.35D;
         this.waterSpeed = 4D;
         this.targetList = RiftUtil.creatureTargets(((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+
+        this.headPart = new RiftCreaturePart(this, 0, 0, 0, 0.25f,  0.375f, 1f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.headPart
+        };
     }
 
     @Override
@@ -54,9 +59,6 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
         this.tasks.addTask(4, new RiftHerdMemberFollow(this));
         this.tasks.addTask(5, new RiftWanderWater(this, 1.0D));
     }
-
-    @Override
-    public void resetParts(float scale) {}
 
     @Override
     public boolean canDoHerding() {

@@ -60,6 +60,23 @@ public class Saurophaganax extends RiftCreature {
         this.saddleItem = ((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
         this.speed = 0.25D;
         this.targetList = RiftUtil.creatureTargets(((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist);
+
+        this.headPart = new RiftCreaturePart(this, 3.5f, 0, 2f, 0.6f, 0.6f, 1.5f);
+        this.bodyPart = new RiftCreaturePart(this, 0f, 0, 1.125f, 1f, 0.8f, 1f);
+        this.neckPart = new RiftCreaturePart(this, 2.5f, 0, 1.7f, 0.5f, 0.65f, 1.5f);
+        this.bodyFrontPart = new RiftCreaturePart(this, 1.5f, 0, 1.125f, 0.8f, 0.8f, 1f);
+        this.tail0Part = new RiftCreaturePart(this, -1.5f, 0, 1.4f, 0.6f, 0.6f, 0.5f);
+        this.tail1Part = new RiftCreaturePart(this, -2.5f, 0, 1.4f, 0.5f, 0.5f, 0.5f);
+        this.tail2Part = new RiftCreaturePart(this, -3.5f, 0, 1.4f, 0.5f, 0.5f, 0.5f);
+        this.hitboxArray = new RiftCreaturePart[]{
+            this.headPart,
+            this.bodyPart,
+            this.neckPart,
+            this.bodyFrontPart,
+            this.tail0Part,
+            this.tail1Part,
+            this.tail2Part
+        };
     }
 
     @Override
@@ -120,28 +137,8 @@ public class Saurophaganax extends RiftCreature {
     }
 
     @Override
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.removeParts();
-            this.oldScale = scale;
-            this.headPart = new RiftCreaturePart(this, 3.5f, 0, 2f, 0.6f * scale, 0.6f * scale, 1.5f);
-            this.bodyPart = new RiftCreaturePart(this, 0f, 0, 1.125f, scale, 0.8f * scale, 1f);
-            this.neckPart = new RiftCreaturePart(this, 2.5f, 0, 1.7f, 0.5f * scale, 0.65f * scale, 1.5f);
-            this.bodyFrontPart = new RiftCreaturePart(this, 1.5f, 0, 1.125f, 0.8f * scale, 0.8f * scale, 1f);
-            this.tail0Part = new RiftCreaturePart(this, -1.5f, 0, 1.4f, 0.6f * scale, 0.6f * scale, 0.5f);
-            this.tail1Part = new RiftCreaturePart(this, -2.5f, 0, 1.4f, 0.5f * scale, 0.5f * scale, 0.5f);
-            this.tail2Part = new RiftCreaturePart(this, -3.5f, 0, 1.4f, 0.5f * scale, 0.5f * scale, 0.5f);
-        }
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
-        if (this.neckPart != null) this.neckPart.onUpdate();
-        if (this.bodyFrontPart != null) this.bodyFrontPart.onUpdate();
-        if (this.tail0Part != null) this.tail0Part.onUpdate();
-        if (this.tail1Part != null) this.tail1Part.onUpdate();
-        if (this.tail2Part != null) this.tail2Part.onUpdate();
 
         float sleepOffsetBody = this.isSleeping() ? -1.2f : 0;
         float sleepOffsetNeck = this.isSleeping() ? -1.7f : 0;
@@ -217,11 +214,6 @@ public class Saurophaganax extends RiftCreature {
         float xOffset = (float)(this.posX + (0.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (0.5) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY + 0.35, zOffset);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        return super.shouldRender(camera) || this.inFrustrum(camera, this.bodyFrontPart) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part);
     }
 
     @Override
