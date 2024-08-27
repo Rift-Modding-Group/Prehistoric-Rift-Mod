@@ -1,16 +1,14 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.model.entity.RiftCreatureModel;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class AnkylosaurusRenderer extends GeoEntityRenderer<RiftCreature> {
+public class AnkylosaurusRenderer extends RiftCreatureRenderer {
     public AnkylosaurusRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
+        super(renderManager);
     }
 
     @Override

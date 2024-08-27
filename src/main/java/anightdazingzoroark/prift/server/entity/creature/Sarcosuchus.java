@@ -225,38 +225,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         if (this.tail4 != null) this.tail4.setPositionAndUpdate(this.tail4.posX, this.tail4.posY + sitOffset, this.tail4.posZ);
     }
 
-    public void removeParts() {
-        super.removeParts();
-        if (this.snoutPart != null) {
-            this.world.removeEntityDangerously(this.snoutPart);
-            this.snoutPart = null;
-        }
-        if (this.frontBodyPart != null) {
-            this.world.removeEntityDangerously(this.frontBodyPart);
-            this.frontBodyPart = null;
-        }
-        if (this.tail0 != null) {
-            this.world.removeEntityDangerously(this.tail0);
-            this.tail0 = null;
-        }
-        if (this.tail1 != null) {
-            this.world.removeEntityDangerously(this.tail1);
-            this.tail1 = null;
-        }
-        if (this.tail2 != null) {
-            this.world.removeEntityDangerously(this.tail2);
-            this.tail2 = null;
-        }
-        if (this.tail3 != null) {
-            this.world.removeEntityDangerously(this.tail3);
-            this.tail3 = null;
-        }
-        if (this.tail4 != null) {
-            this.world.removeEntityDangerously(this.tail4);
-            this.tail4 = null;
-        }
-    }
-
     @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.3f, 1.5f);

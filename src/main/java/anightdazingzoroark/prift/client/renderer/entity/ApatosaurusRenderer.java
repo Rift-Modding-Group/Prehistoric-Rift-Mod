@@ -1,27 +1,17 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.model.entity.RiftCreatureModel;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class ApatosaurusRenderer extends GeoEntityRenderer<RiftCreature> {
+public class ApatosaurusRenderer extends RiftCreatureRenderer {
     public ApatosaurusRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
+        super(renderManager);
         this.shadowSize = 1.75f;
-    }
-
-    @Override
-    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
-        Apatosaurus apatosaurus = (Apatosaurus) livingEntity;
-        return super.shouldRender(apatosaurus, camera, camX, camY, camZ) || apatosaurus.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(apatosaurus);
     }
 
     @Override

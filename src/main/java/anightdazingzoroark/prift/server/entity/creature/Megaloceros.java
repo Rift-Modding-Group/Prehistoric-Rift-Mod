@@ -135,15 +135,6 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     }
 
     @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.frontBodyPart != null) {
-            this.world.removeEntityDangerously(this.frontBodyPart);
-            this.frontBodyPart = null;
-        }
-    }
-
-    @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         this.writePregnancyDataToNBT(compound);

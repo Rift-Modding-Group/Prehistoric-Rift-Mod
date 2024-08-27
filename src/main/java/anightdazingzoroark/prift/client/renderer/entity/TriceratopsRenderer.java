@@ -11,16 +11,10 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class TriceratopsRenderer extends GeoEntityRenderer<RiftCreature> {
+public class TriceratopsRenderer extends RiftCreatureRenderer {
     public TriceratopsRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
+        super(renderManager);
         this.shadowSize = 1.0f;
-    }
-
-    @Override
-    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
-        Triceratops triceratops = (Triceratops) livingEntity;
-        return super.shouldRender(triceratops, camera, camX, camY, camZ) || triceratops.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(triceratops);
     }
 
     @Override

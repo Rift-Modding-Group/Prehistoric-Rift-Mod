@@ -8,9 +8,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class MegalocerosRenderer extends GeoEntityRenderer<RiftCreature> {
+public class MegalocerosRenderer extends RiftCreatureRenderer {
     public MegalocerosRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
+        super(renderManager);
     }
 
     @Override

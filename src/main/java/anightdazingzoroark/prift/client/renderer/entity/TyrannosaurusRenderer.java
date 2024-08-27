@@ -12,16 +12,10 @@ import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 import software.bernie.geckolib3.resource.GeckoLibCache;
 
-public class TyrannosaurusRenderer extends GeoEntityRenderer<RiftCreature> {
+public class TyrannosaurusRenderer extends RiftCreatureRenderer {
     public TyrannosaurusRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
+        super(renderManager);
         this.shadowSize = 1.0f;
-    }
-
-    @Override
-    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
-        Tyrannosaurus tyrannosaurus = (Tyrannosaurus) livingEntity;
-        return super.shouldRender(tyrannosaurus, camera, camX, camY, camZ) || tyrannosaurus.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(tyrannosaurus);
     }
 
     @Override

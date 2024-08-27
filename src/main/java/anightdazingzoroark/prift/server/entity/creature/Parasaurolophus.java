@@ -167,31 +167,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.neckPart != null) {
-            this.world.removeEntityDangerously(this.neckPart);
-            this.neckPart = null;
-        }
-        if (this.tail0Part != null) {
-            this.world.removeEntityDangerously(this.tail0Part);
-            this.tail0Part = null;
-        }
-        if (this.tail1Part != null) {
-            this.world.removeEntityDangerously(this.tail1Part);
-            this.tail1Part = null;
-        }
-        if (this.tail2Part != null) {
-            this.world.removeEntityDangerously(this.tail2Part);
-            this.tail2Part = null;
-        }
-        if (this.tail3Part != null) {
-            this.world.removeEntityDangerously(this.tail3Part);
-            this.tail3Part = null;
-        }
-    }
-
-    @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         this.writeHarvestWanderDataToNBT(compound);

@@ -423,17 +423,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    public void removeParts() {
-        if (this.headPart != null) {
-            this.world.removeEntityDangerously(this.headPart);
-            this.headPart = null;
-        }
-        if (this.bodyPart != null) {
-            this.world.removeEntityDangerously(this.bodyPart);
-            this.bodyPart = null;
-        }
-    }
-
     private void naturalRegen() {
         if (this.healthRegen <= 100) {
             this.healthRegen++;
@@ -1204,7 +1193,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public boolean attackEntityFromPart(MultiPartEntityPart part, DamageSource source, float damage) {
         RiftCreaturePart riftPart = (RiftCreaturePart) part;
-        if (damage > 0.0f) {
+        if (damage > 0.0f && !riftPart.isDisabled()) {
             float newDamage = riftPart.getDamageMultiplier() * damage;
             return this.attackEntityFrom(source, newDamage);
         }

@@ -299,27 +299,6 @@ public class Dimetrodon extends RiftCreature {
     }
 
     @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.neckPart != null) {
-            this.world.removeEntityDangerously(this.neckPart);
-            this.neckPart = null;
-        }
-        if (this.tail0Part != null) {
-            this.world.removeEntityDangerously(this.tail0Part);
-            this.tail0Part = null;
-        }
-        if (this.tail1Part != null) {
-            this.world.removeEntityDangerously(this.tail1Part);
-            this.tail1Part = null;
-        }
-        if (this.tail2Part != null) {
-            this.world.removeEntityDangerously(this.tail2Part);
-            this.tail2Part = null;
-        }
-    }
-
-    @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         if (this.isTamed()) {

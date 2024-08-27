@@ -141,15 +141,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
     }
 
     @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.hipsPart != null) {
-            this.world.removeEntityDangerously(this.hipsPart);
-            this.hipsPart = null;
-        }
-    }
-
-    @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         this.writePregnancyDataToNBT(compound);

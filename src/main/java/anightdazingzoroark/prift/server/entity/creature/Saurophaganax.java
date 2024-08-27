@@ -153,32 +153,6 @@ public class Saurophaganax extends RiftCreature {
         if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sleepOffsetBody + sitOffset, this.tail2Part.posZ);
         if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sleepOffsetNeck + sitOffset, this.neckPart.posZ);
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sleepOffsetHead + sitOffset, this.headPart.posZ);
-
-    }
-
-    @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.neckPart != null) {
-            this.world.removeEntityDangerously(this.neckPart);
-            this.neckPart = null;
-        }
-        if (this.bodyFrontPart != null) {
-            this.world.removeEntityDangerously(this.bodyFrontPart);
-            this.bodyFrontPart = null;
-        }
-        if (this.tail0Part != null) {
-            this.world.removeEntityDangerously(this.tail0Part);
-            this.tail0Part = null;
-        }
-        if (this.tail1Part != null) {
-            this.world.removeEntityDangerously(this.tail1Part);
-            this.tail1Part = null;
-        }
-        if (this.tail2Part != null) {
-            this.world.removeEntityDangerously(this.tail2Part);
-            this.tail2Part = null;
-        }
     }
 
     @Override

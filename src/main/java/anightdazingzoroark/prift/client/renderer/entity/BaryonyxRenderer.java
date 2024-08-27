@@ -1,25 +1,14 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.model.entity.RiftCreatureModel;
-import anightdazingzoroark.prift.server.entity.creature.Baryonyx;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class BaryonyxRenderer extends GeoEntityRenderer<RiftCreature> {
+public class BaryonyxRenderer extends RiftCreatureRenderer {
     public BaryonyxRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
-    }
-
-    @Override
-    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
-        Baryonyx baryonyx = (Baryonyx) livingEntity;
-        return super.shouldRender(baryonyx, camera, camX, camY, camZ) || baryonyx.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(baryonyx);
+        super(renderManager);
     }
 
     @Override

@@ -11,15 +11,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class SarcosuchusRenderer extends GeoEntityRenderer<RiftCreature> {
+public class SarcosuchusRenderer extends RiftCreatureRenderer {
     public SarcosuchusRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
-    }
-
-    @Override
-    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
-        Sarcosuchus sarcosuchus = (Sarcosuchus) livingEntity;
-        return super.shouldRender(sarcosuchus, camera, camX, camY, camZ) || sarcosuchus.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(sarcosuchus);
+        super(renderManager);
     }
 
     @Override

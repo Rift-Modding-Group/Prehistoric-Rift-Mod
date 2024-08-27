@@ -200,59 +200,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         if (this.tail3Part != null) this.tail3Part.setPositionAndUpdate(this.tail3Part.posX, this.tail3Part.posY + sitOffset, this.tail3Part.posZ);
     }
 
-    @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.neck0Part != null) {
-            this.world.removeEntityDangerously(this.neck0Part);
-            this.neck0Part = null;
-        }
-        if (this.neck1Part != null) {
-            this.world.removeEntityDangerously(this.neck1Part);
-            this.neck1Part = null;
-        }
-        if (this.neck2Part != null) {
-            this.world.removeEntityDangerously(this.neck2Part);
-            this.neck2Part = null;
-        }
-        if (this.neck3Part != null) {
-            this.world.removeEntityDangerously(this.neck3Part);
-            this.neck3Part = null;
-        }
-        if (this.neck4Part != null) {
-            this.world.removeEntityDangerously(this.neck4Part);
-            this.neck4Part = null;
-        }
-        if (this.neck5Part != null) {
-            this.world.removeEntityDangerously(this.neck5Part);
-            this.neck5Part = null;
-        }
-        if (this.leftBackLegPart != null) {
-            this.world.removeEntityDangerously(this.leftBackLegPart);
-            this.leftBackLegPart = null;
-        }
-        if (this.rightBackLegPart != null) {
-            this.world.removeEntityDangerously(this.rightBackLegPart);
-            this.rightBackLegPart = null;
-        }
-        if (this.tail0Part != null) {
-            this.world.removeEntityDangerously(this.tail0Part);
-            this.tail0Part = null;
-        }
-        if (this.tail1Part != null) {
-            this.world.removeEntityDangerously(this.tail1Part);
-            this.tail1Part = null;
-        }
-        if (this.tail2Part != null) {
-            this.world.removeEntityDangerously(this.tail2Part);
-            this.tail2Part = null;
-        }
-        if (this.tail3Part != null) {
-            this.world.removeEntityDangerously(this.tail3Part);
-            this.tail3Part = null;
-        }
-    }
-
     private void manageWeaponCooldown() {
         if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);
     }

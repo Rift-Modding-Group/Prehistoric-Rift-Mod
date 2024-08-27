@@ -12,16 +12,10 @@ import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 import software.bernie.geckolib3.resource.GeckoLibCache;
 
-public class ParasaurolophusRenderer extends GeoEntityRenderer<RiftCreature> {
+public class ParasaurolophusRenderer extends RiftCreatureRenderer {
     public ParasaurolophusRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
+        super(renderManager);
         this.shadowSize = 1;
-    }
-
-    @Override
-    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
-        Parasaurolophus parasaurolophus = (Parasaurolophus) livingEntity;
-        return super.shouldRender(parasaurolophus, camera, camX, camY, camZ) || parasaurolophus.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(parasaurolophus);
     }
 
     @Override

@@ -143,46 +143,6 @@ public class Baryonyx extends RiftWaterCreature {
         if (this.tail4Part != null) this.tail4Part.setPositionAndUpdate(this.tail4Part.posX, this.tail4Part.posY + sitOffset, this.tail4Part.posZ);
     }
 
-    public void removeParts() {
-        super.removeParts();
-        if (this.mainHeadPart != null) {
-            this.world.removeEntityDangerously(this.mainHeadPart);
-            this.mainHeadPart = null;
-        }
-        if (this.neckPart != null) {
-            this.world.removeEntityDangerously(this.neckPart);
-            this.neckPart = null;
-        }
-        if (this.frontBodyPart != null) {
-            this.world.removeEntityDangerously(this.frontBodyPart);
-            this.frontBodyPart = null;
-        }
-        if (this.leftLegPart != null) {
-            this.world.removeEntityDangerously(this.leftLegPart);
-            this.leftLegPart = null;
-        }
-        if (this.rightLegPart != null) {
-            this.world.removeEntityDangerously(this.rightLegPart);
-            this.rightLegPart = null;
-        }
-        if (this.tail0Part != null) {
-            this.world.removeEntityDangerously(this.tail0Part);
-            this.tail0Part = null;
-        }
-        if (this.tail1Part != null) {
-            this.world.removeEntityDangerously(this.tail1Part);
-            this.tail1Part = null;
-        }
-        if (this.tail3Part != null) {
-            this.world.removeEntityDangerously(this.tail3Part);
-            this.tail3Part = null;
-        }
-        if (this.tail4Part != null) {
-            this.world.removeEntityDangerously(this.tail4Part);
-            this.tail4Part = null;
-        }
-    }
-
     @Override
     public boolean isAmphibious() {
         return true;

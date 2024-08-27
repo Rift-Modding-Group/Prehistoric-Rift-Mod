@@ -1,14 +1,6 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"animation.ankylosaurus.look": {
-			"loop": true,
-			"bones": {
-				"neck": {
-					"rotation": ["Math.clamp(query.target_x_rotation, -10, 10)", "Math.clamp(query.target_y_rotation, -5, 5)", 0]
-				}
-			}
-		},
 		"animation.ankylosaurus.walk": {
 			"loop": true,
 			"animation_length": 2.0833,
@@ -129,8 +121,8 @@
 				}
 			}
 		},
-		"animation.ankylosaurus.shell_attack_enter": {
-			"loop": "hold_on_last_frame",
+		"animation.ankylosaurus.enter_shell": {
+			"loop": true,
 			"animation_length": 1.04,
 			"bones": {
 				"body": {
@@ -222,7 +214,8 @@
 				}
 			}
 		},
-		"animation.ankylosaurus.shell_attack_exit": {
+		"animation.ankylosaurus.exit_shell": {
+			"loop": true,
 			"animation_length": 1.04,
 			"bones": {
 				"body": {
@@ -317,7 +310,7 @@
 				}
 			}
 		},
-		"animation.ankylosaurus.shell_attack": {
+		"animation.ankylosaurus.shell_mode": {
 			"loop": true,
 			"animation_length": 1.04,
 			"bones": {

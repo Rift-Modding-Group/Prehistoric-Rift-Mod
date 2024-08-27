@@ -242,43 +242,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     }
 
     @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.neckPart != null) {
-            this.world.removeEntityDangerously(this.neckPart);
-            this.neckPart = null;
-        }
-        if (this.hipPart != null) {
-            this.world.removeEntityDangerously(this.hipPart);
-            this.hipPart = null;
-        }
-        if (this.leftLegPart != null) {
-            this.world.removeEntityDangerously(this.leftLegPart);
-            this.leftLegPart = null;
-        }
-        if (this.rightLegPart != null) {
-            this.world.removeEntityDangerously(this.rightLegPart);
-            this.rightLegPart = null;
-        }
-        if (this.tail0Part != null) {
-            this.world.removeEntityDangerously(this.tail0Part);
-            this.tail0Part = null;
-        }
-        if (this.tail1Part != null) {
-            this.world.removeEntityDangerously(this.tail1Part);
-            this.tail1Part = null;
-        }
-        if (this.tail2Part != null) {
-            this.world.removeEntityDangerously(this.tail2Part);
-            this.tail2Part = null;
-        }
-        if (this.tail3Part != null) {
-            this.world.removeEntityDangerously(this.tail3Part);
-            this.tail3Part = null;
-        }
-    }
-
-    @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         this.writeWorkstationDataToNBT(compound);

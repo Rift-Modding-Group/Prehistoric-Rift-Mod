@@ -161,31 +161,6 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
     }
 
-    @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.neckPart != null) {
-            this.world.removeEntityDangerously(this.neckPart);
-            this.neckPart = null;
-        }
-        if (this.hipPart != null) {
-            this.world.removeEntityDangerously(this.hipPart);
-            this.hipPart = null;
-        }
-        if (this.tail0Part != null) {
-            this.world.removeEntityDangerously(this.tail0Part);
-            this.tail0Part = null;
-        }
-        if (this.tail1Part != null) {
-            this.world.removeEntityDangerously(this.tail1Part);
-            this.tail1Part = null;
-        }
-        if (this.tail2Part != null) {
-            this.world.removeEntityDangerously(this.tail2Part);
-            this.tail2Part = null;
-        }
-    }
-
     private void manageCanLeap() {
         if (this.leapCooldown > 0) this.leapCooldown--;
     }

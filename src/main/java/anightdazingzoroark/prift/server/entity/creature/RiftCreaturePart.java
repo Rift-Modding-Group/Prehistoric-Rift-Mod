@@ -14,9 +14,15 @@ public class RiftCreaturePart extends MultiPartEntityPart {
     private final float angleYaw;
     private final float offsetY;
     private final float damageMultiplier;
+    private boolean isDisabled;
+    private boolean immuneToProjectiles;
 
     public RiftCreaturePart(IRiftMultipart parent, float radius, float angleYaw, float offsetY, float width, float height, float damageMultiplier) {
-        super(parent, "", width, height);
+        this(parent, "", radius, angleYaw, offsetY, width, height, damageMultiplier);
+    }
+
+    public RiftCreaturePart(IRiftMultipart parent, String name, float radius, float angleYaw, float offsetY, float width, float height, float damageMultiplier) {
+        super(parent, name, width, height);
         this.partParent = parent.getPartParent();
         this.radius = radius;
         this.angleYaw = (angleYaw + 90.0F) * 0.017453292F;
@@ -29,17 +35,27 @@ public class RiftCreaturePart extends MultiPartEntityPart {
         return this;
     }
 
+    //for sources this part cannot be hurt by
+    public RiftCreaturePart setImmuneToProjectile() {
+        this.immuneToProjectiles = true;
+        return this;
+    }
+
+    public void setDisabled(boolean value) {
+        this.isDisabled = value;
+    }
+
+    public boolean isDisabled() {
+        return this.isDisabled;
+    }
+
     @Override
     public void onUpdate() {
         this.setPositionAndUpdate(this.partParent.posX + this.radius * Math.cos(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw), this.partParent.posY + this.offsetY, this.partParent.posZ + this.radius * Math.sin(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw));
-        if (!this.world.isRemote) this.collideWithNearbyEntities();
+        if (!this.world.isRemote && !this.isDisabled) this.collideWithNearbyEntities();
         if (this.partParent.isDead) this.world.removeEntityDangerously(this);
 
         super.onUpdate();
-    }
-
-    public void resize(float width, float height) {
-        this.setSize(width, height);
     }
 
     public void resize(float scale) {
@@ -58,13 +74,19 @@ public class RiftCreaturePart extends MultiPartEntityPart {
     public RiftCreature getParent() {
         return this.partParent;
     }
+
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        return super.attackEntityFrom(source, amount);
+        return super.attackEntityFrom(source, amount) && !this.isDisabled;
     }
 
     public boolean isUnderwater() {
         BlockPos thisPos = new BlockPos(this.posX, this.posY, this.posZ);
         BlockPos abovePos = thisPos.up();
         return this.world.getBlockState(thisPos).getMaterial().isLiquid() && this.world.getBlockState(abovePos).getMaterial().isLiquid();
+    }
+
+    public boolean isEntityInvulnerable(DamageSource source) {
+        boolean projectileImmunityTest = !this.immuneToProjectiles || !source.isProjectile();
+        return this.invulnerable && source != DamageSource.OUT_OF_WORLD && projectileImmunityTest;
     }
 }

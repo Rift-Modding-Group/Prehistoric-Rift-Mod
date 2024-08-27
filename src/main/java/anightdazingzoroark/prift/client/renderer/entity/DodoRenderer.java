@@ -8,9 +8,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class DodoRenderer extends GeoEntityRenderer<RiftCreature> {
+public class DodoRenderer extends RiftCreatureRenderer {
     public DodoRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
+        super(renderManager);
         this.shadowSize = 1.0f;
     }
 

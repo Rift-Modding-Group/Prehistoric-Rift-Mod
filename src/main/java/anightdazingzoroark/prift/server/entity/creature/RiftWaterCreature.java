@@ -154,17 +154,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         }
     }
 
-    public void removeParts() {
-        if (this.bodyPart != null) {
-            this.world.removeEntityDangerously(this.bodyPart);
-            this.bodyPart = null;
-        }
-        if (this.headPart != null) {
-            this.world.removeEntityDangerously(this.headPart);
-            this.headPart = null;
-        }
-    }
-
     private void targetOnLandManage() {
         if (this.getAttackTarget() != null) {
             if (!this.getAttackTarget().isInWater() && this.isInWater() && !this.isAmphibious()) this.setAttackTarget(null);

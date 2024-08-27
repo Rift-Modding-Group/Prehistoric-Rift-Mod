@@ -138,15 +138,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     }
 
     @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.tailPart != null) {
-            this.world.removeEntityDangerously(this.tailPart);
-            this.tailPart = null;
-        }
-    }
-
-    @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 1f, 2f);
     }

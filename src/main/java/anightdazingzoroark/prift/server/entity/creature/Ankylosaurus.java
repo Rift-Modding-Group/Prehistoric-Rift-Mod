@@ -6,11 +6,16 @@ import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
+import anightdazingzoroark.prift.server.message.RiftMakeNewParts;
+import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -21,7 +26,11 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
+import java.util.Arrays;
+
 public class Ankylosaurus extends RiftCreature implements IHerder {
+    private static final DataParameter<Boolean> START_HIDING = EntityDataManager.<Boolean>createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> STOP_HIDING = EntityDataManager.<Boolean>createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> HIDING = EntityDataManager.<Boolean>createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart leftFrontLegPart;
     private RiftCreaturePart rightFrontLegPart;
@@ -46,7 +55,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
         this.saddleItem = ((AnkylosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
 
         this.headPart = new RiftCreaturePart(this, 2f, 0, 0.7f, 0.5f, 0.5f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.5f, 1.25f, 0.9f, 0.5f);
+        this.bodyPart = new RiftCreaturePart(this, "body", 0, 0, 0.5f, 1.25f, 0.9f, 0.25f).setInvulnerable();
         this.leftFrontLegPart = new RiftCreaturePart(this, 1.5f, 30f, 0, 0.35f, 0.7f, 0.5f);
         this.rightFrontLegPart = new RiftCreaturePart(this, 1.5f, -30f, 0, 0.35f, 0.7f, 0.5f);
         this.leftBackLegPart = new RiftCreaturePart(this, 1.5f, 150f, 0, 0.35f, 0.7f, 0.5f);
@@ -74,6 +83,8 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
     @Override
     protected void entityInit() {
         super.entityInit();
+        this.dataManager.register(START_HIDING, false);
+        this.dataManager.register(STOP_HIDING, false);
         this.dataManager.register(HIDING, false);
     }
 
@@ -88,6 +99,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
+        this.tasks.addTask(0, new RiftAnkylosaurusHideInShell(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.72F, 0.48F));
@@ -101,50 +113,9 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
         this.tasks.addTask(13, new RiftLookAround(this));
     }
 
-    @Override
     public void updateParts() {
         super.updateParts();
-    }
-
-    @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.leftFrontLegPart != null) {
-            this.world.removeEntityDangerously(this.leftFrontLegPart);
-            this.leftFrontLegPart = null;
-        }
-        if (this.rightFrontLegPart != null) {
-            this.world.removeEntityDangerously(this.rightFrontLegPart);
-            this.rightFrontLegPart = null;
-        }
-        if (this.leftBackLegPart != null) {
-            this.world.removeEntityDangerously(this.leftBackLegPart);
-            this.leftBackLegPart = null;
-        }
-        if (this.rightBackLegPart != null) {
-            this.world.removeEntityDangerously(this.rightBackLegPart);
-            this.rightBackLegPart = null;
-        }
-        if (this.tail0 != null) {
-            this.world.removeEntityDangerously(this.tail0);
-            this.tail0 = null;
-        }
-        if (this.tail1 != null) {
-            this.world.removeEntityDangerously(this.tail1);
-            this.tail1 = null;
-        }
-        if (this.tail2 != null) {
-            this.world.removeEntityDangerously(this.tail2);
-            this.tail2 = null;
-        }
-        if (this.tail3 != null) {
-            this.world.removeEntityDangerously(this.tail3);
-            this.tail3 = null;
-        }
-        if (this.tailClub != null) {
-            this.world.removeEntityDangerously(this.tailClub);
-            this.tailClub = null;
-        }
+        for (RiftCreaturePart part : this.hitboxArray) part.setDisabled(!part.partName.equals("body") && this.isHiding());
     }
 
     @Override
@@ -181,6 +152,18 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
         return 6D;
     }
 
+    public boolean attackEntityFromPart(MultiPartEntityPart part, DamageSource source, float damage) {
+        RiftCreaturePart riftPart = (RiftCreaturePart) part;
+        if (riftPart.partName.equals("body")
+                && this.isHiding()
+                && source instanceof EntityDamageSource
+                && source.getImmediateSource() != null) {
+            float damageAmnt = (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue())/8f;
+            source.getImmediateSource().attackEntityFrom(DamageSource.causeMobDamage(this), damageAmnt);
+        }
+        return super.attackEntityFromPart(part, source, damage);
+    }
+
     @Override
     public boolean canBeSaddled() {
         return true;
@@ -204,6 +187,22 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
     @Override
     public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
 
+    }
+
+    public void setStartHiding(boolean value) {
+        this.dataManager.set(START_HIDING, value);
+    }
+
+    public boolean isStartHiding() {
+        return this.dataManager.get(START_HIDING);
+    }
+
+    public void setStopHiding(boolean value) {
+        this.dataManager.set(STOP_HIDING, value);
+    }
+
+    public boolean isStopHiding() {
+        return this.dataManager.get(STOP_HIDING);
     }
 
     public void setHiding(boolean value) {
@@ -234,6 +233,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
         super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::ankylosaurusMovement));
         data.addAnimationController(new AnimationController(this, "attack", 0, this::ankylosaurusAttack));
+        data.addAnimationController(new AnimationController(this, "shellMode", 0, this::ankylosaurusShell));
     }
 
     private <E extends IAnimatable> PlayState ankylosaurusMovement(AnimationEvent<E> event) {
@@ -256,5 +256,21 @@ public class Ankylosaurus extends RiftCreature implements IHerder {
             event.getController().clearAnimationCache();
         }
         return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState ankylosaurusShell(AnimationEvent<E> event) {
+        if (this.isStartHiding()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.enter_shell", true));
+            return PlayState.CONTINUE;
+        }
+        else if (this.isHiding()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.shell_mode", true));
+            return PlayState.CONTINUE;
+        }
+        else if (this.isStopHiding()) {
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.exit_shell", true));
+            return PlayState.CONTINUE;
+        }
+        return PlayState.STOP;
     }
 }

@@ -13,16 +13,10 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class SaurophaganaxRenderer extends GeoEntityRenderer<RiftCreature> {
+public class SaurophaganaxRenderer extends RiftCreatureRenderer {
     public SaurophaganaxRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
+        super(renderManager);
         this.addLayer(new GlowingLayerModel<RiftCreature>(this, this.getGeoModelProvider()::getTextureLocation, this.getGeoModelProvider()::getModelLocation));
-    }
-
-    @Override
-    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
-        Saurophaganax saurophaganax = (Saurophaganax) livingEntity;
-        return super.shouldRender(saurophaganax, camera, camX, camY, camZ) || saurophaganax.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(saurophaganax);
     }
 
     @Override

@@ -173,35 +173,6 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     }
 
     @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.hipPart != null) {
-            this.world.removeEntityDangerously(this.hipPart);
-            this.hipPart = null;
-        }
-        if (this.leftBackLegPart != null) {
-            this.world.removeEntityDangerously(this.leftBackLegPart);
-            this.leftBackLegPart = null;
-        }
-        if (this.rightBackLegPart != null) {
-            this.world.removeEntityDangerously(this.rightBackLegPart);
-            this.rightBackLegPart = null;
-        }
-        if (this.tail0Part != null) {
-            this.world.removeEntityDangerously(this.tail0Part);
-            this.tail0Part = null;
-        }
-        if (this.tail1Part != null) {
-            this.world.removeEntityDangerously(this.tail1Part);
-            this.tail1Part = null;
-        }
-        if (this.tail2Part != null) {
-            this.world.removeEntityDangerously(this.tail2Part);
-            this.tail2Part = null;
-        }
-    }
-
-    @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         this.writeHarvestWanderDataToNBT(compound);

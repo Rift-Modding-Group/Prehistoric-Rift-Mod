@@ -11,15 +11,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class DirewolfRenderer extends GeoEntityRenderer<RiftCreature> {
+public class DirewolfRenderer extends RiftCreatureRenderer {
     public DirewolfRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
-    }
-
-    @Override
-    public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
-        Direwolf direwolf = (Direwolf) livingEntity;
-        return super.shouldRender(direwolf, camera, camX, camY, camZ) || direwolf.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(direwolf);
+        super(renderManager);
     }
 
     @Override

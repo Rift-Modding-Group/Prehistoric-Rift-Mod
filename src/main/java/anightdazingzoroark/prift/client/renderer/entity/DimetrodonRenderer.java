@@ -8,9 +8,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class DimetrodonRenderer extends GeoEntityRenderer<RiftCreature> {
+public class DimetrodonRenderer extends RiftCreatureRenderer {
     public DimetrodonRenderer(RenderManager renderManager) {
-        super(renderManager, new RiftCreatureModel());
+        super(renderManager);
         this.shadowSize = 1f;
     }
 

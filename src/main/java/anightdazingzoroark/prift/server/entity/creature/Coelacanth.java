@@ -65,35 +65,6 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
     }
 
     @Override
-    public void removeParts() {
-        super.removeParts();
-        if (this.bodyFront0 != null) {
-            this.world.removeEntityDangerously(this.bodyFront0);
-            this.bodyFront0 = null;
-        }
-        if (this.bodyFront1 != null) {
-            this.world.removeEntityDangerously(this.bodyFront1);
-            this.bodyFront1 = null;
-        }
-        if (this.bodyFront2 != null) {
-            this.world.removeEntityDangerously(this.bodyFront2);
-            this.bodyFront2 = null;
-        }
-        if (this.bodyBack0 != null) {
-            this.world.removeEntityDangerously(this.bodyBack0);
-            this.bodyBack0 = null;
-        }
-        if (this.bodyBack1 != null) {
-            this.world.removeEntityDangerously(this.bodyBack1);
-            this.bodyBack1 = null;
-        }
-        if (this.bodyBack2 != null) {
-            this.world.removeEntityDangerously(this.bodyBack2);
-            this.bodyBack2 = null;
-        }
-    }
-
-    @Override
     public boolean canDoHerding() {
         return this.isInWater();
     }
