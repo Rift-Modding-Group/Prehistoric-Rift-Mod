@@ -483,22 +483,24 @@ public class ServerEvents {
         //manage cannon explosion stuff
         if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCannon) {
             RiftCannon cannon = (RiftCannon) event.getExplosion().getExplosivePlacedBy();
-            EntityPlayer user = (EntityPlayer) cannon.getPassengers().get(0);
-            //remove cannon and user
-            event.getAffectedEntities().remove(cannon);
-            event.getAffectedEntities().remove(user);
-            //remove creatures tamed to user
-            List<EntityTameable> tamedEntities = new ArrayList<>();
-            for (Entity entity : event.getAffectedEntities()) {
-                if (entity instanceof EntityTameable) {
-                    if ((((EntityTameable) entity).isTamed())) {
-                        if (!((EntityTameable) entity).getOwner().equals(user)) {
-                            tamedEntities.add((EntityTameable) entity);
+            if (!cannon.getPassengers().isEmpty()) {
+                EntityPlayer user = (EntityPlayer) cannon.getPassengers().get(0);
+                //remove cannon and user
+                event.getAffectedEntities().remove(cannon);
+                event.getAffectedEntities().remove(user);
+                //remove creatures tamed to user
+                List<EntityTameable> tamedEntities = new ArrayList<>();
+                for (Entity entity : event.getAffectedEntities()) {
+                    if (entity instanceof EntityTameable) {
+                        if ((((EntityTameable) entity).isTamed())) {
+                            if (!((EntityTameable) entity).getOwner().equals(user)) {
+                                tamedEntities.add((EntityTameable) entity);
+                            }
                         }
                     }
                 }
+                event.getAffectedEntities().removeAll(tamedEntities);
             }
-            event.getAffectedEntities().removeAll(tamedEntities);
         }
         //manage catapult explosion stuff
         if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCatapult) {

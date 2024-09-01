@@ -13,6 +13,7 @@ import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,7 +51,7 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     private int packBuffCooldown;
     private float leapPower;
     private boolean startLeapingToTarget;
-    private EntityLivingBase contLeapTarget;
+    private Entity contLeapTarget;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
     private RiftCreaturePart tail0Part;
@@ -197,11 +198,11 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         return 16f;
     }
 
-    public EntityLivingBase getControlledLeapTarget() {
+    public Entity getControlledLeapTarget() {
         return this.contLeapTarget;
     }
 
-    public void setControlledLeapTarget(EntityLivingBase value) {
+    public void setControlledLeapTarget(Entity value) {
         this.contLeapTarget = value;
     }
 
@@ -288,7 +289,7 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (!this.isActing()) {

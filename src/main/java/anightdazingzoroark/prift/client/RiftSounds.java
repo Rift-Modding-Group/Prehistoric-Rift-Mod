@@ -154,6 +154,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.palaeocastor.death")
     public static final SoundEvent PALAEOCASTOR_DEATH = createSoundEvent("prift.palaeocastor.death");
 
+    @GameRegistry.ObjectHolder("prift.ankylosaurus.idle")
+    public static final SoundEvent ANKYLOSAURUS_IDLE = createSoundEvent("prift.ankylosaurus.idle");
+
+    @GameRegistry.ObjectHolder("prift.ankylosaurus.hurt")
+    public static final SoundEvent ANKYLOSAURUS_HURT = createSoundEvent("prift.ankylosaurus.hurt");
+
+    @GameRegistry.ObjectHolder("prift.ankylosaurus.death")
+    public static final SoundEvent ANKYLOSAURUS_DEATH = createSoundEvent("prift.ankylosaurus.death");
+
     @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
     public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");
 

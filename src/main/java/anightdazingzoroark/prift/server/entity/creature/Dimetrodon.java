@@ -416,7 +416,7 @@ public class Dimetrodon extends RiftCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {}
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     public boolean hasLeftClickChargeBar() {

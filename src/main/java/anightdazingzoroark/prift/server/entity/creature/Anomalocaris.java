@@ -158,7 +158,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (target == null && this.grabVictim == null) {
@@ -184,20 +184,23 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
             if (!this.isActing()) {
                 if (this.getGrabVictim() == null) {
                     if (target != null && RiftUtil.isUsingSSR()) {
-                        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
-                        boolean canGrabFlag;
+                        EntityLivingBase entityLivingBase = target instanceof RiftCreaturePart ? ((RiftCreaturePart)target).getParent() : (target instanceof EntityLivingBase ? (EntityLivingBase) target : null);
+                        if (entityLivingBase != null) {
+                            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
+                            boolean canGrabFlag;
 
-                        if (target instanceof EntityPlayer) {
-                            canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured && RiftUtil.isAppropriateSize(target, MobSize.safeValueOf( ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize ));
-                        }
-                        else {
-                            canGrabFlag = !target.equals(this) && !properties.isCaptured && RiftUtil.isAppropriateSize(target, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize));
-                        }
+                            if (target instanceof EntityPlayer) {
+                                canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf( ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize ));
+                            }
+                            else {
+                                canGrabFlag = !target.equals(this) && !properties.isCaptured && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize));
+                            }
 
-                        if (canGrabFlag) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, target));
-                            EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class).isCaptured = true;
-                            this.setActing(true);
+                            if (canGrabFlag) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
+                                EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class).isCaptured = true;
+                                this.setActing(true);
+                            }
                         }
                     }
                     else if (target == null && !RiftUtil.isUsingSSR()) {

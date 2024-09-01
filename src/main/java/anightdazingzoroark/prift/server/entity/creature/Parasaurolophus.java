@@ -192,7 +192,8 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.useBlow(null, strength);
     }
 
-    public void useBlow(EntityLivingBase target, float strength) {
+    public void useBlow(Entity target, float strength) {
+        RiftCreature thisCreature = this;
         if (target == null) {
             double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + 8D;
             Vec3d vec3d = this.getPositionEyes(1.0F);
@@ -244,21 +245,12 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
                 }
             }
         }
-        else {
-            UUID ownerUUID = this.getOwnerId();
+        else if (target instanceof EntityLivingBase) {
             AxisAlignedBB aabb = target.getEntityBoundingBox().grow(5);
             List<EntityLivingBase> entityList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, aabb, new Predicate<EntityLivingBase>() {
                 @Override
                 public boolean apply(@Nullable EntityLivingBase input) {
-                    if (input instanceof EntityPlayer) {
-                        return !input.getUniqueID().equals(ownerUUID);
-                    }
-                    if (input instanceof EntityTameable) {
-                        if (((EntityTameable)input).isTamed()) {
-                            return !((EntityTameable) input).getOwnerId().equals(ownerUUID);
-                        }
-                    }
-                    return true;
+                    return RiftUtil.checkForNoAssociations(thisCreature, input);
                 }
             });
             for (EntityLivingBase entityLivingBase : entityList) this.parasaurKnockback(entityLivingBase, strength);
@@ -303,7 +295,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (!this.isActing()) {

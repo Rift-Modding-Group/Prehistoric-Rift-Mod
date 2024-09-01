@@ -1,10 +1,10 @@
 package anightdazingzoroark.prift.server.entity.interfaces;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.Entity;
 
 public interface ILeapAttackingMob extends ILeapingMob {
-    EntityLivingBase getControlledLeapTarget();
-    void setControlledLeapTarget(EntityLivingBase value);
+    Entity getControlledLeapTarget();
+    void setControlledLeapTarget(Entity value);
     boolean startLeapingToTarget();
     void setStartLeapToTarget(boolean value);
     float leapWidth();

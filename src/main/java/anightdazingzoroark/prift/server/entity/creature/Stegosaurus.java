@@ -241,7 +241,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return 15;
     }
 
-    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (this.getLeftClickCooldown() == 0) {
@@ -361,7 +361,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
             IBlockState blockState = this.world.getBlockState(this.forcedBreakPos);
             if (blockState.getMaterial() != Material.AIR && this.checkBasedOnStrength(blockState)) {
                 for (int x = -1; x <= 1; x++) {
-                    for (int y = -1; y <= 1; y++) {
+                    for (int y = 0; y <= 2; y++) {
                         for (int z = -1; z <= 1; z++) {
                             BlockPos toBreakPos = this.forcedBreakPos.add(x, y, z);
                             IBlockState toBreakState = this.world.getBlockState(toBreakPos);

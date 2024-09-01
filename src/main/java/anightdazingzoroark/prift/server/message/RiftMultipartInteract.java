@@ -13,25 +13,21 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftMultipartInteract extends AbstractMessage<RiftMultipartInteract> {
     private int creatureId;
-    private float damage;
 
     public RiftMultipartInteract() {}
 
-    public RiftMultipartInteract(RiftCreature creature, float damage) {
+    public RiftMultipartInteract(RiftCreature creature) {
         this.creatureId = creature.getEntityId();
-        this.damage = damage;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.creatureId = buf.readInt();
-        this.damage = buf.readFloat();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.creatureId);
-        buf.writeFloat(this.damage);
     }
 
     @Override
@@ -41,11 +37,8 @@ public class RiftMultipartInteract extends AbstractMessage<RiftMultipartInteract
             if (creature != null) {
                 double dist = player.getDistance(creature);
                 if (dist < 128) {
-                    if (message.damage >= 0F) creature.attackEntityFrom(DamageSource.causeMobDamage(player), message.damage);
-                    else {
-                        creature.processInteract(player, EnumHand.MAIN_HAND);
-                        creature.processInitialInteract(player, EnumHand.MAIN_HAND);
-                    }
+                    creature.processInteract(player, EnumHand.MAIN_HAND);
+                    creature.processInitialInteract(player, EnumHand.MAIN_HAND);
                 }
             }
         }
@@ -58,11 +51,8 @@ public class RiftMultipartInteract extends AbstractMessage<RiftMultipartInteract
             if (creature != null) {
                 double dist = player.getDistance(creature);
                 if (dist < 128) {
-                    if (message.damage >= 0F) creature.attackEntityFrom(DamageSource.causeMobDamage(player), message.damage);
-                    else {
-                        creature.processInteract(player, EnumHand.MAIN_HAND);
-                        creature.processInitialInteract(player, EnumHand.MAIN_HAND);
-                    }
+                    creature.processInteract(player, EnumHand.MAIN_HAND);
+                    creature.processInitialInteract(player, EnumHand.MAIN_HAND);
                 }
             }
         }

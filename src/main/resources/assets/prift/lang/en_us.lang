@@ -26,6 +26,7 @@ entity.direwolf.name=Direwolf
 entity.megaloceros.name=Megaloceros
 entity.baryonyx.name=Baryonyx
 entity.palaeocastor.name=Palaeocastor
+entity.ankylosaurus.name=Ankylosaurus
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon
@@ -104,6 +105,7 @@ item.direwolf_tail.name=Direwolf Tail
 item.megaloceros_antler.name=Megaloceros Antler
 item.baryonyx_claw.name=Baryonyx Claw
 item.palaeocastor_tail.name=Palaeocastor Tail
+item.ankylosaurus_tail.name=Ankylosaurus Tail
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -119,6 +121,7 @@ item.sarcosuchus_egg.name=Sarcosuchus Egg
 item.anomalocaris_sac.name=Anomalocaris Sac
 item.saurophaganax_egg.name=Saurophaganax Egg
 item.baryonyx_egg.name=Baryonyx Egg
+item.ankylosaurus_egg.name=Ankylosaurus Egg
 
 item.apatosaurus_platform.name=Apatosaurus Platform
 item.cannon.name=Cannon
@@ -285,6 +288,10 @@ sounds.subtitle.baryonyx_death=Baryonyx dies
 sounds.subtitle.palaeocastor_idle=Palaeocastor squeaks
 sounds.subtitle.palaeocastor_hurt=Palaeocastor hurts
 sounds.subtitle.palaeocastor_death=Palaeocastor dies
+
+sounds.subtitle.ankylosaurus_idle=Ankylosaurus grunts
+sounds.subtitle.ankylosaurus_hurt=Ankylosaurus hurts
+sounds.subtitle.ankylosaurus_death=Ankylosaurus dies
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral

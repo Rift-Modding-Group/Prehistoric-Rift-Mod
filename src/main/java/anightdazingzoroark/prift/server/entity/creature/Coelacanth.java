@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -127,7 +128,7 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {}
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     @Nullable

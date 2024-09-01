@@ -84,7 +84,7 @@
 				}
 			}
 		},
-		"animation.ankylosaurus.sit": {
+		"animation.ankylosaurus.sitting": {
 			"loop": true,
 			"bones": {
 				"body": {
@@ -351,35 +351,6 @@
 				},
 				"tail1Cube": {
 					"scale": 0
-				}
-			}
-		},
-		"animation.ankylosaurus.harvest": {
-			"animation_length": 0.76,
-			"bones": {
-				"tail0": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.24": [25, 0, 0],
-						"0.52": [-25.57, 0, 0],
-						"0.76": [0, 0, 0]
-					}
-				},
-				"tail1": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.24": [20, 0, 0],
-						"0.52": [15, 0, 0],
-						"0.76": [0, 0, 0]
-					}
-				},
-				"tail2": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.24": [20, 0, 0],
-						"0.52": [0, 0, 0],
-						"0.76": [0, 0, 0]
-					}
 				}
 			}
 		}

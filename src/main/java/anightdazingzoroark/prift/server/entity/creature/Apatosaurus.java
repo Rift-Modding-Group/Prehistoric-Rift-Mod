@@ -465,7 +465,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
         EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
         if (control == 0) {
             if (rider.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) {

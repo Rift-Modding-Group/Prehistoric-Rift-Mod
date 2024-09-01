@@ -74,7 +74,7 @@ public class RiftMountControl extends AbstractMessage<RiftMountControl> {
 
         if (message.usingSSR) creature.controlInput(message.control, message.tick);
         else {
-            EntityLivingBase target = (EntityLivingBase) world.getEntityByID(message.targetId);
+            Entity target = world.getEntityByID(message.targetId);
             BlockPos pos = new BlockPos(message.targetPosX, message.targetPosY, message.targetPosZ);
             creature.controlInput(message.control, message.tick, target, pos);
         }

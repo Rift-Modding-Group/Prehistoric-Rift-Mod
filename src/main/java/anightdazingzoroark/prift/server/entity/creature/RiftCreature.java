@@ -124,7 +124,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
     private boolean steerable = true;
-    protected EntityLivingBase forcedAttackTarget;
+    protected Entity forcedAttackTarget;
     protected BlockPos forcedBreakPos;
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
@@ -1193,7 +1193,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public boolean attackEntityFromPart(MultiPartEntityPart part, DamageSource source, float damage) {
         RiftCreaturePart riftPart = (RiftCreaturePart) part;
-        if (damage > 0.0f && !riftPart.isDisabled()) {
+        if (damage > 0.0f && !riftPart.isDisabled() && riftPart.testForMeleeImmunity(source) && riftPart.testForProjectileImmunity(source)) {
             float newDamage = riftPart.getDamageMultiplier() * damage;
             return this.attackEntityFrom(source, newDamage);
         }
@@ -1208,6 +1208,34 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.hitboxArray;
     }
     //end of multi hitbox stuff
+
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        if (source.getImmediateSource() == null) return false;
+        else if (!(source.getImmediateSource() instanceof EntityPlayer)) {
+            //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
+            Entity attacker = source.getImmediateSource();
+            RiftCreaturePart closestPart = null;
+            float closestDist = RiftUtil.funnyNumber;
+            for (RiftCreaturePart testPart : this.hitboxArray) {
+                if (attacker.getDistance(testPart) <= closestDist && !testPart.isDisabled()) {
+                    closestPart = testPart;
+                    closestDist = attacker.getDistance(testPart);
+                }
+            }
+            if (closestPart != null) {
+                if (closestPart.testForMeleeImmunity(source)
+                        && closestPart.testForProjectileImmunity(source)) return super.attackEntityFrom(source, amount * closestPart.getDamageMultiplier());
+                else return false;
+            }
+        }
+        return super.attackEntityFrom(source, amount);
+    }
+
+
+    @Override
+    public boolean canBeCollidedWith() {
+        return false;
+    }
 
     public boolean isSaddled() {
         return this.dataManager.get(SADDLED);
@@ -1520,7 +1548,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //this is for when shoulder surfing is utilized
-    public abstract void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos);
+    public abstract void controlInput(int control, int holdAmount, Entity target, BlockPos pos);
 
     public abstract boolean hasLeftClickChargeBar();
 
@@ -1557,7 +1585,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             IBlockState blockState = this.world.getBlockState(this.forcedBreakPos);
             if (blockState.getMaterial() != Material.AIR && this.checkBasedOnStrength(blockState)) {
                 for (int x = -1; x <= 1; x++) {
-                    for (int y = -1; y <= 1; y++) {
+                    for (int y = 0; y <= 2; y++) {
                         for (int z = -1; z <= 1; z++) {
                             BlockPos toBreakPos = this.forcedBreakPos.add(x, y, z);
                             IBlockState toBreakState = this.world.getBlockState(toBreakPos);
@@ -1690,7 +1718,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.fallDistance = 0;
                 float moveSpeedMod = (this.getEnergy() > 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
-                float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
+                float moveSpeed = (float)(Math.max(0, this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - riderSpeed)) * moveSpeedMod;
                 if (this instanceof ILeapingMob) {
                     ILeapingMob leapingMob = (ILeapingMob) this;
                     if (!leapingMob.isLeaping() && leapingMob.getLeapPower() > 0) {
@@ -1922,6 +1950,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
         }
+    }
+
+    public void onKillCommand() {
+        this.setDead();
     }
 
     @Nullable

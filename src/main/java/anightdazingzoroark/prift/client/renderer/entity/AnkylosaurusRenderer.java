@@ -18,6 +18,12 @@ public class AnkylosaurusRenderer extends RiftCreatureRenderer {
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());
         model.getBone("spikeSaddle").get().setHidden(!animatable.isSaddled());
+        model.getBone("spike36").get().setHidden(animatable.isSaddled());
+        model.getBone("spike37").get().setHidden(animatable.isSaddled());
+        model.getBone("spike38").get().setHidden(animatable.isSaddled());
+        model.getBone("spike39").get().setHidden(animatable.isSaddled());
+        model.getBone("spike42").get().setHidden(animatable.isSaddled());
+        model.getBone("spike43").get().setHidden(animatable.isSaddled());
         model.getBone("chest").get().setHidden(true);
 
         //change size and rotate neck

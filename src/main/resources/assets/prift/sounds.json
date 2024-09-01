@@ -361,6 +361,28 @@
     "subtitle": "sounds.subtitle.palaeocastor_death"
   },
 
+  "prift.ankylosaurus.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/ankylosaurus/ankylosaurus_idle"
+    ],
+    "subtitle": "sounds.subtitle.ankylosaurus_idle"
+  },
+  "prift.ankylosaurus.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/ankylosaurus/ankylosaurus_hurt"
+    ],
+    "subtitle": "sounds.subtitle.ankylosaurus_hurt"
+  },
+  "prift.ankylosaurus.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/ankylosaurus/ankylosaurus_death"
+    ],
+    "subtitle": "sounds.subtitle.ankylosaurus_death"
+  },
+
   "prift.semi_manual_machine.reset": {
     "category": "block",
     "sounds": [

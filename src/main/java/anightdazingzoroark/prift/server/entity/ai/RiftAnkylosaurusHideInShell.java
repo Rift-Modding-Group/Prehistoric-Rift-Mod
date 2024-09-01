@@ -1,18 +1,13 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.Ankylosaurus;
-import com.google.common.base.Predicate;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.util.DamageSource;
-
-import javax.annotation.Nullable;
 
 public class RiftAnkylosaurusHideInShell extends EntityAIBase {
     private final Ankylosaurus ankylosaurus;
     private int animTick;
     private boolean exitFlag;
+    private int healTick;
 
     public RiftAnkylosaurusHideInShell(Ankylosaurus ankylosaurus) {
         this.ankylosaurus = ankylosaurus;
@@ -22,7 +17,7 @@ public class RiftAnkylosaurusHideInShell extends EntityAIBase {
     @Override
     public boolean shouldExecute() {
         float healthRatio = this.ankylosaurus.getHealth()/this.ankylosaurus.getMaxHealth();
-        return healthRatio <= 0.25;
+        return (healthRatio <= 0.25 || this.ankylosaurus.getForceShellFlag()) && !this.ankylosaurus.isBaby();
     }
 
     @Override
@@ -33,14 +28,18 @@ public class RiftAnkylosaurusHideInShell extends EntityAIBase {
     @Override
     public void startExecuting() {
         this.animTick = 0;
+        this.healTick = 0;
         this.ankylosaurus.setStartHiding(true);
+        this.ankylosaurus.getNavigator().clearPath();
         this.ankylosaurus.removeSpeed();
         this.exitFlag = true;
+        this.ankylosaurus.setForceShellFlag(false);
     }
 
     @Override
     public void resetTask() {
         this.animTick = 0;
+        this.healTick = 0;
         this.ankylosaurus.resetSpeed();
     }
 
@@ -59,13 +58,12 @@ public class RiftAnkylosaurusHideInShell extends EntityAIBase {
             }
         }
         if (this.ankylosaurus.isHiding()) {
-            for (EntityLivingBase entityLivingBase : this.ankylosaurus.world.getEntitiesWithinAABB(EntityLivingBase.class, this.ankylosaurus.getEntityBoundingBox().grow(2D), new Predicate<EntityLivingBase>() {
-                @Override
-                public boolean apply(@Nullable EntityLivingBase entityLivingBase) {
-                    if (entityLivingBase == null) return false;
-                    return !entityLivingBase.equals(ankylosaurus) && RiftUtil.checkForNoAssociations(ankylosaurus, entityLivingBase);
-                }
-            })) entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(this.ankylosaurus), 2f);
+            //regenerate in shell
+            this.healTick++;
+            if (this.healTick >= 60) {
+                this.ankylosaurus.heal(2f);
+                this.healTick = 0;
+            }
         }
         if (this.ankylosaurus.isStopHiding()) {
             this.animTick++;
@@ -74,12 +72,13 @@ public class RiftAnkylosaurusHideInShell extends EntityAIBase {
                 this.animTick = 0;
             }
         }
-        if (healthRatio > 0.25 && !this.ankylosaurus.isStopHiding() && this.exitFlag) {
+        if (!this.ankylosaurus.isStopHiding() && ((healthRatio >= 0.5 && !this.ankylosaurus.isBeingRidden() && this.exitFlag) || this.ankylosaurus.getForceShellFlag())) {
             this.ankylosaurus.setStopHiding(true);
             this.ankylosaurus.setHiding(false);
             this.ankylosaurus.setStartHiding(false);
             this.ankylosaurus.resetSpeed();
             this.exitFlag = false;
+            this.ankylosaurus.setForceShellFlag(false);
         }
     }
 }

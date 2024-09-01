@@ -28,7 +28,7 @@ public class SSRCompatUtils {
         Vec3d to = look.traceEndPos();
         aabb = aabb.offset(look.headOffset());
 
-        List<Entity> entities = Minecraft.getMinecraft().world.getEntitiesWithinAABB(EntityLivingBase.class, aabb, new Predicate<Entity>() {
+        List<Entity> entities = Minecraft.getMinecraft().world.getEntitiesWithinAABB(Entity.class, aabb, new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
                 int attackReach = (int) (creature.getEntityBoundingBox().maxX - creature.getEntityBoundingBox().minX + creature.attackWidth());

@@ -41,6 +41,7 @@ import java.util.stream.Stream;
 public class RiftUtil {
     public static final double gravity = 0.08D;
     public static final UUID nilUUID = new UUID(0L, 0L);
+    public static final int funnyNumber = 69420666;
 
     public static EntityLivingBase getEntityFromUUID(World world, UUID uuid) {
         if (world != null) {
@@ -380,14 +381,17 @@ public class RiftUtil {
         return Block.getBlockFromName(blockName) == state.getBlock() && (blockData == - 1 || state.getBlock().getMetaFromState(state) == blockData);
     }
 
-    public static boolean checkForNoAssociations(RiftCreature user, EntityLivingBase target) {
-        if (target instanceof EntityPlayer) return !user.isOwner(target);
-        else if (target instanceof EntityTameable) {
-            EntityTameable tameable = (EntityTameable) target;
-            if (tameable.isTamed()) {
-                if (user.getOwner() != null) return !tameable.isOwner(user.getOwner());
+    public static boolean checkForNoAssociations(RiftCreature user, Entity target) {
+        if (target instanceof EntityLivingBase) {
+            EntityLivingBase entityLivingBase = (EntityLivingBase)target;
+            if (entityLivingBase instanceof EntityPlayer) return !user.isOwner(entityLivingBase);
+            else if (entityLivingBase instanceof EntityTameable) {
+                EntityTameable tameable = (EntityTameable) entityLivingBase;
+                if (tameable.isTamed()) {
+                    if (user.getOwner() != null) return !tameable.isOwner(user.getOwner());
+                }
+                else return true;
             }
-            else return true;
         }
         return true;
     }

@@ -305,7 +305,7 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, EntityLivingBase target, BlockPos pos) {
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (!this.isActing() && !this.isUsingRightClick()) {
