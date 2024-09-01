@@ -22,7 +22,7 @@ public class RiftAnkylosaurusHideInShell extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.ankylosaurus.isStartHiding() || this.ankylosaurus.isHiding() || this.ankylosaurus.isStopHiding();
+        return (this.ankylosaurus.isStartHiding() || this.ankylosaurus.isHiding() || this.ankylosaurus.isStopHiding()) && this.ankylosaurus.isEntityAlive();
     }
 
     @Override

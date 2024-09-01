@@ -353,6 +353,34 @@
 					"scale": 0
 				}
 			}
+		},
+		"animation.ankylosaurus.incapacitated": {
+			"loop": true,
+			"animation_length": 1.04,
+			"bones": {
+				"body": {
+					"position": [0, -5, 0]
+				},
+				"neck": {
+					"position": [0, 0, 12]
+				},
+				"leftFrontLeg": {
+					"rotation": [-90, 0, 0],
+					"position": [0, 0, 9]
+				},
+				"rightFrontLeg": {
+					"rotation": [-90, 0, 0],
+					"position": [0, 0, 9]
+				},
+				"leftBackLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, 0, -9]
+				},
+				"rightBackLeg": {
+					"rotation": [90, 0, 0],
+					"position": [0, 0, -9]
+				}
+			}
 		}
 	}
 }

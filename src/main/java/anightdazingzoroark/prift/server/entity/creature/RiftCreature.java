@@ -676,9 +676,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
                 }
-                else {
-                    player.sendStatusMessage(new TextComponentTranslation("reminder.not_creature_owner", this.getOwner().getName()), false);
-                }
+                else player.sendStatusMessage(new TextComponentTranslation("reminder.not_creature_owner", this.getOwner().getName()), false);
             }
             else {
                 ClientProxy.popupFromRadial = PopupFromRadial.CLAIM;
@@ -687,6 +685,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             return true;
         }
         else if (this.isTamed() && this.isIncapacitated()) {
+            System.out.println("test");
             if (!itemstack.isEmpty() && itemstack.getItem().equals(RiftItems.REVIVAL_MIX)) {
                 this.consumeItemFromStack(player, itemstack);
                 this.setHealth((float)this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue()/4f);

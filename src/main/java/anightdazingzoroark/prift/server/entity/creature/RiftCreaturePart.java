@@ -23,13 +23,13 @@ public class RiftCreaturePart extends MultiPartEntityPart {
     private boolean immuneToMelee;
     private boolean immuneToProjectiles;
 
-    public RiftCreaturePart(IRiftMultipart parent, float radius, float angleYaw, float offsetY, float width, float height, float damageMultiplier) {
+    public RiftCreaturePart(RiftCreature parent, float radius, float angleYaw, float offsetY, float width, float height, float damageMultiplier) {
         this(parent, "", radius, angleYaw, offsetY, width, height, damageMultiplier);
     }
 
-    public RiftCreaturePart(IRiftMultipart parent, String name, float radius, float angleYaw, float offsetY, float width, float height, float damageMultiplier) {
+    public RiftCreaturePart(RiftCreature parent, String name, float radius, float angleYaw, float offsetY, float width, float height, float damageMultiplier) {
         super(parent, name, width, height);
-        this.partParent = parent.getPartParent();
+        this.partParent = parent;
         this.radius = radius;
         this.angleYaw = (angleYaw + 90.0F) * 0.017453292F;
         this.offsetY = offsetY;
@@ -77,7 +77,10 @@ public class RiftCreaturePart extends MultiPartEntityPart {
     public void onUpdate() {
         this.setPositionAndUpdate(this.partParent.posX + this.radius * Math.cos(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw), this.partParent.posY + this.offsetY, this.partParent.posZ + this.radius * Math.sin(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw));
         //if (!this.world.isRemote && !this.isDisabled) this.collideWithNearbyEntities();
-        if (this.partParent.isDead) this.world.removeEntityDangerously(this);
+        if (!this.partParent.isEntityAlive()) {
+            if (!this.partParent.isTamed()) this.world.removeEntityDangerously(this);
+            else if (this.partParent.getIncapTimer() == 0) this.world.removeEntityDangerously(this);
+        }
 
         super.onUpdate();
     }
@@ -97,7 +100,8 @@ public class RiftCreaturePart extends MultiPartEntityPart {
 
     @Override
     public boolean canBeCollidedWith() {
-        return !this.isDisabled && this.partParent.isEntityAlive();
+        boolean aliveTest = this.partParent.isEntityAlive() || this.partParent.getIncapTimer() > 0;
+        return !this.isDisabled && aliveTest;
     }
 
     public void collideWithNearbyEntities() {
