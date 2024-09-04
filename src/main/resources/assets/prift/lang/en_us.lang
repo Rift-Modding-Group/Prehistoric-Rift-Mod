@@ -224,7 +224,10 @@ priftcommands.journal.add_success=Journal entry for %s successfully added to %s
 priftcommands.journal.entry_already_exists=%s has already been unlocked for %s
 priftcommands.journal.clear_success=Journal entry for %s successfully cleared for %s
 priftcommands.journal.entry_already_cleared=%s has already been cleared for %s
-priftcommands.highlight_creatures.highlight_success=Highlit %s creatures...
+priftcommands.highlight_creatures.usage=/prifthighlightcreatures
+priftcommands.highlight_creatures.highlight_success=Highlighted %s creature(s)
+priftcommands.reset_wild_creatures.usage=/priftresetwildcreatures
+priftcommands.reset_wild_creatures.reset_success=Removed %s wild creature(s)
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus growls
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus hurts

@@ -38,6 +38,6 @@ public class RiftResetWildCreaturesCommand extends CommandBase {
                 notifyCommandListener(sender, this, "priftcommands.reset_wild_creatures.reset_success", riftCreatures.size());
             }
         }
-        else throw new WrongUsageException("priftcommands.bleed.usage", new Object[0]);
+        else throw new WrongUsageException("priftcommands.reset_wild_creatures.usage", new Object[0]);
     }
 }
