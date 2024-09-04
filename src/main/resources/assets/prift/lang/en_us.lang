@@ -224,6 +224,7 @@ priftcommands.journal.add_success=Journal entry for %s successfully added to %s
 priftcommands.journal.entry_already_exists=%s has already been unlocked for %s
 priftcommands.journal.clear_success=Journal entry for %s successfully cleared for %s
 priftcommands.journal.entry_already_cleared=%s has already been cleared for %s
+priftcommands.highlight_creatures.highlight_success=Highlit %s creatures...
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus growls
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus hurts

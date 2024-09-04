@@ -4,7 +4,9 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.*;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
+import anightdazingzoroark.prift.server.commands.RiftCreatureHighlightCommand;
 import anightdazingzoroark.prift.server.commands.RiftJournalCommand;
+import anightdazingzoroark.prift.server.commands.RiftResetWildCreaturesCommand;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -87,6 +89,8 @@ public class RiftInitialize {
     @Mod.EventHandler
     public void serverLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new RiftBleedCommand());
+        event.registerServerCommand(new RiftCreatureHighlightCommand());
         event.registerServerCommand(new RiftJournalCommand());
+        event.registerServerCommand(new RiftResetWildCreaturesCommand());
     }
 }

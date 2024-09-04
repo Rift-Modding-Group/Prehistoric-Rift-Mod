@@ -21,6 +21,7 @@ public class AnomalocarisConfig extends RiftCreatureConfig {
         );
         this.general.targetWhitelist = Arrays.asList(
                 "minecraft:squid",
+                "prift:coelacanth",
                 "prift:megapiranha"
         );
         this.general.targetBlacklist = Arrays.asList();

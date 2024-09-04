@@ -123,7 +123,7 @@ public class GeneralConfig {
                 "prift:direwolf",
                 "prift:baryonyx"
         }, "Mobs in this list will not spawn in a radius around world spawn for some time");
-        daysUntilDangerSpawnNearWSpawn = config.getInt("Days until dangerous creatures can spawn near world spawn", "Spawning", 3, 1, 69420666, "Creatures will not spawn near world spawn for the following value in days");
+        daysUntilDangerSpawnNearWSpawn = config.getInt("Days until dangerous creatures can spawn near world spawn", "Spawning", 3, 0, 69420666, "Creatures will not spawn near world spawn for the following value in days");
         spawnAroundPlayerRad = config.getInt("Radius from players that new creatures spawn in", "Spawning", 24, 1, 69420666, "Creatures will not spawn in a radius of this value around the player");
         spawnInterval = config.getInt("Spawning Interval", "Spawning", 400, 1, 69420666, "Interval in ticks new creatures can spawn around players");
 
