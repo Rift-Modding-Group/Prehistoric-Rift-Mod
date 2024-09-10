@@ -313,7 +313,12 @@ public class RiftUtil {
         else return true;
     }
 
-    public static void drawCenteredString(FontRenderer fontRenderer, String string, int xPos, int yPos, int wrapWidth, int textColor) {
+    public static void drawCenteredString(FontRenderer fontRenderer, String string, int guiWidth, int guiHeight, int xOff, int yOff, int textColor) {
+        int wrapWidth = fontRenderer.getStringWidth(string);
+        fontRenderer.drawString(string, (guiWidth - wrapWidth)/2 + xOff, (guiHeight - fontRenderer.FONT_HEIGHT)/2 - yOff, textColor);
+    }
+
+    public static void drawMultiLineString(FontRenderer fontRenderer, String string, int xPos, int yPos, int wrapWidth, int textColor) {
         List<String> lines = fontRenderer.listFormattedStringToWidth(string, wrapWidth);
         int currentY = yPos;
 

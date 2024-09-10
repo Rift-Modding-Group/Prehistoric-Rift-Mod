@@ -141,6 +141,9 @@ item.gold_rod.name=Gold Rod
 jei.min_power=Minimum Power: %s R
 jei.chance=Chance: %s
 
+journal.top_button.entries=Journal
+journal.top_button.party=Party
+
 radial.choice.ride=Ride
 radial.choice.state=State
 radial.choice.inventory=Inventory

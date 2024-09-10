@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import com.google.common.base.Predicate;
 import com.teamderpy.shouldersurfing.client.ShoulderHelper;
 import net.minecraft.client.Minecraft;
@@ -34,6 +35,7 @@ public class SSRCompatUtils {
                 int attackReach = (int) (creature.getEntityBoundingBox().maxX - creature.getEntityBoundingBox().minX + creature.attackWidth());
                 if (entity.equals(cameraEntity)) return false;
                 else if (entity instanceof RiftCreature && entity.equals(creature)) return false;
+                else if (entity instanceof RiftCreaturePart && ((RiftCreaturePart)entity).getParent().equals(creature)) return false;
                 return entity.getDistanceSq(creature) <= Math.pow(attackReach, 2);
             }
         });

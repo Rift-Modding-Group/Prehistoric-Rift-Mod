@@ -192,10 +192,10 @@ public class RiftCreatureSpawning {
     }
 
     private boolean canFitInArea(RiftCreature creature, RiftCreatureSpawnLists.Spawner spawner) {
-        int xMin = -(int)Math.floor(creature.width / 2);
-        for (int x = xMin; x <= -xMin; x++) {
+        int xMin = (int)Math.floor(creature.width / 2);
+        for (int x = -xMin; x <= xMin; x++) {
             for (int y = 0; y < (int)Math.ceil(creature.height); y++) {
-                for (int z = -xMin; z <= -xMin; z++) {
+                for (int z = -xMin; z <= xMin; z++) {
                     IBlockState state = creature.world.getBlockState(creature.getPosition().add(x, y, z));
                     boolean cantFitInWater = !spawner.getCanSpawnInWater() || state.getMaterial() != Material.WATER;
                     if (state.getMaterial() != Material.AIR && cantFitInWater) return false;

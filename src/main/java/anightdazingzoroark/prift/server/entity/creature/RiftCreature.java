@@ -9,10 +9,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.ServerProxy;
-import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftEgg;
-import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
@@ -614,6 +611,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isTamed() && !this.isIncapacitated()) {
             if (this.getOwner() != null) {
                 if (this.isOwner(player)) {
+                    PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
+                    System.out.println(tamedCreatures.getPartyNBT());
+                    System.out.println(tamedCreatures.getPartyCreatures(this.world));
+
                     if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
@@ -685,7 +686,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             return true;
         }
         else if (this.isTamed() && this.isIncapacitated()) {
-            System.out.println("test");
             if (!itemstack.isEmpty() && itemstack.getItem().equals(RiftItems.REVIVAL_MIX)) {
                 this.consumeItemFromStack(player, itemstack);
                 this.setHealth((float)this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue()/4f);
@@ -698,21 +698,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     this.consumeItemFromStack(player, itemstack);
-                    this.spawnHeartParticles();
-                    if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished", new TextComponentString(this.getName())), false);
-                    this.setTameProgress(0);
-                    this.setTamedBy(player);
-                    this.setAttackTarget(null);
-                    if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
-                    this.world.setEntityState(this, (byte)7);
-                    if (!player.world.isRemote) {
-                        PlayerJournalProgress journalProgress = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class);
-                        if (!journalProgress.getUnlockedCreatures().contains(this.creatureType)) {
-                            journalProgress.unlockCreature(this.creatureType);
-                            player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
-                        }
-                    }
-                    this.enablePersistence();
+                    this.tameCreature(player);
                 }
                 else {
                     this.consumeItemFromStack(player, itemstack);
@@ -731,6 +717,38 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         return false;
+    }
+
+    public void tameCreature(EntityPlayer player) {
+        this.spawnHeartParticles();
+        this.setTameProgress(0);
+        this.setTamedBy(player);
+        this.setAttackTarget(null);
+        if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
+        this.world.setEntityState(this, (byte)7);
+        if (!player.world.isRemote) {
+            //update journal
+            PlayerJournalProgress journalProgress = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class);
+            if (!journalProgress.getUnlockedCreatures().contains(this.creatureType)) {
+                journalProgress.unlockCreature(this.creatureType);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+            }
+
+            //update tamed creature list
+            PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
+            tamedCreatures.init(player, this.world);
+            //test to see if it fits in party
+            if (tamedCreatures.getPartyCreatures(this.world).size() < tamedCreatures.getMaxPartySize()) {
+                tamedCreatures.addToPartyCreatures(this);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
+            }
+            else if (tamedCreatures.getBoxCreatures(this.world).size() < PlayerTamedCreatures.maxBoxSize) {
+                tamedCreatures.addToBoxCreatures(this);
+                this.world.removeEntity(this);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
+            }
+        }
+        this.enablePersistence();
     }
 
     protected void manageAttributes() {
@@ -928,11 +946,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setInteger("Level", this.getLevel());
         compound.setInteger("XP", this.getXP());
         compound.setInteger("Variant", this.getVariant());
+        compound.setByte("CreatureType", (byte) this.creatureType.ordinal());
         compound.setByte("TameStatus", (byte) this.getTameStatus().ordinal());
         compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
         compound.setByte("TurretTargeting", (byte) this.getTurretTargeting().ordinal());
         compound.setBoolean("Saddled", this.isSaddled());
-        if (this.creatureType != null) {
+        if (this.creatureInventory != null) {
             NBTTagList nbttaglist = new NBTTagList();
             for (int i = 0; i < this.creatureInventory.getSizeInventory(); ++i) {
                 ItemStack itemstack = this.creatureInventory.getStackInSlot(i);

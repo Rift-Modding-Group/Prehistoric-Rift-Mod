@@ -85,7 +85,7 @@ public class RiftPopupFromRadial extends GuiScreen {
 
         //text
         String s = I18n.format(I18n.format("radial.popup_choice."+this.popupFromRadial.name().toLowerCase()));
-        RiftUtil.drawCenteredString(this.fontRenderer, s, (this.xSize - 148)/ 2, (this.ySize) / 2 - 35, 148, 0x000000);
+        RiftUtil.drawMultiLineString(this.fontRenderer, s, (this.xSize - 148)/ 2, (this.ySize) / 2 - 35, 148, 0x000000);
 
         GlStateManager.enableLighting();
         GlStateManager.popMatrix();

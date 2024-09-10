@@ -12,6 +12,7 @@ public class RiftEntities {
         //entity properties
         EntityPropertiesHandler.INSTANCE.registerProperties(RiftEntityProperties.class);
         EntityPropertiesHandler.INSTANCE.registerProperties(PlayerJournalProgress.class);
+        EntityPropertiesHandler.INSTANCE.registerProperties(PlayerTamedCreatures.class);
 
         //creatures
         for (int x = 0; x < RiftCreatureType.values().length; x++) {

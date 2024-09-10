@@ -1,12 +1,17 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalButton;
+import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalPartyButton;
 import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
+import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -14,6 +19,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.nbt.NBTException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -33,7 +40,7 @@ import java.util.stream.Collectors;
 @SideOnly(Side.CLIENT)
 public class RiftJournalScreen extends GuiScreen {
     protected final int xSize = 420;
-    protected final int ySize = 225;
+    protected final int ySize = 240;
     protected int guiLeft;
     protected int guiTop;
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
@@ -43,6 +50,7 @@ public class RiftJournalScreen extends GuiScreen {
     private int scrollSidebarOffset = 0;
     private int journalEntryHeight;
     private int sidebarHeight;
+    private boolean isPartyMode;
 
     @Override
     public void initGui() {
@@ -57,6 +65,8 @@ public class RiftJournalScreen extends GuiScreen {
         this.entryScrollOffset = 0;
         this.scrollSidebarOffset = 0;
 
+        this.isPartyMode = true;
+
         super.initGui();
     }
 
@@ -67,10 +77,18 @@ public class RiftJournalScreen extends GuiScreen {
 
         //draw screen
         this.drawGuiContainerBackgroundLayer();
+
         //draw sidebar
-        this.placeButtons(mouseX, mouseY, partialTicks);
-        //draw entry and image
-        this.placeJournalEntry();
+        this.placeJournalButtons(mouseX, mouseY, partialTicks);
+
+        if (this.isPartyMode) {
+        }
+        else {
+            //draw entry and image
+            this.placeJournalEntry();
+        }
+        //top buttons
+        this.placeTopButtons(mouseX, mouseY);
 
         GlStateManager.disableRescaleNormal();
         RenderHelper.disableStandardItemLighting();
@@ -90,10 +108,23 @@ public class RiftJournalScreen extends GuiScreen {
         this.buttonList.clear();
         this.sidebarHeight = 0;
 
-        PlayerJournalProgress progress = EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerJournalProgress.class);
-        for (int x = 0; x < progress.getUnlockedCategories().size(); x++) {
-            this.buttonList.add(new RiftGuiJournalButton(progress.getUnlockedCategories().get(x).toString(), x, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 87 + (25 * x), 96, 20, progress.getUnlockedCategories().get(x).getTranslatedName(true)));
-            this.sidebarHeight += 25;
+        if (this.isPartyMode) {
+            //for party entries
+            PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerTamedCreatures.class);
+            for (int x = 0; x < tamedCreatures.getPartyCreatures(this.mc.world).size(); x++) {
+                RiftCreature creature = tamedCreatures.getPartyCreatures(this.mc.world).get(x);
+                this.buttonList.add(new RiftGuiJournalPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 75 + (40 * x)));
+                //this.buttonList.add(new GuiButton(x, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 79 + (40 * x), 96, 20, creature.getName()));
+                this.sidebarHeight += 40;
+            }
+        }
+        else {
+            //for journal entries
+            PlayerJournalProgress progress = EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerJournalProgress.class);
+            for (int x = 0; x < progress.getUnlockedCategories().size(); x++) {
+                this.buttonList.add(new RiftGuiJournalButton(progress.getUnlockedCategories().get(x).toString(), x, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 79 + (25 * x), 96, 20, progress.getUnlockedCategories().get(x).getTranslatedName(true)));
+                this.sidebarHeight += 25;
+            }
         }
     }
 
@@ -117,9 +148,9 @@ public class RiftJournalScreen extends GuiScreen {
                     .collect(Collectors.toList());
         }
         //add a back button
-        this.buttonList.add(new RiftGuiJournalButton("NULL", 0, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 87, 96, 20, I18n.format("type.creature.back")));
+        this.buttonList.add(new RiftGuiJournalButton("NULL", 0, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 79, 96, 20, I18n.format("type.creature.back")));
         for (int x = 0; x < creatureTypeList.size(); x++) {
-            this.buttonList.add(new RiftGuiJournalButton(creatureTypeList.get(x).toString(), x + 1, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 87 + (25 * (x + 1)), 96, 20, creatureTypeList.get(x).getTranslatedName()));
+            this.buttonList.add(new RiftGuiJournalButton(creatureTypeList.get(x).toString(), x + 1, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 79 + (25 * (x + 1)), 96, 20, creatureTypeList.get(x).getTranslatedName()));
             this.sidebarHeight += 25;
         }
     }
@@ -145,7 +176,7 @@ public class RiftJournalScreen extends GuiScreen {
     @Override
     public void updateScreen() {
         //update sidebar
-        if (this.sidebarType != null) this.setSidebarButtonList(this.sidebarType);
+        if (this.sidebarType != null && !this.isPartyMode) this.setSidebarButtonList(this.sidebarType);
         else this.sidebarButtonListInit();
         for (GuiButton button : this.buttonList) {
             button.y -= this.scrollSidebarOffset;
@@ -156,7 +187,7 @@ public class RiftJournalScreen extends GuiScreen {
     private void placeJournalEntry() {
         //scrollability
         int x = (this.width - 248)/2 + 60;
-        int y = (this.height - 200)/2;
+        int y = (this.height - 200)/2 + 8;
 
         // for scaling
         int scaleFactor = new ScaledResolution(this.mc).getScaleFactor();
@@ -182,7 +213,7 @@ public class RiftJournalScreen extends GuiScreen {
             GlStateManager.popMatrix();
         }
         //text
-        int imgOffset = this.entryType != null ? 160 : 10;
+        int imgOffset = this.entryType != null ? 168 : 18;
         this.fontRenderer.drawSplitString(this.getJournalEntry(), (this.width - 248)/2 + 60, (this.height - 200)/2 + imgOffset - this.entryScrollOffset, 248, 0x000000);
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
@@ -196,7 +227,7 @@ public class RiftJournalScreen extends GuiScreen {
         //create scrollbar
         if (this.journalEntryHeight > 200) {
             int k = (this.width - 5) / 2 + 195;
-            int l = (this.height - 200) / 2;
+            int l = (this.height - 200) / 2 + 8;
             //scrollbar background
             drawRect(k, l, k + 5, l + 200, 0xFFA0A0A0);
             //scrollbar progress
@@ -256,10 +287,9 @@ public class RiftJournalScreen extends GuiScreen {
     }
 
     //managing journal entry and pic ends here
-
-    protected void placeButtons(int mouseX, int mouseY, float partialTicks) {
+    protected void placeJournalButtons(int mouseX, int mouseY, float partialTicks) {
         int x = (this.width - 96) / 2 - 147;
-        int y = (this.height - 200) / 2;
+        int y = (this.height - 200) / 2 + 8;
 
         // for scaling
         int scaleFactor = new ScaledResolution(this.mc).getScaleFactor();
@@ -279,7 +309,7 @@ public class RiftJournalScreen extends GuiScreen {
         //create scrollbar
         if (this.sidebarHeight > 200) {
             int k = (this.width - 1) / 2 - 97;
-            int l = (this.height - 200) / 2;
+            int l = (this.height - 200) / 2 + 8;
             //scrollbar background
             drawRect(k, l, k + 1, l + 200, 0xFFA0A0A0);
             //scrollbar progress
@@ -289,7 +319,30 @@ public class RiftJournalScreen extends GuiScreen {
         }
     }
 
-    //manage scrollability
+    //for top buttons
+    //they aren't really buttons they gonna be more like clickable text that does stuff when u click on em
+    protected void placeTopButtons(int mouseX, int mouseY) {
+        RiftUtil.drawCenteredString(this.fontRenderer, I18n.format("journal.top_button.entries"), this.width, this.height, -32, 111, this.mouseOnTopButtonEntries(mouseX, mouseY) ? 16776960 : 0);
+        RiftUtil.drawCenteredString(this.fontRenderer, I18n.format("journal.top_button.party"), this.width, this.height, -148, 111, this.mouseOnTopButtonParty(mouseX, mouseY) ? 16776960 : 0);
+    }
+
+    private boolean mouseOnTopButtonEntries(int mouseX, int mouseY) {
+        int minX = (this.width - 102)/2 - 32;
+        int maxX = (this.width - 102)/2 + 70;
+        int minY = (this.height - 13) / 2 - 112;
+        int maxY = (this.height - 13) / 2 - 99;
+
+        return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY && this.isPartyMode;
+    }
+
+    private boolean mouseOnTopButtonParty(int mouseX, int mouseY) {
+        int minX = (this.width - 102)/2 - 148;
+        int maxX = (this.width - 102)/2 - 46;
+        int minY = (this.height - 13) / 2 - 112;
+        int maxY = (this.height - 13) / 2 - 99;
+        return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY && !this.isPartyMode;
+    }
+
     @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
@@ -306,6 +359,16 @@ public class RiftJournalScreen extends GuiScreen {
                 this.scrollSidebarOffset += (scroll > 0) ? -10 : 10;
                 this.scrollSidebarOffset = Math.max(0, Math.min(this.scrollSidebarOffset, Math.max(0, this.sidebarHeight - 200)));
             }
+        }
+
+        //on clicking mouse on top stuff
+        if (Mouse.isButtonDown(0) && this.mouseOnTopButtonEntries(mouseX, mouseY)) {
+            this.isPartyMode = false;
+            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        }
+        else if (Mouse.isButtonDown(0) && this.mouseOnTopButtonParty(mouseX, mouseY)) {
+            this.isPartyMode = true;
+            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
     }
 }
