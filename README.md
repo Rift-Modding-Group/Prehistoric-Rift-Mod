@@ -5,7 +5,7 @@ This is a direct port of the since discontinued [Bedrock Version](https://github
 >
 > -Original Description on the README.md of the Bedrock version
 
-Highly recommended that you join the Discord server as well: https://discord.gg/qVWaKRMCRc
+Highly recommended that you join the Discord server as well: https://discord.gg/JnjQtkVt8R
 
 The mod is for Minecraft Forge 1.12.2, and requires the following dependencies:
 * [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib)

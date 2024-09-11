@@ -54,7 +54,7 @@ public class ServerEvents {
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (GeneralConfig.showDiscordMessage) {
             TextComponentString message = new TextComponentString("Click here to join the Discord server for this mod to hang out and receive updates! We beg you!");
-            message.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/qVWaKRMCRc"));
+            message.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/JnjQtkVt8R"));
             message.getStyle().setUnderlined(true);
             event.player.sendMessage(message);
         }
