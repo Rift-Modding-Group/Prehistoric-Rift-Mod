@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.ilexiconn.llibrary.server.entity.EntityProperties;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -11,6 +12,7 @@ import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
     private final List<NBTTagCompound> partyCreatures = new ArrayList<>();
@@ -49,7 +51,6 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
         //for party creatures
         this.partyCreatures.clear();
         if (compound.hasKey("PartyCreatures")) {
-            System.out.println("get party creatures");
             NBTTagList partyCreaturesList = compound.getTagList("PartyCreatures", 10);
             for (int i = 0; i < partyCreaturesList.tagCount(); i++) {
                 this.partyCreatures.add(partyCreaturesList.getCompoundTagAt(i));
@@ -77,7 +78,8 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
     public void addToPartyCreatures(RiftCreature creature) {
         if (this.partyCreatures.size() < this.maxPartySize) {
             NBTTagCompound compound = new NBTTagCompound();
-            creature.writeToNBT(compound);
+            compound.setUniqueId("UniqueID", creature.getUniqueID());
+            creature.writeEntityToNBT(compound);
             this.partyCreatures.add(compound);
         }
     }
@@ -90,9 +92,18 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
         List<RiftCreature> creatures = new ArrayList<>();
         for (NBTTagCompound compound : this.partyCreatures) {
             RiftCreatureType creatureType = RiftCreatureType.values()[compound.getByte("CreatureType")];
+            UUID uniqueID = compound.getUniqueId("UniqueID");
             if (creatureType != null) {
                 RiftCreature creature = creatureType.invokeClass(world);
+
+                //attributes and creature health dont carry over on client side, this should be a workaround
+                if (world.isRemote) {
+                    creature.setHealth(compound.getFloat("Health"));
+                    SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), compound.getTagList("Attributes", 10));
+                }
+
                 creature.readEntityFromNBT(compound);
+                creature.setUniqueId(uniqueID);
                 creatures.add(creature);
             }
         }
@@ -102,7 +113,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
     public void addToBoxCreatures(RiftCreature creature) {
         if (this.boxCreatures.size() < maxBoxSize) {
             NBTTagCompound compound = new NBTTagCompound();
-            creature.writeToNBT(compound);
+            creature.writeEntityToNBT(compound);
             this.boxCreatures.add(compound);
         }
     }
@@ -116,6 +127,23 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
         return creatures;
     }
 
+    public void updateCreatures(RiftCreature creature) {
+        for (RiftCreature partyCreature : this.getPartyCreatures(creature.world)) {
+            if (partyCreature != null && partyCreature.getUniqueID().equals(creature.getUniqueID())) {
+                NBTTagCompound partyMemCompound = new NBTTagCompound();
+                NBTTagCompound partyMemCompoundUpdt = new NBTTagCompound();
+
+                partyMemCompound.setUniqueId("UniqueID", partyCreature.getUniqueID());
+                partyMemCompoundUpdt.setUniqueId("UniqueID", creature.getUniqueID());
+
+                partyCreature.writeEntityToNBT(partyMemCompound);
+                creature.writeEntityToNBT(partyMemCompoundUpdt);
+
+                this.partyCreatures.set(this.partyCreatures.indexOf(partyMemCompound), partyMemCompoundUpdt);
+            }
+        }
+    }
+
     @Override
     public String getID() {
         return "Player Tamed Entities";
@@ -123,11 +151,17 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
 
     @Override
     public int getTrackingTime() {
-        return 20;
+        return 1;
     }
 
     @Override
     public Class<EntityPlayer> getEntityClass() {
         return EntityPlayer.class;
+    }
+
+    public enum DeploymentType {
+        NONE, //in box
+        PARTY, //with player in party
+        BASE //wandering around box
     }
 }

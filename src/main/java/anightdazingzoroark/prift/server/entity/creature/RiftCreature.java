@@ -105,6 +105,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -227,6 +228,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(SLEEPING, false);
         this.dataManager.register(UNCLAIM_TIMER, 0);
         this.dataManager.register(CLIMBING, false);
+        this.dataManager.register(DEPLOYMENT_TYPE, (byte) PlayerTamedCreatures.DeploymentType.NONE.ordinal());
     }
 
     @Override
@@ -309,6 +311,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 this.manageXPAndLevel();
                 this.manageIncapacitated();
+                this.managePlayerTameList();
             }
         }
         if (this.world.isRemote) this.setControls();
@@ -387,6 +390,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
             }
+        }
+    }
+
+    private void managePlayerTameList() {
+        if (this.getOwner() instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) this.getOwner();
+            PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
+            tamedCreatures.updateCreatures(this);
         }
     }
 
@@ -740,11 +751,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             //test to see if it fits in party
             if (tamedCreatures.getPartyCreatures(this.world).size() < tamedCreatures.getMaxPartySize()) {
                 tamedCreatures.addToPartyCreatures(this);
+                this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
             }
             else if (tamedCreatures.getBoxCreatures(this.world).size() < PlayerTamedCreatures.maxBoxSize) {
                 tamedCreatures.addToBoxCreatures(this);
                 this.world.removeEntity(this);
+                this.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
             }
         }
@@ -1468,6 +1481,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(CLIMBING, value);
     }
 
+    public PlayerTamedCreatures.DeploymentType getDeploymentType() {
+        return PlayerTamedCreatures.DeploymentType.values()[(int)this.dataManager.get(DEPLOYMENT_TYPE)];
+    }
+
+    public void setDeploymentType(PlayerTamedCreatures.DeploymentType value) {
+        this.dataManager.set(DEPLOYMENT_TYPE, (byte)value.ordinal());
+    }
+
     public boolean justSpawned() {
         return this.dataManager.get(JUST_SPAWNED);
     }
@@ -1923,6 +1944,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     protected void onDeathUpdate() {
+        if (this.isTamed()) {
+            if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                this.world.removeEntityDangerously(this);
+            }
+            else if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {
+                this.deathTime = 0;
+                this.setIncapacitated(true);
+            }
+        }
+        else super.onDeathUpdate();
+        /*
         if (GeneralConfig.minRevivalDiff.equals("PEACEFUL") || GeneralConfig.minRevivalDiff.equals("EASY") || GeneralConfig.minRevivalDiff.equals("NORMAL") || GeneralConfig.minRevivalDiff.equals("HARD")) {
             EnumDifficulty diff = EnumDifficulty.valueOf(GeneralConfig.minRevivalDiff);
             if (this.world.getDifficulty().getId() < diff.getId()) {
@@ -1968,6 +2000,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
         }
+         */
     }
 
     public void onKillCommand() {

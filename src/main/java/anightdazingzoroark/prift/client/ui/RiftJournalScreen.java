@@ -46,6 +46,7 @@ public class RiftJournalScreen extends GuiScreen {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
     private CreatureCategory sidebarType;
     private RiftCreatureType entryType;
+    private RiftCreature selectedPartyMem;
     private int entryScrollOffset = 0;
     private int scrollSidebarOffset = 0;
     private int journalEntryHeight;
@@ -57,6 +58,7 @@ public class RiftJournalScreen extends GuiScreen {
         //start with the creature types
         this.sidebarType = null;
         this.entryType = null;
+        this.selectedPartyMem = this.getPlayerParty().isEmpty() ? null : this.getPlayerParty().get(0);
 
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
@@ -82,11 +84,9 @@ public class RiftJournalScreen extends GuiScreen {
         this.placeJournalButtons(mouseX, mouseY, partialTicks);
 
         if (this.isPartyMode) {
+            this.placePartyMemberMenu();
         }
-        else {
-            //draw entry and image
-            this.placeJournalEntry();
-        }
+        else this.placeJournalEntry(); //draw entry and image
         //top buttons
         this.placeTopButtons(mouseX, mouseY);
 
@@ -114,7 +114,6 @@ public class RiftJournalScreen extends GuiScreen {
             for (int x = 0; x < tamedCreatures.getPartyCreatures(this.mc.world).size(); x++) {
                 RiftCreature creature = tamedCreatures.getPartyCreatures(this.mc.world).get(x);
                 this.buttonList.add(new RiftGuiJournalPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 75 + (40 * x)));
-                //this.buttonList.add(new GuiButton(x, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 79 + (40 * x), 96, 20, creature.getName()));
                 this.sidebarHeight += 40;
             }
         }
@@ -157,19 +156,25 @@ public class RiftJournalScreen extends GuiScreen {
 
     @Override
     public void actionPerformed(GuiButton button) {
-        RiftGuiJournalButton jButton = (RiftGuiJournalButton)button;
-        if (this.sidebarType == null) {
-            this.sidebarType = CreatureCategory.safeValOf(jButton.getTriggerString());
-            this.scrollSidebarOffset = 0;
-        }
-        else {
-            if (jButton.getTriggerString().equals("NULL")) {
-                this.sidebarType = null;
-                this.entryType = null;
+        if (button instanceof RiftGuiJournalButton) {
+            RiftGuiJournalButton jButton = (RiftGuiJournalButton)button;
+            if (this.sidebarType == null) {
+                this.sidebarType = CreatureCategory.safeValOf(jButton.getTriggerString());
                 this.scrollSidebarOffset = 0;
             }
-            else this.entryType = RiftCreatureType.safeValOf(jButton.getTriggerString());
-            this.entryScrollOffset = 0;
+            else {
+                if (jButton.getTriggerString().equals("NULL")) {
+                    this.sidebarType = null;
+                    this.entryType = null;
+                    this.scrollSidebarOffset = 0;
+                }
+                else this.entryType = RiftCreatureType.safeValOf(jButton.getTriggerString());
+                this.entryScrollOffset = 0;
+            }
+        }
+        else if (button instanceof RiftGuiJournalPartyButton) {
+            RiftGuiJournalPartyButton jButton = (RiftGuiJournalPartyButton)button;
+            this.selectedPartyMem = this.getPlayerParty().get(jButton.id);
         }
     }
 
@@ -287,7 +292,21 @@ public class RiftJournalScreen extends GuiScreen {
     }
 
     //managing journal entry and pic ends here
-    protected void placeJournalButtons(int mouseX, int mouseY, float partialTicks) {
+    private void placePartyMemberMenu() {
+        if (this.selectedPartyMem != null) {
+            GlStateManager.pushMatrix();
+            GlStateManager.enableDepth();
+            GlStateManager.rotate(-45.0F, 0.0F, 1.0F, 0.0F);
+            GlStateManager.rotate(-135.0F, 0.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(-180.0F, 0.0F, 0.0F, 1.0F);
+            GlStateManager.scale(70f, 70f, 70f);
+            Minecraft.getMinecraft().getRenderManager().renderEntity(this.selectedPartyMem, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
+            GlStateManager.disableDepth();
+            GlStateManager.popMatrix();
+        }
+    }
+
+    private void placeJournalButtons(int mouseX, int mouseY, float partialTicks) {
         int x = (this.width - 96) / 2 - 147;
         int y = (this.height - 200) / 2 + 8;
 
@@ -362,13 +381,18 @@ public class RiftJournalScreen extends GuiScreen {
         }
 
         //on clicking mouse on top stuff
-        if (Mouse.isButtonDown(0) && this.mouseOnTopButtonEntries(mouseX, mouseY)) {
+        if (Mouse.isButtonDown(0) && this.mouseOnTopButtonEntries(mouseX, mouseY)) { //switch to journal entries
             this.isPartyMode = false;
             this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
-        else if (Mouse.isButtonDown(0) && this.mouseOnTopButtonParty(mouseX, mouseY)) {
+        else if (Mouse.isButtonDown(0) && this.mouseOnTopButtonParty(mouseX, mouseY)) { //switch to party
             this.isPartyMode = true;
             this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
+    }
+
+    private List<RiftCreature> getPlayerParty() {
+        PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerTamedCreatures.class);
+        return tamedCreatures.getPartyCreatures(this.mc.world);
     }
 }
