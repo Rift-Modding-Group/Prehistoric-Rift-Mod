@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.PalaeocastorConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -10,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackMelee;
@@ -203,13 +205,15 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     }
 
     private <E extends IAnimatable> PlayState palaeocastorMovement(AnimationEvent<E> event) {
-        if (this.isSitting() && !this.hasTarget()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.palaeocastor.sitting", true));
-            return PlayState.CONTINUE;
-        }
-        if ((event.isMoving() || (this.isSitting() && this.hasTarget()))) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.palaeocastor.walk", true));
-            return PlayState.CONTINUE;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (this.isSitting() && !this.hasTarget()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.palaeocastor.sitting", true));
+                return PlayState.CONTINUE;
+            }
+            if ((event.isMoving() || (this.isSitting() && this.hasTarget()))) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.palaeocastor.walk", true));
+                return PlayState.CONTINUE;
+            }
         }
         return PlayState.STOP;
     }

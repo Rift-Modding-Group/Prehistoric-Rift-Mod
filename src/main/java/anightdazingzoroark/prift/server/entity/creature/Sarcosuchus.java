@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -15,6 +16,7 @@ import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
 import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -340,22 +342,26 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     private <E extends IAnimatable> PlayState sarcosuchusMovement(AnimationEvent<E> event) {
-        if (this.isInWater()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.swim", true));
-            return PlayState.CONTINUE;
-        }
-        else {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.sitting", true));
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (this.isInWater()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.swim", true));
                 return PlayState.CONTINUE;
             }
-            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.walk", true));
-                return PlayState.CONTINUE;
+            else {
+                if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.sitting", true));
+                    return PlayState.CONTINUE;
+                }
+                if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.walk", true));
+                    return PlayState.CONTINUE;
+                }
+                event.getController().clearAnimationCache();
+                return PlayState.STOP;
             }
-            event.getController().clearAnimationCache();
-            return PlayState.STOP;
         }
+        event.getController().clearAnimationCache();
+        return PlayState.STOP;
     }
 
     private <E extends IAnimatable> PlayState sarcosuchusAttack(AnimationEvent<E> event) {

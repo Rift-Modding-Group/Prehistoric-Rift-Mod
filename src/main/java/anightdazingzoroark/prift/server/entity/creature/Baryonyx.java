@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.BaryonyxConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -10,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -281,21 +283,24 @@ public class Baryonyx extends RiftWaterCreature {
     }
 
     private <E extends IAnimatable> PlayState baryonyxMovement(AnimationEvent<E> event) {
-        if (this.isInWater()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.swim", true));
-            return PlayState.CONTINUE;
-        }
-        else {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.sitting", true));
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (this.isInWater()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.swim", true));
                 return PlayState.CONTINUE;
             }
-            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.walk", true));
-                return PlayState.CONTINUE;
+            else {
+                if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.sitting", true));
+                    return PlayState.CONTINUE;
+                }
+                if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.walk", true));
+                    return PlayState.CONTINUE;
+                }
+                return PlayState.STOP;
             }
-            return PlayState.STOP;
         }
+        return PlayState.STOP;
     }
 
     private <E extends IAnimatable> PlayState baryonyxAttack(AnimationEvent<E> event) {

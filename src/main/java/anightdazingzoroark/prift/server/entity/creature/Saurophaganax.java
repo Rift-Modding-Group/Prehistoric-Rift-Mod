@@ -3,12 +3,14 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.SaurophaganaxConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -304,17 +306,19 @@ public class Saurophaganax extends RiftCreature {
     }
 
     private <E extends IAnimatable> PlayState saurophaganaxMovement(AnimationEvent<E> event) {
-        if (!this.isSleeping() && this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.sitting", true));
-            return PlayState.CONTINUE;
-        }
-        if (!this.isSleeping() && (event.isMoving() || (this.isSitting() && this.hasTarget()))) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.walk", true));
-            return PlayState.CONTINUE;
-        }
-        if (this.isSleeping() && !this.isIncapacitated()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.sleeping", true));
-            return PlayState.CONTINUE;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (!this.isSleeping() && this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.sitting", true));
+                return PlayState.CONTINUE;
+            }
+            if (!this.isSleeping() && (event.isMoving() || (this.isSitting() && this.hasTarget()))) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.walk", true));
+                return PlayState.CONTINUE;
+            }
+            if (this.isSleeping() && !this.isIncapacitated()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.sleeping", true));
+                return PlayState.CONTINUE;
+            }
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;

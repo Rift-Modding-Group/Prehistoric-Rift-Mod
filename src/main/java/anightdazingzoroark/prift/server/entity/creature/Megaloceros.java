@@ -3,12 +3,14 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.MegalocerosConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -386,13 +388,15 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     }
 
     private <E extends IAnimatable> PlayState megalocerosMovement(AnimationEvent<E> event) {
-        if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.sitting", true));
-            return PlayState.CONTINUE;
-        }
-        if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isCharging()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.walk", true));
-            return PlayState.CONTINUE;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.sitting", true));
+                return PlayState.CONTINUE;
+            }
+            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isCharging()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.walk", true));
+                return PlayState.CONTINUE;
+            }
         }
         return PlayState.STOP;
     }

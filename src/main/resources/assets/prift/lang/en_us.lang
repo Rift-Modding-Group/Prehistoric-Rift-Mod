@@ -143,6 +143,10 @@ jei.chance=Chance: %s
 
 journal.top_button.entries=Journal
 journal.top_button.party=Party
+journal.party_button.dismiss=Dismiss
+journal.party_button.summon=Summon
+journal.party_button.teleport=Teleport
+journal.party_button.feed=Feed
 
 radial.choice.ride=Ride
 radial.choice.state=State

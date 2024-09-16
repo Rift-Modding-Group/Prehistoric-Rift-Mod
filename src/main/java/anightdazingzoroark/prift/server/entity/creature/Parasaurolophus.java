@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
@@ -23,6 +24,7 @@ import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
@@ -562,13 +564,15 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     private <E extends IAnimatable> PlayState parasaurolophusMovement(AnimationEvent<E> event) {
-        if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget() && !this.isUsingWorkstation()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.sitting", true));
-            return PlayState.CONTINUE;
-        }
-        if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.walk", true));
-            return PlayState.CONTINUE;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget() && !this.isUsingWorkstation()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.sitting", true));
+                return PlayState.CONTINUE;
+            }
+            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.walk", true));
+                return PlayState.CONTINUE;
+            }
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;

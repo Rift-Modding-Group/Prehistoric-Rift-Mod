@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.config.ApatosaurusConfig;
@@ -809,13 +810,15 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     private <E extends IAnimatable> PlayState apatosaurusMovement(AnimationEvent<E> event) {
-        if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.sitting", true));
-            return PlayState.CONTINUE;
-        }
-        if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking() && !this.isTailWhipping()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.walk", true));
-            return PlayState.CONTINUE;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.sitting", true));
+                return PlayState.CONTINUE;
+            }
+            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking() && !this.isTailWhipping()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.walk", true));
+                return PlayState.CONTINUE;
+            }
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;

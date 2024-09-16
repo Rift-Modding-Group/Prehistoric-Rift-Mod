@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -13,6 +14,7 @@ import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
@@ -409,17 +411,19 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     }
 
     private <E extends IAnimatable> PlayState utahraptorMovement(AnimationEvent<E> event) {
-        if (event.isMoving() && this.onGround()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.walk", true));
-            return PlayState.CONTINUE;
-        }
-        else if (event.isMoving() && !this.onGround() && !this.isSitting()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.pounce", true));
-            return PlayState.CONTINUE;
-        }
-        else if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.sitting", true));
-            return PlayState.CONTINUE;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (event.isMoving() && this.onGround()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.walk", true));
+                return PlayState.CONTINUE;
+            }
+            else if (event.isMoving() && !this.onGround() && !this.isSitting()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.pounce", true));
+                return PlayState.CONTINUE;
+            }
+            else if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.sitting", true));
+                return PlayState.CONTINUE;
+            }
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;

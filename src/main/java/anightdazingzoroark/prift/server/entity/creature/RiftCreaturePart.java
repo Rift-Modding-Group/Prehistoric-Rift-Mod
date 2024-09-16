@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.interfaces.IRiftMultipart;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftMultipartInteract;
@@ -76,12 +77,11 @@ public class RiftCreaturePart extends MultiPartEntityPart {
     @Override
     public void onUpdate() {
         this.setPositionAndUpdate(this.partParent.posX + this.radius * Math.cos(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw), this.partParent.posY + this.offsetY, this.partParent.posZ + this.radius * Math.sin(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw));
-        //if (!this.world.isRemote && !this.isDisabled) this.collideWithNearbyEntities();
+        //if (this.partParent.isTamed()) System.out.println("is parent alive? "+this.partParent.isEntityAlive());
         if (!this.partParent.isEntityAlive()) {
             if (!this.partParent.isTamed()) this.world.removeEntityDangerously(this);
-            else if (this.partParent.getIncapTimer() == 0) this.world.removeEntityDangerously(this);
+            else if (this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) this.world.removeEntityDangerously(this);
         }
-
         super.onUpdate();
     }
 

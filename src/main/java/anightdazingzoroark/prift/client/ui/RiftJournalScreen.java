@@ -9,6 +9,10 @@ import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
+import anightdazingzoroark.prift.server.message.RiftManagePartyMem;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
+import com.google.common.collect.Lists;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -20,7 +24,6 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.nbt.NBTException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -52,13 +55,14 @@ public class RiftJournalScreen extends GuiScreen {
     private int journalEntryHeight;
     private int sidebarHeight;
     private boolean isPartyMode;
+    private List<GuiButton> partyMemButtonList = Lists.<GuiButton>newArrayList();
 
     @Override
     public void initGui() {
         //start with the creature types
         this.sidebarType = null;
         this.entryType = null;
-        this.selectedPartyMem = this.getPlayerParty().isEmpty() ? null : this.getPlayerParty().get(0);
+        this.selectedPartyMem = this.getPlayerParty().isEmpty() ? null : this.getPlayerParty().get(this.playerTamedCreatures().getLastSelected());
 
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
@@ -86,7 +90,12 @@ public class RiftJournalScreen extends GuiScreen {
         if (this.isPartyMode) {
             this.placePartyMemberMenu();
         }
-        else this.placeJournalEntry(); //draw entry and image
+        else {
+            //draw entry and image
+            this.placeJournalEntry();
+            this.partyMemButtonList.clear();
+        }
+
         //top buttons
         this.placeTopButtons(mouseX, mouseY);
 
@@ -110,9 +119,8 @@ public class RiftJournalScreen extends GuiScreen {
 
         if (this.isPartyMode) {
             //for party entries
-            PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerTamedCreatures.class);
-            for (int x = 0; x < tamedCreatures.getPartyCreatures(this.mc.world).size(); x++) {
-                RiftCreature creature = tamedCreatures.getPartyCreatures(this.mc.world).get(x);
+            for (int x = 0; x < this.playerTamedCreatures().getPartyCreatures(this.mc.world).size(); x++) {
+                RiftCreature creature = this.playerTamedCreatures().getPartyCreatures(this.mc.world).get(x);
                 this.buttonList.add(new RiftGuiJournalPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 75 + (40 * x)));
                 this.sidebarHeight += 40;
             }
@@ -175,6 +183,27 @@ public class RiftJournalScreen extends GuiScreen {
         else if (button instanceof RiftGuiJournalPartyButton) {
             RiftGuiJournalPartyButton jButton = (RiftGuiJournalPartyButton)button;
             this.selectedPartyMem = this.getPlayerParty().get(jButton.id);
+            this.playerTamedCreatures().setLastSelected(jButton.id);
+        }
+        else {
+            if (button.id == 0) {
+                if (this.selectedPartyMem.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                    RiftMessages.WRAPPER.sendToAll(new RiftManagePartyMem(this.selectedPartyMem, false));
+                    RiftMessages.WRAPPER.sendToServer(new RiftManagePartyMem(this.selectedPartyMem, false));
+                    this.selectedPartyMem.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                    this.selectedPartyMem.managePlayerTameList();
+                }
+                else if (this.selectedPartyMem.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftManagePartyMem(this.selectedPartyMem, true));
+                    this.selectedPartyMem.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                    this.selectedPartyMem.managePlayerTameList();
+                }
+            }
+            else if (button.id == 1) {
+                if (this.selectedPartyMem.getDeploymentType() != PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(this.selectedPartyMem));
+                }
+            }
         }
     }
 
@@ -294,15 +323,37 @@ public class RiftJournalScreen extends GuiScreen {
     //managing journal entry and pic ends here
     private void placePartyMemberMenu() {
         if (this.selectedPartyMem != null) {
+            //for party member
+            GlStateManager.pushMatrix();
             GlStateManager.pushMatrix();
             GlStateManager.enableDepth();
+            GlStateManager.translate(this.width / 2f + 40f, this.height / 2f + 30, 180.0F);
             GlStateManager.rotate(-45.0F, 0.0F, 1.0F, 0.0F);
             GlStateManager.rotate(-135.0F, 0.0F, 0.0F, 0.0F);
             GlStateManager.rotate(-180.0F, 0.0F, 0.0F, 1.0F);
-            GlStateManager.scale(70f, 70f, 70f);
+            GlStateManager.scale(15f, 15f, 15f);
             Minecraft.getMinecraft().getRenderManager().renderEntity(this.selectedPartyMem, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
             GlStateManager.disableDepth();
             GlStateManager.popMatrix();
+            GlStateManager.popMatrix();
+
+            //for party member button management
+            this.partyMemButtonList.clear();
+
+            String summonName = this.selectedPartyMem.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY ? I18n.format("journal.party_button.dismiss") : I18n.format("journal.party_button.summon");
+            GuiButton summonButton = new GuiButton(0, (this.width - 60) / 2 - 10, (this.height - 20)/2 + 90, 60, 20, summonName);
+            if (this.selectedPartyMem.isIncapacitated()) summonButton.enabled = false;
+
+            //for teleport to owner button
+            GuiButton tpToOwnerButton = new GuiButton( 1, (this.width - 60) / 2 + 60, (this.height - 20)/2 + 90, 60, 20, I18n.format("journal.party_button.teleport"));
+            if (this.selectedPartyMem.isIncapacitated() || this.selectedPartyMem.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) tpToOwnerButton.enabled = false;
+
+            //for feed button
+            GuiButton feedButton = new GuiButton(2, (this.width - 60) / 2 + 130, (this.height - 20)/2 + 90, 60, 20, I18n.format("journal.party_button.feed"));
+
+            this.partyMemButtonList.add(summonButton);
+            this.partyMemButtonList.add(tpToOwnerButton);
+            this.partyMemButtonList.add(feedButton);
         }
     }
 
@@ -318,12 +369,18 @@ public class RiftJournalScreen extends GuiScreen {
         int scissorW = (this.width - 96) * scaleFactor;
         int scissorH = 200 * scaleFactor;
 
+        //for buttons on the side
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(scissorX, scissorY, scissorW, scissorH);
         for (GuiButton guiButton : this.buttonList) {
             guiButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
         }
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
+
+        //for buttons related to party members
+        for (GuiButton guiButton : this.partyMemButtonList) {
+            guiButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
+        }
 
         //create scrollbar
         if (this.sidebarHeight > 200) {
@@ -391,8 +448,33 @@ public class RiftJournalScreen extends GuiScreen {
         }
     }
 
+    //on clicking on the buttons in the party part of the journal
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        if (mouseButton == 0) {
+            for (int i = 0; i < this.partyMemButtonList.size(); ++i) {
+                GuiButton guibutton = this.partyMemButtonList.get(i);
+
+                if (guibutton.mousePressed(this.mc, mouseX, mouseY)) {
+                    net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Pre event = new net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Pre(this, guibutton, this.partyMemButtonList);
+                    if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event))
+                        break;
+                    guibutton = event.getButton();
+                    this.selectedButton = guibutton;
+                    guibutton.playPressSound(this.mc.getSoundHandler());
+                    this.actionPerformed(guibutton);
+                    if (this.equals(this.mc.currentScreen))
+                        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Post(this, event.getButton(), this.partyMemButtonList));
+                }
+            }
+        }
+    }
+
+    private PlayerTamedCreatures playerTamedCreatures() {
+        return EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerTamedCreatures.class);
+    }
+
     private List<RiftCreature> getPlayerParty() {
-        PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerTamedCreatures.class);
-        return tamedCreatures.getPartyCreatures(this.mc.world);
+        return this.playerTamedCreatures().getPartyCreatures(this.mc.world);
     }
 }

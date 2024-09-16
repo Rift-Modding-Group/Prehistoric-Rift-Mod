@@ -316,7 +316,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         if (this.world.isRemote) this.setControls();
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
-
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
     }
@@ -393,7 +392,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    private void managePlayerTameList() {
+    public void managePlayerTameList() {
         if (this.getOwner() instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer) this.getOwner();
             PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
@@ -418,7 +417,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void updateParts() {
         for (RiftCreaturePart creaturePart : this.hitboxArray) {
-            if (creaturePart != null) creaturePart.onUpdate();
+            if (creaturePart != null) {
+                creaturePart.onUpdate();
+            }
         }
     }
 
@@ -622,10 +623,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isTamed() && !this.isIncapacitated()) {
             if (this.getOwner() != null) {
                 if (this.isOwner(player)) {
-                    PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
-                    System.out.println(tamedCreatures.getPartyNBT());
-                    System.out.println(tamedCreatures.getPartyCreatures(this.world));
-
                     if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
@@ -991,6 +988,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setBoolean("Unclaimed", this.isUnclaimed());
         compound.setInteger("UnclaimTimer", this.getUnclaimTimer());
         compound.setBoolean("Incapacitated", this.isIncapacitated());
+        compound.setByte("DeploymentType", (byte) this.getDeploymentType().ordinal());
     }
 
     @Override
@@ -1031,6 +1029,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setUnclaimed(compound.getBoolean("Unclaimed"));
         this.setUnclaimTimer(compound.getInteger("UnclaimTimer"));
         this.setIncapacitated(compound.getBoolean("Incapacitated"));
+        this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getByte("DeploymentType")]);
         if (this.isUnclaimed()) this.setTamed(true);
     }
 
@@ -1241,8 +1240,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //end of multi hitbox stuff
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (source.getImmediateSource() == null) return false;
-        else if (!(source.getImmediateSource() instanceof EntityPlayer)) {
+        if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
             //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
             Entity attacker = source.getImmediateSource();
             RiftCreaturePart closestPart = null;
@@ -1882,8 +1880,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public List<RiftTameRadialChoice> mainRadialChoices() {
         List<RiftTameRadialChoice> list = new ArrayList<>();
         list.add(RiftTameRadialChoice.INVENTORY);
-        list.add(RiftTameRadialChoice.STATE);
-        if (this.canBeSaddled() && this.isRideable) list.add(RiftTameRadialChoice.RIDE);
+        if (this.getDeploymentType() != PlayerTamedCreatures.DeploymentType.BASE || this.canDoTurretMode()) list.add(RiftTameRadialChoice.STATE);
+        if (this.canBeSaddled() && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY && this.isRideable) list.add(RiftTameRadialChoice.RIDE);
         list.add(RiftTameRadialChoice.OPTIONS);
         list.add(RiftTameRadialChoice.BEHAVIOR);
         return list;
@@ -1914,7 +1912,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         list.add(RiftTameRadialChoice.BACK);
         list.add(RiftTameRadialChoice.CHANGE_NAME);
         list.add(RiftTameRadialChoice.SET_HOME);
-        list.add(RiftTameRadialChoice.UNCLAIM);
+        //list.add(RiftTameRadialChoice.UNCLAIM);
         if (this instanceof IWorkstationUser) list.add(RiftTameRadialChoice.SET_WORKSTATION);
         if (this instanceof IHarvestWhenWandering) list.add(RiftTameRadialChoice.SET_WANDER_HARVEST);
         return list;
@@ -1944,16 +1942,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     protected void onDeathUpdate() {
+        super.onDeathUpdate();
         if (this.isTamed()) {
+            this.setIncapacitated(true);
             if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
-                this.world.removeEntityDangerously(this);
+                this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                if (this.deathTime == 1) {
+                    this.world.removeEntity(this);
+                }
             }
             else if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {
                 this.deathTime = 0;
-                this.setIncapacitated(true);
             }
         }
         else super.onDeathUpdate();
+
         /*
         if (GeneralConfig.minRevivalDiff.equals("PEACEFUL") || GeneralConfig.minRevivalDiff.equals("EASY") || GeneralConfig.minRevivalDiff.equals("NORMAL") || GeneralConfig.minRevivalDiff.equals("HARD")) {
             EnumDifficulty diff = EnumDifficulty.valueOf(GeneralConfig.minRevivalDiff);
@@ -2001,10 +2004,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
          */
-    }
-
-    public void onKillCommand() {
-        this.setDead();
     }
 
     @Nullable

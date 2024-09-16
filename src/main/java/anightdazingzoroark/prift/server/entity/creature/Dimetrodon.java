@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
@@ -17,6 +18,7 @@ import com.charles445.simpledifficulty.config.ModConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -471,13 +473,15 @@ public class Dimetrodon extends RiftCreature {
     }
 
     private <E extends IAnimatable> PlayState dimetrodonMovement(AnimationEvent<E> event) {
-        if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dimetrodon.sitting", true));
-            return PlayState.CONTINUE;
-        }
-        if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dimetrodon.walk", true));
-            return PlayState.CONTINUE;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dimetrodon.sitting", true));
+                return PlayState.CONTINUE;
+            }
+            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dimetrodon.walk", true));
+                return PlayState.CONTINUE;
+            }
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;

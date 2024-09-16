@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.ilexiconn.llibrary.server.entity.EntityProperties;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,6 +16,7 @@ import java.util.UUID;
 public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
     private final List<NBTTagCompound> partyCreatures = new ArrayList<>();
     private final List<NBTTagCompound> boxCreatures = new ArrayList<>();
+    private int lastSelected = 0;
     private int maxPartySize = 4; //range from 4 to 16
     public static final int maxBoxSize = 80;
 
@@ -25,6 +25,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
 
     @Override
     public void saveNBTData(NBTTagCompound compound) {
+        compound.setInteger("LastSelected", this.lastSelected);
         compound.setInteger("MaxPartySize", this.maxPartySize);
 
         //for party creatures
@@ -46,6 +47,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
 
     @Override
     public void loadNBTData(NBTTagCompound compound) {
+        this.lastSelected = compound.getInteger("LastSelected");
         this.maxPartySize = compound.getInteger("MaxPartySize");
 
         //for party creatures
@@ -65,6 +67,14 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
                 this.boxCreatures.add(boxCreaturesList.getCompoundTagAt(i));
             }
         }
+    }
+
+    public void setLastSelected(int value) {
+        this.lastSelected = value;
+    }
+
+    public int getLastSelected() {
+        return this.lastSelected;
     }
 
     public void setMaxPartySize(int value) {
@@ -139,7 +149,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
                 partyCreature.writeEntityToNBT(partyMemCompound);
                 creature.writeEntityToNBT(partyMemCompoundUpdt);
 
-                this.partyCreatures.set(this.partyCreatures.indexOf(partyMemCompound), partyMemCompoundUpdt);
+                if (this.partyCreatures.contains(partyMemCompound)) this.partyCreatures.set(this.partyCreatures.indexOf(partyMemCompound), partyMemCompoundUpdt);
             }
         }
     }
@@ -160,7 +170,8 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
     }
 
     public enum DeploymentType {
-        NONE, //in box
+        NONE, //default
+        PARTY_INACTIVE,
         PARTY, //with player in party
         BASE //wandering around box
     }

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
+import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.AnkylosaurusConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -10,7 +11,9 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -160,8 +163,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (source.getImmediateSource() == null) return false;
-        else if (!(source.getImmediateSource() instanceof EntityPlayer)) {
+        if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
             //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
             Entity attacker = source.getImmediateSource();
             RiftCreaturePart closestPart = null;
@@ -362,13 +364,15 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     private <E extends IAnimatable> PlayState ankylosaurusMovement(AnimationEvent<E> event) {
-        if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget() && !this.isStartHiding() && !this.isHiding() && !this.isStopHiding()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.sitting", true));
-            return PlayState.CONTINUE;
-        }
-        if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.walk", true));
-            return PlayState.CONTINUE;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget() && !this.isStartHiding() && !this.isHiding() && !this.isStopHiding()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.sitting", true));
+                return PlayState.CONTINUE;
+            }
+            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.walk", true));
+                return PlayState.CONTINUE;
+            }
         }
         return PlayState.STOP;
     }
@@ -384,17 +388,19 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     private <E extends IAnimatable> PlayState ankylosaurusShell(AnimationEvent<E> event) {
-        if (this.isStartHiding()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.enter_shell", true));
-            return PlayState.CONTINUE;
-        }
-        else if (this.isHiding()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.shell_mode", true));
-            return PlayState.CONTINUE;
-        }
-        else if (this.isStopHiding()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.exit_shell", true));
-            return PlayState.CONTINUE;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
+            if (this.isStartHiding()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.enter_shell", true));
+                return PlayState.CONTINUE;
+            }
+            else if (this.isHiding()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.shell_mode", true));
+                return PlayState.CONTINUE;
+            }
+            else if (this.isStopHiding()) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.exit_shell", true));
+                return PlayState.CONTINUE;
+            }
         }
         return PlayState.STOP;
     }
