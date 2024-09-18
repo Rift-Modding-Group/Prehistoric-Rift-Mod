@@ -94,10 +94,6 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
         }
     }
 
-    public List<NBTTagCompound> getPartyNBT() {
-        return this.partyCreatures;
-    }
-
     public List<RiftCreature> getPartyCreatures(World world) {
         List<RiftCreature> creatures = new ArrayList<>();
         for (NBTTagCompound compound : this.partyCreatures) {
@@ -123,6 +119,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
     public void addToBoxCreatures(RiftCreature creature) {
         if (this.boxCreatures.size() < maxBoxSize) {
             NBTTagCompound compound = new NBTTagCompound();
+            compound.setUniqueId("UniqueID", creature.getUniqueID());
             creature.writeEntityToNBT(compound);
             this.boxCreatures.add(compound);
         }
@@ -131,8 +128,21 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
     public List<RiftCreature> getBoxCreatures(World world) {
         List<RiftCreature> creatures = new ArrayList<>();
         for (NBTTagCompound compound : this.boxCreatures) {
-            RiftCreature creature = (RiftCreature)EntityList.createEntityFromNBT(compound, world);
-            creatures.add(creature);
+            RiftCreatureType creatureType = RiftCreatureType.values()[compound.getByte("CreatureType")];
+            UUID uniqueID = compound.getUniqueId("UniqueID");
+            if (creatureType != null) {
+                RiftCreature creature = creatureType.invokeClass(world);
+
+                //attributes and creature health dont carry over on client side, this should be a workaround
+                if (world.isRemote) {
+                    creature.setHealth(compound.getFloat("Health"));
+                    SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), compound.getTagList("Attributes", 10));
+                }
+
+                creature.readEntityFromNBT(compound);
+                creature.setUniqueId(uniqueID);
+                creatures.add(creature);
+            }
         }
         return creatures;
     }

@@ -147,6 +147,8 @@ journal.party_button.dismiss=Dismiss
 journal.party_button.summon=Summon
 journal.party_button.teleport=Teleport
 journal.party_button.feed=Feed
+journal.warning.cannot_summon=This creature cannot be summoned in your location!
+journal.warning.cannot_teleport=This creature cannot be teleported to your location!
 
 radial.choice.ride=Ride
 radial.choice.state=State
@@ -208,6 +210,8 @@ reminder.cannot_place_turbine=Cannot place turbine! Make sure that there's a 3 b
 reminder.incapacitated=%s has been incapacitated! Revive it or else it will perish!
 reminder.insufficient_light_blast_charge=%s does not have enough charge to do perform a light blast
 reminder.unlocked_journal_entry=You have unlocked the journal entry for the %s! Check it out by pressing %s!
+reminder.taming_finished_to_party=%s has been added to your party!
+reminder.taming_finished_to_box=%s has been sent to your box!
 
 prift.pregnancy.name=%s pregnancy
 prift.egg.time=Time

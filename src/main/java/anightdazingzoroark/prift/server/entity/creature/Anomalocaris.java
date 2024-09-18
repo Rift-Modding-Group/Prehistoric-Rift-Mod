@@ -82,7 +82,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(1, new RiftMate(this));
+        //this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.36F));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.36F));
         this.tasks.addTask(6, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));

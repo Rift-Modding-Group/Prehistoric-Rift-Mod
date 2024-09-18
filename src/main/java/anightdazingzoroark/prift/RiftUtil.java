@@ -3,6 +3,7 @@ package anightdazingzoroark.prift;
 import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
@@ -412,5 +413,52 @@ public class RiftUtil {
         double xDiff = pos1.getX() - pos2.getX();
         double zDiff = pos1.getZ() - pos2.getZ();
         return Math.sqrt(xDiff * xDiff + zDiff * zDiff);
+    }
+
+    public static boolean testCanBeDeployed(RiftCreature creature, EntityPlayer owner) {
+        if (owner == null) return false;
+        if (creature instanceof RiftWaterCreature) {
+            if (owner.world.getBlockState(owner.getPosition()).getMaterial() == Material.WATER) return true;
+            else if (owner.world.getBlockState(owner.getPosition().down()).getMaterial() != Material.AIR
+                    && ((RiftWaterCreature)creature).isAmphibious()) return true;
+        }
+        else {
+            if (owner.world.getBlockState(owner.getPosition().down()).getMaterial() != Material.AIR) return true;
+        }
+        return false;
+    }
+
+    public static float getCreatureModelScale(RiftCreature creature) {
+        switch (creature.creatureType) {
+            case TYRANNOSAURUS:
+                return 20f;
+            case STEGOSAURUS:
+                return 20f;
+            case TRICERATOPS:
+                return 25f;
+            case UTAHRAPTOR:
+                return 30f;
+            case APATOSAURUS:
+                return 20f;
+            case PARASAUROLOPHUS:
+                return 25f;
+            case DIMETRODON:
+                return 30f;
+            case SARCOSUCHUS:
+                return 30f;
+            case ANOMALOCARIS:
+                return 30f;
+            case SAUROPHAGANAX:
+                return 25f;
+            case DIREWOLF:
+                return 30f;
+            case MEGALOCEROS:
+                return 25f;
+            case BARYONYX:
+                return 20f;
+            case PALAEOCASTOR:
+                return 50f;
+        }
+        return 1f;
     }
 }

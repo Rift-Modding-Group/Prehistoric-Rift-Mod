@@ -160,7 +160,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 3f, 3f));
-        this.tasks.addTask(1, new RiftMate(this));
+        //this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftApatosaurusControlledTailWhip(this, 0.6F, 0.4F));
         this.tasks.addTask(3, new RiftControlledAttack(this, 3F, 3F));

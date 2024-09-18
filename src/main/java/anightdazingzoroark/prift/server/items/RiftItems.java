@@ -80,6 +80,8 @@ public class RiftItems {
 
     public static Item CHITIN;
 
+    public static Item RIFT_SHARD;
+
     public static Item APATOSAURUS_PLATFORM;
     public static Item CANNON;
     public static Item MORTAR;
@@ -153,6 +155,8 @@ public class RiftItems {
         ANKYLOSAURUS_CLUB = riftGenericItem("ankylosaurus_club", true);
 
         CHITIN = riftGenericItem("chitin", true);
+
+        RIFT_SHARD = riftGenericItem("rift_shard", true);
 
         APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
         CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);

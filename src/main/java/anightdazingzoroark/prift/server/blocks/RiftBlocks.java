@@ -29,6 +29,8 @@ public class RiftBlocks {
     public static Block PYROBERRY_JUICE_FLUID;
     public static Block CRYOBERRY_JUICE_FLUID;
 
+    public static Block CREATURE_BOX;
+
     public static void registerBlocks() {
         FEEDING_TROUGH = registerBlock(new RiftFeedingTroughBlock(), "feeding_trough", true, false, true);
         PYROBERRY_BUSH = registerBlock(new RiftPyroberryBush(), "pyroberry_bush", false);
@@ -37,6 +39,8 @@ public class RiftBlocks {
         //fluid shenanigans
         PYROBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.PYROBERRY_JUICE, Material.WATER), "pyroberry_juice", true, true, false);
         CRYOBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.CRYOBERRY_JUICE, Material.WATER), "cryoberry_juice", true, true, false);
+
+        CREATURE_BOX = registerBlock(new RiftCreatureBox(), "creature_block", true);
 
         if (GeneralConfig.canUseMM()) RiftMMBlocks.registerMMBlocks();
     }

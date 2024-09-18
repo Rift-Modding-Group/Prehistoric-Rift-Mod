@@ -5,8 +5,10 @@ import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
+import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -60,7 +62,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
             UUID uniqueID = message.creatureNBT.getUniqueId("UniqueID");
             if (creatureType != null) {
                 RiftCreature creature = creatureType.invokeClass(player.world);
-                EntityPlayer owner = (EntityPlayer)RiftUtil.getEntityFromUUID(player.world, UUID.fromString(message.creatureNBT.getString("OwnerUUID")));
+                EntityPlayer owner = (EntityPlayer) RiftUtil.getEntityFromUUID(player.world, UUID.fromString(message.creatureNBT.getString("OwnerUUID")));
 
                 creature.readEntityFromNBT(message.creatureNBT);
                 creature.setUniqueId(uniqueID);

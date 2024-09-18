@@ -117,7 +117,7 @@ public class Baryonyx extends RiftWaterCreature {
         this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(1, new RiftMate(this));
+        //this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
         this.tasks.addTask(2, new RiftBaryonyxControlledClawAttack(this));
         this.tasks.addTask(3, new RiftAttack.BaryonyxAttack(this, 1.0D));

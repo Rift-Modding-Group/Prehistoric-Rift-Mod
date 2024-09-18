@@ -80,7 +80,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, false));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(1, new RiftMate(this));
+        //this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new EntityAIAttackMelee(this, 1.0D, true));
         this.tasks.addTask(4, new RiftHarvestOnWander(this, 1.25f, 1f));
