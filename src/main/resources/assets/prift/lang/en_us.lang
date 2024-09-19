@@ -147,8 +147,11 @@ journal.party_button.dismiss=Dismiss
 journal.party_button.summon=Summon
 journal.party_button.teleport=Teleport
 journal.party_button.feed=Feed
+journal.party_button.rearrange_party=Rearrange Party
+journal.party_button.stop_rearrange_party=Finished
 journal.warning.cannot_summon=This creature cannot be summoned in your location!
 journal.warning.cannot_teleport=This creature cannot be teleported to your location!
+journal.warning.rearrange_instructions=Click on a creature, then on another creature to swap their positions!
 
 radial.choice.ride=Ride
 radial.choice.state=State

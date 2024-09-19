@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.ilexiconn.llibrary.server.entity.EntityProperties;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -92,6 +91,14 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
             creature.writeEntityToNBT(compound);
             this.partyCreatures.add(compound);
         }
+    }
+
+    public void rearrangePartyCreatures(int posSelected, int posToSwap) {
+        if (posSelected == posToSwap) return;
+        NBTTagCompound compoundSelected = this.partyCreatures.get(posSelected);
+        NBTTagCompound compoundToSwap = this.partyCreatures.get(posToSwap);
+        this.partyCreatures.set(posSelected, compoundToSwap);
+        this.partyCreatures.set(posToSwap, compoundSelected);
     }
 
     public List<RiftCreature> getPartyCreatures(World world) {
