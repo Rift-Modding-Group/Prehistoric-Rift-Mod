@@ -28,11 +28,11 @@ public class RiftGuiCreatureBoxPartyButton extends GuiButton {
 
             //health bar
             double healthPercentage = this.creature.getHealth() / this.creature.getMaxHealth();
-            drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 22, 0, 248, (int)(60 * healthPercentage), 3, 480, 300);
+            drawModalRectWithCustomSizedTexture(this.x + 31, this.y + 22, 0, 248, (int)(60 * healthPercentage), 3, 480, 300);
 
             //energy bar
             double energyPercentage = this.creature.getEnergy() / 20D;
-            drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 26, 0, 251, (int)(60 * energyPercentage), 3, 480, 300);
+            drawModalRectWithCustomSizedTexture(this.x + 31, this.y + 26, 0, 251, (int)(60 * energyPercentage), 3, 480, 300);
 
             //creature icon
             mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+this.creature.creatureType.name().toLowerCase()+"_icon.png"));

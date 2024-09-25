@@ -207,13 +207,13 @@ public class RiftJournalScreen extends GuiScreen {
                     RiftMessages.WRAPPER.sendToAll(new RiftManagePartyMem(this.selectedPartyMem, false));
                     RiftMessages.WRAPPER.sendToServer(new RiftManagePartyMem(this.selectedPartyMem, false));
                     this.selectedPartyMem.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                    this.selectedPartyMem.managePlayerTameList();
+                    this.selectedPartyMem.updatePlayerTameList();
                 }
                 else if (this.selectedPartyMem.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                     if (RiftUtil.testCanBeDeployed(this.selectedPartyMem, this.mc.player)) {
                         RiftMessages.WRAPPER.sendToServer(new RiftManagePartyMem(this.selectedPartyMem, true));
                         this.selectedPartyMem.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                        this.selectedPartyMem.managePlayerTameList();
+                        this.selectedPartyMem.updatePlayerTameList();
                     }
                 }
             }
@@ -392,6 +392,10 @@ public class RiftJournalScreen extends GuiScreen {
                 String instructions = I18n.format("journal.warning.rearrange_instructions");
                 RiftUtil.drawMultiLineString(this.fontRenderer, instructions, (this.width - 120)/2 + 60, (this.height - this.fontRenderer.FONT_HEIGHT)/2 + 70, 120, 0);
             }
+        }
+        else if (this.getPlayerParty().isEmpty()) {
+            String noPartyMembers = I18n.format("journal.warning.no_party_members");
+            this.fontRenderer.drawSplitString(noPartyMembers, (this.width - this.fontRenderer.getStringWidth(noPartyMembers))/2 + 60, (this.height - this.fontRenderer.FONT_HEIGHT)/2, 248, 0x000000);
         }
     }
 

@@ -311,7 +311,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 this.manageXPAndLevel();
                 this.manageIncapacitated();
-                this.managePlayerTameList();
+                this.updatePlayerTameList();
             }
         }
         if (this.world.isRemote) this.setControls();
@@ -392,7 +392,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    public void managePlayerTameList() {
+    public void updatePlayerTameList() {
         if (this.getOwner() instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer) this.getOwner();
             PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
@@ -754,7 +754,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             else if (tamedCreatures.getBoxCreatures(this.world).size() < PlayerTamedCreatures.maxBoxSize) {
                 tamedCreatures.addToBoxCreatures(this);
                 this.world.removeEntity(this);
-                this.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
+                this.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
             }
         }

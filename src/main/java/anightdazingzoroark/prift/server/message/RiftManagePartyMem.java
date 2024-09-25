@@ -34,6 +34,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
             NBTTagCompound creatureInCompound = new NBTTagCompound();
             creature.writeEntityToNBT(creatureInCompound);
             creatureInCompound.setUniqueId("UniqueID", creature.getUniqueID());
+            creatureInCompound.setString("CustomName", creature.getCustomNameTag());
             this.creatureNBT = creatureInCompound;
         }
     }
@@ -60,12 +61,15 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
         if (message.deploy) {
             RiftCreatureType creatureType = RiftCreatureType.values()[message.creatureNBT.getByte("CreatureType")];
             UUID uniqueID = message.creatureNBT.getUniqueId("UniqueID");
+            String customName = message.creatureNBT.getString("CustomName");
+
             if (creatureType != null) {
                 RiftCreature creature = creatureType.invokeClass(player.world);
-                EntityPlayer owner = (EntityPlayer) RiftUtil.getEntityFromUUID(player.world, UUID.fromString(message.creatureNBT.getString("OwnerUUID")));
+                EntityPlayer owner = (EntityPlayer)RiftUtil.getEntityFromUUID(player.world, UUID.fromString(message.creatureNBT.getString("OwnerUUID")));
 
                 creature.readEntityFromNBT(message.creatureNBT);
                 creature.setUniqueId(uniqueID);
+                creature.setCustomNameTag(customName);
                 creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                 creature.setPosition(owner.posX, owner.posY, owner.posZ);
 
@@ -75,7 +79,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
         else {
             RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
             partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-            partyMember.managePlayerTameList();
+            partyMember.updatePlayerTameList();
 
             //for removing hitboxes
             partyMember.setDead();
@@ -89,12 +93,15 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
         if (message.deploy) {
             RiftCreatureType creatureType = RiftCreatureType.values()[message.creatureNBT.getByte("CreatureType")];
             UUID uniqueID = message.creatureNBT.getUniqueId("UniqueID");
+            String customName = message.creatureNBT.getString("CustomName");
+
             if (creatureType != null) {
                 RiftCreature creature = creatureType.invokeClass(player.world);
                 EntityPlayer owner = (EntityPlayer)RiftUtil.getEntityFromUUID(player.world, UUID.fromString(message.creatureNBT.getString("OwnerUUID")));
 
                 creature.readEntityFromNBT(message.creatureNBT);
                 creature.setUniqueId(uniqueID);
+                creature.setCustomNameTag(customName);
                 creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                 creature.setPosition(owner.posX, owner.posY, owner.posZ);
 
@@ -104,7 +111,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
         else {
             RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
             partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-            partyMember.managePlayerTameList();
+            partyMember.updatePlayerTameList();
 
             //for removing hitboxes
             partyMember.setDead();

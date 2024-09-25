@@ -17,6 +17,7 @@ import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -37,10 +38,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.UUID;
+
 @Mod.EventBusSubscriber
 public class ClientProxy extends ServerProxy {
     @Mod.Instance(RiftInitialize.MODID)
     public static Object popupFromRadial;
+    public static UUID creatureUUID;
     private int thirdPersonView = 0;
     private int previousViewType = 0;
     private RiftParticleSpawner particleSpawner;
@@ -158,9 +162,10 @@ public class ClientProxy extends ServerProxy {
             }
         }
         else if (id == GUI_CREATURE_BOX) {
-            if (block instanceof RiftCreatureBox) {
-                return new RiftCreatureBoxMenu();
-            }
+            return new RiftCreatureBoxMenu();
+        }
+        else if (id == GUI_MENU_FROM_CREATURE_BOX) {
+            return new RiftPopupFromCreatureBox(PopupFromCreatureBox.values()[x]);
         }
         return null;
     }

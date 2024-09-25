@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.ilexiconn.llibrary.server.entity.EntityProperties;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
@@ -11,10 +12,11 @@ import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
-    private final List<NBTTagCompound> partyCreatures = new ArrayList<>();
-    private final List<NBTTagCompound> boxCreatures = new ArrayList<>();
+    private List<NBTTagCompound> partyCreatures = new ArrayList<>();
+    private List<NBTTagCompound> boxCreatures = new ArrayList<>();
     private int lastSelected = 0;
     private int maxPartySize = 4; //range from 4 to 16
     public static final int maxBoxSize = 80;
@@ -88,6 +90,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
         if (this.partyCreatures.size() < this.maxPartySize) {
             NBTTagCompound compound = new NBTTagCompound();
             compound.setUniqueId("UniqueID", creature.getUniqueID());
+            compound.setString("CustomName", creature.getCustomNameTag());
             creature.writeEntityToNBT(compound);
             this.partyCreatures.add(compound);
         }
@@ -106,6 +109,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
         for (NBTTagCompound compound : this.partyCreatures) {
             RiftCreatureType creatureType = RiftCreatureType.values()[compound.getByte("CreatureType")];
             UUID uniqueID = compound.getUniqueId("UniqueID");
+            String customName = compound.getString("CustomName");
             if (creatureType != null) {
                 RiftCreature creature = creatureType.invokeClass(world);
 
@@ -117,6 +121,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
 
                 creature.readEntityFromNBT(compound);
                 creature.setUniqueId(uniqueID);
+                creature.setCustomNameTag(customName);
                 creatures.add(creature);
             }
         }
@@ -127,6 +132,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
         if (this.boxCreatures.size() < maxBoxSize) {
             NBTTagCompound compound = new NBTTagCompound();
             compound.setUniqueId("UniqueID", creature.getUniqueID());
+            compound.setString("CustomName", creature.getCustomNameTag());
             creature.writeEntityToNBT(compound);
             this.boxCreatures.add(compound);
         }
@@ -137,6 +143,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
         for (NBTTagCompound compound : this.boxCreatures) {
             RiftCreatureType creatureType = RiftCreatureType.values()[compound.getByte("CreatureType")];
             UUID uniqueID = compound.getUniqueId("UniqueID");
+            String customName = compound.getString("CustomName");
             if (creatureType != null) {
                 RiftCreature creature = creatureType.invokeClass(world);
 
@@ -148,6 +155,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
 
                 creature.readEntityFromNBT(compound);
                 creature.setUniqueId(uniqueID);
+                creature.setCustomNameTag(customName);
                 creatures.add(creature);
             }
         }
@@ -163,12 +171,39 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
                 partyMemCompound.setUniqueId("UniqueID", partyCreature.getUniqueID());
                 partyMemCompoundUpdt.setUniqueId("UniqueID", creature.getUniqueID());
 
+                partyMemCompound.setString("CustomName", partyCreature.getCustomNameTag());
+                partyMemCompoundUpdt.setString("CustomName", creature.getCustomNameTag());
+
                 partyCreature.writeEntityToNBT(partyMemCompound);
                 creature.writeEntityToNBT(partyMemCompoundUpdt);
 
                 if (this.partyCreatures.contains(partyMemCompound)) this.partyCreatures.set(this.partyCreatures.indexOf(partyMemCompound), partyMemCompoundUpdt);
             }
         }
+    }
+
+    public void modifyCreature(UUID uuid, NBTTagCompound compound) {
+        //find in party first
+        for (NBTTagCompound partyMemCompound : this.partyCreatures) {
+            if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
+                for (String key : compound.getKeySet()) {
+                    NBTBase value = compound.getTag(key);
+                    if (partyMemCompound.hasKey(key)) partyMemCompound.setTag(key, value);
+                }
+                return;
+            }
+        }
+    }
+
+    public void removeCreature(UUID uuid) {
+        this.partyCreatures = this.partyCreatures.stream()
+                .filter(compound -> {
+                    return compound.getUniqueId("UniqueID") != null && !compound.getUniqueId("UniqueID").equals(uuid);
+                }).collect(Collectors.toList());
+        this.boxCreatures = this.boxCreatures.stream()
+                .filter(compound -> {
+                    return compound.getUniqueId("UniqueID") != null && !compound.getUniqueId("UniqueID").equals(uuid);
+                }).collect(Collectors.toList());
     }
 
     @Override
@@ -190,6 +225,7 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
         NONE, //default
         PARTY_INACTIVE,
         PARTY, //with player in party
-        BASE //wandering around box
+        BASE, //wandering around box
+        BASE_INACTIVE //sitting in box
     }
 }

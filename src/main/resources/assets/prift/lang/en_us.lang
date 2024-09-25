@@ -7,6 +7,14 @@ action.creature_workstation_already_used=This workstation is already used by ano
 action.creature_start_harvesting=This creature will now harvest while wandering and when it has a set home position
 action.creature_stop_harvesting=This creature will no longer harvest while wandering
 
+creature_box.change_name=Change Name
+creature_box.open_inventory=Open Inventory
+creature_box.release=Release
+creature_box.popup_choice.remove_inventory=Moving a creature from your party to your box will make them drop their inventory (except for their gear). Are you sure you want to do this?
+creature_box.popup_choice.change_name=Change this creature's name.
+creature_box.popup_choice.release=Are you sure you want to release this creature? This cannot be undone!
+creature_box.popup_choice.no_creatures=you have no tamed creatures lol
+
 death.attack.prift_bleed=%s bled to death
 
 entity.tyrannosaurus.name=Tyrannosaurus
@@ -152,6 +160,7 @@ journal.party_button.stop_rearrange_party=Finished
 journal.warning.cannot_summon=This creature cannot be summoned in your location!
 journal.warning.cannot_teleport=This creature cannot be teleported to your location!
 journal.warning.rearrange_instructions=Click on a creature, then on another creature to swap their positions!
+journal.warning.no_party_members=you have no party members lol
 
 radial.choice.ride=Ride
 radial.choice.state=State
@@ -195,6 +204,7 @@ radial.popup_button.yes=Yes
 radial.popup_button.no=No
 radial.popup_button.confirm=Confirm
 radial.popup_button.cancel=Cancel
+radial.popup_button.ok=Ok
 radial.choice.set_wander_harvest=Enable Wander Harvesting
 radial.choice.clear_wander_harvest=Disable Wander Harvesting
 
@@ -213,8 +223,9 @@ reminder.cannot_place_turbine=Cannot place turbine! Make sure that there's a 3 b
 reminder.incapacitated=%s has been incapacitated! Revive it or else it will perish!
 reminder.insufficient_light_blast_charge=%s does not have enough charge to do perform a light blast
 reminder.unlocked_journal_entry=You have unlocked the journal entry for the %s! Check it out by pressing %s!
-reminder.taming_finished_to_party=%s has been added to your party!
-reminder.taming_finished_to_box=%s has been sent to your box!
+reminder.taming_finished_to_party=%s has been added to your party! Press J to check it out!
+reminder.taming_finished_to_box=Your party is full! %s has been sent to your box! Craft a Creature Box to check it out!
+reminder.creature_released=%s has been released! Goodbye %s!
 
 prift.pregnancy.name=%s pregnancy
 prift.egg.time=Time
@@ -326,6 +337,7 @@ turrettargeting.players_and_other_tames=%s will now target other players and the
 turrettargeting.hostiles=%s will now target hostile mobs
 turrettargeting.all=%s will now target anything it deems unfriendly
 tametrait.level=Level %s
+tametrait.health=Health
 
 type.creature.back=Back
 type.creature.all=All

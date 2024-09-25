@@ -45,5 +45,7 @@ public class RiftChangeCreatureName extends AbstractMessage<RiftChangeCreatureNa
     public void onServerReceived(MinecraftServer server, RiftChangeCreatureName message, EntityPlayer player, MessageContext messageContext) {
         RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
         creature.setCustomNameTag(message.newName);
+        creature.setAlwaysRenderNameTag(true);
+        creature.updatePlayerTameList();
     }
 }

@@ -56,6 +56,7 @@ public class ServerProxy implements IGuiHandler {
     public static final int GUI_MILLSTONE = 11;
     public static final int GUI_MECHANICAL_FILTER = 12;
     public static final int GUI_CREATURE_BOX = 13;
+    public static final int GUI_MENU_FROM_CREATURE_BOX = 14;
 
     public void preInit(FMLPreInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);

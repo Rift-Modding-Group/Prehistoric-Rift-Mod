@@ -80,7 +80,12 @@ public class RiftCreaturePart extends MultiPartEntityPart {
         //if (this.partParent.isTamed()) System.out.println("is parent alive? "+this.partParent.isEntityAlive());
         if (!this.partParent.isEntityAlive()) {
             if (!this.partParent.isTamed()) this.world.removeEntityDangerously(this);
-            else if (this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) this.world.removeEntityDangerously(this);
+            else if (this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
+                    || this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE
+                    || this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.NONE) {
+                if (this.partParent.isTamed()) System.out.println("remove");
+                this.world.removeEntityDangerously(this);
+            }
         }
         super.onUpdate();
     }

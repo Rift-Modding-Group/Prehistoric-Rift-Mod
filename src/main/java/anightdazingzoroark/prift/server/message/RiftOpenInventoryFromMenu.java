@@ -6,8 +6,10 @@ import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftOpenInventoryFromMenu extends AbstractMessage<RiftOpenInventoryFromMenu> {
