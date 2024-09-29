@@ -14,6 +14,7 @@ creature_box.popup_choice.remove_inventory=Moving a creature from your party to 
 creature_box.popup_choice.change_name=Change this creature's name.
 creature_box.popup_choice.release=Are you sure you want to release this creature? This cannot be undone!
 creature_box.popup_choice.no_creatures=you have no tamed creatures lol
+creature_box.creature_box=Creature Box
 
 death.attack.prift_bleed=%s bled to death
 

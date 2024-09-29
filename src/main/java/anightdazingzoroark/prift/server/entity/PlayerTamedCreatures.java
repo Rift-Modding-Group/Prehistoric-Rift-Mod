@@ -88,11 +88,17 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
 
     public void addToPartyCreatures(RiftCreature creature) {
         if (this.partyCreatures.size() < this.maxPartySize) {
-            NBTTagCompound compound = new NBTTagCompound();
-            compound.setUniqueId("UniqueID", creature.getUniqueID());
-            compound.setString("CustomName", creature.getCustomNameTag());
-            creature.writeEntityToNBT(compound);
-            this.partyCreatures.add(compound);
+            boolean canAdd = false;
+            if (this.partyCreatures.isEmpty()) canAdd = true;
+            else if (this.partyCreatures.stream().noneMatch(nbt -> nbt.getUniqueId("UniqueID").equals(creature.getUniqueID()))) canAdd = true;
+
+            if (canAdd) {
+                NBTTagCompound compound = new NBTTagCompound();
+                compound.setUniqueId("UniqueID", creature.getUniqueID());
+                compound.setString("CustomName", creature.getCustomNameTag());
+                creature.writeEntityToNBT(compound);
+                this.partyCreatures.add(compound);
+            }
         }
     }
 
@@ -126,6 +132,10 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
             }
         }
         return creatures;
+    }
+
+    public List<NBTTagCompound> getPartyNBT() {
+        return this.partyCreatures;
     }
 
     public void addToBoxCreatures(RiftCreature creature) {
@@ -185,6 +195,16 @@ public class PlayerTamedCreatures extends EntityProperties<EntityPlayer> {
     public void modifyCreature(UUID uuid, NBTTagCompound compound) {
         //find in party first
         for (NBTTagCompound partyMemCompound : this.partyCreatures) {
+            if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
+                for (String key : compound.getKeySet()) {
+                    NBTBase value = compound.getTag(key);
+                    if (partyMemCompound.hasKey(key)) partyMemCompound.setTag(key, value);
+                }
+                return;
+            }
+        }
+        //find in creature box
+        for (NBTTagCompound partyMemCompound : this.boxCreatures) {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
                 for (String key : compound.getKeySet()) {
                     NBTBase value = compound.getTag(key);

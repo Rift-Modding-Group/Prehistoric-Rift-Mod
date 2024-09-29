@@ -551,6 +551,6 @@ public class RiftJournalScreen extends GuiScreen {
     }
 
     private List<RiftCreature> getPlayerParty() {
-        return this.playerTamedCreatures().getPartyCreatures(this.mc.world);
+        return this.playerTamedCreatures().getPartyCreatures(this.mc.player.world);
     }
 }

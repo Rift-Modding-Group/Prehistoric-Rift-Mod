@@ -744,17 +744,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
             //update tamed creature list
             PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
-            tamedCreatures.init(player, this.world);
             //test to see if it fits in party
             if (tamedCreatures.getPartyCreatures(this.world).size() < tamedCreatures.getMaxPartySize()) {
                 tamedCreatures.addToPartyCreatures(this);
                 this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                this.updatePlayerTameList();
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
             }
             else if (tamedCreatures.getBoxCreatures(this.world).size() < PlayerTamedCreatures.maxBoxSize) {
                 tamedCreatures.addToBoxCreatures(this);
-                this.world.removeEntity(this);
                 this.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+
+                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this));
+                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this));
+
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
             }
         }
