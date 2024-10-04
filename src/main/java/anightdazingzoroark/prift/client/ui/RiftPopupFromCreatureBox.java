@@ -4,14 +4,13 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.ServerProxy;
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
-import anightdazingzoroark.prift.server.message.RiftChangeCreatureName;
 import anightdazingzoroark.prift.server.message.RiftChangeNameFromBox;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftRemoveCreatureFromBox;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
@@ -149,8 +148,8 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
         if (this.textField != null) this.textField.updateCursorCounter();
     }
 
-    private PlayerTamedCreatures playerTamedCreatures() {
-        return EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerTamedCreatures.class);
+    private IPlayerTamedCreatures playerTamedCreatures() {
+        return this.mc.player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
     }
 
     private List<RiftCreature> getPlayerParty() {

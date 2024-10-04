@@ -1,0 +1,30 @@
+package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
+
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface IPlayerTamedCreatures {
+    //for direct values
+    void setPartyNBT(List<NBTTagCompound> compound);
+    List<NBTTagCompound> getPartyNBT();
+    void setBoxNBT(List<NBTTagCompound> compound);
+    List<NBTTagCompound> getBoxNBT();
+    void setLastSelected(int value);
+    int getLastSelected();
+    void setMaxPartySize(int value);
+    int getMaxPartySize();
+
+    //for indirect values
+    void addToPartyCreatures(RiftCreature creature);
+    List<RiftCreature> getPartyCreatures(World world);
+    void addToBoxCreatures(RiftCreature creature);
+    List<RiftCreature> getBoxCreatures(World world);
+    void rearrangePartyCreatures(int posSelected, int posToSwap);
+    void updateCreatures(RiftCreature creature);
+    void modifyCreature(UUID uuid, NBTTagCompound compound);
+    void removeCreature(UUID uuid);
+}

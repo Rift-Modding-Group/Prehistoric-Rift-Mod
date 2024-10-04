@@ -1,9 +1,10 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,9 +34,9 @@ public class RiftAddToParty extends AbstractMessage<RiftAddToParty> {
     public void onClientReceived(Minecraft minecraft, RiftAddToParty message, EntityPlayer player, MessageContext messageContext) {
         RiftCreature creature = (RiftCreature)player.world.getEntityByID(message.creatureId);
         if (creature != null) {
-            PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
+            IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             tamedCreatures.addToPartyCreatures(creature);
-            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+            creature.setDeploymentType(DeploymentType.PARTY);
             creature.updatePlayerTameList();
         }
     }
@@ -44,9 +45,9 @@ public class RiftAddToParty extends AbstractMessage<RiftAddToParty> {
     public void onServerReceived(MinecraftServer minecraftServer, RiftAddToParty message, EntityPlayer player, MessageContext messageContext) {
         RiftCreature creature = (RiftCreature)player.world.getEntityByID(message.creatureId);
         if (creature != null) {
-            PlayerTamedCreatures tamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
+            IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             tamedCreatures.addToPartyCreatures(creature);
-            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+            creature.setDeploymentType(DeploymentType.PARTY);
             creature.updatePlayerTameList();
         }
     }

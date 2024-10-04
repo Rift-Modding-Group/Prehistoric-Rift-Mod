@@ -1,17 +1,15 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.entity.RiftEntities;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.util.UUID;
@@ -61,7 +59,7 @@ public class RiftChangeNameFromBox extends AbstractMessage<RiftChangeNameFromBox
             NBTTagCompound compound = new NBTTagCompound();
             compound.setString("CustomName", message.newName);
 
-            PlayerTamedCreatures playerTamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
+            IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             playerTamedCreatures.modifyCreature(message.creatureUUID, compound);
         }
     }
@@ -78,7 +76,7 @@ public class RiftChangeNameFromBox extends AbstractMessage<RiftChangeNameFromBox
             NBTTagCompound compound = new NBTTagCompound();
             compound.setString("CustomName", message.newName);
 
-            PlayerTamedCreatures playerTamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
+            IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             playerTamedCreatures.modifyCreature(message.creatureUUID, compound);
         }
     }

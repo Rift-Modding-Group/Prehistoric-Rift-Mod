@@ -8,6 +8,10 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
+import anightdazingzoroark.prift.server.capabilities.CapabilityHandler;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesStorage;
 import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawning;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
@@ -28,6 +32,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Optional;
@@ -59,6 +64,9 @@ public class ServerProxy implements IGuiHandler {
     public static final int GUI_MENU_FROM_CREATURE_BOX = 14;
 
     public void preInit(FMLPreInitializationEvent e) {
+        CapabilityManager.INSTANCE.register(IPlayerTamedCreatures.class, new PlayerTamedCreaturesStorage(), PlayerTamedCreatures::new);
+        MinecraftForge.EVENT_BUS.register(new CapabilityHandler());
+
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
         RiftFluids.registerFluids();
         RiftBlocks.registerBlocks();

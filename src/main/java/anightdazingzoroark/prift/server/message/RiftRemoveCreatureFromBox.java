@@ -1,11 +1,11 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.ClientProxy;
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -42,7 +42,7 @@ public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatur
         //remove from world
         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
         if (creature != null) {
-            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
+            creature.setDeploymentType(DeploymentType.NONE);
             creature.updatePlayerTameList();
 
             //for removing hitboxes
@@ -58,7 +58,7 @@ public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatur
         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
         if (creature != null) {
             player.sendStatusMessage(new TextComponentTranslation("reminder.creature_released", creature.getName(false), creature.getName(false)), false);
-            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
+            creature.setDeploymentType(DeploymentType.NONE);
             creature.updatePlayerTameList();
 
             //for removing hitboxes
@@ -68,7 +68,7 @@ public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatur
         }
 
         //remove from party and box
-        PlayerTamedCreatures playerTamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
         playerTamedCreatures.removeCreature(message.creatureUUID);
     }
 }

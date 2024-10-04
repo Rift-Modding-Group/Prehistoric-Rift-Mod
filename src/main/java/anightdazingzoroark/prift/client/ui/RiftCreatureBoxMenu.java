@@ -6,11 +6,11 @@ import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxBoxButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxPartyButton;
 import anightdazingzoroark.prift.server.ServerProxy;
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
 import com.google.common.collect.Lists;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -391,8 +391,8 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         }
     }
 
-    private PlayerTamedCreatures playerTamedCreatures() {
-        return EntityPropertiesHandler.INSTANCE.getProperties(this.mc.player, PlayerTamedCreatures.class);
+    private IPlayerTamedCreatures playerTamedCreatures() {
+        return this.mc.player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
     }
 
     private List<RiftCreature> getPlayerParty() {

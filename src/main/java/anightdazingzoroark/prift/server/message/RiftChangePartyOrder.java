@@ -1,8 +1,8 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -39,7 +39,7 @@ public class RiftChangePartyOrder extends AbstractMessage<RiftChangePartyOrder> 
 
     @Override
     public void onServerReceived(MinecraftServer minecraftServer, RiftChangePartyOrder message, EntityPlayer player, MessageContext messageContext) {
-        PlayerTamedCreatures playerTamedCreatures = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerTamedCreatures.class);
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
         playerTamedCreatures.rearrangePartyCreatures(message.posSelected, message.posToSwap);
     }
 }
