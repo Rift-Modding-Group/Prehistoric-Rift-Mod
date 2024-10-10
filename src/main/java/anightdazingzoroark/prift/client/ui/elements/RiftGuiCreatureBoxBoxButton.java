@@ -25,15 +25,22 @@ public class RiftGuiCreatureBoxBoxButton extends GuiButton {
             this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
             drawModalRectWithCustomSizedTexture(this.x, this.y, (this.hovered || this.toMove) ? 222 : 192, this.toMove ? 246 : 216, this.width, this.height, 408, 300);
 
-            //creature icon
-            mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+this.creature.creatureType.name().toLowerCase()+"_icon.png"));
-            drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
+            if (this.creature != null) {
+                //creature icon
+                mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+this.creature.creatureType.name().toLowerCase()+"_icon.png"));
+                drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
 
-            //x mark over creature icon
-            double healthPercentage = this.creature.getHealth() / this.creature.getMaxHealth();
-            if (healthPercentage == 0) {
-                mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png"));
-                drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 60, 248, 24, 24, 408, 300);
+                //x mark over creature icon
+                double healthPercentage = this.creature.getHealth() / this.creature.getMaxHealth();
+                if (healthPercentage == 0) {
+                    mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png"));
+                    drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 60, 248, 24, 24, 408, 300);
+                }
+            }
+            else {
+                //creature icon
+                mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/icons/empty_icon.png"));
+                drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
             }
         }
     }

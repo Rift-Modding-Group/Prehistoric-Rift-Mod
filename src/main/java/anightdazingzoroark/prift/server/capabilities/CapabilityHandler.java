@@ -26,18 +26,6 @@ public class CapabilityHandler {
         if (event.getObject() instanceof EntityPlayer) event.addCapability(PLAYER_TAMED_CREATURES_CAPABILITY, new PlayerTamedCreaturesProvider());
     }
 
-    /*
-    @SubscribeEvent
-    public void onLivingUpdate(LivingEvent.LivingUpdateEvent event) {
-        if (!event.getEntity().world.isRemote && event.getEntity() instanceof EntityPlayer) {
-            EntityPlayer player = (EntityPlayer) event.getEntityLiving();
-            IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-            if (tamedCreatures == null) return;
-            RiftMessages.WRAPPER.sendToAll(new RiftUpdatePlayerTamedCreatures(PlayerTamedCreaturesProvider.writeNBT(tamedCreatures, null), player));
-        }
-    }
-    */
-
     @SubscribeEvent
     public void onEntityJoinWorld(EntityJoinWorldEvent event) {
         if (!event.getEntity().world.isRemote && event.getEntity() instanceof EntityPlayer) {

@@ -6,10 +6,14 @@ import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxBoxButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxPartyButton;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
+import anightdazingzoroark.prift.server.message.RiftChangePartyOrBoxOrder;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftRemoveAfterSendToBox;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -39,10 +43,14 @@ public class RiftCreatureBoxMenu extends GuiScreen {
     private final List<GuiButton> manageSelectedCreatureButtons = Lists.<GuiButton>newArrayList();
     private final List<GuiButton> creaturesInBoxButtons = Lists.<GuiButton>newArrayList();
     private RiftCreature selectedCreature;
+    private boolean changeCreaturesMode;
+    private int partyPosToMove = -1;
+    private int boxPosToMove = -1;
 
     @Override
     public void initGui() {
         this.selectedCreature = null;
+        this.changeCreaturesMode = false;
 
         //reset scrollbars
         this.scrollSidebarOffset = 0;
@@ -85,11 +93,79 @@ public class RiftCreatureBoxMenu extends GuiScreen {
     public void actionPerformed(GuiButton button) {
         if (button instanceof RiftGuiCreatureBoxPartyButton) {
             RiftGuiCreatureBoxPartyButton partyButton = (RiftGuiCreatureBoxPartyButton)button;
-            this.selectedCreature = this.getPlayerParty().get(partyButton.id);
+            if (this.changeCreaturesMode) {
+                if (this.partyPosToMove == -1 && this.boxPosToMove == -1) {
+                    if (partyButton.id < this.getPlayerParty().size()) this.partyPosToMove = partyButton.id;
+                }
+                else {
+                    if (this.boxPosToMove != -1) {
+                        //swap box creature w party creature
+                        if (partyButton.id < this.getPlayerParty().size()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, this.boxPosToMove, partyButton.id));
+                            this.playerTamedCreatures().boxCreatureToPartyCreature(this.boxPosToMove, partyButton.id);
+                        }
+                        //move box creature to party
+                        else {
+                            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_TO_PARTY, this.boxPosToMove));
+                            this.playerTamedCreatures().boxCreatureToParty(this.boxPosToMove);
+                        }
+                    }
+                    //party swap
+                    else if (partyButton.id < this.getPlayerParty().size()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, this.partyPosToMove, partyButton.id));
+                        this.playerTamedCreatures().rearrangePartyCreatures(this.partyPosToMove, partyButton.id);
+                    }
+
+                    this.partyPosToMove = -1;
+                    this.boxPosToMove = -1;
+                }
+            }
+            else {
+                if (partyButton.id < this.getPlayerParty().size()) {
+                    this.selectedCreature = this.getPlayerParty().get(partyButton.id);
+                }
+                else this.selectedCreature = null;
+            }
         }
         else if (button instanceof RiftGuiCreatureBoxBoxButton) {
             RiftGuiCreatureBoxBoxButton boxButton = (RiftGuiCreatureBoxBoxButton)button;
-            this.selectedCreature = this.getPlayerBoxedCreatures().get(boxButton.id);
+            if (this.changeCreaturesMode) {
+                if (this.partyPosToMove == -1 && this.boxPosToMove == -1) {
+                    if (boxButton.id < this.getPlayerBoxedCreatures().size()) this.boxPosToMove = boxButton.id;
+                }
+                else {
+                    if (this.partyPosToMove != -1) {
+                        //swap party creature w box creature
+                        if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP, this.partyPosToMove, boxButton.id));
+                            this.playerTamedCreatures().partyCreatureToBoxCreature(this.partyPosToMove, boxButton.id);
+                        }
+                        //move party creature to box
+                        else {
+                            //if creature is deployed, remove it from world
+                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+
+                            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX, this.partyPosToMove));
+                            this.playerTamedCreatures().partyCreatureToBox(this.partyPosToMove);
+                        }
+                    }
+                    //box swap
+                    else if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_BOX, this.boxPosToMove, boxButton.id));
+                        this.playerTamedCreatures().rearrangeBoxCreatures(this.boxPosToMove, boxButton.id);
+                    }
+
+                    this.partyPosToMove = -1;
+                    this.boxPosToMove = -1;
+                }
+            }
+            else {
+                if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
+                    this.selectedCreature = this.getPlayerBoxedCreatures().get(boxButton.id);
+                }
+                else this.selectedCreature = null;
+            }
         }
         else if (this.manageSelectedCreatureButtons.contains(button)) {
             if (this.selectedCreature != null) {
@@ -102,6 +178,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                     this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, PopupFromCreatureBox.RELEASE.ordinal(), 0, 0);
                 }
             }
+            if (button.id == 2) {
+                this.changeCreaturesMode = !this.changeCreaturesMode;
+                this.partyPosToMove = -1;
+                this.boxPosToMove = -1;
+            }
         }
     }
 
@@ -109,10 +190,17 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         this.buttonList.clear();
         this.partyBarHeight = 0;
 
-        for (int x = 0; x < this.getPlayerParty().size(); x++) {
-            RiftCreature creature = this.getPlayerParty().get(x);
-            this.buttonList.add(new RiftGuiCreatureBoxPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 83 + (40 * x)));
-            this.partyBarHeight += 40;
+        int size = this.getPlayerParty().size() + (this.getPlayerParty().size() < this.playerTamedCreatures().getMaxPartySize() ? 1 : 0);
+        for (int x = 0; x < size; x++) {
+            if (x < this.getPlayerParty().size()) {
+                RiftCreature creature = this.getPlayerParty().get(x);
+                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 83 + (40 * x)));
+                this.partyBarHeight += 40;
+            }
+            else {
+                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(null, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 83 + (40 * x)));
+                this.partyBarHeight += 40;
+            }
         }
     }
 
@@ -120,10 +208,14 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         this.creaturesInBoxButtons.clear();
         this.boxedCreaturesHeight = 0;
 
-        int rows = (int) Math.ceil(this.getPlayerBoxedCreatures().size() / 5D);
-        for (int x = 0; x < this.getPlayerBoxedCreatures().size(); x++) {
-            RiftCreature creature = this.getPlayerBoxedCreatures().get(x);
-            this.creaturesInBoxButtons.add(new RiftGuiCreatureBoxBoxButton(creature, x, (this.width - 30)/2 - 72 + (33 * (x % 5)), (this.height - 30)/2 - 66 + (33 * (int)(x/5))));
+        int size = this.getPlayerBoxedCreatures().size() + (this.getPlayerBoxedCreatures().size() < PlayerTamedCreatures.maxBoxSize ? 1 : 0);
+        int rows = (int) Math.ceil(size / 5D);
+        for (int x = 0; x < size; x++) {
+            if (x < this.getPlayerBoxedCreatures().size()) {
+                RiftCreature creature = this.getPlayerBoxedCreatures().get(x);
+                this.creaturesInBoxButtons.add(new RiftGuiCreatureBoxBoxButton(creature, x, (this.width - 30)/2 - 72 + (33 * (x % 5)), (this.height - 30)/2 - 66 + (33 * (int)(x/5))));
+            }
+            else this.creaturesInBoxButtons.add(new RiftGuiCreatureBoxBoxButton(null, x, (this.width - 30)/2 - 72 + (33 * (x % 5)), (this.height - 30)/2 - 66 + (33 * (int)(x/5))));
         }
         for (int x = 0; x < rows; x++) {
             if (x == 0) this.boxedCreaturesHeight += 30;
@@ -147,6 +239,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(scissorX, scissorY, scissorW, scissorH);
         for (GuiButton guiButton : this.buttonList) {
+            if (this.partyPosToMove != -1 && this.partyPosToMove == guiButton.id) {
+                RiftGuiCreatureBoxPartyButton partyButton = (RiftGuiCreatureBoxPartyButton) guiButton;
+                partyButton.toMove = true;
+            }
+
             //draw button
             guiButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
         }
@@ -189,6 +286,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(scissorX, scissorY, scissorW, scissorH);
         for (GuiButton guiButton : this.creaturesInBoxButtons) {
+            if (this.boxPosToMove != -1 && this.boxPosToMove == guiButton.id) {
+                RiftGuiCreatureBoxBoxButton boxButton = (RiftGuiCreatureBoxBoxButton) guiButton;
+                boxButton.toMove = true;
+            }
+
             //draw button
             guiButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
         }
@@ -273,12 +375,14 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 19, 252, 224, (int)(110 * healthRatio), 4, 408, 300);
 
             //draw other buttons
-            //should have change name, manage inventory, and release buttons
             for (GuiButton button : this.manageSelectedCreatureButtons) {
-                button.enabled = true;
-                button.drawButton(this.mc, mouseX, mouseY, partialTicks);
+                if (button.id != 2) {
+                    button.enabled = true;
+                    button.drawButton(this.mc, mouseX, mouseY, partialTicks);
+                }
             }
         }
+        if (!this.manageSelectedCreatureButtons.isEmpty() && this.manageSelectedCreatureButtons.get(2).id == 2) this.manageSelectedCreatureButtons.get(2).drawButton(this.mc, mouseX, mouseY, partialTicks);
     }
 
     @Override
@@ -311,8 +415,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         changeNameButton.enabled = false;
         GuiButton releaseButton = new GuiButton(1, (this.width - 100)/2 + 140, (this.height - 20)/2 + 85, 100, 20, I18n.format("creature_box.release"));
         releaseButton.enabled = false;
+        String rearrangeName = this.changeCreaturesMode ? I18n.format("creature_box.stop_rearrange_creatures") : I18n.format("creature_box.rearrange_creatures");
+        GuiButton rearrangeButton = new GuiButton(2, (this.width - 100)/2 - 147, (this.height - 20)/2 + 85, 100, 20, rearrangeName);
         this.manageSelectedCreatureButtons.add(changeNameButton);
         this.manageSelectedCreatureButtons.add(releaseButton);
+        this.manageSelectedCreatureButtons.add(rearrangeButton);
     }
 
     private boolean isMouseOverPartyBar(int mouseX, int mouseY) {

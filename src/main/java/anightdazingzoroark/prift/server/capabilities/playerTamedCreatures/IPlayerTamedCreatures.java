@@ -11,8 +11,12 @@ public interface IPlayerTamedCreatures {
     //for direct values
     void setPartyNBT(List<NBTTagCompound> compound);
     List<NBTTagCompound> getPartyNBT();
+    void addToPartyNBT(NBTTagCompound compound);
+    void removeFromPartyNBT(NBTTagCompound compound);
     void setBoxNBT(List<NBTTagCompound> compound);
     List<NBTTagCompound> getBoxNBT();
+    void addToBoxNBT(NBTTagCompound compound);
+    void removeFromBoxNBT(NBTTagCompound compound);
     void setLastSelected(int value);
     int getLastSelected();
     void setMaxPartySize(int value);
@@ -24,6 +28,11 @@ public interface IPlayerTamedCreatures {
     void addToBoxCreatures(RiftCreature creature);
     List<RiftCreature> getBoxCreatures(World world);
     void rearrangePartyCreatures(int posSelected, int posToSwap);
+    void rearrangeBoxCreatures(int posSelected, int posToSwap);
+    void partyCreatureToBoxCreature(int partyPosSelected, int boxPosSelected);
+    void partyCreatureToBox(int partyPosSelected);
+    void boxCreatureToPartyCreature(int boxPosSelected, int partyPosSelected);
+    void boxCreatureToParty(int boxPosSelected);
     void updateCreatures(RiftCreature creature);
     void modifyCreature(UUID uuid, NBTTagCompound compound);
     void removeCreature(UUID uuid);

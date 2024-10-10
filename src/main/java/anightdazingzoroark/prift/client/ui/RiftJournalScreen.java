@@ -11,7 +11,7 @@ import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentTy
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
-import anightdazingzoroark.prift.server.message.RiftChangePartyOrder;
+import anightdazingzoroark.prift.server.message.RiftChangePartyOrBoxOrder;
 import anightdazingzoroark.prift.server.message.RiftManagePartyMem;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
@@ -193,7 +193,7 @@ public class RiftJournalScreen extends GuiScreen {
                     this.partyPosToMove = jButton.id;
                 }
                 else {
-                    RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrder(jButton.id, this.partyPosToMove));
+                    RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, jButton.id, this.partyPosToMove));
                     this.playerTamedCreatures().rearrangePartyCreatures(jButton.id, this.partyPosToMove);
                     this.partyPosToMove = -1;
                 }
@@ -213,6 +213,7 @@ public class RiftJournalScreen extends GuiScreen {
                 }
                 else if (this.selectedPartyMem.getDeploymentType() == DeploymentType.PARTY_INACTIVE) {
                     if (RiftUtil.testCanBeDeployed(this.selectedPartyMem, this.mc.player)) {
+                        //RiftMessages.WRAPPER.sendToAll(new RiftManagePartyMem(this.selectedPartyMem, true));
                         RiftMessages.WRAPPER.sendToServer(new RiftManagePartyMem(this.selectedPartyMem, true));
                         this.selectedPartyMem.setDeploymentType(DeploymentType.PARTY);
                         this.selectedPartyMem.updatePlayerTameList();

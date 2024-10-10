@@ -72,6 +72,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
                 creature.setPosition(owner.posX, owner.posY, owner.posZ);
 
                 player.world.spawnEntity(creature);
+                creature.updatePlayerTameList();
             }
         }
         else {
@@ -104,6 +105,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
                 creature.setPosition(owner.posX, owner.posY, owner.posZ);
 
                 player.world.spawnEntity(creature);
+                creature.updatePlayerTameList();
             }
         }
         else {

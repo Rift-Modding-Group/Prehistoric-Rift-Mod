@@ -26,29 +26,36 @@ public class RiftGuiCreatureBoxPartyButton extends GuiButton {
             this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
             drawModalRectWithCustomSizedTexture(this.x, this.y, (this.hovered || this.toMove) ? 96 : 0, this.toMove ? 248 : 216, this.width, this.height, 408, 300);
 
-            //health bar
-            double healthPercentage = this.creature.getHealth() / this.creature.getMaxHealth();
-            drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 22, 0, 248, (int)(60 * healthPercentage), 3, 408, 300);
+            if (this.creature != null) {
+                //health bar
+                double healthPercentage = this.creature.getHealth() / this.creature.getMaxHealth();
+                drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 22, 0, 248, (int)(60 * healthPercentage), 3, 408, 300);
 
-            //energy bar
-            double energyPercentage = this.creature.getEnergy() / 20D;
-            drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 26, 0, 251, (int)(60 * energyPercentage), 3, 408, 300);
+                //energy bar
+                double energyPercentage = this.creature.getEnergy() / 20D;
+                drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 26, 0, 251, (int)(60 * energyPercentage), 3, 408, 300);
 
-            //creature icon
-            mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+this.creature.creatureType.name().toLowerCase()+"_icon.png"));
-            drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
+                //creature icon
+                mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+this.creature.creatureType.name().toLowerCase()+"_icon.png"));
+                drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
 
-            //x mark over creature icon
-            if (healthPercentage == 0) {
-                mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png"));
-                drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 60, 248, 24, 24, 408, 300);
+                //x mark over creature icon
+                if (healthPercentage == 0) {
+                    mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png"));
+                    drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 60, 248, 24, 24, 408, 300);
+                }
+
+                //creature name and level
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(0.5f, 0.5f, 0.5f);
+                mc.fontRenderer.drawSplitString(this.creature.getName(), (int)((this.x + 32)/0.5), (int)((this.y + 12)/0.5), 140, 0);
+                GlStateManager.popMatrix();
             }
-
-            //creature name and level
-            GlStateManager.pushMatrix();
-            GlStateManager.scale(0.5f, 0.5f, 0.5f);
-            mc.fontRenderer.drawSplitString(this.creature.getName(), (int)((this.x + 32)/0.5), (int)((this.y + 12)/0.5), 140, 0);
-            GlStateManager.popMatrix();
+            else {
+                //creature icon
+                mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/icons/empty_icon.png"));
+                drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
+            }
         }
     }
 }

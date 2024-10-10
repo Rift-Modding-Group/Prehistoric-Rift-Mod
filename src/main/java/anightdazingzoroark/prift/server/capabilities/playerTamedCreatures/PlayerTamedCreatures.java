@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentType;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -66,6 +67,47 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
+    public void rearrangeBoxCreatures(int posSelected, int posToSwap) {
+        if (posSelected == posToSwap) return;
+        NBTTagCompound compoundSelected = this.boxCreatures.get(posSelected);
+        NBTTagCompound compoundToSwap = this.boxCreatures.get(posToSwap);
+        this.boxCreatures.set(posSelected, compoundToSwap);
+        this.boxCreatures.set(posToSwap, compoundSelected);
+    }
+
+    public void partyCreatureToBoxCreature(int partyPosSelected, int boxPosSelected) {
+        NBTTagCompound compoundPartySelected = this.partyCreatures.get(partyPosSelected);
+        NBTTagCompound compoundBoxSelected = this.boxCreatures.get(boxPosSelected);
+        compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
+        compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
+        this.partyCreatures.set(partyPosSelected, compoundBoxSelected);
+        this.boxCreatures.set(boxPosSelected, compoundPartySelected);
+    }
+
+    public void partyCreatureToBox(int partyPosSelected) {
+        NBTTagCompound compoundPartySelected = this.partyCreatures.get(partyPosSelected);
+        compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
+        this.partyCreatures.remove(partyPosSelected);
+        this.boxCreatures.add(compoundPartySelected);
+    }
+
+    public void boxCreatureToPartyCreature(int boxPosSelected, int partyPosSelected) {
+        NBTTagCompound compoundBoxSelected = this.boxCreatures.get(boxPosSelected);
+        NBTTagCompound compoundPartySelected = this.partyCreatures.get(partyPosSelected);
+        compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
+        compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
+        this.boxCreatures.set(boxPosSelected, compoundPartySelected);
+        this.partyCreatures.set(partyPosSelected, compoundBoxSelected);
+    }
+
+    public void boxCreatureToParty(int boxPosSelected) {
+        NBTTagCompound compoundBoxSelected = this.boxCreatures.get(boxPosSelected);
+        compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
+        this.boxCreatures.remove(boxPosSelected);
+        this.partyCreatures.add(compoundBoxSelected);
+    }
+
+    @Override
     public List<RiftCreature> getPartyCreatures(World world) {
         List<RiftCreature> creatures = new ArrayList<>();
         for (NBTTagCompound compound : this.partyCreatures) {
@@ -98,6 +140,16 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public List<NBTTagCompound> getPartyNBT() {
         return this.partyCreatures;
+    }
+
+    @Override
+    public void addToPartyNBT(NBTTagCompound compound) {
+        this.partyCreatures.add(compound);
+    }
+
+    @Override
+    public void removeFromPartyNBT(NBTTagCompound compound) {
+        this.partyCreatures.remove(compound);
     }
 
     @Override
@@ -147,19 +199,22 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
+    public void addToBoxNBT(NBTTagCompound compound) {
+        this.boxCreatures.add(compound);
+    }
+
+    @Override
+    public void removeFromBoxNBT(NBTTagCompound compound) {
+        this.boxCreatures.remove(compound);
+    }
+
+    @Override
     public void updateCreatures(RiftCreature creature) {
-        for (RiftCreature partyCreature : this.getPartyCreatures(creature.world)) {
-            if (partyCreature != null && partyCreature.getUniqueID().equals(creature.getUniqueID())) {
-                NBTTagCompound partyMemCompound = new NBTTagCompound();
+        for (NBTTagCompound partyMemCompound : this.partyCreatures) {
+            if (partyMemCompound.getUniqueId("UniqueID") != null && partyMemCompound.getUniqueId("UniqueID").equals(creature.getUniqueID())) {
                 NBTTagCompound partyMemCompoundUpdt = new NBTTagCompound();
-
-                partyMemCompound.setUniqueId("UniqueID", partyCreature.getUniqueID());
                 partyMemCompoundUpdt.setUniqueId("UniqueID", creature.getUniqueID());
-
-                partyMemCompound.setString("CustomName", partyCreature.getCustomNameTag());
                 partyMemCompoundUpdt.setString("CustomName", creature.getCustomNameTag());
-
-                partyCreature.writeEntityToNBT(partyMemCompound);
                 creature.writeEntityToNBT(partyMemCompoundUpdt);
 
                 if (this.partyCreatures.contains(partyMemCompound)) this.partyCreatures.set(this.partyCreatures.indexOf(partyMemCompound), partyMemCompoundUpdt);
