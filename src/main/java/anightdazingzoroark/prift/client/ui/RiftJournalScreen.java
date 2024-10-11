@@ -67,7 +67,7 @@ public class RiftJournalScreen extends GuiScreen {
         //start with the creature types
         this.sidebarType = null;
         this.entryType = null;
-        this.selectedPartyMem = this.getPlayerParty().isEmpty() ? null : this.getPlayerParty().get(this.playerTamedCreatures().getLastSelected());
+        this.selectedPartyMem = this.getPlayerParty().isEmpty() ? null : this.playerTamedCreatures().getLastSelected() < this.getPlayerParty().size() ? this.getPlayerParty().get(this.playerTamedCreatures().getLastSelected()) : this.getPlayerParty().get(this.getPlayerParty().size() - 1);
 
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;

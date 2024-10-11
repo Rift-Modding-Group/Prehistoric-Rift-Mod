@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentType;
@@ -70,5 +71,6 @@ public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatur
         //remove from party and box
         IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
         playerTamedCreatures.removeCreature(message.creatureUUID);
+        playerTamedCreatures.removeCreatureFromBoxDeployed(player.world, ClientProxy.creatureBoxBlockPos, message.creatureUUID);
     }
 }

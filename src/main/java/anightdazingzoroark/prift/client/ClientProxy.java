@@ -45,6 +45,7 @@ public class ClientProxy extends ServerProxy {
     @Mod.Instance(RiftInitialize.MODID)
     public static Object popupFromRadial;
     public static UUID creatureUUID;
+    public static BlockPos creatureBoxBlockPos;
     private int thirdPersonView = 0;
     private int previousViewType = 0;
     private RiftParticleSpawner particleSpawner;

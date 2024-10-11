@@ -1,22 +1,41 @@
 package anightdazingzoroark.prift.server.blocks;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class RiftCreatureBox extends Block {
+import javax.annotation.Nullable;
+
+public class RiftCreatureBox extends Block implements ITileEntityProvider {
     public RiftCreatureBox() {
         super(Material.ROCK);
+        this.setResistance(69420666F);
+    }
+
+    @Override
+    public boolean hasTileEntity(IBlockState state) {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public TileEntity createNewTileEntity(World worldIn, int meta) {
+        return new RiftTileEntityCreatureBox();
     }
 
     @Override
@@ -26,7 +45,10 @@ public class RiftCreatureBox extends Block {
             if (tamedCreatures.getPartyCreatures(worldIn).isEmpty() && tamedCreatures.getBoxCreatures(worldIn).isEmpty()) {
                 playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, worldIn, PopupFromCreatureBox.NO_CREATURES.ordinal(), 0, 0);
             }
-            else playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_BOX, worldIn, 0, 0, 0);
+            else {
+                ClientProxy.creatureBoxBlockPos = pos;
+                playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_BOX, worldIn, 0, 0, 0);
+            }
         }
         return true;
     }

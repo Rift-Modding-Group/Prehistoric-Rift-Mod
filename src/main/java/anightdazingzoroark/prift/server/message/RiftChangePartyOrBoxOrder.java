@@ -82,9 +82,21 @@ public class RiftChangePartyOrBoxOrder extends AbstractMessage<RiftChangePartyOr
     public enum SwapType {
         REARRANGE_PARTY,
         REARRANGE_BOX,
+        REARRANGE_BOX_DEPLOYED,
+
         PARTY_BOX_SWAP,
         PARTY_TO_BOX,
+        PARTY_BOX_DEPLOYED_SWAP,
+        PARTY_TO_BOX_DEPLOYED,
+
         BOX_PARTY_SWAP,
-        BOX_TO_PARTY;
+        BOX_TO_PARTY,
+        BOX_BOX_DEPLOYED_SWAP,
+        BOX_TO_BOX_DEPLOYED,
+
+        BOX_DEPLOYED_PARTY_SWAP,
+        BOX_DEPLOYED_TO_PARTY,
+        BOX_DEPLOYED_BOX_SWAP,
+        BOX_DEPLOYED_TO_BOX;
     }
 }

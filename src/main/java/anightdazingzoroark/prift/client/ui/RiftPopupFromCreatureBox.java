@@ -122,6 +122,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
             if (button.id == 0) {
                 //remove creature in the box ui
                 this.playerTamedCreatures().removeCreature(ClientProxy.creatureUUID);
+                this.playerTamedCreatures().removeCreatureFromBoxDeployed(this.mc.player.world, ClientProxy.creatureBoxBlockPos, ClientProxy.creatureUUID);
 
                 //remove creature from the party
                 RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreatureFromBox(ClientProxy.creatureUUID));

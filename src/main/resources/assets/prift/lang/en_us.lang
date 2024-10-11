@@ -17,6 +17,7 @@ creature_box.popup_choice.no_creatures=you have no tamed creatures lol
 creature_box.creature_box=Creature Box
 creature_box.rearrange_creatures=Rearrange
 creature_box.stop_rearrange_creatures=Finished
+creature_box.deployed_creatures=Deployed Creatures
 
 death.attack.prift_bleed=%s bled to death
 
