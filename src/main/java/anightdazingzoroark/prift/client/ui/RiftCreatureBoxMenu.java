@@ -12,10 +12,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
-import anightdazingzoroark.prift.server.message.RiftChangeBoxDeployedOrder;
-import anightdazingzoroark.prift.server.message.RiftChangePartyOrBoxOrder;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftRemoveAfterSendToBox;
+import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
@@ -121,8 +118,21 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                     if (this.boxPosToMove != -1 && this.boxDeployedToMove == -1) {
                         //swap box creature w party creature
                         if (partyButton.id < this.getPlayerParty().size()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, this.boxPosToMove, partyButton.id));
-                            this.playerTamedCreatures().boxCreatureToPartyCreature(this.boxPosToMove, partyButton.id);
+                            //if inventory except saddle not empty, just swap box and party creatures
+                            if (this.getPlayerParty().get(partyButton.id).creatureInventory.isEmptyExceptSaddle()) {
+                                //if creature is deployed, remove it from world
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(partyButton.id), true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(partyButton.id), true));
+
+                                RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, this.boxPosToMove, partyButton.id));
+                                this.playerTamedCreatures().boxCreatureToPartyCreature(this.boxPosToMove, partyButton.id);
+                            }
+                            //otherwise, open a prompt that asks whether or not to have em dropped
+                            else {
+                                ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
+                                ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP;
+                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxPosToMove, partyButton.id);
+                            }
                         }
                         //move box creature to party
                         else {
@@ -133,11 +143,19 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                     else if (this.boxPosToMove == -1 && this.boxDeployedToMove != -1) {
                         //swap box deployed creature w party creature
                         if (partyButton.id < this.getPlayerParty().size()) {
+                            //if creature is deployed, remove it from world
+                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+
                             RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_PARTY_SWAP, this.creatureBoxPos, this.boxDeployedToMove, partyButton.id));
                             this.playerTamedCreatures().boxCreatureDeployedToPartyCreature(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove, partyButton.id);
                         }
                         //move box deployed creature to party
                         else {
+                            //if creature is deployed, remove it from world
+                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+
                             RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_PARTY, this.creatureBoxPos, this.boxDeployedToMove));
                             this.playerTamedCreatures().boxCreatureDeployedToParty(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove);
                         }
@@ -177,33 +195,81 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                     if (this.partyPosToMove != -1 && this.boxDeployedToMove == -1) {
                         //swap party creature w box creature
                         if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
-                            //if creature is deployed, remove it from world
-                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
-                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+                            //if inventory except saddle not empty, just move to box
+                            if (this.getPlayerParty().get(this.partyPosToMove).creatureInventory.isEmptyExceptSaddle()) {
+                                //if creature is deployed, remove it from world
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
 
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP, this.partyPosToMove, boxButton.id));
-                            this.playerTamedCreatures().partyCreatureToBoxCreature(this.partyPosToMove, boxButton.id);
+                                RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP, this.partyPosToMove, boxButton.id));
+                                this.playerTamedCreatures().partyCreatureToBoxCreature(this.partyPosToMove, boxButton.id);
+                            }
+                            //otherwise, open a prompt that asks whether or not to have em dropped
+                            else {
+                                ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
+                                ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP;
+                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.partyPosToMove, boxButton.id);
+                            }
                         }
                         //move party creature to box
                         else {
-                            //if creature is deployed, remove it from world
-                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
-                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+                            //if inventory except saddle not empty, just move to box
+                            if (this.getPlayerParty().get(this.partyPosToMove).creatureInventory.isEmptyExceptSaddle()) {
+                                //if creature is deployed, remove it from world
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
 
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX, this.partyPosToMove));
-                            this.playerTamedCreatures().partyCreatureToBox(this.partyPosToMove);
+                                RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX, this.partyPosToMove));
+                                this.playerTamedCreatures().partyCreatureToBox(this.partyPosToMove);
+                            }
+                            //otherwise, open a prompt that asks whether or not to have em dropped
+                            else {
+                                ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
+                                ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX;
+                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.partyPosToMove, 0);
+                            }
                         }
                     }
                     else if (this.partyPosToMove == -1 && this.boxDeployedToMove != -1) {
                         //swap box deployed creature with box creature
                         if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_BOX_SWAP, this.creatureBoxPos, this.boxDeployedToMove, boxButton.id));
-                            this.playerTamedCreatures().boxCreatureDeployedToBoxCreature(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove, boxButton.id);
+                            //if inventory except saddle not empty, just move to box
+                            if (this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove).creatureInventory.isEmptyExceptSaddle()) {
+                                //if creature is deployed, remove it from world
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+
+                                RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_BOX_SWAP, this.creatureBoxPos, this.boxDeployedToMove, boxButton.id));
+                                this.playerTamedCreatures().boxCreatureDeployedToBoxCreature(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove, boxButton.id);
+                            }
+                            //otherwise, open a prompt that asks whether or not to have em dropped
+                            else {
+                                ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
+                                ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_BOX_SWAP;
+                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxDeployedToMove, boxButton.id);
+                            }
                         }
                         //move box deployed creature to box
                         else {
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_BOX, this.creatureBoxPos, this.boxDeployedToMove));
-                            this.playerTamedCreatures().boxCreatureDeployedToBox(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove);
+                            //if inventory except saddle not empty, just move to box
+                            if (this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove).creatureInventory.isEmptyExceptSaddle()) {
+                                //drop items from box deployed creature's inventory
+                                RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.boxDeployedToMove));
+                                this.playerTamedCreatures().removeBoxCreatureDeployedInventory(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove);
+
+                                //if creature is deployed, remove it from world
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+
+                                RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_BOX, this.creatureBoxPos, this.boxDeployedToMove));
+                                this.playerTamedCreatures().boxCreatureDeployedToBox(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove);
+                            }
+                            //otherwise, open a prompt that asks whether or not to have em dropped
+                            else {
+                                ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
+                                ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_BOX;
+                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxDeployedToMove, 0);
+                            }
                         }
                     }
                     //box swap
@@ -222,11 +288,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                     this.selectedCreature = this.getPlayerBoxedCreatures().get(boxButton.id);
                 }
                 else this.selectedCreature = null;
-            }
 
-            this.partyPosToMove = -1;
-            this.boxPosToMove = boxButton.id;
-            this.boxDeployedToMove = -1;
+                this.partyPosToMove = -1;
+                this.boxPosToMove = boxButton.id;
+                this.boxDeployedToMove = -1;
+            }
         }
         else if (button instanceof RiftGuiCreatureBoxDeployedButton) {
             RiftGuiCreatureBoxDeployedButton boxDeployedButton = (RiftGuiCreatureBoxDeployedButton) button;
@@ -245,6 +311,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
                             RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
 
+                            if (this.boxDeployedToMove != -1) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
+                            }
+
                             RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_DEPLOYED_SWAP, this.creatureBoxPos, this.partyPosToMove, boxDeployedButton.id));
                             this.playerTamedCreatures().partyCreatureToBoxCreatureDeployed(this.mc.player.world, this.creatureBoxPos, this.partyPosToMove, boxDeployedButton.id);
                         }
@@ -261,8 +332,21 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                     else if (this.partyPosToMove == -1 && this.boxPosToMove != -1) {
                         //swap box creature with box deployed creature
                         if (boxDeployedButton.id < this.getCreatureBoxDeployedCreatures().size()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_BOX_DEPLOYED_SWAP, this.creatureBoxPos, this.boxPosToMove, boxDeployedButton.id));
-                            this.playerTamedCreatures().boxCreatureToBoxCreatureDeployed(this.mc.player.world, this.creatureBoxPos, this.boxPosToMove, boxDeployedButton.id);
+                            //if inventory except saddle not empty, just move to box
+                            if (this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id).creatureInventory.isEmptyExceptSaddle()) {
+                                //if creature is deployed, remove it from world
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id), true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id), true));
+
+                                RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_BOX_DEPLOYED_SWAP, this.creatureBoxPos, this.boxPosToMove, boxDeployedButton.id));
+                                this.playerTamedCreatures().boxCreatureToBoxCreatureDeployed(this.mc.player.world, this.creatureBoxPos, this.boxPosToMove, boxDeployedButton.id);
+                            }
+                            //otherwise, open a prompt that asks whether or not to have em dropped
+                            else {
+                                ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
+                                ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_BOX_DEPLOYED_SWAP;
+                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxPosToMove, boxDeployedButton.id);
+                            }
                         }
                         //move box creature to box deployed
                         else {
@@ -296,11 +380,13 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             if (this.selectedCreature != null) {
                 if (button.id == 0) {
                     ClientProxy.creatureUUID = this.selectedCreature.getUniqueID();
-                    this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, PopupFromCreatureBox.CHANGE_NAME.ordinal(), 0, 0);
+                    ClientProxy.popupFromRadial = PopupFromCreatureBox.CHANGE_NAME;
+                    this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                 }
                 else if (button.id == 1) {
                     ClientProxy.creatureUUID = this.selectedCreature.getUniqueID();
-                    this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, PopupFromCreatureBox.RELEASE.ordinal(), 0, 0);
+                    ClientProxy.popupFromRadial = PopupFromCreatureBox.RELEASE;
+                    this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                 }
             }
             if (button.id == 2) {
@@ -412,7 +498,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
     private void placeBoxedCreatureButtons(int mouseX, int mouseY, float partialTicks) {
         //place name
-        String string = I18n.format("creature_box.creature_box");
+        String string = I18n.format("creature_box.creature_box", this.mc.player.getName());
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.75f, 0.75f, 0.75f);
         this.fontRenderer.drawString(string, (int) ((this.width/2 - 90)/0.75), (int)(((this.height - this.fontRenderer.FONT_HEIGHT)/2 - 90)/0.75), 0);
@@ -535,39 +621,46 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             this.fontRenderer.drawString(name, (int)((this.width / 2 + 86) / 0.5), (int)(((this.height - this.fontRenderer.FONT_HEIGHT) / 2 - 5) / 0.5), 0);
             GlStateManager.popMatrix();
 
+            //draw owner name
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(0.5f, 0.5f, 0.5f);
+            String ownerName = I18n.format("tametrait.owner", this.selectedCreature.getOwner().getName());
+            this.fontRenderer.drawString(ownerName, (int)((this.width / 2 + 86) / 0.5), (int)(((this.height - this.fontRenderer.FONT_HEIGHT) / 2 + 3) / 0.5), 0);
+            GlStateManager.popMatrix();
+
             //draw level and xp
             GlStateManager.pushMatrix();
             GlStateManager.scale(0.5f, 0.5f, 0.5f);
             String levelString = I18n.format("tametrait.level", this.selectedCreature.getLevel())+" ("+ this.selectedCreature.getXP() +"/"+ this.selectedCreature.getMaxXP() +" XP)";
-            this.fontRenderer.drawString(levelString, (int)((this.width / 2 + 86) / 0.5), (int)(((this.height - this.fontRenderer.FONT_HEIGHT) / 2 + 5) / 0.5), 0);
+            this.fontRenderer.drawString(levelString, (int)((this.width / 2 + 86) / 0.5), (int)(((this.height - this.fontRenderer.FONT_HEIGHT) / 2 + 11) / 0.5), 0);
             GlStateManager.popMatrix();
 
             //draw xp bar
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.mc.getTextureManager().bindTexture(background);
-            drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 8, 252, 216, 110, 4, 408, 300);
+            drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 14, 252, 216, 110, 4, 408, 300);
 
             double xpRatio = (double) this.selectedCreature.getXP() / this.selectedCreature.getMaxXP();
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.mc.getTextureManager().bindTexture(background);
-            drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 8, 252, 220, (int)(110 * xpRatio), 4, 408, 300);
+            drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 14, 252, 220, (int)(110 * xpRatio), 4, 408, 300);
 
             //draw health
             GlStateManager.pushMatrix();
             GlStateManager.scale(0.5f, 0.5f, 0.5f);
             String healthString = I18n.format("tametrait.health")+": "+ this.selectedCreature.getHealth() +"/"+ this.selectedCreature.getMaxHealth() +" HP";
-            this.fontRenderer.drawString(healthString, (int)((this.width / 2 + 86) / 0.5), (int)(((this.height - this.fontRenderer.FONT_HEIGHT) / 2 + 16) / 0.5), 0);
+            this.fontRenderer.drawString(healthString, (int)((this.width / 2 + 86) / 0.5), (int)(((this.height - this.fontRenderer.FONT_HEIGHT) / 2 + 22) / 0.5), 0);
             GlStateManager.popMatrix();
 
             //draw health bar
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.mc.getTextureManager().bindTexture(background);
-            drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 19, 252, 216, 110, 4, 408, 300);
+            drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 25, 252, 216, 110, 4, 408, 300);
 
             double healthRatio = this.selectedCreature.getHealth() / this.selectedCreature.getMaxHealth();
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.mc.getTextureManager().bindTexture(background);
-            drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 19, 252, 224, (int)(110 * healthRatio), 4, 408, 300);
+            drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 25, 252, 224, (int)(110 * healthRatio), 4, 408, 300);
 
             //draw other buttons
             for (GuiButton button : this.manageSelectedCreatureButtons) {

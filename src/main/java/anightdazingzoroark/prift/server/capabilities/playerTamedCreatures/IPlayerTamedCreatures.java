@@ -54,4 +54,6 @@ public interface IPlayerTamedCreatures {
     void removeCreature(UUID uuid);
     void removeCreatureFromBoxDeployed(World world, BlockPos pos, UUID uuid);
 
+    void removePartyCreatureInventory(int partyPos);
+    void removeBoxCreatureDeployedInventory(World world, BlockPos pos, int partyPos);
 }

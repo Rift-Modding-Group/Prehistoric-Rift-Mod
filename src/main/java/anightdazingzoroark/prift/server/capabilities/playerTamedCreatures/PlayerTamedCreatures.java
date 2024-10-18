@@ -3,10 +3,14 @@ package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentType;
+import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -115,6 +119,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
                 compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE.ordinal());
                 compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
+                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
+                compoundBoxDepSelected.setBoolean("HasHomePos", false);
+                compoundBoxDepSelected.removeTag("HomePosX");
+                compoundBoxDepSelected.removeTag("HomePosY");
+                compoundBoxDepSelected.removeTag("HomePosZ");
                 this.partyCreatures.set(partyPosSelected, compoundBoxDepSelected);
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundPartySelected);
             }
@@ -157,6 +166,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
                 compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.BASE.ordinal());
                 compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
+                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
+                compoundBoxDepSelected.setBoolean("HasHomePos", false);
+                compoundBoxDepSelected.removeTag("HomePosX");
+                compoundBoxDepSelected.removeTag("HomePosY");
+                compoundBoxDepSelected.removeTag("HomePosZ");
                 this.boxCreatures.set(boxPosSelected, compoundBoxDepSelected);
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundBoxSelected);
             }
@@ -182,6 +196,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
                 NBTTagCompound compoundPartySelected = this.partyCreatures.get(partyPosSelected);
                 compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
+                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
+                compoundBoxDepSelected.setBoolean("HasHomePos", false);
+                compoundBoxDepSelected.removeTag("HomePosX");
+                compoundBoxDepSelected.removeTag("HomePosY");
+                compoundBoxDepSelected.removeTag("HomePosZ");
                 compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE.ordinal());
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundPartySelected);
                 this.partyCreatures.set(partyPosSelected, compoundBoxDepSelected);
@@ -195,6 +214,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             if (creatureBox != null) {
                 NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
                 compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
+                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
+                compoundBoxDepSelected.setBoolean("HasHomePos", false);
+                compoundBoxDepSelected.removeTag("HomePosX");
+                compoundBoxDepSelected.removeTag("HomePosY");
+                compoundBoxDepSelected.removeTag("HomePosZ");
                 this.partyCreatures.add(compoundBoxDepSelected);
                 creatureBox.removeFromCreatureList(boxDepPosSelected);
             }
@@ -208,6 +232,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
                 NBTTagCompound compoundBoxSelected = this.boxCreatures.get(boxPosSelected);
                 compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
+                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
+                compoundBoxDepSelected.setBoolean("HasHomePos", false);
+                compoundBoxDepSelected.removeTag("HomePosX");
+                compoundBoxDepSelected.removeTag("HomePosY");
+                compoundBoxDepSelected.removeTag("HomePosZ");
                 compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.BASE.ordinal());
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundBoxSelected);
                 this.boxCreatures.set(boxPosSelected, compoundBoxDepSelected);
@@ -221,6 +250,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             if (creatureBox != null) {
                 NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
                 compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
+                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
+                compoundBoxDepSelected.setBoolean("HasHomePos", false);
+                compoundBoxDepSelected.removeTag("HomePosX");
+                compoundBoxDepSelected.removeTag("HomePosY");
+                compoundBoxDepSelected.removeTag("HomePosZ");
                 this.boxCreatures.add(compoundBoxDepSelected);
                 creatureBox.removeFromCreatureList(boxDepPosSelected);
             }
@@ -362,6 +396,39 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                     if (partyMemCompound.hasKey(key)) partyMemCompound.setTag(key, value);
                 }
                 return;
+            }
+        }
+    }
+
+    @Override
+    public void removePartyCreatureInventory(int partyPos) {
+        NBTTagCompound partyMember = this.partyCreatures.get(partyPos);
+        NBTTagList nbtItemList = partyMember.getTagList("Items", 10);
+        boolean canBeSaddled = RiftCreatureType.values()[partyMember.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).canBeSaddled();
+        for (int x = 0; x < nbtItemList.tagCount(); x++) {
+            NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
+            int j = nbttagcompound.getByte("Slot") & 255;
+            if ((canBeSaddled && j != 0) || !canBeSaddled) {
+                nbtItemList.removeTag(x);
+            }
+        }
+    }
+
+    @Override
+    public void removeBoxCreatureDeployedInventory(World world, BlockPos pos, int partyPos) {
+        if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
+            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
+            if (creatureBox != null) {
+                NBTTagCompound creature = creatureBox.getCreatureList().get(partyPos);
+                NBTTagList nbtItemList = creature.getTagList("Items", 10);
+                boolean canBeSaddled = RiftCreatureType.values()[creature.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).canBeSaddled();
+                for (int x = 0; x < nbtItemList.tagCount(); x++) {
+                    NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
+                    int j = nbttagcompound.getByte("Slot") & 255;
+                    if ((canBeSaddled && j != 0) || !canBeSaddled) {
+                        nbtItemList.removeTag(x);
+                    }
+                }
             }
         }
     }

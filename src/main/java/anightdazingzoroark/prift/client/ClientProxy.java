@@ -44,6 +44,7 @@ import java.util.UUID;
 public class ClientProxy extends ServerProxy {
     @Mod.Instance(RiftInitialize.MODID)
     public static Object popupFromRadial;
+    public static Object swapTypeForPopup;
     public static UUID creatureUUID;
     public static BlockPos creatureBoxBlockPos;
     private int thirdPersonView = 0;
@@ -166,7 +167,7 @@ public class ClientProxy extends ServerProxy {
             return new RiftCreatureBoxMenu();
         }
         else if (id == GUI_MENU_FROM_CREATURE_BOX) {
-            return new RiftPopupFromCreatureBox(PopupFromCreatureBox.values()[x]);
+            return new RiftPopupFromCreatureBox(y, z);
         }
         return null;
     }

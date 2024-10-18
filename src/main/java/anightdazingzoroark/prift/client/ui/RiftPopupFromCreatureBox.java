@@ -8,9 +8,8 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
-import anightdazingzoroark.prift.server.message.RiftChangeNameFromBox;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftRemoveCreatureFromBox;
+import anightdazingzoroark.prift.server.message.*;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
@@ -23,6 +22,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
@@ -34,9 +34,13 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
     protected int guiTop;
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/popup_from_radial.png");
     private final PopupFromCreatureBox popupType;
+    private final int valOne;
+    private final int valTwo;
 
-    public RiftPopupFromCreatureBox(PopupFromCreatureBox popupType) {
-        this.popupType = popupType;
+    public RiftPopupFromCreatureBox(int valOne, int valTwo) {
+        this.popupType = (PopupFromCreatureBox) ClientProxy.popupFromRadial;
+        this.valOne = valOne;
+        this.valTwo = valTwo;
     }
 
     @Override
@@ -106,7 +110,89 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
 
     @Override
     public void actionPerformed(GuiButton button) {
-        if (this.popupType == PopupFromCreatureBox.CHANGE_NAME) {
+        if (this.popupType == PopupFromCreatureBox.REMOVE_INVENTORY) {
+            if (button.id == 0) {
+                RiftChangePartyOrBoxOrder.SwapType swapType = (RiftChangePartyOrBoxOrder.SwapType) ClientProxy.swapTypeForPopup;
+                switch (swapType) {
+                    case BOX_PARTY_SWAP:
+                        //drop items from party creature's inventory
+                        RiftMessages.WRAPPER.sendToServer(new RiftDropPartyMemberInventory(this.valTwo));
+                        this.playerTamedCreatures().removePartyCreatureInventory(this.valTwo);
+
+                        //if creature is deployed, remove it from world
+                        RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valTwo), true));
+                        RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valTwo), true));
+
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, this.valOne, this.valTwo));
+                        this.playerTamedCreatures().boxCreatureToPartyCreature(this.valOne, this.valTwo);
+                        break;
+                    case PARTY_BOX_SWAP:
+                        //drop items from party creature's inventory
+                        RiftMessages.WRAPPER.sendToServer(new RiftDropPartyMemberInventory(this.valOne));
+                        this.playerTamedCreatures().removePartyCreatureInventory(this.valOne);
+
+                        //if creature is deployed, remove it from world
+                        RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valOne), true));
+                        RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valOne), true));
+
+                        //drop items from party creature's inventory
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP, this.valOne, this.valTwo));
+                        this.playerTamedCreatures().partyCreatureToBoxCreature(this.valOne, this.valTwo);
+                        break;
+                    case PARTY_TO_BOX:
+                        //drop items from party creature's inventory
+                        RiftMessages.WRAPPER.sendToServer(new RiftDropPartyMemberInventory(this.valOne));
+                        this.playerTamedCreatures().removePartyCreatureInventory(this.valOne);
+
+                        //if creature is deployed, remove it from world
+                        RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valOne), true));
+                        RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valOne), true));
+
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX, this.valOne));
+                        this.playerTamedCreatures().partyCreatureToBox(this.valOne);
+                        break;
+                    case BOX_DEPLOYED_BOX_SWAP:
+                        //drop items from box deployed creature's inventory
+                        RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.valOne));
+                        this.playerTamedCreatures().removeBoxCreatureDeployedInventory(this.mc.player.world, ClientProxy.creatureBoxBlockPos,this.valOne);
+
+                        //if creature is deployed, remove it from world
+                        RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valOne), true));
+                        RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valOne), true));
+
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_BOX_SWAP, ClientProxy.creatureBoxBlockPos, this.valOne, this.valTwo));
+                        this.playerTamedCreatures().boxCreatureDeployedToBoxCreature(this.mc.player.world, ClientProxy.creatureBoxBlockPos, this.valOne, this.valTwo);
+                        break;
+                    case BOX_DEPLOYED_TO_BOX:
+                        //drop items from box deployed creature's inventory
+                        RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.valOne));
+                        this.playerTamedCreatures().removeBoxCreatureDeployedInventory(this.mc.player.world, ClientProxy.creatureBoxBlockPos, this.valOne);
+
+                        //if creature is deployed, remove it from world
+                        RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valOne), true));
+                        RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valOne), true));
+
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_BOX, ClientProxy.creatureBoxBlockPos, this.valOne));
+                        this.playerTamedCreatures().boxCreatureDeployedToBox(this.mc.player.world, ClientProxy.creatureBoxBlockPos, this.valOne);
+                        break;
+                    case BOX_BOX_DEPLOYED_SWAP:
+                        //drop items from box deployed creature's inventory
+                        RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.valTwo));
+                        this.playerTamedCreatures().removeBoxCreatureDeployedInventory(this.mc.player.world, ClientProxy.creatureBoxBlockPos, this.valTwo);
+
+                        //if creature is deployed, remove it from world
+                        RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valTwo), true));
+                        RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valTwo), true));
+
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_BOX_DEPLOYED_SWAP, ClientProxy.creatureBoxBlockPos, this.valOne, this.valTwo));
+                        this.playerTamedCreatures().boxCreatureToBoxCreatureDeployed(this.mc.player.world, ClientProxy.creatureBoxBlockPos, this.valOne, this.valTwo);
+                        break;
+                }
+                ClientProxy.swapTypeForPopup = null;
+                ClientProxy.popupFromRadial = null;
+            }
+        }
+        else if (this.popupType == PopupFromCreatureBox.CHANGE_NAME) {
             if (button.id == 0) {
                 //change creature name in the box ui
                 NBTTagCompound compound = new NBTTagCompound();
@@ -116,6 +202,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                 //change creature name in the world
                 RiftMessages.WRAPPER.sendToServer(new RiftChangeNameFromBox(ClientProxy.creatureUUID, this.textField.getText()));
                 ClientProxy.creatureUUID = null;
+                ClientProxy.popupFromRadial = null;
             }
         }
         else if (this.popupType == PopupFromCreatureBox.RELEASE) {
@@ -128,6 +215,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                 RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreatureFromBox(ClientProxy.creatureUUID));
                 RiftMessages.WRAPPER.sendToServer(new RiftRemoveCreatureFromBox(ClientProxy.creatureUUID));
                 ClientProxy.creatureUUID = null;
+                ClientProxy.popupFromRadial = null;
             }
         }
 
@@ -159,5 +247,17 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
 
     private List<RiftCreature> getPlayerBox() {
         return this.playerTamedCreatures().getBoxCreatures(this.mc.world);
+    }
+
+    private RiftTileEntityCreatureBox getCreatureBox() {
+        if (this.mc.player.world.getTileEntity(ClientProxy.creatureBoxBlockPos) instanceof RiftTileEntityCreatureBox) {
+            return (RiftTileEntityCreatureBox) this.mc.player.world.getTileEntity(ClientProxy.creatureBoxBlockPos);
+        }
+        return null;
+    }
+
+    private List<RiftCreature> getCreatureBoxDeployedCreatures() {
+        if (this.getCreatureBox() != null) return this.getCreatureBox().getCreatures();
+        return new ArrayList<>();
     }
 }

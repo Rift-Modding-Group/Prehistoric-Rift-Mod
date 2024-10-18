@@ -17,6 +17,7 @@ import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
@@ -45,6 +46,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
@@ -316,7 +318,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.manageIncapacitated();
             }
         }
-        if (this.isTamed()) this.updatePlayerTameList();
+        if (this.isTamed() && this.getDeploymentType() == DeploymentType.PARTY) this.updatePlayerTameList();
+        if (this.isTamed() && this.getDeploymentType() == DeploymentType.BASE) this.updateCreatureBoxDeployedList();
         if (this.world.isRemote) this.setControls();
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
@@ -400,6 +403,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             EntityPlayer player = (EntityPlayer) this.getOwner();
             IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             tamedCreatures.updateCreatures(this);
+        }
+    }
+
+    public void updateCreatureBoxDeployedList() {
+        if (this.getHomePos() != null) {
+            TileEntity tileEntity = this.world.getTileEntity(this.getHomePos());
+            if (tileEntity instanceof RiftTileEntityCreatureBox) {
+                RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) tileEntity;
+                creatureBox.updateCreatures(this);
+            }
         }
     }
 
@@ -1917,7 +1930,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         List<RiftTameRadialChoice> list = new ArrayList<>();
         list.add(RiftTameRadialChoice.BACK);
         list.add(RiftTameRadialChoice.CHANGE_NAME);
-        list.add(RiftTameRadialChoice.SET_HOME);
+        if (this.getDeploymentType() != DeploymentType.BASE) list.add(RiftTameRadialChoice.SET_HOME);
         //list.add(RiftTameRadialChoice.UNCLAIM);
         if (this instanceof IWorkstationUser) list.add(RiftTameRadialChoice.SET_WORKSTATION);
         if (this instanceof IHarvestWhenWandering) list.add(RiftTameRadialChoice.SET_WANDER_HARVEST);
@@ -2106,6 +2119,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (itemstack.getCount() != stack.getCount()) this.markDirty();
 
             return itemstack;
+        }
+
+        public boolean isEmptyExceptSaddle() {
+            for (int i = canBeSaddled() ? 1 : 0; i < getSizeInventory(); ++i) {
+                if (!this.getStackInSlot(i).isEmpty()) return false;
+            }
+            return true;
         }
     }
 

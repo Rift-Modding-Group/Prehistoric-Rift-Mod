@@ -19,6 +19,7 @@ import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOnHitMultipart;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
@@ -71,14 +72,19 @@ public class ServerEvents {
         }
     }
 
-    //prevent players from breaking blocks while ridin
     @SubscribeEvent
     public void noBlockBreakWhileRiding(PlayerInteractEvent.LeftClickBlock event) {
+        //prevent players from breaking blocks while ridin
         if (event.getEntityPlayer().isRiding()) {
             if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature || event.getEntityPlayer().getRidingEntity() instanceof RiftLargeWeapon) {
                 event.setUseBlock(null);
                 event.setCanceled(true);
             }
+        }
+        //prevent even creative players from breaking full creature boxes
+        if (event.getWorld().getTileEntity(event.getPos()) instanceof RiftTileEntityCreatureBox) {
+            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox)event.getWorld().getTileEntity(event.getPos());
+            if (creatureBox != null && creatureBox.isUnbreakable()) event.setCanceled(true);
         }
     }
 

@@ -14,7 +14,7 @@ creature_box.popup_choice.remove_inventory=Moving a creature from your party to 
 creature_box.popup_choice.change_name=Change this creature's name.
 creature_box.popup_choice.release=Are you sure you want to release this creature? This cannot be undone!
 creature_box.popup_choice.no_creatures=you have no tamed creatures lol
-creature_box.creature_box=Creature Box
+creature_box.creature_box=%s's Creature Box
 creature_box.rearrange_creatures=Rearrange
 creature_box.stop_rearrange_creatures=Finished
 creature_box.deployed_creatures=Deployed Creatures
@@ -342,6 +342,7 @@ turrettargeting.hostiles=%s will now target hostile mobs
 turrettargeting.all=%s will now target anything it deems unfriendly
 tametrait.level=Level %s
 tametrait.health=Health
+tametrait.owner=Owner: %s
 
 type.creature.back=Back
 type.creature.all=All
