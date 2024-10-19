@@ -22,6 +22,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
@@ -254,7 +255,8 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             //if inventory except saddle not empty, just move to box
                             if (this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove).creatureInventory.isEmptyExceptSaddle()) {
                                 //drop items from box deployed creature's inventory
-                                RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.boxDeployedToMove));
+                                NBTTagList inventoryNBT = this.getCreatureBox().getCreatureList().get(this.boxDeployedToMove).getTagList("Items", 10);
+                                RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.boxDeployedToMove, inventoryNBT));
                                 this.playerTamedCreatures().removeBoxCreatureDeployedInventory(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove);
 
                                 //if creature is deployed, remove it from world

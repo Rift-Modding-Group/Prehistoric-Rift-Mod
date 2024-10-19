@@ -25,7 +25,6 @@ public interface IPlayerTamedCreatures {
 
     //for indirect values
     void addToPartyCreatures(RiftCreature creature);
-
     List<RiftCreature> getPartyCreatures(World world);
     void addToBoxCreatures(RiftCreature creature);
     List<RiftCreature> getBoxCreatures(World world);

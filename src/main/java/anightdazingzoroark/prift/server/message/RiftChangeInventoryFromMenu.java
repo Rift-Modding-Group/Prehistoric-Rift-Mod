@@ -43,7 +43,12 @@ public class RiftChangeInventoryFromMenu extends AbstractMessage<RiftChangeInven
     }
 
     @Override
-    public void onClientReceived(Minecraft client, RiftChangeInventoryFromMenu message, EntityPlayer player, MessageContext messageContext) {}
+    public void onClientReceived(Minecraft client, RiftChangeInventoryFromMenu message, EntityPlayer player, MessageContext messageContext) {
+        RiftCreature interacted = (RiftCreature) player.world.getEntityByID(message.creatureId);
+
+        interacted.creatureInventory.setInventoryFromData(message.inventory);
+        PlayerInvData.applyInventoryData(player, message.playerInventory);
+    }
 
     @Override
     public void onServerReceived(MinecraftServer server, RiftChangeInventoryFromMenu message, EntityPlayer player, MessageContext messageContext) {

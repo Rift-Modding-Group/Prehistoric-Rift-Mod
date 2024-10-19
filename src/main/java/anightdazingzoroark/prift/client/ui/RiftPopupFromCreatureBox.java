@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -153,7 +154,8 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         break;
                     case BOX_DEPLOYED_BOX_SWAP:
                         //drop items from box deployed creature's inventory
-                        RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.valOne));
+                        NBTTagList inventoryNBTOne = this.getCreatureBox().getCreatureList().get(this.valOne).getTagList("Items", 10);
+                        RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.valOne, inventoryNBTOne));
                         this.playerTamedCreatures().removeBoxCreatureDeployedInventory(this.mc.player.world, ClientProxy.creatureBoxBlockPos,this.valOne);
 
                         //if creature is deployed, remove it from world
@@ -165,7 +167,8 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         break;
                     case BOX_DEPLOYED_TO_BOX:
                         //drop items from box deployed creature's inventory
-                        RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.valOne));
+                        NBTTagList inventoryNBTTwo = this.getCreatureBox().getCreatureList().get(this.valOne).getTagList("Items", 10);
+                        RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.valOne, inventoryNBTTwo));
                         this.playerTamedCreatures().removeBoxCreatureDeployedInventory(this.mc.player.world, ClientProxy.creatureBoxBlockPos, this.valOne);
 
                         //if creature is deployed, remove it from world
@@ -177,7 +180,8 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         break;
                     case BOX_BOX_DEPLOYED_SWAP:
                         //drop items from box deployed creature's inventory
-                        RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.valTwo));
+                        NBTTagList inventoryNBTThree = this.getCreatureBox().getCreatureList().get(this.valTwo).getTagList("Items", 10);
+                        RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.valTwo, inventoryNBTThree));
                         this.playerTamedCreatures().removeBoxCreatureDeployedInventory(this.mc.player.world, ClientProxy.creatureBoxBlockPos, this.valTwo);
 
                         //if creature is deployed, remove it from world

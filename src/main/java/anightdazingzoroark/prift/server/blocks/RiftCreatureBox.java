@@ -44,7 +44,8 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
             IPlayerTamedCreatures tamedCreatures = playerIn.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             RiftTileEntityCreatureBox tileEntity = (RiftTileEntityCreatureBox) worldIn.getTileEntity(pos);
             if (tamedCreatures.getPartyCreatures(worldIn).isEmpty() && tamedCreatures.getBoxCreatures(worldIn).isEmpty() && tileEntity.getCreatures().isEmpty()) {
-                playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, worldIn, PopupFromCreatureBox.NO_CREATURES.ordinal(), 0, 0);
+                ClientProxy.popupFromRadial = PopupFromCreatureBox.NO_CREATURES;
+                playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, worldIn, 0, 0, 0);
             }
             else {
                 ClientProxy.creatureBoxBlockPos = pos;

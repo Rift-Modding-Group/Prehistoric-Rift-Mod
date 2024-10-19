@@ -1,12 +1,9 @@
 package anightdazingzoroark.prift.server.inventory;
 
-import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftChangeInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -97,12 +94,14 @@ public class CreatureContainer extends Container {
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
+        RiftMessages.WRAPPER.sendToAll(new RiftChangeInventoryFromMenu(this.creature, this.player));
         RiftMessages.WRAPPER.sendToServer(new RiftChangeInventoryFromMenu(this.creature, this.player));
     }
 
     @Override
     public void onContainerClosed(EntityPlayer player) {
         super.onContainerClosed(player);
+        RiftMessages.WRAPPER.sendToAll(new RiftChangeInventoryFromMenu(this.creature, this.player));
         RiftMessages.WRAPPER.sendToServer(new RiftChangeInventoryFromMenu(this.creature, this.player));
         this.creatureInventory.closeInventory(player);
     }
