@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -16,33 +17,48 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
-    private List<NBTTagCompound> creatureList = new ArrayList<>();
+    private List<NBTTagCompound> creatureListNBT = new ArrayList<>();
+    private List<RiftCreature> creatureList = new ArrayList<>();
     private int maxWanderingCreatures = 10;
-    private int wanderRange = 128;
+    private int wanderRange = 64; //64 block radius
 
     @Override
     public void update() {
+        //create creature list
+        this.createCreatureList();
+
         //if box has contents, make it so that its indestructible when there's creatures inside
         RiftCreatureBox creatureBox = (RiftCreatureBox)this.world.getBlockState(this.pos).getBlock();
         if (this.isUnbreakable()) creatureBox.setHardness(-1.0f);
         else creatureBox.setHardness(0f);
 
         //spawn creatures from box
-        if (!this.world.isRemote) {
-            this.createCreaturesForWandering();
+        if (!this.world.isRemote) this.createCreaturesForWandering();
+
+        //remove creatures that are not recently spawned from the wander range of the creature box
+        AxisAlignedBB removeAABB = new AxisAlignedBB(this.getPos().getX() - this.wanderRange, this.getPos().getY() - this.wanderRange, this.getPos().getZ() - this.wanderRange, this.getPos().getX() + this.wanderRange, this.getPos().getY() + this.wanderRange, this.getPos().getZ() + this.wanderRange);
+        for (RiftCreature creature : this.world.getEntitiesWithinAABB(RiftCreature.class, removeAABB, new Predicate<RiftCreature>() {
+            @Override
+            public boolean apply(@Nullable RiftCreature riftCreature) {
+                return riftCreature != null && riftCreature.ticksExisted <= 100 && !riftCreature.isTamed();
+            }
+        })) {
+            this.world.removeEntity(creature);
         }
     }
 
     public boolean isUnbreakable() {
-        return !this.creatureList.isEmpty();
+        return !this.creatureListNBT.isEmpty();
     }
 
     private void createCreaturesForWandering() {
@@ -51,9 +67,9 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
             //then generate a spawn point
             if (!this.creatureExistsInWorld(creature)) {
                 for (int i = 0; i < 10; i++) {
-                    int xSpawnPos = RiftUtil.randomInRange(this.getPos().getX() - this.wanderRange, this.getPos().getX() + this.wanderRange);
+                    int xSpawnPos = RiftUtil.randomInRange(this.getPos().getX() - 16, this.getPos().getX() + 16);
                     int ySpawnPos = RiftUtil.randomInRange(this.getPos().getY() - 8, this.getPos().getY() + 8);
-                    int zSpawnPos = RiftUtil.randomInRange(this.getPos().getZ() - this.wanderRange, this.getPos().getZ() + this.wanderRange);
+                    int zSpawnPos = RiftUtil.randomInRange(this.getPos().getZ() - 16, this.getPos().getZ() + 16);
                     BlockPos pos = new BlockPos(xSpawnPos, ySpawnPos, zSpawnPos);
                     IBlockState downState = this.world.getBlockState(pos.down());
 
@@ -96,14 +112,14 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     public void updateCreatures(RiftCreature creature) {
-        for (NBTTagCompound partyMemCompound : this.creatureList) {
+        for (NBTTagCompound partyMemCompound : this.creatureListNBT) {
             if (partyMemCompound.getUniqueId("UniqueID") != null && partyMemCompound.getUniqueId("UniqueID").equals(creature.getUniqueID())) {
                 NBTTagCompound partyMemCompoundUpdt = new NBTTagCompound();
                 partyMemCompoundUpdt.setUniqueId("UniqueID", creature.getUniqueID());
                 partyMemCompoundUpdt.setString("CustomName", creature.getCustomNameTag());
                 creature.writeEntityToNBT(partyMemCompoundUpdt);
 
-                if (this.creatureList.contains(partyMemCompound)) this.replaceInCreatureList(this.creatureList.indexOf(partyMemCompound), partyMemCompoundUpdt);
+                if (this.creatureListNBT.contains(partyMemCompound)) this.replaceInCreatureList(this.creatureListNBT.indexOf(partyMemCompound), partyMemCompoundUpdt);
             }
         }
     }
@@ -136,11 +152,14 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     private boolean creatureExistsInWorld(RiftCreature creature) {
-        return this.world.getLoadedEntityList().contains(creature);
+        List<UUID> worldEntityListUUID = this.world.getLoadedEntityList().stream()
+                .map(c -> c.getUniqueID())
+                .collect(Collectors.toList());
+        return worldEntityListUUID.contains(creature.getUniqueID());
     }
 
     public void addToCreatureList(NBTTagCompound tagCompound) {
-        this.creatureList.add(tagCompound);
+        this.creatureListNBT.add(tagCompound);
         if (!this.world.isRemote) {
             this.markDirty();
             IBlockState state = this.world.getBlockState(this.pos);
@@ -149,7 +168,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     public void replaceInCreatureList(int pos, NBTTagCompound tagCompound) {
-        this.creatureList.set(pos, tagCompound);
+        this.creatureListNBT.set(pos, tagCompound);
         if (!this.world.isRemote) {
             this.markDirty();
             IBlockState state = this.world.getBlockState(this.pos);
@@ -158,7 +177,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     public void removeFromCreatureList(int pos) {
-        this.creatureList.remove(pos);
+        this.creatureListNBT.remove(pos);
         if (!this.world.isRemote) {
             this.markDirty();
             IBlockState state = this.world.getBlockState(this.pos);
@@ -167,11 +186,11 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     public List<NBTTagCompound> getCreatureList() {
-        return this.creatureList;
+        return this.creatureListNBT;
     }
 
     public void setCreatureList(List<NBTTagCompound> value) {
-        this.creatureList = value;
+        this.creatureListNBT = value;
         if (!this.world.isRemote) {
             this.markDirty();
             IBlockState state = this.world.getBlockState(this.pos);
@@ -179,17 +198,18 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         }
     }
 
-    public List<RiftCreature> getCreatures() {
-        List<RiftCreature> creatures = new ArrayList<>();
-        for (NBTTagCompound compound : this.creatureList) {
+    public void createCreatureList() {
+        //add creatures to list
+        for (NBTTagCompound compound : this.creatureListNBT) {
             RiftCreatureType creatureType = RiftCreatureType.values()[compound.getByte("CreatureType")];
             UUID uniqueID = compound.getUniqueId("UniqueID");
             String customName = compound.getString("CustomName");
-            if (creatureType != null) {
-                RiftCreature creature = creatureType.invokeClass(world);
+            boolean creatureExists = this.creatureList.stream().noneMatch(c -> c.getUniqueID().equals(uniqueID));
+            if (creatureType != null && creatureExists) {
+                RiftCreature creature = creatureType.invokeClass(this.world);
 
                 //attributes and creature health dont carry over on client side, this should be a workaround
-                if (world.isRemote) {
+                if (this.world.isRemote) {
                     creature.setHealth(compound.getFloat("Health"));
                     SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), compound.getTagList("Attributes", 10));
                 }
@@ -197,10 +217,33 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
                 creature.readEntityFromNBT(compound);
                 creature.setUniqueId(uniqueID);
                 creature.setCustomNameTag(customName);
-                creatures.add(creature);
+                this.creatureList.add(creature);
             }
         }
-        return creatures;
+
+        //compare creaturenbt list to creature list to remove creatures that no longer exist
+        List<UUID> nbtUUIDList = this.creatureListNBT.stream()
+                .map(nbt -> nbt.getUniqueId("UniqueID"))
+                .collect(Collectors.toList());
+        this.creatureList = this.creatureList.stream().filter(c -> nbtUUIDList.contains(c.getUniqueID())).collect(Collectors.toList());
+
+        //compare creaturenbt list to creature list to change creature order
+        for (int x = 0; x < this.creatureList.size(); x++) {
+            if (!this.creatureList.get(x).getUniqueID().equals(nbtUUIDList.get(x))) {
+                for (int y = x; y < this.creatureList.size(); y++) {
+                    if (this.creatureList.get(y).getUniqueID().equals(nbtUUIDList.get(x))) {
+                        RiftCreature oldValue = this.creatureList.get(x);
+                        RiftCreature newValue = this.creatureList.get(y);
+                        this.creatureList.set(x, newValue);
+                        this.creatureList.set(y, oldValue);
+                    }
+                }
+            }
+        }
+    }
+
+    public List<RiftCreature> getCreatures() {
+        return this.creatureList;
     }
 
     public int getMaxWanderingCreatures() {
@@ -242,7 +285,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
                 for (int i = 0; i < boxDeployedCreaturesList.tagCount(); i++) {
                     finalPartyCreatures.add(boxDeployedCreaturesList.getCompoundTagAt(i));
                 }
-                this.creatureList = finalPartyCreatures;
+                this.creatureListNBT = finalPartyCreatures;
             }
         }
     }
@@ -254,8 +297,8 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         compound.setInteger("WanderRange", this.wanderRange);
 
         NBTTagList boxDeployedCreaturesList = new NBTTagList();
-        if (!this.creatureList.isEmpty()) {
-            for (NBTTagCompound boxNBT : this.creatureList) boxDeployedCreaturesList.appendTag(boxNBT);
+        if (!this.creatureListNBT.isEmpty()) {
+            for (NBTTagCompound boxNBT : this.creatureListNBT) boxDeployedCreaturesList.appendTag(boxNBT);
             compound.setTag("BoxDeployedCreatures", boxDeployedCreaturesList);
         }
         else compound.setTag("BoxDeployedCreatures", boxDeployedCreaturesList);
@@ -293,8 +336,20 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
                 for (int i = 0; i < boxDeployedCreaturesList.tagCount(); i++) {
                     finalPartyCreatures.add(boxDeployedCreaturesList.getCompoundTagAt(i));
                 }
-                this.creatureList = finalPartyCreatures;
+                this.creatureListNBT = finalPartyCreatures;
             }
         }
+    }
+
+
+    //for testing only
+    public List<String> creatureListNBTSimple() {
+        List<String> list = new ArrayList<>();
+        for (NBTTagCompound tagCompound : this.creatureListNBT){
+            RiftCreatureType creatureType = RiftCreatureType.values()[tagCompound.getByte("CreatureType")];
+            int level = tagCompound.getInteger("Level");
+            list.add(creatureType.friendlyName+" (Level "+level+")");
+        }
+        return list;
     }
 }

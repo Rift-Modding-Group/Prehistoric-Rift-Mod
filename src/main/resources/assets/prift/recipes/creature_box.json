@@ -1,0 +1,23 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X#X",
+    "#I#",
+    "X#X"
+  ],
+  "key": {
+    "#": {
+      "item": "prift:rift_shard"
+    },
+    "I": {
+      "item": "prift:rift_shard_block"
+    },
+    "X": {
+      "type": "forge:ore_dict",
+      "ore": "cobblestone"
+    }
+  },
+  "result": {
+    "item": "prift:creature_box"
+  }
+}

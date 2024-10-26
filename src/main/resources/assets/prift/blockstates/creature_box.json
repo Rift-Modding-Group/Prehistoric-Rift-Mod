@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "prift:creature_box" },
+    "facing=south": { "model": "prift:creature_box", "y": 180 },
+    "facing=west":  { "model": "prift:creature_box", "y": 270 },
+    "facing=east":  { "model": "prift:creature_box", "y": 90 }
+  }
+}

@@ -685,7 +685,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                         else player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
-                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && !this.getTameStatus().equals(TameStatusType.TURRET_MODE)) {
+                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && !this.getTameStatus().equals(TameStatusType.TURRET_MODE) && !this.getDeploymentType().equals(DeploymentType.BASE)) {
                         if (this instanceof IImpregnable) {
                             if (!((IImpregnable)this).isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                             else player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, this.getEntityId() ,0, 0);

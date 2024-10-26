@@ -16,6 +16,8 @@ import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawning;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import anightdazingzoroark.prift.server.events.RiftCreatureBoxBorder;
+import anightdazingzoroark.prift.server.events.ServerEvents;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
 import anightdazingzoroark.prift.server.inventory.CreatureContainer;
 import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
@@ -88,6 +90,7 @@ public class ServerProxy implements IGuiHandler {
 
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ServerEvents());
+        MinecraftForge.EVENT_BUS.register(new RiftCreatureBoxBorder.RiftCreatureBorderHandler());
         MinecraftForge.EVENT_BUS.register(new RiftCreatureSpawning());
         GameRegistry.registerWorldGenerator(new RiftPlantGenerator(), 0);
     }

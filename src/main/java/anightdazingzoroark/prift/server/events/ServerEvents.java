@@ -1,10 +1,11 @@
-package anightdazingzoroark.prift.server;
+package anightdazingzoroark.prift.server.events;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBaseTop;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.server.RiftDamage;
 import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
@@ -18,7 +19,6 @@ import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftOnHitMultipart;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.google.common.base.Predicate;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
@@ -36,7 +36,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;

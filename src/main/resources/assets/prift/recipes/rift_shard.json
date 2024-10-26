@@ -1,0 +1,12 @@
+{
+  "type": "forge:ore_shapeless",
+  "ingredients": [
+    {
+      "item": "prift:rift_shard_block"
+    }
+  ],
+  "result": {
+    "item": "prift:rift_shard",
+    "count": 9
+  }
+}

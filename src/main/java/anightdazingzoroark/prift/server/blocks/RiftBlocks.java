@@ -26,6 +26,8 @@ public class RiftBlocks {
     public static Block PYROBERRY_BUSH;
     public static Block CRYOBERRY_BUSH;
 
+    public static Block RIFT_SHARD_BLOCK;
+
     public static Block PYROBERRY_JUICE_FLUID;
     public static Block CRYOBERRY_JUICE_FLUID;
 
@@ -36,12 +38,14 @@ public class RiftBlocks {
         PYROBERRY_BUSH = registerBlock(new RiftPyroberryBush(), "pyroberry_bush", false);
         CRYOBERRY_BUSH = registerBlock(new RiftCryoberryBush(), "cryoberry_bush", false);
 
+        RIFT_SHARD_BLOCK = registerBlock(new Block(Material.ROCK), "rift_shard_block", true);
+
         //fluid shenanigans
         PYROBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.PYROBERRY_JUICE, Material.WATER), "pyroberry_juice", true, true, false);
         CRYOBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.CRYOBERRY_JUICE, Material.WATER), "cryoberry_juice", true, true, false);
 
         CREATURE_BOX = registerBlock(new RiftCreatureBox(), "creature_box", true);
-        //to add: deployment boxes for ranchery and breeding
+        //todo: deployment boxes for ranchery and breeding
         //ranchery is for creatures that may be ranched for their meat or other drops
         //breeding is for creature breeding
         //should probably add gender to creatures too

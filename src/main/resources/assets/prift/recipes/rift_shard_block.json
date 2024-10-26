@@ -1,0 +1,16 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "prift:rift_shard"
+    }
+  },
+  "result": {
+    "item": "prift:rift_shard_block"
+  }
+}

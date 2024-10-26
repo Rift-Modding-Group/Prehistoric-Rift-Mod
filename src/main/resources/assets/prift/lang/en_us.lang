@@ -98,6 +98,7 @@ item.semi_manual_hammerer_core.name=Semi Manual Hammerer Core
 item.semi_manual_machine_frame.name=Semi Manual Machine Frame
 item.hammer.name=Hammer
 item.file.name=File
+item.rift_shard.name=Rift Shard
 item.bola.name=Bola
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
@@ -371,6 +372,8 @@ tile.semi_manual_extruder.name=Semi Automatic Extruder
 tile.semi_manual_hammerer.name=Semi Automatic Hammerer
 tile.millstone.name=Millstone
 tile.mechanical_filter.name=Mechanical Filter
+tile.creature_box.name=Creature Box
+tile.rift_shard_block.name=Block of Rift Shards
 
 hwyla.health=Health: %s / %s
 hwyla.power_consumed=Power Consumed: %s
