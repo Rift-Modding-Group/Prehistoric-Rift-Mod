@@ -116,14 +116,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
                 NBTTagCompound compoundPartySelected = this.partyCreatures.get(partyPosSelected);
-                NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
+                NBTTagCompound compoundBoxDepSelected = this.boxCreatureDeployedModified(creatureBox.getCreatureList().get(boxDepPosSelected), true);
                 compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE.ordinal());
-                compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
-                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
-                compoundBoxDepSelected.setBoolean("HasHomePos", false);
-                compoundBoxDepSelected.removeTag("HomePosX");
-                compoundBoxDepSelected.removeTag("HomePosY");
-                compoundBoxDepSelected.removeTag("HomePosZ");
                 this.partyCreatures.set(partyPosSelected, compoundBoxDepSelected);
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundPartySelected);
             }
@@ -163,14 +157,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
                 NBTTagCompound compoundBoxSelected = this.boxCreatures.get(boxPosSelected);
-                NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
+                NBTTagCompound compoundBoxDepSelected = this.boxCreatureDeployedModified(creatureBox.getCreatureList().get(boxDepPosSelected), false);
                 compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.BASE.ordinal());
-                compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
-                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
-                compoundBoxDepSelected.setBoolean("HasHomePos", false);
-                compoundBoxDepSelected.removeTag("HomePosX");
-                compoundBoxDepSelected.removeTag("HomePosY");
-                compoundBoxDepSelected.removeTag("HomePosZ");
                 this.boxCreatures.set(boxPosSelected, compoundBoxDepSelected);
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundBoxSelected);
             }
@@ -193,14 +181,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
-                NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
+                NBTTagCompound compoundBoxDepSelected = this.boxCreatureDeployedModified(creatureBox.getCreatureList().get(boxDepPosSelected), true);
                 NBTTagCompound compoundPartySelected = this.partyCreatures.get(partyPosSelected);
-                compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
-                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
-                compoundBoxDepSelected.setBoolean("HasHomePos", false);
-                compoundBoxDepSelected.removeTag("HomePosX");
-                compoundBoxDepSelected.removeTag("HomePosY");
-                compoundBoxDepSelected.removeTag("HomePosZ");
                 compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE.ordinal());
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundPartySelected);
                 this.partyCreatures.set(partyPosSelected, compoundBoxDepSelected);
@@ -212,13 +194,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
-                NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
-                compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
-                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
-                compoundBoxDepSelected.setBoolean("HasHomePos", false);
-                compoundBoxDepSelected.removeTag("HomePosX");
-                compoundBoxDepSelected.removeTag("HomePosY");
-                compoundBoxDepSelected.removeTag("HomePosZ");
+                NBTTagCompound compoundBoxDepSelected = this.boxCreatureDeployedModified(creatureBox.getCreatureList().get(boxDepPosSelected), true);
                 this.partyCreatures.add(compoundBoxDepSelected);
                 creatureBox.removeFromCreatureList(boxDepPosSelected);
             }
@@ -229,14 +205,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
-                NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
+                NBTTagCompound compoundBoxDepSelected = this.boxCreatureDeployedModified(creatureBox.getCreatureList().get(boxDepPosSelected), false);
                 NBTTagCompound compoundBoxSelected = this.boxCreatures.get(boxPosSelected);
-                compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
-                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
-                compoundBoxDepSelected.setBoolean("HasHomePos", false);
-                compoundBoxDepSelected.removeTag("HomePosX");
-                compoundBoxDepSelected.removeTag("HomePosY");
-                compoundBoxDepSelected.removeTag("HomePosZ");
                 compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.BASE.ordinal());
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundBoxSelected);
                 this.boxCreatures.set(boxPosSelected, compoundBoxDepSelected);
@@ -248,13 +218,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
-                NBTTagCompound compoundBoxDepSelected = creatureBox.getCreatureList().get(boxDepPosSelected);
-                compoundBoxDepSelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
-                compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
-                compoundBoxDepSelected.setBoolean("HasHomePos", false);
-                compoundBoxDepSelected.removeTag("HomePosX");
-                compoundBoxDepSelected.removeTag("HomePosY");
-                compoundBoxDepSelected.removeTag("HomePosZ");
+                NBTTagCompound compoundBoxDepSelected = this.boxCreatureDeployedModified(creatureBox.getCreatureList().get(boxDepPosSelected), false);
                 this.boxCreatures.add(compoundBoxDepSelected);
                 creatureBox.removeFromCreatureList(boxDepPosSelected);
             }
@@ -431,6 +395,25 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 }
             }
         }
+    }
+
+    private NBTTagCompound boxCreatureDeployedModified(NBTTagCompound compoundBoxDepSelected, boolean toParty) {
+        byte deploymentTypeByte = toParty ? (byte) DeploymentType.PARTY_INACTIVE.ordinal() : (byte) DeploymentType.BASE_INACTIVE.ordinal();
+        compoundBoxDepSelected.setByte("DeploymentType", deploymentTypeByte);
+        compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
+        compoundBoxDepSelected.setBoolean("HasHomePos", false);
+        compoundBoxDepSelected.removeTag("HomePosX");
+        compoundBoxDepSelected.removeTag("HomePosY");
+        compoundBoxDepSelected.removeTag("HomePosZ");
+        //for creatures with workstations
+        if (compoundBoxDepSelected.hasKey("UsingWorkstation")) compoundBoxDepSelected.setBoolean("UsingWorkstation", false);
+        //for creatures with lead based workstations
+        if (compoundBoxDepSelected.hasKey("UsingLeadForWork")) compoundBoxDepSelected.setBoolean("UsingLeadForWork", false);
+        //for turret mode users
+        if (compoundBoxDepSelected.hasKey("TurretMode")) compoundBoxDepSelected.setBoolean("TurretMode", false);
+        //for harvest on wander users
+        if (compoundBoxDepSelected.hasKey("CanHarvest")) compoundBoxDepSelected.setBoolean("CanHarvest", false);
+        return compoundBoxDepSelected;
     }
 
     @Override

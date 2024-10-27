@@ -20,28 +20,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatureFromMenu> {
     private TameStatusType tameStatus;
     private TameBehaviorType tameBehavior;
-    private TurretModeTargeting turretModeTargeting;
     private int creatureId;
 
     public RiftChangeCreatureFromMenu() {}
 
     public RiftChangeCreatureFromMenu(RiftCreature creature, TameStatusType tameStatus) {
-        this(creature, tameStatus, creature.getTameBehavior(), creature.getTurretTargeting());
+        this(creature, tameStatus, creature.getTameBehavior());
     }
 
     public RiftChangeCreatureFromMenu(RiftCreature creature, TameBehaviorType tameBehavior) {
-        this(creature, creature.getTameStatus(), tameBehavior, creature.getTurretTargeting());
+        this(creature, creature.getTameStatus(), tameBehavior);
     }
 
-    public RiftChangeCreatureFromMenu(RiftCreature creature, TurretModeTargeting turretModeTargeting) {
-        this(creature, creature.getTameStatus(), creature.getTameBehavior(), turretModeTargeting);
-    }
-
-    public RiftChangeCreatureFromMenu(RiftCreature creature, TameStatusType tameStatus, TameBehaviorType tameBehavior, TurretModeTargeting turretModeTargeting) {
+    public RiftChangeCreatureFromMenu(RiftCreature creature, TameStatusType tameStatus, TameBehaviorType tameBehavior) {
         this.creatureId = creature.getEntityId();
         this.tameStatus = tameStatus;
         this.tameBehavior = tameBehavior;
-        this.turretModeTargeting = turretModeTargeting;
     }
 
     @Override
@@ -49,7 +43,6 @@ public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatu
         this.creatureId = buf.readInt();
         this.tameStatus = TameStatusType.values()[buf.readInt()];
         this.tameBehavior = TameBehaviorType.values()[buf.readInt()];
-        this.turretModeTargeting = TurretModeTargeting.values()[buf.readInt()];
     }
 
     @Override
@@ -57,7 +50,6 @@ public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatu
         buf.writeInt(this.creatureId);
         buf.writeInt(this.tameStatus.ordinal());
         buf.writeInt(this.tameBehavior.ordinal());
-        buf.writeInt(this.turretModeTargeting.ordinal());
     }
 
     @Override
@@ -66,7 +58,6 @@ public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatu
         RiftCreature interacted = (RiftCreature) player.world.getEntityByID(message.creatureId);
         interacted.setTameBehavior(message.tameBehavior);
         interacted.setTameStatus(message.tameStatus);
-        interacted.setTurretModeTargeting(message.turretModeTargeting);
         interacted.getNavigator().clearPath();
         interacted.setAttackTarget((EntityLivingBase)null);
     }
@@ -78,15 +69,8 @@ public class RiftChangeCreatureFromMenu extends AbstractMessage<RiftChangeCreatu
         if (!interacted.getTameBehavior().equals(message.tameBehavior)) this.sendTameBehaviorMessage(message.tameBehavior, interacted);
         interacted.setTameBehavior(message.tameBehavior);
 
-        if (!interacted.getTameStatus().equals(message.tameStatus)) {
-            this.sendTameStatusMessage(message.tameStatus, interacted);
-            if (message.tameStatus.equals(TameStatusType.TURRET_MODE)) interacted.removeSpeed();
-            else interacted.resetSpeed();
-        }
+        if (!interacted.getTameStatus().equals(message.tameStatus)) this.sendTameStatusMessage(message.tameStatus, interacted);
         interacted.setTameStatus(message.tameStatus);
-
-        if (!interacted.getTurretTargeting().equals(message.turretModeTargeting)) this.sendTurretTargetingMessage(message.turretModeTargeting, interacted);
-        interacted.setTurretModeTargeting(message.turretModeTargeting);
 
         interacted.getNavigator().clearPath();
         interacted.setAttackTarget((EntityLivingBase)null);

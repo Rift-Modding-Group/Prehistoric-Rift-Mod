@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
@@ -80,7 +79,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
-    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ACTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -104,11 +102,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> JUST_SPAWNED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> TAME_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HAS_HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> UNCLAIMED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> INCAP_COUNTDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> UNCLAIM_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private int energyMod;
@@ -203,7 +199,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(VARIANT, rand.nextInt(4));
         this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
-        this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
         this.dataManager.register(SADDLED, false);
         this.dataManager.register(ENERGY, 20);
         this.dataManager.register(ACTING, false);
@@ -227,11 +222,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(JUST_SPAWNED, true);
         this.dataManager.register(TAME_PROGRESS, 0);
         this.dataManager.register(HAS_HOME_POS, false);
-        this.dataManager.register(UNCLAIMED, false);
         this.dataManager.register(INCAPACITATED, false);
         this.dataManager.register(INCAP_COUNTDOWN, 1200);
         this.dataManager.register(SLEEPING, false);
-        this.dataManager.register(UNCLAIM_TIMER, 0);
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) DeploymentType.NONE.ordinal());
     }
@@ -302,7 +295,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();
             if (this.isTamed()) {
-                if (this.isUnclaimed()) this.manageUnclaimed();
                 this.updateEnergyMove();
                 this.updateEnergyActions();
                 this.resetEnergyActionMod();
@@ -462,28 +454,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setScaleForAge(boolean child) {
         float scale = RiftUtil.clamp(Math.min((0.75f/24000f) * (this.getAgeInTicks() - 24000f) + 1f, 1f), 0.25f, 1f);
         this.setScale(scale);
-    }
-
-    private void manageUnclaimed() {
-        this.setUnclaimTimer(this.getUnclaimTimer() + 1);
-        if (this.getUnclaimTimer() >= 24000) {
-            this.setTamed(false);
-            this.setTameStatus(TameStatusType.WANDER);
-            this.clearHomePos();
-            this.setUnclaimTimer(0);
-            for (int i = 0; i < this.creatureInventory.getSizeInventory(); i++) {
-                ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
-                EntityItem entityItem = new EntityItem(this.world, this.posX, this.posY + this.getEyeHeight(), this.posZ, itemInSlot);
-                if (this instanceof Apatosaurus) {
-                    if (itemInSlot.getItem() == RiftItems.APATOSAURUS_PLATFORM) this.setSaddled(false);
-                }
-                else {
-                    if (this.saddleItemEqual(itemInSlot)) this.setSaddled(false);
-                }
-                this.world.spawnEntity(entityItem);
-                this.creatureInventory.setInventorySlotContents(i, new ItemStack(Items.AIR));
-            }
-        }
     }
 
     private void updateEnergyMove() {
@@ -685,7 +655,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                         else player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
-                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && !this.getTameStatus().equals(TameStatusType.TURRET_MODE) && !this.getDeploymentType().equals(DeploymentType.BASE)) {
+                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode()) && !this.getDeploymentType().equals(DeploymentType.BASE)) {
                         if (this instanceof IImpregnable) {
                             if (!((IImpregnable)this).isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                             else player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, this.getEntityId() ,0, 0);
@@ -702,10 +672,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
                 else player.sendStatusMessage(new TextComponentTranslation("reminder.not_creature_owner", this.getOwner().getName()), false);
-            }
-            else {
-                ClientProxy.popupFromRadial = PopupFromRadial.CLAIM;
-                RiftMessages.WRAPPER.sendToServer(new RiftOpenPopupFromRadial(this));
             }
             return true;
         }
@@ -978,7 +944,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setByte("CreatureType", (byte) this.creatureType.ordinal());
         compound.setByte("TameStatus", (byte) this.getTameStatus().ordinal());
         compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
-        compound.setByte("TurretTargeting", (byte) this.getTurretTargeting().ordinal());
         compound.setBoolean("Saddled", this.isSaddled());
         if (this.creatureInventory != null) {
             NBTTagList nbttaglist = new NBTTagList();
@@ -1004,8 +969,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             compound.setInteger("HomePosY", this.homePosition.getY());
             compound.setInteger("HomePosZ", this.homePosition.getZ());
         }
-        compound.setBoolean("Unclaimed", this.isUnclaimed());
-        compound.setInteger("UnclaimTimer", this.getUnclaimTimer());
         compound.setBoolean("Incapacitated", this.isIncapacitated());
         compound.setByte("DeploymentType", (byte) this.getDeploymentType().ordinal());
     }
@@ -1018,7 +981,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setVariant(compound.getInteger("Variant"));
         if (compound.hasKey("TameStatus")) this.setTameStatus(TameStatusType.values()[compound.getByte("TameStatus")]);
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
-        if (this.canDoTurretMode() && compound.hasKey("TurretTargeting")) this.setTurretModeTargeting(TurretModeTargeting.values()[compound.getByte("TurretTargeting")]);
         this.setSaddled(compound.getBoolean("Saddled"));
         if (this.creatureInventory != null) {
             NBTTagList nbtTagList = compound.getTagList("Items", 10);
@@ -1045,11 +1007,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setJustSpawned(compound.getBoolean("JustSpawned"));
         this.setTameProgress(compound.getInteger("TameProgress"));
         if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
-        this.setUnclaimed(compound.getBoolean("Unclaimed"));
-        this.setUnclaimTimer(compound.getInteger("UnclaimTimer"));
         this.setIncapacitated(compound.getBoolean("Incapacitated"));
         this.setDeploymentType(DeploymentType.values()[compound.getByte("DeploymentType")]);
-        if (this.isUnclaimed()) this.setTamed(true);
     }
 
     private void initInventory() {
@@ -1226,13 +1185,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
     public void setTameBehavior(TameBehaviorType tameBehavior) {
         this.dataManager.set(BEHAVIOR, (byte) tameBehavior.ordinal());
-    }
-
-    public TurretModeTargeting getTurretTargeting() {
-        return TurretModeTargeting.values()[this.dataManager.get(TURRET_TARGET).byteValue()];
-    }
-    public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
-        this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
     }
 
     //for multi hitbox stuff
@@ -1449,14 +1401,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(AGE_TICKS, value * 24000);
     }
 
-    public boolean isUnclaimed() {
-        return this.dataManager.get(UNCLAIMED);
-    }
-
-    public void setUnclaimed(boolean value) {
-        this.dataManager.set(UNCLAIMED, value);
-    }
-
     public boolean isIncapacitated() {
         return this.dataManager.get(INCAPACITATED);
     }
@@ -1480,14 +1424,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setSleeping(boolean value) {
         this.dataManager.set(SLEEPING, value);
         this.removePassengers();
-    }
-
-    public int getUnclaimTimer() {
-        return this.dataManager.get(UNCLAIM_TIMER);
-    }
-
-    public void setUnclaimTimer(int value) {
-        this.dataManager.set(UNCLAIM_TIMER, value);
     }
 
     public boolean isClimbing() {
@@ -1611,10 +1547,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public abstract boolean hasRightClickChargeBar();
 
     public abstract boolean hasSpacebarChargeBar();
-
-    public boolean canDoTurretMode() {
-        return false;
-    }
 
     public boolean checkBasedOnStrength(IBlockState blockState) {
         Block block = blockState.getBlock();
@@ -1877,7 +1809,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this instanceof IWorkstationUser) {
             leashOperatingFlag = !((IWorkstationUser)this).isUsingWorkstation();
         }
-        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && !this.getTameStatus().equals(TameStatusType.TURRET_MODE) && leashOperatingFlag;
+        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && (!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode()) && leashOperatingFlag;
     }
 
     public void onDeath(DamageSource cause) {
@@ -1899,7 +1831,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public List<RiftTameRadialChoice> mainRadialChoices() {
         List<RiftTameRadialChoice> list = new ArrayList<>();
         list.add(RiftTameRadialChoice.INVENTORY);
-        if (this.getDeploymentType() != DeploymentType.BASE || this.canDoTurretMode()) list.add(RiftTameRadialChoice.STATE);
         if (this.canBeSaddled() && this.getDeploymentType() == DeploymentType.PARTY && this.isRideable) list.add(RiftTameRadialChoice.RIDE);
         list.add(RiftTameRadialChoice.OPTIONS);
         list.add(RiftTameRadialChoice.BEHAVIOR);
@@ -1912,7 +1843,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         list.add(RiftTameRadialChoice.STAND);
         list.add(RiftTameRadialChoice.SIT);
         list.add(RiftTameRadialChoice.WANDER);
-        if (this.canDoTurretMode()) list.add(RiftTameRadialChoice.TURRET_MODE);
         return list;
     }
 
@@ -1929,11 +1859,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public List<RiftTameRadialChoice> optionsRadialChoices() {
         List<RiftTameRadialChoice> list = new ArrayList<>();
         list.add(RiftTameRadialChoice.BACK);
-        list.add(RiftTameRadialChoice.CHANGE_NAME);
-        if (this.getDeploymentType() != DeploymentType.BASE) list.add(RiftTameRadialChoice.SET_HOME);
-        //list.add(RiftTameRadialChoice.UNCLAIM);
         if (this instanceof IWorkstationUser) list.add(RiftTameRadialChoice.SET_WORKSTATION);
         if (this instanceof IHarvestWhenWandering) list.add(RiftTameRadialChoice.SET_WANDER_HARVEST);
+        if (this instanceof ITurretModeUser) list.add(RiftTameRadialChoice.SET_TURRET_MODE);
         return list;
     }
 

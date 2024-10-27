@@ -48,7 +48,7 @@ public class RiftParasaurolophusBlow extends EntityAIBase {
     @Override
     public void resetTask() {
         this.parasaurolophus.setBlowing(false);
-        if (!this.parasaurolophus.getTameStatus().equals(TameStatusType.TURRET_MODE)) this.parasaurolophus.resetSpeed();
+        if (!this.parasaurolophus.isTurretMode()) this.parasaurolophus.resetSpeed();
     }
 
     @Override
@@ -79,7 +79,7 @@ public class RiftParasaurolophusBlow extends EntityAIBase {
                 }
                 if (this.animTime > this.animLength) {
                     this.animTime = -1;
-                    if (!this.parasaurolophus.getTameStatus().equals(TameStatusType.TURRET_MODE)) this.parasaurolophus.resetSpeed();
+                    if (!this.parasaurolophus.isTurretMode()) this.parasaurolophus.resetSpeed();
                     this.parasaurolophus.setBlowing(false);
                     this.startBlowFlag = false;
                     if (!this.parasaurolophus.isTamed()) this.useFlag = false;

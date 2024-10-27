@@ -122,7 +122,6 @@ public class ClientProxy extends ServerProxy {
             IInventory playerInventory = player.inventory;
             return new RiftCreatureInvMenu(playerInventory, (RiftCreature) entity);
         }
-        else if (id == GUI_MENU_FROM_RADIAL) return new RiftPopupFromRadial((RiftCreature) entity);
         else if (id == GUI_WEAPON_INVENTORY) {
             IInventory playerInventory = player.inventory;
             return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);

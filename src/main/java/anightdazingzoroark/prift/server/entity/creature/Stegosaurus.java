@@ -11,12 +11,10 @@ import anightdazingzoroark.prift.config.StegosaurusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
-import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
-import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
-import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
+import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -55,7 +53,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttacker, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
+public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttacker, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
@@ -64,6 +62,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     private static final DataParameter<Integer> LEAD_WORK_X_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Y_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BYTE);
     public int strongAttackCharge;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
@@ -121,6 +121,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.dataManager.register(LEAD_WORK_X_POS, 0);
         this.dataManager.register(LEAD_WORK_Y_POS, 0);
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
+        this.dataManager.register(TURRET_MODE, false);
+        this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
     }
 
     @Override
@@ -182,6 +184,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         super.writeEntityToNBT(compound);
         this.writeHarvestWanderDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);
+        this.writeTurretModeDataToNBT(compound);
     }
 
     @Override
@@ -189,6 +192,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         super.readEntityFromNBT(compound);
         this.readHarvestWanderDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
+        this.readTurretModeDataFromNBT(compound);
     }
 
     private void manageCanStrongAttack() {
@@ -329,6 +333,23 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     public AxisAlignedBB breakRange() {
         return new AxisAlignedBB(-1, 0, -1, 1, 0, 1);
+    }
+
+    @Override
+    public boolean isTurretMode() {
+        return this.dataManager.get(TURRET_MODE);
+    }
+
+    @Override
+    public void setTurretMode(boolean value) {
+        this.dataManager.set(TURRET_MODE, value);
+    }
+
+    public TurretModeTargeting getTurretTargeting() {
+        return TurretModeTargeting.values()[this.dataManager.get(TURRET_TARGET).byteValue()];
+    }
+    public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
+        this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
     }
 
     @Override

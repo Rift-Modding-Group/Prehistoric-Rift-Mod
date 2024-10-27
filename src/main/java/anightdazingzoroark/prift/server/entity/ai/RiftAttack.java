@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
+import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -51,18 +52,18 @@ public class RiftAttack extends EntityAIBase {
             this.path = this.attacker.getNavigator().getPathToEntityLiving(entitylivingbase);
             double d0 = this.attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
 
-            if (this.path != null) return this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE);
+            if (this.path != null) return this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && (!(this.attacker instanceof ITurretModeUser) || !((ITurretModeUser) this.attacker).isTurretMode());
             else {
                 if (this.attacker instanceof IRangedAttacker) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && (!(this.attacker instanceof ITurretModeUser) || !((ITurretModeUser) this.attacker).isTurretMode()) && this.getRangedAttackReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !this.attacker.isRangedAttacking() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof IChargingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && ((IChargingMob) this.attacker).isNotUtilizingCharging() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && (!(this.attacker instanceof ITurretModeUser) || !((ITurretModeUser) this.attacker).isTurretMode()) && this.getChargeReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && ((IChargingMob) this.attacker).isNotUtilizingCharging() && !this.attacker.isActing();
                 }
                 else if (this.attacker instanceof ILeapAttackingMob) {
-                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE) && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !((ILeapAttackingMob)this.attacker).isLeaping() && !this.attacker.isActing();
+                    return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && (!(this.attacker instanceof ITurretModeUser) || !((ITurretModeUser) this.attacker).isTurretMode()) && this.getLeapReachSqr(entitylivingbase) < this.getAttackReachSqr(entitylivingbase) && !((ILeapAttackingMob)this.attacker).isLeaping() && !this.attacker.isActing();
                 }
-                return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && !this.attacker.getTameStatus().equals(TameStatusType.TURRET_MODE);
+                return this.getAttackReachSqr(entitylivingbase) >= d0 && this.attacker.getEnergy() > 0 && !this.attacker.isBeingRidden() && (!(this.attacker instanceof ITurretModeUser) || !((ITurretModeUser) this.attacker).isTurretMode());
             }
         }
     }

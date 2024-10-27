@@ -6,9 +6,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPowere
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
-import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
+import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
@@ -16,7 +14,7 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.ParasaurolophusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
-import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
+import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.block.BlockBloomery;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustionWorkerStoneBase;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
@@ -57,7 +55,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
+public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
     private static final DataParameter<Boolean> BLOWING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_BLOW = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
@@ -71,6 +69,8 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     private static final DataParameter<Integer> LEAD_WORK_X_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Y_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BYTE);
     private RiftCreaturePart neckPart;
     private RiftCreaturePart tail0Part;
     private RiftCreaturePart tail1Part;
@@ -122,6 +122,8 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.dataManager.register(LEAD_WORK_X_POS, 0);
         this.dataManager.register(LEAD_WORK_Y_POS, 0);
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
+        this.dataManager.register(TURRET_MODE, false);
+        this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
     }
 
     protected void initEntityAI() {
@@ -174,6 +176,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.writeHarvestWanderDataToNBT(compound);
         this.writeWorkstationDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);
+        this.writeTurretModeDataToNBT(compound);
     }
 
     @Override
@@ -182,6 +185,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.readHarvestWanderDataFromNBT(compound);
         this.readWorkstationDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
+        this.readTurretModeDataFromNBT(compound);
     }
 
     private void manageCanBlow() {
@@ -364,10 +368,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         return false;
     }
 
-    public boolean canDoTurretMode() {
-        return true;
-    }
-
     @Override
     public float getRenderSizeModifier() {
         return RiftUtil.setModelScale(this, 0.3f, 1.5f);
@@ -490,6 +490,23 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.dataManager.set(LEAD_WORK_Z_POS, 0);
         EntityPlayer player = (EntityPlayer)this.getOwner();
         if (!this.world.isRemote) this.clearLeadAttachPosMessage(destroyed, player);
+    }
+
+    @Override
+    public boolean isTurretMode() {
+        return this.dataManager.get(TURRET_MODE);
+    }
+
+    @Override
+    public void setTurretMode(boolean value) {
+        this.dataManager.set(TURRET_MODE, value);
+    }
+
+    public TurretModeTargeting getTurretTargeting() {
+        return TurretModeTargeting.values()[this.dataManager.get(TURRET_TARGET).byteValue()];
+    }
+    public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
+        this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
     }
 
     @Override

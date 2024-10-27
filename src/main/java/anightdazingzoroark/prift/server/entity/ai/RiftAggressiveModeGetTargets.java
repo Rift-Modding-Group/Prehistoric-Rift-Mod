@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
@@ -48,7 +49,7 @@ public class RiftAggressiveModeGetTargets extends EntityAITarget {
         else if (this.creature.isBeingRidden()) return false;
         else if (!this.creature.getTameBehavior().equals(TameBehaviorType.AGGRESSIVE)) return false;
         else if (this.creature.busyAtWork()) return false;
-        else if (this.creature.getTameStatus().equals(TameStatusType.TURRET_MODE)) return false;
+        else if (this.creature instanceof ITurretModeUser && ((ITurretModeUser) this.creature).isTurretMode()) return false;
         else {
             if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {
                 return false;
