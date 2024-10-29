@@ -6,7 +6,8 @@ import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBaseTop;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.RiftDamage;
-import anightdazingzoroark.prift.server.entity.PlayerJournalProgress;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
@@ -17,6 +18,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import anightdazingzoroark.prift.server.message.RiftJournalEditOne;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -149,9 +151,12 @@ public class ServerEvents {
             EntityPlayer player = (EntityPlayer)event.getSource().getTrueSource();
             RiftCreature creature = (RiftCreature)event.getEntityLiving();
             if (!player.world.isRemote) {
-                PlayerJournalProgress journalProgress = EntityPropertiesHandler.INSTANCE.getProperties(player, PlayerJournalProgress.class);
+                IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
                 if (!journalProgress.getUnlockedCreatures().contains(creature.creatureType)) {
+                    //add on server side
                     journalProgress.unlockCreature(creature.creatureType);
+                    //add on client side
+                    RiftMessages.WRAPPER.sendToAll(new RiftJournalEditOne(creature.creatureType, true));
                     player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
                 }
             }

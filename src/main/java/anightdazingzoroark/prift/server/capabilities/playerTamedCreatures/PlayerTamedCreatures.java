@@ -2,12 +2,10 @@ package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentType;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -439,5 +437,13 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 creatureBox.setCreatureList(newCreatureBoxDeployedList);
             }
         }
+    }
+
+    public enum DeploymentType {
+        NONE, //default
+        PARTY_INACTIVE,
+        PARTY, //with player in party
+        BASE, //wandering around box
+        BASE_INACTIVE //sitting in box
     }
 }

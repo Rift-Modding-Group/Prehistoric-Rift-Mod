@@ -1,8 +1,8 @@
 package anightdazingzoroark.prift.server.message;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
@@ -36,7 +36,7 @@ public class RiftAddToParty extends AbstractMessage<RiftAddToParty> {
         if (creature != null) {
             IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             tamedCreatures.addToPartyCreatures(creature);
-            creature.setDeploymentType(DeploymentType.PARTY);
+            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
             creature.updatePlayerTameList();
         }
     }
@@ -47,7 +47,7 @@ public class RiftAddToParty extends AbstractMessage<RiftAddToParty> {
         if (creature != null) {
             IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             tamedCreatures.addToPartyCreatures(creature);
-            creature.setDeploymentType(DeploymentType.PARTY);
+            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
             creature.updatePlayerTameList();
         }
     }

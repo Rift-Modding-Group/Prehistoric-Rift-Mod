@@ -2,9 +2,9 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
@@ -43,7 +43,7 @@ public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatur
         //remove from world
         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
         if (creature != null) {
-            creature.setDeploymentType(DeploymentType.NONE);
+            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
             creature.updatePlayerTameList();
 
             //for removing hitboxes
@@ -59,7 +59,7 @@ public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatur
         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
         if (creature != null) {
             player.sendStatusMessage(new TextComponentTranslation("reminder.creature_released", creature.getName(false), creature.getName(false)), false);
-            creature.setDeploymentType(DeploymentType.NONE);
+            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
             creature.updatePlayerTameList();
 
             //for removing hitboxes

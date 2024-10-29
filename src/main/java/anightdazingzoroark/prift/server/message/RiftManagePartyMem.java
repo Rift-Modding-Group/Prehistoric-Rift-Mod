@@ -1,18 +1,15 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.server.entity.PlayerTamedCreatures.DeploymentType;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
@@ -68,7 +65,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
                 creature.readEntityFromNBT(message.creatureNBT);
                 creature.setUniqueId(uniqueID);
                 creature.setCustomNameTag(customName);
-                creature.setDeploymentType(DeploymentType.PARTY);
+                creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                 creature.setPosition(owner.posX, owner.posY, owner.posZ);
 
                 player.world.spawnEntity(creature);
@@ -77,7 +74,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
         }
         else {
             RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
-            partyMember.setDeploymentType(DeploymentType.PARTY_INACTIVE);
+            partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
             partyMember.updatePlayerTameList();
 
             //for removing hitboxes
@@ -101,7 +98,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
                 creature.readEntityFromNBT(message.creatureNBT);
                 creature.setUniqueId(uniqueID);
                 creature.setCustomNameTag(customName);
-                creature.setDeploymentType(DeploymentType.PARTY);
+                creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                 creature.setPosition(owner.posX, owner.posY, owner.posZ);
 
                 player.world.spawnEntity(creature);
@@ -110,7 +107,7 @@ public class RiftManagePartyMem extends AbstractMessage<RiftManagePartyMem> {
         }
         else {
             RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
-            partyMember.setDeploymentType(DeploymentType.PARTY_INACTIVE);
+            partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
             partyMember.updatePlayerTameList();
 
             //for removing hitboxes
