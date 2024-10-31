@@ -2,6 +2,8 @@ package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -48,8 +50,9 @@ public class ClientEvents {
         GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
+        INonPotionEffects nonPotionEffects = player.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
 
-        if (properties.isCaptured || properties.isTiedByBola) {
+        if (properties.isCaptured || nonPotionEffects.isBolaCaptured()) {
             if (settings.keyBindForward.isKeyDown()) {
                 KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
             }

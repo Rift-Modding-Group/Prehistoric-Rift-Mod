@@ -412,25 +412,6 @@ public class ServerEvents {
         EntityLivingBase entity = event.getEntityLiving();
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
         if (!entity.world.isRemote) {
-            double fallMotion = !entity.onGround ? entity.motionY : 0;
-            boolean isMoving =  Math.sqrt((entity.motionX * entity.motionX) + (fallMotion * fallMotion) + (entity.motionZ * entity.motionZ)) > 0;
-            //manage bleeding
-            if (properties.isBleeding) {
-                if (isMoving) entity.attackEntityFrom(RiftDamage.RIFT_BLEED, (float)properties.bleedingStrength + 1F);
-                else entity.attackEntityFrom(RiftDamage.RIFT_BLEED, (float)(properties.bleedingStrength + 1) * 2F);
-                properties.ticksUntilStopBleeding--;
-            }
-            if (properties.ticksUntilStopBleeding <= 0) properties.resetBleeding();
-
-            //manage bola
-            if (properties.isTiedByBola) {
-                entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 255));
-//                entity.motionY -= 0.5;
-//                entity.velocityChanged = true;
-                properties.bolaTiedCountdown--;
-            }
-            if (properties.bolaTiedCountdown <= 0) properties.resetBolaCapture();
-
             RiftCreature creature = null;
             if (entity instanceof RiftCreature) creature = (RiftCreature) entity;
             if (creature != null) {
@@ -450,15 +431,6 @@ public class ServerEvents {
                         entity.swingingHand = null;
                     }
                 }
-            }
-
-            //manage bleed particles
-            if (properties.isBleeding) {
-                double motionY = RiftUtil.randomInRange(1D, 1.5D);
-                double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
-                double f1 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) + entity.getEntityBoundingBox().minY;
-                double f2 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxZ - entity.getEntityBoundingBox().minZ) + entity.getEntityBoundingBox().minZ;
-                RiftInitialize.PROXY.spawnParticle("bleed", f, f1, f2, 0D, motionY, 0D);
             }
 
             //manage pregnancy particles
@@ -483,9 +455,7 @@ public class ServerEvents {
     public void onEntityDeath(LivingDeathEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
         RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
-        properties.resetBleeding();
         properties.isCaptured = false;
-        properties.resetBolaCapture();
     }
 
     //manage cannon impacting stuff

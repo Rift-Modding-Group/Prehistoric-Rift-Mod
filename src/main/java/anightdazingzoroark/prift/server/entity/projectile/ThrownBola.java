@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
@@ -47,16 +49,14 @@ public class ThrownBola extends EntityArrow implements IRiftProjectile, IProject
                 EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
                 entityLivingBase.attackEntityFrom(DamageSource.causeThrownDamage(this, this.shootingEntity), 0f);
                 if (RiftUtil.isAppropriateSize(entityLivingBase, MobSize.MEDIUM)) {
-                    RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entityLivingBase, RiftEntityProperties.class);
-                    properties.setBolaCapture(300);
+                    NonPotionEffectsHelper.setBolaCaptured(entityLivingBase, 300);
                 }
             }
             else if (entity instanceof RiftCreaturePart) {
                 RiftCreature parent = ((RiftCreaturePart)entity).getParent();
                 parent.attackEntityFrom(DamageSource.causeThrownDamage(this, this.shootingEntity), 0f);
                 if (RiftUtil.isAppropriateSize(parent, MobSize.MEDIUM)) {
-                    RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(parent, RiftEntityProperties.class);
-                    properties.setBolaCapture(300);
+                    NonPotionEffectsHelper.setBolaCaptured(parent, 300);
                 }
             }
             this.setDead();

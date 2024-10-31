@@ -14,14 +14,9 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     public int leftClickFill;
     public int rightClickFill;
     public boolean rCTrigger;
-    public boolean isBleeding;
-    public int bleedingStrength;
-    public int ticksUntilStopBleeding;
     public boolean settingCreatureWorkstation;
     public int creatureIdForWorkstation;
     public boolean isCaptured;
-    public boolean isTiedByBola;
-    public int bolaTiedCountdown;
 
     @Override
     public int getTrackingTime() {
@@ -36,16 +31,9 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.rightClickFill = 0;
         this.rCTrigger = false;
 
-        this.isBleeding = false;
-        this.bleedingStrength = -1;
-        this.ticksUntilStopBleeding = 0;
-
         this.settingCreatureWorkstation = false;
         this.creatureIdForWorkstation = -1;
         this.isCaptured = false;
-
-        this.isTiedByBola = false;
-        this.bolaTiedCountdown = 0;
     }
 
     @Override
@@ -55,13 +43,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         compound.setInteger("LeftClickFill", this.leftClickFill);
         compound.setInteger("RightClickFill", this.rightClickFill);
         compound.setBoolean("RCTrigger", this.rCTrigger);
-
-        compound.setBoolean("IsBleeding", this.isBleeding);
-        compound.setInteger("BleedingStrength", this.bleedingStrength);
-        compound.setInteger("TicksUntilStopBleeding", this.ticksUntilStopBleeding);
-
-        compound.setBoolean("IsTiedByBola", this.isTiedByBola);
-        compound.setInteger("BolaCountdown", this.bolaTiedCountdown);
     }
 
     @Override
@@ -71,13 +52,6 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
         this.leftClickFill = compound.getInteger("LeftClickFill");
         this.rightClickFill = compound.getInteger("RightClickFill");
         this.rCTrigger = compound.getBoolean("RCTrigger");
-
-        this.isBleeding = compound.getBoolean("IsBleeding");
-        this.bleedingStrength = compound.getInteger("BleedingStrength");
-        this.ticksUntilStopBleeding = compound.getInteger("TicksUntilStopBleeding");
-
-        this.isTiedByBola = compound.getBoolean("IsTiedByBola");
-        this.bolaTiedCountdown = compound.getInteger("BolaCountdown");
     }
 
     @Override
@@ -88,27 +62,5 @@ public class RiftEntityProperties extends EntityProperties<EntityLivingBase> {
     @Override
     public Class<EntityLivingBase> getEntityClass() {
         return EntityLivingBase.class;
-    }
-
-    public void setBleeding(int strength, int ticks) {
-        this.isBleeding = true;
-        this.bleedingStrength = strength;
-        this.ticksUntilStopBleeding = ticks;
-    }
-
-    public void resetBleeding() {
-        this.isBleeding = false;
-        this.bleedingStrength = -1;
-        this.ticksUntilStopBleeding = 0;
-    }
-
-    public void setBolaCapture(int ticks) {
-        this.isTiedByBola = true;
-        this.bolaTiedCountdown = ticks;
-    }
-
-    public void resetBolaCapture() {
-        this.isTiedByBola = false;
-        this.bolaTiedCountdown = 0;
     }
 }

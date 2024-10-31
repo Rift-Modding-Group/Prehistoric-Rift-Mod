@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPowere
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.StegosaurusConfig;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -416,9 +417,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     private boolean attackEntityAsMobStrong(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), ((float) this.strongAttackCharge - 100f)/3f + 30f + (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
         if (flag) {
-            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entityIn, RiftEntityProperties.class);
             this.applyEnchantments(this, entityIn);
-            if (((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.canInflictBleed) properties.setBleeding(0, 200);
+            if (((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.canInflictBleed) NonPotionEffectsHelper.setBleeding((EntityLivingBase) entityIn, 0, 200);
         }
         return flag;
     }

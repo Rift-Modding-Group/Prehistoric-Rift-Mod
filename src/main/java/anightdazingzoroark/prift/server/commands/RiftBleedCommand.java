@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.commands;
 
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.command.CommandBase;
@@ -32,8 +33,7 @@ public class RiftBleedCommand extends CommandBase {
         else if (args.length == 2) {
             Entity target = getEntity(server, sender, args[0]);
             if (target instanceof EntityLivingBase) {
-                RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
-                properties.setBleeding(0, Integer.parseInt(args[1]) * 20);
+                NonPotionEffectsHelper.setBleeding((EntityLivingBase)target, 0, Integer.parseInt(args[1]) * 20);
                 notifyCommandListener(sender, this, "priftcommands.bleed.successful", new Object[] {target.getDisplayName()});
             }
             else throw new WrongUsageException("priftcommands.bleed.cannot_bleed", new Object[0]);
@@ -41,8 +41,7 @@ public class RiftBleedCommand extends CommandBase {
         else if (args.length == 3) {
             Entity target = getEntity(server, sender, args[0]);
             if (target instanceof EntityLivingBase) {
-                RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
-                properties.setBleeding(Integer.parseInt(args[2]), Integer.parseInt(args[1]) * 20);
+                NonPotionEffectsHelper.setBleeding((EntityLivingBase)target, Integer.parseInt(args[2]), Integer.parseInt(args[1]) * 20);
                 notifyCommandListener(sender, this, "priftcommands.bleed.successful", new Object[] {target.getDisplayName()});
             }
             else throw new WrongUsageException("priftcommands.bleed.cannot_bleed", new Object[0]);

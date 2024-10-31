@@ -9,6 +9,9 @@ import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.capabilities.CapabilityHandler;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffects;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsStorage;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressStorage;
@@ -71,6 +74,7 @@ public class ServerProxy implements IGuiHandler {
     public void preInit(FMLPreInitializationEvent e) {
         CapabilityManager.INSTANCE.register(IPlayerTamedCreatures.class, new PlayerTamedCreaturesStorage(), PlayerTamedCreatures::new);
         CapabilityManager.INSTANCE.register(IPlayerJournalProgress.class, new PlayerJournalProgressStorage(), PlayerJournalProgress::new);
+        CapabilityManager.INSTANCE.register(INonPotionEffects.class, new NonPotionEffectsStorage(), NonPotionEffects::new);
         MinecraftForge.EVENT_BUS.register(new CapabilityHandler());
 
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
