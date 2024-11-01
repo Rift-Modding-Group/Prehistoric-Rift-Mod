@@ -5,6 +5,8 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.RiftMMBlocks;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -26,6 +28,9 @@ public class RiftBlocks {
     public static Block PYROBERRY_BUSH;
     public static Block CRYOBERRY_BUSH;
 
+    public static Block RIFTED_STONE;
+    public static Block RIFTED_COBBLESTONE;
+    public static Block RIFT_SHARD_ORE;
     public static Block RIFT_SHARD_BLOCK;
 
     public static Block PYROBERRY_JUICE_FLUID;
@@ -38,6 +43,9 @@ public class RiftBlocks {
         PYROBERRY_BUSH = registerBlock(new RiftPyroberryBush(), "pyroberry_bush", false);
         CRYOBERRY_BUSH = registerBlock(new RiftCryoberryBush(), "cryoberry_bush", false);
 
+        RIFTED_STONE = registerBlock(new RiftRiftedStone(), "rifted_stone", true);
+        RIFTED_COBBLESTONE = registerBlock(new Block(Material.ROCK, MapColor.PURPLE).setHardness(7.5F).setResistance(10.0F), "rifted_cobblestone", true);
+        RIFT_SHARD_ORE = registerBlock(new RiftRiftShardOre(), "rift_shard_ore", true);
         RIFT_SHARD_BLOCK = registerBlock(new Block(Material.ROCK), "rift_shard_block", true);
 
         //fluid shenanigans

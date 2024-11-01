@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "prift:blocks/rifted_stone"
+  }
+}
