@@ -2,16 +2,13 @@ package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.ServerProxy;
-import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
-import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
-import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftOpenWeaponInventory;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.GameSettings;
@@ -49,10 +46,8 @@ public class ClientEvents {
     public void noMoveWhileTrapped(InputEvent.KeyInputEvent event) {
         GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
-        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
-        INonPotionEffects nonPotionEffects = player.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
 
-        if (properties.isCaptured || nonPotionEffects.isBolaCaptured()) {
+        if (NonPotionEffectsHelper.isCaptured(player) || NonPotionEffectsHelper.isBolaCaptured(player)) {
             if (settings.keyBindForward.isKeyDown()) {
                 KeyBinding.setKeyBindState(settings.keyBindForward.getKeyCode(), false);
             }

@@ -5,8 +5,8 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.AnomalocarisConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
 import anightdazingzoroark.prift.server.enums.MobSize;
@@ -15,7 +15,6 @@ import anightdazingzoroark.prift.server.message.RiftGrabberTargeting;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSetGrabTarget;
 import com.google.common.base.Predicate;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -186,19 +185,18 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
                     if (target != null && RiftUtil.isUsingSSR()) {
                         EntityLivingBase entityLivingBase = target instanceof RiftCreaturePart ? ((RiftCreaturePart)target).getParent() : (target instanceof EntityLivingBase ? (EntityLivingBase) target : null);
                         if (entityLivingBase != null) {
-                            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
                             boolean canGrabFlag;
 
                             if (target instanceof EntityPlayer) {
-                                canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf( ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize ));
+                                canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !NonPotionEffectsHelper.isCaptured(target) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf( ((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize ));
                             }
                             else {
-                                canGrabFlag = !target.equals(this) && !properties.isCaptured && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize));
+                                canGrabFlag = !target.equals(this) && !NonPotionEffectsHelper.isCaptured(target) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize));
                             }
 
                             if (canGrabFlag) {
                                 RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
-                                EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class).isCaptured = true;
+                                NonPotionEffectsHelper.setCaptured(target, true);
                                 this.setActing(true);
                             }
                         }
@@ -208,25 +206,24 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
                         List<EntityLivingBase> potGrabList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth()).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
                             @Override
                             public boolean apply(@Nullable EntityLivingBase input) {
-                                RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
                                 if (input instanceof EntityPlayer) {
-                                    return !input.getUniqueID().equals(ownerID) && !properties.isCaptured && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(creatureType)).general.maximumGrabTargetSize));
+                                    return !input.getUniqueID().equals(ownerID) && !NonPotionEffectsHelper.isCaptured(input) && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(creatureType)).general.maximumGrabTargetSize));
                                 }
                                 else {
-                                    return !properties.isCaptured && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(creatureType)).general.maximumGrabTargetSize));
+                                    return !NonPotionEffectsHelper.isCaptured(input) && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(creatureType)).general.maximumGrabTargetSize));
                                 }
                             }
                         });
                         potGrabList.remove(this);
                         if (!potGrabList.isEmpty()) {
                             RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, potGrabList.get(0)));
-                            EntityPropertiesHandler.INSTANCE.getProperties(potGrabList.get(0), RiftEntityProperties.class).isCaptured = true;
+                            NonPotionEffectsHelper.setCaptured(potGrabList.get(0), true);
                             this.setActing(true);
                         }
                     }
                 }
                 else {
-                    EntityPropertiesHandler.INSTANCE.getProperties(this.getGrabVictim(), RiftEntityProperties.class).isCaptured = false;
+                    NonPotionEffectsHelper.setCaptured(this.getGrabVictim(), false);
                     RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, null));
                     this.setActing(true);
                 }
@@ -251,11 +248,10 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         boolean playerRideFlag = (this.isBeingRidden() && this.getControllingPassenger() instanceof EntityPlayer);
         if (entityIn.isEntityAlive() && entityIn instanceof EntityLivingBase && !playerRideFlag) {
             EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
-            RiftEntityProperties entityProperties = EntityPropertiesHandler.INSTANCE.getProperties(entityLivingBase, RiftEntityProperties.class);
 
             if (RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(((AnomalocarisConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumGrabTargetSize))) {
                 RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
-                entityProperties.isCaptured = true;
+                NonPotionEffectsHelper.setCaptured(entityLivingBase, true);
             }
         }
         return super.attackEntityAsMob(entityIn);
@@ -273,7 +269,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     @Override
     public void onDeath(DamageSource source) {
         super.onDeath(source);
-        if (this.getGrabVictim() != null) EntityPropertiesHandler.INSTANCE.getProperties(this.getGrabVictim(), RiftEntityProperties.class).isCaptured = false;
+        if (this.getGrabVictim() != null) NonPotionEffectsHelper.setCaptured(this.getGrabVictim(), false);
     }
 
     public void setTamedBy(EntityPlayer player) {

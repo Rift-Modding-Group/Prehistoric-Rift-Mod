@@ -7,10 +7,12 @@ public class NonPotionEffects implements INonPotionEffects {
     private int bleedStrength;
     private int bleedTick;
 
-    private RiftCreature captor;
+    private boolean isCaptured;
 
     private boolean isBolaCaptured;
     private int bolaCapturedTick;
+
+    private boolean isRiding;
 
     @Override
     public void setBleeding(int strength, int ticks) {
@@ -40,18 +42,13 @@ public class NonPotionEffects implements INonPotionEffects {
     }
 
     @Override
-    public void setCapturedByCreature(RiftCreature creature) {
-        this.captor = creature;
+    public void setCaptured(boolean value) {
+        this.isCaptured = value;
     }
 
     @Override
-    public void undoCapture() {
-        this.captor = null;
-    }
-
-    @Override
-    public RiftCreature getCaptor() {
-        return this.captor;
+    public boolean isCaptured() {
+        return this.isCaptured;
     }
 
     @Override
@@ -73,5 +70,15 @@ public class NonPotionEffects implements INonPotionEffects {
     @Override
     public int getBolaCapturedTick() {
         return this.bolaCapturedTick;
+    }
+
+    @Override
+    public void setRiding(boolean value) {
+        this.isRiding = value;
+    }
+
+    @Override
+    public boolean isRiding() {
+        return this.isRiding;
     }
 }

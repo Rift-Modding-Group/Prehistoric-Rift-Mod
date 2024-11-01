@@ -47,6 +47,8 @@ public class ClientProxy extends ServerProxy {
     public static Object swapTypeForPopup;
     public static UUID creatureUUID;
     public static BlockPos creatureBoxBlockPos;
+    public static int creatureIdForWorkstation = -1;
+    public static boolean settingCreatureWorkstation = false;
     private int thirdPersonView = 0;
     private int previousViewType = 0;
     private RiftParticleSpawner particleSpawner;

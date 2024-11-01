@@ -2,13 +2,10 @@ package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
-import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
-import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
 import anightdazingzoroark.prift.server.enums.MobSize;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;

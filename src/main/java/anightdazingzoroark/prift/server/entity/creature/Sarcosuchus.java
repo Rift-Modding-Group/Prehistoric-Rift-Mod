@@ -7,17 +7,15 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
 import com.google.common.base.Predicate;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -34,8 +32,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -127,7 +123,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         if (this.isBeingRidden() && this.canUseRightClick() && this.getRightClickCooldown() == 0 && this.isUsingRightClick() && (this.getRightClickUse() >= 0 && this.getRightClickUse() <= 100) && this.getEnergy() > 6) this.forcedSpinAttack();
         else if (!this.isBeingRidden() || !this.canUseRightClick() || this.getRightClickCooldown() > 0 || !this.isUsingRightClick()) {
             this.spinTime = 0;
-            if (this.forcedSpinVictim != null) EntityPropertiesHandler.INSTANCE.getProperties(this.forcedSpinVictim, RiftEntityProperties.class).isCaptured = false;
+            if (this.forcedSpinVictim != null) NonPotionEffectsHelper.setCaptured(this.forcedSpinVictim, false);
             this.forcedSpinVictim = null;
             if (this.getRightClickCooldown() > 0) {
                 this.setRightClickCooldown(this.getRightClickCooldown() - 1);
@@ -140,7 +136,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         else if (!this.isUsingRightClick() && this.messageSent) this.messageSent = false;
         if (this.isBeingRidden()) {
             if (this.getRightClickUse() > 100) {
-                if (this.forcedSpinVictim != null) EntityPropertiesHandler.INSTANCE.getProperties(this.forcedSpinVictim, RiftEntityProperties.class).isCaptured = false;
+                if (this.forcedSpinVictim != null) NonPotionEffectsHelper.setCaptured(this.forcedSpinVictim, false);;
                 this.forcedSpinVictim = null;
             }
             if (this.forcedSpinVictim == null) this.setIsSpinning(false);
@@ -165,21 +161,19 @@ public class Sarcosuchus extends RiftWaterCreature {
             if (RiftUtil.isUsingSSR()) {
                 EntityLivingBase target = (EntityLivingBase) SSRCompatUtils.getEntities(this).entityHit;
                 if (target != null) {
-                    RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(target, RiftEntityProperties.class);
-
                     boolean canSpinFlag;
                     if (target instanceof EntityPlayer) {
-                        canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !target.getUniqueID().equals(this.getOwnerId()) && !properties.isCaptured;
+                        canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !target.getUniqueID().equals(this.getOwnerId()) && !NonPotionEffectsHelper.isCaptured(target);
                     }
                     else {
                         if (target instanceof EntityTameable) {
                             EntityTameable inpTameable = (EntityTameable)target;
                             if (inpTameable.isTamed()) {
-                                canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !target.getUniqueID().equals(inpTameable.getOwnerId()) && !properties.isCaptured;
+                                canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !target.getUniqueID().equals(inpTameable.getOwnerId()) && !NonPotionEffectsHelper.isCaptured(target);
                             }
-                            else canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !properties.isCaptured;
+                            else canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !NonPotionEffectsHelper.isCaptured(target);
                         }
-                        else canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !properties.isCaptured;
+                        else canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !NonPotionEffectsHelper.isCaptured(target);
                     }
                     if (canSpinFlag) this.forcedSpinVictim = target;
                 }
@@ -189,19 +183,18 @@ public class Sarcosuchus extends RiftWaterCreature {
                 List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth()).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
                     @Override
                     public boolean apply(@Nullable EntityLivingBase input) {
-                        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(input, RiftEntityProperties.class);
                         if (input instanceof EntityPlayer) {
-                            return RiftUtil.isAppropriateSize(input, spinMaxSize) && !input.getUniqueID().equals(ownerID) && !properties.isCaptured;
+                            return RiftUtil.isAppropriateSize(input, spinMaxSize) && !input.getUniqueID().equals(ownerID) && !NonPotionEffectsHelper.isCaptured(input);
                         }
                         else {
                             if (input instanceof EntityTameable) {
                                 EntityTameable inpTameable = (EntityTameable)input;
                                 if (inpTameable.isTamed()) {
-                                    return RiftUtil.isAppropriateSize(inpTameable, spinMaxSize) && !ownerID.equals(inpTameable.getOwnerId()) && !properties.isCaptured;
+                                    return RiftUtil.isAppropriateSize(inpTameable, spinMaxSize) && !ownerID.equals(inpTameable.getOwnerId()) && !NonPotionEffectsHelper.isCaptured(input);
                                 }
-                                else return RiftUtil.isAppropriateSize(inpTameable, spinMaxSize) && !properties.isCaptured;
+                                else return RiftUtil.isAppropriateSize(inpTameable, spinMaxSize) && !NonPotionEffectsHelper.isCaptured(input);
                             }
-                            return RiftUtil.isAppropriateSize(input, spinMaxSize) && !properties.isCaptured;
+                            return RiftUtil.isAppropriateSize(input, spinMaxSize) && !NonPotionEffectsHelper.isCaptured(input);
                         }
                     }
                 });
@@ -266,8 +259,8 @@ public class Sarcosuchus extends RiftWaterCreature {
     @Override
     public void onDeath(DamageSource source) {
         super.onDeath(source);
-        if (this.forcedSpinVictim != null) EntityPropertiesHandler.INSTANCE.getProperties(this.forcedSpinVictim, RiftEntityProperties.class).isCaptured = false;
-        if (this.getAttackTarget() != null) EntityPropertiesHandler.INSTANCE.getProperties(this.getAttackTarget(), RiftEntityProperties.class).isCaptured = false;
+        if (this.forcedSpinVictim != null) NonPotionEffectsHelper.setCaptured(this.forcedSpinVictim, false);
+        if (this.getAttackTarget() != null) NonPotionEffectsHelper.setCaptured(this.getAttackTarget(), false);
     }
 
     public float attackWidth() {

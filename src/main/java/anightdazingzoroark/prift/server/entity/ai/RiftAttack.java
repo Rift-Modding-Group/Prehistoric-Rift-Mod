@@ -3,18 +3,16 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.SarcosuchusConfig;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
 import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -242,7 +240,6 @@ public class RiftAttack extends EntityAIBase {
         private EntityLivingBase spinVictim;
         private int spinTime;
         private boolean spinFlag;
-        private RiftEntityProperties targetProperties;
 
         public SarcosuchusAttack(Sarcosuchus sarcosuchus, double speedIn, float attackAnimLength, float attackAnimTime) {
             super(sarcosuchus, speedIn, attackAnimLength, attackAnimTime);
@@ -254,7 +251,6 @@ public class RiftAttack extends EntityAIBase {
             super.startExecuting();
             this.spinTime = 0;
             this.spinFlag = true;
-            this.targetProperties = EntityPropertiesHandler.INSTANCE.getProperties(this.sarcosuchus.getAttackTarget(), RiftEntityProperties.class);
         }
 
         public boolean shouldContinueExecuting() {
@@ -268,7 +264,7 @@ public class RiftAttack extends EntityAIBase {
             super.resetTask();
             this.spinTime = 0;
             this.sarcosuchus.setIsSpinning(false);
-            if (this.spinVictim != null) EntityPropertiesHandler.INSTANCE.getProperties(this.spinVictim, RiftEntityProperties.class).isCaptured = false;
+            if (this.spinVictim != null) NonPotionEffectsHelper.setCaptured(this.spinVictim, false);;
             this.spinVictim = null;
         }
 
@@ -296,11 +292,11 @@ public class RiftAttack extends EntityAIBase {
                         this.attackCooldown = 20;
                         if (this.sarcosuchus.isTamed()) this.sarcosuchus.energyActionMod++;
 
-                        if (enemy.isEntityAlive() && this.sarcosuchus.getEnergy() > 6 && !this.targetProperties.isCaptured) {
+                        if (enemy.isEntityAlive() && this.sarcosuchus.getEnergy() > 6 && !NonPotionEffectsHelper.isCaptured(enemy)) {
                             if (RiftUtil.isAppropriateSize(enemy, MobSize.safeValueOf(((SarcosuchusConfig) RiftConfigHandler.getConfig(RiftCreatureType.SARCOSUCHUS)).general.maximumSpinAttackTargetSize))) {
                                 this.sarcosuchus.setIsSpinning(true);
                                 this.spinVictim = enemy;
-                                this.targetProperties.isCaptured = true;
+                                NonPotionEffectsHelper.setCaptured(enemy, true);
                             }
                         }
                         else this.sarcosuchus.resetSpeed();
@@ -315,7 +311,7 @@ public class RiftAttack extends EntityAIBase {
                 if (this.sarcosuchus.isTamed() && this.spinTime % 10 == 0) this.sarcosuchus.setEnergy(this.sarcosuchus.getEnergy() - 1);
                 if (this.spinTime >= 100) {
                     this.spinFlag = false;
-                    EntityPropertiesHandler.INSTANCE.getProperties(this.spinVictim, RiftEntityProperties.class).isCaptured = false;
+                    NonPotionEffectsHelper.setCaptured(this.spinVictim, false);
                 }
                 this.spinTime++;
             }

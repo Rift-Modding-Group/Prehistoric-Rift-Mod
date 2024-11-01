@@ -2,14 +2,14 @@ package anightdazingzoroark.prift.server.events;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBaseTop;
 import anightdazingzoroark.prift.config.GeneralConfig;
-import anightdazingzoroark.prift.server.RiftDamage;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.entity.creature.*;
-import anightdazingzoroark.prift.server.entity.RiftEntityProperties;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
@@ -23,7 +23,6 @@ import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.google.common.base.Predicate;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -166,9 +165,9 @@ public class ServerEvents {
     //manage setting creature workstation
     @SubscribeEvent
     public void setCreatureWorkstation(PlayerInteractEvent.RightClickBlock event) {
-        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(event.getEntityPlayer(), RiftEntityProperties.class);
-        if (properties.settingCreatureWorkstation) {
-            RiftCreature creature = (RiftCreature) event.getWorld().getEntityByID(properties.creatureIdForWorkstation);
+        if (event.getWorld().isRemote) return;
+        if (ClientProxy.settingCreatureWorkstation) {
+            RiftCreature creature = (RiftCreature) event.getWorld().getEntityByID(ClientProxy.creatureIdForWorkstation);
             IWorkstationUser workstationUser = (IWorkstationUser) creature;
             IBlockState iblockstate = event.getWorld().getBlockState(event.getPos());
             if (iblockstate.getMaterial() != Material.AIR) {
@@ -202,8 +201,8 @@ public class ServerEvents {
                 }
                 else event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.creature_workstation_already_used"), false);
 
-                properties.settingCreatureWorkstation = false;
-                properties.creatureIdForWorkstation = -1;
+                ClientProxy.settingCreatureWorkstation = false;
+                ClientProxy.creatureIdForWorkstation = -1;
             }
         }
     }
@@ -258,20 +257,16 @@ public class ServerEvents {
         }
     }
 
-    //i forgor what tf this does :skull:
-    //probably best if it doesnt get deleted
+    //make it so that upon mounting a creature then dismounting it
+    //you dont take damage
     @SubscribeEvent
     public void onStartRiding(EntityMountEvent event) {
         if (event.isDismounting() && event.getEntityMounting() instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer)event.getEntityMounting();
-            RiftEntityProperties playerProperties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
             if (event.getEntityBeingMounted() instanceof RiftCreature) {
                 RiftCreature creature = (RiftCreature) event.getEntityBeingMounted();
-                RiftEntityProperties creatureProperties = EntityPropertiesHandler.INSTANCE.getProperties(creature, RiftEntityProperties.class);
-
                 RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(creature, 1, false));
-                if (playerProperties != null) playerProperties.ridingCreature = true;
-                creatureProperties.rCTrigger = false;
+                NonPotionEffectsHelper.setRiding(player, true);
             }
         }
     }
@@ -301,11 +296,10 @@ public class ServerEvents {
     public void noDamageWhenDismounting(LivingFallEvent event) {
         if (event.getEntityLiving() instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer)event.getEntityLiving();
-            RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(player, RiftEntityProperties.class);
 
-            if (properties.ridingCreature) {
+            if (NonPotionEffectsHelper.isRiding(player)) {
                 event.setDamageMultiplier(0);
-                properties.ridingCreature = false;
+                NonPotionEffectsHelper.setRiding(player, false);
             }
         }
     }
@@ -410,7 +404,6 @@ public class ServerEvents {
     @SubscribeEvent
     public void forEachEntityTick(LivingEvent.LivingUpdateEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
-        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
         if (!entity.world.isRemote) {
             RiftCreature creature = null;
             if (entity instanceof RiftCreature) creature = (RiftCreature) entity;
@@ -447,15 +440,7 @@ public class ServerEvents {
         }
 
         //make sure mobs dont fall when trapped
-        if (properties.isCaptured) entity.fallDistance = 0;
-    }
-
-    //reset some properties (like bleeding) upon death
-    @SubscribeEvent
-    public void onEntityDeath(LivingDeathEvent event) {
-        EntityLivingBase entity = event.getEntityLiving();
-        RiftEntityProperties properties = EntityPropertiesHandler.INSTANCE.getProperties(entity, RiftEntityProperties.class);
-        properties.isCaptured = false;
+        if (NonPotionEffectsHelper.isCaptured(entity)) entity.fallDistance = 0;
     }
 
     //manage cannon impacting stuff

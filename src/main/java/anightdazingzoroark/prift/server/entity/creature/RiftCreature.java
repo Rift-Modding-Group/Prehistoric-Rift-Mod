@@ -1833,7 +1833,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         List<RiftTameRadialChoice> list = new ArrayList<>();
         list.add(RiftTameRadialChoice.INVENTORY);
         if (this.canBeSaddled() && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY && this.isRideable) list.add(RiftTameRadialChoice.RIDE);
-        list.add(RiftTameRadialChoice.OPTIONS);
+        if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) list.add(RiftTameRadialChoice.OPTIONS);
         list.add(RiftTameRadialChoice.BEHAVIOR);
         return list;
     }
