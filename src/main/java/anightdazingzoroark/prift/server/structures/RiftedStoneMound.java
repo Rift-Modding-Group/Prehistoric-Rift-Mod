@@ -40,7 +40,7 @@ public class RiftedStoneMound extends WorldGenerator {
 
     private IBlockState getBlockForBuilding(Random random) {
         int chance = random.nextInt(100);
-        if (chance >= 90) return RiftBlocks.RIFT_SHARD_ORE.getDefaultState();
+        if (chance >= 95) return RiftBlocks.RIFT_SHARD_ORE.getDefaultState();
         else if (chance >= 50) return RiftBlocks.RIFTED_COBBLESTONE.getDefaultState();
         else return RiftBlocks.RIFTED_STONE.getDefaultState();
     }

@@ -41,6 +41,9 @@ public class GeneralConfig {
     public static String[] riftedMoundBiomes = {"all"};
     public static int riftedMoundWeight = 10;
     public static String[] riftedMoundSize = {"2", "3", "4", "7"};
+    public static int riftedVeinWeight = 5;
+    public static int riftedVeinSize = 32;
+    public static String[] riftedVeinGenHeight = {"8", "128"};
 
     //creature leveling
     public static int levelingRadius = 800;
@@ -143,8 +146,11 @@ public class GeneralConfig {
         cryoberryBiomes = config.getStringList("Cryoberry Biomes", "World Generation Stuff", new String[]{"tag:snowy"}, "The biomes that Pyroberries will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
         cryoberryWeight = config.getInt("Cryoberry Spawn Weight", "World Generation Stuff", 100, 1, 69420666, "The weight representing how likely Cryoberries spawn. Higher values mean higher amounts of Pyroberries");
         riftedMoundBiomes = config.getStringList("Rifted Mound Biomes", "World Generation Stuff", new String[]{"all"}, "The biomes that Rifted Mounds will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
-        riftedMoundWeight = config.getInt("Rifted Mound Spawn Weight", "World Generation Stuff", 10, 1, 69420666, "The weight representing how likely Rifted Mounds spawn. Higher values mean higher amounts of Rifted Mounds");
-        riftedMoundSize = config.getStringList("Rifted Mound Size", "World Generation Stuff", new String[]{"2", "3", "4", "7"}, "The size in which Rifted Mounds will be at. First two entries are range in radius, last two are range in height above ground");
+        riftedMoundWeight = config.getInt("Rifted Stone Mound Spawn Weight", "World Generation Stuff", 10, 1, 69420666, "The weight representing how likely Rifted Stone Mounds spawn. Higher values mean higher amounts of Rifted Stone Mounds");
+        riftedMoundSize = config.getStringList("Rifted Stone Mound Size", "World Generation Stuff", new String[]{"2", "3", "4", "7"}, "The size in which Rifted Stone Mounds will be at. First two entries are range in radius, last two are range in height above ground");
+        riftedVeinWeight = config.getInt("Rifted Stone Vein Weight", "World Generation Stuff", 5, 1, 69420666, "The weight representing how likely Rifted Stone Veins spawn. Higher values mean higher amounts of Rifted Stone Veins");
+        riftedVeinSize = config.getInt("Rifted Stone Vein Size", "World Generation Stuff", 32, 1, 69420666, "The size in which Rifted Stone Veins will be at");
+        riftedVeinGenHeight = config.getStringList("Rifted Stone Vein Generation Height", "World Generation Stuff", new String[]{"8", "128"}, "Minimum and maximum height in which Rifted Stone Veins will generate");
 
         //creature leveling
         levelingRadius = config.getInt("Level based on distance from (0, 0)", "Creature Leveling", 1600, 0, 69420666, "Distance from (0, 0) from which creature levels get increased. This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");
