@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift;
 
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
@@ -10,7 +9,6 @@ import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -424,6 +422,60 @@ public class RiftUtil {
         }
         else {
             if (owner.world.getBlockState(owner.getPosition().down()).getMaterial() != Material.AIR) return true;
+        }
+        return false;
+    }
+
+    public static boolean posInBiomeListString(List<String> biomeStringList, World world, BlockPos pos) {
+        //turn data from string list into array
+        List<Biome> biomeList = new ArrayList<>();
+        for (String biomeEntry : biomeStringList) {
+            if (biomeEntry.charAt(0) != '-') {
+                int partOne = biomeEntry.indexOf(":");
+                String spawnerType = partOne != -1 ? biomeEntry.substring(0, partOne) : biomeEntry;
+                String entry = biomeEntry.substring(partOne + 1);
+                if (spawnerType.equals("biome")) {
+                    for (Biome biome : Biome.REGISTRY) {
+                        if (biome.getRegistryName().toString().equals(entry)) {
+                            biomeList.add(biome);
+                        }
+                    }
+                }
+                else if (spawnerType.equals("tag")) {
+                    for (Biome biome : Biome.REGISTRY) {
+                        if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(entry))) {
+                            biomeList.add(biome);
+                        }
+                    }
+                }
+                else if (spawnerType.equals("all")) {
+                    for (Biome biome : Biome.REGISTRY) {
+                        biomeList.add(biome);
+                    }
+                }
+            }
+            else {
+                int partOne = biomeEntry.indexOf(":");
+                String spawnerType = biomeEntry.substring(1, partOne);
+                String entry = biomeEntry.substring(partOne + 1);
+                if (spawnerType.equals("biome")) {
+                    for (Biome biome : Biome.REGISTRY) {
+                        if (biome.getRegistryName().equals(entry) && biomeList.contains(biome)) {
+                            biomeList.remove(biome);
+                        }
+                    }
+                }
+                else if (spawnerType.equals("tag")) {
+                    for (Biome biome : Biome.REGISTRY) {
+                        if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(entry)) && biomeList.contains(biome)) {
+                            biomeList.remove(biome);
+                        }
+                    }
+                }
+            }
+        }
+        for (Biome biomeToSpawn : biomeList) {
+            if (world.getBiome(pos).equals(biomeToSpawn)) return true;
         }
         return false;
     }

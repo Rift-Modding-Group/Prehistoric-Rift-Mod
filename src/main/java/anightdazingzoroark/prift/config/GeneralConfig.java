@@ -33,11 +33,14 @@ public class GeneralConfig {
     public static String[] truffleBiomes = {"tag:forest"};
     public static String[] truffleAmntRange = {"1", "3"};
 
-    //plant stuff
-    public static String[] pyroberryBiomes = {"tag:plains"};
+    //worldgen stuff
+    public static String[] pyroberryBiomes = {"tag:savanna"};
     public static int pyroberryWeight = 100;
     public static String[] cryoberryBiomes = {"tag:snowy"};
     public static int cryoberryWeight = 100;
+    public static String[] riftedMoundBiomes = {"all"};
+    public static int riftedMoundWeight = 10;
+    public static String[] riftedMoundSize = {"2", "3", "4", "7"};
 
     //creature leveling
     public static int levelingRadius = 800;
@@ -134,11 +137,14 @@ public class GeneralConfig {
         truffleBiomes = config.getStringList("Biomes where truffles can be found", "Truffle Spawning Stuff", new String[]{"tag:forest"}, "Biomes that truffles will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
         truffleAmntRange = config.getStringList("Range for amount of truffles dropped", "Truffle Spawning Stuff", new String[]{"1", "3"}, "The range for the amount of truffles that can spawn from breaking blocks.");
 
-        //plant stuff
-        pyroberryBiomes = config.getStringList("Pyroberry Biomes", "Plant Stuff", new String[]{"tag:plains"}, "The biomes that Pyroberries will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
-        pyroberryWeight = config.getInt("Pyroberry Spawn Weight", "Plant Stuff", 100, 1, 69420666, "The weight representing how likely Pyroberries spawn. Higher values mean higher amounts of Pyroberries");
-        cryoberryBiomes = config.getStringList("Cryoberry Biomes", "Plant Stuff", new String[]{"tag:snowy"}, "The biomes that Pyroberries will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
-        cryoberryWeight = config.getInt("Cryoberry Spawn Weight", "Plant Stuff", 100, 1, 69420666, "The weight representing how likely Cryoberries spawn. Higher values mean higher amounts of Pyroberries");
+        //worldgen stuff
+        pyroberryBiomes = config.getStringList("Pyroberry Biomes", "World Generation Stuff", new String[]{"tag:plains"}, "The biomes that Pyroberries will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
+        pyroberryWeight = config.getInt("Pyroberry Spawn Weight", "World Generation Stuff", 100, 1, 69420666, "The weight representing how likely Pyroberries spawn. Higher values mean higher amounts of Pyroberries");
+        cryoberryBiomes = config.getStringList("Cryoberry Biomes", "World Generation Stuff", new String[]{"tag:snowy"}, "The biomes that Pyroberries will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
+        cryoberryWeight = config.getInt("Cryoberry Spawn Weight", "World Generation Stuff", 100, 1, 69420666, "The weight representing how likely Cryoberries spawn. Higher values mean higher amounts of Pyroberries");
+        riftedMoundBiomes = config.getStringList("Rifted Mound Biomes", "World Generation Stuff", new String[]{"all"}, "The biomes that Rifted Mounds will spawn in. To add an entry add \"<biome/tag>:<insert identifier of biome or name of biome tag here>\". To blacklist an entry (make it so it will never spawn there) add \"-<biome/tag>:<insert identifier of biome or name of biome tag here>\"");
+        riftedMoundWeight = config.getInt("Rifted Mound Spawn Weight", "World Generation Stuff", 10, 1, 69420666, "The weight representing how likely Rifted Mounds spawn. Higher values mean higher amounts of Rifted Mounds");
+        riftedMoundSize = config.getStringList("Rifted Mound Size", "World Generation Stuff", new String[]{"2", "3", "4", "7"}, "The size in which Rifted Mounds will be at. First two entries are range in radius, last two are range in height above ground");
 
         //creature leveling
         levelingRadius = config.getInt("Level based on distance from (0, 0)", "Creature Leveling", 1600, 0, 69420666, "Distance from (0, 0) from which creature levels get increased. This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");

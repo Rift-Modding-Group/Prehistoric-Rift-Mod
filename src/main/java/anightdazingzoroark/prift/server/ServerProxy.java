@@ -33,6 +33,7 @@ import anightdazingzoroark.prift.server.recipes.RiftRecipes;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntities;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
 import anightdazingzoroark.prift.server.world.RiftPlantGenerator;
+import anightdazingzoroark.prift.server.world.RiftStructureGenerator;
 import com.charles445.simpledifficulty.api.temperature.TemperatureRegistry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -101,6 +102,7 @@ public class ServerProxy implements IGuiHandler {
         MinecraftForge.EVENT_BUS.register(new RiftCreatureBoxBorder.RiftCreatureBorderHandler());
         MinecraftForge.EVENT_BUS.register(new RiftCreatureSpawning());
         GameRegistry.registerWorldGenerator(new RiftPlantGenerator(), 0);
+        GameRegistry.registerWorldGenerator(new RiftStructureGenerator(), 0);
     }
 
     public void postInit(FMLPostInitializationEvent event) {}

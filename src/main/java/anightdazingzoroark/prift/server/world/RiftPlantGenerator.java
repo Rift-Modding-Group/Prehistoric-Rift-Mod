@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.world;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBerryBush;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
@@ -10,11 +11,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.fml.common.IWorldGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Random;
 
 public class RiftPlantGenerator implements IWorldGenerator {
@@ -40,48 +39,9 @@ public class RiftPlantGenerator implements IWorldGenerator {
             }
             else state = block.getDefaultState();
 
-            List<Biome> biomeList = new ArrayList<>();
-            for (String biomeEntry : biomeTags) {
-                if (biomeEntry.charAt(0) != '-') {
-                    int partOne = biomeEntry.indexOf(":");
-                    String spawnerType = biomeEntry.substring(0, partOne);
-                    String entry = biomeEntry.substring(partOne + 1);
-                    if (spawnerType.equals("biome")) {
-                        for (Biome biome : Biome.REGISTRY) {
-                            if (biome.getRegistryName().toString().equals(entry) && world.getBiome(pos).equals(biome) && world.isAirBlock(pos) && state.getBlock().canPlaceBlockAt(world, pos)) {
-                                biomeList.add(biome);
-                            }
-                        }
-                    }
-                    else if (spawnerType.equals("tag")) {
-                        for (Biome biome : Biome.REGISTRY) {
-                            if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(entry)) && world.getBiome(pos).equals(biome) && world.isAirBlock(pos) && state.getBlock().canPlaceBlockAt(world, pos)) {
-                                biomeList.add(biome);
-                            }
-                        }
-                    }
-                }
-                else {
-                    int partOne = biomeEntry.indexOf(":");
-                    String spawnerType = biomeEntry.substring(1, partOne);
-                    String entry = biomeEntry.substring(partOne + 1);
-                    if (spawnerType.equals("biome")) {
-                        for (Biome biome : Biome.REGISTRY) {
-                            if (biome.getRegistryName().equals(entry) && biomeList.contains(biome)) {
-                                biomeList.remove(biome);
-                            }
-                        }
-                    }
-                    else if (spawnerType.equals("tag")) {
-                        for (Biome biome : Biome.REGISTRY) {
-                            if (BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(entry)) && biomeList.contains(biome)) {
-                                biomeList.remove(biome);
-                            }
-                        }
-                    }
-                }
-            }
-            if (!biomeList.isEmpty()) world.setBlockState(pos, state, 2);
+            if (RiftUtil.posInBiomeListString(Arrays.asList(biomeTags), world, pos)
+                && world.isAirBlock(pos)
+                && state.getBlock().canPlaceBlockAt(world, pos)) world.setBlockState(pos, state, 2);
         }
     }
 }
