@@ -734,7 +734,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.updatePlayerTameList();
             if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
         }
-        else if (tamedCreatures.getBoxCreatures(this.world).size() < anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures.maxBoxSize) {
+        else if (tamedCreatures.getBoxCreatures(this.world).size() < tamedCreatures.getMaxBoxSize()) {
             tamedCreatures.addToBoxCreatures(this);
             this.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
 

@@ -20,8 +20,12 @@ public interface IPlayerTamedCreatures {
     void removeFromBoxNBT(NBTTagCompound compound);
     void setLastSelected(int value);
     int getLastSelected();
-    void setMaxPartySize(int value);
     int getMaxPartySize();
+    void setPartySizeLevel(int value);
+    int getPartySizeLevel();
+    int getMaxBoxSize();
+    void setBoxSizeLevel(int value);
+    int getBoxSizeLevel();
 
     //for indirect values
     void addToPartyCreatures(RiftCreature creature);

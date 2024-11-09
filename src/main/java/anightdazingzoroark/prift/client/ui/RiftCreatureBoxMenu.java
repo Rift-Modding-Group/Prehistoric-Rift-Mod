@@ -417,11 +417,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         for (int x = 0; x < size; x++) {
             if (x < this.getPlayerParty().size()) {
                 RiftCreature creature = this.getPlayerParty().get(x);
-                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 83 + (40 * x)));
+                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 78 + (40 * x)));
                 this.partyBarHeight += 40;
             }
             else {
-                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(null, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 83 + (40 * x)));
+                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(null, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 78 + (40 * x)));
                 this.partyBarHeight += 40;
             }
         }
@@ -431,7 +431,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         this.creaturesInBoxButtons.clear();
         this.boxedCreaturesHeight = 0;
 
-        int size = this.getPlayerBoxedCreatures().size() + (this.getPlayerBoxedCreatures().size() < PlayerTamedCreatures.maxBoxSize ? 1 : 0);
+        int size = this.getPlayerBoxedCreatures().size() + (this.getPlayerBoxedCreatures().size() < this.playerTamedCreatures().getMaxBoxSize() ? 1 : 0);
         int rows = (int) Math.ceil(size / 5D);
         for (int x = 0; x < size; x++) {
             if (x < this.getPlayerBoxedCreatures().size()) {
@@ -470,15 +470,15 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
     private void placePartyMemberButtons(int mouseX, int mouseY, float partialTicks) {
         int x = (this.width - 96) / 2 - 147;
-        int y = (this.height - 200) / 2;
+        int y = (this.height - 170) / 2 - 12;
 
         // for scaling
         int scaleFactor = new ScaledResolution(this.mc).getScaleFactor();
 
         int scissorX = x * scaleFactor;
-        int scissorY = (this.height - y - 200) * scaleFactor;
+        int scissorY = (this.height - y - 170) * scaleFactor;
         int scissorW = (this.width - 96) * scaleFactor;
-        int scissorH = 200 * scaleFactor;
+        int scissorH = 170 * scaleFactor;
 
         //for buttons on the side
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -495,14 +495,14 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
         //create scrollbar
-        if (this.partyBarHeight > 200) {
+        if (this.partyBarHeight > 170) {
             int k = (this.width - 1) / 2 - 97;
-            int l = (this.height - 200) / 2;
+            int l = (this.height - 170) / 2 - 12;
             //scrollbar background
-            drawRect(k, l, k + 1, l + 200, 0xFFA0A0A0);
+            drawRect(k, l, k + 1, l + 170, 0xFFA0A0A0);
             //scrollbar progress
-            int thumbHeight = Math.max(10, (int)((float)200 * (200f / this.partyBarHeight)));
-            int thumbPosition = (int)((float)this.scrollSidebarOffset / (this.partyBarHeight - 200) * (200 - thumbHeight));
+            int thumbHeight = Math.max(10, (int)((float)170 * (170f / this.partyBarHeight)));
+            int thumbPosition = (int)((float)this.scrollSidebarOffset / (this.partyBarHeight - 170) * (170 - thumbHeight));
             drawRect(k, l + thumbPosition, k + 1, l + thumbHeight + thumbPosition, 0xFFC0C0C0);
         }
     }
@@ -726,9 +726,9 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
     private boolean isMouseOverPartyBar(int mouseX, int mouseY) {
         int minX = (this.width - 96) / 2 - 147;
-        int minY = (this.height - 200) / 2 - 8;
+        int minY = (this.height - 170) / 2 - 8;
         int maxX = (this.width - 96) / 2 - 51;
-        int maxY = (this.height - 200) / 2 + 192;
+        int maxY = (this.height - 170) / 2 + 192;
         return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
     }
 
@@ -758,7 +758,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         if (scroll != 0) {
             if (this.isMouseOverPartyBar(mouseX, mouseY)) {
                 this.scrollSidebarOffset += (scroll > 0) ? -10 : 10;
-                this.scrollSidebarOffset = Math.max(0, Math.min(this.scrollSidebarOffset, Math.max(0, this.partyBarHeight - 200)));
+                this.scrollSidebarOffset = Math.max(0, Math.min(this.scrollSidebarOffset, Math.max(0, this.partyBarHeight - 170)));
             }
             if (this.isMouseOverBoxedCreatures(mouseX, mouseY)) {
                 this.scrollBoxedCreaturesOffset += (scroll > 0) ? -10 : 10;

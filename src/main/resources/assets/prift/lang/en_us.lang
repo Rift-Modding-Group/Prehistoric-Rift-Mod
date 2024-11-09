@@ -151,6 +151,15 @@ item.gold_plate.name=Gold Plate
 item.iron_rod.name=Iron Rod
 item.gold_rod.name=Gold Rod
 
+item.player_party_upgrade.name=Player Party Upgrade
+item.player_party_upgrade.tooltip=Use this to increase the amount of slots you can have in your party
+item.player_box_upgrade.name=Player Box Upgrade
+item.player_box_upgrade.tooltip=Use this to increase the amount of slots you can have in your box
+item.box_wanderer_upgrade.name=Creature Box Wanderer Upgrade
+item.box_wanderer_upgrade.tooltip=Use this on any creature box to increase the amount of creatures that can wander around it
+item.box_range_upgrade.name=Creature Box Range Upgrade
+item.box_range_upgrade.tooltip=Use this on any creature box to increase the wander range and spawn blocking range of wild creatures of the box
+
 jei.min_power=Minimum Power: %s R
 jei.chance=Chance: %s
 
@@ -233,6 +242,14 @@ reminder.unlocked_journal_entry=You have unlocked the journal entry for the %s! 
 reminder.taming_finished_to_party=%s has been added to your party! Press J to check it out!
 reminder.taming_finished_to_box=Your party is full! %s has been sent to your box! Craft a Creature Box to check it out!
 reminder.creature_released=%s has been released! Goodbye %s!
+reminder.party_level_upgraded=Your party level has been upgraded to level %s! Two new extra party slots have been unlocked!
+reminder.party_level_max=Your party level has already been maxed out! You can't use this anymore!
+reminder.box_level_upgraded=Your box level has been upgraded to level %s! 20 new extra box slots have been unlocked!
+reminder.box_level_max=Your box level has already been maxed out! You can't use this anymore!
+reminder.box_wanderer_level_upgraded=This box's wanderer level has been upgraded to level %s! 5 extra slots for wandering creatures have been unlocked!
+reminder.box_wanderer_level_max=This box's wanderer level has already been maxed out! You can't use this anymore!
+reminder.box_range_level_upgraded=This box's range level has been upgraded to level %s! Wandering and spawn blocking for wild creatures has been increased!
+reminder.box_range_level_max=This box's range level has already been maxed out! You can't use this anymore!
 
 prift.pregnancy.name=%s pregnancy
 prift.egg.time=Time

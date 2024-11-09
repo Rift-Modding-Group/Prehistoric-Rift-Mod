@@ -1,14 +1,12 @@
 package anightdazingzoroark.prift.server.blocks;
 
-import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ClientProxy;
-import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
-import anightdazingzoroark.prift.server.message.RiftCreatureBoxSneak;
+import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftOpenCreatureBoxMenu;
+import anightdazingzoroark.prift.server.message.RiftOpenCreatureBoxNoCreaturesMenu;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -20,12 +18,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -75,18 +74,52 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (worldIn.isRemote) {
+        if (!worldIn.isRemote) {
             IPlayerTamedCreatures tamedCreatures = playerIn.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             RiftTileEntityCreatureBox tileEntity = (RiftTileEntityCreatureBox) worldIn.getTileEntity(pos);
-            if (playerIn.isSneaking()) RiftMessages.WRAPPER.sendToServer(new RiftCreatureBoxSneak(pos));
+
+            if (tileEntity == null) return false;
+
+            if (playerIn.isSneaking()) {
+                //highlight all creatures deployed
+                for (RiftCreature creature : tileEntity.getCreatures()) {
+                    if (creature != null) {
+                        creature.addPotionEffect(new PotionEffect(MobEffects.GLOWING, 100));
+                    }
+                }
+            }
             else {
-                if (tamedCreatures.getPartyCreatures(worldIn).isEmpty() && tamedCreatures.getBoxCreatures(worldIn).isEmpty() && tileEntity.getCreatures().isEmpty()) {
-                    ClientProxy.popupFromRadial = PopupFromCreatureBox.NO_CREATURES;
-                    playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, worldIn, 0, 0, 0);
+                ItemStack itemStack = playerIn.getHeldItem(hand);
+
+                if (itemStack.isEmpty()) {
+                    if (tamedCreatures.getPartyCreatures(worldIn).isEmpty() && tamedCreatures.getBoxCreatures(worldIn).isEmpty() && tileEntity.getCreatures().isEmpty()) {
+                        RiftMessages.WRAPPER.sendToAll(new RiftOpenCreatureBoxNoCreaturesMenu(playerIn));
+                    }
+                    else RiftMessages.WRAPPER.sendToAll(new RiftOpenCreatureBoxMenu(playerIn, pos));
                 }
                 else {
-                    ClientProxy.creatureBoxBlockPos = pos;
-                    playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_BOX, worldIn, 0, 0, 0);
+                    if (itemStack.getItem() == RiftItems.BOX_RANGE_UPGRADE) {
+                        if (tileEntity.getWanderRangeLevel() >= 4) {
+                            playerIn.sendStatusMessage(new TextComponentTranslation("reminder.box_range_level_max"), false);
+                        }
+                        else {
+                            int newLevel = tileEntity.getWanderRangeLevel() + 1;
+                            tileEntity.setWanderRangeLevel(newLevel);
+                            playerIn.sendStatusMessage(new TextComponentTranslation("reminder.box_range_level_upgraded", newLevel), false);
+                            itemStack.setCount(itemStack.getCount() - 1);
+                        }
+                    }
+                    else if (itemStack.getItem() == RiftItems.BOX_WANDERER_UPGRADE) {
+                        if (tileEntity.getCreatureAmntLevel() >= 4) {
+                            playerIn.sendStatusMessage(new TextComponentTranslation("reminder.box_wanderer_level_max"), false);
+                        }
+                        else {
+                            int newLevel = tileEntity.getCreatureAmntLevel() + 1;
+                            tileEntity.setCreatureAmntLevel(newLevel);
+                            playerIn.sendStatusMessage(new TextComponentTranslation("reminder.box_wanderer_level_upgraded", newLevel), false);
+                            itemStack.setCount(itemStack.getCount() - 1);
+                        }
+                    }
                 }
             }
         }

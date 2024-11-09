@@ -1,0 +1,22 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X#X",
+    "#A#",
+    "X#X"
+  ],
+  "key": {
+    "X": {
+      "item": "minecraft:redstone"
+    },
+    "#": {
+      "item": "prift:rift_shard"
+    },
+    "A": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "item": "prift:box_wanderer_upgrade"
+  }
+}

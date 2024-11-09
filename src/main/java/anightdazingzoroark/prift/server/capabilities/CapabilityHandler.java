@@ -75,7 +75,7 @@ public class CapabilityHandler {
 
         tamedCreatures.setPartyNBT(oldTamedCreatures.getPartyNBT());
         tamedCreatures.setBoxNBT(oldTamedCreatures.getBoxNBT());
-        tamedCreatures.setMaxPartySize(oldTamedCreatures.getMaxPartySize());
+        tamedCreatures.setPartySizeLevel(oldTamedCreatures.getPartySizeLevel());
         tamedCreatures.setLastSelected(oldTamedCreatures.getLastSelected());
 
         //replicate journal progress

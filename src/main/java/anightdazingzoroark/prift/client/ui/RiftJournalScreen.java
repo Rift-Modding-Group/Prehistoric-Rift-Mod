@@ -127,7 +127,7 @@ public class RiftJournalScreen extends GuiScreen {
             //for party entries
             for (int x = 0; x < this.getPlayerParty().size(); x++) {
                 RiftCreature creature = this.getPlayerParty().get(x);
-                this.buttonList.add(new RiftGuiJournalPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 75 + (40 * x)));
+                this.buttonList.add(new RiftGuiJournalPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 70 + (40 * x)));
                 this.sidebarHeight += 40;
             }
         }
@@ -329,9 +329,9 @@ public class RiftJournalScreen extends GuiScreen {
 
     private boolean isMouseOverSidebar(int mouseX, int mouseY) {
         int minX = (this.width - 96) / 2 - 147;
-        int minY = (this.height - 200) / 2;
+        int minY = (this.height - this.sidebarHeight()) / 2;
         int maxX = (this.width - 96) / 2 - 51;
-        int maxY = (this.height - 200) / 2 + 200;
+        int maxY = (this.height - this.sidebarHeight()) / 2 + this.sidebarHeight();
         return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
     }
 
@@ -402,15 +402,15 @@ public class RiftJournalScreen extends GuiScreen {
 
     private void placeJournalButtons(int mouseX, int mouseY, float partialTicks) {
         int x = (this.width - 96) / 2 - 147;
-        int y = (this.height - 200) / 2 + 8;
+        int y = (this.height - this.sidebarHeight()) / 2 + (this.isPartyMode ? -4 : 8); //if party, -4, else, 8
 
         // for scaling
         int scaleFactor = new ScaledResolution(this.mc).getScaleFactor();
 
         int scissorX = x * scaleFactor;
-        int scissorY = (this.height - y - 200) * scaleFactor;
+        int scissorY = (this.height - y - this.sidebarHeight()) * scaleFactor;
         int scissorW = (this.width - 96) * scaleFactor;
-        int scissorH = 200 * scaleFactor;
+        int scissorH = this.sidebarHeight() * scaleFactor;
 
         //for buttons on the side
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -460,14 +460,14 @@ public class RiftJournalScreen extends GuiScreen {
         }
 
         //create scrollbar
-        if (this.sidebarHeight > 200) {
+        if (this.sidebarHeight > this.sidebarHeight()) {
             int k = (this.width - 1) / 2 - 97;
-            int l = (this.height - 200) / 2 + 8;
+            int l = (this.height - this.sidebarHeight()) / 2 + (this.isPartyMode ? -4 : 8);
             //scrollbar background
-            drawRect(k, l, k + 1, l + 200, 0xFFA0A0A0);
+            drawRect(k, l, k + 1, l + this.sidebarHeight(), 0xFFA0A0A0);
             //scrollbar progress
-            int thumbHeight = Math.max(10, (int)((float)200 * (200f / this.sidebarHeight)));
-            int thumbPosition = (int)((float)this.scrollSidebarOffset / (this.sidebarHeight - 200) * (200 - thumbHeight));
+            int thumbHeight = Math.max(10, (int)((float)this.sidebarHeight() * ((float) this.sidebarHeight() / this.sidebarHeight)));
+            int thumbPosition = (int)((float)this.scrollSidebarOffset / (this.sidebarHeight - this.sidebarHeight()) * (this.sidebarHeight() - thumbHeight));
             drawRect(k, l + thumbPosition, k + 1, l + thumbHeight + thumbPosition, 0xFFC0C0C0);
         }
     }
@@ -510,7 +510,7 @@ public class RiftJournalScreen extends GuiScreen {
             }
             if (this.isMouseOverSidebar(mouseX, mouseY)) {
                 this.scrollSidebarOffset += (scroll > 0) ? -10 : 10;
-                this.scrollSidebarOffset = Math.max(0, Math.min(this.scrollSidebarOffset, Math.max(0, this.sidebarHeight - 200)));
+                this.scrollSidebarOffset = Math.max(0, Math.min(this.scrollSidebarOffset, Math.max(0, this.sidebarHeight - this.sidebarHeight())));
             }
         }
 
@@ -545,6 +545,10 @@ public class RiftJournalScreen extends GuiScreen {
                 }
             }
         }
+    }
+
+    private int sidebarHeight() {
+        return this.isPartyMode ? 170 : 200;
     }
 
     private IPlayerTamedCreatures playerTamedCreatures() {

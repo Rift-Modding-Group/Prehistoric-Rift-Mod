@@ -21,8 +21,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private List<NBTTagCompound> partyCreatures = new ArrayList<>();
     private List<NBTTagCompound> boxCreatures = new ArrayList<>();
     private int lastSelected = 0;
-    private int maxPartySize = 4; //range from 4 to 16
-    public static final int maxBoxSize = 80;
+    private int partySizeLevel = 0;
+    private int boxSizeLevel = 0;
 
     @Override
     public void setLastSelected(int value) {
@@ -35,18 +35,38 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
-    public void setMaxPartySize(int value) {
-        this.maxPartySize = value;
+    public int getMaxPartySize() {
+        return 4 + this.partySizeLevel * 2;
     }
 
     @Override
-    public int getMaxPartySize() {
-        return this.maxPartySize;
+    public void setPartySizeLevel(int value) {
+        this.partySizeLevel = value;
+    }
+
+    @Override
+    public int getPartySizeLevel() {
+        return this.partySizeLevel;
+    }
+
+    @Override
+    public int getMaxBoxSize() {
+        return 80 + this.boxSizeLevel * 20;
+    }
+
+    @Override
+    public void setBoxSizeLevel(int value) {
+        if (value <= 4) this.boxSizeLevel = value;
+    }
+
+    @Override
+    public int getBoxSizeLevel() {
+        return this.boxSizeLevel;
     }
 
     @Override
     public void addToPartyCreatures(RiftCreature creature) {
-        if (this.partyCreatures.size() < this.maxPartySize) {
+        if (this.partyCreatures.size() < this.getMaxPartySize()) {
             boolean canAdd = false;
             if (this.partyCreatures.isEmpty()) canAdd = true;
             else if (this.partyCreatures.stream().noneMatch(nbt -> nbt.getUniqueId("UniqueID").equals(creature.getUniqueID()))) canAdd = true;
@@ -270,7 +290,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
 
     @Override
     public void addToBoxCreatures(RiftCreature creature) {
-        if (this.boxCreatures.size() < maxBoxSize) {
+        if (this.boxCreatures.size() < this.getMaxBoxSize()) {
             NBTTagCompound compound = new NBTTagCompound();
             compound.setUniqueId("UniqueID", creature.getUniqueID());
             compound.setString("CustomName", creature.getCustomNameTag());

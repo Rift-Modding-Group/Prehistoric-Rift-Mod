@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.tileentities;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
-import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawnLists;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
@@ -29,8 +28,8 @@ import java.util.stream.Collectors;
 public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     private List<NBTTagCompound> creatureListNBT = new ArrayList<>();
     private List<RiftCreature> creatureList = new ArrayList<>();
-    private int maxWanderingCreatures = 10;
-    private int wanderRange = 64; //64 block radius
+    private int creatureAmntLevel = 0;
+    private int wanderRangeLevel = 0;
 
     @Override
     public void update() {
@@ -46,7 +45,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         if (!this.world.isRemote) this.createCreaturesForWandering();
 
         //remove creatures that are not recently spawned from the wander range of the creature box
-        AxisAlignedBB removeAABB = new AxisAlignedBB(this.getPos().getX() - this.wanderRange, this.getPos().getY() - this.wanderRange, this.getPos().getZ() - this.wanderRange, this.getPos().getX() + this.wanderRange, this.getPos().getY() + this.wanderRange, this.getPos().getZ() + this.wanderRange);
+        AxisAlignedBB removeAABB = new AxisAlignedBB(this.getPos().getX() - this.getWanderRange(), this.getPos().getY() - this.getWanderRange(), this.getPos().getZ() - this.getWanderRange(), this.getPos().getX() + this.getWanderRange(), this.getPos().getY() + this.getWanderRange(), this.getPos().getZ() + this.getWanderRange());
         for (RiftCreature creature : this.world.getEntitiesWithinAABB(RiftCreature.class, removeAABB, new Predicate<RiftCreature>() {
             @Override
             public boolean apply(@Nullable RiftCreature riftCreature) {
@@ -247,11 +246,16 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     public int getMaxWanderingCreatures() {
-        return this.maxWanderingCreatures;
+        return 10 + this.creatureAmntLevel * 5;
     }
 
-    public void setMaxWanderingCreatures(int value) {
-        this.maxWanderingCreatures = value;
+    public int getCreatureAmntLevel() {
+        return this.creatureAmntLevel;
+    }
+
+    public void setCreatureAmntLevel(int value) {
+        if (value > 4) return;
+        this.creatureAmntLevel = value;
         if (!this.world.isRemote) {
             this.markDirty();
             IBlockState state = this.world.getBlockState(this.pos);
@@ -260,11 +264,16 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     public int getWanderRange() {
-        return this.wanderRange;
+        return 16 + this.wanderRangeLevel * 8;
     }
 
-    public void setWanderRange(int value) {
-        this.wanderRange = value;
+    public int getWanderRangeLevel() {
+        return this.wanderRangeLevel;
+    }
+
+    public void setWanderRangeLevel(int value) {
+        if (value > 4) return;
+        this.wanderRangeLevel = value;
         if (!this.world.isRemote) {
             this.markDirty();
             IBlockState state = this.world.getBlockState(this.pos);
@@ -275,8 +284,8 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        this.maxWanderingCreatures = compound.getInteger("MaxWanderingCreatures");
-        this.wanderRange = compound.getInteger("WanderRange");
+        this.creatureAmntLevel = compound.getInteger("CreatureAmountLevel");
+        this.wanderRangeLevel = compound.getInteger("WanderRangeLevel");
 
         if (compound.hasKey("BoxDeployedCreatures")) {
             NBTTagList boxDeployedCreaturesList = compound.getTagList("BoxDeployedCreatures", 10);
@@ -293,8 +302,8 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
-        compound.setInteger("MaxWanderingCreatures", this.maxWanderingCreatures);
-        compound.setInteger("WanderRange", this.wanderRange);
+        compound.setInteger("CreatureAmountLevel", this.creatureAmntLevel);
+        compound.setInteger("WanderRangeLevel", this.wanderRangeLevel);
 
         NBTTagList boxDeployedCreaturesList = new NBTTagList();
         if (!this.creatureListNBT.isEmpty()) {
@@ -326,8 +335,8 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
 
     @Override
     public void handleUpdateTag(NBTTagCompound tag) {
-        this.maxWanderingCreatures = tag.getInteger("MaxWanderingCreatures");
-        this.wanderRange = tag.getInteger("WanderRange");
+        this.creatureAmntLevel = tag.getInteger("CreatureAmountLevel");
+        this.wanderRangeLevel = tag.getInteger("WanderRangeLevel");
 
         if (tag.hasKey("BoxDeployedCreatures")) {
             NBTTagList boxDeployedCreaturesList = tag.getTagList("BoxDeployedCreatures", 10);

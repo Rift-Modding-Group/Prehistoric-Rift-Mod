@@ -1,0 +1,22 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X#X",
+    "#A#",
+    "X#X"
+  ],
+  "key": {
+    "X": {
+      "item": "minecraft:redstone"
+    },
+    "#": {
+      "item": "prift:rift_shard"
+    },
+    "A": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "result": {
+    "item": "prift:player_box_upgrade"
+  }
+}
