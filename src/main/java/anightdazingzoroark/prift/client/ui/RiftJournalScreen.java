@@ -116,7 +116,7 @@ public class RiftJournalScreen extends GuiScreen {
         this.mc.getTextureManager().bindTexture(background);
         int k = (this.width - this.xSize) / 2;
         int l = (this.height - this.ySize) / 2;
-        drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, (float)this.xSize, (float)this.ySize);
+        drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, 560F, 240F);
     }
 
     protected void sidebarButtonListInit() {
@@ -347,8 +347,14 @@ public class RiftJournalScreen extends GuiScreen {
     private void placePartyMemberMenu(int mouseX, int mouseY, float partialTicks) {
         if (this.selectedPartyMem != null) {
             //for party member size
-            RiftCreature creatureToRender = this.selectedPartyMem;
             float scaleMultiplier = RiftUtil.getCreatureModelScale(this.selectedPartyMem);
+
+            //make sure its not rotated and red when dead
+            if (this.selectedPartyMem.getHealth() / this.selectedPartyMem.getMaxHealth() <= 0) {
+                this.selectedPartyMem.deathTime = 0;
+                this.selectedPartyMem.isDead = false;
+                this.selectedPartyMem.hurtTime = 0;
+            }
 
             //render entity
             GlStateManager.pushMatrix();
@@ -357,16 +363,23 @@ public class RiftJournalScreen extends GuiScreen {
             GlStateManager.translate(this.width / 2f + 50f, this.height / 2f + 50, 180.0F);
 
             //for rotating
-            int mouseXMod = RiftUtil.clamp(mouseX + (this.width / 2 + 50), 480, 592);
+            int mouseXMod = this.selectedPartyMem.getHealth() / this.selectedPartyMem.getMaxHealth() <= 0 ? 592 : RiftUtil.clamp(mouseX + (this.width / 2 + 50), 480, 592);
             GlStateManager.rotate(mouseXMod, 0.0F, 1.0F, 0.0F);
 
             GlStateManager.rotate(180, 1.0F, 0.0F, 0.0F);
 
             GlStateManager.scale(scaleMultiplier, scaleMultiplier, scaleMultiplier);
-            Minecraft.getMinecraft().getRenderManager().renderEntity(creatureToRender, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
+            Minecraft.getMinecraft().getRenderManager().renderEntity(this.selectedPartyMem, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
             GlStateManager.disableDepth();
             GlStateManager.popMatrix();
             GlStateManager.popMatrix();
+
+            //add cross over when creature is dead
+            if (this.selectedPartyMem.getHealth() / this.selectedPartyMem.getMaxHealth() <= 0) {
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                this.mc.getTextureManager().bindTexture(background);
+                drawModalRectWithCustomSizedTexture((this.width - 140) / 2 + 50, (this.height - 136) / 2, 420, 0, 140, 136, 560, 240);
+            }
 
             //for party member button management
             this.partyMemButtonList.clear();
