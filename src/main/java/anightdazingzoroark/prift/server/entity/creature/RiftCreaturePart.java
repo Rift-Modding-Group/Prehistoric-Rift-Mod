@@ -103,7 +103,7 @@ public class RiftCreaturePart extends MultiPartEntityPart {
 
     @Override
     public boolean canBeCollidedWith() {
-        boolean aliveTest = this.partParent.isEntityAlive() || this.partParent.getIncapTimer() > 0;
+        boolean aliveTest = this.partParent.isEntityAlive();
         return !this.isDisabled && aliveTest;
     }
 

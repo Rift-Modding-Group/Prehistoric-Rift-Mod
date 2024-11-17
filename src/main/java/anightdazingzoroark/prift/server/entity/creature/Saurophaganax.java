@@ -315,7 +315,7 @@ public class Saurophaganax extends RiftCreature {
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.walk", true));
                 return PlayState.CONTINUE;
             }
-            if (this.isSleeping() && !this.isIncapacitated()) {
+            if (this.isSleeping()) {
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.sleeping", true));
                 return PlayState.CONTINUE;
             }

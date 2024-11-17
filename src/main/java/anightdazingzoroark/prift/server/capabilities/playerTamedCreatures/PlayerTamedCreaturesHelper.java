@@ -1,14 +1,9 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftUpgradePlayerBox;
-import anightdazingzoroark.prift.server.message.RiftUpgradePlayerParty;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.List;
 
@@ -53,11 +48,112 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
-    public static void upgradeCreatureBoxWandererCount(World world, BlockPos pos, int value) {
-        TileEntity tileEntity = world.getTileEntity(pos);
-        if (tileEntity instanceof RiftTileEntityCreatureBox) {
-            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) tileEntity;
-            creatureBox.setCreatureAmntLevel(value);
+    public static int getCreatureBoxLastOpenedTime(EntityPlayer player) {
+        return getPlayerTamedCreatures(player).getLastOpenedTime();
+    }
+
+    public static void setCreatureBoxLastOpenedTime(EntityPlayer player, int lastOpenedTime) {
+        if (player.world.isRemote) {
+            int timeToSubtract = lastOpenedTime - getCreatureBoxLastOpenedTime(player);
+            for (RiftCreature creature : getPlayerTamedCreatures(player).getBoxCreatures(player.world)) {
+                if (creature.getHealth() / creature.getMaxHealth() <= 0) {
+                    NBTTagCompound tagCompound = new NBTTagCompound();
+                    tagCompound.setInteger("BoxReviveTime", creature.getBoxReviveTime() - timeToSubtract);
+                    getPlayerTamedCreatures(player).modifyCreature(creature.getUniqueID(), tagCompound);
+                    RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                }
+            }
+
+            getPlayerTamedCreatures(player).setLastOpenedTime(lastOpenedTime);
+            RiftMessages.WRAPPER.sendToServer(new RiftCreatureBoxSetLastOpenedTime(player, lastOpenedTime));
+        }
+        else {
+            int timeToSubtract = lastOpenedTime - getCreatureBoxLastOpenedTime(player);
+            for (RiftCreature creature : getPlayerTamedCreatures(player).getBoxCreatures(player.world)) {
+                if (creature.getHealth() / creature.getMaxHealth() <= 0) {
+                    NBTTagCompound tagCompound = new NBTTagCompound();
+                    tagCompound.setInteger("BoxReviveTime", creature.getBoxReviveTime() - timeToSubtract);
+                    getPlayerTamedCreatures(player).modifyCreature(creature.getUniqueID(), tagCompound);
+                    RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                }
+            }
+
+            getPlayerTamedCreatures(player).setLastOpenedTime(lastOpenedTime);
+            RiftMessages.WRAPPER.sendToAll(new RiftCreatureBoxSetLastOpenedTime(player, lastOpenedTime));
+        }
+    }
+
+    public static void openToRegenPlayerBoxCreatures(EntityPlayer player) {
+        for (RiftCreature creature : getPlayerTamedCreatures(player).getBoxCreatures(player.world)) {
+            if (creature.getHealth()/creature.getMaxHealth() <= 0) {
+                NBTTagCompound tagCompound = new NBTTagCompound();
+
+                if (creature.getBoxReviveTime() > 0) {
+                    tagCompound.setInteger("BoxReviveTime", creature.getBoxReviveTime() - 1);
+
+                    if (player.world.isRemote) {
+                        getPlayerTamedCreatures(player).modifyCreature(creature.getUniqueID(), tagCompound);
+                        RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                    }
+                    else {
+                        getPlayerTamedCreatures(player).modifyCreature(creature.getUniqueID(), tagCompound);
+                        RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                    }
+                }
+                else {
+                    tagCompound.setFloat("Health", creature.getMaxHealth());
+                    tagCompound.setShort("HurtTime", (short)0);
+                    tagCompound.setInteger("HurtByTimestamp", 0);
+                    tagCompound.setShort("DeathTime", (short)0);
+                    RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                    RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                }
+            }
+        }
+    }
+
+    public static void regeneratePlayerBoxCreatures(EntityPlayer player) {
+        for (RiftCreature creature : getPlayerTamedCreatures(player).getBoxCreatures(player.world)) {
+            //regenerate energy
+            if (creature.getEnergy() < 20) {
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                tagCompound.setInteger("Energy", 20);
+
+                if (player.world.isRemote) {
+                    getPlayerTamedCreatures(player).modifyCreature(creature.getUniqueID(), tagCompound);
+                    RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                }
+                else {
+                    getPlayerTamedCreatures(player).modifyCreature(creature.getUniqueID(), tagCompound);
+                    RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                }
+            }
+
+            //regenerate health
+            if (creature.getHealth()/creature.getMaxHealth() <= 0) {
+                NBTTagCompound tagCompound = new NBTTagCompound();
+
+                if (creature.getBoxReviveTime() > 0) {
+                    tagCompound.setInteger("BoxReviveTime", creature.getBoxReviveTime() - 1);
+
+                    if (player.world.isRemote) {
+                        getPlayerTamedCreatures(player).modifyCreature(creature.getUniqueID(), tagCompound);
+                        RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                    }
+                    else {
+                        getPlayerTamedCreatures(player).modifyCreature(creature.getUniqueID(), tagCompound);
+                        RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                    }
+                }
+                else {
+                    tagCompound.setFloat("Health", creature.getMaxHealth());
+                    tagCompound.setShort("HurtTime", (short)0);
+                    tagCompound.setInteger("HurtByTimestamp", 0);
+                    tagCompound.setShort("DeathTime", (short)0);
+                    RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                    RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                }
+            }
         }
     }
 }

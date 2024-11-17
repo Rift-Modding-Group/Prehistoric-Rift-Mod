@@ -374,11 +374,11 @@ public class RiftJournalScreen extends GuiScreen {
             //for summon/dismiss button
             String summonName = this.selectedPartyMem.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY ? I18n.format("journal.party_button.dismiss") : I18n.format("journal.party_button.summon");
             GuiButton summonButton = new GuiButton(0, (this.width - 60) / 2 + 20, (this.height - 20)/2 + 90, 60, 20, summonName);
-            if (this.selectedPartyMem.isIncapacitated()) summonButton.enabled = false;
+            if (!this.selectedPartyMem.isEntityAlive()) summonButton.enabled = false;
 
             //for teleport to owner button
             GuiButton tpToOwnerButton = new GuiButton( 1, (this.width - 60) / 2 + 90, (this.height - 20)/2 + 90, 60, 20, I18n.format("journal.party_button.teleport"));
-            if (this.selectedPartyMem.isIncapacitated() || this.selectedPartyMem.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) tpToOwnerButton.enabled = false;
+            if (!this.selectedPartyMem.isEntityAlive() || this.selectedPartyMem.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) tpToOwnerButton.enabled = false;
 
             //for rearrange button
             String rearrangeName = this.changePartyOrderMode ? I18n.format("journal.party_button.stop_rearrange_party") : I18n.format("journal.party_button.rearrange_party");

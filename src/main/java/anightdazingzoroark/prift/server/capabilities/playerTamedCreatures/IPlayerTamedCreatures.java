@@ -26,6 +26,8 @@ public interface IPlayerTamedCreatures {
     int getMaxBoxSize();
     void setBoxSizeLevel(int value);
     int getBoxSizeLevel();
+    void setLastOpenedTime(int value);
+    int getLastOpenedTime();
 
     //for indirect values
     void addToPartyCreatures(RiftCreature creature);

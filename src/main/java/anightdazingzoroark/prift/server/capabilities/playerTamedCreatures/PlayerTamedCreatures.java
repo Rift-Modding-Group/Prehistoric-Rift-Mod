@@ -23,6 +23,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private int lastSelected = 0;
     private int partySizeLevel = 0;
     private int boxSizeLevel = 0;
+    private int lastOpenedTime = 0;
 
     @Override
     public void setLastSelected(int value) {
@@ -62,6 +63,16 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public int getBoxSizeLevel() {
         return this.boxSizeLevel;
+    }
+
+    @Override
+    public void setLastOpenedTime(int value) {
+        this.lastOpenedTime = value;
+    }
+
+    @Override
+    public int getLastOpenedTime() {
+        return this.lastOpenedTime;
     }
 
     @Override
@@ -365,7 +376,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
                 for (String key : compound.getKeySet()) {
                     NBTBase value = compound.getTag(key);
-                    if (partyMemCompound.hasKey(key)) partyMemCompound.setTag(key, value);
+                    //if (partyMemCompound.hasKey(key)) partyMemCompound.setTag(key, value);
+                    partyMemCompound.setTag(key, value);
                 }
                 return;
             }
@@ -375,7 +387,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
                 for (String key : compound.getKeySet()) {
                     NBTBase value = compound.getTag(key);
-                    if (partyMemCompound.hasKey(key)) partyMemCompound.setTag(key, value);
+                    //if (partyMemCompound.hasKey(key)) partyMemCompound.setTag(key, value);
+                    partyMemCompound.setTag(key, value);
                 }
                 return;
             }

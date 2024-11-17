@@ -103,11 +103,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> JUST_SPAWNED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> TAME_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HAS_HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> INCAP_COUNTDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
+    private int boxReviveTime;
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -223,8 +222,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(JUST_SPAWNED, true);
         this.dataManager.register(TAME_PROGRESS, 0);
         this.dataManager.register(HAS_HOME_POS, false);
-        this.dataManager.register(INCAPACITATED, false);
-        this.dataManager.register(INCAP_COUNTDOWN, 1200);
         this.dataManager.register(SLEEPING, false);
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) PlayerTamedCreatures.DeploymentType.NONE.ordinal());
@@ -304,11 +301,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 if (this.isBeingRidden()) this.informRiderEnergy();
                 this.manageTargetingBySitting();
                 if (this.canNaturalRegen()) {
-                    if (this.getHealth() < this.getMaxHealth()) this.naturalRegen();
+                    if (this.getHealth() < this.getMaxHealth() && this.getHealth() > 0) this.naturalRegen();
                     else this.healthRegen = 0;
                 }
                 this.manageXPAndLevel();
-                this.manageIncapacitated();
             }
         }
         if (this.isTamed() && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) this.updatePlayerTameList();
@@ -409,12 +405,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    private void manageIncapacitated() {
-        if (this.isIncapacitated()) {
-            this.setIncapTimer(this.getIncapTimer() - 1);
-        }
-    }
-
     private void manageXPAndLevel() {
         if (this.getXP() >= this.getMaxXP() && this.getLevel() < 100) {
             int tempXp = this.getXP() - this.getMaxXP();
@@ -442,13 +432,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void naturalRegen() {
-        if (this.healthRegen <= 100) {
-            this.healthRegen++;
+        if (this.hurtTime <= 0) {
+            if (this.healthRegen <= 100) this.healthRegen++;
+            else {
+                this.healthRegen = 0;
+                this.heal(2f);
+            }
         }
-        else {
-            this.healthRegen = 0;
-            this.heal(2f);
-        }
+        else this.healthRegen = 0;
     }
 
     @Override
@@ -607,7 +598,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
-        if (this.isTamed() && !this.isIncapacitated()) {
+        if (this.isTamed()) {
             if (this.getOwner() != null) {
                 if (this.isOwner(player)) {
                     if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
@@ -676,12 +667,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             return true;
         }
-        else if (this.isTamed() && this.isIncapacitated()) {
+        else if (this.isTamed()) {
             if (!itemstack.isEmpty() && itemstack.getItem().equals(RiftItems.REVIVAL_MIX)) {
                 this.consumeItemFromStack(player, itemstack);
                 this.setHealth((float)this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue()/4f);
-                this.setIncapTimer(1200);
-                this.setIncapacitated(false);
                 return true;
             }
         }
@@ -970,8 +959,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             compound.setInteger("HomePosY", this.homePosition.getY());
             compound.setInteger("HomePosZ", this.homePosition.getZ());
         }
-        compound.setBoolean("Incapacitated", this.isIncapacitated());
         compound.setByte("DeploymentType", (byte) this.getDeploymentType().ordinal());
+        compound.setInteger("BoxReviveTime", this.boxReviveTime);
     }
 
     @Override
@@ -1008,8 +997,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setJustSpawned(compound.getBoolean("JustSpawned"));
         this.setTameProgress(compound.getInteger("TameProgress"));
         if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
-        this.setIncapacitated(compound.getBoolean("Incapacitated"));
         this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getByte("DeploymentType")]);
+        this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
     }
 
     private void initInventory() {
@@ -1400,22 +1389,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setAgeInDays(int value) {
         this.dataManager.set(AGE_TICKS, value * 24000);
-    }
-
-    public boolean isIncapacitated() {
-        return this.dataManager.get(INCAPACITATED);
-    }
-
-    public void setIncapacitated(boolean value) {
-        this.dataManager.set(INCAPACITATED, value);
-    }
-
-    public int getIncapTimer() {
-        return this.dataManager.get(INCAP_COUNTDOWN);
-    }
-
-    public void setIncapTimer(int value) {
-        this.dataManager.set(INCAP_COUNTDOWN, value);
     }
 
     public boolean isSleeping() {
@@ -1883,75 +1856,34 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    private void sendIncapMessage() {
-        if (this.isTamed() && !this.world.isRemote && this.getOwner() instanceof EntityPlayerMP) {
-            ((EntityPlayer)this.getOwner()).sendStatusMessage(new TextComponentTranslation("reminder.incapacitated", this.getDisplayName()), false);
-        }
+    public int getBoxReviveTime() {
+        return this.boxReviveTime;
+    }
+
+    public void setBoxReviveTime(int time) {
+        this.boxReviveTime = time;
     }
 
     protected void onDeathUpdate() {
-        super.onDeathUpdate();
         if (this.isTamed()) {
-            this.setIncapacitated(true);
+            this.setHealth(0f);
             if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                 this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                if (this.deathTime == 1) {
-                    this.world.removeEntity(this);
-                }
+                this.setBoxReviveTime(12000); //change to 12000 later
+                this.deathTime = 20;
+                this.updatePlayerTameList();
+                this.setDead();
+                //this.world.removeEntity(this);
             }
             else if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {
-                this.deathTime = 0;
+                System.out.println("base death");
+                this.setBoxReviveTime(200); //12000
+            }
+            else {
+                System.out.println("something else death");
             }
         }
         else super.onDeathUpdate();
-
-        /*
-        if (GeneralConfig.minRevivalDiff.equals("PEACEFUL") || GeneralConfig.minRevivalDiff.equals("EASY") || GeneralConfig.minRevivalDiff.equals("NORMAL") || GeneralConfig.minRevivalDiff.equals("HARD")) {
-            EnumDifficulty diff = EnumDifficulty.valueOf(GeneralConfig.minRevivalDiff);
-            if (this.world.getDifficulty().getId() < diff.getId()) {
-                if (this.isTamed()) {
-                    if (this.getIncapTimer() > 0) {
-                        this.deathTime = 0;
-                        if (!this.isIncapacitated()) this.sendIncapMessage();
-                        this.setIncapacitated(true);
-                    }
-                    else {
-                        this.setIncapacitated(false);
-                        if (this.deathTime == 0) this.sendDeathMessage();
-                        super.onDeathUpdate();
-                    }
-                }
-                else {
-                    if (this.deathTime == 0) this.sendDeathMessage();
-                    super.onDeathUpdate();
-                }
-            }
-            else {
-                if (this.deathTime == 0) this.sendDeathMessage();
-                super.onDeathUpdate();
-            }
-        }
-        else {
-            if (GeneralConfig.minRevivalDiff.equals("NONE")) {
-                if (this.isTamed()) {
-                    if (this.getIncapTimer() > 0) {
-                        this.deathTime = 0;
-                        if (!this.isIncapacitated()) this.sendIncapMessage();
-                        this.setIncapacitated(true);
-                    }
-                    else {
-                        this.setIncapacitated(false);
-                        if (this.deathTime == 0) this.sendDeathMessage();
-                        super.onDeathUpdate();
-                    }
-                }
-                else {
-                    if (this.deathTime == 0) this.sendDeathMessage();
-                    super.onDeathUpdate();
-                }
-            }
-        }
-         */
     }
 
     @Nullable
@@ -1981,10 +1913,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "incapacitance", 0, new AnimationController.IAnimationPredicate() {
+        data.addAnimationController(new AnimationController(this, "sleep", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
-                if (isIncapacitated() || isSleeping()) {
+                if (isSleeping()) {
                     event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".incapacitated", true));
                     return PlayState.CONTINUE;
                 }
