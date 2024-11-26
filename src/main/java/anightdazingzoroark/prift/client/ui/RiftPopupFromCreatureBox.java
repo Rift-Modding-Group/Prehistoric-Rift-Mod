@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -124,8 +125,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valTwo), true));
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valTwo), true));
 
-                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, this.valOne, this.valTwo));
-                        this.playerTamedCreatures().boxCreatureToPartyCreature(this.valOne, this.valTwo);
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, this.mc.player, this.valOne, this.valTwo));
                         this.getCreatureBox().createCreatureList();
                         break;
                     case PARTY_BOX_SWAP:
@@ -138,8 +138,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valOne), true));
 
                         //drop items from party creature's inventory
-                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP, this.valOne, this.valTwo));
-                        this.playerTamedCreatures().partyCreatureToBoxCreature(this.valOne, this.valTwo);
+                        PlayerTamedCreaturesHelper.partyBoxSwap(this.mc.player, this.valOne, this.valTwo);
                         this.getCreatureBox().createCreatureList();
                         break;
                     case PARTY_TO_BOX:
@@ -151,8 +150,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valOne), true));
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valOne), true));
 
-                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX, this.valOne));
-                        this.playerTamedCreatures().partyCreatureToBox(this.valOne);
+                        PlayerTamedCreaturesHelper.partyToBox(this.mc.player, this.valOne);
                         this.getCreatureBox().createCreatureList();
                         break;
                     case BOX_DEPLOYED_BOX_SWAP:

@@ -190,8 +190,7 @@ public class RiftJournalScreen extends GuiScreen {
                     this.partyPosToMove = jButton.id;
                 }
                 else {
-                    RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, jButton.id, this.partyPosToMove));
-                    PlayerTamedCreaturesHelper.getPlayerTamedCreatures(this.mc.player).rearrangePartyCreatures(jButton.id, this.partyPosToMove);
+                    PlayerTamedCreaturesHelper.rearrangePartyCreatures(this.mc.player, jButton.id, this.partyPosToMove);
                     this.partyPosToMove = -1;
                 }
             }

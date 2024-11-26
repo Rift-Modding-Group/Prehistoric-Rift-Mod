@@ -132,8 +132,8 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(partyButton.id), true));
                                 RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(partyButton.id), true));
 
-                                RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, this.boxPosToMove, partyButton.id));
-                                this.playerTamedCreatures().boxCreatureToPartyCreature(this.boxPosToMove, partyButton.id);
+                                RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, this.mc.player, this.boxPosToMove, partyButton.id));
+                                PlayerTamedCreaturesHelper.boxPartySwap(this.mc.player, this.boxPosToMove, partyButton.id);
                             }
                             //otherwise, open a prompt that asks whether or not to have em dropped
                             else {
@@ -143,10 +143,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             }
                         }
                         //move box creature to party
-                        else {
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_TO_PARTY, this.boxPosToMove));
-                            this.playerTamedCreatures().boxCreatureToParty(this.boxPosToMove);
-                        }
+                        else PlayerTamedCreaturesHelper.boxToParty(this.mc.player, this.boxPosToMove);
                     }
                     else if (this.boxPosToMove == -1 && this.boxDeployedToMove != -1) {
                         //swap box deployed creature w party creature
@@ -171,10 +168,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         }
                     }
                     //party swap
-                    else if (partyButton.id < this.getPlayerParty().size()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, this.partyPosToMove, partyButton.id));
-                        this.playerTamedCreatures().rearrangePartyCreatures(this.partyPosToMove, partyButton.id);
-                    }
+                    else if (partyButton.id < this.getPlayerParty().size()) PlayerTamedCreaturesHelper.rearrangePartyCreatures(this.mc.player, this.partyPosToMove, partyButton.id);
 
                     this.partyPosToMove = -1;
                     this.boxPosToMove = -1;
@@ -215,8 +209,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                     RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
                                     RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
 
-                                    RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP, this.partyPosToMove, boxButton.id));
-                                    this.playerTamedCreatures().partyCreatureToBoxCreature(this.partyPosToMove, boxButton.id);
+                                    PlayerTamedCreaturesHelper.partyBoxSwap(this.mc.player, this.partyPosToMove, boxButton.id);
                                 }
                                 //otherwise, open a prompt that asks whether or not to have em dropped
                                 else {
@@ -233,8 +226,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                     RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
                                     RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
 
-                                    RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX, this.partyPosToMove));
-                                    this.playerTamedCreatures().partyCreatureToBox(this.partyPosToMove);
+                                    PlayerTamedCreaturesHelper.partyToBox(this.mc.player, this.partyPosToMove);
                                 }
                                 //otherwise, open a prompt that asks whether or not to have em dropped
                                 else {
@@ -290,10 +282,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             }
                         }
                         //box swap
-                        else if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_BOX, this.boxPosToMove, boxButton.id));
-                            this.playerTamedCreatures().rearrangeBoxCreatures(this.boxPosToMove, boxButton.id);
-                        }
+                        else if (boxButton.id < this.getPlayerBoxedCreatures().size()) PlayerTamedCreaturesHelper.rearrangeBoxCreatures(this.mc.player, this.boxPosToMove, boxButton.id);
 
                         this.partyPosToMove = -1;
                         this.boxPosToMove = -1;

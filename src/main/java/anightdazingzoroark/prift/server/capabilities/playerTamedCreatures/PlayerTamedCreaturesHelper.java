@@ -188,6 +188,71 @@ public class PlayerTamedCreaturesHelper {
     }
 
     //swapping related stuff (good lord im going insane)
+    public static void rearrangePartyCreatures(EntityPlayer player, int posSelected, int posToSwap) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).rearrangePartyCreatures(posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, player, posSelected, posToSwap));
+        }
+        else {
+            getPlayerTamedCreatures(player).rearrangePartyCreatures(posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, player, posSelected, posToSwap));
+        }
+    }
+
+    public static void partyBoxSwap(EntityPlayer player, int posSelected, int posToSwap) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).partyCreatureToBoxCreature(posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP, player, posSelected, posToSwap));
+        }
+        else {
+            getPlayerTamedCreatures(player).partyCreatureToBoxCreature(posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP, player, posSelected, posToSwap));
+        }
+    }
+
+    public static void partyToBox(EntityPlayer player, int posSelected) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).partyCreatureToBox(posSelected);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX, player, posSelected));
+        }
+        else {
+            getPlayerTamedCreatures(player).partyCreatureToBox(posSelected);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX, player, posSelected));
+        }
+    }
+
+    public static void rearrangeBoxCreatures(EntityPlayer player, int posSelected, int posToSwap) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).rearrangeBoxCreatures(posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_BOX, player, posSelected, posToSwap));
+        }
+        else {
+            getPlayerTamedCreatures(player).rearrangeBoxCreatures(posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_BOX, player, posSelected, posToSwap));
+        }
+    }
+
+    public static void boxPartySwap(EntityPlayer player, int posSelected, int posToSwap) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).boxCreatureToPartyCreature(posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, player, posSelected, posToSwap));
+        }
+        else {
+            getPlayerTamedCreatures(player).boxCreatureToPartyCreature(posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, player, posSelected, posToSwap));
+        }
+    }
+
+    public static void boxToParty(EntityPlayer player, int posSelected) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).boxCreatureToParty(posSelected);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_TO_PARTY, player, posSelected));
+        }
+        else {
+            getPlayerTamedCreatures(player).boxCreatureToParty(posSelected);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_TO_PARTY, player, posSelected));
+        }
+    }
 
     //other helper functions
     public static RiftCreature createCreatureFromNBT(World world, NBTTagCompound compound) {
