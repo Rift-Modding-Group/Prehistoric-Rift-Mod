@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -221,6 +222,28 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    public static void partyBoxDeployedSwap(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).partyCreatureToBoxCreatureDeployed(player.world, pos, posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_DEPLOYED_SWAP, player, pos, posSelected, posToSwap));
+        }
+        else {
+            getPlayerTamedCreatures(player).partyCreatureToBoxCreatureDeployed(player.world, pos, posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_DEPLOYED_SWAP, player, pos, posSelected, posToSwap));
+        }
+    }
+
+    public static void partyToBoxDeployed(EntityPlayer player, BlockPos pos, int posSelected) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).partyCreatureToBoxDeployed(player.world, pos, posSelected);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX_DEPLOYED, player, pos, posSelected));
+        }
+        else {
+            getPlayerTamedCreatures(player).partyCreatureToBoxDeployed(player.world, pos, posSelected);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX_DEPLOYED, player, pos, posSelected));
+        }
+    }
+
     public static void rearrangeBoxCreatures(EntityPlayer player, int posSelected, int posToSwap) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).rearrangeBoxCreatures(posSelected, posToSwap);
@@ -251,6 +274,74 @@ public class PlayerTamedCreaturesHelper {
         else {
             getPlayerTamedCreatures(player).boxCreatureToParty(posSelected);
             RiftMessages.WRAPPER.sendToAll(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_TO_PARTY, player, posSelected));
+        }
+    }
+
+    public static void boxBoxDeployedSwap(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).boxCreatureToBoxCreatureDeployed(player.world, pos, posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_BOX_DEPLOYED_SWAP, player, pos, posSelected, posToSwap));
+        }
+        else {
+            getPlayerTamedCreatures(player).boxCreatureToBoxCreatureDeployed(player.world, pos, posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_BOX_DEPLOYED_SWAP, player, pos, posSelected, posToSwap));
+        }
+    }
+
+    public static void boxToBoxDeployed(EntityPlayer player, BlockPos pos, int posSelected) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).boxCreatureToBoxDeployed(player.world, pos, posSelected);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_TO_BOX_DEPLOYED, player, pos, posSelected));
+        }
+        else {
+            getPlayerTamedCreatures(player).partyCreatureToBoxDeployed(player.world, pos, posSelected);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_TO_BOX_DEPLOYED, player, pos, posSelected));
+        }
+    }
+
+    public static void rearrangeBoxDeployedCreatures(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {}
+
+    public static void boxDeployedPartySwap(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).boxCreatureDeployedToPartyCreature(player.world, pos, posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_PARTY_SWAP, player, pos, posSelected, posToSwap));
+        }
+        else {
+            getPlayerTamedCreatures(player).boxCreatureDeployedToPartyCreature(player.world, pos, posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_PARTY_SWAP, player, pos, posSelected, posToSwap));
+        }
+    }
+
+    public static void boxDeployedToParty(EntityPlayer player, BlockPos pos, int posSelected) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).boxCreatureDeployedToParty(player.world, pos, posSelected);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_PARTY, player, pos, posSelected));
+        }
+        else {
+            getPlayerTamedCreatures(player).boxCreatureDeployedToParty(player.world, pos, posSelected);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_PARTY, player, pos, posSelected));
+        }
+    }
+
+    public static void boxDeployedBoxSwap(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).boxCreatureDeployedToBoxCreature(player.world, pos, posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_BOX_SWAP, player, pos, posSelected, posToSwap));
+        }
+        else {
+            getPlayerTamedCreatures(player).boxCreatureDeployedToBoxCreature(player.world, pos, posSelected, posToSwap);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_BOX_SWAP, player, pos, posSelected, posToSwap));
+        }
+    }
+
+    public static void boxDeployedToBox(EntityPlayer player, BlockPos pos, int posSelected) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).boxCreatureDeployedToBox(player.world, pos, posSelected);
+            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_BOX, player, pos, posSelected));
+        }
+        else {
+            getPlayerTamedCreatures(player).boxCreatureDeployedToBox(player.world, pos, posSelected);
+            RiftMessages.WRAPPER.sendToAll(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_BOX, player, pos, posSelected));
         }
     }
 

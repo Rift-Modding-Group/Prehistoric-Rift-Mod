@@ -152,8 +152,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
                             RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
 
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_PARTY_SWAP, this.creatureBoxPos, this.boxDeployedToMove, partyButton.id));
-                            this.playerTamedCreatures().boxCreatureDeployedToPartyCreature(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove, partyButton.id);
+                            PlayerTamedCreaturesHelper.boxDeployedPartySwap(this.mc.player, this.creatureBoxPos, this.boxDeployedToMove, partyButton.id);
                             this.getCreatureBox().createCreatureList();
                         }
                         //move box deployed creature to party
@@ -162,8 +161,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
                             RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
 
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_PARTY, this.creatureBoxPos, this.boxDeployedToMove));
-                            this.playerTamedCreatures().boxCreatureDeployedToParty(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove);
+                            PlayerTamedCreaturesHelper.boxDeployedToParty(this.mc.player, this.creatureBoxPos, this.boxDeployedToMove);
                             this.getCreatureBox().createCreatureList();
                         }
                     }
@@ -245,8 +243,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                     RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
                                     RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
 
-                                    RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_BOX_SWAP, this.creatureBoxPos, this.boxDeployedToMove, boxButton.id));
-                                    this.playerTamedCreatures().boxCreatureDeployedToBoxCreature(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove, boxButton.id);
+                                    PlayerTamedCreaturesHelper.boxDeployedBoxSwap(this.mc.player, this.creatureBoxPos, this.boxDeployedToMove, boxButton.id);
                                     this.getCreatureBox().createCreatureList();
                                 }
                                 //otherwise, open a prompt that asks whether or not to have em dropped
@@ -269,8 +266,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                     RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
                                     RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
 
-                                    RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_BOX, this.creatureBoxPos, this.boxDeployedToMove));
-                                    this.playerTamedCreatures().boxCreatureDeployedToBox(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove);
+                                    PlayerTamedCreaturesHelper.boxDeployedToBox(this.mc.player, this.creatureBoxPos, this.boxDeployedToMove);
                                     this.getCreatureBox().createCreatureList();
                                 }
                                 //otherwise, open a prompt that asks whether or not to have em dropped
@@ -323,8 +319,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedToMove), true));
                             }
 
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_DEPLOYED_SWAP, this.creatureBoxPos, this.partyPosToMove, boxDeployedButton.id));
-                            this.playerTamedCreatures().partyCreatureToBoxCreatureDeployed(this.mc.player.world, this.creatureBoxPos, this.partyPosToMove, boxDeployedButton.id);
+                            PlayerTamedCreaturesHelper.partyBoxDeployedSwap(this.mc.player, this.creatureBoxPos, this.partyPosToMove, boxDeployedButton.id);
                             this.getCreatureBox().createCreatureList();
                         }
                         //move party creature to box deployed
@@ -333,8 +328,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
                             RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
 
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX_DEPLOYED, this.creatureBoxPos, this.partyPosToMove));
-                            this.playerTamedCreatures().partyCreatureToBoxDeployed(this.mc.player.world, this.creatureBoxPos, this.partyPosToMove);
+                            PlayerTamedCreaturesHelper.partyToBoxDeployed(this.mc.player, this.creatureBoxPos, this.partyPosToMove);
                             this.getCreatureBox().createCreatureList();
                         }
                     }
@@ -347,8 +341,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id), true));
                                 RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id), true));
 
-                                RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_BOX_DEPLOYED_SWAP, this.creatureBoxPos, this.boxPosToMove, boxDeployedButton.id));
-                                this.playerTamedCreatures().boxCreatureToBoxCreatureDeployed(this.mc.player.world, this.creatureBoxPos, this.boxPosToMove, boxDeployedButton.id);
+                                PlayerTamedCreaturesHelper.boxBoxDeployedSwap(this.mc.player, this.creatureBoxPos, this.boxPosToMove, boxDeployedButton.id);
                                 this.getCreatureBox().createCreatureList();
                             }
                             //otherwise, open a prompt that asks whether or not to have em dropped
@@ -360,14 +353,13 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         }
                         //move box creature to box deployed
                         else {
-                            RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_TO_BOX_DEPLOYED, this.creatureBoxPos, this.boxPosToMove));
-                            this.playerTamedCreatures().boxCreatureToBoxDeployed(this.mc.player.world, this.creatureBoxPos, this.boxPosToMove);
+                            PlayerTamedCreaturesHelper.boxToBoxDeployed(this.mc.player, this.creatureBoxPos, this.boxPosToMove);
                             this.getCreatureBox().createCreatureList();
                         }
                     }
                     //box deployed swap
                     else if (boxDeployedButton.id < this.getCreatureBoxDeployedCreatures().size()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_BOX_DEPLOYED, this.creatureBoxPos, this.boxDeployedToMove, boxDeployedButton.id));
+                        RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_BOX_DEPLOYED, this.mc.player, this.creatureBoxPos, this.boxDeployedToMove, boxDeployedButton.id));
                         this.playerTamedCreatures().rearrangeDeployedBoxCreatures(this.mc.player.world, this.creatureBoxPos, this.boxDeployedToMove, boxDeployedButton.id);
                         this.getCreatureBox().createCreatureList();
                     }
