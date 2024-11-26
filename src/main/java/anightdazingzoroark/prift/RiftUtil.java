@@ -413,19 +413,6 @@ public class RiftUtil {
         return Math.sqrt(xDiff * xDiff + zDiff * zDiff);
     }
 
-    public static boolean testCanBeDeployed(RiftCreature creature, EntityPlayer owner) {
-        if (owner == null) return false;
-        if (creature instanceof RiftWaterCreature) {
-            if (owner.world.getBlockState(owner.getPosition()).getMaterial() == Material.WATER) return true;
-            else if (owner.world.getBlockState(owner.getPosition().down()).getMaterial() != Material.AIR
-                    && ((RiftWaterCreature)creature).isAmphibious()) return true;
-        }
-        else {
-            if (owner.world.getBlockState(owner.getPosition().down()).getMaterial() != Material.AIR) return true;
-        }
-        return false;
-    }
-
     public static boolean posInBiomeListString(List<String> biomeStringList, World world, BlockPos pos) {
         //turn data from string list into array
         List<Biome> biomeList = new ArrayList<>();
