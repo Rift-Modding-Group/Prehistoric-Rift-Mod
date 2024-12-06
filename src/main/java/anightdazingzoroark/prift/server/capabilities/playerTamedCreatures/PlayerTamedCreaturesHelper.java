@@ -25,6 +25,17 @@ public class PlayerTamedCreaturesHelper {
         return getPlayerTamedCreatures(player).getPartyCreatures(player.world);
     }
 
+    public static void addToPlayerParty(EntityPlayer player, RiftCreature creature) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).addToPartyCreatures(creature);
+            RiftMessages.WRAPPER.sendToServer(new RiftAddToParty(player, creature));
+        }
+        else {
+            getPlayerTamedCreatures(player).addToPartyCreatures(creature);
+            RiftMessages.WRAPPER.sendToAll(new RiftAddToParty(player, creature));
+        }
+    }
+
     public static List<NBTTagCompound> getPlayerPartyNBT(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getPartyNBT();
     }
@@ -33,7 +44,27 @@ public class PlayerTamedCreaturesHelper {
         return getPlayerTamedCreatures(player).getBoxCreatures(player.world);
     }
 
+    //update creatures
+    public static void updateAllPartyMems(EntityPlayer player) {
+        if (player.world.isRemote) {
+            for (RiftCreature creature : getPlayerParty(player)) updatePartyMem(creature);
+        }
+    }
+
+    public static void updatePartyMem(RiftCreature creature) {
+        if (creature.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyDeployed((EntityPlayer) creature.getOwner(), creature));
+        else RiftMessages.WRAPPER.sendToAll(new RiftUpdatePartyDeployed((EntityPlayer) creature.getOwner(), creature));
+    }
+
     //getting and changing other variables
+    public static int getMaxPartySize(EntityPlayer player) {
+        return getPlayerTamedCreatures(player).getMaxPartySize();
+    }
+
+    public static int getMaxBoxSize(EntityPlayer player) {
+        return getPlayerTamedCreatures(player).getMaxBoxSize();
+    }
+
     public static int getLastSelected(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getLastSelected();
     }
@@ -357,6 +388,14 @@ public class PlayerTamedCreaturesHelper {
         creature.setUniqueId(uniqueID);
         creature.setCustomNameTag(customName);
         return creature;
+    }
+
+    public static NBTTagCompound createNBTFromCreature(RiftCreature creature) {
+        NBTTagCompound compound = new NBTTagCompound();
+        compound.setUniqueId("UniqueID", creature.getUniqueID());
+        compound.setString("CustomName", creature.getCustomNameTag());
+        creature.writeEntityToNBT(compound);
+        return compound;
     }
 
     public static void deployCreatureFromParty(EntityPlayer player, int position, boolean deploy) {

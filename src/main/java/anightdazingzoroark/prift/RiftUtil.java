@@ -2,9 +2,11 @@ package anightdazingzoroark.prift;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftRemoveCreature;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -467,6 +469,43 @@ public class RiftUtil {
         return false;
     }
 
+    public static void removeCreature(RiftCreature creature) {
+        if (creature == null) return;
+        if (creature.getParts() == null) return;
+        RiftCreature subCreature = creature;
+
+        if (creature.world.isRemote) {
+            //remove creature
+            creature.world.removeEntity(creature);
+            RiftMessages.WRAPPER.sendToServer(new RiftRemoveCreature(creature, true));
+
+            //remove hitboxes
+            for (Entity part : subCreature.getParts()) {
+                RiftCreaturePart creaturePart = (RiftCreaturePart) part;
+
+                if (creaturePart != null) {
+                    creature.world.removeEntityDangerously(creaturePart);
+                    RiftMessages.WRAPPER.sendToServer(new RiftRemoveCreature(creaturePart, false));
+                }
+            }
+        }
+        else {
+            //remove creature
+            creature.world.removeEntity(creature);
+            RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreature(creature, true));
+
+            //remove hitboxes
+            for (Entity part : subCreature.getParts()) {
+                RiftCreaturePart creaturePart = (RiftCreaturePart) part;
+
+                if (creaturePart != null) {
+                    creature.world.removeEntityDangerously(creaturePart);
+                    RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreature(creaturePart, false));
+                }
+            }
+        }
+    }
+
     public static float getCreatureModelScale(RiftCreature creature) {
         switch (creature.creatureType) {
             case TYRANNOSAURUS:
@@ -496,6 +535,8 @@ public class RiftUtil {
             case BARYONYX:
                 return 20f;
             case PALAEOCASTOR:
+                return 50f;
+            case ANKYLOSAURUS:
                 return 50f;
         }
         return 1f;

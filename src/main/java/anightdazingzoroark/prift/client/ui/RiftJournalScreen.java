@@ -86,6 +86,9 @@ public class RiftJournalScreen extends GuiScreen {
         if (mc != null && mc.world != null) this.drawDefaultBackground();
         else return;
 
+        //update creatures as long as this page is open
+        PlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+
         //draw screen
         this.drawGuiContainerBackgroundLayer();
 
@@ -344,13 +347,14 @@ public class RiftJournalScreen extends GuiScreen {
     private void placePartyMemberMenu(int mouseX, int mouseY, float partialTicks) {
         if (this.getSelectedCreature() != null) {
             //for party member size
-            float scaleMultiplier = RiftUtil.getCreatureModelScale(this.getSelectedCreature());
+            RiftCreature creatureToRender = this.getSelectedCreature();
+            float scaleMultiplier = RiftUtil.getCreatureModelScale(creatureToRender);
 
             //make sure its not rotated and red when dead
-            if (this.getSelectedCreature().getHealth() / this.getSelectedCreature().getMaxHealth() <= 0) {
-                this.getSelectedCreature().deathTime = 0;
-                this.getSelectedCreature().isDead = false;
-                this.getSelectedCreature().hurtTime = 0;
+            if (creatureToRender.getHealth() / creatureToRender.getMaxHealth() <= 0) {
+                creatureToRender.deathTime = 0;
+                creatureToRender.isDead = false;
+                creatureToRender.hurtTime = 0;
             }
 
             //render entity
@@ -360,13 +364,13 @@ public class RiftJournalScreen extends GuiScreen {
             GlStateManager.translate(this.width / 2f + 50f, this.height / 2f + 50, 180.0F);
 
             //for rotating
-            int mouseXMod = this.getSelectedCreature().getHealth() / this.getSelectedCreature().getMaxHealth() <= 0 ? 592 : RiftUtil.clamp(mouseX + (this.width / 2 + 50), 480, 592);
+            int mouseXMod = creatureToRender.getHealth() / creatureToRender.getMaxHealth() <= 0 ? 592 : RiftUtil.clamp(mouseX + (this.width / 2 + 50), 480, 592);
             GlStateManager.rotate(mouseXMod, 0.0F, 1.0F, 0.0F);
 
             GlStateManager.rotate(180, 1.0F, 0.0F, 0.0F);
 
             GlStateManager.scale(scaleMultiplier, scaleMultiplier, scaleMultiplier);
-            Minecraft.getMinecraft().getRenderManager().renderEntity(this.getSelectedCreature(), 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
+            Minecraft.getMinecraft().getRenderManager().renderEntity(creatureToRender, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
             GlStateManager.disableDepth();
             GlStateManager.popMatrix();
             GlStateManager.popMatrix();

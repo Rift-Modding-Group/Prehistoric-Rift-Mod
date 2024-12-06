@@ -79,6 +79,9 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         if (mc != null && mc.world != null) this.drawDefaultBackground();
         else return;
 
+        //update creatures as long as this page is open
+        PlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+
         //draw screen
         this.drawGuiContainerBackgroundLayer();
 

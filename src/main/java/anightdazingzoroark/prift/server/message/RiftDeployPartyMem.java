@@ -67,12 +67,7 @@ public class RiftDeployPartyMem extends AbstractMessage<RiftDeployPartyMem> {
             //update remove creature
             RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, uuid);
             partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-            partyMember.updatePlayerTameList();
-
-            //for removing hitboxes
-            partyMember.setDead();
-            partyMember.setHealth(0);
-            partyMember.updateParts();
+            PlayerTamedCreaturesHelper.updatePartyMem(partyMember);
         }
     }
 
@@ -107,12 +102,7 @@ public class RiftDeployPartyMem extends AbstractMessage<RiftDeployPartyMem> {
             //update remove creature
             RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, uuid);
             partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-            partyMember.updatePlayerTameList();
-
-            //for removing hitboxes
-            partyMember.setDead();
-            partyMember.setHealth(0);
-            partyMember.updateParts();
+            PlayerTamedCreaturesHelper.updatePartyMem(partyMember);
         }
     }
 }
