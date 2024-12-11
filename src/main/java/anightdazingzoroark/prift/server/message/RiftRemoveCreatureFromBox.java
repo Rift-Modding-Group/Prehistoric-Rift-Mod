@@ -44,11 +44,7 @@ public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatur
         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
         if (creature != null) {
             creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
-
-            //for removing hitboxes
-            creature.setDead();
-            creature.setHealth(0);
-            creature.updateParts();
+            RiftUtil.removeCreature(creature);
         }
     }
 
@@ -61,9 +57,7 @@ public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatur
             creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
 
             //for removing hitboxes
-            creature.setDead();
-            creature.setHealth(0);
-            creature.updateParts();
+            RiftUtil.removeCreature(creature);
         }
 
         //remove from party and box

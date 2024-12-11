@@ -47,25 +47,11 @@ public class RiftRemoveAfterSendToBox extends AbstractMessage<RiftRemoveAfterSen
     public void onClientReceived(Minecraft minecraft, RiftRemoveAfterSendToBox message, EntityPlayer player, MessageContext messageContext) {
         if (message.useUUID) {
             RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
-            if (creature != null) {
-                creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-
-                //for removing hitboxes
-                creature.setDead();
-                creature.setHealth(0);
-                creature.updateParts();
-            }
+            if (creature != null) RiftUtil.removeCreature(creature);
         }
         else {
             RiftCreature creature = (RiftCreature)player.world.getEntityByID(message.creatureId);
-            if (creature != null) {
-                creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-
-                //for removing hitboxes
-                creature.setDead();
-                creature.setHealth(0);
-                creature.updateParts();
-            }
+            if (creature != null) RiftUtil.removeCreature(creature);
         }
     }
 
@@ -73,25 +59,11 @@ public class RiftRemoveAfterSendToBox extends AbstractMessage<RiftRemoveAfterSen
     public void onServerReceived(MinecraftServer minecraftServer, RiftRemoveAfterSendToBox message, EntityPlayer player, MessageContext messageContext) {
         if (message.useUUID) {
             RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
-            if (creature != null) {
-                creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-
-                //for removing hitboxes
-                creature.setDead();
-                creature.setHealth(0);
-                creature.updateParts();
-            }
+            if (creature != null) RiftUtil.removeCreature(creature);
         }
         else {
             RiftCreature creature = (RiftCreature)player.world.getEntityByID(message.creatureId);
-            if (creature != null) {
-                creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-
-                //for removing hitboxes
-                creature.setDead();
-                creature.setHealth(0);
-                creature.updateParts();
-            }
+            if (creature != null) RiftUtil.removeCreature(creature);
         }
     }
 }

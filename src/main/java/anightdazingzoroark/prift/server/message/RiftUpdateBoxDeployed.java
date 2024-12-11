@@ -85,6 +85,7 @@ public class RiftUpdateBoxDeployed extends AbstractMessage<RiftUpdateBoxDeployed
 
                 //for removing creature and hitboxes
                 RiftUtil.removeCreature(creature);
+                System.out.println("go commit die");
             }
         }
         else {
@@ -96,7 +97,6 @@ public class RiftUpdateBoxDeployed extends AbstractMessage<RiftUpdateBoxDeployed
                     && creature.isEntityAlive()) {
                 //for removing creature and hitboxes
                 RiftUtil.removeCreature(creature);
-                System.out.println("remove pt 2");
             }
         }
     }
@@ -122,7 +122,7 @@ public class RiftUpdateBoxDeployed extends AbstractMessage<RiftUpdateBoxDeployed
 
                 //for removing creature and hitboxes
                 RiftUtil.removeCreature(creature);
-                System.out.println("remove pt 1");
+                System.out.println("go commit die");
             }
         }
         else {
