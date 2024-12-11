@@ -15,6 +15,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -81,6 +82,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
         //update creatures as long as this page is open
         PlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+        RiftTileEntityCreatureBoxHelper.updateAllDeployedCreatures(this.mc.world, this.creatureBoxPos);
 
         //draw screen
         this.drawGuiContainerBackgroundLayer();

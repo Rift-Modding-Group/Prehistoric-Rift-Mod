@@ -7,12 +7,10 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftUpdateBoxDeployed;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
@@ -59,6 +57,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         return !this.creatureListNBT.isEmpty();
     }
 
+    //this creates the creatures that wander around the box
     private void createCreaturesForWandering() {
         for (NBTTagCompound tagCompound : this.creatureListNBT) {
             RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.world, tagCompound);
@@ -173,6 +172,24 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         }
     }
 
+    public void replaceInCreatureList(UUID uuid, NBTTagCompound tagCompound) {
+        for (NBTTagCompound deployedCompound : this.creatureListNBT) {
+            if (deployedCompound.getUniqueId("UniqueID").equals(uuid)) {
+                for (String key : tagCompound.getKeySet()) {
+                    NBTBase value = tagCompound.getTag(key);
+                    deployedCompound.setTag(key, value);
+                }
+                break;
+            }
+        }
+
+        if (!this.world.isRemote) {
+            this.markDirty();
+            IBlockState state = this.world.getBlockState(this.pos);
+            this.world.notifyBlockUpdate(this.pos, state, state, 3);
+        }
+    }
+
     public void removeFromCreatureList(int pos) {
         this.creatureListNBT.remove(pos);
         if (!this.world.isRemote) {
@@ -186,6 +203,8 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         return this.creatureListNBT;
     }
 
+    //this is only for rendering and making obtaining creature data from this box
+    //easier to deal with
     public List<RiftCreature> getCreatures() {
         List<RiftCreature> creatureList = new ArrayList<>();
         for (NBTTagCompound compound : this.creatureListNBT) {

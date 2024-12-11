@@ -20,6 +20,7 @@ import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -310,7 +311,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.manageXPAndLevel();
             }
         }
-        if (this.isTamed() && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.updateCreatureBoxDeployedList();
+        //if (this.isTamed() && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.updateCreatureBoxDeployedList();
         if (this.world.isRemote) this.setControls();
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
@@ -1807,7 +1808,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY
                 || this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) PlayerTamedCreaturesHelper.updatePartyMem(this);
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
-                || this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) this.updateCreatureBoxDeployedList();
+                || this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE)
+            RiftTileEntityCreatureBoxHelper.updateDeployedCreature(this.getHomePos(), this);
 
         super.onDeath(cause);
     }
