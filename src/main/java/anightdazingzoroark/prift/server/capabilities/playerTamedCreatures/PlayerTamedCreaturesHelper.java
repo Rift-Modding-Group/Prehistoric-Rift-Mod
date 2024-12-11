@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
@@ -47,6 +48,9 @@ public class PlayerTamedCreaturesHelper {
     //update creatures
     public static void updateAllPartyMems(EntityPlayer player) {
         if (player.world.isRemote) {
+            for (RiftCreature creature : getPlayerParty(player)) updatePartyMem(creature);
+        }
+        else {
             for (RiftCreature creature : getPlayerParty(player)) updatePartyMem(creature);
         }
     }
@@ -384,6 +388,13 @@ public class PlayerTamedCreaturesHelper {
         String customName = compound.getString("CustomName");
 
         RiftCreature creature = creatureType.invokeClass(world);
+
+        //attributes and creature health dont carry over on client side, this should be a workaround
+        if (world.isRemote) {
+            creature.setHealth(compound.getFloat("Health"));
+            SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), compound.getTagList("Attributes", 10));
+        }
+
         creature.readEntityFromNBT(compound);
         creature.setUniqueId(uniqueID);
         creature.setCustomNameTag(customName);

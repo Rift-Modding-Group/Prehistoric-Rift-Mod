@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.ilexiconn.llibrary.server.network.AbstractMessage;
@@ -46,6 +47,6 @@ public class RiftChangeCreatureName extends AbstractMessage<RiftChangeCreatureNa
         RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
         creature.setCustomNameTag(message.newName);
         creature.setAlwaysRenderNameTag(true);
-        creature.updatePlayerTameList();
+        PlayerTamedCreaturesHelper.updatePartyMem(creature);
     }
 }

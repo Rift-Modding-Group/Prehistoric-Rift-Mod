@@ -2,10 +2,13 @@ package anightdazingzoroark.prift.server.tileentities;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftUpdateBoxDeployed;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -27,15 +30,11 @@ import java.util.stream.Collectors;
 
 public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     private List<NBTTagCompound> creatureListNBT = new ArrayList<>();
-    private List<RiftCreature> creatureList = new ArrayList<>();
     private int creatureAmntLevel = 0;
     private int wanderRangeLevel = 0;
 
     @Override
     public void update() {
-        //create creature list
-        this.createCreatureList();
-
         //if box has contents, make it so that its indestructible when there's creatures inside
         RiftCreatureBox creatureBox = (RiftCreatureBox)this.world.getBlockState(this.pos).getBlock();
         if (this.isUnbreakable()) creatureBox.setHardness(-1.0f);
@@ -52,7 +51,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
                 return riftCreature != null && riftCreature.ticksExisted <= 100 && !riftCreature.isTamed();
             }
         })) {
-            this.world.removeEntity(creature);
+            RiftUtil.removeCreature(creature);
         }
     }
 
@@ -61,43 +60,35 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     private void createCreaturesForWandering() {
-        for (RiftCreature creature : this.getCreatures()) {
-            //check if creature exists in world
-            //then generate a spawn point
-            if (!this.creatureExistsInWorld(creature)) {
-                for (int i = 0; i < 10; i++) {
-                    int xSpawnPos = RiftUtil.randomInRange(this.getPos().getX() - 16, this.getPos().getX() + 16);
-                    int ySpawnPos = RiftUtil.randomInRange(this.getPos().getY() - 8, this.getPos().getY() + 8);
-                    int zSpawnPos = RiftUtil.randomInRange(this.getPos().getZ() - 16, this.getPos().getZ() + 16);
-                    BlockPos pos = new BlockPos(xSpawnPos, ySpawnPos, zSpawnPos);
-                    IBlockState downState = this.world.getBlockState(pos.down());
+        for (NBTTagCompound tagCompound : this.creatureListNBT) {
+            RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.world, tagCompound);
 
-                    if (creature instanceof RiftWaterCreature) {
-                        RiftWaterCreature waterCreature = (RiftWaterCreature) creature;
-                        //spawn amphibious creatures
-                        if (waterCreature.isAmphibious()) {
-                            if ((this.canFitInArea(creature, pos) && downState.getMaterial() != Material.AIR) || this.entireAreaWater(creature, pos)) {
-                                creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
-                                creature.setTameStatus(TameStatusType.WANDER);
-                                creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
-                                this.world.spawnEntity(creature);
-                                break;
-                            }
-                        }
-                        //spawn aquatic creatures
-                        else {
-                            if (this.entireAreaWater(creature, pos)) {
-                                creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
-                                creature.setTameStatus(TameStatusType.WANDER);
-                                creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
-                                this.world.spawnEntity(creature);
-                                break;
-                            }
+            //check for validity and if creature already exists, then continue
+            if (creature == null || this.creatureExistsInWorld(creature) || !creature.isEntityAlive()) continue;
+
+            //generate a spawn point for creature
+            for (int i = 0; i < 10; i++) {
+                int xSpawnPos = RiftUtil.randomInRange(this.getPos().getX() - 16, this.getPos().getX() + 16);
+                int ySpawnPos = RiftUtil.randomInRange(this.getPos().getY() - 8, this.getPos().getY() + 8);
+                int zSpawnPos = RiftUtil.randomInRange(this.getPos().getZ() - 16, this.getPos().getZ() + 16);
+                BlockPos pos = new BlockPos(xSpawnPos, ySpawnPos, zSpawnPos);
+                IBlockState downState = this.world.getBlockState(pos.down());
+
+                if (creature instanceof RiftWaterCreature) {
+                    RiftWaterCreature waterCreature = (RiftWaterCreature) creature;
+                    //spawn amphibious creatures
+                    if (waterCreature.isAmphibious()) {
+                        if ((this.canFitInArea(creature, pos) && downState.getMaterial() != Material.AIR) || this.entireAreaWater(creature, pos)) {
+                            creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
+                            creature.setTameStatus(TameStatusType.WANDER);
+                            creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
+                            this.world.spawnEntity(creature);
+                            break;
                         }
                     }
+                    //spawn aquatic creatures
                     else {
-                        //spawn regular land creatures
-                        if (this.canFitInArea(creature, pos) && downState.getMaterial() != Material.AIR) {
+                        if (this.entireAreaWater(creature, pos)) {
                             creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
                             creature.setTameStatus(TameStatusType.WANDER);
                             creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
@@ -106,17 +97,24 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
                         }
                     }
                 }
+                else {
+                    //spawn regular land creatures
+                    if (this.canFitInArea(creature, pos) && downState.getMaterial() != Material.AIR) {
+                        creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
+                        creature.setTameStatus(TameStatusType.WANDER);
+                        creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
+                        this.world.spawnEntity(creature);
+                        break;
+                    }
+                }
             }
         }
     }
 
-    public void updateCreatures(RiftCreature creature) {
+    public void updateCreature(RiftCreature creature) {
         for (NBTTagCompound partyMemCompound : this.creatureListNBT) {
             if (partyMemCompound.getUniqueId("UniqueID") != null && partyMemCompound.getUniqueId("UniqueID").equals(creature.getUniqueID())) {
-                NBTTagCompound partyMemCompoundUpdt = new NBTTagCompound();
-                partyMemCompoundUpdt.setUniqueId("UniqueID", creature.getUniqueID());
-                partyMemCompoundUpdt.setString("CustomName", creature.getCustomNameTag());
-                creature.writeEntityToNBT(partyMemCompoundUpdt);
+                NBTTagCompound partyMemCompoundUpdt = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
 
                 if (this.creatureListNBT.contains(partyMemCompound)) this.replaceInCreatureList(this.creatureListNBT.indexOf(partyMemCompound), partyMemCompoundUpdt);
             }
@@ -188,6 +186,15 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         return this.creatureListNBT;
     }
 
+    public List<RiftCreature> getCreatures() {
+        List<RiftCreature> creatureList = new ArrayList<>();
+        for (NBTTagCompound compound : this.creatureListNBT) {
+            RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.world, compound);
+            if (creature != null) creatureList.add(creature);
+        }
+        return creatureList;
+    }
+
     public void setCreatureList(List<NBTTagCompound> value) {
         this.creatureListNBT = value;
         if (!this.world.isRemote) {
@@ -195,54 +202,6 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
             IBlockState state = this.world.getBlockState(this.pos);
             this.world.notifyBlockUpdate(this.pos, state, state, 3);
         }
-    }
-
-    public void createCreatureList() {
-        //add creatures to list
-        for (NBTTagCompound compound : this.creatureListNBT) {
-            RiftCreatureType creatureType = RiftCreatureType.values()[compound.getByte("CreatureType")];
-            UUID uniqueID = compound.getUniqueId("UniqueID");
-            String customName = compound.getString("CustomName");
-            boolean creatureExists = this.creatureList.stream().noneMatch(c -> c.getUniqueID().equals(uniqueID));
-            if (creatureType != null && creatureExists) {
-                RiftCreature creature = creatureType.invokeClass(this.world);
-
-                //attributes and creature health dont carry over on client side, this should be a workaround
-                if (this.world.isRemote) {
-                    creature.setHealth(compound.getFloat("Health"));
-                    SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), compound.getTagList("Attributes", 10));
-                }
-
-                creature.readEntityFromNBT(compound);
-                creature.setUniqueId(uniqueID);
-                creature.setCustomNameTag(customName);
-                this.creatureList.add(creature);
-            }
-        }
-
-        //compare creaturenbt list to creature list to remove creatures that no longer exist
-        List<UUID> nbtUUIDList = this.creatureListNBT.stream()
-                .map(nbt -> nbt.getUniqueId("UniqueID"))
-                .collect(Collectors.toList());
-        this.creatureList = this.creatureList.stream().filter(c -> nbtUUIDList.contains(c.getUniqueID())).collect(Collectors.toList());
-
-        //compare creaturenbt list to creature list to change creature order
-        for (int x = 0; x < this.creatureList.size(); x++) {
-            if (!this.creatureList.get(x).getUniqueID().equals(nbtUUIDList.get(x))) {
-                for (int y = x; y < this.creatureList.size(); y++) {
-                    if (this.creatureList.get(y).getUniqueID().equals(nbtUUIDList.get(x))) {
-                        RiftCreature oldValue = this.creatureList.get(x);
-                        RiftCreature newValue = this.creatureList.get(y);
-                        this.creatureList.set(x, newValue);
-                        this.creatureList.set(y, oldValue);
-                    }
-                }
-            }
-        }
-    }
-
-    public List<RiftCreature> getCreatures() {
-        return this.creatureList;
     }
 
     public int getMaxWanderingCreatures() {

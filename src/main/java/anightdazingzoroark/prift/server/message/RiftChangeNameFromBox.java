@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -53,7 +54,7 @@ public class RiftChangeNameFromBox extends AbstractMessage<RiftChangeNameFromBox
         if (creature != null) {
             creature.setCustomNameTag(message.newName);
             creature.setAlwaysRenderNameTag(true);
-            creature.updatePlayerTameList();
+            PlayerTamedCreaturesHelper.updatePartyMem(creature);
         }
         else {
             NBTTagCompound compound = new NBTTagCompound();
@@ -70,7 +71,7 @@ public class RiftChangeNameFromBox extends AbstractMessage<RiftChangeNameFromBox
         if (creature != null) {
             creature.setCustomNameTag(message.newName);
             creature.setAlwaysRenderNameTag(true);
-            creature.updatePlayerTameList();
+            PlayerTamedCreaturesHelper.updatePartyMem(creature);
         }
         else {
             NBTTagCompound compound = new NBTTagCompound();

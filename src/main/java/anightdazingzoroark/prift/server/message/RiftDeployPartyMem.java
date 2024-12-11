@@ -90,7 +90,6 @@ public class RiftDeployPartyMem extends AbstractMessage<RiftDeployPartyMem> {
             if (creature != null) {
                 creature.setPosition(player.posX, player.posY, player.posZ);
                 player.world.spawnEntity(creature);
-                creature.updatePlayerTameList();
             }
         }
         else {

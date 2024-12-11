@@ -160,7 +160,6 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valOne), true));
 
                         PlayerTamedCreaturesHelper.boxDeployedBoxSwap(this.mc.player, ClientProxy.creatureBoxBlockPos, this.valOne, this.valTwo);
-                        this.getCreatureBox().createCreatureList();
                         break;
                     case BOX_DEPLOYED_TO_BOX:
                         //drop items from box deployed creature's inventory
@@ -173,7 +172,6 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valOne), true));
 
                         PlayerTamedCreaturesHelper.boxDeployedToBox(this.mc.player, ClientProxy.creatureBoxBlockPos, this.valOne);
-                        this.getCreatureBox().createCreatureList();
                         break;
                     case BOX_BOX_DEPLOYED_SWAP:
                         //drop items from box deployed creature's inventory
@@ -186,7 +184,6 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valTwo), true));
 
                         PlayerTamedCreaturesHelper.boxBoxDeployedSwap(this.mc.player, ClientProxy.creatureBoxBlockPos, this.valOne, this.valTwo);
-                        this.getCreatureBox().createCreatureList();
                         break;
                 }
                 ClientProxy.swapTypeForPopup = null;

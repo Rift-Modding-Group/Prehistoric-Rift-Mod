@@ -49,7 +49,6 @@ public class RiftRemoveAfterSendToBox extends AbstractMessage<RiftRemoveAfterSen
             RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
             if (creature != null) {
                 creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                creature.updatePlayerTameList();
 
                 //for removing hitboxes
                 creature.setDead();
@@ -61,7 +60,6 @@ public class RiftRemoveAfterSendToBox extends AbstractMessage<RiftRemoveAfterSen
             RiftCreature creature = (RiftCreature)player.world.getEntityByID(message.creatureId);
             if (creature != null) {
                 creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                creature.updatePlayerTameList();
 
                 //for removing hitboxes
                 creature.setDead();
@@ -77,7 +75,6 @@ public class RiftRemoveAfterSendToBox extends AbstractMessage<RiftRemoveAfterSen
             RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
             if (creature != null) {
                 creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                creature.updatePlayerTameList();
 
                 //for removing hitboxes
                 creature.setDead();
@@ -89,7 +86,6 @@ public class RiftRemoveAfterSendToBox extends AbstractMessage<RiftRemoveAfterSen
             RiftCreature creature = (RiftCreature)player.world.getEntityByID(message.creatureId);
             if (creature != null) {
                 creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                creature.updatePlayerTameList();
 
                 //for removing hitboxes
                 creature.setDead();

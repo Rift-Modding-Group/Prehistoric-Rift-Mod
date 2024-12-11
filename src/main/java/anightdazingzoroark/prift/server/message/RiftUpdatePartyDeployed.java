@@ -79,7 +79,6 @@ public class RiftUpdatePartyDeployed extends AbstractMessage<RiftUpdatePartyDepl
             }
         }
         else {
-            System.out.println("health from nbt: "+message.tagCompound.getFloat("Health"));
             playerTamedCreatures.modifyCreature(message.uuid, message.tagCompound);
             if (creature != null
                     && PlayerTamedCreatures.DeploymentType.values()[message.tagCompound.getByte("DeploymentType")] == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
@@ -107,7 +106,6 @@ public class RiftUpdatePartyDeployed extends AbstractMessage<RiftUpdatePartyDepl
             else if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                 NBTTagCompound newCompound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
                 playerTamedCreatures.modifyCreature(message.uuid, newCompound);
-                System.out.println("health from nbt: "+newCompound.getFloat("Health"));
                 RiftMessages.WRAPPER.sendToAll(new RiftUpdatePartyDeployed(player, creature, newCompound));
 
                 //for removing creature and hitboxes

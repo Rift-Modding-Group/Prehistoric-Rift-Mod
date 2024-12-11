@@ -207,14 +207,11 @@ public class RiftJournalScreen extends GuiScreen {
                 if (this.getSelectedCreature().getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                     PlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedPartyPos, false);
                     this.getSelectedCreature().setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                    this.getSelectedCreature().updatePlayerTameList();
                 }
                 else if (this.getSelectedCreature().getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                     if (PlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedPartyPos)) {
-                        //RiftMessages.WRAPPER.sendToAll(new RiftManagePartyMem(this.selectedPartyMem, true));
                         PlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedPartyPos, true);
                         this.getSelectedCreature().setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                        this.getSelectedCreature().updatePlayerTameList();
                     }
                 }
             }

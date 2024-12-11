@@ -258,23 +258,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     public List<RiftCreature> getPartyCreatures(World world) {
         List<RiftCreature> creatures = new ArrayList<>();
         for (NBTTagCompound compound : this.partyCreatures) {
-            RiftCreatureType creatureType = RiftCreatureType.values()[compound.getByte("CreatureType")];
-            UUID uniqueID = compound.getUniqueId("UniqueID");
-            String customName = compound.getString("CustomName");
-            if (creatureType != null) {
-                RiftCreature creature = creatureType.invokeClass(world);
-
-                //attributes and creature health dont carry over on client side, this should be a workaround
-                if (world.isRemote) {
-                    creature.setHealth(compound.getFloat("Health"));
-                    SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), compound.getTagList("Attributes", 10));
-                }
-
-                creature.readEntityFromNBT(compound);
-                creature.setUniqueId(uniqueID);
-                creature.setCustomNameTag(customName);
-                creatures.add(creature);
-            }
+            RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(world, compound);
+            if (creature != null) creatures.add(creature);
         }
         return creatures;
     }
@@ -314,23 +299,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     public List<RiftCreature> getBoxCreatures(World world) {
         List<RiftCreature> creatures = new ArrayList<>();
         for (NBTTagCompound compound : this.boxCreatures) {
-            RiftCreatureType creatureType = RiftCreatureType.values()[compound.getByte("CreatureType")];
-            UUID uniqueID = compound.getUniqueId("UniqueID");
-            String customName = compound.getString("CustomName");
-            if (creatureType != null) {
-                RiftCreature creature = creatureType.invokeClass(world);
-
-                //attributes and creature health dont carry over on client side, this should be a workaround
-                if (world.isRemote) {
-                    creature.setHealth(compound.getFloat("Health"));
-                    SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), compound.getTagList("Attributes", 10));
-                }
-
-                creature.readEntityFromNBT(compound);
-                creature.setUniqueId(uniqueID);
-                creature.setCustomNameTag(customName);
-                creatures.add(creature);
-            }
+            RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(world, compound);
+            if (creature != null) creatures.add(creature);
         }
         return creatures;
     }
