@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.blocks;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -83,8 +84,10 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
             if (playerIn.isSneaking()) {
                 //highlight all creatures deployed
                 for (RiftCreature creature : tileEntity.getCreatures()) {
-                    if (creature != null) {
-                        creature.addPotionEffect(new PotionEffect(MobEffects.GLOWING, 100));
+                    if (creature == null) continue;
+                    RiftCreature actualCreature = (RiftCreature) RiftUtil.getEntityFromUUID(worldIn, creature.getUniqueID());
+                    if (actualCreature != null) {
+                        actualCreature.addPotionEffect(new PotionEffect(MobEffects.GLOWING, 100));
                     }
                 }
             }

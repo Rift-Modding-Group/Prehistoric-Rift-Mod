@@ -63,7 +63,7 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
-    public void noAttackWhileRiding(AttackEntityEvent event) {
+    public void attackEntity(AttackEntityEvent event) {
         //prevent players from attackin while ridin
         if (event.getEntityPlayer().isRiding()) {
             if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature || event.getEntityPlayer().getRidingEntity() instanceof RiftLargeWeapon) {

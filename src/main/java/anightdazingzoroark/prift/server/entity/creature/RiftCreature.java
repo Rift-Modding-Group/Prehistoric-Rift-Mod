@@ -719,7 +719,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             else if (PlayerTamedCreaturesHelper.getPlayerBox(player).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(player)) {
                 this.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                PlayerTamedCreaturesHelper.addToPlayerParty(player, this);
+                PlayerTamedCreaturesHelper.addToPlayerBox(player, this);
 
                 RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this, false));
                 RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this, false));

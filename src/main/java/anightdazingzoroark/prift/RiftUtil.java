@@ -537,7 +537,7 @@ public class RiftUtil {
             case PALAEOCASTOR:
                 return 50f;
             case ANKYLOSAURUS:
-                return 50f;
+                return 20f;
         }
         return 1f;
     }

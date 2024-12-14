@@ -45,6 +45,17 @@ public class PlayerTamedCreaturesHelper {
         return getPlayerTamedCreatures(player).getBoxCreatures(player.world);
     }
 
+    public static void addToPlayerBox(EntityPlayer player, RiftCreature creature) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).addToBoxCreatures(creature);
+            RiftMessages.WRAPPER.sendToServer(new RiftAddToBox(player, creature));
+        }
+        else {
+            getPlayerTamedCreatures(player).addToBoxCreatures(creature);
+            RiftMessages.WRAPPER.sendToAll(new RiftAddToBox(player, creature));
+        }
+    }
+
     //update creatures
     public static void updateAllPartyMems(EntityPlayer player) {
         if (player.world.isRemote) {

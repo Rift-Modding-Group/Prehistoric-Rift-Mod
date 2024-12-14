@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftMultipartInteract;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
@@ -77,21 +78,7 @@ public class RiftCreaturePart extends MultiPartEntityPart {
     public void onUpdate() {
         this.setPositionAndUpdate(this.partParent.posX + this.radius * Math.cos(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw), this.partParent.posY + this.offsetY, this.partParent.posZ + this.radius * Math.sin(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw));
         //if (this.partParent.isTamed()) System.out.println("is parent alive? "+this.partParent.isEntityAlive());
-        if (this.partParent.isEntityAlive()) {
-            if (this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
-                    || this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE
-                    || this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.NONE) {
-                this.world.removeEntityDangerously(this);
-            }
-        }
-        else {
-            if (!this.partParent.isTamed()) this.world.removeEntityDangerously(this);
-            else if (this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
-                    || this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE
-                    || this.partParent.getDeploymentType() == PlayerTamedCreatures.DeploymentType.NONE) {
-                this.world.removeEntityDangerously(this);
-            }
-        }
+        if (!this.partParent.isEntityAlive()) this.world.removeEntityDangerously(this);
         super.onUpdate();
     }
 

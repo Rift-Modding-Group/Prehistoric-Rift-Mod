@@ -58,8 +58,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     private static final DataParameter<Integer> LEAD_WORK_X_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Y_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BYTE);
+    private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BYTE);
     public int strongAttackCharge;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
