@@ -36,8 +36,6 @@ public class RiftAttackForOwner extends EntityAITarget {
                 }
             }
             else {
-                System.out.println("last attacked entity: "+owner.getLastAttackedEntity());
-                System.out.println("owner: "+owner);
                 this.hitTarget = owner.getLastAttackedEntity();
                 int i = owner.getLastAttackedEntityTime();
                 return i != this.timestamp && this.isSuitableTarget(this.hitTarget, false) && this.creature.shouldAttackEntity(this.hitTarget, owner) && !this.creature.busyAtWork();
