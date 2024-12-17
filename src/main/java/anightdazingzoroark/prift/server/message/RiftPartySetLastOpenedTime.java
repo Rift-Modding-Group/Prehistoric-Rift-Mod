@@ -9,13 +9,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftCreatureBoxSetLastOpenedTime extends AbstractMessage<RiftCreatureBoxSetLastOpenedTime> {
+public class RiftPartySetLastOpenedTime extends AbstractMessage<RiftPartySetLastOpenedTime> {
     private int playerId;
     private int lastOpenedTime;
 
-    public RiftCreatureBoxSetLastOpenedTime() {}
+    public RiftPartySetLastOpenedTime() {}
 
-    public RiftCreatureBoxSetLastOpenedTime(EntityPlayer player, int lastOpenedTime) {
+    public RiftPartySetLastOpenedTime(EntityPlayer player, int lastOpenedTime) {
         this.playerId = player.getEntityId();
         this.lastOpenedTime = lastOpenedTime;
     }
@@ -33,16 +33,16 @@ public class RiftCreatureBoxSetLastOpenedTime extends AbstractMessage<RiftCreatu
     }
 
     @Override
-    public void onClientReceived(Minecraft minecraft, RiftCreatureBoxSetLastOpenedTime message, EntityPlayer messagePlayer, MessageContext messageContext) {
+    public void onClientReceived(Minecraft minecraft, RiftPartySetLastOpenedTime message, EntityPlayer messagePlayer, MessageContext messageContext) {
         EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
         IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        playerTamedCreatures.setBoxLastOpenedTime(message.lastOpenedTime);
+        playerTamedCreatures.setPartyLastOpenedTime(message.lastOpenedTime);
     }
 
     @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftCreatureBoxSetLastOpenedTime message, EntityPlayer messagePlayer, MessageContext messageContext) {
+    public void onServerReceived(MinecraftServer minecraftServer, RiftPartySetLastOpenedTime message, EntityPlayer messagePlayer, MessageContext messageContext) {
         EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
         IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        playerTamedCreatures.setBoxLastOpenedTime(message.lastOpenedTime);
+        playerTamedCreatures.setPartyLastOpenedTime(message.lastOpenedTime);
     }
 }

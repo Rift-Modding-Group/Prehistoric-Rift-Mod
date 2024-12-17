@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
@@ -126,7 +125,7 @@ public class PlayerTamedCreaturesHelper {
     }
 
     public static int getCreatureBoxLastOpenedTime(EntityPlayer player) {
-        return getPlayerTamedCreatures(player).getLastOpenedTime();
+        return getPlayerTamedCreatures(player).getBoxLastOpenedTime();
     }
 
     public static void setCreatureBoxLastOpenedTime(EntityPlayer player, int lastOpenedTime) {
@@ -141,7 +140,7 @@ public class PlayerTamedCreaturesHelper {
                 }
             }
 
-            getPlayerTamedCreatures(player).setLastOpenedTime(lastOpenedTime);
+            getPlayerTamedCreatures(player).setBoxLastOpenedTime(lastOpenedTime);
             RiftMessages.WRAPPER.sendToServer(new RiftCreatureBoxSetLastOpenedTime(player, lastOpenedTime));
         }
         else {
@@ -155,7 +154,7 @@ public class PlayerTamedCreaturesHelper {
                 }
             }
 
-            getPlayerTamedCreatures(player).setLastOpenedTime(lastOpenedTime);
+            getPlayerTamedCreatures(player).setBoxLastOpenedTime(lastOpenedTime);
             RiftMessages.WRAPPER.sendToAll(new RiftCreatureBoxSetLastOpenedTime(player, lastOpenedTime));
         }
     }
@@ -187,6 +186,64 @@ public class PlayerTamedCreaturesHelper {
                 }
             }
         }
+    }
+
+    public static int getPartyLastOpenedTime(EntityPlayer player) {
+        return getPlayerTamedCreatures(player).getPartyLastOpenedTime();
+    }
+
+    public static void setPartyLastOpenedTime(EntityPlayer player, int lastOpenedTime) {
+        if (player.world.isRemote) {
+            int timeToSubtract = lastOpenedTime - getPartyLastOpenedTime(player);
+            for (RiftCreature creature : getPlayerTamedCreatures(player).getPartyCreatures(player.world)) {
+                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE && creature.getEnergy() < 20) {
+                    int reenergizeTime = timeToSubtract;
+                    int newEnergyLevel = creature.getEnergy();
+                    int divideTimes = timeToSubtract / creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
+                    for (int x = 0; x < divideTimes; x++) {
+                        reenergizeTime -= creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
+                        newEnergyLevel += 1;
+                    }
+
+                    NBTTagCompound tagCompound = new NBTTagCompound();
+                    tagCompound.setInteger("PartyReenergizeTime", reenergizeTime);
+                    tagCompound.setInteger("Energy", newEnergyLevel);
+
+                    RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                    RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+
+                }
+            }
+
+            getPlayerTamedCreatures(player).setPartyLastOpenedTime(lastOpenedTime);
+            RiftMessages.WRAPPER.sendToServer(new RiftPartySetLastOpenedTime(player, lastOpenedTime));
+        }
+        else {
+            int timeToSubtract = lastOpenedTime - getPartyLastOpenedTime(player);
+            for (RiftCreature creature : getPlayerTamedCreatures(player).getPartyCreatures(player.world)) {
+                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE && creature.getEnergy() < 20) {
+                    int reenergizeTime = timeToSubtract;
+                    int newEnergyLevel = creature.getEnergy();
+                    int divideTimes = timeToSubtract / creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
+                    for (int x = 0; x < divideTimes; x++) {
+                        reenergizeTime -= creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
+                        newEnergyLevel += 1;
+                    }
+
+                    NBTTagCompound tagCompound = new NBTTagCompound();
+                    tagCompound.setInteger("PartyReenergizeTime", reenergizeTime);
+                    tagCompound.setInteger("Energy", newEnergyLevel);
+
+                    RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                    RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+
+                }
+            }
+
+            getPlayerTamedCreatures(player).setPartyLastOpenedTime(lastOpenedTime);
+            RiftMessages.WRAPPER.sendToAll(new RiftPartySetLastOpenedTime(player, lastOpenedTime));
+        }
+
     }
 
     public static void regeneratePlayerBoxCreatures(EntityPlayer player) {
@@ -227,6 +284,25 @@ public class PlayerTamedCreaturesHelper {
                     tagCompound.setShort("HurtTime", (short)0);
                     tagCompound.setInteger("HurtByTimestamp", 0);
                     tagCompound.setShort("DeathTime", (short)0);
+                    RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                    RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                }
+            }
+        }
+    }
+
+    public static void reenergizePartyUndeployedCreatures(EntityPlayer player) {
+        for (RiftCreature creature : getPlayerTamedCreatures(player).getPartyCreatures(player.world)) {
+            if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                if (creature.getEnergy() < 20) {
+                    tagCompound.setInteger("PartyReenergizeTime", creature.getPartyReenergizeTime() + 1);
+
+                    if (tagCompound.getInteger("PartyReenergizeTime") > creature.creatureType.getMaxEnergyRegenMod(creature.getLevel())) {
+                        tagCompound.setInteger("PartyReenergizeTime", 0);
+                        tagCompound.setInteger("Energy", creature.getEnergy() + 1);
+                    }
+
                     RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
                     RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
                 }

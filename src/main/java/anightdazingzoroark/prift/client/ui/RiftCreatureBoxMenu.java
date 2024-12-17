@@ -66,6 +66,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
     public void initGui() {
         this.selectedCreature = null;
         this.changeCreaturesMode = false;
+        PlayerTamedCreaturesHelper.setPartyLastOpenedTime(this.mc.player, this.mc.player.ticksExisted);
         PlayerTamedCreaturesHelper.setCreatureBoxLastOpenedTime(this.mc.player, this.mc.player.ticksExisted);
         PlayerTamedCreaturesHelper.openToRegenPlayerBoxCreatures(this.mc.player);
 
@@ -100,7 +101,10 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         this.createSelectedCreatureInfo(mouseX, mouseY, partialTicks);
 
         //manage creatures stored in creature box
-        if (this.guiTimePassed++ % 2 == 0) PlayerTamedCreaturesHelper.regeneratePlayerBoxCreatures(this.mc.player);
+        if (this.guiTimePassed++ % 2 == 0) {
+            PlayerTamedCreaturesHelper.reenergizePartyUndeployedCreatures(this.mc.player);
+            PlayerTamedCreaturesHelper.regeneratePlayerBoxCreatures(this.mc.player);
+        }
 
         GlStateManager.disableRescaleNormal();
         RenderHelper.disableStandardItemLighting();

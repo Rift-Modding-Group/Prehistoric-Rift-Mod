@@ -110,6 +110,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private int boxReviveTime;
+    private int partyReenergizeTime;
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
@@ -956,6 +957,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         compound.setByte("DeploymentType", (byte) this.getDeploymentType().ordinal());
         compound.setInteger("BoxReviveTime", this.boxReviveTime);
+        compound.setInteger("PartyReenergizeTime", this.partyReenergizeTime);
     }
 
     @Override
@@ -994,6 +996,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
         this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getByte("DeploymentType")]);
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
+        this.setPartyReenergizeTime(compound.getInteger("PartyReenergizeTime"));
     }
 
     private void initInventory() {
@@ -1194,6 +1197,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.hitboxArray;
     }
     //end of multi hitbox stuff
+
+    protected void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source) {
+        if (!this.isTamed()) super.dropLoot(wasRecentlyHit, lootingModifier, source);
+    }
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
         if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
@@ -1875,6 +1882,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setBoxReviveTime(int time) {
         this.boxReviveTime = time;
+    }
+
+    public int getPartyReenergizeTime() {
+        return this.partyReenergizeTime;
+    }
+
+    public void setPartyReenergizeTime(int time) {
+        this.partyReenergizeTime = time;
     }
 
     @Nullable

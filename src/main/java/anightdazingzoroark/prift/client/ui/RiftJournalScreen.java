@@ -60,9 +60,12 @@ public class RiftJournalScreen extends GuiScreen {
     private boolean isPartyMode;
     private List<GuiButton> partyMemButtonList = Lists.<GuiButton>newArrayList();
     private boolean changePartyOrderMode;
+    private int guiTimePassed = 0;
 
     @Override
     public void initGui() {
+        PlayerTamedCreaturesHelper.setPartyLastOpenedTime(this.mc.player, this.mc.player.ticksExisted);
+
         //start with the creature types
         this.sidebarType = null;
         this.entryType = null;
@@ -106,6 +109,10 @@ public class RiftJournalScreen extends GuiScreen {
 
         //top buttons
         this.placeTopButtons(mouseX, mouseY);
+
+        if (this.guiTimePassed++ % 2 == 0) {
+            PlayerTamedCreaturesHelper.reenergizePartyUndeployedCreatures(this.mc.player);
+        }
 
         GlStateManager.disableRescaleNormal();
         RenderHelper.disableStandardItemLighting();

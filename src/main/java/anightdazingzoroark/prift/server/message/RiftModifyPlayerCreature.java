@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class RiftModifyPlayerCreature extends AbstractMessage<RiftModifyPlayerCreature> {
     private int playerID;
