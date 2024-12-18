@@ -1,8 +1,8 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIWander;
@@ -21,7 +21,10 @@ public class RiftWanderWater extends EntityAIWander {
     @Override
     public boolean shouldExecute() {
         if (this.waterCreature.isTamed()) {
-            if (this.waterCreature.getTameStatus() == TameStatusType.WANDER && !this.waterCreature.isBeingRidden() && this.waterCreature.isInWater()) return super.shouldExecute();
+            if (!this.waterCreature.isSitting()
+                    && this.waterCreature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                    && !this.waterCreature.isBeingRidden()
+                    && this.waterCreature.isInWater()) return super.shouldExecute();
             else return false;
         }
         else {

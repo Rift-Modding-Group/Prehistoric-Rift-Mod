@@ -15,7 +15,6 @@ import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IApexPredator;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -232,7 +231,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     public void updateParts() {
         super.updateParts();
 
-        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -1f : 0.25f;
+        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -1f : 0.25f;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
         if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
         if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);

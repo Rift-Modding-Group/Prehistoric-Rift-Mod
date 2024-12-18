@@ -18,7 +18,6 @@ import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
 import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
 import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
 import anightdazingzoroark.prift.server.message.*;
@@ -27,7 +26,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
@@ -186,7 +184,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     public void updateParts() {
         super.updateParts();
 
-        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -1.125f : 0;
+        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -1.125f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
         if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
         if (this.neck0Part != null) this.neck0Part.setPositionAndUpdate(this.neck0Part.posX, this.neck0Part.posY + sitOffset, this.neck0Part.posZ);

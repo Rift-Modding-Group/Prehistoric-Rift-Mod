@@ -1,14 +1,12 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.pathfinding.PathNavigate;
-import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -38,7 +36,8 @@ public class RiftWaterCreatureFollowOwner extends EntityAIBase {
 
         if (entitylivingbase == null) return false;
         else if (entitylivingbase instanceof EntityPlayer && ((EntityPlayer)entitylivingbase).isSpectator()) return false;
-        else if (this.creature.getTameStatus() != TameStatusType.STAND) return false;
+        else if (this.creature.isSitting()) return false;
+        else if (this.creature.getDeploymentType() != PlayerTamedCreatures.DeploymentType.PARTY) return false;
         else if (this.creature.getDistanceSq(entitylivingbase) < (double)(this.minDist * this.minDist)) return false;
         else {
             this.owner = entitylivingbase;
@@ -57,13 +56,18 @@ public class RiftWaterCreatureFollowOwner extends EntityAIBase {
     }
 
     public boolean shouldContinueExecuting() {
-        if (this.creature.isAmphibious()) return this.creature.getDistanceSq(this.owner) > (double)(this.maxDist * this.maxDist) && this.creature.getTameStatus() == TameStatusType.STAND;
-        else return this.owner.isInWater() && this.creature.getDistanceSq(this.owner) > (double)(this.maxDist * this.maxDist) && this.creature.getTameStatus() == TameStatusType.STAND;
+        if (this.creature.isAmphibious()) return this.creature.getDistanceSq(this.owner) > (double)(this.maxDist * this.maxDist)
+                && !this.creature.isSitting()
+                && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY;
+        else return this.owner.isInWater()
+                && this.creature.getDistanceSq(this.owner) > (double)(this.maxDist * this.maxDist)
+                && !this.creature.isSitting()
+                && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY;
     }
 
     public void updateTask() {
         this.creature.getLookHelper().setLookPositionWithEntity(this.owner, 10.0F, (float)this.creature.getVerticalFaceSpeed());
-        if (this.creature.getTameStatus() == TameStatusType.STAND) {
+        if (!this.creature.isSitting() && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
             if (--this.timeToRecalcPath <= 0) {
                 this.timeToRecalcPath = 10;
                 if (!this.creature.getNavigator().tryMoveToEntityLiving(this.owner, this.followSpeed)) {

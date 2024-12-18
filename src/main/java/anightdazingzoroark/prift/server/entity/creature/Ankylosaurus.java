@@ -10,7 +10,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -137,7 +136,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
 
         //disable parts when hiding
         for (RiftCreaturePart part : this.hitboxArray) {
-            if (this.getTameStatus().equals(TameStatusType.SIT) && !this.isHiding()) {
+            if (this.isSitting() && !this.isHiding()) {
                 part.setDisabled(!part.partName.equals("body") && !part.partName.equals("head"));
             }
             else if (this.isHiding()) {
@@ -146,7 +145,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         }
 
         //change positions when sitting or hiding
-        float sitOffset = ((this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) || this.isHiding()) ? -0.75f : 0;
+        float sitOffset = ((this.isSitting() && !this.isBeingRidden()) || this.isHiding()) ? -0.75f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
         if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
     }

@@ -80,7 +80,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> RANGED_ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-    private static final DataParameter<Byte> STATUS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
+    private static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -148,7 +148,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public RiftCreaturePart bodyPart;
     public RiftCreaturePart[] hitboxArray;
     public float oldScale;
-    public boolean changeSitFlag;
     private int healthRegen;
     protected double attackDamage;
     public double healthLevelMultiplier;
@@ -187,7 +186,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.chargeCooldown = 0;
         this.maxRightClickCooldown = 100f;
         this.oldScale = 0;
-        this.changeSitFlag = false;
         this.healthRegen = 0;
         this.resetParts(0);
         this.isFloatingOnWater = false;
@@ -201,7 +199,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(ATTACKING, false);
         this.dataManager.register(RANGED_ATTACKING, false);
         this.dataManager.register(VARIANT, rand.nextInt(4));
-        this.dataManager.register(STATUS, (byte) TameStatusType.STAND.ordinal());
+        this.dataManager.register(SITTING, false);
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
         this.dataManager.register(SADDLED, false);
         this.dataManager.register(ENERGY, 20);
@@ -304,7 +302,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.lowEnergyEffects();
                 this.eatFromInventory();
                 if (this.isBeingRidden()) this.informRiderEnergy();
-                this.manageTargetingBySitting();
                 if (this.canNaturalRegen()) {
                     if (this.getHealth() < this.getMaxHealth() && this.getHealth() > 0) this.naturalRegen();
                     else this.healthRegen = 0;
@@ -554,11 +551,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.informNoEnergy && this.getEnergy() > 0) this.informNoEnergy = false;
     }
 
-    private void manageTargetingBySitting() {
-        if (!this.isBeingRidden()) this.setSitting(this.getTameStatus() == TameStatusType.SIT);
-        else this.setSitting(this.getAttackTarget() == null);
-    }
-
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
@@ -610,7 +602,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
-                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getTameStatus() != TameStatusType.SIT) {
+                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && !this.isSitting()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setInLove(player);
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
@@ -928,7 +920,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setInteger("XP", this.getXP());
         compound.setInteger("Variant", this.getVariant());
         compound.setByte("CreatureType", (byte) this.creatureType.ordinal());
-        compound.setByte("TameStatus", (byte) this.getTameStatus().ordinal());
         compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
         compound.setBoolean("Saddled", this.isSaddled());
         if (this.creatureInventory != null) {
@@ -966,7 +957,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setLevel(compound.getInteger("Level"));
         this.setXP(compound.getInteger("XP"));
         this.setVariant(compound.getInteger("Variant"));
-        if (compound.hasKey("TameStatus")) this.setTameStatus(TameStatusType.values()[compound.getByte("TameStatus")]);
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
         this.setSaddled(compound.getBoolean("Saddled"));
         if (this.creatureInventory != null) {
@@ -1121,13 +1111,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setActing(value);
     }
 
-    public TameStatusType getTameStatus() {
-        return TameStatusType.values()[this.dataManager.get(STATUS).byteValue()];
+    public boolean isSitting() {
+        return this.dataManager.get(SITTING);
     }
 
-    public void setTameStatus(TameStatusType tameStatus) {
-        this.dataManager.set(STATUS, (byte) tameStatus.ordinal());
-        this.changeSitFlag = tameStatus.equals(TameStatusType.SIT);
+    public void setSitting(boolean value) {
+        this.dataManager.set(SITTING, value);
     }
 
     public int getEnergy() {
@@ -1793,7 +1782,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this instanceof IWorkstationUser) {
             leashOperatingFlag = !((IWorkstationUser)this).isUsingWorkstation();
         }
-        return !this.getLeashed() && this.isTamed() && !this.getTameStatus().equals(TameStatusType.SIT) && (!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode()) && leashOperatingFlag;
+        return !this.getLeashed() && this.isTamed() && !this.isSitting() && (!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode()) && leashOperatingFlag;
     }
 
     public void onDeath(DamageSource cause) {
@@ -1810,7 +1799,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-        this.setTameStatus(TameStatusType.STAND);
+        this.setSitting(false);
         this.setBoxReviveTime(12000);
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY
                 || this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) PlayerTamedCreaturesHelper.updatePartyMem(this);

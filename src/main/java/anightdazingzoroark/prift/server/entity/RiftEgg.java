@@ -10,7 +10,6 @@ import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
 import com.charles445.simpledifficulty.api.config.json.JsonTemperature;
 import com.charles445.simpledifficulty.api.temperature.TemperatureEnum;
@@ -94,7 +93,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
             if (this.getOwnerId() != null) {
                 creature.setTamed(true);
                 creature.setOwnerId(this.getOwnerId());
-                creature.setTameStatus(TameStatusType.SIT);
+                creature.setSitting(true);
                 creature.setTameBehavior(TameBehaviorType.PASSIVE);
             }
 

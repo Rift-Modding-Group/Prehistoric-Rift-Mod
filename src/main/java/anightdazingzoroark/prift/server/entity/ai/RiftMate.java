@@ -7,7 +7,6 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
@@ -84,7 +83,7 @@ public class RiftMate extends EntityAIBase {
         this.creature.resetInLove();
         this.targetMate.resetInLove();
         ((IImpregnable)this.creature).setPregnant(true, 1800);
-        this.creature.setTameStatus(TameStatusType.SIT);
+        this.creature.setSitting(true);
         this.creature.setTameBehavior(TameBehaviorType.PASSIVE);
         Random random = this.creature.getRNG();
         if (this.world.getGameRules().getBoolean("doMobLoot")) {

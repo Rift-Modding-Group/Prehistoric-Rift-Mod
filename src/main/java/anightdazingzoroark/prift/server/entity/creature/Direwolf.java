@@ -12,7 +12,6 @@ import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSpawnChestDetectParticle;
 import anightdazingzoroark.prift.server.message.RiftSpawnDetectParticle;
@@ -20,7 +19,6 @@ import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -39,8 +37,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -138,7 +134,7 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
     public void updateParts() {
         super.updateParts();
 
-        if (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden() && this.hipsPart != null) {
+        if (this.isSitting() && !this.isBeingRidden() && this.hipsPart != null) {
             this.hipsPart.setPositionAndUpdate(this.hipsPart.posX, this.hipsPart.posY - 0.3f, this.hipsPart.posZ);
         }
     }

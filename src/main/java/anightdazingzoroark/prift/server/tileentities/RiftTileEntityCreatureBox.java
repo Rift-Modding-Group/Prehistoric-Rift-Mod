@@ -6,7 +6,6 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -79,7 +78,6 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
                     if (waterCreature.isAmphibious()) {
                         if ((this.canFitInArea(creature, pos) && downState.getMaterial() != Material.AIR) || this.entireAreaWater(creature, pos)) {
                             creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
-                            creature.setTameStatus(TameStatusType.WANDER);
                             creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
                             this.world.spawnEntity(creature);
                             break;
@@ -89,7 +87,6 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
                     else {
                         if (this.entireAreaWater(creature, pos)) {
                             creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
-                            creature.setTameStatus(TameStatusType.WANDER);
                             creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
                             this.world.spawnEntity(creature);
                             break;
@@ -100,7 +97,6 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
                     //spawn regular land creatures
                     if (this.canFitInArea(creature, pos) && downState.getMaterial() != Material.AIR) {
                         creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
-                        creature.setTameStatus(TameStatusType.WANDER);
                         creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
                         this.world.spawnEntity(creature);
                         break;

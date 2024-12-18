@@ -1,12 +1,9 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
@@ -64,7 +61,7 @@ public class RiftSac extends EntityTameable implements IAnimatable {
             if (this.getOwnerId() != null) {
                 creature.setTamed(true);
                 creature.setOwnerId(this.getOwnerId());
-                creature.setTameStatus(TameStatusType.SIT);
+                creature.setSitting(true);
                 creature.setTameBehavior(TameBehaviorType.PASSIVE);
             }
 

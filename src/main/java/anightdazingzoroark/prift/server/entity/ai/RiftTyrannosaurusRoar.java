@@ -3,8 +3,6 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 
 import java.util.Random;
@@ -30,7 +28,11 @@ public class RiftTyrannosaurusRoar extends EntityAIBase {
                     if (!this.creature.isTamed()) {
                         return !this.creature.isActing() && this.creature.canRoar();
                     }
-                    else return this.creature.getPassengers().isEmpty() && !this.creature.isActing() && this.creature.canRoar() && this.creature.getTameStatus() != TameStatusType.SIT && this.creature.getTameBehavior() != TameBehaviorType.PASSIVE;
+                    else return this.creature.getPassengers().isEmpty()
+                            && !this.creature.isActing()
+                            && this.creature.canRoar()
+                            && !this.creature.isSitting()
+                            && this.creature.getTameBehavior() != TameBehaviorType.PASSIVE;
                 }
                 else {
                     this.failAttemptTimer = 10;

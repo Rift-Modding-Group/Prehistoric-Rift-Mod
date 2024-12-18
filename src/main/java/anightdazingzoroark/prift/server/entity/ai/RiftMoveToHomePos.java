@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.math.BlockPos;
@@ -23,7 +23,10 @@ public class RiftMoveToHomePos extends EntityAIBase {
     @Override
     public boolean shouldExecute() {
         if (this.creature.isTamed() && !this.creature.isSleeping()) {
-            if (this.creature.getHasHomePos() && creature.getTameStatus() == TameStatusType.WANDER) {
+            if (this.creature.getHasHomePos()
+                    && !this.creature.isSitting()
+                    && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                    && !this.creature.busyAtWork()) {
                 if (this.creature.getIdleTime() >= 100) return false;
                 if (this.creature.getRNG().nextInt(120) != 0) return false;
 
@@ -43,7 +46,7 @@ public class RiftMoveToHomePos extends EntityAIBase {
     }
 
     public boolean shouldContinueExecuting() {
-        return !this.creature.getNavigator().noPath() && this.creature.getEnergy() > 0 && !this.creature.isSleeping();
+        return !this.creature.getNavigator().noPath() && this.creature.getEnergy() > 0 && !this.creature.isSleeping() && !this.creature.busyAtWork() && !this.creature.isSitting();
     }
 
     public void startExecuting() {

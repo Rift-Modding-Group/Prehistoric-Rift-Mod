@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.interfaces;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentString;
@@ -22,7 +21,7 @@ public interface IImpregnable {
                 baby.setAgeInDays(0);
                 baby.setTamed(true);
                 baby.setOwnerId(parent.getOwnerId());
-                baby.setTameStatus(TameStatusType.SIT);
+                baby.setSitting(true);
                 baby.setTameBehavior(TameBehaviorType.PASSIVE);
                 baby.setLocationAndAngles(parent.posX, parent.posY, parent.posZ, 0.0F, 0.0F);
                 parent.world.spawnEntity(baby);

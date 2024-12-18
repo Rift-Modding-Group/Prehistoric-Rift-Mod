@@ -6,11 +6,9 @@ import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -191,7 +189,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
         //for not sinkin in certain conditions
         if (this.isBeingRidden() && this.isInWater() && !this.isUsingSwimControls()) this.motionY *= 0;
-        if (!this.isBeingRidden() && this.isInWater() && this.getTameStatus() == TameStatusType.SIT) this.motionY *= 0;
+        if (!this.isBeingRidden() && this.isInWater() && this.isSitting()) this.motionY *= 0;
     }
 
     @Override
@@ -315,7 +313,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
         }
         else {
             if (this.isInWater()) {
-                if ((this.getTameStatus() == TameStatusType.SIT && this.getAttackTarget() == null) || this.getNavigator().noPath()) {
+                if ((this.isSitting() && this.getAttackTarget() == null) || this.getNavigator().noPath()) {
                     this.motionX = 0;
                     this.motionY = 0;
                     this.motionZ = 0;

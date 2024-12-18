@@ -13,7 +13,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -162,9 +161,9 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public void updateParts() {
         super.updateParts();
 
-        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.5f : 0.25f;
-        float tail1SitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.6f : 0.5f;
-        float tail2SitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.8f : 0.5f;
+        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.5f : 0.25f;
+        float tail1SitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.6f : 0.5f;
+        float tail2SitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.8f : 0.5f;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
         if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
         if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);

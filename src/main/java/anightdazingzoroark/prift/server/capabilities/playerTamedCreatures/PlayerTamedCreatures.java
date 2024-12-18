@@ -2,10 +2,8 @@ package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -431,7 +429,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private NBTTagCompound boxCreatureDeployedModified(NBTTagCompound compoundBoxDepSelected, boolean toParty) {
         byte deploymentTypeByte = toParty ? (byte) DeploymentType.PARTY_INACTIVE.ordinal() : (byte) DeploymentType.BASE_INACTIVE.ordinal();
         compoundBoxDepSelected.setByte("DeploymentType", deploymentTypeByte);
-        compoundBoxDepSelected.setByte("TameStatus", (byte) TameStatusType.STAND.ordinal());
         compoundBoxDepSelected.setBoolean("HasHomePos", false);
         compoundBoxDepSelected.removeTag("HomePosX");
         compoundBoxDepSelected.removeTag("HomePosY");

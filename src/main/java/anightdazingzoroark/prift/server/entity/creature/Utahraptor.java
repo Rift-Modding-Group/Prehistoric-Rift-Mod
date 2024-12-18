@@ -12,7 +12,6 @@ import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftCl
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import com.google.common.base.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -154,7 +153,7 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     public void updateParts() {
         super.updateParts();
 
-        float sitOffset = (this.getTameStatus().equals(TameStatusType.SIT) && !this.isBeingRidden()) ? -0.45f : 0;
+        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.45f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
         if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
         if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);

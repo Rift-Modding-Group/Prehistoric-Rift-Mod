@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.math.BlockPos;
@@ -26,8 +26,11 @@ public class RiftGoToWater extends EntityAIBase {
     public boolean shouldExecute() {
         if (!this.creature.isInWater()) {
             this.waterBlockPos = this.nearestWaterBlock();
-            if (!this.creature.isTamed()) return this.waterBlockPos != null;
-            else return this.waterBlockPos != null && this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden();
+            if (this.creature.isTamed()) return this.waterBlockPos != null
+                    && !this.creature.isSitting()
+                    && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                    && !this.creature.isBeingRidden();
+            else return this.waterBlockPos != null;
         }
         return false;
     }

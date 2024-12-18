@@ -16,7 +16,6 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftJournalEditOne;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
@@ -194,7 +193,7 @@ public class ServerEvents {
                         else {
                             ((IWorkstationUser)creature).setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
                         }
-                        creature.setTameStatus(TameStatusType.STAND);
+                        creature.setSitting(false);
                         event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_success"), false);
                     }
                     else event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_fail"), false);

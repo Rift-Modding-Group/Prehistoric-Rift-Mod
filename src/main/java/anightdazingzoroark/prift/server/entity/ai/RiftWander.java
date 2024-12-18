@@ -1,12 +1,11 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.math.BlockPos;
@@ -31,11 +30,18 @@ public class RiftWander extends EntityAIWander {
         if (this.creature.isSleeping()) return false;
         else if (this.creature.isTamed()) {
             if (this.creature instanceof RiftWaterCreature) {
-                if (this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden() && !this.creature.isInWater()) return super.shouldExecute();
+                if (!this.creature.isSitting()
+                        && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                        && !this.creature.busyAtWork()
+                        && !this.creature.isBeingRidden()
+                        && !this.creature.isInWater()) return super.shouldExecute();
                 else return false;
             }
             else {
-                if (this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden()) return super.shouldExecute();
+                if (!this.creature.isSitting()
+                        && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                        && !this.creature.busyAtWork()
+                        && !this.creature.isBeingRidden()) return super.shouldExecute();
                 else return false;
             }
         }
@@ -60,7 +66,7 @@ public class RiftWander extends EntityAIWander {
         boolean isNotInWater = this.creature instanceof RiftWaterCreature ? !this.creature.isInWater() : true;
         boolean hasNoHerdLeader = this.creature instanceof IHerder ? !((IHerder)this.creature).hasHerdLeader() : true;
 
-        return this.creature.getEnergy() > 0 && hasNoHerdLeader && isNotInWater && super.shouldContinueExecuting();
+        return this.creature.getEnergy() > 0 && hasNoHerdLeader && isNotInWater && !this.creature.busyAtWork() && super.shouldContinueExecuting();
     }
 
     @Nullable

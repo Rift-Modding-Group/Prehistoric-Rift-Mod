@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
@@ -31,7 +31,12 @@ public class RiftHarvestOnWander extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.creature.isTamed() && this.creature.getTameStatus() == TameStatusType.WANDER && !this.creature.isBeingRidden() && this.creature instanceof IHarvestWhenWandering && ((IHarvestWhenWandering)this.creature).canHarvest();
+        return this.creature.isTamed()
+                && !this.creature.isSitting()
+                && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                && !this.creature.isBeingRidden()
+                && this.creature instanceof IHarvestWhenWandering
+                && ((IHarvestWhenWandering)this.creature).canHarvest();
     }
 
     @Override

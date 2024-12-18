@@ -10,7 +10,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
 import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.enums.TameStatusType;
 import anightdazingzoroark.prift.server.message.RiftGrabberTargeting;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSetGrabTarget;
@@ -282,7 +281,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
 
     public void removePassenger(Entity passenger) {
         super.removePassenger(passenger);
-        if (this.getTameStatus().equals(TameStatusType.SIT)) {
+        if (this.isSitting()) {
             if (!this.world.isRemote) {
                 this.setUseInvisibility(false);
                 this.invisibilityTimeout = -1;
@@ -296,9 +295,9 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         }
     }
 
-    public void setTameStatus(TameStatusType tameStatus) {
-        super.setTameStatus(tameStatus);
-        if (tameStatus.equals(TameStatusType.SIT)) {
+    public void setSitting(boolean value) {
+        super.setSitting(value);
+        if (value) {
             if (!this.world.isRemote) {
                 this.setUseInvisibility(false);
                 this.invisibilityTimeout = -1;
