@@ -355,9 +355,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         //find in party first
         for (NBTTagCompound partyMemCompound : this.partyCreatures) {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
-                //if incoming nbt tag has no active effects while current one has, remove current one
-                if (!compound.hasKey("ActiveEffects")) partyMemCompound.removeTag("ActiveEffects");
-
                 //replace each nbt tag
                 for (String key : compound.getKeySet()) {
                     NBTBase value = compound.getTag(key);
@@ -369,14 +366,30 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         //find in creature box
         for (NBTTagCompound partyMemCompound : this.boxCreatures) {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
-                //if incoming nbt tag has no active effects while current one has, remove current one
-                if (!compound.hasKey("ActiveEffects")) partyMemCompound.removeTag("ActiveEffects");
-
                 //replace each nbt tag
                 for (String key : compound.getKeySet()) {
                     NBTBase value = compound.getTag(key);
                     partyMemCompound.setTag(key, value);
                 }
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void replaceCreature(UUID uuid, NBTTagCompound compound) {
+        //find in party first
+        for (int x = 0; x < this.partyCreatures.size(); x++) {
+            if (this.partyCreatures.get(x).getUniqueId("UniqueID").equals(uuid)) {
+                this.partyCreatures.set(x, compound);
+                return;
+            }
+        }
+
+        //find in creature box
+        for (int x = 0; x < this.boxCreatures.size(); x++) {
+            if (this.boxCreatures.get(x).getUniqueId("UniqueID").equals(uuid)) {
+                this.boxCreatures.set(x, compound);
                 return;
             }
         }

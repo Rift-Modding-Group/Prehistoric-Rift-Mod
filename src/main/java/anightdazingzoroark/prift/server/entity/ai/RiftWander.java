@@ -4,12 +4,15 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+
+import javax.annotation.Nullable;
 
 public class RiftWander extends EntityAIWander {
     protected final RiftCreature creature;
@@ -58,5 +61,26 @@ public class RiftWander extends EntityAIWander {
         boolean hasNoHerdLeader = this.creature instanceof IHerder ? !((IHerder)this.creature).hasHerdLeader() : true;
 
         return this.creature.getEnergy() > 0 && hasNoHerdLeader && isNotInWater && super.shouldContinueExecuting();
+    }
+
+    @Nullable
+    @Override
+    protected Vec3d getPosition() {
+        Vec3d pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+
+        //change wandering position around creature box
+        if (this.creature.isTamed() && pos != null) {
+            BlockPos blockPos = new BlockPos(pos);
+            for (int i = 0; !this.withinHomeDistance(blockPos) && i < 10; i++) pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+        }
+        return pos;
+    }
+
+    private boolean withinHomeDistance(BlockPos pos) {
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.creature.world.getTileEntity(this.creature.getHomePos());
+
+        if (creatureBox == null) return false;
+
+        return this.creature.getDistanceSq(pos) <= creatureBox.getWanderRange() * creatureBox.getWanderRange();
     }
 }

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.enums.TameStatusType;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.RandomPositionGenerator;
@@ -41,20 +42,33 @@ public class RiftWanderWater extends EntityAIWander {
 
     @Override
     protected Vec3d getPosition() {
-        Vec3d pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+        Vec3d pos = RandomPositionGenerator.findRandomTarget(this.waterCreature, 10, 7);
         if (pos != null) {
             BlockPos blockPos = new BlockPos(pos);
-            for (int i = 0; !this.isWaterDestination(blockPos) && i < 10; i++) pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+
+            //change wandering position based on whether or not destination is water
+            //and distance from creature box
+            for (int i = 0; !this.isWaterDestination(blockPos)
+                    && (!this.waterCreature.isTamed() || !this.withinHomeDistance(blockPos))
+                    && i < 10; i++) pos = RandomPositionGenerator.findRandomTarget(this.waterCreature, 10, 7);
         }
         return pos;
     }
 
     @Override
     public void resetTask() {
-        this.entity.getNavigator().clearPath();
+        this.waterCreature.getNavigator().clearPath();
     }
 
     private boolean isWaterDestination(BlockPos pos) {
-        return this.entity.world.getBlockState(pos).getMaterial() == Material.WATER;
+        return this.waterCreature.world.getBlockState(pos).getMaterial() == Material.WATER;
+    }
+
+    private boolean withinHomeDistance(BlockPos pos) {
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.waterCreature.world.getTileEntity(this.waterCreature.getHomePos());
+
+        if (creatureBox == null) return false;
+
+        return this.waterCreature.getDistanceSq(pos) <= creatureBox.getWanderRange() * creatureBox.getWanderRange();
     }
 }
