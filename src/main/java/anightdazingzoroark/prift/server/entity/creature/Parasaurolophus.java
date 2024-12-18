@@ -71,6 +71,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BYTE);
+    private RiftCreaturePart hipsPart;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart tail0Part;
     private RiftCreaturePart tail1Part;
@@ -91,6 +92,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
         this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.48f, 0.625f, 0.5f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, 1.375f, 0, 0.8f, 0.75f, 0.8f, 1f);
+        this.hipsPart = new RiftCreaturePart(this, 0f, 0, 0.8f, 0.9f, 0.8f, 1f);
         this.neckPart = new RiftCreaturePart(this, 2.125f, 0, 1.125f, 0.5f, 0.7f, 1.5f);
         this.tail0Part = new RiftCreaturePart(this, -1.125f, 0, 1f, 0.4f, 0.6f, 0.5f);
         this.tail1Part = new RiftCreaturePart(this, -1.625f, 0, 1.1f, 0.4f, 0.45f, 0.5f);
@@ -99,6 +101,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.hitboxArray = new RiftCreaturePart[]{
             this.headPart,
             this.bodyPart,
+            this.hipsPart,
             this.neckPart,
             this.tail0Part,
             this.tail1Part,

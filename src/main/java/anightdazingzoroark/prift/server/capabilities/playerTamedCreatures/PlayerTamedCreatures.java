@@ -355,9 +355,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         //find in party first
         for (NBTTagCompound partyMemCompound : this.partyCreatures) {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
+                //if incoming nbt tag has no active effects while current one has, remove current one
+                if (!compound.hasKey("ActiveEffects")) partyMemCompound.removeTag("ActiveEffects");
+
+                //replace each nbt tag
                 for (String key : compound.getKeySet()) {
                     NBTBase value = compound.getTag(key);
-                    //if (partyMemCompound.hasKey(key)) partyMemCompound.setTag(key, value);
                     partyMemCompound.setTag(key, value);
                 }
                 return;
@@ -366,9 +369,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         //find in creature box
         for (NBTTagCompound partyMemCompound : this.boxCreatures) {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
+                //if incoming nbt tag has no active effects while current one has, remove current one
+                if (!compound.hasKey("ActiveEffects")) partyMemCompound.removeTag("ActiveEffects");
+
+                //replace each nbt tag
                 for (String key : compound.getKeySet()) {
                     NBTBase value = compound.getTag(key);
-                    //if (partyMemCompound.hasKey(key)) partyMemCompound.setTag(key, value);
                     partyMemCompound.setTag(key, value);
                 }
                 return;

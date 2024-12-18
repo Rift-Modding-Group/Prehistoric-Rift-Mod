@@ -73,7 +73,6 @@ public class RiftUpdateBoxDeployed extends AbstractMessage<RiftUpdateBoxDeployed
             if (creature == null || creatureBox == null) return;
 
             if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {
-                System.out.println(PlayerTamedCreaturesHelper.createNBTFromCreature(creature));
                 NBTTagCompound newCompound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
                 creatureBox.replaceInCreatureList(message.uuid, newCompound);
                 RiftMessages.WRAPPER.sendToServer(new RiftUpdateBoxDeployed(creatureBoxPos, creature, newCompound));
@@ -85,7 +84,6 @@ public class RiftUpdateBoxDeployed extends AbstractMessage<RiftUpdateBoxDeployed
 
                 //for removing creature and hitboxes
                 RiftUtil.removeCreature(creature);
-                System.out.println("go commit die");
             }
         }
         else {
@@ -122,7 +120,6 @@ public class RiftUpdateBoxDeployed extends AbstractMessage<RiftUpdateBoxDeployed
 
                 //for removing creature and hitboxes
                 RiftUtil.removeCreature(creature);
-                System.out.println("go commit die");
             }
         }
         else {

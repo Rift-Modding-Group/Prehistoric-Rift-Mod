@@ -60,7 +60,6 @@ public class RiftUpdatePartyDeployed extends AbstractMessage<RiftUpdatePartyDepl
         EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
         IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.uuid);
-
         if (message.tagCompound.isEmpty()) {
             if (creature == null) return;
 
@@ -94,7 +93,6 @@ public class RiftUpdatePartyDeployed extends AbstractMessage<RiftUpdatePartyDepl
         EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
         IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.uuid);
-
         if (message.tagCompound.isEmpty()) {
             if (creature == null) return;
 
