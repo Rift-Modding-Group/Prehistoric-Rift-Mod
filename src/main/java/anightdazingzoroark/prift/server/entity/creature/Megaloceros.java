@@ -101,7 +101,7 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.36F));
         this.tasks.addTask(6, new RiftHarvestOnWander(this, 0.52F, 0.36F));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
+        //this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));
         this.tasks.addTask(11, new RiftHerdMemberFollow(this));

@@ -30,7 +30,8 @@ public class RiftWander extends EntityAIWander {
         if (this.creature.isSleeping()) return false;
         else if (this.creature.isTamed()) {
             if (this.creature instanceof RiftWaterCreature) {
-                if (!this.creature.isSitting()
+                if (this.creature.getEnergy() > 6
+                        && !this.creature.isSitting()
                         && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                         && !this.creature.busyAtWork()
                         && !this.creature.isBeingRidden()
@@ -38,7 +39,8 @@ public class RiftWander extends EntityAIWander {
                 else return false;
             }
             else {
-                if (!this.creature.isSitting()
+                if (this.creature.getEnergy() > 6
+                        && !this.creature.isSitting()
                         && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                         && !this.creature.busyAtWork()
                         && !this.creature.isBeingRidden()) return super.shouldExecute();
@@ -66,7 +68,7 @@ public class RiftWander extends EntityAIWander {
         boolean isNotInWater = this.creature instanceof RiftWaterCreature ? !this.creature.isInWater() : true;
         boolean hasNoHerdLeader = this.creature instanceof IHerder ? !((IHerder)this.creature).hasHerdLeader() : true;
 
-        return this.creature.getEnergy() > 0 && hasNoHerdLeader && isNotInWater && !this.creature.busyAtWork() && super.shouldContinueExecuting();
+        return this.creature.getEnergy() > 6 && hasNoHerdLeader && isNotInWater && !this.creature.busyAtWork() && super.shouldContinueExecuting();
     }
 
     @Nullable
@@ -75,18 +77,25 @@ public class RiftWander extends EntityAIWander {
         Vec3d pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
 
         //change wandering position around creature box
-        if (this.creature.isTamed() && pos != null) {
-            BlockPos blockPos = new BlockPos(pos);
-            for (int i = 0; !this.withinHomeDistance(blockPos) && i < 10; i++) pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+        if (this.creature.isTamed()) {
+            for (int i = 0; i < 10; i++) {
+                if (this.withinHomeDistance(pos)) break;
+                else pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+            }
+            if (!this.withinHomeDistance(pos)) pos = this.getPosition();
         }
+
         return pos;
     }
 
-    private boolean withinHomeDistance(BlockPos pos) {
+    private boolean withinHomeDistance(Vec3d pos) {
+        if (pos == null || this.creature.getHomePos() == null) return false;
+
         RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.creature.world.getTileEntity(this.creature.getHomePos());
 
         if (creatureBox == null) return false;
 
-        return this.creature.getDistanceSq(pos) <= creatureBox.getWanderRange() * creatureBox.getWanderRange();
+        return creatureBox.getDistanceSq(pos.x, pos.y, pos.z) < (creatureBox.getWanderRange() - 2) * (creatureBox.getWanderRange() - 2)
+                && creatureBox.getDistanceSq(pos.x, pos.y, pos.z) >= 9;
     }
 }

@@ -21,7 +21,8 @@ public class RiftWanderWater extends EntityAIWander {
     @Override
     public boolean shouldExecute() {
         if (this.waterCreature.isTamed()) {
-            if (!this.waterCreature.isSitting()
+            if (this.waterCreature.getEnergy() > 6
+                    && !this.waterCreature.isSitting()
                     && this.waterCreature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                     && !this.waterCreature.isBeingRidden()
                     && this.waterCreature.isInWater()) return super.shouldExecute();
@@ -40,21 +41,28 @@ public class RiftWanderWater extends EntityAIWander {
     @Override
     public boolean shouldContinueExecuting() {
         boolean hasNoHerdLeader = this.waterCreature instanceof IHerder ? !((IHerder)this.waterCreature).hasHerdLeader() : true;
-        return this.waterCreature.getEnergy() > 0 && hasNoHerdLeader && this.waterCreature.isInWater() && super.shouldContinueExecuting();
+        return this.waterCreature.getEnergy() > 6 && hasNoHerdLeader && this.waterCreature.isInWater() && super.shouldContinueExecuting();
     }
 
     @Override
     protected Vec3d getPosition() {
         Vec3d pos = RandomPositionGenerator.findRandomTarget(this.waterCreature, 10, 7);
-        if (pos != null) {
-            BlockPos blockPos = new BlockPos(pos);
 
-            //change wandering position based on whether or not destination is water
-            //and distance from creature box
-            for (int i = 0; !this.isWaterDestination(blockPos)
-                    && (!this.waterCreature.isTamed() || !this.withinHomeDistance(blockPos))
-                    && i < 10; i++) pos = RandomPositionGenerator.findRandomTarget(this.waterCreature, 10, 7);
+        if (this.waterCreature.isTamed()) {
+            for (int i = 0; i < 10; i++) {
+                if (this.isWaterDestination(pos) && this.withinHomeDistance(pos)) break;
+                else pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+            }
+            if (!this.isWaterDestination(pos) || !this.withinHomeDistance(pos)) pos = this.getPosition();
         }
+        else {
+            for (int i = 0; i < 10; i++) {
+                if (this.isWaterDestination(pos)) break;
+                else pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+            }
+            if (!this.isWaterDestination(pos)) pos = this.getPosition();
+        }
+
         return pos;
     }
 
@@ -63,15 +71,20 @@ public class RiftWanderWater extends EntityAIWander {
         this.waterCreature.getNavigator().clearPath();
     }
 
-    private boolean isWaterDestination(BlockPos pos) {
-        return this.waterCreature.world.getBlockState(pos).getMaterial() == Material.WATER;
+    private boolean isWaterDestination(Vec3d pos) {
+        if (pos == null) return false;
+        BlockPos blockPos = new BlockPos(pos);
+        return this.waterCreature.world.getBlockState(blockPos).getMaterial() == Material.WATER;
     }
 
-    private boolean withinHomeDistance(BlockPos pos) {
+    private boolean withinHomeDistance(Vec3d pos) {
+        if (pos == null || this.waterCreature.getHomePos() == null) return false;
+
         RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.waterCreature.world.getTileEntity(this.waterCreature.getHomePos());
 
         if (creatureBox == null) return false;
 
-        return this.waterCreature.getDistanceSq(pos) <= creatureBox.getWanderRange() * creatureBox.getWanderRange();
+        return creatureBox.getDistanceSq(pos.x, pos.y, pos.z) < (creatureBox.getWanderRange() - 2) * (creatureBox.getWanderRange() - 2)
+                && creatureBox.getDistanceSq(pos.x, pos.y, pos.z) >= 9;
     }
 }

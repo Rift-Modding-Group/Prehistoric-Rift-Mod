@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionE
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
@@ -26,7 +27,6 @@ public class CapabilityHandler {
 
     @SubscribeEvent
     public void attachCapability(AttachCapabilitiesEvent<Entity> event) {
-        //if (!(event.getObject() instanceof EntityLivingBase)) return;
         if (event.getObject() instanceof EntityPlayer) {
             event.addCapability(PLAYER_TAMED_CREATURES_CAPABILITY, new PlayerTamedCreaturesProvider());
             event.addCapability(PLAYER_JOURNAL_PROGRESS_CAPABILITY, new PlayerJournalProgressProvider());
@@ -76,7 +76,10 @@ public class CapabilityHandler {
         tamedCreatures.setPartyNBT(oldTamedCreatures.getPartyNBT());
         tamedCreatures.setBoxNBT(oldTamedCreatures.getBoxNBT());
         tamedCreatures.setPartySizeLevel(oldTamedCreatures.getPartySizeLevel());
+        tamedCreatures.setBoxSizeLevel(oldTamedCreatures.getBoxSizeLevel());
         tamedCreatures.setLastSelected(oldTamedCreatures.getLastSelected());
+        tamedCreatures.setPartyLastOpenedTime(oldTamedCreatures.getPartyLastOpenedTime());
+        tamedCreatures.setBoxLastOpenedTime(oldTamedCreatures.getBoxLastOpenedTime());
 
         //replicate journal progress
         IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);

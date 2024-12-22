@@ -301,6 +301,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.resetEnergyActionMod();
                 this.lowEnergyEffects();
                 this.eatFromInventory();
+                this.manageSittingFromEnergy();
                 if (this.isBeingRidden()) this.informRiderEnergy();
                 if (this.canNaturalRegen()) {
                     if (this.getHealth() < this.getMaxHealth() && this.getHealth() > 0) this.naturalRegen();
@@ -534,6 +535,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else this.eatFromInvForGrowthCooldown = 0;
+    }
+
+    private void manageSittingFromEnergy() {
+        if (this.getEnergy() <= 6
+            && !this.isSitting()
+            && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setSitting(true);
+        if (this.getEnergy() > 6
+            && this.isSitting()
+            && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setSitting(false);
     }
 
     private void informRiderEnergy() {

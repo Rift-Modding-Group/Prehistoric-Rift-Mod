@@ -7,15 +7,12 @@ import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class PlayerTamedCreaturesHelper {
     //player party and creature box
@@ -43,6 +40,17 @@ public class PlayerTamedCreaturesHelper {
         return getPlayerTamedCreatures(player).getPartyNBT();
     }
 
+    public static void setPlayerPartyNBT(EntityPlayer player, List<NBTTagCompound> tagCompounds) {
+        if (player.world.isRemote) {
+            getPlayerTamedCreatures(player).setPartyNBT(tagCompounds);
+            RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player, tagCompounds));
+        }
+        else {
+            getPlayerTamedCreatures(player).setPartyNBT(tagCompounds);
+            RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartyNBT(player, tagCompounds));
+        }
+    }
+
     public static List<RiftCreature> getPlayerBox(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getBoxCreatures(player.world);
     }
@@ -56,6 +64,50 @@ public class PlayerTamedCreaturesHelper {
             getPlayerTamedCreatures(player).addToBoxCreatures(creature);
             RiftMessages.WRAPPER.sendToAll(new RiftAddToBox(player, creature));
         }
+    }
+
+    public static List<NBTTagCompound> getPlayerBoxNBT(EntityPlayer player) {
+        return getPlayerTamedCreatures(player).getBoxNBT();
+    }
+
+    //force sync client to data and vice versa
+    public static void forceSyncParty(EntityPlayer player) {
+        if (player.world.isRemote) {
+            if (getPlayerPartyNBT(player).isEmpty()) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
+        }
+        else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartyNBT(player));
+    }
+
+    public static void forceSyncBox(EntityPlayer player) {
+        if (player.world.isRemote) {
+            if (getPlayerBoxNBT(player).isEmpty()) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player));
+        }
+        else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncBoxNBT(player));
+    }
+
+    public static void forceSyncPartySizeLevel(EntityPlayer player) {
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartySizeLevel(player));
+        else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartySizeLevel(player));
+    }
+
+    public static void forceSyncBoxSizeLevel(EntityPlayer player) {
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxSizeLevel(player));
+        else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncBoxSizeLevel(player));
+    }
+
+    public static void forceSyncLastSelected(EntityPlayer player) {
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncLastSelected(player));
+        else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncLastSelected(player));
+    }
+
+    public static void forceSyncPartyLastOpenedTime(EntityPlayer player) {
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyLastOpenedTime(player));
+        else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartyLastOpenedTime(player));
+    }
+
+    public static void forceSyncBoxLastOpenedTime(EntityPlayer player) {
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxLastOpenedTime(player));
+        else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncBoxLastOpenedTime(player));
     }
 
     //update creatures
@@ -133,6 +185,7 @@ public class PlayerTamedCreaturesHelper {
 
     public static void setCreatureBoxLastOpenedTime(EntityPlayer player, int lastOpenedTime) {
         if (player.world.isRemote) {
+            //forceSyncBoxLastOpenedTime(player); //force sync server side to client side
             int timeToSubtract = lastOpenedTime - getCreatureBoxLastOpenedTime(player);
             for (RiftCreature creature : getPlayerTamedCreatures(player).getBoxCreatures(player.world)) {
                 if (creature.getHealth() / creature.getMaxHealth() <= 0) {

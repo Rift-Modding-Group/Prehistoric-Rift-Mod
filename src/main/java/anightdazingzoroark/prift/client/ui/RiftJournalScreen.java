@@ -62,9 +62,25 @@ public class RiftJournalScreen extends GuiScreen {
     private boolean changePartyOrderMode;
     private int guiTimePassed = 0;
 
+    public void setWorldAndResolution(Minecraft mc, int width, int height) {
+        super.setWorldAndResolution(mc, width, height);
+
+        //force sync from server to client
+        PlayerTamedCreaturesHelper.forceSyncParty(this.mc.player);
+        PlayerTamedCreaturesHelper.forceSyncBox(this.mc.player);
+        PlayerTamedCreaturesHelper.forceSyncPartySizeLevel(this.mc.player);
+        PlayerTamedCreaturesHelper.forceSyncBoxSizeLevel(this.mc.player);
+        PlayerTamedCreaturesHelper.forceSyncLastSelected(this.mc.player);
+        PlayerTamedCreaturesHelper.forceSyncPartyLastOpenedTime(this.mc.player);
+        PlayerTamedCreaturesHelper.forceSyncBoxLastOpenedTime(this.mc.player);
+    }
+
     @Override
     public void initGui() {
-        PlayerTamedCreaturesHelper.setPartyLastOpenedTime(this.mc.player, this.mc.player.ticksExisted);
+        super.initGui();
+
+        //for set last open time
+        PlayerTamedCreaturesHelper.setPartyLastOpenedTime(this.mc.player, (int) this.mc.world.getTotalWorldTime());
 
         //start with the creature types
         this.sidebarType = null;
@@ -80,8 +96,6 @@ public class RiftJournalScreen extends GuiScreen {
 
         this.isPartyMode = true;
         this.changePartyOrderMode = false;
-
-        super.initGui();
     }
 
     @Override

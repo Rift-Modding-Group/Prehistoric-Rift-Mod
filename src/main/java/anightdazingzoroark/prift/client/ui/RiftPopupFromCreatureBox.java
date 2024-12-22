@@ -66,6 +66,12 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
         else if (this.popupType == PopupFromCreatureBox.NO_CREATURES) {
             this.buttonList.add(new GuiButton(0, (this.width - 60)/2, (this.height - 20)/2 + 30, 60, 20, I18n.format("radial.popup_button.ok")));
         }
+        else if (this.popupType == PopupFromCreatureBox.OWNED_BY_OTHER) {
+            this.buttonList.add(new GuiButton(0, (this.width - 60)/2, (this.height - 20)/2 + 30, 60, 20, I18n.format("radial.popup_button.ok")));
+        }
+        else if (this.popupType == PopupFromCreatureBox.CREATURE_REVIVING) {
+            this.buttonList.add(new GuiButton(0, (this.width - 60)/2, (this.height - 20)/2 + 30, 60, 20, I18n.format("radial.popup_button.ok")));
+        }
         super.initGui();
     }
 

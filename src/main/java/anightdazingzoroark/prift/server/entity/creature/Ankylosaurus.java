@@ -125,7 +125,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 3D));
         this.tasks.addTask(9, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(10, new RiftMoveToHomePos(this, 1.0D));
+        //this.tasks.addTask(10, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(11, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
