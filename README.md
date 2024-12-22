@@ -10,6 +10,7 @@ Highly recommended that you join the Discord server as well: https://discord.gg/
 The mod is for Minecraft Forge 1.12.2, and requires the following dependencies:
 * [Geckolib](https://www.curseforge.com/minecraft/mc-mods/geckolib)
 * [LLibrary](https://www.curseforge.com/minecraft/mc-mods/llibrary)
+* [MixinBooter](https://www.curseforge.com/minecraft/mc-mods/mixin-booter)
 
 All the above dependencies require the latest versions of their 1.12.2 versions to work.
 
