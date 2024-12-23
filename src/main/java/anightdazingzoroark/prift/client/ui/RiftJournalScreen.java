@@ -451,9 +451,8 @@ public class RiftJournalScreen extends GuiScreen {
             //change to select highlight when changin party positions
             if (guiButton instanceof RiftGuiJournalPartyButton) {
                 RiftGuiJournalPartyButton jButton = (RiftGuiJournalPartyButton) guiButton;
-                if (this.partyPosToMove != -1 && jButton.id == this.partyPosToMove) {
-                    jButton.toMove = true;
-                }
+                if (this.partyPosToMove != -1 && jButton.id == this.partyPosToMove) jButton.toMove = true;
+                jButton.isSelected = jButton.id == this.selectedPartyPos;
             }
 
             //draw button

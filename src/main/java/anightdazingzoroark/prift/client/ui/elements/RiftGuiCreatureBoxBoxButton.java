@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui.elements;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -10,10 +11,12 @@ import net.minecraft.util.ResourceLocation;
 public class RiftGuiCreatureBoxBoxButton extends GuiButton {
     private final RiftCreature creature;
     public boolean toMove;
+    public boolean isSelected;
 
     public RiftGuiCreatureBoxBoxButton(RiftCreature creature, int buttonId, int x, int y) {
         super(buttonId, x, y, 30, 30, "");
         this.creature = creature;
+        this.isSelected = false;
     }
 
     @Override
@@ -23,7 +26,7 @@ public class RiftGuiCreatureBoxBoxButton extends GuiButton {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             mc.renderEngine.bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png"));
             this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-            drawModalRectWithCustomSizedTexture(this.x, this.y, (this.hovered || this.toMove) ? 222 : 192, this.toMove ? 246 : 216, this.width, this.height, 408, 300);
+            drawModalRectWithCustomSizedTexture(this.x, this.y, this.getButtonUVs()[0], this.getButtonUVs()[1], this.width, this.height, 408, 300);
 
             if (this.creature != null) {
                 double healthPercentage = this.creature.getHealth() / this.creature.getMaxHealth();
@@ -64,6 +67,12 @@ public class RiftGuiCreatureBoxBoxButton extends GuiButton {
                 drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
             }
         }
+    }
+
+    private int[] getButtonUVs() {
+        if (this.toMove) return new int[]{222, 246};
+        else if (this.hovered || this.isSelected) return new int[]{222, 216};
+        return new int[]{192, 216};
     }
 
     private String[] getReviveTimeMinutes(int tick) {

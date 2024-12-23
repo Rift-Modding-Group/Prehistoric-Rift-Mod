@@ -46,7 +46,7 @@ public class RiftOpenCreatureBoxMenu extends AbstractMessage<RiftOpenCreatureBox
     public void onClientReceived(Minecraft minecraft, RiftOpenCreatureBoxMenu message, EntityPlayer messagePlayer, MessageContext messageContext) {
         EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
         ClientProxy.creatureBoxBlockPos = new BlockPos(message.posX, message.posY, message.posZ);
-        player.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_BOX, messagePlayer.world, 0, 0, 0);
+        player.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_BOX, messagePlayer.world, -1, 0, 0);
     }
 
     @Override

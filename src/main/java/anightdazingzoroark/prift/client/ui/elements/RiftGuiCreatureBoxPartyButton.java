@@ -10,11 +10,13 @@ import net.minecraft.util.ResourceLocation;
 public class RiftGuiCreatureBoxPartyButton extends GuiButton {
     private final RiftCreature creature;
     public boolean toMove;
+    public boolean isSelected;
 
     public RiftGuiCreatureBoxPartyButton(RiftCreature creature, int buttonId, int x, int y) {
         super(buttonId, x, y, 96, 32, "");
         this.creature = creature;
         this.toMove = false;
+        this.isSelected = false;
     }
 
     @Override
@@ -24,7 +26,7 @@ public class RiftGuiCreatureBoxPartyButton extends GuiButton {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             mc.renderEngine.bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png"));
             this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-            drawModalRectWithCustomSizedTexture(this.x, this.y, (this.hovered || this.toMove) ? 96 : 0, this.toMove ? 248 : 216, this.width, this.height, 408, 300);
+            drawModalRectWithCustomSizedTexture(this.x, this.y, this.getButtonUVs()[0], this.getButtonUVs()[1], this.width, this.height, 408, 300);
 
             if (this.creature != null) {
                 //health bar
@@ -57,5 +59,11 @@ public class RiftGuiCreatureBoxPartyButton extends GuiButton {
                 drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
             }
         }
+    }
+
+    private int[] getButtonUVs() {
+        if (this.toMove) return new int[]{96, 248};
+        else if (this.hovered || this.isSelected) return new int[]{96, 216};
+        return new int[]{0, 216};
     }
 }

@@ -11,11 +11,13 @@ import net.minecraft.util.ResourceLocation;
 public class RiftGuiJournalPartyButton extends GuiButton {
     private final RiftCreature creature;
     public boolean toMove;
+    public boolean isSelected;
 
     public RiftGuiJournalPartyButton(RiftCreature creature, int buttonId, int x, int y) {
         super(buttonId, x, y, 96, 32, "");
         this.creature = creature;
         this.toMove = false;
+        this.isSelected = false;
     }
 
     @Override
@@ -54,8 +56,8 @@ public class RiftGuiJournalPartyButton extends GuiButton {
     }
 
     private int[] getButtonUVs() {
-        if (this.hovered) return new int[]{96, 0};
-        else if (this.toMove) return new int[]{96, 32};
+        if (this.toMove) return new int[]{96, 32};
+        else if (this.hovered || (this.isSelected && this.creature.getDeploymentType() != PlayerTamedCreatures.DeploymentType.PARTY)) return new int[]{96, 0};
         else if (this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) return new int[]{96, 64};
         return new int[]{0, 0};
     }
