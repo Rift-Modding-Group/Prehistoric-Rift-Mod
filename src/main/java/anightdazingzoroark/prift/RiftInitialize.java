@@ -81,11 +81,6 @@ public class RiftInitialize {
 
         //for creature config
         RiftConfigHandler.saveAllConfigs();
-
-        //crash game if some config stuff is wrong
-        if (!GeneralConfig.minRevivalDiff.equals("PEACEFUL") && !GeneralConfig.minRevivalDiff.equals("EASY") && !GeneralConfig.minRevivalDiff.equals("NORMAL") && !GeneralConfig.minRevivalDiff.equals("HARD") && !GeneralConfig.minRevivalDiff.equals("NONE")) {
-            throw new RuntimeException("Invalid configuration value detected for field \"Minimum Difficulty for Creature Revival\" in general.cfg. Please correct your configuration file.");
-        }
     }
 
     @Mod.EventHandler

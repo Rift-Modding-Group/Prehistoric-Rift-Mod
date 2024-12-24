@@ -12,8 +12,6 @@ import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlay
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.*;
@@ -300,11 +298,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.updateEnergyActions();
                 this.resetEnergyActionMod();
                 this.lowEnergyEffects();
-                this.eatFromInventory();
+                if (GeneralConfig.creatureEatFromInventory) this.eatFromInventory();
                 this.manageSittingFromEnergy();
                 if (this.isBeingRidden()) this.informRiderEnergy();
                 if (this.canNaturalRegen()) {
-                    if (this.getHealth() < this.getMaxHealth() && this.getHealth() > 0) this.naturalRegen();
+                    if (this.getHealth() < this.getMaxHealth() && this.getHealth() > 0 && GeneralConfig.naturalCreatureRegen) this.naturalRegen();
                     else this.healthRegen = 0;
                 }
                 this.manageXPAndLevel();

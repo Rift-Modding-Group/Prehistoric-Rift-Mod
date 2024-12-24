@@ -21,10 +21,8 @@ public class GeneralConfig {
     public static String[] turretModeHostileTargets = {"minecraft:cave_spider", "minecraft:enderman", "minecraft:spider", "minecraft:zombie_pigman", "minecraft:blaze", "minecraft:creeper", "minecraft:elder_guardian", "minecraft:endermite", "minecraft:evoker", "minecraft:ghast", "minecraft:guardian", "minecraft:husk", "minecraft:magma_cube", "minecraft:shulker", "minecraft:silverfish", "minecraft:skeleton", "minecraft:slime", "minecraft:stray", "minecraft:vex", "minecraft:vindicator", "minecraft:witch", "minecraft:wither_skeleton", "minecraft:zombie", "minecraft:zombie_villager", "prift:tyrannosaurus", "prift:utahraptor", "prift:direwolf"};
     public static boolean dropHemolymph = true;
     public static boolean putDropsInCreatureInv = true;
-    public static String minRevivalDiff = "HARD";
-
-    //creature revival
-    public static String[] reviveItems = {};
+    public static boolean naturalCreatureRegen = true;
+    public static boolean creatureEatFromInventory = true;
 
     //truffle stuff
     public static boolean truffleSpawning = true;
@@ -115,7 +113,8 @@ public class GeneralConfig {
         turretModeHostileTargets = config.getStringList("Hostile mobs targeted by mobs in turret mode", "General", new String[]{"minecraft:cave_spider", "minecraft:enderman", "minecraft:spider", "minecraft:zombie_pigman", "minecraft:blaze", "minecraft:creeper", "minecraft:elder_guardian", "minecraft:endermite", "minecraft:evoker", "minecraft:ghast", "minecraft:guardian", "minecraft:husk", "minecraft:magma_cube", "minecraft:shulker", "minecraft:silverfish", "minecraft:skeleton", "minecraft:slime", "minecraft:stray", "minecraft:vex", "minecraft:vindicator", "minecraft:witch", "minecraft:wither_skeleton", "minecraft:zombie", "minecraft:zombie_villager", "prift:tyrannosaurus", "prift:utahraptor", "prift:direwolf"}, "Identifiers of mobs that creatures in turret mode will attack, if their targeting is set to \"Attack Hostiles\"");
         dropHemolymph = config.getBoolean("Let Arthropods drop Hemolymph and Chitin", "General", true, "Whether or not arthropods that are not added by Prehistoric Rift (basically anything Bane of Arthropods works on) will drop some Hemolymph and Chitin");
         putDropsInCreatureInv = config.getBoolean("Put drops of mobs killed by tamed creatures in their inventories", "General", true, "Whether or not items dropped by mobs killed by tamed creatures will automatically go to the inventory of whatever killed it");
-        minRevivalDiff = config.getString("Minimum Difficulty for Creature Revival", "General", "HARD", "Minimum difficulty in which creatures can be incapacitated. If the difficulty is set to this or above, killed mobs just get killed. Usable values: PEACEFUL, EASY, NORMAL, HARD, NONE (tamed creatures can be revived regardless of difficulty).");
+        naturalCreatureRegen = config.getBoolean("Tamed Creatures can regenerate health", "General", true, "Whether or not tamed creatures can regenerate health over time");
+        creatureEatFromInventory = config.getBoolean("Tamed Creatures can eat from their inventory", "General", true, "Whether or not tamed creatures can eat items from their inventory to regenerate health or energy");
 
         //spawning
         config.addCustomCategoryComment("Spawning", "This mod uses its own spawning system, hence, the presence of this section. Further spawn related stuff can be edited in the creature's individual config files");
