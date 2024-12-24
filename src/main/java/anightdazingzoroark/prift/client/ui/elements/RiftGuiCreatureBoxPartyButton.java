@@ -11,12 +11,16 @@ public class RiftGuiCreatureBoxPartyButton extends GuiButton {
     private final RiftCreature creature;
     public boolean toMove;
     public boolean isSelected;
+    public int topLimit;
+    public int bottomLimit;
 
-    public RiftGuiCreatureBoxPartyButton(RiftCreature creature, int buttonId, int x, int y) {
+    public RiftGuiCreatureBoxPartyButton(RiftCreature creature, int buttonId, int x, int y, int topLimit, int bottomLimit) {
         super(buttonId, x, y, 96, 32, "");
         this.creature = creature;
         this.toMove = false;
         this.isSelected = false;
+        this.topLimit = topLimit;
+        this.bottomLimit = bottomLimit;
     }
 
     @Override
@@ -25,7 +29,9 @@ public class RiftGuiCreatureBoxPartyButton extends GuiButton {
             //the button itself
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             mc.renderEngine.bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png"));
-            this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+            int upper = Math.max(this.y, this.topLimit);
+            int lower = Math.min(this.y + this.height, this.bottomLimit);
+            this.hovered = mouseX >= this.x && mouseY >= upper && mouseX < this.x + this.width && mouseY < lower;
             drawModalRectWithCustomSizedTexture(this.x, this.y, this.getButtonUVs()[0], this.getButtonUVs()[1], this.width, this.height, 408, 300);
 
             if (this.creature != null) {
@@ -59,6 +65,13 @@ public class RiftGuiCreatureBoxPartyButton extends GuiButton {
                 drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
             }
         }
+    }
+
+    @Override
+    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+        int upper = Math.max(this.y, this.topLimit);
+        int lower = Math.min(this.y + this.height, this.bottomLimit);
+        return this.enabled && this.visible && mouseX >= this.x && mouseY >= upper && mouseX < this.x + this.width && mouseY < lower;
     }
 
     private int[] getButtonUVs() {

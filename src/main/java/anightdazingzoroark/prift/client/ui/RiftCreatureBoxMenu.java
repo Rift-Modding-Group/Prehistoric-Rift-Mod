@@ -7,7 +7,6 @@ import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxBoxButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxDeployedButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxPartyButton;
 import anightdazingzoroark.prift.server.ServerProxy;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
@@ -97,10 +96,10 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             this.selectedCreature = this.getPlayerParty().get(this.partyPosSelected);
         }
         else if (this.partyPosSelected == -1 && this.boxPosSelected != -1 && this.boxDeployedPosSelected == -1) {
-            this.selectedCreature = this.getPlayerBoxedCreatures().get(this.partyPosSelected);
+            this.selectedCreature = this.getPlayerBoxedCreatures().get(this.boxPosSelected);
         }
         else if (this.partyPosSelected == -1 && this.boxPosSelected == -1 && this.boxDeployedPosSelected != -1) {
-            this.selectedCreature = this.getCreatureBoxDeployedCreatures().get(this.partyPosSelected);
+            this.selectedCreature = this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosSelected);
         }
     }
 
@@ -581,11 +580,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         for (int x = 0; x < size; x++) {
             if (x < this.getPlayerParty().size()) {
                 RiftCreature creature = this.getPlayerParty().get(x);
-                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 78 + (40 * x)));
+                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 78 + (40 * x), (this.height - 170) / 2 - 10, (this.height - 170) / 2 + 160));
                 this.partyBarHeight += 40;
             }
             else {
-                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(null, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 78 + (40 * x)));
+                this.buttonList.add(new RiftGuiCreatureBoxPartyButton(null, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 78 + (40 * x), (this.height - 170) / 2 - 10, (this.height - 170) / 2 + 160));
                 this.partyBarHeight += 40;
             }
         }
@@ -634,7 +633,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
     private void placePartyMemberButtons(int mouseX, int mouseY, float partialTicks) {
         int x = (this.width - 96) / 2 - 147;
-        int y = (this.height - 170) / 2 - 12;
+        int y = (this.height - 170) / 2 - 10;
 
         // for scaling
         int scaleFactor = new ScaledResolution(this.mc).getScaleFactor();
@@ -734,7 +733,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
         //create area
         int x = (this.width - 162) / 2 - 87;
-        int y = (this.height - 63) / 2 + 52;
+        int y = (this.height - 63) / 2 + 69;
 
         // for scaling
         int scaleFactor = new ScaledResolution(this.mc).getScaleFactor();
@@ -764,9 +763,9 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         //create scrollbar
         if (this.boxedCreaturesDeployedHeight > 63) {
             int k = (this.width - 1) / 2 + 77;
-            int l = (this.height - 96) / 2 + 48;
+            int l = (this.height - 63) / 2 + 69;
             //scrollbar background
-            drawRect(k, l, k + 1, l + 96, 0xFF7A7A7A);
+            drawRect(k, l, k + 1, l + 63, 0xFF7A7A7A);
             //scrollbar progress
             int thumbHeight = Math.max(10, (int)((float)63 * (63f / this.boxedCreaturesDeployedHeight)));
             int thumbPosition = (int)((float)this.scrollBoxedDeployedCreaturesOffset / (this.boxedCreaturesDeployedHeight - 96) * (96 - thumbHeight));
@@ -881,6 +880,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         //update sidebar
         this.partyButtonListInit();
         for (GuiButton button : this.buttonList) {
+            //change positions based on how far the user scrolled
             button.y -= this.scrollSidebarOffset;
         }
 
@@ -902,6 +902,19 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
         //update deployed box creatures
         this.boxedCreaturesDeployedButtonListInit();
+        for (GuiButton button : this.creaturesInBoxDeployedButtons) {
+            //change positions based on how far the user scrolled
+            button.y -= this.scrollBoxedDeployedCreaturesOffset;
+
+            //disable buttons depending on whether or not they are visible
+            int minY = (this.height - 63) / 2 + 52;
+            int maxY = (this.height - 63) / 2 + 115;
+            int visibleButtonSize = 0;
+            for (int y = button.y; y <= button.y + 30; y++) {
+                if (minY <= y && maxY >= y) visibleButtonSize++;
+            }
+            if (visibleButtonSize == 0) button.enabled = false;
+        }
 
         //update selected creature buttons
         this.manageSelectedCreatureButtons.clear();
@@ -910,7 +923,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         GuiButton releaseButton = new GuiButton(1, (this.width - 100)/2 + 140, (this.height - 20)/2 + 85, 100, 20, I18n.format("creature_box.release"));
         releaseButton.enabled = false;
         String rearrangeName = this.changeCreaturesMode ? I18n.format("creature_box.stop_rearrange_creatures") : I18n.format("creature_box.rearrange_creatures");
-        GuiButton rearrangeButton = new GuiButton(2, (this.width - 100)/2 - 147, (this.height - 20)/2 + 85, 100, 20, rearrangeName);
+        GuiButton rearrangeButton = new GuiButton(2, (this.width - 100)/2 - 147, (this.height - 20)/2 + 90, 100, 20, rearrangeName);
         this.manageSelectedCreatureButtons.add(changeNameButton);
         this.manageSelectedCreatureButtons.add(releaseButton);
         this.manageSelectedCreatureButtons.add(rearrangeButton);
@@ -918,9 +931,9 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
     private boolean isMouseOverPartyBar(int mouseX, int mouseY) {
         int minX = (this.width - 96) / 2 - 147;
-        int minY = (this.height - 170) / 2 - 8;
+        int minY = (this.height - 170) / 2 - 10;
         int maxX = (this.width - 96) / 2 - 51;
-        int maxY = (this.height - 170) / 2 + 192;
+        int maxY = (this.height - 170) / 2 + 160;
         return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
     }
 
@@ -958,7 +971,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             }
             if (this.isMouseOverBoxedDeployedCreatures(mouseX, mouseY)) {
                 this.scrollBoxedDeployedCreaturesOffset += (scroll > 0) ? -10 : 10;
-                this.scrollBoxedDeployedCreaturesOffset = Math.max(0, Math.min(this.scrollBoxedDeployedCreaturesOffset, Math.max(0, this.boxedCreaturesDeployedHeight - 96)));
+                this.scrollBoxedDeployedCreaturesOffset = Math.max(0, Math.min(this.scrollBoxedDeployedCreaturesOffset, Math.max(0, this.boxedCreaturesDeployedHeight - 63)));
             }
         }
     }
