@@ -141,7 +141,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
         //manage creatures stored in creature box
         if (this.guiTimePassed++ % 2 == 0) {
-            PlayerTamedCreaturesHelper.reenergizePartyUndeployedCreatures(this.mc.player);
+            PlayerTamedCreaturesHelper.reenergizePartyUndeployedCreatures(this.mc.player, this.guiTimePassed / 2);
             PlayerTamedCreaturesHelper.regeneratePlayerBoxCreatures(this.mc.player);
         }
 

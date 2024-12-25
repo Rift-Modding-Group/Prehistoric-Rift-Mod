@@ -125,7 +125,7 @@ public class RiftJournalScreen extends GuiScreen {
         this.placeTopButtons(mouseX, mouseY);
 
         if (this.guiTimePassed++ % 2 == 0) {
-            PlayerTamedCreaturesHelper.reenergizePartyUndeployedCreatures(this.mc.player);
+            PlayerTamedCreaturesHelper.reenergizePartyUndeployedCreatures(this.mc.player, this.guiTimePassed / 2);
         }
 
         GlStateManager.disableRescaleNormal();

@@ -62,7 +62,6 @@ public class RiftDeployPartyMem extends AbstractMessage<RiftDeployPartyMem> {
             //edit nbt
             NBTTagCompound compound = new NBTTagCompound();
             compound.setByte("DeploymentType", (byte) PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE.ordinal());
-            //compound.setInteger("PartyReenergizeTime", 1200);
             playerTamedCreatures.modifyCreature(uuid, compound);
 
             //update remove creature
@@ -97,7 +96,6 @@ public class RiftDeployPartyMem extends AbstractMessage<RiftDeployPartyMem> {
             //edit nbt
             NBTTagCompound compound = new NBTTagCompound();
             compound.setByte("DeploymentType", (byte) PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE.ordinal());
-            //compound.setInteger("PartyReenergizeTime", 1200);
             playerTamedCreatures.modifyCreature(uuid, compound);
 
             //update remove creature

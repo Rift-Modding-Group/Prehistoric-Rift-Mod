@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
@@ -7,7 +8,9 @@ import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -252,54 +255,132 @@ public class PlayerTamedCreaturesHelper {
         if (player.world.isRemote) {
             int timeToSubtract = lastOpenedTime - getPartyLastOpenedTime(player);
             for (RiftCreature creature : getPlayerTamedCreatures(player).getPartyCreatures(player.world)) {
-                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE && creature.getEnergy() < 20) {
-                    int reenergizeTime = timeToSubtract;
+                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                    NBTTagCompound tagCompound = new NBTTagCompound();
+
+                    float newHealthLevel = creature.getHealth();
                     int newEnergyLevel = creature.getEnergy();
-                    int divideTimes = timeToSubtract / creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
-                    for (int x = 0; x < divideTimes; x++) {
-                        reenergizeTime -= creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
-                        newEnergyLevel += 1;
+
+                    //create tag list from creature inventory
+                    NBTTagList nbtItemList = new NBTTagList();
+                    if (creature.creatureInventory != null) {
+                        for (int i = 0; i < creature.creatureInventory.getSizeInventory(); ++i) {
+                            ItemStack itemstack = creature.creatureInventory.getStackInSlot(i);
+                            if (!itemstack.isEmpty()) {
+                                NBTTagCompound nbttagcompound = new NBTTagCompound();
+                                nbttagcompound.setByte("Slot", (byte) i);
+                                itemstack.writeToNBT(nbttagcompound);
+                                nbtItemList.appendTag(nbttagcompound);
+                            }
+                        }
                     }
 
-                    NBTTagCompound tagCompound = new NBTTagCompound();
-                    tagCompound.setInteger("PartyReenergizeTime", reenergizeTime);
+                    //health regen
+                    if (creature.getHealth() < creature.getMaxHealth()) {
+                        for (int j = 0; j < timeToSubtract; j++) {
+                            //natural regen
+                            if (GeneralConfig.naturalCreatureRegen && j % 100 == 0) {
+                                newHealthLevel += 2f;
+                                if (newHealthLevel >= creature.getMaxHealth()) break;
+                            }
+
+                            //food based regen
+                            if (GeneralConfig.creatureEatFromInventory && j % 60 == 0) {
+                                //manipulate based on item edibility
+                                for (int i = nbtItemList.tagList.size() - 1; i >= 0; i--) {
+                                    NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
+
+                                    //skip if slot is at 0, which is reserved for saddles only
+                                    if (creature.canBeSaddled() && itemNBT.getByte("Slot") == 0) continue;
+
+                                    ItemStack itemStack = new ItemStack(itemNBT);
+                                    if (creature.isFavoriteFood(itemStack) && !creature.isEnergyRegenItem(itemStack)) {
+                                        newHealthLevel += creature.getFavoriteFoodHeal(new ItemStack(itemNBT));
+                                        itemNBT.setByte("Count", (byte) Math.max(0, itemNBT.getByte("Count") - 1));
+                                        break;
+                                    }
+                                }
+                                if (newHealthLevel >= creature.getMaxHealth()) break;
+                            }
+                        }
+                    }
+
+                    //energy regen
+                    if (creature.getEnergy() < 20) {
+                        for (int j = 0; j < timeToSubtract; j++) {
+                            //natural regen
+                            if (timeToSubtract % creature.creatureType.getMaxEnergyRegenMod(creature.getLevel()) == 0) {
+                                newEnergyLevel += 1;
+                                if (newEnergyLevel >= 20) break;
+                            }
+
+                            //food based regen
+                            if (GeneralConfig.creatureEatFromInventory && j % 60 == 0) {
+                                //manipulate based on item edibility
+                                for (int i = nbtItemList.tagList.size() - 1; i >= 0; i--) {
+                                    NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
+
+                                    //skip if slot is at 0, which is reserved for saddles only
+                                    if (creature.canBeSaddled() && itemNBT.getByte("Slot") == 0) continue;
+
+                                    ItemStack itemStack = new ItemStack(itemNBT);
+                                    if (creature.isEnergyRegenItem(itemStack)) {
+                                        newEnergyLevel += creature.getEnergyRegenItemValue(new ItemStack(itemNBT));
+                                        itemNBT.setByte("Count", (byte) Math.max(0, itemNBT.getByte("Count") - 1));
+                                        break;
+                                    }
+                                }
+                                if (newEnergyLevel >= 20) break;
+                            }
+                        }
+                    }
+
+                    tagCompound.setTag("Items", nbtItemList);
+                    tagCompound.setFloat("Health", Math.min(newHealthLevel, creature.getMaxHealth()));
                     tagCompound.setInteger("Energy", newEnergyLevel);
 
                     RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
                     RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
-
                 }
             }
-
             getPlayerTamedCreatures(player).setPartyLastOpenedTime(lastOpenedTime);
             RiftMessages.WRAPPER.sendToServer(new RiftPartySetLastOpenedTime(player, lastOpenedTime));
         }
         else {
             int timeToSubtract = lastOpenedTime - getPartyLastOpenedTime(player);
             for (RiftCreature creature : getPlayerTamedCreatures(player).getPartyCreatures(player.world)) {
-                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE && creature.getEnergy() < 20) {
-                    int reenergizeTime = timeToSubtract;
-                    int newEnergyLevel = creature.getEnergy();
-                    int divideTimes = timeToSubtract / creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
-                    for (int x = 0; x < divideTimes; x++) {
-                        reenergizeTime -= creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
-                        newEnergyLevel += 1;
+                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                    NBTTagCompound tagCompound = new NBTTagCompound();
+
+                    //natural energy regen
+                    if (creature.getEnergy() < 20) {
+                        int newEnergyLevel = creature.getEnergy();
+                        int energyDivideTimes = timeToSubtract / creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
+                        for (int x = 0; x < energyDivideTimes; x++) {
+                            newEnergyLevel += 1;
+                        }
+
+                        tagCompound.setInteger("Energy", newEnergyLevel);
                     }
 
-                    NBTTagCompound tagCompound = new NBTTagCompound();
-                    tagCompound.setInteger("PartyReenergizeTime", reenergizeTime);
-                    tagCompound.setInteger("Energy", newEnergyLevel);
+                    //natural health regen
+                    if (creature.getHealth() < creature.getMaxHealth()) {
+                        float newHealthLevel = creature.getHealth();
+                        int healthDivideTimes = timeToSubtract / 100;
+                        for (int x = 0; x < healthDivideTimes; x++) {
+                            newHealthLevel += 2;
+                        }
+
+                        tagCompound.setFloat("Health", newHealthLevel);
+                    }
 
                     RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
                     RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
-
                 }
             }
-
             getPlayerTamedCreatures(player).setPartyLastOpenedTime(lastOpenedTime);
             RiftMessages.WRAPPER.sendToAll(new RiftPartySetLastOpenedTime(player, lastOpenedTime));
         }
-
     }
 
     public static void regeneratePlayerBoxCreatures(EntityPlayer player) {
@@ -347,21 +428,83 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
-    public static void reenergizePartyUndeployedCreatures(EntityPlayer player) {
+    public static void reenergizePartyUndeployedCreatures(EntityPlayer player, int time) {
+        if (time <= 0) return;;
+
         for (RiftCreature creature : getPlayerTamedCreatures(player).getPartyCreatures(player.world)) {
             if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                 NBTTagCompound tagCompound = new NBTTagCompound();
-                if (creature.getEnergy() < 20) {
-                    tagCompound.setInteger("PartyReenergizeTime", creature.getPartyReenergizeTime() + 1);
 
-                    if (tagCompound.getInteger("PartyReenergizeTime") > creature.creatureType.getMaxEnergyRegenMod(creature.getLevel())) {
-                        tagCompound.setInteger("PartyReenergizeTime", 0);
-                        tagCompound.setInteger("Energy", creature.getEnergy() + 1);
+                int newEnergyValue = creature.getEnergy();
+                float newHealthValue = creature.getHealth();
+
+                //create tag list from creature inventory
+                NBTTagList nbtItemList = new NBTTagList();
+                if (creature.creatureInventory != null) {
+                    for (int i = 0; i < creature.creatureInventory.getSizeInventory(); ++i) {
+                        ItemStack itemstack = creature.creatureInventory.getStackInSlot(i);
+                        if (!itemstack.isEmpty()) {
+                            NBTTagCompound nbttagcompound = new NBTTagCompound();
+                            nbttagcompound.setByte("Slot", (byte) i);
+                            itemstack.writeToNBT(nbttagcompound);
+                            nbtItemList.appendTag(nbttagcompound);
+                        }
                     }
-
-                    RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
-                    RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
                 }
+
+                if (creature.getHealth() < creature.getMaxHealth()) {
+                    //natural health regen
+                    if (GeneralConfig.naturalCreatureRegen && time % 100 == 0) newHealthValue += 2f;
+
+                    //health regen from food
+                    if (GeneralConfig.creatureEatFromInventory && time % 60 == 0) {
+                        //manipulate based on item edibility
+                        for (int i = nbtItemList.tagList.size() - 1; i >= 0; i--) {
+                            NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
+
+                            //skip if slot is at 0, which is reserved for saddles only
+                            if (creature.canBeSaddled() && itemNBT.getByte("Slot") == 0) continue;
+
+                            //create item, use it to heal up, then reduce count
+                            ItemStack itemStack = new ItemStack(itemNBT);
+                            if (creature.isFavoriteFood(itemStack) && !creature.isEnergyRegenItem(itemStack)) {
+                                newHealthValue += creature.getFavoriteFoodHeal(new ItemStack(itemNBT));
+                                itemNBT.setByte("Count", (byte) Math.max(0, itemNBT.getByte("Count") - 1));
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (creature.getEnergy() < 20) {
+                    //natural energy regen
+                    if (time % creature.creatureType.getMaxEnergyRegenMod(creature.getLevel()) == 0) newEnergyValue++;
+
+                    //energy regen from food
+                    if (GeneralConfig.creatureEatFromInventory && time % 60 == 0) {
+                        //manipulate based on item edibility
+                        for (int i = nbtItemList.tagList.size() - 1; i >= 0; i--) {
+                            NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
+
+                            //skip if slot is at 0, which is reserved for saddles only
+                            if (creature.canBeSaddled() && itemNBT.getByte("Slot") == 0) continue;
+
+                            ItemStack itemStack = new ItemStack(itemNBT);
+                            if (creature.isEnergyRegenItem(itemStack)) {
+                                newEnergyValue += creature.getEnergyRegenItemValue(new ItemStack(itemNBT));
+                                itemNBT.setByte("Count", (byte) Math.max(0, itemNBT.getByte("Count") - 1));
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                tagCompound.setInteger("Energy", newEnergyValue);
+                tagCompound.setFloat("Health", newHealthValue);
+                tagCompound.setTag("Items", nbtItemList);
+
+                RiftMessages.WRAPPER.sendToAll(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
+                RiftMessages.WRAPPER.sendToServer(new RiftModifyPlayerCreature(player, creature.getUniqueID(), tagCompound));
             }
         }
     }
