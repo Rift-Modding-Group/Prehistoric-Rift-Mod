@@ -621,7 +621,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
-                    else if (itemstack.getItem() instanceof ItemPotion) {
+                    else if (itemstack.getItem() instanceof ItemPotion && !(itemstack.getItem() instanceof ItemSplashPotion) && !(itemstack.getItem() instanceof ItemLingeringPotion)) {
                         for (PotionEffect effect : PotionUtils.getEffectsFromStack(itemstack)) {
                             this.addPotionEffect(new PotionEffect(effect));
                         }
