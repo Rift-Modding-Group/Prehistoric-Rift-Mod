@@ -23,7 +23,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-@Mod(modid = RiftInitialize.MODID, name = RiftInitialize.MODNAME, version = RiftInitialize.MODVERSION, dependencies = "required-after:forge@[11.16.0.1865,);required-after:geckolib3@[3.0.19,);after:harvestcraft@[1.12.2zb,);after:pyrotech@[1.12.2-1.6.11,);")
+@Mod(modid = RiftInitialize.MODID, name = RiftInitialize.MODNAME, version = RiftInitialize.MODVERSION, dependencies = "required-after:forge@[11.16.0.1865,);required-after:geckolib3@[3.0.19,);required-after:mixinbooter@[10.2,);after:harvestcraft@[1.12.2zb,);after:pyrotech@[1.12.2-1.6.11,);")
 public class RiftInitialize {
     public static final String MODID = "prift";
     public static final String SSR_MOD_ID = "shouldersurfing";

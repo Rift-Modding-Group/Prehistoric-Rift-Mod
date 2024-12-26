@@ -11,6 +11,6 @@
     "credits": "Authors of this project",
     "logoFile": "",
     "screenshots": [],
-    "dependencies": ["geckolib3@[3.0.19,)"]
+    "dependencies": ["geckolib3@[3.0.19,)", "mixinbooter@[10.2,)"]
   }
 ]

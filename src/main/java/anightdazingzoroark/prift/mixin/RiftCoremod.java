@@ -6,7 +6,6 @@ import zone.rong.mixinbooter.IEarlyMixinLoader;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.Supplier;
 
 @IFMLLoadingPlugin.Name("prift")
 @IFMLLoadingPlugin.MCVersion(ForgeVersion.mcVersion)
