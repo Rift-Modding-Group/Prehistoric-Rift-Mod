@@ -4,13 +4,15 @@ import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlay
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftJournalEditOne extends AbstractMessage<RiftJournalEditOne> {
+public class RiftJournalEditOne implements IMessage {
     private int creatureTypeId;
     private boolean addToEntry;
 
@@ -33,17 +35,27 @@ public class RiftJournalEditOne extends AbstractMessage<RiftJournalEditOne> {
         buf.writeBoolean(this.addToEntry);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftJournalEditOne message, EntityPlayer player, MessageContext messageContext) {
-        IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-        if (message.addToEntry) journalProgress.unlockCreature(RiftCreatureType.values()[message.creatureTypeId]);
-        else journalProgress.clearCreature(RiftCreatureType.values()[message.creatureTypeId]);
-    }
+    public static class Handler implements IMessageHandler<RiftJournalEditOne, IMessage> {
+        @Override
+        public IMessage onMessage(RiftJournalEditOne message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftJournalEditOne message, EntityPlayer player, MessageContext messageContext) {
-        IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-        if (message.addToEntry) journalProgress.unlockCreature(RiftCreatureType.values()[message.creatureTypeId]);
-        else journalProgress.clearCreature(RiftCreatureType.values()[message.creatureTypeId]);
+        private void handle(RiftJournalEditOne message, MessageContext ctx) {
+            if (ctx.side == Side.SERVER) {
+                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+                IPlayerJournalProgress journalProgress = messagePlayer.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
+                if (message.addToEntry) journalProgress.unlockCreature(RiftCreatureType.values()[message.creatureTypeId]);
+                else journalProgress.clearCreature(RiftCreatureType.values()[message.creatureTypeId]);
+            }
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+                IPlayerJournalProgress journalProgress = messagePlayer.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
+                if (message.addToEntry) journalProgress.unlockCreature(RiftCreatureType.values()[message.creatureTypeId]);
+                else journalProgress.clearCreature(RiftCreatureType.values()[message.creatureTypeId]);
+            }
+        }
     }
 }

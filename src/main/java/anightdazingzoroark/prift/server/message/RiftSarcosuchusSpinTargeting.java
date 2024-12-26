@@ -2,14 +2,14 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftSarcosuchusSpinTargeting extends AbstractMessage<RiftSarcosuchusSpinTargeting> {
+public class RiftSarcosuchusSpinTargeting implements IMessage {
     private int sarcoId;
     private int targetId;
 
@@ -32,22 +32,25 @@ public class RiftSarcosuchusSpinTargeting extends AbstractMessage<RiftSarcosuchu
         buf.writeInt(this.targetId);
     }
 
-    @Override
-    public void onClientReceived(Minecraft client, RiftSarcosuchusSpinTargeting message, EntityPlayer player, MessageContext messageContext) {
+    public static class Handler implements IMessageHandler<RiftSarcosuchusSpinTargeting, IMessage> {
+        @Override
+        public IMessage onMessage(RiftSarcosuchusSpinTargeting message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    }
+        private void handle(RiftSarcosuchusSpinTargeting message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            Sarcosuchus sarcosuchus = (Sarcosuchus) playerEntity.world.getEntityByID(message.sarcoId);
+            EntityLivingBase target = (EntityLivingBase) playerEntity.world.getEntityByID(message.targetId);
 
-    @Override
-    public void onServerReceived(MinecraftServer server, RiftSarcosuchusSpinTargeting message, EntityPlayer player, MessageContext messageContext) {
-        Sarcosuchus sarcosuchus = (Sarcosuchus) player.world.getEntityByID(message.sarcoId);
-        EntityLivingBase target = (EntityLivingBase) player.world.getEntityByID(message.targetId);
-
-        double angleToTarget = Math.atan2(sarcosuchus.getLookVec().z, sarcosuchus.getLookVec().x);
-        target.setPosition(2 * Math.cos(angleToTarget) + sarcosuchus.posX, sarcosuchus.posY, 2 * Math.sin(angleToTarget) + sarcosuchus.posZ);
-        sarcosuchus.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
-        sarcosuchus.attackEntityUsingSpin(target);
-        target.motionX = 0;
-        target.motionY = 0;
-        target.motionZ = 0;
+            double angleToTarget = Math.atan2(sarcosuchus.getLookVec().z, sarcosuchus.getLookVec().x);
+            target.setPosition(2 * Math.cos(angleToTarget) + sarcosuchus.posX, sarcosuchus.posY, 2 * Math.sin(angleToTarget) + sarcosuchus.posZ);
+            sarcosuchus.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
+            sarcosuchus.attackEntityUsingSpin(target);
+            target.motionX = 0;
+            target.motionY = 0;
+            target.motionZ = 0;
+        }
     }
 }

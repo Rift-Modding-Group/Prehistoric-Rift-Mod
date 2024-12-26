@@ -1,19 +1,20 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.UUID;
 
-public class RiftRemoveAfterSendToBox extends AbstractMessage<RiftRemoveAfterSendToBox> {
+public class RiftRemoveAfterSendToBox implements IMessage {
     private int creatureId;
     private UUID creatureUUID;
     private boolean useUUID;
@@ -43,27 +44,39 @@ public class RiftRemoveAfterSendToBox extends AbstractMessage<RiftRemoveAfterSen
         buf.writeBoolean(this.useUUID);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftRemoveAfterSendToBox message, EntityPlayer player, MessageContext messageContext) {
-        if (message.useUUID) {
-            RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
-            if (creature != null) RiftUtil.removeCreature(creature);
+    public static class Handler implements IMessageHandler<RiftRemoveAfterSendToBox, IMessage> {
+        @Override
+        public IMessage onMessage(RiftRemoveAfterSendToBox message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
-        else {
-            RiftCreature creature = (RiftCreature)player.world.getEntityByID(message.creatureId);
-            if (creature != null) RiftUtil.removeCreature(creature);
-        }
-    }
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftRemoveAfterSendToBox message, EntityPlayer player, MessageContext messageContext) {
-        if (message.useUUID) {
-            RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
-            if (creature != null) RiftUtil.removeCreature(creature);
-        }
-        else {
-            RiftCreature creature = (RiftCreature)player.world.getEntityByID(message.creatureId);
-            if (creature != null) RiftUtil.removeCreature(creature);
+        private void handle(RiftRemoveAfterSendToBox message, MessageContext ctx) {
+            if (ctx.side == Side.SERVER) {
+                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+
+                if (message.useUUID) {
+                    RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.creatureUUID);
+                    if (creature != null) RiftUtil.removeCreature(creature);
+                }
+                else {
+                    RiftCreature creature = (RiftCreature)messagePlayer.world.getEntityByID(message.creatureId);
+                    if (creature != null) RiftUtil.removeCreature(creature);
+                }
+            }
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+
+                if (message.useUUID) {
+                    RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.creatureUUID);
+                    if (creature != null) RiftUtil.removeCreature(creature);
+                }
+                else {
+                    RiftCreature creature = (RiftCreature)messagePlayer.world.getEntityByID(message.creatureId);
+                    if (creature != null) RiftUtil.removeCreature(creature);
+                }
+            }
         }
     }
 }

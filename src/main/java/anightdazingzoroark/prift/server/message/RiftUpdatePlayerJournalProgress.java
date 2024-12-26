@@ -3,18 +3,16 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftUpdatePlayerJournalProgress extends AbstractMessage<RiftUpdatePlayerJournalProgress> {
+public class RiftUpdatePlayerJournalProgress implements IMessage {
     private NBTTagCompound nbtTagCompound;
     private int playerId;
 
@@ -37,18 +35,21 @@ public class RiftUpdatePlayerJournalProgress extends AbstractMessage<RiftUpdateP
         buf.writeInt(this.playerId);
     }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void onClientReceived(Minecraft minecraft, RiftUpdatePlayerJournalProgress message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        EntityPlayer player = (EntityPlayer) Minecraft.getMinecraft().world.getEntityByID(message.playerId);
-        if (player != null) {
-            Minecraft.getMinecraft().addScheduledTask(() -> {
-                IPlayerJournalProgress capability = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-                if (capability != null) PlayerJournalProgressProvider.readNBT(capability, null, message.nbtTagCompound);
-            });
+    public static class Handler implements IMessageHandler<RiftUpdatePlayerJournalProgress, IMessage> {
+        @Override
+        public IMessage onMessage(RiftUpdatePlayerJournalProgress message, MessageContext ctx) {
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
+
+        private void handle(RiftUpdatePlayerJournalProgress message, MessageContext ctx) {
+            EntityPlayer player = (EntityPlayer) Minecraft.getMinecraft().world.getEntityByID(message.playerId);
+            if (player != null) {
+                Minecraft.getMinecraft().addScheduledTask(() -> {
+                    IPlayerJournalProgress capability = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
+                    if (capability != null) PlayerJournalProgressProvider.readNBT(capability, null, message.nbtTagCompound);
+                });
+            }
         }
     }
-
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftUpdatePlayerJournalProgress message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

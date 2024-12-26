@@ -3,13 +3,15 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftForceSyncPartyLastOpenedTime extends AbstractMessage<RiftForceSyncPartyLastOpenedTime> {
+public class RiftForceSyncPartyLastOpenedTime implements IMessage {
     private int playerId;
     private int partyLastOpenedTime;
 
@@ -36,21 +38,33 @@ public class RiftForceSyncPartyLastOpenedTime extends AbstractMessage<RiftForceS
         buf.writeInt(this.partyLastOpenedTime);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftForceSyncPartyLastOpenedTime message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+    public static class Handler implements IMessageHandler<RiftForceSyncPartyLastOpenedTime, IMessage> {
+        @Override
+        public IMessage onMessage(RiftForceSyncPartyLastOpenedTime message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-        if (message.partyLastOpenedTime < 0) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyLastOpenedTime(player, playerTamedCreatures.getPartyLastOpenedTime()));
-        else playerTamedCreatures.setPartyLastOpenedTime(message.partyLastOpenedTime);
-    }
+        private void handle(RiftForceSyncPartyLastOpenedTime message, MessageContext ctx) {
+            if (ctx.side == Side.SERVER) {
+                EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftForceSyncPartyLastOpenedTime message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
 
-        if (message.partyLastOpenedTime < 0) RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartyLastOpenedTime(player, playerTamedCreatures.getPartyLastOpenedTime()));
-        else playerTamedCreatures.setPartyLastOpenedTime(message.partyLastOpenedTime);
+                if (message.partyLastOpenedTime < 0) RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartyLastOpenedTime(player, playerTamedCreatures.getPartyLastOpenedTime()));
+                else playerTamedCreatures.setPartyLastOpenedTime(message.partyLastOpenedTime);
+            }
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+
+                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+
+                if (message.partyLastOpenedTime < 0) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyLastOpenedTime(player, playerTamedCreatures.getPartyLastOpenedTime()));
+                else playerTamedCreatures.setPartyLastOpenedTime(message.partyLastOpenedTime);
+            }
+        }
     }
 }

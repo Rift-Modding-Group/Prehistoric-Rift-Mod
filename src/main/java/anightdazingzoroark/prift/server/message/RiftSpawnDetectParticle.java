@@ -2,13 +2,13 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftSpawnDetectParticle extends AbstractMessage<RiftSpawnDetectParticle> {
+public class RiftSpawnDetectParticle implements IMessage {
     private int playerId;
     private int xPos;
     private int yPos;
@@ -39,13 +39,15 @@ public class RiftSpawnDetectParticle extends AbstractMessage<RiftSpawnDetectPart
         buf.writeInt(this.zPos);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftSpawnDetectParticle message, EntityPlayer entityPlayer, MessageContext messageContext) {
-        RiftInitialize.PROXY.spawnParticle("detect", message.xPos + 0.5D, message.yPos + 1D, message.zPos + 0.5D, 0, 0,0);
-    }
+    public static class Handler implements IMessageHandler<RiftSpawnDetectParticle, IMessage> {
+        @Override
+        public IMessage onMessage(RiftSpawnDetectParticle message, MessageContext ctx) {
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftSpawnDetectParticle message, EntityPlayer entityPlayer, MessageContext messageContext) {
-
+        private void handle(RiftSpawnDetectParticle message, MessageContext ctx) {
+            RiftInitialize.PROXY.spawnParticle("detect", message.xPos + 0.5D, message.yPos + 1D, message.zPos + 0.5D, 0, 0,0);
+        }
     }
 }

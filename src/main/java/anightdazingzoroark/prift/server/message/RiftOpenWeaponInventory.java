@@ -4,14 +4,14 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftOpenWeaponInventory extends AbstractMessage<RiftOpenWeaponInventory> {
+public class RiftOpenWeaponInventory implements IMessage {
     private int weaponId;
 
     public RiftOpenWeaponInventory() {}
@@ -30,12 +30,17 @@ public class RiftOpenWeaponInventory extends AbstractMessage<RiftOpenWeaponInven
         buf.writeInt(this.weaponId);
     }
 
-    @Override
-    public void onClientReceived(Minecraft client, RiftOpenWeaponInventory message, EntityPlayer player, MessageContext messageContext) {}
+    public static class Handler implements IMessageHandler<RiftOpenWeaponInventory, IMessage> {
+        @Override
+        public IMessage onMessage(RiftOpenWeaponInventory message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer server, RiftOpenWeaponInventory message, EntityPlayer player, MessageContext messageContext) {
-        World world = player.getEntityWorld();
-        player.openGui(RiftInitialize.instance, ServerProxy.GUI_WEAPON_INVENTORY, world, message.weaponId, 0, 0);
+        private void handle(RiftOpenWeaponInventory message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            World world = playerEntity.getEntityWorld();
+            playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_WEAPON_INVENTORY, world, message.weaponId, 0, 0);
+        }
     }
 }

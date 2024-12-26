@@ -2,16 +2,17 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftChangeBoxDeployedOrder extends AbstractMessage<RiftChangeBoxDeployedOrder> {
+public class RiftChangeBoxDeployedOrder implements IMessage {
     private byte swapTypeBit;
     private int playerId;
     private int creatureBoxXPos;
@@ -64,90 +65,102 @@ public class RiftChangeBoxDeployedOrder extends AbstractMessage<RiftChangeBoxDep
         buf.writeInt(this.posToSwap);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftChangeBoxDeployedOrder message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        RiftChangePartyOrBoxOrder.SwapType swapType = RiftChangePartyOrBoxOrder.SwapType.values()[message.swapTypeBit];
-        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        BlockPos creatureBoxPos = new BlockPos(message.creatureBoxXPos, message.creatureBoxYPos, message.creatureBoxZPos);
-
-        if (message.posToSwap != -1) {
-            switch (swapType) {
-                case REARRANGE_BOX_DEPLOYED:
-                    playerTamedCreatures.rearrangeDeployedBoxCreatures(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
-                case PARTY_BOX_DEPLOYED_SWAP:
-                    playerTamedCreatures.partyCreatureToBoxCreatureDeployed(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
-                case BOX_BOX_DEPLOYED_SWAP:
-                    playerTamedCreatures.boxCreatureToBoxCreatureDeployed(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
-                case BOX_DEPLOYED_PARTY_SWAP:
-                    playerTamedCreatures.boxCreatureDeployedToPartyCreature(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
-                case BOX_DEPLOYED_BOX_SWAP:
-                    playerTamedCreatures.boxCreatureDeployedToBoxCreature(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
-            }
+    public static class Handler implements IMessageHandler<RiftChangeBoxDeployedOrder, IMessage> {
+        @Override
+        public IMessage onMessage(RiftChangeBoxDeployedOrder message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
-        else {
-            switch (swapType) {
-                case PARTY_TO_BOX_DEPLOYED:
-                    playerTamedCreatures.partyCreatureToBoxDeployed(messagePlayer.world, creatureBoxPos, message.posSelected);
-                    break;
-                case BOX_TO_BOX_DEPLOYED:
-                    playerTamedCreatures.boxCreatureToBoxDeployed(messagePlayer.world, creatureBoxPos, message.posSelected);
-                    break;
-                case BOX_DEPLOYED_TO_PARTY:
-                    playerTamedCreatures.boxCreatureDeployedToParty(messagePlayer.world, creatureBoxPos, message.posSelected);
-                    break;
-                case BOX_DEPLOYED_TO_BOX:
-                    playerTamedCreatures.boxCreatureDeployedToBox(messagePlayer.world, creatureBoxPos, message.posSelected);
-                    break;
-            }
-        }
-    }
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftChangeBoxDeployedOrder message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        RiftChangePartyOrBoxOrder.SwapType swapType = RiftChangePartyOrBoxOrder.SwapType.values()[message.swapTypeBit];
-        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        BlockPos creatureBoxPos = new BlockPos(message.creatureBoxXPos, message.creatureBoxYPos, message.creatureBoxZPos);
+        private void handle(RiftChangeBoxDeployedOrder message, MessageContext ctx) {
+            if (ctx.side == Side.SERVER) {
+                EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
-        if (message.posToSwap != -1) {
-            switch (swapType) {
-                case REARRANGE_BOX_DEPLOYED:
-                    playerTamedCreatures.rearrangeDeployedBoxCreatures(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
-                case PARTY_BOX_DEPLOYED_SWAP:
-                    playerTamedCreatures.partyCreatureToBoxCreatureDeployed(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
-                case BOX_BOX_DEPLOYED_SWAP:
-                    playerTamedCreatures.boxCreatureToBoxCreatureDeployed(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
-                case BOX_DEPLOYED_PARTY_SWAP:
-                    playerTamedCreatures.boxCreatureDeployedToPartyCreature(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
-                case BOX_DEPLOYED_BOX_SWAP:
-                    playerTamedCreatures.boxCreatureDeployedToBoxCreature(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
-                    break;
+                RiftChangePartyOrBoxOrder.SwapType swapType = RiftChangePartyOrBoxOrder.SwapType.values()[message.swapTypeBit];
+                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+                BlockPos creatureBoxPos = new BlockPos(message.creatureBoxXPos, message.creatureBoxYPos, message.creatureBoxZPos);
+
+                if (message.posToSwap != -1) {
+                    switch (swapType) {
+                        case REARRANGE_BOX_DEPLOYED:
+                            playerTamedCreatures.rearrangeDeployedBoxCreatures(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                        case PARTY_BOX_DEPLOYED_SWAP:
+                            playerTamedCreatures.partyCreatureToBoxCreatureDeployed(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                        case BOX_BOX_DEPLOYED_SWAP:
+                            playerTamedCreatures.boxCreatureToBoxCreatureDeployed(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                        case BOX_DEPLOYED_PARTY_SWAP:
+                            playerTamedCreatures.boxCreatureDeployedToPartyCreature(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                        case BOX_DEPLOYED_BOX_SWAP:
+                            playerTamedCreatures.boxCreatureDeployedToBoxCreature(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                    }
+                }
+                else {
+                    switch (swapType) {
+                        case PARTY_TO_BOX_DEPLOYED:
+                            playerTamedCreatures.partyCreatureToBoxDeployed(messagePlayer.world, creatureBoxPos, message.posSelected);
+                            break;
+                        case BOX_TO_BOX_DEPLOYED:
+                            playerTamedCreatures.boxCreatureToBoxDeployed(messagePlayer.world, creatureBoxPos, message.posSelected);
+                            break;
+                        case BOX_DEPLOYED_TO_PARTY:
+                            playerTamedCreatures.boxCreatureDeployedToParty(messagePlayer.world, creatureBoxPos, message.posSelected);
+                            break;
+                        case BOX_DEPLOYED_TO_BOX:
+                            playerTamedCreatures.boxCreatureDeployedToBox(messagePlayer.world, creatureBoxPos, message.posSelected);
+                            break;
+                    }
+                }
             }
-        }
-        else {
-            switch (swapType) {
-                case PARTY_TO_BOX_DEPLOYED:
-                    playerTamedCreatures.partyCreatureToBoxDeployed(messagePlayer.world, creatureBoxPos, message.posSelected);
-                    break;
-                case BOX_TO_BOX_DEPLOYED:
-                    playerTamedCreatures.boxCreatureToBoxDeployed(messagePlayer.world, creatureBoxPos, message.posSelected);
-                    break;
-                case BOX_DEPLOYED_TO_PARTY:
-                    playerTamedCreatures.boxCreatureDeployedToParty(messagePlayer.world, creatureBoxPos, message.posSelected);
-                    break;
-                case BOX_DEPLOYED_TO_BOX:
-                    playerTamedCreatures.boxCreatureDeployedToBox(messagePlayer.world, creatureBoxPos, message.posSelected);
-                    break;
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+
+                RiftChangePartyOrBoxOrder.SwapType swapType = RiftChangePartyOrBoxOrder.SwapType.values()[message.swapTypeBit];
+                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+                BlockPos creatureBoxPos = new BlockPos(message.creatureBoxXPos, message.creatureBoxYPos, message.creatureBoxZPos);
+
+                if (message.posToSwap != -1) {
+                    switch (swapType) {
+                        case REARRANGE_BOX_DEPLOYED:
+                            playerTamedCreatures.rearrangeDeployedBoxCreatures(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                        case PARTY_BOX_DEPLOYED_SWAP:
+                            playerTamedCreatures.partyCreatureToBoxCreatureDeployed(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                        case BOX_BOX_DEPLOYED_SWAP:
+                            playerTamedCreatures.boxCreatureToBoxCreatureDeployed(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                        case BOX_DEPLOYED_PARTY_SWAP:
+                            playerTamedCreatures.boxCreatureDeployedToPartyCreature(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                        case BOX_DEPLOYED_BOX_SWAP:
+                            playerTamedCreatures.boxCreatureDeployedToBoxCreature(messagePlayer.world, creatureBoxPos, message.posSelected, message.posToSwap);
+                            break;
+                    }
+                }
+                else {
+                    switch (swapType) {
+                        case PARTY_TO_BOX_DEPLOYED:
+                            playerTamedCreatures.partyCreatureToBoxDeployed(messagePlayer.world, creatureBoxPos, message.posSelected);
+                            break;
+                        case BOX_TO_BOX_DEPLOYED:
+                            playerTamedCreatures.boxCreatureToBoxDeployed(messagePlayer.world, creatureBoxPos, message.posSelected);
+                            break;
+                        case BOX_DEPLOYED_TO_PARTY:
+                            playerTamedCreatures.boxCreatureDeployedToParty(messagePlayer.world, creatureBoxPos, message.posSelected);
+                            break;
+                        case BOX_DEPLOYED_TO_BOX:
+                            playerTamedCreatures.boxCreatureDeployedToBox(messagePlayer.world, creatureBoxPos, message.posSelected);
+                            break;
+                    }
+                }
             }
         }
     }

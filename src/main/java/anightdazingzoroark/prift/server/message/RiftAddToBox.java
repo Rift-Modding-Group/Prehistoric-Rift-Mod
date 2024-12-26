@@ -5,15 +5,17 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlaye
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.UUID;
 
-public class RiftAddToBox extends AbstractMessage<RiftAddToBox> {
+public class RiftAddToBox implements IMessage {
     private int playerId;
     private UUID uuid;
 
@@ -41,25 +43,37 @@ public class RiftAddToBox extends AbstractMessage<RiftAddToBox> {
         buf.writeLong(this.uuid.getLeastSignificantBits());
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftAddToBox message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.uuid);
+    public static class Handler implements IMessageHandler<RiftAddToBox, IMessage> {
+        @Override
+        public IMessage onMessage(RiftAddToBox message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-        boolean creatureInList = playerTamedCreatures.getBoxNBT().stream()
-                .noneMatch(nbt -> nbt.hasKey("UniqueIDMost") && nbt.hasKey("UniqueIDLeast") && nbt.getUniqueId("UniqueID").equals(message.uuid));
-        if (creatureInList && creature != null) playerTamedCreatures.addToBoxCreatures(creature);
-    }
+        private void handle(RiftAddToBox message, MessageContext ctx) {
+            if (ctx.side == Side.SERVER) {
+                EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftAddToBox message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.uuid);
+                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+                RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.uuid);
 
-        boolean creatureInList = playerTamedCreatures.getBoxNBT().stream()
-                .noneMatch(nbt -> nbt.hasKey("UniqueIDMost") && nbt.hasKey("UniqueIDLeast") && nbt.getUniqueId("UniqueID").equals(message.uuid));
-        if (creatureInList && creature != null) playerTamedCreatures.addToBoxCreatures(creature);
+                boolean creatureInList = playerTamedCreatures.getBoxNBT().stream()
+                        .noneMatch(nbt -> nbt.hasKey("UniqueIDMost") && nbt.hasKey("UniqueIDLeast") && nbt.getUniqueId("UniqueID").equals(message.uuid));
+                if (creatureInList && creature != null) playerTamedCreatures.addToBoxCreatures(creature);
+            }
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+
+                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+                RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.uuid);
+
+                boolean creatureInList = playerTamedCreatures.getBoxNBT().stream()
+                        .noneMatch(nbt -> nbt.hasKey("UniqueIDMost") && nbt.hasKey("UniqueIDLeast") && nbt.getUniqueId("UniqueID").equals(message.uuid));
+                if (creatureInList && creature != null) playerTamedCreatures.addToBoxCreatures(creature);
+            }
+        }
     }
 }

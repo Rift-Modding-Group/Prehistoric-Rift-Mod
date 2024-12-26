@@ -2,21 +2,23 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.UUID;
 
-public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatureFromBox> {
+public class RiftRemoveCreatureFromBox implements IMessage {
     private UUID creatureUUID;
 
     public RiftRemoveCreatureFromBox() {}
@@ -38,31 +40,43 @@ public class RiftRemoveCreatureFromBox extends AbstractMessage<RiftRemoveCreatur
         buf.writeLong(this.creatureUUID.getLeastSignificantBits());
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftRemoveCreatureFromBox message, EntityPlayer player, MessageContext messageContext) {
-        //remove from world
-        RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
-        if (creature != null) {
-            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
-            RiftUtil.removeCreature(creature);
-        }
-    }
-
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftRemoveCreatureFromBox message, EntityPlayer player, MessageContext messageContext) {
-        //remove from world
-        RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
-        if (creature != null) {
-            player.sendStatusMessage(new TextComponentTranslation("reminder.creature_released", creature.getName(false), creature.getName(false)), false);
-            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
-
-            //for removing hitboxes
-            RiftUtil.removeCreature(creature);
+    public static class Handler implements IMessageHandler<RiftRemoveCreatureFromBox, IMessage> {
+        @Override
+        public IMessage onMessage(RiftRemoveCreatureFromBox message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
 
-        //remove from party and box
-        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        playerTamedCreatures.removeCreature(message.creatureUUID);
-        playerTamedCreatures.removeCreatureFromBoxDeployed(player.world, ClientProxy.creatureBoxBlockPos, message.creatureUUID);
+        private void handle(RiftRemoveCreatureFromBox message, MessageContext ctx) {
+            if (ctx.side == Side.SERVER) {
+                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+
+                //remove from world
+                RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.creatureUUID);
+                if (creature != null) {
+                    messagePlayer.sendStatusMessage(new TextComponentTranslation("reminder.creature_released", creature.getName(false), creature.getName(false)), false);
+                    creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
+
+                    //for removing hitboxes
+                    RiftUtil.removeCreature(creature);
+                }
+
+                //remove from party and box
+                IPlayerTamedCreatures playerTamedCreatures = messagePlayer.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+                playerTamedCreatures.removeCreature(message.creatureUUID);
+                playerTamedCreatures.removeCreatureFromBoxDeployed(messagePlayer.world, ClientProxy.creatureBoxBlockPos, message.creatureUUID);
+            }
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+
+                //remove from world
+                RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.creatureUUID);
+                if (creature != null) {
+                    creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.NONE);
+                    RiftUtil.removeCreature(creature);
+                }
+            }
+        }
     }
 }

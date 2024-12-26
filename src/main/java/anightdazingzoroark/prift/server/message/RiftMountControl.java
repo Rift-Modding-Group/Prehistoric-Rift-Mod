@@ -2,17 +2,16 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftMountControl extends AbstractMessage<RiftMountControl> {
+public class RiftMountControl implements IMessage {
     private int creatureId;
     private int control; //0 is for left click, 1 is for right click, 2 is for spacebar
     private int tick; //tick num
@@ -63,20 +62,24 @@ public class RiftMountControl extends AbstractMessage<RiftMountControl> {
         buf.writeBoolean(this.usingSSR);
     }
 
-    @Override
-    public void onClientReceived(Minecraft client, RiftMountControl message, EntityPlayer player, MessageContext messageContext) {
-    }
+    public static class Handler implements IMessageHandler<RiftMountControl, IMessage> {
+        @Override
+        public IMessage onMessage(RiftMountControl message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer server, RiftMountControl message, EntityPlayer player, MessageContext messageContext) {
-        World world = player.getEntityWorld();
-        RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
+        private void handle(RiftMountControl message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            World world = playerEntity.getEntityWorld();
+            RiftCreature creature = (RiftCreature)world.getEntityByID(message.creatureId);
 
-        if (message.usingSSR) creature.controlInput(message.control, message.tick);
-        else {
-            Entity target = world.getEntityByID(message.targetId);
-            BlockPos pos = new BlockPos(message.targetPosX, message.targetPosY, message.targetPosZ);
-            creature.controlInput(message.control, message.tick, target, pos);
+            if (message.usingSSR) creature.controlInput(message.control, message.tick);
+            else {
+                Entity target = world.getEntityByID(message.targetId);
+                BlockPos pos = new BlockPos(message.targetPosX, message.targetPosY, message.targetPosZ);
+                creature.controlInput(message.control, message.tick, target, pos);
+            }
         }
     }
 }

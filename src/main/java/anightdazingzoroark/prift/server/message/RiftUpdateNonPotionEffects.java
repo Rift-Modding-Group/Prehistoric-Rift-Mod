@@ -3,19 +3,16 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftUpdateNonPotionEffects extends AbstractMessage<RiftUpdateNonPotionEffects> {
+public class RiftUpdateNonPotionEffects implements IMessage {
     private NBTTagCompound nbtTagCompound;
     private int entityId;
 
@@ -38,20 +35,21 @@ public class RiftUpdateNonPotionEffects extends AbstractMessage<RiftUpdateNonPot
         buf.writeInt(this.entityId);
     }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void onClientReceived(Minecraft minecraft, RiftUpdateNonPotionEffects message, EntityPlayer player, MessageContext messageContext) {
-        EntityLivingBase entity = (EntityLivingBase) Minecraft.getMinecraft().world.getEntityByID(message.entityId);
-        if (entity != null) {
-            Minecraft.getMinecraft().addScheduledTask(() -> {
-                INonPotionEffects capability = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-                if (capability != null) NonPotionEffectsProvider.readNBT(capability, null, message.nbtTagCompound);
-            });
+    public static class Handler implements IMessageHandler<RiftUpdateNonPotionEffects, IMessage> {
+        @Override
+        public IMessage onMessage(RiftUpdateNonPotionEffects message, MessageContext ctx) {
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
-    }
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftUpdateNonPotionEffects message, EntityPlayer player, MessageContext messageContext) {
-
+        private void handle(RiftUpdateNonPotionEffects message, MessageContext ctx) {
+            EntityLivingBase entity = (EntityLivingBase) Minecraft.getMinecraft().world.getEntityByID(message.entityId);
+            if (entity != null) {
+                Minecraft.getMinecraft().addScheduledTask(() -> {
+                    INonPotionEffects capability = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+                    if (capability != null) NonPotionEffectsProvider.readNBT(capability, null, message.nbtTagCompound);
+                });
+            }
+        }
     }
 }

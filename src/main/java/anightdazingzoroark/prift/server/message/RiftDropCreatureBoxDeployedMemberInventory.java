@@ -7,19 +7,20 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftDropCreatureBoxDeployedMemberInventory extends AbstractMessage<RiftDropCreatureBoxDeployedMemberInventory> {
+public class RiftDropCreatureBoxDeployedMemberInventory implements IMessage {
     private int creatureBoxPosX;
     private int creatureBoxPosY;
     private int creatureBoxPosZ;
@@ -56,40 +57,43 @@ public class RiftDropCreatureBoxDeployedMemberInventory extends AbstractMessage<
         ByteBufUtils.writeTag(buf, tagCompound);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftDropCreatureBoxDeployedMemberInventory message, EntityPlayer player, MessageContext messageContext) {
-
-    }
-
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftDropCreatureBoxDeployedMemberInventory message, EntityPlayer player, MessageContext messageContext) {
-        BlockPos pos = new BlockPos(message.creatureBoxPosX, message.creatureBoxPosY, message.creatureBoxPosZ);
-        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox)player.world.getTileEntity(pos);
-        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-        NBTTagCompound partyMemNBT = creatureBox.getCreatureList().get(message.creatureBoxDeployedPos);
-        NBTTagList nbtItemList = message.inventoryTagCompound;
-        boolean canBeSaddled = RiftCreatureType.values()[partyMemNBT.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).canBeSaddled();
-
-        for (int x = 0; x < nbtItemList.tagCount(); x++) {
-            //get the real creature first to make the item spawn in its location
-            //otherwise it spawns at the owners location
-            RiftCreature realCreature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, partyMemNBT.getUniqueId("UniqueID"));
-            boolean inWorld = player.world.getLoadedEntityList().contains(realCreature);
-            int itemPosX = realCreature == null ? (int)player.posX : (inWorld ? realCreature.getPosition().getX() : (int)player.posX);
-            int itemPosY = realCreature == null ? (int)player.posY : (inWorld ? realCreature.getPosition().getY() : (int)player.posY);
-            int itemPosZ = realCreature == null ? (int)player.posZ : (inWorld ? realCreature.getPosition().getZ() : (int)player.posZ);
-
-            NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
-            int j = nbttagcompound.getByte("Slot") & 255;
-            if ((canBeSaddled && j != 0) || !canBeSaddled) {
-                EntityItem entityItem = new EntityItem(player.world, itemPosX, itemPosY, itemPosZ);
-                entityItem.setItem(new ItemStack(nbttagcompound));
-                player.world.spawnEntity(entityItem);
-            }
+    public static class Handler implements IMessageHandler<RiftDropCreatureBoxDeployedMemberInventory, IMessage> {
+        @Override
+        public IMessage onMessage(RiftDropCreatureBoxDeployedMemberInventory message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
 
-        playerTamedCreatures.removeBoxCreatureDeployedInventory(player.world, pos, message.creatureBoxDeployedPos);
+        private void handle(RiftDropCreatureBoxDeployedMemberInventory message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
 
+            BlockPos pos = new BlockPos(message.creatureBoxPosX, message.creatureBoxPosY, message.creatureBoxPosZ);
+            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox)playerEntity.world.getTileEntity(pos);
+            IPlayerTamedCreatures playerTamedCreatures = playerEntity.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+
+            NBTTagCompound partyMemNBT = creatureBox.getCreatureList().get(message.creatureBoxDeployedPos);
+            NBTTagList nbtItemList = message.inventoryTagCompound;
+            boolean canBeSaddled = RiftCreatureType.values()[partyMemNBT.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).canBeSaddled();
+
+            for (int x = 0; x < nbtItemList.tagCount(); x++) {
+                //get the real creature first to make the item spawn in its location
+                //otherwise it spawns at the owners location
+                RiftCreature realCreature = (RiftCreature) RiftUtil.getEntityFromUUID(playerEntity.world, partyMemNBT.getUniqueId("UniqueID"));
+                boolean inWorld = playerEntity.world.getLoadedEntityList().contains(realCreature);
+                int itemPosX = realCreature == null ? (int)playerEntity.posX : (inWorld ? realCreature.getPosition().getX() : (int)playerEntity.posX);
+                int itemPosY = realCreature == null ? (int)playerEntity.posY : (inWorld ? realCreature.getPosition().getY() : (int)playerEntity.posY);
+                int itemPosZ = realCreature == null ? (int)playerEntity.posZ : (inWorld ? realCreature.getPosition().getZ() : (int)playerEntity.posZ);
+
+                NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
+                int j = nbttagcompound.getByte("Slot") & 255;
+                if ((canBeSaddled && j != 0) || !canBeSaddled) {
+                    EntityItem entityItem = new EntityItem(playerEntity.world, itemPosX, itemPosY, itemPosZ);
+                    entityItem.setItem(new ItemStack(nbttagcompound));
+                    playerEntity.world.spawnEntity(entityItem);
+                }
+            }
+
+            playerTamedCreatures.removeBoxCreatureDeployedInventory(playerEntity.world, pos, message.creatureBoxDeployedPos);
+        }
     }
 }

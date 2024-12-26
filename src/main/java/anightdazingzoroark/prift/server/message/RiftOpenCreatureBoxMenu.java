@@ -4,14 +4,14 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.ServerProxy;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftOpenCreatureBoxMenu extends AbstractMessage<RiftOpenCreatureBoxMenu> {
+public class RiftOpenCreatureBoxMenu implements IMessage {
     private int playerId;
     private int posX;
     private int posY;
@@ -42,15 +42,19 @@ public class RiftOpenCreatureBoxMenu extends AbstractMessage<RiftOpenCreatureBox
         buf.writeInt(this.posZ);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftOpenCreatureBoxMenu message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-        ClientProxy.creatureBoxBlockPos = new BlockPos(message.posX, message.posY, message.posZ);
-        player.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_BOX, messagePlayer.world, -1, 0, 0);
-    }
+    public static class Handler implements IMessageHandler<RiftOpenCreatureBoxMenu, IMessage> {
+        @Override
+        public IMessage onMessage(RiftOpenCreatureBoxMenu message, MessageContext ctx) {
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftOpenCreatureBoxMenu message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        private void handle(RiftOpenCreatureBoxMenu message, MessageContext ctx) {
+            EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
+            EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+            ClientProxy.creatureBoxBlockPos = new BlockPos(message.posX, message.posY, message.posZ);
+            player.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_BOX, messagePlayer.world, -1, 0, 0);
+        }
     }
 }

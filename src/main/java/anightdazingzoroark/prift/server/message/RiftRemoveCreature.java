@@ -3,14 +3,16 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftRemoveCreature extends AbstractMessage<RiftRemoveCreature> {
+public class RiftRemoveCreature implements IMessage {
     private int entityId;
     private boolean isCreature; //true if creature, false if hitbox
 
@@ -33,27 +35,39 @@ public class RiftRemoveCreature extends AbstractMessage<RiftRemoveCreature> {
         buf.writeBoolean(this.isCreature);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftRemoveCreature message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        if (message.isCreature) {
-            RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.entityId);
-            if (creature != null) messagePlayer.world.removeEntityDangerously(creature);
+    public static class Handler implements IMessageHandler<RiftRemoveCreature, IMessage> {
+        @Override
+        public IMessage onMessage(RiftRemoveCreature message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
-        else {
-            RiftCreaturePart creaturePart = (RiftCreaturePart) messagePlayer.world.getEntityByID(message.entityId);
-            if (creaturePart != null) messagePlayer.world.removeEntityDangerously(creaturePart);
-        }
-    }
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftRemoveCreature message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        if (message.isCreature) {
-            RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.entityId);
-            if (creature != null) messagePlayer.world.removeEntityDangerously(creature);
-        }
-        else {
-            RiftCreaturePart creaturePart = (RiftCreaturePart) messagePlayer.world.getEntityByID(message.entityId);
-            if (creaturePart != null) messagePlayer.world.removeEntityDangerously(creaturePart);
+        private void handle(RiftRemoveCreature message, MessageContext ctx) {
+            if (ctx.side == Side.SERVER) {
+                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+
+                if (message.isCreature) {
+                    RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.entityId);
+                    if (creature != null) messagePlayer.world.removeEntityDangerously(creature);
+                }
+                else {
+                    RiftCreaturePart creaturePart = (RiftCreaturePart) messagePlayer.world.getEntityByID(message.entityId);
+                    if (creaturePart != null) messagePlayer.world.removeEntityDangerously(creaturePart);
+                }
+            }
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+
+                if (message.isCreature) {
+                    RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.entityId);
+                    if (creature != null) messagePlayer.world.removeEntityDangerously(creature);
+                }
+                else {
+                    RiftCreaturePart creaturePart = (RiftCreaturePart) messagePlayer.world.getEntityByID(message.entityId);
+                    if (creaturePart != null) messagePlayer.world.removeEntityDangerously(creaturePart);
+                }
+            }
         }
     }
 }

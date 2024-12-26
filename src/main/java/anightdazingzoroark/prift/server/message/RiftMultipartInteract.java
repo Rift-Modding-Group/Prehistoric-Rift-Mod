@@ -2,16 +2,14 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.DamageSource;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumHand;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftMultipartInteract extends AbstractMessage<RiftMultipartInteract> {
+public class RiftMultipartInteract implements IMessage {
     private int creatureId;
 
     public RiftMultipartInteract() {}
@@ -30,29 +28,23 @@ public class RiftMultipartInteract extends AbstractMessage<RiftMultipartInteract
         buf.writeInt(this.creatureId);
     }
 
-    @Override
-    public void onClientReceived(Minecraft client, RiftMultipartInteract message, EntityPlayer player, MessageContext messageContext) {
-        if (player.world != null) {
-            RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
-            if (creature != null) {
-                double dist = player.getDistance(creature);
-                if (dist < 128) {
-                    creature.processInteract(player, EnumHand.MAIN_HAND);
-                    creature.processInitialInteract(player, EnumHand.MAIN_HAND);
-                }
-            }
+    public static class Handler implements IMessageHandler<RiftMultipartInteract, IMessage> {
+        @Override
+        public IMessage onMessage(RiftMultipartInteract message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
-    }
 
-    @Override
-    public void onServerReceived(MinecraftServer server, RiftMultipartInteract message, EntityPlayer player, MessageContext messageContext) {
-        if (player.world != null) {
-            RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
-            if (creature != null) {
-                double dist = player.getDistance(creature);
-                if (dist < 128) {
-                    creature.processInteract(player, EnumHand.MAIN_HAND);
-                    creature.processInitialInteract(player, EnumHand.MAIN_HAND);
+        private void handle(RiftMultipartInteract message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            if (playerEntity.world != null) {
+                RiftCreature creature = (RiftCreature) playerEntity.world.getEntityByID(message.creatureId);
+                if (creature != null) {
+                    double dist = playerEntity.getDistance(creature);
+                    if (dist < 128) {
+                        creature.processInteract(playerEntity, EnumHand.MAIN_HAND);
+                        creature.processInitialInteract(playerEntity, EnumHand.MAIN_HAND);
+                    }
                 }
             }
         }

@@ -29,6 +29,7 @@ import anightdazingzoroark.prift.server.inventory.CreatureContainer;
 import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
 import anightdazingzoroark.prift.server.inventory.WeaponContainer;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.recipes.RiftRecipes;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntities;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
@@ -78,6 +79,7 @@ public class ServerProxy implements IGuiHandler {
         CapabilityManager.INSTANCE.register(INonPotionEffects.class, new NonPotionEffectsStorage(), NonPotionEffects::new);
         MinecraftForge.EVENT_BUS.register(new CapabilityHandler());
 
+        RiftMessages.registerMessages();
         NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, this);
         RiftFluids.registerFluids();
         RiftBlocks.registerBlocks();

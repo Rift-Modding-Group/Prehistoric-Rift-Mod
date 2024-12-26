@@ -3,15 +3,16 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.util.UUID;
 
-public class RiftTeleportPartyMemToPlayer extends AbstractMessage<RiftTeleportPartyMemToPlayer> {
+public class RiftTeleportPartyMemToPlayer implements IMessage {
     private UUID creatureUUID;
 
     public RiftTeleportPartyMemToPlayer() {}
@@ -33,15 +34,18 @@ public class RiftTeleportPartyMemToPlayer extends AbstractMessage<RiftTeleportPa
         buf.writeLong(this.creatureUUID.getLeastSignificantBits());
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftTeleportPartyMemToPlayer riftTeleportPartyMemToPlayer, EntityPlayer entityPlayer, MessageContext messageContext) {
+    public static class Handler implements IMessageHandler<RiftTeleportPartyMemToPlayer, IMessage> {
+        @Override
+        public IMessage onMessage(RiftTeleportPartyMemToPlayer message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    }
-
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftTeleportPartyMemToPlayer message, EntityPlayer player, MessageContext messageContext) {
-        RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, message.creatureUUID);
-        EntityPlayer owner = (EntityPlayer) partyMember.getOwner();
-        if (owner != null) partyMember.setPosition(owner.posX, owner.posY, owner.posZ);
+        private void handle(RiftTeleportPartyMemToPlayer message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(playerEntity.world, message.creatureUUID);
+            EntityPlayer owner = (EntityPlayer) partyMember.getOwner();
+            if (owner != null) partyMember.setPosition(owner.posX, owner.posY, owner.posZ);
+        }
     }
 }

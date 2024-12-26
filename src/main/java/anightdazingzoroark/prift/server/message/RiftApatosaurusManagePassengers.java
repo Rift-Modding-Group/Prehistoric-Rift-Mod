@@ -2,14 +2,14 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftApatosaurusManagePassengers extends AbstractMessage<RiftApatosaurusManagePassengers> {
+public class RiftApatosaurusManagePassengers implements IMessage {
     private int apatoId;
 
     public RiftApatosaurusManagePassengers() {}
@@ -28,13 +28,18 @@ public class RiftApatosaurusManagePassengers extends AbstractMessage<RiftApatosa
         buf.writeInt(this.apatoId);
     }
 
-    @Override
-    public void onClientReceived(Minecraft client, RiftApatosaurusManagePassengers message, EntityPlayer player, MessageContext messageContext) {}
+    public static class Handler implements IMessageHandler<RiftApatosaurusManagePassengers, IMessage> {
+        @Override
+        public IMessage onMessage(RiftApatosaurusManagePassengers message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer server, RiftApatosaurusManagePassengers message, EntityPlayer player, MessageContext messageContext) {
-        World world = player.world;
-        Apatosaurus apatosaurus = (Apatosaurus) world.getEntityByID(message.apatoId);
-        apatosaurus.addPassengersManual();
+        private void handle(RiftApatosaurusManagePassengers message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            World world = playerEntity.world;
+            Apatosaurus apatosaurus = (Apatosaurus) world.getEntityByID(message.apatoId);
+            apatosaurus.addPassengersManual();
+        }
     }
 }

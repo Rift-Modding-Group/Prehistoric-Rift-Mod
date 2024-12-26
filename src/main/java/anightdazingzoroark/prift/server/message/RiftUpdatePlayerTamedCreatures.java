@@ -3,18 +3,16 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftUpdatePlayerTamedCreatures extends AbstractMessage<RiftUpdatePlayerTamedCreatures> {
+public class RiftUpdatePlayerTamedCreatures implements IMessage {
     private NBTTagCompound nbtTagCompound;
     private int playerId;
 
@@ -37,20 +35,21 @@ public class RiftUpdatePlayerTamedCreatures extends AbstractMessage<RiftUpdatePl
         buf.writeInt(this.playerId);
     }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void onClientReceived(Minecraft minecraft, RiftUpdatePlayerTamedCreatures message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        EntityPlayer player = (EntityPlayer) Minecraft.getMinecraft().world.getEntityByID(message.playerId);
-        if (player != null) {
-            Minecraft.getMinecraft().addScheduledTask(() -> {
-                IPlayerTamedCreatures capability = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                if (capability != null) PlayerTamedCreaturesProvider.readNBT(capability, null, message.nbtTagCompound);
-            });
+    public static class Handler implements IMessageHandler<RiftUpdatePlayerTamedCreatures, IMessage> {
+        @Override
+        public IMessage onMessage(RiftUpdatePlayerTamedCreatures message, MessageContext ctx) {
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
-    }
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftUpdatePlayerTamedCreatures message, EntityPlayer messagePlayer, MessageContext messageContext) {
-
+        private void handle(RiftUpdatePlayerTamedCreatures message, MessageContext ctx) {
+            EntityPlayer player = (EntityPlayer) Minecraft.getMinecraft().world.getEntityByID(message.playerId);
+            if (player != null) {
+                Minecraft.getMinecraft().addScheduledTask(() -> {
+                    IPlayerTamedCreatures capability = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+                    if (capability != null) PlayerTamedCreaturesProvider.readNBT(capability, null, message.nbtTagCompound);
+                });
+            }
+        }
     }
 }

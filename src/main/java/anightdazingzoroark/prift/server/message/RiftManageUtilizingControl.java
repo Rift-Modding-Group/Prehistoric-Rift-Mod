@@ -3,14 +3,14 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftManageUtilizingControl extends AbstractMessage<RiftManageUtilizingControl> {
+public class RiftManageUtilizingControl implements IMessage {
     private int entityId;
     private int control; //0 is left click, 1 is right click, 2 is spacebar, 3 is middle click
     private boolean isUsing;
@@ -41,29 +41,34 @@ public class RiftManageUtilizingControl extends AbstractMessage<RiftManageUtiliz
         buf.writeBoolean(this.isUsing);
     }
 
-    @Override
-    public void onClientReceived(Minecraft client, RiftManageUtilizingControl message, EntityPlayer player, MessageContext messageContext) {}
-
-    @Override
-    public void onServerReceived(MinecraftServer server, RiftManageUtilizingControl message, EntityPlayer player, MessageContext messageContext) {
-        EntityLivingBase entity = (EntityLivingBase) player.world.getEntityByID(message.entityId);
-        if (entity instanceof RiftCreature) {
-            RiftCreature creature = (RiftCreature) entity;
-            switch (message.control) {
-                case 0:
-                    creature.setUsingLeftClick(message.isUsing);
-                    break;
-                case 1:
-                    creature.setUsingRightClick(message.isUsing);
-                    break;
-                case 2:
-                    creature.setUsingSpacebar(message.isUsing);
-                    break;
-            }
+    public static class Handler implements IMessageHandler<RiftManageUtilizingControl, IMessage> {
+        @Override
+        public IMessage onMessage(RiftManageUtilizingControl message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
-        else if (entity instanceof RiftLargeWeapon) {
-            RiftLargeWeapon weapon = (RiftLargeWeapon) entity;
-            weapon.setUsingLeftClick(message.isUsing);
+
+        private void handle(RiftManageUtilizingControl message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            EntityLivingBase entity = (EntityLivingBase) playerEntity.world.getEntityByID(message.entityId);
+            if (entity instanceof RiftCreature) {
+                RiftCreature creature = (RiftCreature) entity;
+                switch (message.control) {
+                    case 0:
+                        creature.setUsingLeftClick(message.isUsing);
+                        break;
+                    case 1:
+                        creature.setUsingRightClick(message.isUsing);
+                        break;
+                    case 2:
+                        creature.setUsingSpacebar(message.isUsing);
+                        break;
+                }
+            }
+            else if (entity instanceof RiftLargeWeapon) {
+                RiftLargeWeapon weapon = (RiftLargeWeapon) entity;
+                weapon.setUsingLeftClick(message.isUsing);
+            }
         }
     }
 }

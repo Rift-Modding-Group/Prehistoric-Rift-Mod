@@ -3,14 +3,14 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftSetGrabTarget extends AbstractMessage<RiftSetGrabTarget> {
+public class RiftSetGrabTarget implements IMessage {
     private int grabberId;
     private int targetId;
 
@@ -33,18 +33,23 @@ public class RiftSetGrabTarget extends AbstractMessage<RiftSetGrabTarget> {
         buf.writeInt(this.targetId);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftSetGrabTarget message, EntityPlayer entityPlayer, MessageContext messageContext) {}
-
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftSetGrabTarget message, EntityPlayer entityPlayer, MessageContext messageContext) {
-        RiftCreature creature = (RiftCreature) entityPlayer.world.getEntityByID(message.grabberId);
-        IGrabber grabber = (IGrabber) creature;
-
-        if (message.targetId != -1) {
-            EntityLivingBase target = (EntityLivingBase) entityPlayer.world.getEntityByID(message.targetId);
-            grabber.setGrabVictim(target);
+    public static class Handler implements IMessageHandler<RiftSetGrabTarget, IMessage> {
+        @Override
+        public IMessage onMessage(RiftSetGrabTarget message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
-        else grabber.setGrabVictim(null);
+
+        private void handle(RiftSetGrabTarget message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            RiftCreature creature = (RiftCreature) playerEntity.world.getEntityByID(message.grabberId);
+            IGrabber grabber = (IGrabber) creature;
+
+            if (message.targetId != -1) {
+                EntityLivingBase target = (EntityLivingBase) playerEntity.world.getEntityByID(message.targetId);
+                grabber.setGrabVictim(target);
+            }
+            else grabber.setGrabVictim(null);
+        }
     }
 }

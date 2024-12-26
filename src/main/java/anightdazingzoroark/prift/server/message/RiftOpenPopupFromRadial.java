@@ -4,14 +4,14 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftOpenPopupFromRadial extends AbstractMessage<RiftOpenPopupFromRadial> {
+public class RiftOpenPopupFromRadial implements IMessage {
     private int creatureId;
 
     public RiftOpenPopupFromRadial() {}
@@ -30,12 +30,17 @@ public class RiftOpenPopupFromRadial extends AbstractMessage<RiftOpenPopupFromRa
         buf.writeInt(this.creatureId);
     }
 
-    @Override
-    public void onClientReceived(Minecraft client, RiftOpenPopupFromRadial message, EntityPlayer player, MessageContext messageContext) {}
+    public static class Handler implements IMessageHandler<RiftOpenPopupFromRadial, IMessage> {
+        @Override
+        public IMessage onMessage(RiftOpenPopupFromRadial message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer server, RiftOpenPopupFromRadial message, EntityPlayer player, MessageContext messageContext) {
-        World world = player.world;
-        player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_RADIAL, world, message.creatureId, 0, 0);
+        private void handle(RiftOpenPopupFromRadial message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            World world = playerEntity.world;
+            playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_RADIAL, world, message.creatureId, 0, 0);
+        }
     }
 }

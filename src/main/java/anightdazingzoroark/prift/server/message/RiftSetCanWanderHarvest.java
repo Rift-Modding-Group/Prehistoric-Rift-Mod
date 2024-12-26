@@ -3,14 +3,15 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftSetCanWanderHarvest extends AbstractMessage<RiftSetCanWanderHarvest> {
+public class RiftSetCanWanderHarvest implements IMessage {
     private int creatureId;
     private boolean value;
 
@@ -33,17 +34,20 @@ public class RiftSetCanWanderHarvest extends AbstractMessage<RiftSetCanWanderHar
         buf.writeBoolean(this.value);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftSetCanWanderHarvest message, EntityPlayer entityPlayer, MessageContext messageContext) {
+    public static class Handler implements IMessageHandler<RiftSetCanWanderHarvest, IMessage> {
+        @Override
+        public IMessage onMessage(RiftSetCanWanderHarvest message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    }
-
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftSetCanWanderHarvest message, EntityPlayer entityPlayer, MessageContext messageContext) {
-        RiftCreature creature = (RiftCreature)entityPlayer.world.getEntityByID(message.creatureId);
-        IHarvestWhenWandering harvestWanderer = (IHarvestWhenWandering) creature;
-        harvestWanderer.setCanHarvest(message.value);
-        String messageToSend = message.value ? "action.creature_start_harvesting" : "action.creature_stop_harvesting";
-        ((EntityPlayer) creature.getOwner()).sendStatusMessage(new TextComponentTranslation(messageToSend), false);
+        private void handle(RiftSetCanWanderHarvest message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            RiftCreature creature = (RiftCreature)playerEntity.world.getEntityByID(message.creatureId);
+            IHarvestWhenWandering harvestWanderer = (IHarvestWhenWandering) creature;
+            harvestWanderer.setCanHarvest(message.value);
+            String messageToSend = message.value ? "action.creature_start_harvesting" : "action.creature_stop_harvesting";
+            ((EntityPlayer) creature.getOwner()).sendStatusMessage(new TextComponentTranslation(messageToSend), false);
+        }
     }
 }

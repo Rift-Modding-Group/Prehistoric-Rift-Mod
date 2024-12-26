@@ -3,14 +3,16 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftSetBleeding extends AbstractMessage<RiftSetBleeding> {
+public class RiftSetBleeding implements IMessage {
     private int entityId;
     private int strength;
     private int ticks;
@@ -37,15 +39,25 @@ public class RiftSetBleeding extends AbstractMessage<RiftSetBleeding> {
         buf.writeInt(this.ticks);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftSetBleeding message, EntityPlayer player, MessageContext messageContext) {
-        INonPotionEffects nonPotionEffects = player.world.getEntityByID(message.entityId).getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-        nonPotionEffects.setBleeding(message.strength, message.ticks);
-    }
+    public static class Handler implements IMessageHandler<RiftSetBleeding, IMessage> {
+        @Override
+        public IMessage onMessage(RiftSetBleeding message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftSetBleeding message, EntityPlayer player, MessageContext messageContext) {
-        INonPotionEffects nonPotionEffects = player.world.getEntityByID(message.entityId).getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-        nonPotionEffects.setBleeding(message.strength, message.ticks);
+        private void handle(RiftSetBleeding message, MessageContext ctx) {
+            if (ctx.side == Side.SERVER) {
+                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+                INonPotionEffects nonPotionEffects = messagePlayer.world.getEntityByID(message.entityId).getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+                nonPotionEffects.setBleeding(message.strength, message.ticks);
+            }
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+                INonPotionEffects nonPotionEffects = messagePlayer.world.getEntityByID(message.entityId).getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+                nonPotionEffects.setBleeding(message.strength, message.ticks);
+            }
+        }
     }
 }

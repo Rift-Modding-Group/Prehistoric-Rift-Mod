@@ -2,13 +2,13 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftForceChangePos extends AbstractMessage<RiftForceChangePos> {
+public class RiftForceChangePos implements IMessage {
     private int creatureId;
     private double x;
     private double y;
@@ -39,14 +39,17 @@ public class RiftForceChangePos extends AbstractMessage<RiftForceChangePos> {
         buf.writeDouble(this.z);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftForceChangePos message, EntityPlayer player, MessageContext messageContext) {
+    public static class Handler implements IMessageHandler<RiftForceChangePos, IMessage> {
+        @Override
+        public IMessage onMessage(RiftForceChangePos message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    }
-
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftForceChangePos message, EntityPlayer player, MessageContext messageContext) {
-        RiftCreature creature = (RiftCreature)player.world.getEntityByID(message.creatureId);
-        creature.setPosition(message.x, message.y, message.z);
+        private void handle(RiftForceChangePos message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            RiftCreature creature = (RiftCreature)playerEntity.world.getEntityByID(message.creatureId);
+            creature.setPosition(message.x, message.y, message.z);
+        }
     }
 }

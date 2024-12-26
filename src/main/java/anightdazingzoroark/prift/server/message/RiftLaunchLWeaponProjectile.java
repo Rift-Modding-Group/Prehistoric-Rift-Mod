@@ -1,15 +1,14 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftLaunchLWeaponProjectile extends AbstractMessage<RiftLaunchLWeaponProjectile> {
+public class RiftLaunchLWeaponProjectile implements IMessage {
     private int weaponId;
     private int charge;
 
@@ -36,12 +35,17 @@ public class RiftLaunchLWeaponProjectile extends AbstractMessage<RiftLaunchLWeap
         buf.writeInt(this.charge);
     }
 
-    @Override
-    public void onClientReceived(Minecraft client, RiftLaunchLWeaponProjectile message, EntityPlayer player, MessageContext messageContext) {}
+    public static class Handler implements IMessageHandler<RiftLaunchLWeaponProjectile, IMessage> {
+        @Override
+        public IMessage onMessage(RiftLaunchLWeaponProjectile message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer server, RiftLaunchLWeaponProjectile message, EntityPlayer player, MessageContext messageContext) {
-        RiftLargeWeapon weapon = (RiftLargeWeapon)player.world.getEntityByID(message.weaponId);
-        weapon.launchProjectile(player, Math.min(message.charge, 100));
+        private void handle(RiftLaunchLWeaponProjectile message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            RiftLargeWeapon weapon = (RiftLargeWeapon)playerEntity.world.getEntityByID(message.weaponId);
+            weapon.launchProjectile(playerEntity, Math.min(message.charge, 100));
+        }
     }
 }

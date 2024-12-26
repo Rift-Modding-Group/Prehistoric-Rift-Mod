@@ -4,14 +4,14 @@ import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftSetWorkstation extends AbstractMessage<RiftSetWorkstation> {
+public class RiftSetWorkstation implements IMessage {
     private int creatureId;
     private boolean startUse;
 
@@ -34,20 +34,25 @@ public class RiftSetWorkstation extends AbstractMessage<RiftSetWorkstation> {
         buf.writeBoolean(this.startUse);
     }
 
-    @Override
-    public void onClientReceived(Minecraft client, RiftSetWorkstation message, EntityPlayer player, MessageContext messageContext) {}
+    public static class Handler implements IMessageHandler<RiftSetWorkstation, IMessage> {
+        @Override
+        public IMessage onMessage(RiftSetWorkstation message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
+        }
 
-    @Override
-    public void onServerReceived(MinecraftServer server, RiftSetWorkstation message, EntityPlayer player, MessageContext messageContext) {
-        RiftCreature creature = (RiftCreature) player.world.getEntityByID(message.creatureId);
-        if (creature.getOwner().equals(player)) {
-            if (message.startUse) {
-                creature.setSitting(false);
-                ClientProxy.settingCreatureWorkstation = true;
-                ClientProxy.creatureIdForWorkstation = message.creatureId;
-                player.sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_start"), false);
+        private void handle(RiftSetWorkstation message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+            RiftCreature creature = (RiftCreature) playerEntity.world.getEntityByID(message.creatureId);
+            if (creature.getOwner().equals(playerEntity)) {
+                if (message.startUse) {
+                    creature.setSitting(false);
+                    ClientProxy.settingCreatureWorkstation = true;
+                    ClientProxy.creatureIdForWorkstation = message.creatureId;
+                    playerEntity.sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_start"), false);
+                }
+                else ((IWorkstationUser) creature).clearWorkstation(false);
             }
-            else ((IWorkstationUser) creature).clearWorkstation(false);
         }
     }
 }

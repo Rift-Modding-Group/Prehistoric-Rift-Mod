@@ -6,19 +6,18 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.ilexiconn.llibrary.server.network.AbstractMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-import java.util.UUID;
-
-public class RiftDropPartyMemberInventory extends AbstractMessage<RiftDropPartyMemberInventory> {
+public class RiftDropPartyMemberInventory implements IMessage {
     private int partyPos;
 
     public RiftDropPartyMemberInventory() {}
@@ -37,36 +36,40 @@ public class RiftDropPartyMemberInventory extends AbstractMessage<RiftDropPartyM
         buf.writeInt(this.partyPos);
     }
 
-    @Override
-    public void onClientReceived(Minecraft minecraft, RiftDropPartyMemberInventory message, EntityPlayer player, MessageContext messageContext) {
-
-    }
-
-    @Override
-    public void onServerReceived(MinecraftServer minecraftServer, RiftDropPartyMemberInventory message, EntityPlayer player, MessageContext messageContext) {
-        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-        NBTTagCompound partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.partyPos);
-        NBTTagList nbtItemList = partyMemNBT.getTagList("Items", 10);
-        boolean canBeSaddled = RiftCreatureType.values()[partyMemNBT.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).canBeSaddled();
-
-        for (int x = 0; x < nbtItemList.tagCount(); x++) {
-            //get the real creature first to make the item spawn in its location
-            //otherwise it spawns at the owners location
-            RiftCreature realCreature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, partyMemNBT.getUniqueId("UniqueID"));
-            int itemPosX = realCreature == null ? (int)player.posX : realCreature.getPosition().getX();
-            int itemPosY = realCreature == null ? (int)player.posY : realCreature.getPosition().getY();
-            int itemPosZ = realCreature == null ? (int)player.posZ : realCreature.getPosition().getZ();
-
-            NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
-            int j = nbttagcompound.getByte("Slot") & 255;
-            if ((canBeSaddled && j != 0) || !canBeSaddled) {
-                EntityItem entityItem = new EntityItem(player.world, itemPosX, itemPosY, itemPosZ);
-                entityItem.setItem(new ItemStack(nbttagcompound));
-                player.world.spawnEntity(entityItem);
-            }
+    public static class Handler implements IMessageHandler<RiftDropPartyMemberInventory, IMessage> {
+        @Override
+        public IMessage onMessage(RiftDropPartyMemberInventory message, MessageContext ctx) {
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            return null;
         }
 
-        playerTamedCreatures.removePartyCreatureInventory(message.partyPos);
+        private void handle(RiftDropPartyMemberInventory message, MessageContext ctx) {
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+
+            IPlayerTamedCreatures playerTamedCreatures = playerEntity.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+
+            NBTTagCompound partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.partyPos);
+            NBTTagList nbtItemList = partyMemNBT.getTagList("Items", 10);
+            boolean canBeSaddled = RiftCreatureType.values()[partyMemNBT.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).canBeSaddled();
+
+            for (int x = 0; x < nbtItemList.tagCount(); x++) {
+                //get the real creature first to make the item spawn in its location
+                //otherwise it spawns at the owners location
+                RiftCreature realCreature = (RiftCreature) RiftUtil.getEntityFromUUID(playerEntity.world, partyMemNBT.getUniqueId("UniqueID"));
+                int itemPosX = realCreature == null ? (int)playerEntity.posX : realCreature.getPosition().getX();
+                int itemPosY = realCreature == null ? (int)playerEntity.posY : realCreature.getPosition().getY();
+                int itemPosZ = realCreature == null ? (int)playerEntity.posZ : realCreature.getPosition().getZ();
+
+                NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
+                int j = nbttagcompound.getByte("Slot") & 255;
+                if ((canBeSaddled && j != 0) || !canBeSaddled) {
+                    EntityItem entityItem = new EntityItem(playerEntity.world, itemPosX, itemPosY, itemPosZ);
+                    entityItem.setItem(new ItemStack(nbttagcompound));
+                    playerEntity.world.spawnEntity(entityItem);
+                }
+            }
+
+            playerTamedCreatures.removePartyCreatureInventory(message.partyPos);
+        }
     }
 }
