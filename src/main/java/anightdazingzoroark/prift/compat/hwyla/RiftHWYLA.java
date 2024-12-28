@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.hwyla.provider.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import mcp.mobius.waila.api.IWailaPlugin;
 import mcp.mobius.waila.api.IWailaRegistrar;
@@ -13,6 +14,9 @@ import mcp.mobius.waila.api.WailaPlugin;
 public class RiftHWYLA implements IWailaPlugin {
     @Override
     public void register(IWailaRegistrar registrar) {
+        RiftCreatureProvider creatureProvider = new RiftCreatureProvider();
+        registrar.registerBodyProvider(creatureProvider, RiftCreature.class);
+
         RiftCreaturePartProvider creaturePartProvider = new RiftCreaturePartProvider();
         registrar.registerHeadProvider(creaturePartProvider, RiftCreaturePart.class);
         registrar.registerBodyProvider(creaturePartProvider, RiftCreaturePart.class);

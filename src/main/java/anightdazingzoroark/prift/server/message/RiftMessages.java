@@ -105,5 +105,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftForceSyncPartyLastOpenedTime.Handler.class, RiftForceSyncPartyLastOpenedTime.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftForceSyncBoxLastOpenedTime.Handler.class, RiftForceSyncBoxLastOpenedTime.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncBoxLastOpenedTime.Handler.class, RiftForceSyncBoxLastOpenedTime.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftAddToBox.Handler.class, RiftAddToBox.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftAddToBox.Handler.class, RiftAddToBox.class, id++, Side.CLIENT);
     }
 }

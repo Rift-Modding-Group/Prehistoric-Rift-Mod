@@ -30,10 +30,18 @@ public class RiftCreaturePartProvider implements IWailaEntityProvider {
     @Override
     public List<String> getWailaBody(Entity entity, List<String> currenttip, IWailaEntityAccessor accessor, IWailaConfigHandler config) {
         RiftCreaturePart part = (RiftCreaturePart) entity;
-        if (part != null && config.getConfig("general.showhp")) {
-            int currentHealth = (int)part.getParent().getHealth();
-            int maxHealth = (int)part.getParent().getMaxHealth();
-            currenttip.add(I18n.format("hwyla.health", currentHealth, maxHealth));
+        if (part != null) {
+            //show owner
+            if (part.getParent().isTamed()) currenttip.add(I18n.format("hwyla.owner", part.getParent().getOwner().getName()));
+            else currenttip.add(I18n.format("hwyla.wild"));
+
+            //show health and energy
+            if (config.getConfig("general.showhp")) {
+                int currentHealth = (int)Math.ceil(part.getParent().getHealth());
+                int maxHealth = (int)part.getParent().getMaxHealth();
+                currenttip.add(I18n.format("hwyla.health", currentHealth, maxHealth));
+                if (part.getParent().isTamed()) currenttip.add(I18n.format("hwyla.energy", part.getParent().getEnergy(), 20));
+            }
         }
         return currenttip;
     }
