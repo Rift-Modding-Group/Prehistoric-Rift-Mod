@@ -53,7 +53,6 @@ public class RiftModifyPlayerCreature implements IMessage {
         @Override
         public IMessage onMessage(RiftModifyPlayerCreature message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 

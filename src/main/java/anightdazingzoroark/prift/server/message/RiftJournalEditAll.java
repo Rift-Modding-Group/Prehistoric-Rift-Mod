@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -29,23 +30,10 @@ public class RiftJournalEditAll implements IMessage {
         buf.writeBoolean(this.add);
     }
 
-    public void onClientReceived(Minecraft minecraft, RiftJournalEditAll message, EntityPlayer player, MessageContext messageContext) {
-        IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-        if (message.add) {
-            for (RiftCreatureType creatureType : RiftCreatureType.values()) {
-                if (!journalProgress.getUnlockedCreatures().contains(creatureType)) {
-                    journalProgress.unlockCreature(creatureType);
-                }
-            }
-        }
-        else journalProgress.resetEntries();
-    }
-
-
     public static class Handler implements IMessageHandler<RiftJournalEditAll, IMessage> {
         @Override
         public IMessage onMessage(RiftJournalEditAll message, MessageContext ctx) {
-            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 

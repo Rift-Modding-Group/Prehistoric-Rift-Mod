@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -39,7 +40,7 @@ public class RiftOpenCreatureBoxNoCreaturesMenu implements IMessage {
     public static class Handler implements IMessageHandler<RiftOpenCreatureBoxNoCreaturesMenu, IMessage> {
         @Override
         public IMessage onMessage(RiftOpenCreatureBoxNoCreaturesMenu message, MessageContext ctx) {
-            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 

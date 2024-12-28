@@ -39,7 +39,6 @@ public class RiftSetCaptured implements IMessage {
         @Override
         public IMessage onMessage(RiftSetCaptured message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 

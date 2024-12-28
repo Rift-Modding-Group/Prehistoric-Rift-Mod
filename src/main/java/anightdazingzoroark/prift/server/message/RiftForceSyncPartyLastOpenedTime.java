@@ -42,7 +42,6 @@ public class RiftForceSyncPartyLastOpenedTime implements IMessage {
         @Override
         public IMessage onMessage(RiftForceSyncPartyLastOpenedTime message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 

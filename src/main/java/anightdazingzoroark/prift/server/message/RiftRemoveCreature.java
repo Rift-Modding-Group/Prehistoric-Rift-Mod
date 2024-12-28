@@ -39,7 +39,6 @@ public class RiftRemoveCreature implements IMessage {
         @Override
         public IMessage onMessage(RiftRemoveCreature message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 

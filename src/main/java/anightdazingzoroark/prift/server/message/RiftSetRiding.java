@@ -40,7 +40,6 @@ public class RiftSetRiding implements IMessage {
         @Override
         public IMessage onMessage(RiftSetRiding message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 

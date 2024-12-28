@@ -42,7 +42,6 @@ public class RiftForceSyncPartySizeLevel implements IMessage {
         @Override
         public IMessage onMessage(RiftForceSyncPartySizeLevel message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
