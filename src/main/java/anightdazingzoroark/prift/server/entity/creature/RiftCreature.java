@@ -305,9 +305,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else this.healthRegen = 0;
                 }
                 this.manageXPAndLevel();
+                if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE && !this.creatureBoxWithinReach()) {
+                    BlockPos teleportPos = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.getHomePos(), this.world, this);
+                    if (teleportPos != null) this.setPosition(teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
+                }
             }
         }
-        //if (this.isTamed() && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.updateCreatureBoxDeployedList();
         if (this.world.isRemote) this.setControls();
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
@@ -382,16 +385,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         this.setMiddleClickUse(0);
                     }
                 }
-            }
-        }
-    }
-
-    public void updateCreatureBoxDeployedList() {
-        if (this.getHomePos() != null) {
-            TileEntity tileEntity = this.world.getTileEntity(this.getHomePos());
-            if (tileEntity instanceof RiftTileEntityCreatureBox) {
-                RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) tileEntity;
-                creatureBox.updateCreature(this);
             }
         }
     }
@@ -1474,6 +1467,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean isInCave() {
         BlockPos pos = new BlockPos(this);
         return !this.world.canSeeSky(pos.up()) && pos.getY() <= 56;
+    }
+
+    public boolean creatureBoxWithinReach() {
+        if (this.getHomePos() == null) return false;
+
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.world.getTileEntity(this.getHomePos());
+
+        if (creatureBox == null) return false;
+
+        int dist = creatureBox.getWanderRange();
+        return creatureBox.getDistanceSq(this.posX, this.posY, this.posZ) <= dist * dist;
     }
 
     public boolean canNaturalRegen() {

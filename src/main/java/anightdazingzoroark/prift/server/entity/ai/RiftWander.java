@@ -1,14 +1,12 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.RandomPositionGenerator;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nullable;
@@ -31,6 +29,7 @@ public class RiftWander extends EntityAIWander {
         else if (this.creature.isTamed()) {
             if (this.creature instanceof RiftWaterCreature) {
                 if (this.creature.getEnergy() > 6
+                        && this.creature.creatureBoxWithinReach()
                         && !this.creature.isSitting()
                         && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                         && !this.creature.busyAtWork()
@@ -40,6 +39,7 @@ public class RiftWander extends EntityAIWander {
             }
             else {
                 if (this.creature.getEnergy() > 6
+                        && this.creature.creatureBoxWithinReach()
                         && !this.creature.isSitting()
                         && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                         && !this.creature.busyAtWork()
@@ -68,7 +68,7 @@ public class RiftWander extends EntityAIWander {
         boolean isNotInWater = this.creature instanceof RiftWaterCreature ? !this.creature.isInWater() : true;
         boolean hasNoHerdLeader = this.creature instanceof IHerder ? !((IHerder)this.creature).hasHerdLeader() : true;
 
-        return this.creature.getEnergy() > 6 && hasNoHerdLeader && isNotInWater && !this.creature.busyAtWork() && super.shouldContinueExecuting();
+        return this.creature.getEnergy() > 6 && this.creature.creatureBoxWithinReach() && hasNoHerdLeader && isNotInWater && !this.creature.busyAtWork() && super.shouldContinueExecuting();
     }
 
     @Nullable
@@ -77,18 +77,18 @@ public class RiftWander extends EntityAIWander {
         Vec3d pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
 
         //change wandering position around creature box
-        if (this.creature.isTamed()) {
+        if (this.creature.isTamed() && this.creature.creatureBoxWithinReach()) {
             for (int i = 0; i < 10; i++) {
-                if (this.withinHomeDistance(pos)) break;
+                if (this.vectorWithinHomeDistance(pos)) break;
                 else pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
             }
-            if (!this.withinHomeDistance(pos)) pos = this.getPosition();
+            if (!this.vectorWithinHomeDistance(pos)) pos = this.getPosition();
         }
 
         return pos;
     }
 
-    private boolean withinHomeDistance(Vec3d pos) {
+    private boolean vectorWithinHomeDistance(Vec3d pos) {
         if (pos == null || this.creature.getHomePos() == null) return false;
 
         RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.creature.world.getTileEntity(this.creature.getHomePos());

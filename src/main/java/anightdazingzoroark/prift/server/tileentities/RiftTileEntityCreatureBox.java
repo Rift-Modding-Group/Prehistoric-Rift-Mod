@@ -65,53 +65,11 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
             if (creature == null || this.creatureExistsInWorld(creature) || !creature.isEntityAlive()) continue;
 
             //generate a spawn point for creature
-            for (int i = 0; i < 10; i++) {
-                int xSpawnPos = RiftUtil.randomInRange(this.getPos().getX() - 16, this.getPos().getX() + 16);
-                int ySpawnPos = RiftUtil.randomInRange(this.getPos().getY() - 8, this.getPos().getY() + 8);
-                int zSpawnPos = RiftUtil.randomInRange(this.getPos().getZ() - 16, this.getPos().getZ() + 16);
-                BlockPos pos = new BlockPos(xSpawnPos, ySpawnPos, zSpawnPos);
-                IBlockState downState = this.world.getBlockState(pos.down());
-
-                if (creature instanceof RiftWaterCreature) {
-                    RiftWaterCreature waterCreature = (RiftWaterCreature) creature;
-                    //spawn amphibious creatures
-                    if (waterCreature.isAmphibious()) {
-                        if ((this.canFitInArea(creature, pos) && downState.getMaterial() != Material.AIR) || this.entireAreaWater(creature, pos)) {
-                            creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
-                            creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
-                            this.world.spawnEntity(creature);
-                            break;
-                        }
-                    }
-                    //spawn aquatic creatures
-                    else {
-                        if (this.entireAreaWater(creature, pos)) {
-                            creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
-                            creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
-                            this.world.spawnEntity(creature);
-                            break;
-                        }
-                    }
-                }
-                else {
-                    //spawn regular land creatures
-                    if (this.canFitInArea(creature, pos) && downState.getMaterial() != Material.AIR) {
-                        creature.setPosition(xSpawnPos, ySpawnPos, zSpawnPos);
-                        creature.setHomePos(this.getPos().getX(), this.getPos().getY(), this.getPos().getZ());
-                        this.world.spawnEntity(creature);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    public void updateCreature(RiftCreature creature) {
-        for (NBTTagCompound partyMemCompound : this.creatureListNBT) {
-            if (partyMemCompound.getUniqueId("UniqueID") != null && partyMemCompound.getUniqueId("UniqueID").equals(creature.getUniqueID())) {
-                NBTTagCompound partyMemCompoundUpdt = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
-
-                if (this.creatureListNBT.contains(partyMemCompound)) this.replaceInCreatureList(this.creatureListNBT.indexOf(partyMemCompound), partyMemCompoundUpdt);
+            BlockPos spawnPoint = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.pos, this.world, creature);
+            if (spawnPoint != null) {
+                creature.setPosition(spawnPoint.getX(), spawnPoint.getY(), spawnPoint.getZ());
+                creature.setHomePos(this.pos.getX(), this.pos.getY(), this.pos.getZ());
+                this.world.spawnEntity(creature);
             }
         }
     }
