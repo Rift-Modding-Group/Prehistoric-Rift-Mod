@@ -305,7 +305,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else this.healthRegen = 0;
                 }
                 this.manageXPAndLevel();
-                if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE && !this.creatureBoxWithinReach()) {
+                if (!this.hasTarget() && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE && !this.creatureBoxWithinReach()) {
                     BlockPos teleportPos = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.getHomePos(), this.world, this);
                     if (teleportPos != null) this.setPosition(teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
                 }

@@ -187,14 +187,26 @@ public class ServerEvents {
                 if (canUseFlag) {
                     if (workstationUser.isWorkstation(event.getPos())) {
                         event.setCanceled(true);
-                        if (iblockstate.getBlock() instanceof BlockSemiManualBaseTop) {
-                            ((IWorkstationUser)creature).setUseWorkstation(event.getPos().getX(), event.getPos().down().getY(), event.getPos().getZ());
+
+                        //calculate distance of workstation from creature box
+                        boolean nearHomePos = false;
+                        if (creature.getHomePos() != null && event.getWorld().getTileEntity(creature.getHomePos()) instanceof RiftTileEntityCreatureBox) {
+                            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) event.getWorld().getTileEntity(creature.getHomePos());
+                            int dist = creatureBox.getWanderRange();
+                            nearHomePos = event.getPos().distanceSq(creature.getHomePos().getX(), creature.getHomePos().getY(), creature.getHomePos().getZ()) < dist * dist;
                         }
-                        else {
-                            ((IWorkstationUser)creature).setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
+
+                        if (nearHomePos) {
+                            if (iblockstate.getBlock() instanceof BlockSemiManualBaseTop) {
+                                ((IWorkstationUser)creature).setUseWorkstation(event.getPos().getX(), event.getPos().down().getY(), event.getPos().getZ());
+                            }
+                            else {
+                                ((IWorkstationUser)creature).setUseWorkstation(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
+                            }
+                            creature.setSitting(false);
+                            event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_success"), false);
                         }
-                        creature.setSitting(false);
-                        event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_success"), false);
+                        else event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_too_far"), false);
                     }
                     else event.getEntityPlayer().sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_fail"), false);
                 }
