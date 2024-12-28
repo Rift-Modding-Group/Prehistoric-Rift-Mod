@@ -180,7 +180,6 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(partyButton.id), true));
                                 RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(partyButton.id), true));
 
-                                RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP, this.mc.player, this.boxPosToMove, partyButton.id));
                                 PlayerTamedCreaturesHelper.boxPartySwap(this.mc.player, this.boxPosToMove, partyButton.id);
 
                                 this.partyPosSelected = partyButton.id;
@@ -518,7 +517,6 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                     }
                     //box deployed swap
                     else if (boxDeployedButton.id < this.getCreatureBoxDeployedCreatures().size()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftChangeBoxDeployedOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_BOX_DEPLOYED, this.mc.player, this.creatureBoxPos, this.boxDeployedPosToMove, boxDeployedButton.id));
                         this.playerTamedCreatures().rearrangeDeployedBoxCreatures(this.mc.player.world, this.creatureBoxPos, this.boxDeployedPosToMove, boxDeployedButton.id);
 
                         this.partyPosSelected = -1;
