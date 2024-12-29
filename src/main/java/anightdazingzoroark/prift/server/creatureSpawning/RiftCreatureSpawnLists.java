@@ -122,8 +122,6 @@ public class RiftCreatureSpawnLists {
         public BiomeSpawner changeSpawnerBasedOnPos(World world, BlockPos pos) {
             List<Spawner> tempSpawnerList = this.spawnerList;
 
-            //System.out.println("before: "+tempSpawnerList);
-
             //change spawnerList based on whether or not a creature can spawn in at a certain place
             //based on whether it can spawn on land, air, or in water
             tempSpawnerList = tempSpawnerList.stream().filter(
@@ -175,8 +173,6 @@ public class RiftCreatureSpawnLists {
             tempSpawnerList = tempSpawnerList.stream().filter(
                     spawner -> !spawner.getMustSpawnInRain() || world.isRaining()
             ).collect(Collectors.toList());
-
-            //System.out.println("after: "+tempSpawnerList);
 
             return new BiomeSpawner(this.biome, tempSpawnerList);
         }

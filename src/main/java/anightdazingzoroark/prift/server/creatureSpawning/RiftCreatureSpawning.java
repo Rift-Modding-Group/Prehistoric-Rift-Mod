@@ -10,6 +10,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -25,10 +26,14 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Mod.EventBusSubscriber
 public class RiftCreatureSpawning {
+    private static final ExecutorService chunkLoadExecutor = Executors.newSingleThreadExecutor();
+
+    //spawn creatures while player is in loaded chunks
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onWorldTick(TickEvent.WorldTickEvent event) {
         if (event.world.isRemote) return;
@@ -38,53 +43,72 @@ public class RiftCreatureSpawning {
         if (!world.getGameRules().getBoolean("doMobSpawning")) return;
 
         if (event.phase == TickEvent.Phase.END && world.getTotalWorldTime() % (long)GeneralConfig.spawnInterval == 0) {
-            List<BlockPos> spawnPositions = new ArrayList<>();
-            ChunkProviderServer chunkProvider = world.getChunkProvider();
+            ExecutorService executor = Executors.newSingleThreadExecutor();
 
-            //add positions
-            for (Map.Entry<Long, Chunk> entry : chunkProvider.loadedChunks.entrySet()) {
-                for (int x = 0; x < 10; x++) {
-                    Chunk chunk = entry.getValue();
-                    spawnPositions.add(this.getRandomChunkPosition(world, chunk.x, chunk.z));
+            executor.submit(() -> {
+                try {
+                    List<BlockPos> spawnPositions = new ArrayList<>();
+                    ChunkProviderServer chunkProvider = world.getChunkProvider();
+
+                    //add positions
+                    for (Map.Entry<Long, Chunk> entry : chunkProvider.loadedChunks.entrySet()) {
+                        for (int x = 0; x < 10; x++) {
+                            Chunk chunk = entry.getValue();
+                            spawnPositions.add(this.getRandomChunkPosition(world, chunk.x, chunk.z));
+                        }
+                    }
+
+                    //remove positions too close to players
+                    List<BlockPos> playerPositions = new ArrayList<>();
+                    for (EntityPlayer player : world.playerEntities) playerPositions.add(player.getPosition());
+
+                    Iterator<BlockPos> iterator = spawnPositions.iterator();
+                    while (iterator.hasNext()) {
+                        BlockPos pos = iterator.next();
+                        boolean tooClose = playerPositions.stream().anyMatch(refPos -> {
+                            double minDist = GeneralConfig.spawnAroundPlayerRad;
+                            double maxDistance = Minecraft.getMinecraft().gameSettings.renderDistanceChunks * 16;
+                            return pos.distanceSq(refPos) <= Math.pow(minDist, 2) || pos.distanceSq(refPos) >= Math.pow(maxDistance, 2);
+                        });
+                        if (tooClose) iterator.remove();
+                    }
+
+                    //first get list of biomes of all loaded chunks
+                    List<Biome> biomeList = new ArrayList<>();
+                    for (BlockPos pos : spawnPositions) {
+                        Biome biome = world.getBiome(pos);
+                        if (!biomeList.contains(biome)) biomeList.add(biome);
+                    }
+                    //generate
+                    List<RiftCreatureSpawnLists.BiomeSpawner> landBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "LAND");
+                    List<RiftCreatureSpawnLists.BiomeSpawner> waterBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "WATER");
+                    List<RiftCreatureSpawnLists.BiomeSpawner> airBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "AIR");
+                    List<RiftCreatureSpawnLists.BiomeSpawner> caveBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "CAVE");
+
+                    //finally spawn the creatures based on spawnPositions and biomeSpawnerList
+                    /*
+                    if (this.spawnFromBiomeSpawnerLists(world, landBiomeSpawnerList, spawnPositions) ||
+                            this.spawnFromBiomeSpawnerLists(world, waterBiomeSpawnerList, spawnPositions) ||
+                            this.spawnFromBiomeSpawnerLists(world, airBiomeSpawnerList, spawnPositions) ||
+                            this.spawnFromBiomeSpawnerLists(world, caveBiomeSpawnerList, spawnPositions)
+                    ) RiftInitialize.logger.info("Creatures successfully spawned in");
+                    */
+                    this.spawnEntityOnMainThread(world, landBiomeSpawnerList, spawnPositions);
+                    this.spawnEntityOnMainThread(world, waterBiomeSpawnerList, spawnPositions);
+                    this.spawnEntityOnMainThread(world, airBiomeSpawnerList, spawnPositions);
+                    this.spawnEntityOnMainThread(world, caveBiomeSpawnerList, spawnPositions);
                 }
-            }
-
-            //remove positions too close to players
-            List<BlockPos> playerPositions = new ArrayList<>();
-            for (EntityPlayer player : world.playerEntities) playerPositions.add(player.getPosition());
-
-            Iterator<BlockPos> iterator = spawnPositions.iterator();
-            while (iterator.hasNext()) {
-                BlockPos pos = iterator.next();
-                boolean tooClose = playerPositions.stream().anyMatch(refPos -> {
-                    double minDist = GeneralConfig.spawnAroundPlayerRad;
-                    double maxDistance = Minecraft.getMinecraft().gameSettings.renderDistanceChunks * 16;
-                    return pos.distanceSq(refPos) <= Math.pow(minDist, 2) || pos.distanceSq(refPos) >= Math.pow(maxDistance, 2);
-                });
-                if (tooClose) iterator.remove();
-            }
-
-            //first get list of biomes of all loaded chunks
-            List<Biome> biomeList = new ArrayList<>();
-            for (BlockPos pos : spawnPositions) {
-                Biome biome = world.getBiome(pos);
-                if (!biomeList.contains(biome)) biomeList.add(biome);
-            }
-            //generate
-            List<RiftCreatureSpawnLists.BiomeSpawner> landBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "LAND");
-            List<RiftCreatureSpawnLists.BiomeSpawner> waterBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "WATER");
-            List<RiftCreatureSpawnLists.BiomeSpawner> airBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "AIR");
-            List<RiftCreatureSpawnLists.BiomeSpawner> caveBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "CAVE");
-
-            //finally spawn the creatures based on spawnPositions and biomeSpawnerList
-            if (this.spawnFromBiomeSpawnerLists(world, landBiomeSpawnerList, spawnPositions) ||
-                this.spawnFromBiomeSpawnerLists(world, waterBiomeSpawnerList, spawnPositions) ||
-                this.spawnFromBiomeSpawnerLists(world, airBiomeSpawnerList, spawnPositions) ||
-                this.spawnFromBiomeSpawnerLists(world, caveBiomeSpawnerList, spawnPositions)
-            ) RiftInitialize.logger.info("Creatures successfully spawned in");
+                catch (Exception e) {
+                    RiftInitialize.logger.error("Error during spawn calculation: ", e);
+                }
+                finally {
+                    executor.shutdown();
+                }
+            });
         }
     }
 
+    //spawn creature for every new chunk player loads
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onWorldLoad(ChunkEvent.Load event) {
         if (event.getWorld().isRemote) return;
@@ -95,39 +119,92 @@ public class RiftCreatureSpawning {
 
         if (!world.getGameRules().getBoolean("doMobSpawning")) return;
 
-        List<BlockPos> spawnPositions = new ArrayList<>();
-        for (int x = 0; x < 10; x++) spawnPositions.add(this.getRandomChunkPosition(world, event.getChunk().x, event.getChunk().z));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            try {
+                List<BlockPos> spawnPositions = new ArrayList<>();
+                for (int x = 0; x < 10; x++) spawnPositions.add(this.getRandomChunkPosition(world, event.getChunk().x, event.getChunk().z));
 
-        //remove positions too close to players
-        List<BlockPos> playerPositions = new ArrayList<>();
-        for (EntityPlayer player : world.playerEntities) playerPositions.add(player.getPosition());
+                //remove positions too close to players
+                List<BlockPos> playerPositions = new ArrayList<>();
+                for (EntityPlayer player : world.playerEntities) playerPositions.add(player.getPosition());
 
-        Iterator<BlockPos> iterator = spawnPositions.iterator();
-        while (iterator.hasNext()) {
-            BlockPos pos = iterator.next();
-            boolean tooClose = playerPositions.stream().anyMatch(refPos -> pos.distanceSq(refPos) <= Math.pow(GeneralConfig.spawnAroundPlayerRad, 2));
-            if (tooClose) iterator.remove();
-        }
+                Iterator<BlockPos> iterator = spawnPositions.iterator();
+                while (iterator.hasNext()) {
+                    BlockPos pos = iterator.next();
+                    boolean tooClose = playerPositions.stream().anyMatch(refPos -> pos.distanceSq(refPos) <= Math.pow(GeneralConfig.spawnAroundPlayerRad, 2));
+                    if (tooClose) iterator.remove();
+                }
 
-        //first get list of biomes of all loaded chunks
-        List<Biome> biomeList = new ArrayList<>();
-        for (BlockPos pos : spawnPositions) {
-            Biome biome = world.getBiome(pos);
-            if (!biomeList.contains(biome)) biomeList.add(biome);
-        }
+                //first get list of biomes of all loaded chunks
+                List<Biome> biomeList = new ArrayList<>();
+                for (BlockPos pos : spawnPositions) {
+                    Biome biome = world.getBiome(pos);
+                    if (!biomeList.contains(biome)) biomeList.add(biome);
+                }
 
-        //generate
-        List<RiftCreatureSpawnLists.BiomeSpawner> landBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "LAND");
-        List<RiftCreatureSpawnLists.BiomeSpawner> waterBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "WATER");
-        List<RiftCreatureSpawnLists.BiomeSpawner> airBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "AIR");
-        List<RiftCreatureSpawnLists.BiomeSpawner> caveBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "CAVE");
+                //generate
+                List<RiftCreatureSpawnLists.BiomeSpawner> landBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "LAND");
+                List<RiftCreatureSpawnLists.BiomeSpawner> waterBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "WATER");
+                List<RiftCreatureSpawnLists.BiomeSpawner> airBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "AIR");
+                List<RiftCreatureSpawnLists.BiomeSpawner> caveBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "CAVE");
 
-        //finally spawn the creatures based on spawnPositions and biomeSpawnerList
-        if (this.spawnFromBiomeSpawnerLists(world, landBiomeSpawnerList, spawnPositions) ||
-            this.spawnFromBiomeSpawnerLists(world, waterBiomeSpawnerList, spawnPositions) ||
-            this.spawnFromBiomeSpawnerLists(world, airBiomeSpawnerList, spawnPositions) ||
-            this.spawnFromBiomeSpawnerLists(world, caveBiomeSpawnerList, spawnPositions)
-        ) RiftInitialize.logger.info("Creatures successfully generated");
+                //finally spawn the creatures based on spawnPositions and biomeSpawnerList
+                /*
+                if (this.spawnFromBiomeSpawnerLists(world, landBiomeSpawnerList, spawnPositions) ||
+                        this.spawnFromBiomeSpawnerLists(world, waterBiomeSpawnerList, spawnPositions) ||
+                        this.spawnFromBiomeSpawnerLists(world, airBiomeSpawnerList, spawnPositions) ||
+                        this.spawnFromBiomeSpawnerLists(world, caveBiomeSpawnerList, spawnPositions)
+                ) RiftInitialize.logger.info("Creatures successfully generated");
+                */
+                this.spawnEntityOnMainThread(world, landBiomeSpawnerList, spawnPositions);
+                this.spawnEntityOnMainThread(world, waterBiomeSpawnerList, spawnPositions);
+                this.spawnEntityOnMainThread(world, airBiomeSpawnerList, spawnPositions);
+                this.spawnEntityOnMainThread(world, caveBiomeSpawnerList, spawnPositions);
+            }
+            catch (Exception e) {
+                RiftInitialize.logger.error("Error during spawn calculation: ", e);
+            }
+            finally {
+                executor.shutdown();
+            }
+        });
+    }
+
+    private void spawnEntityOnMainThread(World world, List<RiftCreatureSpawnLists.BiomeSpawner> biomeSpawners, List<BlockPos> spawnPositions) {
+        MinecraftServer server = world.getMinecraftServer();
+        if (server == null) return;
+
+        server.addScheduledTask(() -> {
+            for (BlockPos pos : spawnPositions) {
+                for (RiftCreatureSpawnLists.BiomeSpawner biomeSpawner : biomeSpawners) {
+                    if (world.getBiome(pos).equals(biomeSpawner.biome)) {
+                        //make biome spawner based on position
+                        RiftCreatureSpawnLists.BiomeSpawner newBiomeSpawner = biomeSpawner.changeSpawnerBasedOnPos(world, pos);
+                        if (newBiomeSpawner.spawnerList.isEmpty()) continue;
+                        RiftCreatureSpawnLists.Spawner spawnerToSpawn = newBiomeSpawner.getSpawnerRandomly();
+
+                        //now spawn a creature
+                        int spawnAmnt = spawnerToSpawn.getSpawnAmnt();
+                        for (int x = 0; x < spawnAmnt; x++) {
+                            //create creature
+                            RiftCreature creatureToSpawn = spawnerToSpawn.getCreatureType().invokeClass(world);
+                            creatureToSpawn.setPosition(pos.getX(), pos.getY(), pos.getZ());
+                            creatureToSpawn.onInitialSpawn(world.getDifficultyForLocation(pos), null);
+
+                            if (this.canFitInArea(creatureToSpawn, spawnerToSpawn)
+                                    && this.otherCreaturesFarAway(creatureToSpawn)
+                                    && this.testOtherCreatures(creatureToSpawn, spawnerToSpawn.getDensityLimit())
+                                    && this.testForDangerNearSpawn(creatureToSpawn)
+                            ) {
+                                world.spawnEntity(creatureToSpawn);
+                                if (GeneralConfig.spawnCreatureNotify) RiftInitialize.logger.info("Spawned "+creatureToSpawn.getName()+" at x=: "+pos.getX()+", y="+pos.getY()+", z="+pos.getZ());
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private boolean spawnFromBiomeSpawnerLists(World world, List<RiftCreatureSpawnLists.BiomeSpawner> biomeSpawners, List<BlockPos> spawnPositions) {
@@ -198,7 +275,10 @@ public class RiftCreatureSpawning {
                 for (int z = -xMin; z <= xMin; z++) {
                     IBlockState state = creature.world.getBlockState(creature.getPosition().add(x, y, z));
                     boolean cantFitInWater = !spawner.getCanSpawnInWater() || state.getMaterial() != Material.WATER;
-                    if (state.getMaterial() != Material.AIR && cantFitInWater) return false;
+                    boolean isValidSpot = state.getMaterial() == Material.AIR
+                            || state.getMaterial() == Material.PLANTS
+                            || state.getMaterial() == Material.VINE;
+                    if (!isValidSpot && cantFitInWater) return false;
                 }
             }
         }

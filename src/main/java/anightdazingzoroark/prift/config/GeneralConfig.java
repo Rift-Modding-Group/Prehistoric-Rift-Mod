@@ -49,7 +49,7 @@ public class GeneralConfig {
     public static String[] difficultyIncrement = {"EASY:0", "NORMAL:5", "HARD:10"};
 
     //spawning
-    public static String[] universalSpawnBlocks = {"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1", "minecraft:stained_hardened_clay:-1"};
+    public static String[] universalSpawnBlocks = {"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1", "minecraft:stained_hardened_clay:-1", "minecraft:snow:-1", "minecraft:snow_layer:-1"};
     public static int dangerSpawnPreventRadius = 512;
     public static String[] dangerousMobs = {
             "prift:tyrannosaurus",
@@ -118,7 +118,7 @@ public class GeneralConfig {
 
         //spawning
         config.addCustomCategoryComment("Spawning", "This mod uses its own spawning system, hence, the presence of this section. Further spawn related stuff can be edited in the creature's individual config files");
-        universalSpawnBlocks = config.getStringList("List of blocks creatures can spawn on", "Spawning", new String[]{"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1", "minecraft:stained_hardened_clay:-1"}, "Identifiers of blocks that creatures from the mod can spawn on (water creatures don't count). To add blocks add \"block:<insert block's identifier here>:<insert data id here>\"");
+        universalSpawnBlocks = config.getStringList("List of blocks creatures can spawn on", "Spawning", new String[]{"minecraft:grass:0", "minecraft:dirt:-1", "minecraft:gravel:0", "minecraft:sand:-1", "minecraft:stone:-1", "minecraft:stained_hardened_clay:-1", "minecraft:snow:-1", "minecraft:snow_layer:-1"}, "Identifiers of blocks that creatures from the mod can spawn on (water creatures don't count). To add blocks add \"block:<insert block's identifier here>:<insert data id here>\"");
         dangerSpawnPreventRadius = config.getInt("Minimum radius from world spawn where dangerous creatures will not spawn in", "Spawning", 512, 1, 69420666, "To prevent new players from constant spawnkills on their first day, dangerous carnivores will not spawn in a certain radius (as defined here) surrounding spawn as defined here for some time");
         dangerousMobs = config.getStringList("Dangerous mobs to not spawn near world spawn", "Spawning", new String[]{
                 "prift:tyrannosaurus",
