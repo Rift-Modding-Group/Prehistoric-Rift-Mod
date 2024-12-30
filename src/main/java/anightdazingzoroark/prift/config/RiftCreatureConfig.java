@@ -148,6 +148,10 @@ public abstract class RiftCreatureConfig {
         @SerializedName("biomes")
         public List<String> biomes;
 
+        //structures a creature can only spawn in
+        @SerializedName("structures")
+        public List<String> structures;
+
         //if gamestages is installed, make it so that this creature
         //will only spawn in certain gamestages
         @SerializedName("gamestages")
@@ -230,6 +234,11 @@ public abstract class RiftCreatureConfig {
 
         public SpawnRule setBiomes(String... values) {
             this.biomes = Arrays.asList(values);
+            return this;
+        }
+
+        public SpawnRule setStructures(String... values) {
+            this.structures = Arrays.asList(values);
             return this;
         }
 

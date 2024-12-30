@@ -10,9 +10,14 @@ import net.darkhax.gamestages.GameStageHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.structure.MapGenStructureData;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.fml.common.Loader;
 import sereneseasons.api.season.SeasonHelper;
@@ -40,7 +45,8 @@ public class RiftCreatureSpawnLists {
                                 .setSpawnInAir(spawnRule.inAir)
                                 .setMustSeeSky(spawnRule.mustSeeSky)
                                 .setYLevelRange(spawnRule.yLevelRange)
-                                .setDimensionId(spawnRule.dimensionId);
+                                .setDimensionId(spawnRule.dimensionId)
+                                .setStructures(spawnRule.structures);
                         //serene seasons compat
                         if (Loader.isModLoaded(RiftInitialize.SERENE_SEASONS_MOD_ID)) spawnerToAdd = spawnerToAdd.setSeasons(spawnRule.seasons);
                         //gamestages compat
@@ -134,7 +140,7 @@ public class RiftCreatureSpawnLists {
                     spawner -> {
                         boolean spawnAboveBlock = spawner.getCanSpawnOnLand() && this.canSpawnAboveBlock(world, pos, spawner.getSpawnBlocksWhitelist());
                         boolean spawnInWater = spawner.getCanSpawnInWater() && world.getBlockState(pos).getMaterial() == Material.WATER;
-                        boolean spawnInAir = spawner.getCanSpawnInAir() && (world.getBlockState(pos).getMaterial() == Material.AIR || world.getBlockState(pos).getMaterial() == Material.PLANTS || world.getBlockState(pos).getMaterial() == Material.VINE);
+                        boolean spawnInAir = spawner.getCanSpawnInAir() && world.getBlockState(pos).getMaterial() == Material.AIR;
                         return spawnAboveBlock || spawnInWater || spawnInAir;
                     }
             ).collect(Collectors.toList());
@@ -178,6 +184,30 @@ public class RiftCreatureSpawnLists {
             //change spawnerList based on whether or not its raining
             tempSpawnerList = tempSpawnerList.stream().filter(
                     spawner -> !spawner.getMustSpawnInRain() || world.isRaining()
+            ).collect(Collectors.toList());
+
+            //change spawnerList based on the structure associated with the pos
+            tempSpawnerList = tempSpawnerList.stream().filter(
+                    spawner -> {
+                        if (spawner.structures == null || spawner.structures.isEmpty()) return true;
+
+                        for (String structureString : spawner.structures) {
+                            //get structure data
+                            MapGenStructureData data = (MapGenStructureData) world.getPerWorldStorage().getOrLoadData(MapGenStructureData.class, structureString);
+
+                            if (data == null) return false;
+
+                            //parse structure data
+                            List<ChunkPos> parsedStrucData = this.parseStructureData(data);
+
+                            //get chunk data
+                            ChunkPos chunkPos = new ChunkPos(pos);
+
+                            if (parsedStrucData.contains(chunkPos)) return true;
+                        }
+
+                        return false;
+                    }
             ).collect(Collectors.toList());
 
             //if serene seasons is installed, change spawnerList based on current season
@@ -236,6 +266,26 @@ public class RiftCreatureSpawnLists {
             }
             return flag;
         }
+
+        private List<ChunkPos> parseStructureData(MapGenStructureData data) {
+            List<ChunkPos> chunks = new ArrayList<>();
+            NBTTagCompound nbttagcompound = data.getTagCompound();
+
+            for (String s : nbttagcompound.getKeySet()) {
+                NBTBase nbtbase = nbttagcompound.getTag(s);
+
+                if (nbtbase.getId() == 10) {
+                    NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbtbase;
+
+                    if (nbttagcompound1.hasKey("ChunkX") && nbttagcompound1.hasKey("ChunkZ")) {
+                        int x = nbttagcompound1.getInteger("ChunkX");
+                        int z = nbttagcompound1.getInteger("ChunkZ");
+                        chunks.add(new ChunkPos(x, z));
+                    }
+                }
+            }
+            return chunks;
+        }
     }
 
     public static class Spawner {
@@ -251,6 +301,7 @@ public class RiftCreatureSpawnLists {
         private boolean mustSeeSky;
         private List<Integer> yLevelRange;
         private int dimensionId;
+        private List<String> structures;
         private List<String> seasons;
         private List<String> gamestages;
 
@@ -358,6 +409,11 @@ public class RiftCreatureSpawnLists {
 
         public Spawner setDimensionId(int value) {
             this.dimensionId = value;
+            return this;
+        }
+
+        public Spawner setStructures(List<String> values) {
+            this.structures = values;
             return this;
         }
 
