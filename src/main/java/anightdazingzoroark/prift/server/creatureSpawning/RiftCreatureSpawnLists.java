@@ -1,20 +1,20 @@
 package anightdazingzoroark.prift.server.creatureSpawning;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
+import net.minecraftforge.fml.common.Loader;
+import sereneseasons.api.season.SeasonHelper;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,7 +28,7 @@ public class RiftCreatureSpawnLists {
                 for (RiftCreatureConfig.SpawnRule spawnRule: RiftConfigHandler.getConfig(creatureType).spawnRules) {
                     List<Biome> configBiomeList = getBiomeList(spawnRule);
                     if (configBiomeList.contains(biomeToTest) && timeOfDay >= spawnRule.timeRange.get(0) && timeOfDay <= spawnRule.timeRange.get(1) && spawnRule.category.equals(category)) {
-                        spawnerList.add(new Spawner(spawnRule.weight, creatureType)
+                        Spawner spawnerToAdd = new Spawner(spawnRule.weight, creatureType)
                                 .setSpawnAmntRange(spawnRule.spawnAmntRange.get(0), spawnRule.spawnAmntRange.get(1))
                                 .setDensityLimit(spawnRule.densityLimit)
                                 .setSpawnBlocksWhitelist(spawnRule.spawnBlocksWhitelist)
@@ -38,8 +38,10 @@ public class RiftCreatureSpawnLists {
                                 .setSpawnInAir(spawnRule.inAir)
                                 .setMustSeeSky(spawnRule.mustSeeSky)
                                 .setYLevelRange(spawnRule.yLevelRange)
-                                .setDimensionId(spawnRule.dimensionId)
-                        );
+                                .setDimensionId(spawnRule.dimensionId);
+                        //serene seasons compat
+                        if (Loader.isModLoaded(RiftInitialize.SERENE_SEASONS_MOD_ID)) spawnerToAdd = spawnerToAdd.setSeasons(spawnRule.seasons);
+                        spawnerList.add(spawnerToAdd);
                     }
                 }
             }
@@ -128,7 +130,7 @@ public class RiftCreatureSpawnLists {
                     spawner -> {
                         boolean spawnAboveBlock = spawner.getCanSpawnOnLand() && this.canSpawnAboveBlock(world, pos, spawner.getSpawnBlocksWhitelist());
                         boolean spawnInWater = spawner.getCanSpawnInWater() && world.getBlockState(pos).getMaterial() == Material.WATER;
-                        boolean spawnInAir = spawner.getCanSpawnInAir() && world.getBlockState(pos).getMaterial() == Material.AIR;
+                        boolean spawnInAir = spawner.getCanSpawnInAir() && (world.getBlockState(pos).getMaterial() == Material.AIR || world.getBlockState(pos).getMaterial() == Material.PLANTS || world.getBlockState(pos).getMaterial() == Material.VINE);
                         return spawnAboveBlock || spawnInWater || spawnInAir;
                     }
             ).collect(Collectors.toList());
@@ -174,6 +176,16 @@ public class RiftCreatureSpawnLists {
                     spawner -> !spawner.getMustSpawnInRain() || world.isRaining()
             ).collect(Collectors.toList());
 
+            //if serene seasons is installed, change spawnerList based on current season
+            if (Loader.isModLoaded(RiftInitialize.SERENE_SEASONS_MOD_ID)) {
+                tempSpawnerList = tempSpawnerList.stream().filter(
+                        spawner -> {
+                            if (spawner.seasons == null || spawner.seasons.isEmpty()) return true;
+                            return spawner.seasons.contains(SeasonHelper.getSeasonState(world).getSubSeason().toString().toLowerCase());
+                        }
+                ).collect(Collectors.toList());
+            }
+
             return new BiomeSpawner(this.biome, tempSpawnerList);
         }
 
@@ -217,6 +229,7 @@ public class RiftCreatureSpawnLists {
         private boolean mustSeeSky;
         private List<Integer> yLevelRange;
         private int dimensionId;
+        private List<String> seasons;
 
         public Spawner(int weight, RiftCreatureType creatureType) {
             this.weight = weight;
@@ -322,6 +335,11 @@ public class RiftCreatureSpawnLists {
 
         public Spawner setDimensionId(int value) {
             this.dimensionId = value;
+            return this;
+        }
+
+        public Spawner setSeasons(List<String> values) {
+            this.seasons = values;
             return this;
         }
     }

@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.config;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import com.google.gson.annotations.SerializedName;
+import net.minecraftforge.fml.common.Optional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -152,9 +154,9 @@ public abstract class RiftCreatureConfig {
         public String gamestage;
 
         //if serene seasons is installed, make it so that this creature
-        //will only spawn during this season
-        @SerializedName("season")
-        public String season;
+        //will only spawn during certain seasons
+        @SerializedName("seasons")
+        public List<String> seasons;
 
         public SpawnRule setCategory(String value) {
             this.category = value;
@@ -227,6 +229,12 @@ public abstract class RiftCreatureConfig {
         }
 
         public SpawnRule setBiomes(String... values) {
+            this.biomes = Arrays.asList(values);
+            return this;
+        }
+
+        @Optional.Method(modid = RiftInitialize.SERENE_SEASONS_MOD_ID)
+        public SpawnRule setSeasons(String... values) {
             this.biomes = Arrays.asList(values);
             return this;
         }

@@ -31,6 +31,7 @@ public class RiftInitialize {
     public static final String SIMPLE_DIFFICULTY_MOD_ID = "simpledifficulty";
     public static final String MYSTICAL_MECHANICS_MOD_ID = "mysticalmechanics";
     public static final String HARVESTCRAFT_MOD_ID = "harvestcraft";
+    public static final String SERENE_SEASONS_MOD_ID = "sereneseasons";
     public static final String MODNAME = "Prehistoric Rift";
     public static final String MODVERSION= "0.0.14";
     @SidedProxy(clientSide = "anightdazingzoroark.prift.client.ClientProxy", serverSide = "anightdazingzoroark.prift.server.ServerProxy")
