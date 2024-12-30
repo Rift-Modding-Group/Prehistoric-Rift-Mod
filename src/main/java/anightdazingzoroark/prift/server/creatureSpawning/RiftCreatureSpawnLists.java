@@ -6,8 +6,10 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import net.darkhax.gamestages.GameStageHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -41,6 +43,8 @@ public class RiftCreatureSpawnLists {
                                 .setDimensionId(spawnRule.dimensionId);
                         //serene seasons compat
                         if (Loader.isModLoaded(RiftInitialize.SERENE_SEASONS_MOD_ID)) spawnerToAdd = spawnerToAdd.setSeasons(spawnRule.seasons);
+                        //gamestages compat
+                        if (Loader.isModLoaded(RiftInitialize.GAME_STAGES_MOD_ID)) spawnerToAdd = spawnerToAdd.setGamestages(spawnRule.gamestages);
                         spawnerList.add(spawnerToAdd);
                     }
                 }
@@ -186,6 +190,24 @@ public class RiftCreatureSpawnLists {
                 ).collect(Collectors.toList());
             }
 
+            //if gamestages is installed, change spawnerList based on game stage
+            if (Loader.isModLoaded(RiftInitialize.GAME_STAGES_MOD_ID)) {
+                tempSpawnerList = tempSpawnerList.stream().filter(
+                        spawner -> {
+                            if (spawner.gamestages == null || spawner.gamestages.isEmpty()) return true;
+
+                            //check if one player has a stage
+                            for (EntityPlayer player : world.playerEntities) {
+                                for (String stageString : spawner.gamestages) {
+                                    if (GameStageHelper.hasStage(player, stageString)) return true;
+                                }
+                            }
+
+                            return false;
+                        }
+                ).collect(Collectors.toList());
+            }
+
             return new BiomeSpawner(this.biome, tempSpawnerList);
         }
 
@@ -230,6 +252,7 @@ public class RiftCreatureSpawnLists {
         private List<Integer> yLevelRange;
         private int dimensionId;
         private List<String> seasons;
+        private List<String> gamestages;
 
         public Spawner(int weight, RiftCreatureType creatureType) {
             this.weight = weight;
@@ -340,6 +363,11 @@ public class RiftCreatureSpawnLists {
 
         public Spawner setSeasons(List<String> values) {
             this.seasons = values;
+            return this;
+        }
+
+        public Spawner setGamestages(List<String> values) {
+            this.gamestages = values;
             return this;
         }
     }

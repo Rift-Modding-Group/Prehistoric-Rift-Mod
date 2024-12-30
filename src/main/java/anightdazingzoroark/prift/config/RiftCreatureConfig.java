@@ -150,8 +150,8 @@ public abstract class RiftCreatureConfig {
 
         //if gamestages is installed, make it so that this creature
         //will only spawn in certain gamestages
-        @SerializedName("gamestage")
-        public String gamestage;
+        @SerializedName("gamestages")
+        public List<String> gamestages;
 
         //if serene seasons is installed, make it so that this creature
         //will only spawn during certain seasons
@@ -236,6 +236,12 @@ public abstract class RiftCreatureConfig {
         @Optional.Method(modid = RiftInitialize.SERENE_SEASONS_MOD_ID)
         public SpawnRule setSeasons(String... values) {
             this.biomes = Arrays.asList(values);
+            return this;
+        }
+
+        @Optional.Method(modid = RiftInitialize.GAME_STAGES_MOD_ID)
+        public SpawnRule setGameStages(String... values) {
+            this.gamestages = Arrays.asList(values);
             return this;
         }
     }
