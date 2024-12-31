@@ -133,7 +133,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.tasks.addTask(0, new RiftParasaurStokeCombustor(this));
         this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 64f, 1.76f, 0.24f));
         this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
-        //this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftResetAnimatedPose(this, 1.52F, 1));
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.24F));
@@ -367,8 +367,8 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public float getRenderSizeModifier() {
-        return RiftUtil.setModelScale(this, 0.3f, 1.5f);
+    public float[] ageScaleParams() {
+        return new float[]{0.3f, 1.5f};
     }
 
     @Override

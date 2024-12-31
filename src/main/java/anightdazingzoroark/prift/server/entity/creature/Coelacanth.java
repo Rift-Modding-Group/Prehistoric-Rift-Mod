@@ -95,8 +95,8 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
     }
 
     @Override
-    public float getRenderSizeModifier() {
-        return 1f;
+    public float[] ageScaleParams() {
+        return new float[]{1f, 1f};
     }
 
     public float attackWidth() {

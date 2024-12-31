@@ -105,7 +105,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        //this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.52F));
         this.tasks.addTask(3, new RiftAttack.SarcosuchusAttack(this, 4.0D, 0.52f, 0.52f));
         this.tasks.addTask(4, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
@@ -220,8 +220,8 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     @Override
-    public float getRenderSizeModifier() {
-        return RiftUtil.setModelScale(this, 0.3f, 1.5f);
+    public float[] ageScaleParams() {
+        return new float[]{0.3f, 1.5f};
     }
 
     public boolean isSpinning() {

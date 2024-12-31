@@ -107,7 +107,7 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        //this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftPackBuff(this, 1.68f, 0f, 90f));
         this.tasks.addTask(4, new RiftControlledAttack(this, 0.28F, 0.28F));
@@ -391,8 +391,8 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     }
 
     @Override
-    public float getRenderSizeModifier() {
-        return RiftUtil.setModelScale(this, 0.3f, 1f);
+    public float[] ageScaleParams() {
+        return new float[]{0.3f, 1f};
     }
 
     @Override

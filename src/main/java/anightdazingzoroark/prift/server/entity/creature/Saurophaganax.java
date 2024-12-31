@@ -122,7 +122,7 @@ public class Saurophaganax extends RiftCreature {
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftSleepAtDay(this));
-        //this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftSaurophaganaxUseLightBlast(this));
         this.tasks.addTask(4, new RiftControlledAttack(this, 0.52F, 0.24F));
@@ -164,8 +164,8 @@ public class Saurophaganax extends RiftCreature {
     }
 
     @Override
-    public float getRenderSizeModifier() {
-        return RiftUtil.setModelScale(this, 0.2f, 2f);
+    public float[] ageScaleParams() {
+        return new float[]{0.2f, 2f};
     }
 
     public boolean canBeSaddled() {

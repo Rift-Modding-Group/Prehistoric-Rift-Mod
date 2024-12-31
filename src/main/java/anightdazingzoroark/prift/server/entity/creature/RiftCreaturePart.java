@@ -21,6 +21,8 @@ public class RiftCreaturePart extends MultiPartEntityPart {
     private boolean isDisabled;
     private boolean immuneToMelee;
     private boolean immuneToProjectiles;
+    private final float initWidth;
+    private final float initHeight;
 
     public RiftCreaturePart(RiftCreature parent, float radius, float angleYaw, float offsetY, float width, float height, float damageMultiplier) {
         this(parent, "", radius, angleYaw, offsetY, width, height, damageMultiplier);
@@ -28,6 +30,8 @@ public class RiftCreaturePart extends MultiPartEntityPart {
 
     public RiftCreaturePart(RiftCreature parent, String name, float radius, float angleYaw, float offsetY, float width, float height, float damageMultiplier) {
         super(parent, name, width, height);
+        this.initWidth = width;
+        this.initHeight = height;
         this.partParent = parent;
         this.radius = radius;
         this.angleYaw = (angleYaw + 90.0F) * 0.017453292F;
@@ -74,7 +78,11 @@ public class RiftCreaturePart extends MultiPartEntityPart {
 
     @Override
     public void onUpdate() {
-        this.setPositionAndUpdate(this.partParent.posX + this.radius * Math.cos(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw), this.partParent.posY + this.offsetY, this.partParent.posZ + this.radius * Math.sin(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw));
+        //define and set offsets
+        double xOffset = this.radius * (this.width / (this.initWidth * this.partParent.ageScaleParams()[1])) * Math.cos(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw);
+        double yOffset = this.offsetY * (this.height / (this.initHeight * this.partParent.ageScaleParams()[1]));
+        double zOffset = this.radius * (this.width / (this.initWidth * this.partParent.ageScaleParams()[1])) * Math.sin(this.partParent.renderYawOffset * (Math.PI / 180.0F) + this.angleYaw);
+        this.setPositionAndUpdate(this.partParent.posX + xOffset, this.partParent.posY + yOffset, this.partParent.posZ + zOffset);
         //if (this.partParent.isTamed()) System.out.println("is parent alive? "+this.partParent.isEntityAlive());
         if (!this.partParent.isEntityAlive()) this.world.removeEntityDangerously(this);
         super.onUpdate();
@@ -90,7 +98,7 @@ public class RiftCreaturePart extends MultiPartEntityPart {
     }
 
     public void resize(float scale) {
-        this.setSize(this.width * scale, this.height * scale);
+        this.setSize(this.initWidth * scale, this.initHeight * scale);
     }
 
     @Override

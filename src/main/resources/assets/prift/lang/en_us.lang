@@ -261,8 +261,12 @@ prift.egg.seconds=second(s)
 prift.egg.too_cold=Too cold for hatching!
 prift.egg.too_warm=Too warm for hatching!
 
-prift.notify.egg_hatched=Your Egg has hatched!
-prift.notify.baby_birthed=%s has given birth!
+prift.notify.egg_hatched_to_party=Your Egg has hatched! The baby will be sent to your party!
+prift.notify.egg_hatched_to_box=Your Egg has hatched! The baby will be sent to your box!
+prift.notify.sac_hatched_to_party=Your Sac has hatched! The baby will be sent to your party!
+prift.notify.sac_hatched_to_box=Your Sac has hatched! The baby will be sent to your box!
+prift.notify.baby_birthed_to_party=%s has given birth! The baby will be sent to your party!
+prift.notify.baby_birthed_to_box=%s has given birth! The baby will be sent to your box!
 
 priftcommands.bleed.usage=/priftbleed [player|entity] [seconds] [strength]
 priftcommands.bleed.successful=Applied bleed on %s

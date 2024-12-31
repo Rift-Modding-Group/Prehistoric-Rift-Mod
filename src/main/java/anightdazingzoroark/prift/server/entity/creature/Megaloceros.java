@@ -93,7 +93,7 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
 
-        //this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftControlledCharge(this, 0.24f, 4f));
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.36F));
@@ -189,8 +189,8 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     }
 
     @Override
-    public float getRenderSizeModifier() {
-        return RiftUtil.setModelScale(this, 0.3f, 1.125f);
+    public float[] ageScaleParams() {
+        return new float[]{0.3f, 1.125f};
     }
 
     public float attackWidth() {

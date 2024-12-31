@@ -128,8 +128,8 @@ public class Dodo extends RiftCreature implements IHerder {
     }
 
     @Override
-    public float getRenderSizeModifier() {
-        return RiftUtil.setModelScale(this, 0.5f, 0.75f);
+    public float[] ageScaleParams() {
+        return new float[]{0.5f, 0.75f};
     }
 
     @Override

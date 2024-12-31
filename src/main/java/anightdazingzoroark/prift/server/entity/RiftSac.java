@@ -2,6 +2,8 @@ package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import net.minecraft.block.material.Material;
@@ -61,17 +63,23 @@ public class RiftSac extends EntityTameable implements IAnimatable {
             if (this.getOwnerId() != null) {
                 creature.setTamed(true);
                 creature.setOwnerId(this.getOwnerId());
-                creature.setSitting(true);
                 creature.setTameBehavior(TameBehaviorType.PASSIVE);
             }
 
             creature.setLocationAndAngles(Math.floor(this.posX), Math.floor(this.posY) + 1, Math.floor(this.posZ), this.world.rand.nextFloat() * 360.0F, 0.0F);
             if (!this.world.isRemote) {
-                List<EntityPlayer> nearby = world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB(this.posX - 50.0, this.posY - 50.0, this.posZ - 50.0, this.posX + 50.0, this.posY + 50.0, this.posZ + 50.0));
-                for (EntityPlayer player : nearby) {
-                    if (player.getUniqueID().equals(this.getOwnerId())) player.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched"), false);
+                EntityPlayer owner = (EntityPlayer) this.getOwner();
+                if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
+                    creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                    this.world.spawnEntity(creature);
+                    PlayerTamedCreaturesHelper.addToPlayerParty(owner, creature);
+                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_party"), false);
                 }
-                this.world.spawnEntity(creature);
+                else if (PlayerTamedCreaturesHelper.getPlayerBox(owner).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(owner)) {
+                    creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                    PlayerTamedCreaturesHelper.addToPlayerBox(owner, creature);
+                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_box"), false);
+                }
             }
             this.setDead();
         }

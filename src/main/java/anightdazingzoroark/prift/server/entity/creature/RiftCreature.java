@@ -143,7 +143,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public String saddleItem;
     public RiftCreaturePart headPart;
     public RiftCreaturePart bodyPart;
-    public RiftCreaturePart[] hitboxArray;
+    public RiftCreaturePart[] hitboxArray = {};
     public float oldScale;
     private int healthRegen;
     protected double attackDamage;
@@ -1003,7 +1003,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.targetList;
     }
 
-    public abstract float getRenderSizeModifier();
+    public float getRenderSizeModifier() {
+        return RiftUtil.setModelScale(this, this.ageScaleParams()[0], this.ageScaleParams()[1]);
+    }
+
+    public abstract float[] ageScaleParams();
 
     @SideOnly(Side.CLIENT)
     public boolean shouldRender(ICamera camera) {

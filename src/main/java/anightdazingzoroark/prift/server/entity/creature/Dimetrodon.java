@@ -101,7 +101,7 @@ public class Dimetrodon extends RiftCreature {
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this, true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        //this.tasks.addTask(1, new RiftMate(this));
+        this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftAttack(this, 1.0D, 0.52F, 0.52F));
         this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
@@ -398,8 +398,8 @@ public class Dimetrodon extends RiftCreature {
     }
 
     @Override
-    public float getRenderSizeModifier() {
-        return RiftUtil.setModelScale(this, 0.4f, 1.25f);
+    public float[] ageScaleParams() {
+        return new float[]{0.4f, 1.25f};
     }
 
     public float attackWidth() {

@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.interfaces;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,12 +23,23 @@ public interface IImpregnable {
                 baby.setAgeInDays(0);
                 baby.setTamed(true);
                 baby.setOwnerId(parent.getOwnerId());
-                baby.setSitting(true);
                 baby.setTameBehavior(TameBehaviorType.PASSIVE);
                 baby.setLocationAndAngles(parent.posX, parent.posY, parent.posZ, 0.0F, 0.0F);
-                parent.world.spawnEntity(baby);
                 this.setPregnant(false, 0);
-                if (parent.getOwner() != null) ((EntityPlayer)parent.getOwner()).sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed", new TextComponentString(parent.getName())), false);
+                parent.setSitting(false);
+
+                EntityPlayer owner = (EntityPlayer) parent.getOwner();
+                if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
+                    baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                    parent.world.spawnEntity(baby);
+                    PlayerTamedCreaturesHelper.addToPlayerParty(owner, baby);
+                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed_to_party", parent.getName()), false);
+                }
+                else if (PlayerTamedCreaturesHelper.getPlayerBox(owner).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(owner)) {
+                    baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                    PlayerTamedCreaturesHelper.addToPlayerBox(owner, baby);
+                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed_to_box", parent.getName()), false);
+                }
             }
         }
     }
