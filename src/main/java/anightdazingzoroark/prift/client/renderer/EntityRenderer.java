@@ -37,6 +37,7 @@ public class EntityRenderer {
         RenderingRegistry.registerEntityRenderingHandler(Baryonyx.class, BaryonyxRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(Palaeocastor.class, PalaeocastorRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(Ankylosaurus.class, AnkylosaurusRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(Dilophosaurus.class, DilophosaurusRenderer::new);
 
         //everythin else
         RenderingRegistry.registerEntityRenderingHandler(RiftEgg.class, RiftEggRenderer::new);

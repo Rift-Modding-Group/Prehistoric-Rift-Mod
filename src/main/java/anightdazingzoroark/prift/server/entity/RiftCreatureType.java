@@ -30,7 +30,8 @@ public enum RiftCreatureType {
     MEGALOCEROS(Megaloceros.class, MegalocerosConfig.class, CreatureCategory.MAMMAL, CreatureDiet.HERBIVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 6048296, 4666924, 0, 0, null),
     BARYONYX(Baryonyx.class, BaryonyxConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.PISCIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 1277213, 4674683, 300, 1f, EggTemperature.COLD),
     PALAEOCASTOR(Palaeocastor.class, PalaeocastorConfig.class, CreatureCategory.MAMMAL, CreatureDiet.SAXUMAVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.STONE, LevelupRate.FAST, 3881787, 855309, 0, 0, null),
-    ANKYLOSAURUS(Ankylosaurus.class, AnkylosaurusConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.STONE, LevelupRate.SLOW, 4338984, 4343887, 300, 1, EggTemperature.COLD);
+    ANKYLOSAURUS(Ankylosaurus.class, AnkylosaurusConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.STONE, LevelupRate.SLOW, 4338984, 4343887, 300, 1, EggTemperature.COLD),
+    DILOPHOSAURUS(Dilophosaurus.class, DilophosaurusConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 16239896, 1141548, 180, 1f, EggTemperature.COLD);
 
     private final Class<? extends RiftCreature> creature;
     private final Class<? extends RiftCreatureConfig> config;

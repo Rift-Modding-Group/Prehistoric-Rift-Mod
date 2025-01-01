@@ -14,6 +14,7 @@ import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 public abstract class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
     public RiftCreatureRenderer(RenderManager renderManager) {
         super(renderManager, new RiftCreatureModel());
+        this.shadowSize = 1f;
     }
 
     @Override
