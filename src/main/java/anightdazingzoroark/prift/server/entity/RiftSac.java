@@ -87,7 +87,7 @@ public class RiftSac extends EntityTameable implements IAnimatable {
                 }
                 else if (PlayerTamedCreaturesHelper.getPlayerBox(owner).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(owner)) {
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                    PlayerTamedCreaturesHelper.addToPlayerBox(owner, creature);
+                    PlayerTamedCreaturesHelper.addToPlayerBoxViaNBT(owner, creature);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_box"), false);
                 }
             }

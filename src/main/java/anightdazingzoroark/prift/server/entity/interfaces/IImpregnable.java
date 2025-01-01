@@ -47,7 +47,7 @@ public interface IImpregnable {
                 }
                 else if (PlayerTamedCreaturesHelper.getPlayerBox(owner).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(owner)) {
                     baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                    PlayerTamedCreaturesHelper.addToPlayerBox(owner, baby);
+                    PlayerTamedCreaturesHelper.addToPlayerBoxViaNBT(owner, baby);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed_to_box", parent.getName()), false);
                 }
             }

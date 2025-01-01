@@ -70,6 +70,19 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    public static void addToPlayerBoxViaNBT(EntityPlayer player, RiftCreature creature) {
+        if (player.world.isRemote) {
+            NBTTagCompound tagCompound = createNBTFromCreature(creature);
+            getPlayerTamedCreatures(player).addToBoxNBT(tagCompound);
+            RiftMessages.WRAPPER.sendToServer(new RiftAddToBoxNBT(player, tagCompound));
+        }
+        else {
+            NBTTagCompound tagCompound = createNBTFromCreature(creature);
+            getPlayerTamedCreatures(player).addToBoxNBT(tagCompound);
+            RiftMessages.WRAPPER.sendToAll(new RiftAddToBoxNBT(player, tagCompound));
+        }
+    }
+
     public static List<NBTTagCompound> getPlayerBoxNBT(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getBoxNBT();
     }
