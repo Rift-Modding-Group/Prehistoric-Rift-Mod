@@ -47,6 +47,15 @@ public class RiftGuiJournalPartyButton extends GuiButton {
                 drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 60, 32, 24, 24, 192, 96);
             }
 
+            //paficier icon for babies
+            if (this.creature.isBaby()) {
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(0.5f, 0.5f, 0.5f);
+                mc.renderEngine.bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/sidebar_party_button.png"));
+                drawModalRectWithCustomSizedTexture((int)((this.x + 3) / 0.5), (int)((this.y + 21) / 0.5), 0, 38, 11, 11, 192, 96);
+                GlStateManager.popMatrix();
+            }
+
             //creature name and level
             GlStateManager.pushMatrix();
             GlStateManager.scale(0.5f, 0.5f, 0.5f);

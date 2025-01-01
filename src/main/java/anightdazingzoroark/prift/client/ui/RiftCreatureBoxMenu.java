@@ -811,6 +811,12 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             GlStateManager.popMatrix();
             GlStateManager.popMatrix();
 
+            //add pacifier icon for babies
+            if (this.selectedCreature.isBaby()) {
+                this.mc.getTextureManager().bindTexture(background);
+                drawModalRectWithCustomSizedTexture((this.width - 11) / 2 + 100, (this.height - 11) / 2 - 85, 362, 216, 11, 11, 408, 300);
+            }
+
             //add cross over when creature is dead
             if (this.selectedCreature.getHealth() / this.selectedCreature.getMaxHealth() <= 0) {
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

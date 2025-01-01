@@ -53,6 +53,15 @@ public class RiftGuiCreatureBoxPartyButton extends GuiButton {
                     drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 60, 248, 24, 24, 408, 300);
                 }
 
+                //paficier icon for babies
+                if (this.creature.isBaby()) {
+                    GlStateManager.pushMatrix();
+                    GlStateManager.scale(0.5f, 0.5f, 0.5f);
+                    mc.renderEngine.bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png"));
+                    drawModalRectWithCustomSizedTexture((int)((this.x + 3) / 0.5), (int)((this.y + 21) / 0.5), 362, 216, 11, 11, 408, 300);
+                    GlStateManager.popMatrix();
+                }
+
                 //creature name and level
                 GlStateManager.pushMatrix();
                 GlStateManager.scale(0.5f, 0.5f, 0.5f);

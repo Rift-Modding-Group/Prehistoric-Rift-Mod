@@ -277,7 +277,7 @@ public class PlayerTamedCreaturesHelper {
                     }
 
                     //health regen
-                    if (creature.getHealth() < creature.getMaxHealth()) {
+                    if (creature.getHealth() < creature.getMaxHealth() && creature.getHealth() > 0) {
                         for (int j = 0; j < timeToSubtract; j++) {
                             //natural regen
                             if (GeneralConfig.naturalCreatureRegen && j % 100 == 0) {
@@ -365,7 +365,7 @@ public class PlayerTamedCreaturesHelper {
                     }
 
                     //natural health regen
-                    if (creature.getHealth() < creature.getMaxHealth()) {
+                    if (creature.getHealth() < creature.getMaxHealth() && creature.getHealth() > 0) {
                         float newHealthLevel = creature.getHealth();
                         int healthDivideTimes = timeToSubtract / 100;
                         for (int x = 0; x < healthDivideTimes; x++) {
@@ -401,7 +401,7 @@ public class PlayerTamedCreaturesHelper {
                 }
             }
 
-            //regenerate health
+            //reviving creature
             if (creature.getHealth()/creature.getMaxHealth() <= 0) {
                 NBTTagCompound tagCompound = new NBTTagCompound();
 
@@ -453,7 +453,7 @@ public class PlayerTamedCreaturesHelper {
                     }
                 }
 
-                if (creature.getHealth() < creature.getMaxHealth()) {
+                if (creature.getHealth() < creature.getMaxHealth() && creature.getHealth() > 0) {
                     //natural health regen
                     if (GeneralConfig.naturalCreatureRegen && time % 100 == 0) newHealthValue += 2f;
 

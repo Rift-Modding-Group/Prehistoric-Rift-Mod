@@ -391,6 +391,13 @@ public class RiftJournalScreen extends GuiScreen {
             GlStateManager.popMatrix();
             GlStateManager.popMatrix();
 
+            //add pacifier icon for babies
+            if (this.getSelectedCreature().isBaby()) {
+                this.mc.getTextureManager().bindTexture(background);
+                drawModalRectWithCustomSizedTexture((this.width - 22) / 2 - 60, (this.height - 22) / 2 + 85, 420, 218, 22, 22, 560, 240);
+            }
+
+
             //add cross over when creature is dead
             if (this.getSelectedCreature().getHealth() / this.getSelectedCreature().getMaxHealth() <= 0) {
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

@@ -32,17 +32,26 @@ public class RiftGuiCreatureBoxBoxButton extends GuiButton {
                 double healthPercentage = this.creature.getHealth() / this.creature.getMaxHealth();
                 boolean isIncapped = healthPercentage == 0 && this.creature.getBoxReviveTime() > 0;
 
-                //creature icon
                 if (isIncapped) {
                     GlStateManager.pushMatrix();
                     GlStateManager.enableBlend();
                     GlStateManager.color(1.0F, 1.0F, 1.0F, 0.25F);
                 }
+                //creature icon
                 mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+this.creature.creatureType.name().toLowerCase()+"_icon.png"));
                 drawModalRectWithCustomSizedTexture(this.x + 3, this.y + 3, 0, 0, 24, 24, 24, 24);
                 if (isIncapped) {
                     GlStateManager.color(1.0F, 1.0F, 1.0F, 1F);
                     GlStateManager.disableBlend();
+                    GlStateManager.popMatrix();
+                }
+
+                //paficier icon for babies
+                if (this.creature.isBaby()) {
+                    GlStateManager.pushMatrix();
+                    GlStateManager.scale(0.5f, 0.5f, 0.5f);
+                    mc.renderEngine.bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png"));
+                    drawModalRectWithCustomSizedTexture((int)((this.x + 3) / 0.5), (int)((this.y + 21) / 0.5), 362, 216, 11, 11, 408, 300);
                     GlStateManager.popMatrix();
                 }
 
