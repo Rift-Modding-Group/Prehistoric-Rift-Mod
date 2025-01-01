@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.message.*;

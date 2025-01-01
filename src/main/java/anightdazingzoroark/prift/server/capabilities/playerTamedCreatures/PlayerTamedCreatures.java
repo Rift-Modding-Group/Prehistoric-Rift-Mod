@@ -92,10 +92,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             else if (this.partyCreatures.stream().noneMatch(nbt -> nbt.getUniqueId("UniqueID").equals(creature.getUniqueID()))) canAdd = true;
 
             if (canAdd) {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setUniqueId("UniqueID", creature.getUniqueID());
-                compound.setString("CustomName", creature.getCustomNameTag());
-                creature.writeEntityToNBT(compound);
+                NBTTagCompound compound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
                 this.partyCreatures.add(compound);
             }
         }
@@ -296,10 +293,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public void addToBoxCreatures(RiftCreature creature) {
         if (this.boxCreatures.size() < this.getMaxBoxSize()) {
-            NBTTagCompound compound = new NBTTagCompound();
-            compound.setUniqueId("UniqueID", creature.getUniqueID());
-            compound.setString("CustomName", creature.getCustomNameTag());
-            creature.writeEntityToNBT(compound);
+            NBTTagCompound compound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
             this.boxCreatures.add(compound);
         }
     }
@@ -332,20 +326,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public void removeFromBoxNBT(NBTTagCompound compound) {
         this.boxCreatures.remove(compound);
-    }
-
-    @Override
-    public void updateCreatures(RiftCreature creature) {
-        for (NBTTagCompound partyMemCompound : this.partyCreatures) {
-            if (partyMemCompound.getUniqueId("UniqueID") != null && partyMemCompound.getUniqueId("UniqueID").equals(creature.getUniqueID())) {
-                NBTTagCompound partyMemCompoundUpdt = new NBTTagCompound();
-                partyMemCompoundUpdt.setUniqueId("UniqueID", creature.getUniqueID());
-                partyMemCompoundUpdt.setString("CustomName", creature.getCustomNameTag());
-                creature.writeEntityToNBT(partyMemCompoundUpdt);
-
-                if (this.partyCreatures.contains(partyMemCompound)) this.partyCreatures.set(this.partyCreatures.indexOf(partyMemCompound), partyMemCompoundUpdt);
-            }
-        }
     }
 
     @Override
@@ -433,6 +413,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         compoundBoxDepSelected.removeTag("HomePosX");
         compoundBoxDepSelected.removeTag("HomePosY");
         compoundBoxDepSelected.removeTag("HomePosZ");
+        compoundBoxDepSelected.setBoolean("Sitting", false);
+        //for dimetrodons
+        if (RiftCreatureType.values()[compoundBoxDepSelected.getByte("CreatureType")] == RiftCreatureType.DIMETRODON) {
+            compoundBoxDepSelected.setBoolean("TakingCareOfEgg", false);
+        }
         //for creatures with workstations
         if (compoundBoxDepSelected.hasKey("UsingWorkstation")) compoundBoxDepSelected.setBoolean("UsingWorkstation", false);
         //for creatures with lead based workstations

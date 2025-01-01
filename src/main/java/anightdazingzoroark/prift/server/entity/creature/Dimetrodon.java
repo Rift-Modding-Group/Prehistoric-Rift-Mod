@@ -7,7 +7,9 @@ import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
@@ -53,11 +55,14 @@ public class Dimetrodon extends RiftCreature {
     private static final DataParameter<Byte> TEMPERATURE = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> FORCED_TEMPERATURE = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> FORCED_TEMPERATURE_TIME = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> CARING_EGG = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.BOOLEAN);
 
     private RiftCreaturePart neckPart;
     private RiftCreaturePart tail0Part;
     private RiftCreaturePart tail1Part;
     private RiftCreaturePart tail2Part;
+
+    public RiftEgg eggTarget;
 
     public Dimetrodon(World worldIn) {
         super(worldIn, RiftCreatureType.DIMETRODON);
@@ -91,6 +96,7 @@ public class Dimetrodon extends RiftCreature {
         this.dataManager.register(TEMPERATURE, (byte) EggTemperature.NEUTRAL.ordinal());
         this.dataManager.register(FORCED_TEMPERATURE, false);
         this.dataManager.register(FORCED_TEMPERATURE_TIME, 0);
+        this.dataManager.register(CARING_EGG, false);
         this.setCanPickUpLoot(true);
     }
 
@@ -106,9 +112,11 @@ public class Dimetrodon extends RiftCreature {
         this.tasks.addTask(3, new RiftAttack(this, 1.0D, 0.52F, 0.52F));
         this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         //this.tasks.addTask(5, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(6, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(7, new RiftWander(this, 1.0D));
-        this.tasks.addTask(8, new RiftLookAround(this));
+        this.tasks.addTask(5, new RiftDimetrodonEggCaring(this));
+        this.tasks.addTask(6, new RiftDimetrodonMoveToEgg(this, 1.0D));
+        this.tasks.addTask(7, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(8, new RiftWander(this, 1.0D));
+        this.tasks.addTask(9, new RiftLookAround(this));
     }
 
     @Override
@@ -117,6 +125,17 @@ public class Dimetrodon extends RiftCreature {
         this.manageForcedTemperatureTime();
         if (!this.world.isRemote) this.dynamicTemperature();
         this.showTemperatureParticles();
+    }
+
+    @Override
+    protected void manageSittingFromEnergy() {
+        if (this.getEnergy() <= 6
+                && !this.isSitting()
+                && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setSitting(true);
+        if (this.getEnergy() > 6
+                && this.isSitting()
+                && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                && !this.isTakingCareOfEgg()) this.setSitting(false);
     }
 
     private void manageForcedTemperatureTime() {
@@ -331,6 +350,7 @@ public class Dimetrodon extends RiftCreature {
         compound.setByte("Temperature", (byte) this.getTemperature().ordinal());
         compound.setBoolean("ForcedTemperature", this.isTemperatureForced());
         compound.setInteger("ForcedTemperatureTime", this.getForcedTemperatureTime());
+        compound.setBoolean("TakingCareOfEgg", this.isTakingCareOfEgg());
     }
 
     @Override
@@ -339,6 +359,7 @@ public class Dimetrodon extends RiftCreature {
         if (compound.hasKey("Temperature")) this.setTemperature(EggTemperature.values()[compound.getByte("Temperature")]);
         this.setTemperatureForced(compound.getBoolean("ForcedTemperature"));
         this.setForcedTemperatureTime(compound.getInteger("ForcedTemperatureTime"));
+        this.setTakingCareOfEgg(compound.getBoolean("TakingCareOfEgg"));
     }
 
     private boolean isTemperatureSettingItem (ItemStack itemstack) {
@@ -456,6 +477,14 @@ public class Dimetrodon extends RiftCreature {
 
     public void setForcedTemperatureTime(int value) {
         this.dataManager.set(FORCED_TEMPERATURE_TIME, value);
+    }
+
+    public boolean isTakingCareOfEgg() {
+        return this.dataManager.get(CARING_EGG);
+    }
+
+    public void setTakingCareOfEgg(boolean value) {
+        this.dataManager.set(CARING_EGG, value);
     }
 
     @Override

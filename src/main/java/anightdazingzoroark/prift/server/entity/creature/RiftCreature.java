@@ -527,7 +527,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else this.eatFromInvForGrowthCooldown = 0;
     }
 
-    private void manageSittingFromEnergy() {
+    protected void manageSittingFromEnergy() {
         if (this.getEnergy() <= 6
             && !this.isSitting()
             && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setSitting(true);

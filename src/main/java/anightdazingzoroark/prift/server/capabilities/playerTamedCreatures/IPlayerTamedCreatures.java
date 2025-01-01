@@ -56,7 +56,6 @@ public interface IPlayerTamedCreatures {
     void boxCreatureDeployedToBoxCreature(World world, BlockPos pos, int posSelected, int posToSwap);
     void boxCreatureDeployedToBox(World world, BlockPos pos, int boxDepPosSelected);
 
-    void updateCreatures(RiftCreature creature);
     void modifyCreature(UUID uuid, NBTTagCompound compound);
     void replaceCreature(UUID uuid, NBTTagCompound compound);
     void removeCreature(UUID uuid);

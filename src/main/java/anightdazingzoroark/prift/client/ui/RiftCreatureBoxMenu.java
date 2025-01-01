@@ -93,13 +93,19 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
         //set selected creature
         if (this.partyPosSelected != -1 && this.boxPosSelected == -1 && this.boxDeployedPosSelected == -1) {
-            this.selectedCreature = this.getPlayerParty().get(this.partyPosSelected);
+            if (this.getPlayerParty().size() > this.partyPosSelected) {
+                this.selectedCreature = this.getPlayerParty().get(this.partyPosSelected);
+            }
         }
         else if (this.partyPosSelected == -1 && this.boxPosSelected != -1 && this.boxDeployedPosSelected == -1) {
-            this.selectedCreature = this.getPlayerBoxedCreatures().get(this.boxPosSelected);
+            if (this.getPlayerBoxedCreatures().size() > this.boxPosSelected) {
+                this.selectedCreature = this.getPlayerBoxedCreatures().get(this.boxPosSelected);
+            }
         }
         else if (this.partyPosSelected == -1 && this.boxPosSelected == -1 && this.boxDeployedPosSelected != -1) {
-            this.selectedCreature = this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosSelected);
+            if (this.getCreatureBoxDeployedCreatures().size() > this.boxDeployedPosSelected) {
+                this.selectedCreature = this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosSelected);
+            }
         }
     }
 
