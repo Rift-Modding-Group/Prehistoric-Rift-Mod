@@ -59,6 +59,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetTurretMode.Handler.class, RiftSetTurretMode.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeTurretTargetingFromMenu.Handler.class, RiftChangeTurretTargetingFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpdatePlayerJournalProgress.Handler.class, RiftUpdatePlayerJournalProgress.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftJournalEditAll.Handler.class, RiftJournalEditAll.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftJournalEditAll.Handler.class, RiftJournalEditAll.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftUpdateNonPotionEffects.Handler.class, RiftUpdateNonPotionEffects.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetBleeding.Handler.class, RiftSetBleeding.class, id++, Side.SERVER);

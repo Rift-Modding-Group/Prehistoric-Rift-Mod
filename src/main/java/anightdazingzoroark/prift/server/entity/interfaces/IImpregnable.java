@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.interfaces;
 
+import anightdazingzoroark.prift.client.RiftControls;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -29,6 +31,14 @@ public interface IImpregnable {
                 parent.setSitting(false);
 
                 EntityPlayer owner = (EntityPlayer) parent.getOwner();
+
+                //update journal
+                if (!PlayerJournalProgressHelper.getUnlockedCreatures(owner).contains(baby.creatureType)) {
+                    PlayerJournalProgressHelper.unlockCreature(owner, baby.creatureType);
+                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", baby.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                }
+
+                //update player tamed creatures
                 if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
                     baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                     parent.world.spawnEntity(baby);

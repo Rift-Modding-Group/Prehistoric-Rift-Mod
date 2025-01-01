@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
 public class RiftJournalEditAll implements IMessage {
     private boolean add;
@@ -38,17 +39,20 @@ public class RiftJournalEditAll implements IMessage {
         }
 
         private void handle(RiftJournalEditAll message, MessageContext ctx) {
-            EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+            if (ctx.side == Side.SERVER) {
+                EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
-            IPlayerJournalProgress journalProgress = messagePlayer.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-            if (message.add) {
-                for (RiftCreatureType creatureType : RiftCreatureType.values()) {
-                    if (!journalProgress.getUnlockedCreatures().contains(creatureType)) {
-                        journalProgress.unlockCreature(creatureType);
-                    }
-                }
+                IPlayerJournalProgress journalProgress = messagePlayer.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
+                if (message.add) journalProgress.unlockAllEntries();
+                else journalProgress.resetEntries();
             }
-            else journalProgress.resetEntries();
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+
+                IPlayerJournalProgress journalProgress = messagePlayer.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
+                if (message.add) journalProgress.unlockAllEntries();
+                else journalProgress.resetEntries();
+            }
         }
     }
 }

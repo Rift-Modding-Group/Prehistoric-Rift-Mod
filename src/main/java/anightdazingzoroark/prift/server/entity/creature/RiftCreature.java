@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
@@ -695,16 +696,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
         this.world.setEntityState(this, (byte)7);
 
-        //update journal
-        IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-        if (!journalProgress.getUnlockedCreatures().contains(this.creatureType)) {
-            journalProgress.unlockCreature(this.creatureType);
-            if (!this.world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
-        }
-
-        //update tamed creature list
-        //test to see if it fits in party
         if (!this.world.isRemote) {
+            //update journal
+            if (!PlayerJournalProgressHelper.getUnlockedCreatures(player).contains(this.creatureType)) {
+                PlayerJournalProgressHelper.unlockCreature(player, this.creatureType);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+            }
+
+            //update tamed creature list
             if (PlayerTamedCreaturesHelper.getPlayerParty(player).size() < PlayerTamedCreaturesHelper.getMaxPartySize(player)) {
                 this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                 PlayerTamedCreaturesHelper.addToPlayerParty(player, this);

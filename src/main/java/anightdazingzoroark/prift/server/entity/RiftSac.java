@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -69,6 +71,14 @@ public class RiftSac extends EntityTameable implements IAnimatable {
             creature.setLocationAndAngles(Math.floor(this.posX), Math.floor(this.posY) + 1, Math.floor(this.posZ), this.world.rand.nextFloat() * 360.0F, 0.0F);
             if (!this.world.isRemote) {
                 EntityPlayer owner = (EntityPlayer) this.getOwner();
+
+                //update journal
+                if (!PlayerJournalProgressHelper.getUnlockedCreatures(owner).contains(this.getCreatureType())) {
+                    PlayerJournalProgressHelper.unlockCreature(owner, this.getCreatureType());
+                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.getCreatureType().getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                }
+
+                //update player tamed creatures
                 if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                     this.world.spawnEntity(creature);

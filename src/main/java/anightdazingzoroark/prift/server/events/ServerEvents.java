@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManual
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
@@ -149,12 +150,8 @@ public class ServerEvents {
             EntityPlayer player = (EntityPlayer)event.getSource().getTrueSource();
             RiftCreature creature = (RiftCreature)event.getEntityLiving();
             if (!player.world.isRemote) {
-                IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-                if (!journalProgress.getUnlockedCreatures().contains(creature.creatureType)) {
-                    //add on server side
-                    journalProgress.unlockCreature(creature.creatureType);
-                    //add on client side
-                    RiftMessages.WRAPPER.sendToAll(new RiftJournalEditOne(creature.creatureType, true));
+                if (!PlayerJournalProgressHelper.getUnlockedCreatures(player).contains(creature.creatureType)) {
+                    PlayerJournalProgressHelper.unlockCreature(player, creature.creatureType);
                     player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
                 }
             }

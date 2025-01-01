@@ -30,6 +30,15 @@ public class PlayerJournalProgress implements IPlayerJournalProgress {
     }
 
     @Override
+    public void unlockAllEntries() {
+        for (RiftCreatureType creatureType : RiftCreatureType.values()) {
+            if (!this.unlockedCreatures.contains(creatureType)) {
+                this.unlockedCreatures.add(creatureType);
+            }
+        }
+    }
+
+    @Override
     public void resetEntries() {
         this.unlockedCreatures.clear();
     }

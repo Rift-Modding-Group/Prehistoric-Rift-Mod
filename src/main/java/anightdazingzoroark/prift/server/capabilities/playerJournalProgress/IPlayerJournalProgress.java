@@ -10,6 +10,7 @@ public interface IPlayerJournalProgress {
     void setUnlockedCreatures(List<RiftCreatureType> value);
     void unlockCreature(RiftCreatureType creatureType);
     void clearCreature(RiftCreatureType creatureType);
+    void unlockAllEntries();
     void resetEntries();
     List<CreatureCategory> getUnlockedCategories();
 }
