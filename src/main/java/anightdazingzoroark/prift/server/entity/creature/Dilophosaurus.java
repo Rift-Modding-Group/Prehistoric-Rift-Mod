@@ -8,10 +8,10 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
 import anightdazingzoroark.prift.server.entity.projectile.DilophosaurusSpit;
-import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -19,6 +19,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
@@ -80,13 +81,38 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
         this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftRangedAttack(this, false, 1.0D, 2.64F, 0.72F));
-        this.tasks.addTask(4, new RiftAttack.DilophosaurusAttack(this, 1.0D));
-        this.tasks.addTask(8, new RiftWander(this, 1.0D));
-        this.tasks.addTask(9, new RiftLookAround(this));
+        this.tasks.addTask(3, new RiftControlledRangedAttack(this, 2.64F, 0.72F, 20));
+        this.tasks.addTask(3, new RiftDilophosaurusControlledClawAttack(this));
+        this.tasks.addTask(4, new RiftRangedAttack(this, false, 1.0D, 2.64F, 0.72F));
+        this.tasks.addTask(5, new RiftAttack.DilophosaurusAttack(this, 1.0D));
+        this.tasks.addTask(6, new RiftWander(this, 1.0D));
+        this.tasks.addTask(7, new RiftLookAround(this));
+    }
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        this.manageCanForcedUseSpit();
+    }
+
+    @Override
+    public void updateParts() {
+        super.updateParts();
+
+        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.45f : 0;
+        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
+        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
+        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
+        if (this.hipPart != null) this.hipPart.setPositionAndUpdate(this.hipPart.posX, this.hipPart.posY + sitOffset, this.hipPart.posZ);
+        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
+        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
+        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
+    }
+
+    private void manageCanForcedUseSpit() {
+        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
     }
 
     @Override
@@ -136,13 +162,52 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
     }
 
     @Override
+    public void controlRangedAttack(double strength) {
+        DilophosaurusSpit thrownStegoPlate = new DilophosaurusSpit(this.world, this, (EntityPlayer)this.getControllingPassenger());
+        thrownStegoPlate.setDamage(2D + (double)(this.getLevel())/10D);
+        thrownStegoPlate.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, 1.5f, 1.0F);
+        this.world.spawnEntity(thrownStegoPlate);
+    }
+
+    @Override
+    public boolean canBeSaddled() {
+        return true;
+    }
+
+    @Override
+    public int slotCount() {
+        return 18;
+    }
+
+    @Override
     public Vec3d riderPos() {
-        return null;
+        float xOffset = (float)(this.posX + (0.05) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
+        float zOffset = (float)(this.posZ + (0.05) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
+        return new Vec3d(xOffset, this.posY - 0.75, zOffset);
     }
 
     @Override
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-
+        if (control == 0) {
+            if (this.getEnergy() > 0) {
+                if (!this.isActing()) {
+                    this.forcedAttackTarget = target;
+                    this.forcedBreakPos = pos;
+                    if (RiftUtil.randomInRange(0, 1) == 0) this.setUsingLeftClaw(true);
+                    else this.setUsingRightClaw(true);
+                }
+            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
+        if (control == 1) {
+            if (this.getEnergy() > 0) {
+                if (!this.isActing()) {
+                    this.setRangedAttacking(true);
+                    this.setRightClickUse(0);
+                }
+            }
+            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
+        }
     }
 
     @Override
@@ -152,7 +217,7 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return false;
+        return true;
     }
 
     @Override
