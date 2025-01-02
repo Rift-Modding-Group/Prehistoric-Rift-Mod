@@ -12,6 +12,7 @@ public class RiftProjectiles {
     public static Item MORTAR_SHELL;
     public static Item CATAPULT_BOULDER;
     public static Item THROWN_BOLA;
+    public static Item DILOPHOSAURUS_SPIT;
 
     public static void registerProjectiles() {
         THROWN_STEGOSAURUS_PLATE_ONE = new ThrownStegoPlateAnimator().setRegistryName("thrown_stegosaurus_plate_animator_one").setTranslationKey("thrown_stegosaurus_plate_animator_one");
@@ -25,6 +26,8 @@ public class RiftProjectiles {
 
         THROWN_BOLA = new ThrownBolaAnimator().setRegistryName("thrown_bola_animator").setTranslationKey("thrown_bola_animator");
 
+        DILOPHOSAURUS_SPIT = new DilophosaurusSpitAnimator().setRegistryName("dilophosaurus_spit_animator").setTranslationKey("dilophosaurus_spit_animator");
+
         RiftItems.ITEMS.add(THROWN_STEGOSAURUS_PLATE_ONE);
         RiftItems.ITEMS.add(THROWN_STEGOSAURUS_PLATE_TWO);
         RiftItems.ITEMS.add(THROWN_STEGOSAURUS_PLATE_THREE);
@@ -35,5 +38,7 @@ public class RiftProjectiles {
         RiftItems.ITEMS.add(CATAPULT_BOULDER);
 
         RiftItems.ITEMS.add(THROWN_BOLA);
+
+        RiftItems.ITEMS.add(DILOPHOSAURUS_SPIT);
     }
 }

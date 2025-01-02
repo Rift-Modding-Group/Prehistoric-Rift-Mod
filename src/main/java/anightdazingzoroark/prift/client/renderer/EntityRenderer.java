@@ -59,6 +59,7 @@ public class EntityRenderer {
         RiftProjectiles.THROWN_STEGOSAURUS_PLATE_TWO.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(1));
         RiftProjectiles.THROWN_STEGOSAURUS_PLATE_THREE.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(2));
         RiftProjectiles.THROWN_STEGOSAURUS_PLATE_FOUR.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(3));
+
         RenderingRegistry.registerEntityRenderingHandler(RiftCannonball.class, new IRenderFactory<RiftCannonball>() {
             @Override
             public Render<? super RiftCannonball> createRenderFor(RenderManager manager) {
@@ -66,6 +67,7 @@ public class EntityRenderer {
             }
         });
         RiftProjectiles.CANNONBALL.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CANNON));
+
         RenderingRegistry.registerEntityRenderingHandler(RiftMortarShell.class, new IRenderFactory<RiftMortarShell>() {
             @Override
             public Render<? super RiftMortarShell> createRenderFor(RenderManager manager) {
@@ -73,6 +75,7 @@ public class EntityRenderer {
             }
         });
         RiftProjectiles.MORTAR_SHELL.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.MORTAR));
+
         RenderingRegistry.registerEntityRenderingHandler(RiftCatapultBoulder.class, new IRenderFactory<RiftCatapultBoulder>() {
             @Override
             public Render<? super RiftCatapultBoulder> createRenderFor(RenderManager manager) {
@@ -80,6 +83,7 @@ public class EntityRenderer {
             }
         });
         RiftProjectiles.CATAPULT_BOULDER.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CATAPULT));
+
         RenderingRegistry.registerEntityRenderingHandler(ThrownBola.class, new IRenderFactory<ThrownBola>() {
             @Override
             public Render<? super ThrownBola> createRenderFor(RenderManager manager) {
@@ -87,5 +91,13 @@ public class EntityRenderer {
             }
         });
         RiftProjectiles.THROWN_BOLA.setTileEntityItemStackRenderer(new ThrownBolaAnimatorRenderer());
+
+        RenderingRegistry.registerEntityRenderingHandler(DilophosaurusSpit.class, new IRenderFactory<DilophosaurusSpit>() {
+            @Override
+            public Render<? super DilophosaurusSpit> createRenderFor(RenderManager manager) {
+                return new ProjectileRenderer<DilophosaurusSpit>(manager, Minecraft.getMinecraft().getRenderItem(), null);
+            }
+        });
+        RiftProjectiles.DILOPHOSAURUS_SPIT.setTileEntityItemStackRenderer(new DilophosaurusSpitRenderer());
     }
 }

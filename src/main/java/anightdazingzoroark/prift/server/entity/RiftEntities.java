@@ -30,6 +30,7 @@ public class RiftEntities {
         registerEntity("mortar_shell_projectile", RiftMortarShell.class, miscId++, RiftInitialize.instance);
         registerEntity("catapult_boulder_projectile", RiftCatapultBoulder.class, miscId++, RiftInitialize.instance);
         registerEntity("thrown_bola", ThrownBola.class, miscId++, RiftInitialize.instance);
+        registerEntity("dilophosaurus_spit", DilophosaurusSpit.class, miscId++, RiftInitialize.instance);
     }
 
     public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {

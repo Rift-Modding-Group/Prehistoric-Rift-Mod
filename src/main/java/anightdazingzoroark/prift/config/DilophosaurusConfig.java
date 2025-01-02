@@ -20,7 +20,10 @@ public class DilophosaurusConfig extends RiftCreatureConfig {
                 new Meal("prift:advanced_carnivore_meal", 0.33)
         );
         this.general.targetWhitelist = Arrays.asList();
-        this.general.targetBlacklist = Arrays.asList();
+        this.general.targetBlacklist = Arrays.asList(
+                "prift:stegosaurus",
+                "prift:triceratops"
+        );
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(16).setBiomes("tag:forest", "tag:jungle", "-tag:cold")
         );
