@@ -534,4 +534,8 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     protected SoundEvent getDeathSound() {
         return RiftSounds.STEGOSAURUS_DEATH;
     }
+
+    public SoundEvent rangedAttackSound() {
+        return SoundEvents.ENTITY_ARROW_SHOOT;
+    }
 }

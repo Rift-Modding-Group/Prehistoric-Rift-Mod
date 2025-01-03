@@ -30,6 +30,7 @@ public class RiftControlledRangedAttack extends EntityAIBase {
     }
 
     public void startExecuting() {
+        this.attacker.playSound(((IRangedAttacker)this.attacker).rangedAttackSound(), 2, 1);
         this.animTime = 0;
     }
 

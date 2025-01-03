@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -417,6 +418,21 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         //for dimetrodons
         if (RiftCreatureType.values()[compoundBoxDepSelected.getByte("CreatureType")] == RiftCreatureType.DIMETRODON) {
             compoundBoxDepSelected.setBoolean("TakingCareOfEgg", false);
+        }
+        //for speed
+        double oldSpeed = RiftCreatureType.values()[compoundBoxDepSelected.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).getSpeed();
+        double oldWaterSpeed = RiftCreatureType.values()[compoundBoxDepSelected.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).getWaterSpeed();
+        NBTTagList attributeTagList = compoundBoxDepSelected.getTagList("Attributes", 10);
+        for (int x = 0; x < attributeTagList.tagList.size(); x++) {
+            NBTTagCompound attributeTagCompound = (NBTTagCompound) attributeTagList.get(x);
+            if (attributeTagCompound.getString("Name").equals("generic.movementSpeed")) {
+                attributeTagCompound.setDouble("Base", oldSpeed);
+                attributeTagList.set(x, attributeTagCompound);
+            }
+            else if (attributeTagCompound.getString("Name").equals("forge.swimSpeed")) {
+                attributeTagCompound.setDouble("Base", oldWaterSpeed);
+                attributeTagList.set(x, attributeTagCompound);
+            }
         }
         //for creatures with workstations
         if (compoundBoxDepSelected.hasKey("UsingWorkstation")) compoundBoxDepSelected.setBoolean("UsingWorkstation", false);

@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
 import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
@@ -55,7 +56,7 @@ public class RiftRangedAttack extends EntityAIBase {
 
     public void resetTask() {
         this.seeTime = 0;
-        this.attacker.resetSpeed();
+        if ((!(this.attacker instanceof ITurretModeUser) || !((ITurretModeUser) this.attacker).isTurretMode())) this.attacker.resetSpeed();
         this.attacker.setRangedAttacking(false);
     }
 
@@ -77,7 +78,7 @@ public class RiftRangedAttack extends EntityAIBase {
                 ++this.strafingTime;
             }
             else {
-                if ((!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode())) this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget);
+                if ((!(this.attacker instanceof ITurretModeUser) || !((ITurretModeUser) this.attacker).isTurretMode())) this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget);
                 this.strafingTime = -1;
             }
 
@@ -91,7 +92,7 @@ public class RiftRangedAttack extends EntityAIBase {
                 if (d0 > this.getRangedAttackReachSqr() * 0.75D) this.strafingBackwards = false;
                 else if (d0 < this.getRangedAttackReachSqr() * 0.25D) this.strafingBackwards = true;
 
-                if ((!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode())) this.attacker.getMoveHelper().strafe(this.strafingBackwards ? -0.5F : 0.5F, this.strafingClockwise ? 0.5F : -0.5F);
+                if ((!(this.attacker instanceof ITurretModeUser) || !((ITurretModeUser) this.attacker).isTurretMode())) this.attacker.getMoveHelper().strafe(this.strafingBackwards ? -0.5F : 0.5F, this.strafingClockwise ? 0.5F : -0.5F);
                 this.attacker.faceEntity(entitylivingbase, 30.0F, 30.0F);
             }
             else this.attacker.getLookHelper().setLookPositionWithEntity(entitylivingbase, 30.0F, 30.0F);
@@ -99,6 +100,7 @@ public class RiftRangedAttack extends EntityAIBase {
             if (flag) {
                 if (--this.attackCooldown <= 0) {
                     this.attacker.setRangedAttacking(true);
+                    if (this.animTime == 0) this.attacker.playSound(((IRangedAttacker)this.attacker).rangedAttackSound(), 2, 1);
                     if (!this.canMoveWhenShooting) this.attacker.removeSpeed();
                     this.animTime++;
                     if (this.animTime == this.shootAnimTime) {
@@ -107,7 +109,7 @@ public class RiftRangedAttack extends EntityAIBase {
                     if (this.animTime > this.shootAnimLength) {
                         this.animTime = 0;
                         this.attacker.setRangedAttacking(false);
-                        if ((!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode())) this.attacker.resetSpeed();
+                        if ((!(this.attacker instanceof ITurretModeUser) || !((ITurretModeUser) this.attacker).isTurretMode())) this.attacker.resetSpeed();
                         this.attackCooldown = 20;
                         if (this.attacker.isTamed()) this.attacker.energyActionMod++;
                     }
@@ -117,7 +119,7 @@ public class RiftRangedAttack extends EntityAIBase {
     }
 
     protected double getAttackReachSqr(EntityLivingBase attackTarget) {
-        if (this instanceof ITurretModeUser && ((ITurretModeUser) this).isTurretMode()) return 0;
+        if (this.attacker instanceof ITurretModeUser && ((ITurretModeUser) this.attacker).isTurretMode()) return 0;
         return Math.pow(this.attacker.attackWidth(), 2) + attackTarget.width;
     }
 

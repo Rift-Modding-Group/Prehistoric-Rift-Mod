@@ -538,6 +538,8 @@ public class RiftUtil {
                 return 50f;
             case ANKYLOSAURUS:
                 return 20f;
+            case DILOPHOSAURUS:
+                return 30f;
         }
         return 1f;
     }

@@ -1,26 +1,34 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.DilophosaurusConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
+import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import anightdazingzoroark.prift.server.entity.projectile.DilophosaurusSpit;
+import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -28,9 +36,14 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
-public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
+import javax.annotation.Nullable;
+
+public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITurretModeUser {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dilophosaurus"));
     private static final DataParameter<Boolean> LEFT_CLAW = EntityDataManager.<Boolean>createKey(Dilophosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> RIGHT_CLAW = EntityDataManager.<Boolean>createKey(Dilophosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Dilophosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Dilophosaurus.class, DataSerializers.BYTE);
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
     private RiftCreaturePart tail0Part;
@@ -72,10 +85,13 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
         super.entityInit();
         this.dataManager.register(LEFT_CLAW, false);
         this.dataManager.register(RIGHT_CLAW, false);
+        this.dataManager.register(TURRET_MODE, false);
+        this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
         this.setCanPickUpLoot(true);
     }
 
     protected void initEntityAI() {
+        this.targetTasks.addTask(0, new RiftTurretModeTargeting(this, true));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
@@ -87,8 +103,9 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
         this.tasks.addTask(3, new RiftDilophosaurusControlledClawAttack(this));
         this.tasks.addTask(4, new RiftRangedAttack(this, false, 1.0D, 2.64F, 0.72F));
         this.tasks.addTask(5, new RiftAttack.DilophosaurusAttack(this, 1.0D));
-        this.tasks.addTask(6, new RiftWander(this, 1.0D));
-        this.tasks.addTask(7, new RiftLookAround(this));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(7, new RiftWander(this, 1.0D));
+        this.tasks.addTask(8, new RiftLookAround(this));
     }
 
     @Override
@@ -113,6 +130,18 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
 
     private void manageCanForcedUseSpit() {
         if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        this.writeTurretModeDataToNBT(compound);
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.readTurretModeDataFromNBT(compound);
     }
 
     @Override
@@ -149,24 +178,43 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
     }
 
     @Override
+    public boolean isTurretMode() {
+        return this.dataManager.get(TURRET_MODE);
+    }
+
+    @Override
+    public void setTurretMode(boolean value) {
+        this.dataManager.set(TURRET_MODE, value);
+    }
+
+    @Override
+    public TurretModeTargeting getTurretTargeting() {
+        return TurretModeTargeting.values()[this.dataManager.get(TURRET_TARGET)];
+    }
+
+    @Override
+    public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
+        this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
+    }
+
+    @Override
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
         DilophosaurusSpit dilophosaurusSpit = new DilophosaurusSpit(this.world, this);
         double d0 = target.posX - this.posX;
-        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - dilophosaurusSpit.posY;
+        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 6.0F) - dilophosaurusSpit.posY;
         double d2 = target.posZ - this.posZ;
         double d3 = (double) MathHelper.sqrt(d0 * d0 + d2 * d2);
-        dilophosaurusSpit.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 1F);
+        dilophosaurusSpit.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.5F, 1.0F);
         dilophosaurusSpit.setDamage(2D + (double)(this.getLevel())/10D);
-        this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
         this.world.spawnEntity(dilophosaurusSpit);
     }
 
     @Override
     public void controlRangedAttack(double strength) {
-        DilophosaurusSpit thrownStegoPlate = new DilophosaurusSpit(this.world, this, (EntityPlayer)this.getControllingPassenger());
-        thrownStegoPlate.setDamage(2D + (double)(this.getLevel())/10D);
-        thrownStegoPlate.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, 1.5f, 1.0F);
-        this.world.spawnEntity(thrownStegoPlate);
+        DilophosaurusSpit dilophosaurusSpit = new DilophosaurusSpit(this.world, this, (EntityPlayer)this.getControllingPassenger());
+        dilophosaurusSpit.setDamage(2D + (double)(this.getLevel())/10D);
+        dilophosaurusSpit.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, 1.5f, 1.0F);
+        this.world.spawnEntity(dilophosaurusSpit);
     }
 
     @Override
@@ -223,6 +271,12 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
     @Override
     public boolean hasSpacebarChargeBar() {
         return false;
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
     }
 
     @Override
@@ -284,5 +338,21 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker {
         }
         else event.getController().clearAnimationCache();
         return PlayState.CONTINUE;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.DILOPHOSAURUS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.DILOPHOSAURUS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.DILOPHOSAURUS_DEATH;
+    }
+
+    public SoundEvent rangedAttackSound() {
+        return RiftSounds.DILOPHOSAURUS_SPIT;
     }
 }

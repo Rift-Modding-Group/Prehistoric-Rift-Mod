@@ -383,6 +383,35 @@
     "subtitle": "sounds.subtitle.ankylosaurus_death"
   },
 
+  "prift.dilophosaurus.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dilophosaurus/dilophosaurus_idle"
+    ],
+    "subtitle": "sounds.subtitle.dilophosaurus_idle"
+  },
+  "prift.dilophosaurus.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dilophosaurus/dilophosaurus_hurt"
+    ],
+    "subtitle": "sounds.subtitle.dilophosaurus_hurt"
+  },
+  "prift.dilophosaurus.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dilophosaurus/dilophosaurus_death"
+    ],
+    "subtitle": "sounds.subtitle.dilophosaurus_death"
+  },
+  "prift.dilophosaurus.spit": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dilophosaurus/dilophosaurus_spit"
+    ],
+    "subtitle": "sounds.subtitle.dilophosaurus_spit"
+  },
+
   "prift.semi_manual_machine.reset": {
     "category": "block",
     "sounds": [

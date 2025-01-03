@@ -1144,6 +1144,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.getEntityAttribute(EntityLivingBase.SWIM_SPEED).setBaseValue(value);
     }
 
+    public double getSpeed() {
+        return this.speed;
+    }
+
+    public double getWaterSpeed() {
+        return this.waterSpeed;
+    }
+
     public void resetSpeed() {
         this.setSpeed(this.speed);
         this.setWaterSpeed(this.waterSpeed);

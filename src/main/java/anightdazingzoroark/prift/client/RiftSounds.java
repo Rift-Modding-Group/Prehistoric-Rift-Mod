@@ -163,6 +163,18 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.ankylosaurus.death")
     public static final SoundEvent ANKYLOSAURUS_DEATH = createSoundEvent("prift.ankylosaurus.death");
 
+    @GameRegistry.ObjectHolder("prift.dilophosaurus.idle")
+    public static final SoundEvent DILOPHOSAURUS_IDLE = createSoundEvent("prift.dilophosaurus.idle");
+
+    @GameRegistry.ObjectHolder("prift.dilophosaurus.hurt")
+    public static final SoundEvent DILOPHOSAURUS_HURT = createSoundEvent("prift.dilophosaurus.hurt");
+
+    @GameRegistry.ObjectHolder("prift.dilophosaurus.death")
+    public static final SoundEvent DILOPHOSAURUS_DEATH = createSoundEvent("prift.dilophosaurus.death");
+
+    @GameRegistry.ObjectHolder("prift.dilophosaurus.spit")
+    public static final SoundEvent DILOPHOSAURUS_SPIT = createSoundEvent("prift.dilophosaurus.spit");
+
     @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
     public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");
 
