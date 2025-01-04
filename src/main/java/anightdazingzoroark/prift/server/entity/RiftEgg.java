@@ -94,7 +94,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
             creature.setHealth((float) (creature.minCreatureHealth + (0.1) * (creature.getLevel()) * (creature.minCreatureHealth)));
             creature.setAgeInDays(0);
 
-            if (this.getOwnerId() != null) {
+            if (this.getOwnerId() != null && this.getCreatureType() != RiftCreatureType.DODO) {
                 creature.setTamed(true);
                 creature.setOwnerId(this.getOwnerId());
                 creature.setTameBehavior(TameBehaviorType.PASSIVE);
@@ -110,18 +110,21 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
                     owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.getCreatureType().getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
                 }
 
-                //update player tamed creatures
-                if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
-                    creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                    this.world.spawnEntity(creature);
-                    PlayerTamedCreaturesHelper.addToPlayerParty(owner, creature);
-                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_party"), false);
+                if (this.getCreatureType() != RiftCreatureType.DODO) {
+                    //update player tamed creatures
+                    if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
+                        creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                        this.world.spawnEntity(creature);
+                        PlayerTamedCreaturesHelper.addToPlayerParty(owner, creature);
+                        owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_party"), false);
+                    }
+                    else if (PlayerTamedCreaturesHelper.getPlayerBox(owner).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(owner)) {
+                        creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                        PlayerTamedCreaturesHelper.addToPlayerBoxViaNBT(owner, creature);
+                        owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_box"), false);
+                    }
                 }
-                else if (PlayerTamedCreaturesHelper.getPlayerBox(owner).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(owner)) {
-                    creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                    PlayerTamedCreaturesHelper.addToPlayerBoxViaNBT(owner, creature);
-                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_box"), false);
-                }
+                else this.world.spawnEntity(creature);
             }
             this.setDead();
         }

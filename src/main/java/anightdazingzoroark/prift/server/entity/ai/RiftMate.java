@@ -59,6 +59,9 @@ public class RiftMate extends EntityAIBase {
             if (category.equals(CreatureCategory.DINOSAUR) || category.equals(CreatureCategory.REPTILE) || category.equals(CreatureCategory.BIRD) || this.creature.creatureType.equals(RiftCreatureType.DIMETRODON)) this.spawnEgg();
             else if (category.equals(CreatureCategory.INVERTEBRATE)) this.spawnSac();
             else if (category.equals(CreatureCategory.MAMMAL)) this.setPregnant();
+
+            this.creature.setLoveCooldown(12000);
+            this.targetMate.setLoveCooldown(12000);
         }
     }
 
@@ -113,6 +116,7 @@ public class RiftMate extends EntityAIBase {
             egg.setLocationAndAngles(this.creature.posX, this.creature.posY, this.creature.posZ, 0.0F, 0.0F);
             egg.enablePersistence();
             egg.setHatchTime(this.creature.creatureType.getHatchTime() * 20);
+            egg.setOwnerId(player.getUniqueID());
             this.world.spawnEntity(egg);
 
             Random random = this.creature.getRNG();
@@ -154,6 +158,7 @@ public class RiftMate extends EntityAIBase {
             sac.setLocationAndAngles(this.creature.posX, this.creature.posY, this.creature.posZ, 0.0F, 0.0F);
             sac.enablePersistence();
             sac.setHatchTime(this.creature.creatureType.getHatchTime() * 20);
+            sac.setOwnerId(player.getUniqueID());
             this.world.spawnEntity(sac);
 
             Random random = this.creature.getRNG();

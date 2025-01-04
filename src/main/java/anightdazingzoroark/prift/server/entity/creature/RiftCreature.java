@@ -76,6 +76,7 @@ import java.util.List;
 public abstract class RiftCreature extends EntityTameable implements IAnimatable, IRiftMultipart {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> LOVE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> RANGED_ATTACKING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -194,6 +195,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.entityInit();
         this.dataManager.register(LEVEL, 1);
         this.dataManager.register(XP, 0);
+        this.dataManager.register(LOVE_COOLDOWN, 0);
         this.dataManager.register(ATTACKING, false);
         this.dataManager.register(RANGED_ATTACKING, false);
         this.dataManager.register(VARIANT, rand.nextInt(4));
@@ -298,6 +300,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.updateEnergyActions();
                 this.resetEnergyActionMod();
                 this.lowEnergyEffects();
+                this.manageLoveCooldown();
                 if (GeneralConfig.creatureEatFromInventory) this.eatFromInventory();
                 this.manageSittingFromEnergy();
                 if (this.isBeingRidden()) this.informRiderEnergy();
@@ -486,6 +489,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else if (this.getEnergy() == 0) this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 255));
     }
 
+    private void manageLoveCooldown() {
+        if (this.getLoveCooldown() > 0) this.setLoveCooldown(this.getLoveCooldown() - 1);
+    }
+
     private void eatFromInventory() {
         int minSlot = this.canBeSaddled() ? 1 : 0;
         if (this.getHealth() < this.getMaxHealth()) {
@@ -603,7 +610,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
-                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && !this.isSitting()) {
+                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getLoveCooldown() == 0 && !this.isSitting()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setInLove(player);
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
@@ -677,7 +684,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 return true;
             }
-            else if (!itemstack.isEmpty() && (this.creatureType == RiftCreatureType.DODO) && (this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
+            else if (!itemstack.isEmpty() && (this.creatureType == RiftCreatureType.DODO) && this.isBaby() && this.isFavoriteFood(itemstack)) {
+                this.consumeItemFromStack(player, itemstack);
+                this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
+                this.showGrowthParticles();
+                this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                this.spawnItemCrackParticles(itemstack.getItem());
+                return true;
+            }
+            else if (!itemstack.isEmpty() && this.creatureType == RiftCreatureType.DODO && !this.isBaby() && this.getLoveCooldown() == 0 && (this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL)) {
                 this.consumeItemFromStack(player, itemstack);
                 this.setInLove(player);
                 this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
@@ -917,6 +932,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.writeEntityToNBT(compound);
         compound.setInteger("Level", this.getLevel());
         compound.setInteger("XP", this.getXP());
+        compound.setInteger("LoveCooldown", this.getLoveCooldown());
         compound.setInteger("Variant", this.getVariant());
         compound.setByte("CreatureType", (byte) this.creatureType.ordinal());
         compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
@@ -954,6 +970,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.readEntityFromNBT(compound);
         this.setLevel(compound.getInteger("Level"));
         this.setXP(compound.getInteger("XP"));
+        this.setLoveCooldown(compound.getInteger("LoveCooldown"));
         this.setVariant(compound.getInteger("Variant"));
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
         this.setSaddled(compound.getBoolean("Saddled"));
@@ -1084,6 +1101,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public int getMaxXP() {
         return (int)Math.round((double)this.getLevel() * this.creatureType.getLevelupRate().getRate() * 25D);
+    }
+
+    public int getLoveCooldown() {
+        return this.dataManager.get(LOVE_COOLDOWN);
+    }
+
+    public void setLoveCooldown(int value) {
+        this.dataManager.set(LOVE_COOLDOWN, value);
     }
 
     public int getVariant() {
