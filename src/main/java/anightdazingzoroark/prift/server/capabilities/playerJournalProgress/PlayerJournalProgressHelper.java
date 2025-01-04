@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.List;
+import java.util.Map;
 
 public class PlayerJournalProgressHelper {
     public static IPlayerJournalProgress getPlayerJournalProgress(EntityPlayer player) {
@@ -15,12 +16,23 @@ public class PlayerJournalProgressHelper {
         return player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
     }
 
-    public static List<RiftCreatureType> getUnlockedCreatures(EntityPlayer player) {
-        return getPlayerJournalProgress(player).getUnlockedCreatures();
+    public static Map<RiftCreatureType, Boolean> getUnlockedCreatures(EntityPlayer player) {
+        return getPlayerJournalProgress(player).getEncounteredCreatures();
     }
 
     public static List<CreatureCategory> getUnlockedCategories(EntityPlayer player) {
         return getPlayerJournalProgress(player).getUnlockedCategories();
+    }
+
+    public static void discoverCreature(EntityPlayer player, RiftCreatureType creatureType) {
+        if (player.world.isRemote) {
+            getPlayerJournalProgress(player).discoverCreature(creatureType);
+            RiftMessages.WRAPPER.sendToServer(new RiftJournalEditOne(creatureType, true, false));
+        }
+        else {
+            getPlayerJournalProgress(player).discoverCreature(creatureType);
+            RiftMessages.WRAPPER.sendToAll(new RiftJournalEditOne(creatureType, true, false));
+        }
     }
 
     public static void unlockCreature(EntityPlayer player, RiftCreatureType creatureType) {

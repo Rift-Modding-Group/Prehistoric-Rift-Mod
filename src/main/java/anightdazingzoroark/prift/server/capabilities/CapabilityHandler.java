@@ -84,7 +84,7 @@ public class CapabilityHandler {
         IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
         IPlayerJournalProgress oldJournalProgress = event.getOriginal().getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
 
-        journalProgress.setUnlockedCreatures(oldJournalProgress.getUnlockedCreatures());
+        journalProgress.setEncounteredCreatures(oldJournalProgress.getEncounteredCreatures());
 
         //replicate effects
         INonPotionEffects nonPotionEffects = player.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);

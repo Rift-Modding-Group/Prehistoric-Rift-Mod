@@ -3,16 +3,12 @@ package anightdazingzoroark.prift.server.capabilities.playerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class PlayerJournalProgressStorage implements Capability.IStorage<IPlayerJournalProgress> {
     @Nullable
@@ -23,13 +19,12 @@ public class PlayerJournalProgressStorage implements Capability.IStorage<IPlayer
         NBTTagCompound compound = new NBTTagCompound();
 
         NBTTagList entryList = new NBTTagList();
-        if (!instance.getUnlockedCreatures().isEmpty()) {
-            Set<Integer> uniqueCreatureOrdinals = new HashSet<>();
-            for (RiftCreatureType creatureType : instance.getUnlockedCreatures()) {
-                uniqueCreatureOrdinals.add(creatureType.ordinal());
-            }
-            for (int ordinal : uniqueCreatureOrdinals) {
-                entryList.appendTag(new NBTTagInt(ordinal));
+        if (!instance.getEncounteredCreatures().isEmpty()) {
+            for (Map.Entry<RiftCreatureType, Boolean> entry : instance.getEncounteredCreatures().entrySet()) {
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                tagCompound.setByte("Creature", (byte) entry.getKey().ordinal());
+                tagCompound.setBoolean("IsUnlocked", entry.getValue());
+                entryList.appendTag(tagCompound);
             }
             compound.setTag("UnlockedCreatures", entryList);
         }
@@ -46,13 +41,14 @@ public class PlayerJournalProgressStorage implements Capability.IStorage<IPlayer
             NBTTagCompound compound = (NBTTagCompound)nbt;
 
             if (compound.hasKey("UnlockedCreatures")) {
-                NBTTagList entryList = compound.getTagList("UnlockedCreatures", 3);
+                NBTTagList entryList = compound.getTagList("UnlockedCreatures", 10);
                 if (!entryList.isEmpty()) {
-                    List<RiftCreatureType> finalUnlockedList = new ArrayList<>();
+                    Map<RiftCreatureType, Boolean> finalUnlockedList = new HashMap<>();
                     for (int i = 0; i < entryList.tagCount(); i++) {
-                        finalUnlockedList.add(RiftCreatureType.values()[entryList.getIntAt(i)]);
+                        NBTTagCompound nbtEntry = (NBTTagCompound) entryList.get(i);
+                        finalUnlockedList.put(RiftCreatureType.values()[nbtEntry.getByte("Creature")], nbtEntry.getBoolean("IsUnlocked"));
                     }
-                    instance.setUnlockedCreatures(finalUnlockedList);
+                    instance.setEncounteredCreatures(finalUnlockedList);
                 }
             }
         }

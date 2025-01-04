@@ -52,7 +52,7 @@ public class RiftJournalCommand extends CommandBase {
                 if (args[1].equals("unlock")) {
                     RiftCreatureType creatureType = RiftCreatureType.safeValOf(args[2].toUpperCase());
                     if (creatureType != null) {
-                        if (!PlayerJournalProgressHelper.getUnlockedCreatures(target).contains(creatureType)) {
+                        if (!PlayerJournalProgressHelper.getUnlockedCreatures(target).containsKey(creatureType)) {
                             PlayerJournalProgressHelper.unlockCreature(target, creatureType);
                             notifyCommandListener(sender, this, "priftcommands.journal.add_success", creatureType.getTranslatedName(), target.getDisplayName());
                         }
@@ -63,7 +63,7 @@ public class RiftJournalCommand extends CommandBase {
                 else if (args[1].equals("clear")) {
                     RiftCreatureType creatureType = RiftCreatureType.safeValOf(args[2].toUpperCase());
                     if (creatureType != null) {
-                        if (PlayerJournalProgressHelper.getUnlockedCreatures(target).contains(creatureType)) {
+                        if (PlayerJournalProgressHelper.getUnlockedCreatures(target).containsKey(creatureType)) {
                             PlayerJournalProgressHelper.clearCreature(target, creatureType);
                             notifyCommandListener(sender, this, "priftcommands.journal.clear_success", creatureType.getTranslatedName(), target.getDisplayName());
                         }

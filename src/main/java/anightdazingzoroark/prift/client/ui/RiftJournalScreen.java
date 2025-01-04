@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalPartyButton;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -35,9 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SideOnly(Side.CLIENT)
@@ -165,14 +164,7 @@ public class RiftJournalScreen extends GuiScreen {
         this.buttonList.clear();
         this.sidebarHeight = 25;
 
-        List<RiftCreatureType> creatureTypeList = this.playerJournalProgress().getUnlockedCreatures();
-        //sort by name
-        Collections.sort(creatureTypeList, new Comparator<RiftCreatureType>() {
-            @Override
-            public int compare(RiftCreatureType f1, RiftCreatureType f2) {
-                return f1.name().compareTo(f2.name());
-            }
-        });
+        List<RiftCreatureType> creatureTypeList = this.playerJournalProgress().getEncounteredCreatures().keySet().stream().sorted(Comparator.comparing(Enum::name)).collect(Collectors.toList());
         //additional filter by category
         if (!category.equals(CreatureCategory.ALL)) {
             creatureTypeList = creatureTypeList.stream()
@@ -182,7 +174,8 @@ public class RiftJournalScreen extends GuiScreen {
         //add a back button
         this.buttonList.add(new RiftGuiJournalButton("NULL", 0, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 79, 96, 20, I18n.format("type.creature.back")));
         for (int x = 0; x < creatureTypeList.size(); x++) {
-            this.buttonList.add(new RiftGuiJournalButton(creatureTypeList.get(x).toString(), x + 1, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 79 + (25 * (x + 1)), 96, 20, creatureTypeList.get(x).getTranslatedName()));
+            String name = this.playerJournalProgress().getEncounteredCreatures().get(creatureTypeList.get(x)) ? creatureTypeList.get(x).getTranslatedName() : ("("+creatureTypeList.get(x).getTranslatedName()+")");
+            this.buttonList.add(new RiftGuiJournalButton(creatureTypeList.get(x).toString(), x + 1, (this.width - 96)/2 - 147, (this.height - 20) / 2 - 79 + (25 * (x + 1)), 96, 20, name));
             this.sidebarHeight += 25;
         }
     }
@@ -272,8 +265,11 @@ public class RiftJournalScreen extends GuiScreen {
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(scissorX, scissorY, scissorW, scissorH);
-        //image
+
+        int imgOffset = 0;
+        String journalString = "";
         if (this.entryType != null) {
+            //image
             this.mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/journal/"+this.entryType.name().toLowerCase()+"_journal.png"));
             final int imgWidth = 240;
             final int imgHeight = 180;
@@ -284,15 +280,19 @@ public class RiftJournalScreen extends GuiScreen {
             GlStateManager.scale(0.75f, 0.75f, 0.75f);
             drawModalRectWithCustomSizedTexture((int) (k / 0.75), (int) (l / 0.75) - (int)(this.entryScrollOffset / 0.75D), 0, 0, imgWidth, imgHeight, (float)imgWidth, (float)imgHeight);
             GlStateManager.popMatrix();
+
+            //text
+            if (this.playerJournalProgress().getEncounteredCreatures().get(this.entryType)) {
+                imgOffset = this.entryType != null ? 168 : 18;
+                journalString = this.getJournalEntry();
+                this.fontRenderer.drawSplitString(journalString, (this.width - 248)/2 + 60, (this.height - 200)/2 + imgOffset - this.entryScrollOffset, 248, 0x000000);
+            }
         }
-        //text
-        int imgOffset = this.entryType != null ? 168 : 18;
-        this.fontRenderer.drawSplitString(this.getJournalEntry(), (this.width - 248)/2 + 60, (this.height - 200)/2 + imgOffset - this.entryScrollOffset, 248, 0x000000);
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
         //get height of all content
-        List<String> wrappedTextLines = this.fontRenderer.listFormattedStringToWidth(this.getJournalEntry(), 248);
+        List<String> wrappedTextLines = this.fontRenderer.listFormattedStringToWidth(journalString, 248);
         int lineHeight = this.fontRenderer.FONT_HEIGHT;
         int displayedTextHeight = wrappedTextLines.size() * lineHeight;
         this.journalEntryHeight = displayedTextHeight + imgOffset;

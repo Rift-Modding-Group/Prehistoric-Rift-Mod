@@ -150,7 +150,7 @@ public class ServerEvents {
             EntityPlayer player = (EntityPlayer)event.getSource().getTrueSource();
             RiftCreature creature = (RiftCreature)event.getEntityLiving();
             if (!player.world.isRemote) {
-                if (!PlayerJournalProgressHelper.getUnlockedCreatures(player).contains(creature.creatureType)) {
+                if (!PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(creature.creatureType)) {
                     PlayerJournalProgressHelper.unlockCreature(player, creature.creatureType);
                     player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
                 }

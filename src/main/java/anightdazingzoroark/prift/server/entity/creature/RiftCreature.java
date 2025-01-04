@@ -295,6 +295,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setHasTarget(this.getAttackTarget() != null);
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();
+            this.manageDiscoveryByPlayer();
             if (this.isTamed()) {
                 this.updateEnergyMove();
                 this.updateEnergyActions();
@@ -390,6 +391,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
             }
+        }
+    }
+
+    private void manageDiscoveryByPlayer() {
+        AxisAlignedBB axisAlignedBB = new AxisAlignedBB(this.posX - 8, this.posY - 4, this.posZ - 8, this.posX + 8, this.posY + 4, this.posZ + 8);
+        for (EntityPlayer player : this.world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB, new Predicate<EntityPlayer>() {
+            @Override
+            public boolean apply(@Nullable EntityPlayer player) {
+                return !PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(creatureType);
+            }
+        })) {
+            PlayerJournalProgressHelper.discoverCreature(player, this.creatureType);
+            player.sendStatusMessage(new TextComponentTranslation("reminder.discovered_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
         }
     }
 
@@ -713,7 +727,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         if (!this.world.isRemote) {
             //update journal
-            if (!PlayerJournalProgressHelper.getUnlockedCreatures(player).contains(this.creatureType)) {
+            if (PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(this.creatureType) && !PlayerJournalProgressHelper.getUnlockedCreatures(player).get(this.creatureType)) {
                 PlayerJournalProgressHelper.unlockCreature(player, this.creatureType);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
             }

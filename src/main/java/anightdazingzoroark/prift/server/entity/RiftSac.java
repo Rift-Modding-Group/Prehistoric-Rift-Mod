@@ -73,7 +73,7 @@ public class RiftSac extends EntityTameable implements IAnimatable {
                 EntityPlayer owner = (EntityPlayer) this.getOwner();
 
                 //update journal
-                if (!PlayerJournalProgressHelper.getUnlockedCreatures(owner).contains(this.getCreatureType())) {
+                if (PlayerJournalProgressHelper.getUnlockedCreatures(owner).containsKey(this.getCreatureType()) && !PlayerJournalProgressHelper.getUnlockedCreatures(owner).get(this.getCreatureType())) {
                     PlayerJournalProgressHelper.unlockCreature(owner, this.getCreatureType());
                     owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.getCreatureType().getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
                 }

@@ -33,7 +33,7 @@ public interface IImpregnable {
                 EntityPlayer owner = (EntityPlayer) parent.getOwner();
 
                 //update journal
-                if (!PlayerJournalProgressHelper.getUnlockedCreatures(owner).contains(baby.creatureType)) {
+                if (PlayerJournalProgressHelper.getUnlockedCreatures(owner).containsKey(baby.creatureType) && !PlayerJournalProgressHelper.getUnlockedCreatures(owner).get(baby.creatureType)) {
                     PlayerJournalProgressHelper.unlockCreature(owner, baby.creatureType);
                     owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", baby.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
                 }
