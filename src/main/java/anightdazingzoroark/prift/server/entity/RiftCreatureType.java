@@ -13,28 +13,31 @@ import net.minecraft.world.World;
 import java.util.Locale;
 
 public enum RiftCreatureType {
-    TYRANNOSAURUS(Tyrannosaurus.class, TyrannosaurusConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, BlockBreakTier.WOOD, LevelupRate.SLOW, 3670016, 2428687, 450, 1, EggTemperature.VERY_WARM),
-    STEGOSAURUS(Stegosaurus.class, StegosaurusConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.DIRT, LevelupRate.NORMAL, 1731840, 16743424, 300, 1, EggTemperature.WARM),
-    DODO(Dodo.class, DodoConfig.class, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, null, null, null, 7828853, 6184028, 90, 0.25f, EggTemperature.NEUTRAL),
-    TRICERATOPS(Triceratops.class, TriceratopsConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 935177, 3631923, 300, 1, EggTemperature.WARM),
-    UTAHRAPTOR(Utahraptor.class, UtahraptorConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.FAST, BlockBreakTier.DIRT, LevelupRate.FAST, 5855577, 10439936, 180, 0.5f, EggTemperature.COLD),
-    APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.VERY_SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.STONE, LevelupRate.VERY_SLOW, 3160621, 16748800, 450, 1, EggTemperature.VERY_WARM),
-    PARASAUROLOPHUS(Parasaurolophus.class, ParasaurolophusConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 10055190, 8920579, 300, 1, EggTemperature.COLD),
-    DIMETRODON(Dimetrodon.class, DimetrodonConfig.class, CreatureCategory.MAMMAL, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, null, LevelupRate.NORMAL, 10968581, 13198105, 90, 0.5f, EggTemperature.NEUTRAL),
-    COELACANTH(Coelacanth.class, CoelacanthConfig.class, CreatureCategory.FISH, CreatureDiet.INSECTIVORE, null, null, null, null, 1329530, 1857680, 0, 0, null),
-    MEGAPIRANHA(Megapiranha.class, MegapiranhaConfig.class, CreatureCategory.FISH, CreatureDiet.CARNIVORE, null, null, null, null, 8421504, 10226700, 0, 0, null),
-    SARCOSUCHUS(Sarcosuchus.class, SarcosuchusConfig.class, CreatureCategory.REPTILE, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 2302246, 2627379, 300, 0.5f, EggTemperature.COLD),
-    ANOMALOCARIS(Anomalocaris.class, AnomalocarisConfig.class, CreatureCategory.INVERTEBRATE, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.DIRT, LevelupRate.NORMAL, 10892050, 12270358, 300, 1f, null),
-    SAUROPHAGANAX(Saurophaganax.class, SaurophaganaxConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.INSECTIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 986895, 16737280, 450, 1f, EggTemperature.COLD),
-    DIREWOLF(Direwolf.class, DirewolfConfig.class, CreatureCategory.MAMMAL, CreatureDiet.CARNIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.FAST, BlockBreakTier.DIRT, LevelupRate.FAST, 8421504, 10066329, 0, 0, null),
-    MEGALOCEROS(Megaloceros.class, MegalocerosConfig.class, CreatureCategory.MAMMAL, CreatureDiet.HERBIVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 6048296, 4666924, 0, 0, null),
-    BARYONYX(Baryonyx.class, BaryonyxConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.PISCIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 1277213, 4674683, 300, 1f, EggTemperature.COLD),
-    PALAEOCASTOR(Palaeocastor.class, PalaeocastorConfig.class, CreatureCategory.MAMMAL, CreatureDiet.SAXUMAVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.STONE, LevelupRate.FAST, 3881787, 855309, 0, 0, null),
-    ANKYLOSAURUS(Ankylosaurus.class, AnkylosaurusConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.STONE, LevelupRate.SLOW, 4338984, 4343887, 300, 1, EggTemperature.COLD),
-    DILOPHOSAURUS(Dilophosaurus.class, DilophosaurusConfig.class, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 16239896, 1141548, 180, 0.5f, EggTemperature.COLD);
+    TYRANNOSAURUS(Tyrannosaurus.class, TyrannosaurusConfig.class, true, false, true, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, BlockBreakTier.WOOD, LevelupRate.SLOW, 3670016, 2428687, 450, 1, EggTemperature.VERY_WARM),
+    STEGOSAURUS(Stegosaurus.class, StegosaurusConfig.class, true, true, true, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.DIRT, LevelupRate.NORMAL, 1731840, 16743424, 300, 1, EggTemperature.WARM),
+    DODO(Dodo.class, DodoConfig.class, false, false, true, CreatureCategory.BIRD, CreatureDiet.HERBIVORE, null, null, null, null, 7828853, 6184028, 90, 0.25f, EggTemperature.NEUTRAL),
+    TRICERATOPS(Triceratops.class, TriceratopsConfig.class, true, true, true, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 935177, 3631923, 300, 1, EggTemperature.WARM),
+    UTAHRAPTOR(Utahraptor.class, UtahraptorConfig.class, true, true, true, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.FAST, BlockBreakTier.DIRT, LevelupRate.FAST, 5855577, 10439936, 180, 0.5f, EggTemperature.COLD),
+    APATOSAURUS(Apatosaurus.class, ApatosaurusConfig.class, true, false, true, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.VERY_SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.STONE, LevelupRate.VERY_SLOW, 3160621, 16748800, 450, 1, EggTemperature.VERY_WARM),
+    PARASAUROLOPHUS(Parasaurolophus.class, ParasaurolophusConfig.class, true, true, true, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 10055190, 8920579, 300, 1, EggTemperature.COLD),
+    DIMETRODON(Dimetrodon.class, DimetrodonConfig.class, true, true, true, CreatureCategory.MAMMAL, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.NORMAL, null, LevelupRate.NORMAL, 10968581, 13198105, 90, 0.5f, EggTemperature.NEUTRAL),
+    COELACANTH(Coelacanth.class, CoelacanthConfig.class, false, false, false, CreatureCategory.FISH, CreatureDiet.INSECTIVORE, null, null, null, null, 1329530, 1857680, 0, 0, null),
+    MEGAPIRANHA(Megapiranha.class, MegapiranhaConfig.class, false, false, false, CreatureCategory.FISH, CreatureDiet.CARNIVORE, null, null, null, null, 8421504, 10226700, 0, 0, null),
+    SARCOSUCHUS(Sarcosuchus.class, SarcosuchusConfig.class, true, true, true, CreatureCategory.REPTILE, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 2302246, 2627379, 300, 0.5f, EggTemperature.COLD),
+    ANOMALOCARIS(Anomalocaris.class, AnomalocarisConfig.class, true, true, true, CreatureCategory.INVERTEBRATE, CreatureDiet.CARNIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.DIRT, LevelupRate.NORMAL, 10892050, 12270358, 300, 1f, null),
+    SAUROPHAGANAX(Saurophaganax.class, SaurophaganaxConfig.class, true, true, true, CreatureCategory.DINOSAUR, CreatureDiet.INSECTIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 986895, 16737280, 450, 1f, EggTemperature.COLD),
+    DIREWOLF(Direwolf.class, DirewolfConfig.class, true, true, true, CreatureCategory.MAMMAL, CreatureDiet.CARNIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.FAST, BlockBreakTier.DIRT, LevelupRate.FAST, 8421504, 10066329, 0, 0, null),
+    MEGALOCEROS(Megaloceros.class, MegalocerosConfig.class, true, true, true, CreatureCategory.MAMMAL, CreatureDiet.HERBIVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 6048296, 4666924, 0, 0, null),
+    BARYONYX(Baryonyx.class, BaryonyxConfig.class, true, true, true, CreatureCategory.DINOSAUR, CreatureDiet.PISCIVORE, EnergyCategory.NORMAL, EnergyRechargeCategory.SLOW, BlockBreakTier.WOOD, LevelupRate.NORMAL, 1277213, 4674683, 300, 1f, EggTemperature.COLD),
+    PALAEOCASTOR(Palaeocastor.class, PalaeocastorConfig.class, true, true, true, CreatureCategory.MAMMAL, CreatureDiet.SAXUMAVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.STONE, LevelupRate.FAST, 3881787, 855309, 0, 0, null),
+    ANKYLOSAURUS(Ankylosaurus.class, AnkylosaurusConfig.class, true, true, true, CreatureCategory.DINOSAUR, CreatureDiet.HERBIVORE, EnergyCategory.SLOW, EnergyRechargeCategory.SLOW, BlockBreakTier.STONE, LevelupRate.SLOW, 4338984, 4343887, 300, 1, EggTemperature.COLD),
+    DILOPHOSAURUS(Dilophosaurus.class, DilophosaurusConfig.class, true, true, true, CreatureCategory.DINOSAUR, CreatureDiet.CARNIVORE, EnergyCategory.FAST, EnergyRechargeCategory.NORMAL, BlockBreakTier.DIRT, LevelupRate.FAST, 16239896, 1141548, 180, 0.5f, EggTemperature.COLD);
 
     private final Class<? extends RiftCreature> creature;
     private final Class<? extends RiftCreatureConfig> config;
+    private final boolean isTameable;
+    private final boolean isTameableByFeeding;
+    private final boolean isBreedable;
     private final CreatureCategory creatureCategory;
     private final CreatureDiet creatureDiet;
     private final EnergyCategory energyCategory;
@@ -50,9 +53,12 @@ public enum RiftCreatureType {
     public Item sacItem;
     public final String friendlyName;
 
-    RiftCreatureType(Class<? extends RiftCreature> creature, Class<? extends RiftCreatureConfig> config, CreatureCategory creatureCategory, CreatureDiet creatureDiet, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, BlockBreakTier blockBreakTier, LevelupRate levelupRate, int eggPrimary, int eggSecondary, int hatchTime, float eggScale, EggTemperature eggTemperature) {
+    RiftCreatureType(Class<? extends RiftCreature> creature, Class<? extends RiftCreatureConfig> config, boolean isTameable, boolean isTameableByFeeding, boolean isBreedable, CreatureCategory creatureCategory, CreatureDiet creatureDiet, EnergyCategory energyCategory, EnergyRechargeCategory energyRechargeCategory, BlockBreakTier blockBreakTier, LevelupRate levelupRate, int eggPrimary, int eggSecondary, int hatchTime, float eggScale, EggTemperature eggTemperature) {
         this.creature = creature;
         this.config = config;
+        this.isTameable = isTameable;
+        this.isTameableByFeeding = isTameableByFeeding;
+        this.isBreedable = isBreedable;
         this.creatureCategory = creatureCategory;
         this.creatureDiet = creatureDiet;
         this.energyCategory = energyCategory;
@@ -72,6 +78,18 @@ public enum RiftCreatureType {
 
     public Class<? extends RiftCreatureConfig> getConfig() {
         return this.config;
+    }
+
+    public boolean isTameable() {
+        return this.isTameable;
+    }
+
+    public boolean isTameableByFeeding() {
+        return this.isTameableByFeeding;
+    }
+
+    public boolean isBreedable() {
+        return this.isBreedable;
     }
 
     public CreatureCategory getCreatureCategory() {

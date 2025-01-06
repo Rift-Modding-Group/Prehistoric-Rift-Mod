@@ -181,8 +181,11 @@ journal.warning.cannot_summon=This creature cannot be summoned in your location!
 journal.warning.cannot_teleport=This creature cannot be teleported to your location!
 journal.warning.rearrange_instructions=Click on a creature, then on another creature to swap their positions!
 journal.warning.no_party_members=you have no party members lol
-journal.taming_foods=Taming/Breeding Foods:
+journal.taming_or_breeding_foods=Taming/Breeding Foods:
+journal.breeding_foods=Breeding Foods:
+journal.favorite_foods=Favorite Foods:
 journal.open_in_jei=Click to see JEI recipe
+journal.must_kill_for_egg=This creature must be killed for a chance to obtain its egg for hatching and taming
 
 radial.choice.ride=Ride
 radial.choice.state=State

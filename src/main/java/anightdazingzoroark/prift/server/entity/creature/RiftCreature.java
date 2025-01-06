@@ -402,8 +402,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 return !PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(creatureType);
             }
         })) {
-            PlayerJournalProgressHelper.discoverCreature(player, this.creatureType);
-            player.sendStatusMessage(new TextComponentTranslation("reminder.discovered_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+            if (this.creatureType.isTameable()) {
+                PlayerJournalProgressHelper.discoverCreature(player, this.creatureType);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.discovered_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+            }
+            else {
+                PlayerJournalProgressHelper.unlockCreature(player, this.creatureType);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+            }
         }
     }
 
@@ -1535,7 +1541,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isTameableByFeeding() {
-        return true;
+        return this.creatureType.isTameableByFeeding();
     }
 
     public boolean canBeSaddled() {

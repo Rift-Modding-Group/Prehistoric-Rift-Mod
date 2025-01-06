@@ -52,7 +52,8 @@ public class RiftJournalScreen extends GuiScreen {
     protected int guiLeft;
     protected int guiTop;
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
-    private Map<String, List<Integer>> shownItemsList = new HashMap<>();
+    private Map<String, List<Integer>> shownTamingFoodsList = new HashMap<>();
+    private Map<String, List<Integer>> shownFavoriteFoodsList = new HashMap<>();
     private CreatureCategory sidebarType;
     private RiftCreatureType entryType;
     private int selectedPartyPos = -1;
@@ -289,29 +290,64 @@ public class RiftJournalScreen extends GuiScreen {
             drawModalRectWithCustomSizedTexture((int) (k / 0.75), (int) (l / 0.75) - (int)(this.entryScrollOffset / 0.75D), 0, 0, imgWidth, imgHeight, (float)imgWidth, (float)imgHeight);
             GlStateManager.popMatrix();
 
-            //taming foods
-            imgOffset += 16;
-            String tamingFoodsLabel = I18n.format("journal.taming_foods");
-            Map<String, List<Integer>> tempItemList = new HashMap<>();
-            this.fontRenderer.drawString(tamingFoodsLabel, (this.width - this.fontRenderer.getStringWidth(tamingFoodsLabel)) / 2 - 5, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + 41, 0x000000);
-            for (int i = 0; i < RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.size(); i++) {
-                RiftCreatureConfig.Meal meal = RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.get(i);
-                List<Integer> pos = new ArrayList<>();
-                pos.add((this.width - 16) / 2 + (i * 20) - 56 + this.fontRenderer.getStringWidth(tamingFoodsLabel) + 4);
-                pos.add((this.height - 16) / 2 + 40 + imgOffset - this.entryScrollOffset);
-                tempItemList.put(meal.itemId, pos);
-                this.renderItem(meal.itemId, pos.get(0), pos.get(1));
+            //for creatures that can only be tamed by killing and hoping they drop their egg
+            //add a warning here about it
+            if (this.entryType.isTameable() && !this.entryType.isTameableByFeeding()) {
+                imgOffset += 24;
+                String labelString = I18n.format("journal.must_kill_for_egg");
+                this.fontRenderer.drawSplitString(labelString, (this.width - 248) / 2 + 60, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + 40, 248,0xff0000);
             }
-            this.shownItemsList = tempItemList;
+
+            int textOffset = 0;
+
+            //taming foods
+            if (RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals != null && !RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.isEmpty()) {
+                imgOffset += 24;
+                textOffset += 16 * (RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.size() / 6);
+                String tamingFoodsLabel = this.entryType.isTameableByFeeding() ?  I18n.format("journal.taming_or_breeding_foods") : I18n.format("journal.breeding_foods");
+                int tamingFoodsLabelOffset = this.entryType.isTameableByFeeding() ? -5 : -24;
+                Map<String, List<Integer>> tempItemList = new HashMap<>();
+                this.fontRenderer.drawString(tamingFoodsLabel, (this.width - this.fontRenderer.getStringWidth(tamingFoodsLabel)) / 2 + tamingFoodsLabelOffset, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + 41, 0x000000);
+                for (int i = 0; i < RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.size(); i++) {
+                    RiftCreatureConfig.Meal meal = RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.get(i);
+                    List<Integer> pos = new ArrayList<>();
+                    pos.add((this.width - 16) / 2 + ((i % 6) * 20) - 56 + this.fontRenderer.getStringWidth(tamingFoodsLabel) + 4);
+                    pos.add((this.height - 16) / 2 + ((i / 6) * 20) + 40 + imgOffset - this.entryScrollOffset);
+                    tempItemList.put(meal.itemId, pos);
+                    this.renderItem(meal.itemId, pos.get(0), pos.get(1));
+                }
+                this.shownTamingFoodsList = tempItemList;
+            }
+
+            //healing foods
+            if (this.playerJournalProgress().getEncounteredCreatures().get(this.entryType) && RiftConfigHandler.getConfig(this.entryType).general.favoriteFood != null && !RiftConfigHandler.getConfig(this.entryType).general.favoriteFood.isEmpty()) {
+                imgOffset += 16;
+                textOffset += 16 * (RiftConfigHandler.getConfig(this.entryType).general.favoriteFood.size() / 8);
+                String favoriteFoodsLabel = I18n.format("journal.favorite_foods");
+                Map<String, List<Integer>> tempItemList = new HashMap<>();
+                this.fontRenderer.drawString(favoriteFoodsLabel, (this.width - this.fontRenderer.getStringWidth(favoriteFoodsLabel)) / 2 - 25, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + 41, 0x000000);
+                for (int i = 0; i < RiftConfigHandler.getConfig(this.entryType).general.favoriteFood.size(); i++) {
+                    RiftCreatureConfig.Food food = RiftConfigHandler.getConfig(this.entryType).general.favoriteFood.get(i);
+                    List<Integer> pos = new ArrayList<>();
+                    pos.add((this.width - 16) / 2 + ((i % 8) * 20) - 56 + this.fontRenderer.getStringWidth(favoriteFoodsLabel) + 4);
+                    pos.add((this.height - 16) / 2 + ((i / 8) * 20) + 40 + imgOffset - this.entryScrollOffset);
+                    tempItemList.put(food.itemId, pos);
+                    this.renderItem(food.itemId, pos.get(0), pos.get(1));
+                }
+                this.shownFavoriteFoodsList = tempItemList;
+            }
 
             //text
             if (this.playerJournalProgress().getEncounteredCreatures().get(this.entryType)) {
-                imgOffset += this.entryType != null ? 168 : 18;
+                imgOffset += this.entryType != null ? 160 : 18;
                 journalString = this.getJournalEntry();
-                this.fontRenderer.drawSplitString(journalString, (this.width - 248)/2 + 60, (this.height - 200)/2 + imgOffset - this.entryScrollOffset, 248, 0x000000);
+                this.fontRenderer.drawSplitString(journalString, (this.width - 248)/2 + 60, (this.height - 200)/2 + imgOffset - this.entryScrollOffset + textOffset, 248, 0x000000);
             }
         }
-        else this.shownItemsList = new HashMap<>();
+        else {
+            this.shownTamingFoodsList = new HashMap<>();
+            this.shownFavoriteFoodsList = new HashMap<>();
+        }
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
@@ -391,9 +427,19 @@ public class RiftJournalScreen extends GuiScreen {
 
     //managing journal entry and pic ends here
     private void placeOtherItemData(int mouseX, int mouseY) {
-        for (Map.Entry<String, List<Integer>> entry : this.shownItemsList.entrySet()) {
+        for (Map.Entry<String, List<Integer>> entry : this.shownTamingFoodsList.entrySet()) {
             if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
             && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16) {
+                ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
+                List<String> strings = new ArrayList<>();
+                strings.add(itemStack.getDisplayName());
+                if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) strings.add(I18n.format("journal.open_in_jei"));
+                this.drawHoveringText(strings, mouseX, mouseY);
+            }
+        }
+        for (Map.Entry<String, List<Integer>> entry : this.shownFavoriteFoodsList.entrySet()) {
+            if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
+                    && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16) {
                 ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
                 List<String> strings = new ArrayList<>();
                 strings.add(itemStack.getDisplayName());
@@ -604,14 +650,27 @@ public class RiftJournalScreen extends GuiScreen {
         }
 
         //on clicking on shown items, open JEI recipes if JEI is available
-        if (!this.shownItemsList.isEmpty() && Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) {
-            for (Map.Entry<String, List<Integer>> entry : this.shownItemsList.entrySet()) {
-                if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
-                        && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16
-                        && Mouse.isButtonDown(0)) {
-                    ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
-                    RiftJEI.showRecipesForItemStack(itemStack, false);
-                    break;
+        if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) {
+            if (!this.shownTamingFoodsList.isEmpty()) {
+                for (Map.Entry<String, List<Integer>> entry : this.shownTamingFoodsList.entrySet()) {
+                    if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
+                            && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16
+                            && Mouse.isButtonDown(0)) {
+                        ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
+                        RiftJEI.showRecipesForItemStack(itemStack, false);
+                        break;
+                    }
+                }
+            }
+            if (!this.shownFavoriteFoodsList.isEmpty()) {
+                for (Map.Entry<String, List<Integer>> entry : this.shownFavoriteFoodsList.entrySet()) {
+                    if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
+                            && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16
+                            && Mouse.isButtonDown(0)) {
+                        ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
+                        RiftJEI.showRecipesForItemStack(itemStack, false);
+                        break;
+                    }
                 }
             }
         }
