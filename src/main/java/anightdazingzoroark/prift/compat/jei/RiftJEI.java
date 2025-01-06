@@ -16,10 +16,13 @@ import com.codetaylor.mc.pyrotech.modules.tech.bloomery.recipe.BloomeryRecipe;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.recipe.WitherForgeRecipe;
 import mezz.jei.api.*;
 import mezz.jei.api.ingredients.IIngredientBlacklist;
+import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -29,12 +32,18 @@ import static com.codetaylor.mc.pyrotech.modules.tech.bloomery.ModuleTechBloomer
 
 @JEIPlugin
 public class RiftJEI implements IModPlugin {
+    private static IJeiRuntime jeiRuntime;
     public static final String smExtractorCat = "prift.semi_manual_extractor";
     public static final String smPresserCat = "prift.semi_manual_presser";
     public static final String smExtruderCat = "prift.semi_manual_extruder";
     public static final String smHammererCat = "prift.semi_manual_hammerer";
     public static final String millstoneCat = "prift.millstone";
     public static final String mechFilterCat = "prift.mechanical_filter";
+
+    @Override
+    public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
+        RiftJEI.jeiRuntime = jeiRuntime;
+    }
 
     //recipe makers
     private List<RiftJEISMExtractorWrapper> semiManualExtractorWrappers() {
@@ -154,5 +163,10 @@ public class RiftJEI implements IModPlugin {
             registry.addRecipeClickArea(RiftMechanicalFilterMenu.class, 81, 44, 14, 22, mechFilterCat);
             registry.addRecipeCatalyst(new ItemStack(RiftMMBlocks.MECHANICAL_FILTER), mechFilterCat);
         }
+    }
+
+    public static boolean showRecipesForItemStack(ItemStack itemStack, boolean isUses) {
+        jeiRuntime.getRecipesGui().show(jeiRuntime.getRecipeRegistry().createFocus(isUses ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, itemStack));
+        return Minecraft.getMinecraft().currentScreen instanceof IRecipesGui;
     }
 }

@@ -5,9 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Arrays;
 
 public class AnomalocarisConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public AnomalocarisGeneral general = new AnomalocarisGeneral();
-
     public AnomalocarisConfig() {
         this.stats.baseHealth = 50;
         this.stats.baseDamage = 5;
@@ -29,10 +26,5 @@ public class AnomalocarisConfig extends RiftCreatureConfig {
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("WATER").setSpawnInWater().setMustSeeSky().setYLevelRange(0, 64).setWeight(5).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("biome:minecraft:deep_ocean")
         );
-    }
-
-    public static class AnomalocarisGeneral extends PredatorGeneral {
-        @SerializedName("maximumGrabTargetSize")
-        public String maximumGrabTargetSize;
     }
 }

@@ -34,8 +34,8 @@ public class Dodo extends RiftCreature implements IHerder {
     public Dodo(World worldIn) {
         super(worldIn, RiftCreatureType.DODO);
         this.setSize(0.75f, 0.75f);
-        this.favoriteFood = ((DodoConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.breedingFood = ((DodoConfig)RiftConfigHandler.getConfig(this.creatureType)).general.breedingFood;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 3;
         this.speed = 0.25D;
         this.isRideable = false;

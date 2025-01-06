@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.config;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.minecraftforge.fml.common.Optional;
 
@@ -8,6 +9,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class RiftCreatureConfig {
+    @SerializedName("general")
+    public General general = new General();
+
     @SerializedName("stats")
     public Stats stats = new Stats();
 
@@ -37,14 +41,59 @@ public abstract class RiftCreatureConfig {
 
         @SerializedName("favoriteMeals")
         public List<Meal> favoriteMeals;
-    }
 
-    public static class PredatorGeneral extends General {
+        //alternative to favoriteMeals for creatures that cannot be tamed but can still be bred
+        @SerializedName("breedingFood")
+        public List<String> breedingFood;
+
         @SerializedName("targetWhitelist")
         public List<String> targetWhitelist;
 
         @SerializedName("targetBlacklist")
         public List<String> targetBlacklist;
+
+        @SerializedName("harvestableBlocks")
+        public List<String> harvestableBlocks;
+
+        //anomalocaris only
+        @SerializedName("maximumGrabTargetSize")
+        public String maximumGrabTargetSize;
+
+        //apatosaurus only
+        @SerializedName("maximumPassengerSize")
+        public String maximumPassengerSize;
+
+        //dimetrodon only
+        @SerializedName("temperatureChangingItems")
+        public List<DimetrodonConfig.TemperatureChangingItem> temperatureChangingItems;
+
+        //direwolf only
+        @SerializedName("sniffableBlocks")
+        public List<String> sniffableBlocks;
+
+        @SerializedName("blockSniffRange")
+        public Integer blockSniffRange;
+
+        @SerializedName("maximumMobSniffSize")
+        public String maximumMobSniffSize;
+
+        @SerializedName("mobSniffRange")
+        public Integer mobSniffRange;
+
+        //for sarcosuchus only
+        @SerializedName("maximumSpinAttackTargetSize")
+        public String maximumSpinAttackTargetSize;
+
+        //for stegosaurus only
+        @SerializedName("canInflictBleed")
+        public Boolean canInflictBleed;
+
+        //for tyrannosaurus only
+        @SerializedName("affectedByRoarBlacklist")
+        public List<String> affectedByRoarBlacklist;
+
+        @SerializedName("useRoarBlacklistAsWhitelist")
+        public Boolean useRoarBlacklistAsWhitelist;
     }
 
     public static class Food {
@@ -72,6 +121,11 @@ public abstract class RiftCreatureConfig {
         public Meal(String itemId, double tameMultiplier) {
             this.itemId = itemId;
             this.tameMultiplier = tameMultiplier;
+        }
+
+        @Override
+        public String toString() {
+            return "{itemId: "+this.itemId+", tameMultiplier: "+this.tameMultiplier+"}";
         }
     }
 

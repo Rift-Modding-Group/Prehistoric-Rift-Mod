@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DirewolfConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public DirewolfGeneral general = new DirewolfGeneral();
-
     public DirewolfConfig() {
         this.stats.baseHealth = 30;
         this.stats.baseDamage = 6;
@@ -34,19 +31,5 @@ public class DirewolfConfig extends RiftCreatureConfig {
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(10).setSpawnAmntRange(2, 4).setDensityLimit(16).setBiomes("tag:snowy"),
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(12000, 24000).setWeight(24).setSpawnAmntRange(2, 4).setDensityLimit(24).setBiomes("tag:snowy")
         );
-    }
-
-    public static class DirewolfGeneral extends PredatorGeneral {
-        @SerializedName("sniffableBlocks")
-        public List<String> sniffableBlocks;
-
-        @SerializedName("blockSniffRange")
-        public int blockSniffRange;
-
-        @SerializedName("maximumMobSniffSize")
-        public String maximumMobSniffSize;
-
-        @SerializedName("mobSniffRange")
-        public int mobSniffRange;
     }
 }

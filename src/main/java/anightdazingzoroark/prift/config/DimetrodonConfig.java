@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DimetrodonConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public DimetrodonGeneral general = new DimetrodonGeneral();
-
     @SerializedName("simpleDifficulty")
     public SimpleDifficulty simpleDifficulty = new SimpleDifficulty();
 
@@ -43,11 +40,6 @@ public class DimetrodonConfig extends RiftCreatureConfig {
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("tag:sandy", "tag:savanna")
         );
-    }
-
-    public static class DimetrodonGeneral extends PredatorGeneral {
-        @SerializedName("temperatureChangingItems")
-        public List<TemperatureChangingItem> temperatureChangingItems;
     }
 
     public static class SimpleDifficulty {

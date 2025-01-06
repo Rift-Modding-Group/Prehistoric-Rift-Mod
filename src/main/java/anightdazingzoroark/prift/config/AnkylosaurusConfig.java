@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AnkylosaurusConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public AnkylosaurusGeneral general = new AnkylosaurusGeneral();
-
     public AnkylosaurusConfig() {
         this.stats.baseHealth = 80;
         this.stats.baseDamage = 25;
@@ -40,10 +37,5 @@ public class AnkylosaurusConfig extends RiftCreatureConfig {
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(15).setSpawnAmntRange(4, 6).setDensityLimit(12).setBiomes("tag:sandy")
         );
 
-    }
-
-    public static class AnkylosaurusGeneral extends General {
-        @SerializedName("harvestableBlocks")
-        public List<String> harvestableBlocks;
     }
 }

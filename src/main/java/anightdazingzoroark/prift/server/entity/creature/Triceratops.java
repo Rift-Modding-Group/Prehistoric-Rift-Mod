@@ -77,12 +77,12 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
         this.setSize(2f, 2f);
-        this.favoriteFood = ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 20;
         this.speed = 0.15D;
         this.isRideable = true;
-        this.saddleItem = ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
 
         this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.2f, 1f, 1.25f, 1f).setInvulnerable();
         this.bodyPart = new RiftCreaturePart(this, 1.125f, 0, 0.8f, 1f, 0.875f, 1f);

@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class StegosaurusConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public StegosaurusGeneral general = new StegosaurusGeneral();
-
     public StegosaurusConfig() {
         this.stats.baseHealth = 100;
         this.stats.baseDamage = 30;
@@ -34,13 +31,5 @@ public class StegosaurusConfig extends RiftCreatureConfig {
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(15).setSpawnAmntRange(4, 6).setDensityLimit(12).setBiomes("tag:plains", "-tag:savanna")
         );
-    }
-
-    public static class StegosaurusGeneral extends General {
-        @SerializedName("canInflictBleed")
-        public boolean canInflictBleed;
-
-        @SerializedName("harvestableBlocks")
-        public List<String> harvestableBlocks;
     }
 }

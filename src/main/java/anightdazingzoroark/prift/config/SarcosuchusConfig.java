@@ -5,9 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Arrays;
 
 public class SarcosuchusConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public SarcosuchusGeneral general = new SarcosuchusGeneral();
-
     public SarcosuchusConfig() {
         this.stats.baseHealth = 80;
         this.stats.baseDamage = 15;
@@ -29,10 +26,5 @@ public class SarcosuchusConfig extends RiftCreatureConfig {
                 new SpawnRule().setCategory("WATER").setSpawnInWater().setMustSeeSky().setYLevelRange(56, 64).setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(2).setBiomes("biome:minecraft:river"),
                 new SpawnRule().setCategory("WATER").setSpawnInWater().setMustSeeSky().setYLevelRange(56, 64).setWeight(15).setSpawnAmntRange(1, 1).setDensityLimit(2).setBiomes("tag:swamp")
         );
-    }
-
-    public static class SarcosuchusGeneral extends PredatorGeneral {
-        @SerializedName("maximumSpinAttackTargetSize")
-        public String maximumSpinAttackTargetSize;
     }
 }

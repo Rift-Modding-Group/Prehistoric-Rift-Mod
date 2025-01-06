@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MegalocerosConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public MegalocerosGeneral general = new MegalocerosGeneral();
-
     public MegalocerosConfig() {
         this.stats.baseHealth = 6;
         this.stats.baseDamage = 4;
@@ -28,10 +25,5 @@ public class MegalocerosConfig extends RiftCreatureConfig {
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(15).setSpawnAmntRange(4, 6).setDensityLimit(10).setBiomes("tag:snowy", "-tag:forest")
         );
-    }
-
-    public static class MegalocerosGeneral extends General {
-        @SerializedName("harvestableBlocks")
-        public List<String> harvestableBlocks;
     }
 }

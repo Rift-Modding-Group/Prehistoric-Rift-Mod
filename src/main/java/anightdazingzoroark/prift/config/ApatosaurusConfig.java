@@ -5,9 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Arrays;
 
 public class ApatosaurusConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public ApatosaurusGeneral general = new ApatosaurusGeneral();
-
     public ApatosaurusConfig() {
         this.stats.baseHealth = 200;
         this.stats.baseDamage = 80;
@@ -26,10 +23,5 @@ public class ApatosaurusConfig extends RiftCreatureConfig {
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(7).setSpawnAmntRange(1, 3).setDensityLimit(4).setBiomes("tag:plains", "-tag:savanna")
         );
-    }
-
-    public static class ApatosaurusGeneral extends General {
-        @SerializedName("maximumPassengerSize")
-        public String maximumPassengerSize;
     }
 }

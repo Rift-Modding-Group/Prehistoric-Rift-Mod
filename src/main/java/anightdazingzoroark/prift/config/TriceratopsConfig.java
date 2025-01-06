@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TriceratopsConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public TriceratopsGeneral general = new TriceratopsGeneral();
-
     public TriceratopsConfig() {
         this.stats.baseHealth = 80;
         this.stats.baseDamage = 25;
@@ -29,10 +26,5 @@ public class TriceratopsConfig extends RiftCreatureConfig {
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(15).setSpawnAmntRange(4, 6).setDensityLimit(10).setBiomes("tag:plains", "-tag:savanna")
         );
-    }
-
-    public static class TriceratopsGeneral extends General {
-        @SerializedName("harvestableBlocks")
-        public List<String> harvestableBlocks;
     }
 }

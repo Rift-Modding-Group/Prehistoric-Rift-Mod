@@ -4,7 +4,9 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalPartyButton;
+import anightdazingzoroark.prift.compat.jei.RiftJEI;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -15,6 +17,7 @@ import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
 import com.google.common.collect.Lists;
+import mezz.jei.api.IJeiRuntime;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiButton;
@@ -22,10 +25,13 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Mouse;
@@ -46,6 +52,7 @@ public class RiftJournalScreen extends GuiScreen {
     protected int guiLeft;
     protected int guiTop;
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
+    private Map<String, List<Integer>> shownItemsList = new HashMap<>();
     private CreatureCategory sidebarType;
     private RiftCreatureType entryType;
     private int selectedPartyPos = -1;
@@ -115,6 +122,7 @@ public class RiftJournalScreen extends GuiScreen {
         else {
             //draw entry and image
             this.placeJournalEntry();
+            this.placeOtherItemData(mouseX, mouseY);
             this.partyMemButtonList.clear();
         }
 
@@ -281,13 +289,29 @@ public class RiftJournalScreen extends GuiScreen {
             drawModalRectWithCustomSizedTexture((int) (k / 0.75), (int) (l / 0.75) - (int)(this.entryScrollOffset / 0.75D), 0, 0, imgWidth, imgHeight, (float)imgWidth, (float)imgHeight);
             GlStateManager.popMatrix();
 
+            //taming foods
+            imgOffset += 16;
+            String tamingFoodsLabel = I18n.format("journal.taming_foods");
+            Map<String, List<Integer>> tempItemList = new HashMap<>();
+            this.fontRenderer.drawString(tamingFoodsLabel, (this.width - this.fontRenderer.getStringWidth(tamingFoodsLabel)) / 2 - 5, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + 41, 0x000000);
+            for (int i = 0; i < RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.size(); i++) {
+                RiftCreatureConfig.Meal meal = RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.get(i);
+                List<Integer> pos = new ArrayList<>();
+                pos.add((this.width - 16) / 2 + (i * 20) - 56 + this.fontRenderer.getStringWidth(tamingFoodsLabel) + 4);
+                pos.add((this.height - 16) / 2 + 40 + imgOffset - this.entryScrollOffset);
+                tempItemList.put(meal.itemId, pos);
+                this.renderItem(meal.itemId, pos.get(0), pos.get(1));
+            }
+            this.shownItemsList = tempItemList;
+
             //text
             if (this.playerJournalProgress().getEncounteredCreatures().get(this.entryType)) {
-                imgOffset = this.entryType != null ? 168 : 18;
+                imgOffset += this.entryType != null ? 168 : 18;
                 journalString = this.getJournalEntry();
                 this.fontRenderer.drawSplitString(journalString, (this.width - 248)/2 + 60, (this.height - 200)/2 + imgOffset - this.entryScrollOffset, 248, 0x000000);
             }
         }
+        else this.shownItemsList = new HashMap<>();
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
@@ -308,6 +332,12 @@ public class RiftJournalScreen extends GuiScreen {
             int thumbPosition = (int)((float)this.entryScrollOffset / (this.journalEntryHeight - 200) * (200 - thumbHeight));
             drawRect(k, l + thumbPosition, k + 5, l + thumbHeight + thumbPosition, 0xFFC0C0C0);
         }
+    }
+
+    private void renderItem(String itemId, int x, int y) {
+        RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
+        ItemStack itemStack = RiftUtil.getItemStackFromString(itemId);
+        renderItem.renderItemAndEffectIntoGUI(itemStack, x, y);
     }
 
     private String getJournalEntry() {
@@ -360,6 +390,19 @@ public class RiftJournalScreen extends GuiScreen {
     }
 
     //managing journal entry and pic ends here
+    private void placeOtherItemData(int mouseX, int mouseY) {
+        for (Map.Entry<String, List<Integer>> entry : this.shownItemsList.entrySet()) {
+            if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
+            && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16) {
+                ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
+                List<String> strings = new ArrayList<>();
+                strings.add(itemStack.getDisplayName());
+                if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) strings.add(I18n.format("journal.open_in_jei"));
+                this.drawHoveringText(strings, mouseX, mouseY);
+            }
+        }
+    }
+
     private void placePartyMemberMenu(int mouseX, int mouseY, float partialTicks) {
         if (this.getSelectedCreature() != null) {
             //for party member size
@@ -558,6 +601,19 @@ public class RiftJournalScreen extends GuiScreen {
         else if (Mouse.isButtonDown(0) && this.mouseOnTopButtonParty(mouseX, mouseY)) { //switch to party
             this.isPartyMode = true;
             this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        }
+
+        //on clicking on shown items, open JEI recipes if JEI is available
+        if (!this.shownItemsList.isEmpty() && Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) {
+            for (Map.Entry<String, List<Integer>> entry : this.shownItemsList.entrySet()) {
+                if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
+                        && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16
+                        && Mouse.isButtonDown(0)) {
+                    ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
+                    RiftJEI.showRecipesForItemStack(itemStack, false);
+                    break;
+                }
+            }
         }
     }
 

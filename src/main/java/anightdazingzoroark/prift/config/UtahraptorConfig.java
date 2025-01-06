@@ -5,9 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Arrays;
 
 public class UtahraptorConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public PredatorGeneral general = new PredatorGeneral();
-
     public UtahraptorConfig() {
         this.stats.baseHealth = 30;
         this.stats.baseDamage = 4;

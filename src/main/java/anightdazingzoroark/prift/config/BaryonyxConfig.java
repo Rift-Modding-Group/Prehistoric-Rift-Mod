@@ -5,9 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Arrays;
 
 public class BaryonyxConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public PredatorGeneral general = new PredatorGeneral();
-
     public BaryonyxConfig() {
         this.stats.baseHealth = 60;
         this.stats.baseDamage = 10;

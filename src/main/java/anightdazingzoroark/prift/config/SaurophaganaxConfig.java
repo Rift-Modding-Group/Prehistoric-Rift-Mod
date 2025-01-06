@@ -5,9 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Arrays;
 
 public class SaurophaganaxConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public PredatorGeneral general = new PredatorGeneral();
-
     public SaurophaganaxConfig() {
         this.stats.baseHealth = 100;
         this.stats.baseDamage = 60;

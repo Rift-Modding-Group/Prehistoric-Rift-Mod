@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PalaeocastorConfig extends RiftCreatureConfig {
-    @SerializedName("general")
-    public PalaeocastorGeneral general = new PalaeocastorGeneral();
-
     public PalaeocastorConfig() {
         this.stats.baseHealth = 20;
         this.stats.baseDamage = 5;
@@ -41,10 +38,5 @@ public class PalaeocastorConfig extends RiftCreatureConfig {
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("CAVE").setSpawnOnLand().setYLevelRange(0, 56).setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("all")
         );
-    }
-
-    public static class PalaeocastorGeneral extends General {
-        @SerializedName("harvestableBlocks")
-        public List<String> harvestableBlocks;
     }
 }
