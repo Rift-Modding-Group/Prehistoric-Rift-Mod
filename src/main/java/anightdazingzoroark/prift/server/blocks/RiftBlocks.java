@@ -52,11 +52,7 @@ public class RiftBlocks {
         PYROBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.PYROBERRY_JUICE, Material.WATER), "pyroberry_juice", true, true, false);
         CRYOBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.CRYOBERRY_JUICE, Material.WATER), "cryoberry_juice", true, true, false);
 
-        CREATURE_BOX = registerBlock(new RiftCreatureBox(), "creature_box", true);
-        //todo: deployment boxes for ranchery and breeding
-        //ranchery is for creatures that may be ranched for their meat or other drops
-        //breeding is for creature breeding
-        //should probably add gender to creatures too
+        CREATURE_BOX = registerBlock(new RiftCreatureBox(), "creature_box", true, false);
 
         if (GeneralConfig.canUseMM()) RiftMMBlocks.registerMMBlocks();
     }

@@ -323,7 +323,7 @@ public class PlayerTamedCreaturesHelper {
                     if (creature.getEnergy() < 20) {
                         for (int j = 0; j < timeToSubtract; j++) {
                             //natural regen
-                            if (timeToSubtract % creature.creatureType.getMaxEnergyRegenMod(creature.getLevel()) == 0) {
+                            if (j % creature.creatureType.getMaxEnergyRegenMod(creature.getLevel()) == 0) {
                                 newEnergyLevel += 1;
                                 if (newEnergyLevel >= 20) break;
                             }
