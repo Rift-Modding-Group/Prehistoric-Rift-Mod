@@ -1631,47 +1631,47 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //to based on where the player is looking
     public EntityLivingBase getControlAttackTargets() {
-        final int reach = 64; //8 squared, for players
-        double creatureReach = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + this.attackWidth();
+        final int reach = 16;
+        EntityPlayer playerRider = (EntityPlayer) this.getControllingPassenger();
+        Vec3d eyePosition = playerRider.getPositionEyes(1.0F);
+        Vec3d lookDirection = playerRider.getLook(1.0F);
+        Vec3d rayEnd = eyePosition.add(lookDirection.scale(reach));
 
-        Vec3d eyePos = this.getControllingPassenger().getPositionEyes(1.0F);
-        Vec3d viewVector = this.getControllingPassenger().getLook(1.0F);
-        Vec3d viewVectorMax = eyePos.add(viewVector.x * reach, viewVector.y * reach, viewVector.z * reach);
         Entity pointedEntity = null;
-        Entity rider = this.getControllingPassenger();
-        List<Entity> passengers = this.getPassengers();
-        List<Entity> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(viewVectorMax.x, viewVectorMax.y, viewVectorMax.z).grow(1.0D), new Predicate<Entity>() {
+        double closestDistance = reach;
+
+        RiftCreature user = this;
+        List<Entity> entities = this.world.getEntitiesInAABBexcluding(this, playerRider.getEntityBoundingBox().grow(reach), new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
-                return !passengers.contains(entity) && getDistanceSq(entity.getPosition()) <= creatureReach * creatureReach;
+                if (entity == null) return false;
+                if (entity instanceof MultiPartEntityPart) {
+                    MultiPartEntityPart entityPart = (MultiPartEntityPart) entity;
+                    return !entityPart.parent.equals(user);
+                }
+                else if (entity instanceof RiftCreature) {
+                    RiftCreature creature = (RiftCreature) entity;
+                    return !creature.equals(user);
+                }
+                else if (entity instanceof EntityPlayer) {
+                    EntityPlayer player = (EntityPlayer) entity;
+                    return !player.isSpectator() && !player.equals(playerRider);
+                }
+                return true;
             }
         });
-        double d2 = reach;
-        for (Entity potentialTarget : list) {
-            AxisAlignedBB axisalignedbb = potentialTarget.getEntityBoundingBox().grow((double) potentialTarget.getCollisionBorderSize() + 2F);
-            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(eyePos, viewVectorMax);
 
-            if (potentialTarget != this && potentialTarget != rider) {
-                if (axisalignedbb.contains(eyePos)) {
-                    if (d2 >= 0.0D) {
-                        pointedEntity = potentialTarget;
-                        d2 = 0.0D;
-                    }
-                }
-                else if (raytraceresult != null) {
-                    double d3 = eyePos.distanceTo(raytraceresult.hitVec);
+        for (Entity entity : entities) {
+            AxisAlignedBB boundingBox = entity.getEntityBoundingBox().grow(0.3);
+            RayTraceResult entityResult = boundingBox.calculateIntercept(eyePosition, rayEnd);
 
-                    if (d3 < d2 || d2 == 0.0D) {
-                        if (potentialTarget.getLowestRidingEntity() == rider.getLowestRidingEntity() && !rider.canRiderInteract()) {
-                            if (d2 == 0.0D) {
-                                pointedEntity = potentialTarget;
-                            }
-                        }
-                        else {
-                            pointedEntity = potentialTarget;
-                            d2 = d3;
-                        }
-                    }
+            if (entityResult != null) {
+                double distance = eyePosition.distanceTo(entityResult.hitVec);
+
+                if (distance < closestDistance) {
+                    if (entity instanceof MultiPartEntityPart) pointedEntity = (Entity) ((MultiPartEntityPart) entity).parent;
+                    else pointedEntity = entity;
+                    closestDistance = distance;
                 }
             }
         }
@@ -1680,21 +1680,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //to based on where the player is looking
     public BlockPos getControlBlockPosToBreak() {
-        final int reach = 64; //8 squared, for players
-        double creatureReach = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + this.attackWidth();
+        final int reach = 16;
+        EntityPlayer playerRider = (EntityPlayer) this.getControllingPassenger();
+        Vec3d eyePosition = playerRider.getPositionEyes(1.0F);
+        Vec3d lookDirection = playerRider.getLook(1.0F);
+        Vec3d rayEnd = eyePosition.add(lookDirection.scale(reach));
 
-        Vec3d eyePos = this.getControllingPassenger().getPositionEyes(1.0F);
-        Vec3d viewVector = this.getControllingPassenger().getLook(1.0F);
-        Vec3d viewVectorMax = eyePos.add(viewVector.x * reach, viewVector.y * reach, viewVector.z * reach);
-
-        RayTraceResult rayTraceResult = world.rayTraceBlocks(eyePos, viewVectorMax, false, false, false);
-
-        if (rayTraceResult != null
-                && rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK
-                && this.getDistanceSq(rayTraceResult.getBlockPos()) <= creatureReach * creatureReach) {
-            return rayTraceResult.getBlockPos();
-        }
-
+        RayTraceResult rayTraceResult = this.world.rayTraceBlocks(eyePosition, rayEnd, false, false, false);
+        if (rayTraceResult != null && rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK) return rayTraceResult.getBlockPos();
         return null;
     }
 
