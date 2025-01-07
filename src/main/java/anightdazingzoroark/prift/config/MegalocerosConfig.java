@@ -11,6 +11,7 @@ public class MegalocerosConfig extends RiftCreatureConfig {
         this.stats.baseDamage = 4;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.2;
+        this.general.saddleItem = "minecraft:saddle";
         this.general.favoriteFood = RiftCreatureConfigDefaults.defaultHerbivoreFoods;
         this.general.favoriteMeals = Arrays.asList(
                 new Meal("prift:basic_herbivore_meal", 0.1),
