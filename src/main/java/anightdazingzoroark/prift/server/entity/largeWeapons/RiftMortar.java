@@ -13,6 +13,7 @@ import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -61,6 +62,7 @@ public class RiftMortar extends RiftLargeWeapon {
                     }
                 }
             }
+            if (!flag1 && !flag2) player.sendStatusMessage(new TextComponentTranslation("reminder.mortar_no_ammo", this.getName()), false);
             if (flag1 || flag2) {
                 RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, player);
                 mortarShell.shoot(this, launchDist);

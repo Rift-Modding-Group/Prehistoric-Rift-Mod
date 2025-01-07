@@ -16,6 +16,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -118,6 +119,7 @@ public class RiftCatapult extends RiftLargeWeapon {
                     }
                 }
             }
+            if (!flag1 && !flag2) player.sendStatusMessage(new TextComponentTranslation("reminder.catapult_no_ammo", this.getName()), false);
             if (flag1 || flag2) {
                 this.setLaunching(true);
                 RiftCatapultBoulder boulder = new RiftCatapultBoulder(this.world, this, player);

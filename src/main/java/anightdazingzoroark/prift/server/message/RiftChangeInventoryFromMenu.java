@@ -48,22 +48,12 @@ public class RiftChangeInventoryFromMenu implements IMessage {
         }
 
         private void handle(RiftChangeInventoryFromMenu message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+            EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
-                RiftCreature interacted = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
+            RiftCreature interacted = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
 
-                interacted.creatureInventory.setInventoryFromData(message.inventory);
-                PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-
-                RiftCreature interacted = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
-
-                interacted.creatureInventory.setInventoryFromData(message.inventory);
-                PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
-            }
+            interacted.creatureInventory.setInventoryFromData(message.inventory);
+            PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
         }
     }
 

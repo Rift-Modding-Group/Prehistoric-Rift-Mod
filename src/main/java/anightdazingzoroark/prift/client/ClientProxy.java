@@ -64,6 +64,7 @@ public class ClientProxy extends ServerProxy {
         MinecraftForge.EVENT_BUS.register(new RiftLeftClickChargeBar());
         MinecraftForge.EVENT_BUS.register(new RiftSpacebarChargeBar());
         MinecraftForge.EVENT_BUS.register(new RiftCreatureControls());
+        MinecraftForge.EVENT_BUS.register(new RiftLargeWeaponControls());
     }
 
     @SideOnly(Side.CLIENT)

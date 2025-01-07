@@ -262,6 +262,9 @@ reminder.box_wanderer_level_upgraded=This box's wanderer level has been upgraded
 reminder.box_wanderer_level_max=This box's wanderer level has already been maxed out! You can't use this anymore!
 reminder.box_range_level_upgraded=This box's range level has been upgraded to level %s! Wandering and spawn blocking for wild creatures has been increased!
 reminder.box_range_level_max=This box's range level has already been maxed out! You can't use this anymore!
+reminder.cannon_no_ammo=This cannon has no ammo! Open its inventory to insert cannonballs!
+reminder.mortar_no_ammo=This mortar has no ammo! Open its inventory to insert mortar shells!
+reminder.catapult_no_ammo=This catapult has no ammo! Open its inventory to insert catapult boulders!
 
 prift.pregnancy.name=%s pregnancy
 prift.egg.time=Time
@@ -458,3 +461,7 @@ creature_control.left_mouse.ankylosaurus=Tail Attack
 creature_control.right_mouse.ankylosaurus=Toggle Shell Mode
 creature_control.left_mouse.dilophosaurus=Slash
 creature_control.right_mouse.dilophosaurus=Spit
+
+large_weapon_control.left_mouse.cannon=Fire
+large_weapon_control.left_mouse.mortar=Fire (Chargeable)
+large_weapon_control.left_mouse.catapult=Launch (Chargeable)

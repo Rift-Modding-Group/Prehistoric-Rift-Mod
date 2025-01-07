@@ -15,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -42,6 +43,7 @@ public class RiftCannon extends RiftLargeWeapon {
                 }
             }
         }
+        if (!flag1 && !flag2) player.sendStatusMessage(new TextComponentTranslation("reminder.cannon_no_ammo", this.getName()), false);
         if (flag1 || flag2) {
             RiftCannonball cannonball = new RiftCannonball(this.world, this, player);
             cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);

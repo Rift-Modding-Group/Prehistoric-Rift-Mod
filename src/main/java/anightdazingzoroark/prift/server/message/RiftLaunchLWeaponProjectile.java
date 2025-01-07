@@ -45,7 +45,7 @@ public class RiftLaunchLWeaponProjectile implements IMessage {
         private void handle(RiftLaunchLWeaponProjectile message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             RiftLargeWeapon weapon = (RiftLargeWeapon)playerEntity.world.getEntityByID(message.weaponId);
-            weapon.launchProjectile(playerEntity, Math.min(message.charge, 100));
+            if (weapon.getLeftClickCooldown() <= 0) weapon.launchProjectile(playerEntity, Math.min(message.charge, 100));
         }
     }
 }

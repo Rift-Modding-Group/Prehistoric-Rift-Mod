@@ -48,22 +48,12 @@ public class RiftChangeWeaponInvFromMenu implements IMessage {
         }
 
         private void handle(RiftChangeWeaponInvFromMenu message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+            EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
-                RiftLargeWeapon interacted = (RiftLargeWeapon) messagePlayer.world.getEntityByID(message.creatureId);
+            RiftLargeWeapon interacted = (RiftLargeWeapon) messagePlayer.world.getEntityByID(message.creatureId);
 
-                interacted.weaponInventory.setInventoryFromData(message.inventory);
-                PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-
-                RiftLargeWeapon interacted = (RiftLargeWeapon) messagePlayer.world.getEntityByID(message.creatureId);
-
-                interacted.weaponInventory.setInventoryFromData(message.inventory);
-                PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
-            }
+            interacted.weaponInventory.setInventoryFromData(message.inventory);
+            PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
         }
     }
 

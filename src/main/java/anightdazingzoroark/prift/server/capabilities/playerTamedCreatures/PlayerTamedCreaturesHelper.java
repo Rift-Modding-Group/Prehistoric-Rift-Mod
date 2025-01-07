@@ -443,7 +443,7 @@ public class PlayerTamedCreaturesHelper {
     }
 
     public static void reenergizePartyUndeployedCreatures(EntityPlayer player, int time) {
-        if (time <= 0) return;;
+        if (time <= 0) return;
 
         for (RiftCreature creature : getPlayerTamedCreatures(player).getPartyCreatures(player.world)) {
             if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
