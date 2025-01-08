@@ -4,23 +4,33 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.AnkylosaurusConfig;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
+import com.codetaylor.mc.pyrotech.modules.tech.basic.block.spi.BlockAnvilBase;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockHorizontal;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -39,12 +49,16 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenWandering {
+public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenWandering, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/ankylosaurus"));
     private static final DataParameter<Boolean> START_HIDING = EntityDataManager.<Boolean>createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> STOP_HIDING = EntityDataManager.<Boolean>createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> HIDING = EntityDataManager.<Boolean>createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> WORKSTATION_Z_POS = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.VARINT);
     private RiftCreaturePart leftFrontLegPart;
     private RiftCreaturePart rightFrontLegPart;
     private RiftCreaturePart leftBackLegPart;
@@ -61,12 +75,12 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     public Ankylosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.ANKYLOSAURUS);
         this.setSize(2f, 2.5f);
-        this.favoriteFood = ((AnkylosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((AnkylosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 20;
         this.speed = 0.15D;
         this.isRideable = true;
-        this.saddleItem = ((AnkylosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
 
         this.headPart = new RiftCreaturePart(this, "head",2f, 0, 0.7f, 0.5f, 0.5f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, "body", 0, 0, 0.5f, 1.25f, 0.9f, 0.25f)
@@ -103,6 +117,10 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         this.dataManager.register(STOP_HIDING, false);
         this.dataManager.register(HIDING, false);
         this.dataManager.register(CAN_HARVEST, false);
+        this.dataManager.register(USING_WORKSTATION, false);
+        this.dataManager.register(WORKSTATION_X_POS, 0);
+        this.dataManager.register(WORKSTATION_Y_POS, 0);
+        this.dataManager.register(WORKSTATION_Z_POS, 0);
     }
 
     @Override
@@ -117,6 +135,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftAnkylosaurusHideInShell(this));
+        this.tasks.addTask(1, new RiftAnkylosaurusHitAnvil(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftControlledAttack(this, 1.2F, 0.6F));
@@ -187,12 +206,14 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         super.writeEntityToNBT(compound);
         this.resetSpeed();
         this.writeHarvestWanderDataToNBT(compound);
+        this.writeWorkstationDataToNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         this.readHarvestWanderDataFromNBT(compound);
+        this.readWorkstationDataFromNBT(compound);
     }
 
     @Override
@@ -273,7 +294,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
 
     @Override
     public List<String> blocksToHarvest() {
-        return ((AnkylosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
+        return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }
 
     public int harvestRange() {
@@ -283,6 +304,62 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     @Override
     public AxisAlignedBB breakRange() {
         return new AxisAlignedBB(-1, 0, -1, 1, 2, 1);
+    }
+
+    @Override
+    public boolean canUseWorkstation() {
+        return GeneralConfig.canUsePyrotech();
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
+        Block block = this.world.getBlockState(pos).getBlock();
+        if (GeneralConfig.canUsePyrotech()) return block instanceof BlockAnvilBase;
+        return false;
+    }
+
+    @Override
+    public BlockPos workstationUseFromPos() {
+        return this.getWorkstationPos();
+    }
+
+    @Override
+    public boolean isUsingWorkAnim() {
+        return this.isAttacking();
+    }
+
+    @Override
+    public void setUsingWorkAnim(boolean value) {
+        this.setAttacking(value);
+    }
+
+    @Override
+    public SoundEvent useAnimSound() {
+        return SoundEvents.BLOCK_STONE_BREAK;
+    }
+
+    public void setUseWorkstation(double x, double y, double z) {
+        this.dataManager.set(USING_WORKSTATION, true);
+        this.dataManager.set(WORKSTATION_X_POS, (int)x);
+        this.dataManager.set(WORKSTATION_Y_POS, (int)y);
+        this.dataManager.set(WORKSTATION_Z_POS, (int)z);
+    }
+
+    public void clearWorkstation(boolean destroyed) {
+        this.dataManager.set(USING_WORKSTATION, false);
+        this.dataManager.set(WORKSTATION_X_POS, 0);
+        this.dataManager.set(WORKSTATION_Y_POS, 0);
+        this.dataManager.set(WORKSTATION_Z_POS, 0);
+        EntityPlayer owner = (EntityPlayer) this.getOwner();
+        if (!this.world.isRemote) this.clearWorkstationMessage(destroyed, owner);
+    }
+
+    public boolean isUsingWorkstation() {
+        return this.dataManager.get(USING_WORKSTATION);
+    }
+
+    public BlockPos getWorkstationPos() {
+        return new BlockPos(this.dataManager.get(WORKSTATION_X_POS), this.dataManager.get(WORKSTATION_Y_POS), this.dataManager.get(WORKSTATION_Z_POS));
     }
 
     public void setHarvesting(boolean value) {

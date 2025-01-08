@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.mixin;
 
+import anightdazingzoroark.prift.config.GeneralConfig;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import org.spongepowered.asm.launch.MixinBootstrap;
 import zone.rong.mixinbooter.IEarlyMixinLoader;
 
 import javax.annotation.Nullable;
