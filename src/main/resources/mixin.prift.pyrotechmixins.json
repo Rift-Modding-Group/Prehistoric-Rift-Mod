@@ -5,9 +5,6 @@
   "compatibilityLevel": "JAVA_8",
   "minVersion": "0.8",
   "mixins": [
-    "RiftMixinPyrotechTileEntityAnvil"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+    "RiftMixinBloomAnvilRecipeFromAnkylosaurus"
+  ]
 }

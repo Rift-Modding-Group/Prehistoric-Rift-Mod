@@ -10,7 +10,10 @@ public class RiftCoremodLate implements ILateMixinLoader {
     @Override
     public List<String> getMixinConfigs() {
         List<String> configs = new ArrayList<>();
-        if (GeneralConfig.canUsePyrotech()) configs.add("mixin.prift.pyrotechtileentityanvil.json");
+        if (GeneralConfig.canUsePyrotech()) {
+            configs.add("mixin.prift.pyrotechmixins.json");
+            configs.add("mixin.prift.pyrotechinvokers.json");
+        }
         return configs;
     }
 

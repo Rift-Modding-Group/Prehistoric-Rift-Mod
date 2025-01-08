@@ -6,7 +6,7 @@ import net.minecraft.entity.MultiPartEntityPart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(value = EntityLivingBase.class)
+@Mixin(EntityLivingBase.class)
 public class RiftMixinSetTargetAfterHitboxHit {
     @Overwrite
     public void setLastAttackedEntity(Entity entity) {

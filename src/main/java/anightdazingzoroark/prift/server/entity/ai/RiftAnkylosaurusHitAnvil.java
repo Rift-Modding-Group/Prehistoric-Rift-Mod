@@ -113,7 +113,7 @@ public class RiftAnkylosaurusHitAnvil extends EntityAIBase {
                                 //give outputs
                                 if (tileAnvilBase.getRecipeProgress() >= 0.9999) {
                                     if (tileAnvilBase.getRecipe() instanceof AnvilRecipe.IExtendedRecipe) {
-                                        List<ItemStack> outputList = ((AnvilRecipe.IExtendedRecipe) tileAnvilBase.getRecipe()).onRecipeCompleted(tileAnvilBase, this.ankylosaurus.world, tileAnvilBase.getStackHandler(), tileAnvilBase.getRecipe(), new ItemStack(ModuleCore.Items.IRON_HAMMER));
+                                        List<ItemStack> outputList = ((AnvilRecipe.IExtendedRecipe) tileAnvilBase.getRecipe()).onRecipeCompleted(tileAnvilBase, this.ankylosaurus.world, tileAnvilBase.getStackHandler(), tileAnvilBase.getRecipe(), null);
                                         for (ItemStack itemOutput : outputList) this.ankylosaurus.creatureInventory.addItem(itemOutput);
                                     }
                                     else {
