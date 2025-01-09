@@ -88,13 +88,13 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     public Apatosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.APATOSAURUS);
         this.setSize(4f, 3f);
-        this.favoriteFood = ((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 50;
         this.speed = 0.15D;
         this.isRideable = true;
         this.launchTick = 0;
-        this.saddleItem = ((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
 
         this.headPart = new RiftCreaturePart(this, 6.625f, 0, 4.5125f, 0.625f, 0.5f, 2f);
         this.bodyPart = new RiftCreaturePart(this, -0.75f, 0, 1.35f, 1.65f, 1f, 1f);
@@ -676,7 +676,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
                 }
             })) {
                 for (int i = 0; i < 3 - passengerSize; i++) {
-                    boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf( ((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumPassengerSize ));
+                    boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumPassengerSize ));
                     if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
                         entity.startRiding(this, true);
                         this.dismount = true;
@@ -703,7 +703,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
                     }
                 })) {
                     for (int i = 0; i < 3 - passengerSize; i++) {
-                        boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(((ApatosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.maximumPassengerSize));
+                        boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumPassengerSize));
                         if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
                             entity.startRiding(this, true);
                             this.dismount = true;

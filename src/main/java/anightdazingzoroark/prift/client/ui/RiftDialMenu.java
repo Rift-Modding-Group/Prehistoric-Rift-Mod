@@ -235,6 +235,7 @@ public class RiftDialMenu extends GuiScreen {
             }
             if (this.radialChoiceMenu == 0 && this.creature.busyAtWork() && (this.choices.get(i) == RiftTameRadialChoice.STATE || this.choices.get(i) == RiftTameRadialChoice.BEHAVIOR)) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 2 && this.creature.busyAtWork() && (this.choices.get(i) != RiftTameRadialChoice.BACK && this.choices.get(i) != RiftTameRadialChoice.SET_WORKSTATION)) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 2 && this.creature.busyAtTurretMode() && (this.choices.get(i) != RiftTameRadialChoice.BACK && this.choices.get(i) != RiftTameRadialChoice.SET_TURRET_MODE)) radialString = "["+radialString+"]";
 
             //create text
             float angle1 = ((i / (float) numItems) + 0.25f) * 2 * (float) Math.PI;
@@ -278,6 +279,9 @@ public class RiftDialMenu extends GuiScreen {
                 this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
             if (this.radialChoiceMenu == 2 && this.creature.busyAtWork() && this.choices.get(this.selectedItem) != RiftTameRadialChoice.BACK && this.choices.get(this.selectedItem) != RiftTameRadialChoice.SET_WORKSTATION) {
+                this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
+            }
+            if (this.radialChoiceMenu == 2 && this.creature.busyAtTurretMode() && this.choices.get(this.selectedItem) != RiftTameRadialChoice.BACK && this.choices.get(this.selectedItem) != RiftTameRadialChoice.SET_TURRET_MODE) {
                 this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
             if (this.radialChoiceMenu == 2 && this.creature.isBaby() && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.SET_WORKSTATION || this.choices.get(this.selectedItem) == RiftTameRadialChoice.SET_WANDER_HARVEST)) {
@@ -375,20 +379,19 @@ public class RiftDialMenu extends GuiScreen {
                         this.radialChoiceMenu = 0;
                     }
                     else if (this.creature.optionsRadialChoices().get(this.selectedItem) == RiftTameRadialChoice.SET_WORKSTATION) {
-                        if (!this.creature.isBaby()) {
+                        if (!this.creature.isBaby() && !this.creature.busyAtTurretMode()) {
                             RiftMessages.WRAPPER.sendToServer(new RiftSetWorkstation(this.creature, !this.creature.busyAtWork()));
                             this.mc.player.closeScreen();
                         }
                     }
                     else if (this.creature.optionsRadialChoices().get(this.selectedItem) == RiftTameRadialChoice.SET_WANDER_HARVEST) {
-                        if (!this.creature.isBaby() && !this.creature.busyAtWork()) {
+                        if (!this.creature.isBaby() && !this.creature.busyAtWork() && !this.creature.busyAtTurretMode()) {
                             RiftMessages.WRAPPER.sendToServer(new RiftSetCanWanderHarvest(this.creature, !((IHarvestWhenWandering)this.creature).canHarvest()));
                             this.mc.player.closeScreen();
                         }
                     }
                     else if (this.creature.optionsRadialChoices().get(this.selectedItem) == RiftTameRadialChoice.SET_TURRET_MODE && !this.creature.busyAtWork()) {
-                        ITurretModeUser turretModeUser = (ITurretModeUser) this.creature;
-                        RiftMessages.WRAPPER.sendToServer(new RiftSetTurretMode(this.creature, !turretModeUser.isTurretMode()));
+                        RiftMessages.WRAPPER.sendToServer(new RiftSetTurretMode(this.creature, !((ITurretModeUser) this.creature).isTurretMode()));
                         this.mc.player.closeScreen();
                     }
                 }

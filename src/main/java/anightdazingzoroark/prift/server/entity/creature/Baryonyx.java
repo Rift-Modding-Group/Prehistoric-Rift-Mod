@@ -56,13 +56,13 @@ public class Baryonyx extends RiftWaterCreature {
         super(worldIn, RiftCreatureType.BARYONYX);
         this.setSize(1.25f, 2.75f);
         this.experienceValue = 20;
-        this.favoriteFood = ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.isRideable = true;
-        this.saddleItem = ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.25D;
         this.waterSpeed = 5D;
-        this.targetList = RiftUtil.creatureTargets(((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((BaryonyxConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 
         this.bodyPart = new RiftCreaturePart(this, 0, 0, 1.25f, 0.9f, 1f, 1f);
         this.headPart = new RiftCreaturePart(this, 4f, 0, 2.125f, 0.75f, 0.5f, 1.5f);

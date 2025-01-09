@@ -65,14 +65,14 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         super(worldIn, RiftCreatureType.UTAHRAPTOR);
         this.setSize(1.25f, 1.5f);
         this.experienceValue = 10;
-        this.favoriteFood = ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.speed = 0.35D;
         this.isRideable = true;
         this.packBuffCooldown = 0;
         this.maxRightClickCooldown = 1800f;
-        this.saddleItem = ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
-        this.targetList = RiftUtil.creatureTargets(((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((UtahraptorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
+        this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 
         this.headPart = new RiftCreaturePart(this, 2f, 0, 1.7f, 1f, 0.6f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.9f, 1f, 0.8f, 1f);

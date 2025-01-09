@@ -51,11 +51,11 @@ public class Saurophaganax extends RiftCreature {
     public Saurophaganax(World worldIn) {
         super(worldIn, RiftCreatureType.SAUROPHAGANAX);
         this.setSize(2f, 3f);
-        this.favoriteFood = ((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 20;
         this.isRideable = true;
-        this.saddleItem = ((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.25D;
         this.targetList = RiftUtil.creatureTargets(((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist);
 

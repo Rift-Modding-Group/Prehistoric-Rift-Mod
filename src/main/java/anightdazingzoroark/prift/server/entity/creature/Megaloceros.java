@@ -55,12 +55,12 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     public Megaloceros(World worldIn) {
         super(worldIn, RiftCreatureType.MEGALOCEROS);
         this.setSize(1f, 1.5f);
-        this.favoriteFood = ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 10;
         this.speed = 0.35D;
         this.isRideable = true;
-        this.saddleItem = ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
 
         this.headPart = new RiftCreaturePart(this, 1.4f, 0, 1.3f, 0.7f, 0.6f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.75f, 1f, 0.75f, 1f);
@@ -294,7 +294,7 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
 
     @Override
     public List<String> blocksToHarvest() {
-        return ((MegalocerosConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
+        return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }
 
     public int harvestRange() {

@@ -46,8 +46,8 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     public Palaeocastor(World worldIn) {
         super(worldIn, RiftCreatureType.PALAEOCASTOR);
         this.setSize(0.75f, 0.75f);
-        this.favoriteFood = ((PalaeocastorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((PalaeocastorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.speed = 0.25D;
         this.attackDamage = RiftConfigHandler.getConfig(this.creatureType).stats.baseDamage;
         this.experienceValue = 3;
@@ -133,7 +133,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
 
     @Override
     public List<String> blocksToHarvest() {
-        return ((PalaeocastorConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
+        return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }
 
     public void setHarvesting(boolean value) {

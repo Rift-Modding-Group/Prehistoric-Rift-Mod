@@ -54,12 +54,12 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
         super(worldIn, RiftCreatureType.DILOPHOSAURUS);
         this.setSize(1f, 1.75f);
         this.experienceValue = 20;
-        this.favoriteFood = ((DilophosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((DilophosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.isRideable = true;
-        this.saddleItem = ((DilophosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.2D;
-        this.targetList = RiftUtil.creatureTargets(((DilophosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((DilophosaurusConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 
         this.headPart = new RiftCreaturePart(this, 2f, 0, 1.7f, 1f, 0.6f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.9f, 1f, 0.8f, 1f);

@@ -60,15 +60,15 @@ public class Sarcosuchus extends RiftWaterCreature {
         super(worldIn, RiftCreatureType.SARCOSUCHUS);
         this.setSize(1.25f, 0.5f);
         this.experienceValue = 10;
-        this.favoriteFood = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.isRideable = true;
-        this.saddleItem = ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.2D;
         this.waterSpeed = 10D;
         this.spinTime = 0;
         this.messageSent = true;
-        this.targetList = RiftUtil.creatureTargets(((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 
         this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.125f, 0.75f, 0.675f, 1f);
         this.headPart = new RiftCreaturePart(this, 1.625f, 0, 0.125f, 0.625f, 0.625f, 1.5f);
@@ -156,7 +156,7 @@ public class Sarcosuchus extends RiftWaterCreature {
             }
         }
         else {
-            MobSize spinMaxSize = MobSize.safeValueOf(((SarcosuchusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.maximumSpinAttackTargetSize);
+            MobSize spinMaxSize = MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumSpinAttackTargetSize);
             if (RiftUtil.isUsingSSR()) {
                 EntityLivingBase target = (EntityLivingBase) SSRCompatUtils.getEntities(this).entityHit;
                 if (target != null) {

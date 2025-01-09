@@ -7,6 +7,8 @@ action.creature_workstation_destroyed=This creature's workstation has been destr
 action.creature_workstation_already_used=This workstation is already used by another creature!
 action.creature_start_harvesting=This creature will now harvest while wandering and when it has a set home position
 action.creature_stop_harvesting=This creature will no longer harvest while wandering
+action.creature_start_turret_mode=Turret mode enabled
+action.creature_stop_turret_mode=Turret mode disabled
 
 creature_box.change_name=Change Name
 creature_box.open_inventory=Open Inventory

@@ -367,7 +367,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
 
     @Override
     public List<String> blocksToHarvest() {
-        return ((TriceratopsConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
+        return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }
 
     public int harvestRange() {

@@ -102,7 +102,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     private static final Predicate<EntityLivingBase> ROAR_BLACKLIST = new Predicate<EntityLivingBase>() {
         @Override
         public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = ((TyrannosaurusConfig) RiftConfigHandler.getConfig(RiftCreatureType.TYRANNOSAURUS)).general.affectedByRoarBlacklist;
+            List<String> blacklist = RiftConfigHandler.getConfig(RiftCreatureType.TYRANNOSAURUS).general.affectedByRoarBlacklist;
             if (!blacklist.isEmpty()) {
                 if (entity instanceof EntityPlayer) return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
                 else return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
@@ -113,7 +113,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     private static final Predicate<EntityLivingBase> ROAR_WHITELIST = new Predicate<EntityLivingBase>() {
         @Override
         public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = ((TyrannosaurusConfig) RiftConfigHandler.getConfig(RiftCreatureType.TYRANNOSAURUS)).general.affectedByRoarBlacklist;
+            List<String> blacklist = RiftConfigHandler.getConfig(RiftCreatureType.TYRANNOSAURUS).general.affectedByRoarBlacklist;
 
             if (!blacklist.isEmpty()) {
                 if (entity instanceof EntityPlayer) return entity.isEntityAlive() && blacklist.contains("minecraft:player");
@@ -143,15 +143,15 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
         this.setSize(3.25f, 4f);
-        this.favoriteFood = ((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 50;
         this.speed = 0.20D;
         this.roarCooldownTicks = 0;
         this.roarCharge = 0;
         this.isRideable = true;
-        this.saddleItem = ((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
-        this.targetList = RiftUtil.creatureTargets(((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
+        this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 
         this.headPart = new RiftCreaturePart(this, 3f, 0, 3f, 0.75f, 0.5f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, 0, 0, 2f, 0.75f, 0.75f, 1f);
@@ -294,7 +294,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     //stuff below this comment is for roar stuff
     public void roar(float strength) {
-        Predicate<EntityLivingBase> targetPredicate = ((TyrannosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.useRoarBlacklistAsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
+        Predicate<EntityLivingBase> targetPredicate = RiftConfigHandler.getConfig(this.creatureType).general.useRoarBlacklistAsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
         for (EntityLivingBase entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea((double)strength * 6d), targetPredicate)) {
             if (entity != this) {
                 if (this.isTamed() && entity instanceof EntityTameable) {

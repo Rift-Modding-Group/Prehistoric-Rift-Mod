@@ -345,7 +345,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     @Override
     public List<String> blocksToHarvest() {
-        return ((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.harvestableBlocks;
+        return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }
 
     public int harvestRange() {
@@ -479,7 +479,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), ((float) this.strongAttackCharge - 100f)/3f + 30f + (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
         if (flag) {
             this.applyEnchantments(this, entityIn);
-            if (((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.canInflictBleed) NonPotionEffectsHelper.setBleeding((EntityLivingBase) entityIn, 0, 200);
+            if (RiftConfigHandler.getConfig(this.creatureType).general.canInflictBleed) NonPotionEffectsHelper.setBleeding(entityIn, 0, 200);
         }
         return flag;
     }

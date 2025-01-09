@@ -1503,7 +1503,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean busyAtWork() {
         boolean usingWorkstation = (this instanceof IWorkstationUser) && ((IWorkstationUser)this).isUsingWorkstation();
         boolean usingLeadForWork = (this instanceof ILeadWorkstationUser) && ((ILeadWorkstationUser)this).isUsingLeadForWork();
-        return  usingWorkstation || usingLeadForWork;
+        return usingWorkstation || usingLeadForWork;
+    }
+
+    public boolean busyAtTurretMode() {
+        if (this instanceof ITurretModeUser) return ((ITurretModeUser)this).isTurretMode();
+        return false;
     }
 
     public boolean isBaby() {

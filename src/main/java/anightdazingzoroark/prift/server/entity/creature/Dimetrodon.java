@@ -67,12 +67,12 @@ public class Dimetrodon extends RiftCreature {
     public Dimetrodon(World worldIn) {
         super(worldIn, RiftCreatureType.DIMETRODON);
         this.setSize(1f, 1f);
-        this.favoriteFood = ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 10;
         this.speed = 0.20D;
         this.isRideable = false;
-        this.targetList = RiftUtil.creatureTargets(((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 
         this.headPart = new RiftCreaturePart(this, 1.25f, 0, 0.45f, 0.5f, 0.425f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.3f, 1f, 0.5f, 1f);
@@ -364,7 +364,7 @@ public class Dimetrodon extends RiftCreature {
 
     private boolean isTemperatureSettingItem (ItemStack itemstack) {
         boolean flag = false;
-        for (DimetrodonConfig.TemperatureChangingItem item : ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.temperatureChangingItems) {
+        for (DimetrodonConfig.TemperatureChangingItem item : RiftConfigHandler.getConfig(this.creatureType).general.temperatureChangingItems) {
             if (!flag) flag = RiftUtil.itemStackEqualToString(itemstack, item.itemId);
         }
         return flag;
@@ -373,7 +373,7 @@ public class Dimetrodon extends RiftCreature {
     private EggTemperature getTemperatureFromItem(ItemStack itemstack) {
         DimetrodonConfig.TemperatureChangingItem itemToGet = new DimetrodonConfig.TemperatureChangingItem("", "NEUTRAL", 0);
         boolean flag = false;
-        for (DimetrodonConfig.TemperatureChangingItem item : ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.temperatureChangingItems) {
+        for (DimetrodonConfig.TemperatureChangingItem item : RiftConfigHandler.getConfig(this.creatureType).general.temperatureChangingItems) {
             if (!flag) {
                 flag = RiftUtil.itemStackEqualToString(itemstack, item.itemId);
                 itemToGet = item;
@@ -386,7 +386,7 @@ public class Dimetrodon extends RiftCreature {
     private int getTemperatureTimeFromItem(ItemStack itemstack) {
         DimetrodonConfig.TemperatureChangingItem itemToGet = new DimetrodonConfig.TemperatureChangingItem("", "NEUTRAL", 0);
         boolean flag = false;
-        for (DimetrodonConfig.TemperatureChangingItem item : ((DimetrodonConfig)RiftConfigHandler.getConfig(this.creatureType)).general.temperatureChangingItems) {
+        for (DimetrodonConfig.TemperatureChangingItem item : RiftConfigHandler.getConfig(this.creatureType).general.temperatureChangingItems) {
             if (!flag) {
                 flag = RiftUtil.itemStackEqualToString(itemstack, item.itemId);
                 itemToGet = item;

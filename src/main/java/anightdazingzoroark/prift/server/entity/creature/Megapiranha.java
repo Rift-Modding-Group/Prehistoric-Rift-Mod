@@ -34,10 +34,10 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
         super(worldIn, RiftCreatureType.MEGAPIRANHA);
         this.setSize(0.5f, 0.75f);
         this.experienceValue = 3;
-        this.favoriteFood = ((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
         this.speed = 0.35D;
         this.waterSpeed = 4D;
-        this.targetList = RiftUtil.creatureTargets(((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist, ((MegapiranhaConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetBlacklist, true);
+        this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 
         this.headPart = new RiftCreaturePart(this, 0, 0, 0, 0.25f,  0.375f, 1f);
         this.hitboxArray = new RiftCreaturePart[]{
