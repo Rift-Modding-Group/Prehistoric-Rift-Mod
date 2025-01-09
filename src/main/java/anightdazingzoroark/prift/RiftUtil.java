@@ -506,6 +506,14 @@ public class RiftUtil {
         }
     }
 
+    public static <K, V> List<K> getKeysByValue(Map<K, V> map, V targetValue) {
+        List<K> matchingKeys = new ArrayList<>();
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            if (targetValue.equals(entry.getValue())) matchingKeys.add(entry.getKey());
+        }
+        return matchingKeys;
+    }
+
     public static float getCreatureModelScale(RiftCreature creature) {
         switch (creature.creatureType) {
             case TYRANNOSAURUS:

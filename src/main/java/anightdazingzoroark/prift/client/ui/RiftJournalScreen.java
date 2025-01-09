@@ -13,6 +13,8 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
+import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
@@ -54,6 +56,7 @@ public class RiftJournalScreen extends GuiScreen {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
     private Map<String, List<Integer>> shownTamingFoodsList = new HashMap<>();
     private Map<String, List<Integer>> shownFavoriteFoodsList = new HashMap<>();
+    private Map<String, List<Integer>> shownWorkstationsList = new HashMap<>();
     private CreatureCategory sidebarType;
     private RiftCreatureType entryType;
     private int selectedPartyPos = -1;
@@ -290,6 +293,10 @@ public class RiftJournalScreen extends GuiScreen {
             drawModalRectWithCustomSizedTexture((int) (k / 0.75), (int) (l / 0.75) - (int)(this.entryScrollOffset / 0.75D), 0, 0, imgWidth, imgHeight, (float)imgWidth, (float)imgHeight);
             GlStateManager.popMatrix();
 
+            int textOffset = 0;
+            int tamingFoodsHeight = 0;
+            int favoriteFoodsHeight = 0;
+
             //for creatures that can only be tamed by killing and hoping they drop their egg
             //add a warning here about it
             if (this.entryType.isTameable() && !this.entryType.isTameableByFeeding()) {
@@ -298,12 +305,11 @@ public class RiftJournalScreen extends GuiScreen {
                 this.fontRenderer.drawSplitString(labelString, (this.width - 248) / 2 + 60, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + 40, 248,0xff0000);
             }
 
-            int textOffset = 0;
-
             //taming foods
             if (RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals != null && !RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.isEmpty()) {
                 imgOffset += 24;
                 textOffset += 16 * (RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.size() / 6);
+                tamingFoodsHeight = 16 * (RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.size() / 6);
                 String tamingFoodsLabel = this.entryType.isTameableByFeeding() ?  I18n.format("journal.taming_or_breeding_foods") : I18n.format("journal.breeding_foods");
                 int tamingFoodsLabelOffset = this.entryType.isTameableByFeeding() ? -5 : -24;
                 Map<String, List<Integer>> tempItemList = new HashMap<>();
@@ -323,6 +329,7 @@ public class RiftJournalScreen extends GuiScreen {
             if (this.playerJournalProgress().getEncounteredCreatures().get(this.entryType) && RiftConfigHandler.getConfig(this.entryType).general.favoriteFood != null && !RiftConfigHandler.getConfig(this.entryType).general.favoriteFood.isEmpty()) {
                 imgOffset += 16;
                 textOffset += 16 * (RiftConfigHandler.getConfig(this.entryType).general.favoriteFood.size() / 8);
+                favoriteFoodsHeight = 16 * (RiftConfigHandler.getConfig(this.entryType).general.favoriteFood.size() / 8);
                 String favoriteFoodsLabel = I18n.format("journal.favorite_foods");
                 Map<String, List<Integer>> tempItemList = new HashMap<>();
                 this.fontRenderer.drawString(favoriteFoodsLabel, (this.width - this.fontRenderer.getStringWidth(favoriteFoodsLabel)) / 2 - 25, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + 41, 0x000000);
@@ -337,6 +344,41 @@ public class RiftJournalScreen extends GuiScreen {
                 this.shownFavoriteFoodsList = tempItemList;
             }
 
+            //usable workstations
+            if (this.playerJournalProgress().getEncounteredCreatures().get(this.entryType) && (this.entryType.invokeClass(this.mc.player.world) instanceof IWorkstationUser || this.entryType.invokeClass(this.mc.player.world) instanceof ILeadWorkstationUser)) {
+                IWorkstationUser workstationUser = this.entryType.invokeClass(this.mc.player.world) instanceof IWorkstationUser ? (IWorkstationUser) this.entryType.invokeClass(this.mc.player.world) : null;
+                ILeadWorkstationUser leadWorkstationUser = this.entryType.invokeClass(this.mc.player.world) instanceof ILeadWorkstationUser ? (ILeadWorkstationUser) this.entryType.invokeClass(this.mc.player.world) : null;
+                imgOffset += 16;
+                int numWorkstationsSize = (workstationUser != null ? RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).size() : 0)
+                        + (leadWorkstationUser != null ? 1 : 0);
+                textOffset += 16 * (numWorkstationsSize / 8);
+                String workstationsLabel = I18n.format("journal.workstations");
+                Map<String, List<Integer>> tempWorkstationsList = new HashMap<>();
+                this.fontRenderer.drawString(workstationsLabel, this.width / 2 - 64, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + favoriteFoodsHeight + 41, 0x000000);
+                if (workstationUser != null) {
+                    for (int i = 0; i < RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).size(); i++) {
+                        String workstationString = RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).get(i);
+                        List<Integer> pos = new ArrayList<>();
+                        pos.add((this.width - 16) / 2 + ((i % 8) * 20) - 56 + this.fontRenderer.getStringWidth(workstationsLabel) + 4);
+                        pos.add((this.height - 16) / 2 + ((i / 8) * 20) + 40 + imgOffset - this.entryScrollOffset + favoriteFoodsHeight);
+                        tempWorkstationsList.put(workstationString, pos);
+                        this.renderItem(workstationString, pos.get(0), pos.get(1));
+                    }
+                }
+                if (leadWorkstationUser != null) {
+                    //since the only item that can be utilized by lead workstation users is the lead powered crank
+                    //it will be used here lol
+                    String workstationString = "prift:lead_powered_crank";
+                    List<Integer> pos = new ArrayList<>();
+                    int i = workstationUser != null ? RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).size() : 0;
+                    pos.add((this.width - 16) / 2 + ((i % 8) * 20) - 56 + this.fontRenderer.getStringWidth(workstationsLabel) + 4);
+                    pos.add((this.height - 16) / 2 + ((i / 8) * 20) + 40 + imgOffset - this.entryScrollOffset + favoriteFoodsHeight);
+                    tempWorkstationsList.put(workstationString, pos);
+                    this.renderItem(workstationString, pos.get(0), pos.get(1));
+                }
+                this.shownWorkstationsList = tempWorkstationsList;
+            }
+
             //text
             if (this.playerJournalProgress().getEncounteredCreatures().get(this.entryType)) {
                 imgOffset += this.entryType != null ? 160 : 18;
@@ -347,6 +389,7 @@ public class RiftJournalScreen extends GuiScreen {
         else {
             this.shownTamingFoodsList = new HashMap<>();
             this.shownFavoriteFoodsList = new HashMap<>();
+            this.shownWorkstationsList = new HashMap<>();
         }
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
@@ -438,6 +481,16 @@ public class RiftJournalScreen extends GuiScreen {
             }
         }
         for (Map.Entry<String, List<Integer>> entry : this.shownFavoriteFoodsList.entrySet()) {
+            if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
+                    && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16) {
+                ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
+                List<String> strings = new ArrayList<>();
+                strings.add(itemStack.getDisplayName());
+                if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) strings.add(I18n.format("journal.open_in_jei"));
+                this.drawHoveringText(strings, mouseX, mouseY);
+            }
+        }
+        for (Map.Entry<String, List<Integer>> entry : this.shownWorkstationsList.entrySet()) {
             if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
                     && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16) {
                 ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
@@ -664,6 +717,17 @@ public class RiftJournalScreen extends GuiScreen {
             }
             if (!this.shownFavoriteFoodsList.isEmpty()) {
                 for (Map.Entry<String, List<Integer>> entry : this.shownFavoriteFoodsList.entrySet()) {
+                    if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
+                            && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16
+                            && Mouse.isButtonDown(0)) {
+                        ItemStack itemStack = RiftUtil.getItemStackFromString(entry.getKey());
+                        RiftJEI.showRecipesForItemStack(itemStack, false);
+                        break;
+                    }
+                }
+            }
+            if (!this.shownWorkstationsList.isEmpty()) {
+                for (Map.Entry<String, List<Integer>> entry : this.shownWorkstationsList.entrySet()) {
                     if (mouseX >= entry.getValue().get(0) && mouseX <= entry.getValue().get(0) + 16
                             && mouseY >= entry.getValue().get(1) && mouseY <= entry.getValue().get(1) + 16
                             && Mouse.isButtonDown(0)) {
