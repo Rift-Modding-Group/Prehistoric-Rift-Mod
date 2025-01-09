@@ -14,6 +14,8 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
+import com.codetaylor.mc.pyrotech.modules.tech.basic.block.BlockChoppingBlock;
+import com.codetaylor.mc.pyrotech.modules.tech.basic.block.spi.BlockAnvilBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -48,7 +50,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttacker, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder {
+public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttacker, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
@@ -59,6 +61,10 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BYTE);
+    private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> WORKSTATION_Z_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     public int strongAttackCharge;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
@@ -74,13 +80,13 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
         this.setSize(2.125f, 2.5f);
-        this.favoriteFood = ((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteFood;
-        this.tamingFood = ((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.favoriteMeals;
+        this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
+        this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 20;
         this.speed = 0.175D;
         this.isRideable = true;
         this.strongAttackCharge = 0;
-        this.saddleItem = ((StegosaurusConfig) RiftConfigHandler.getConfig(this.creatureType)).general.saddleItem;
+        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
 
         this.headPart = new RiftCreaturePart(this, 3.125f, 0, 1.1f, 0.6f, 0.5f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, 0.55f, 0, 0.8f, 0.875f, 0.75f, 1f);
@@ -118,6 +124,10 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
         this.dataManager.register(TURRET_MODE, false);
         this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
+        this.dataManager.register(USING_WORKSTATION, false);
+        this.dataManager.register(WORKSTATION_X_POS, 0);
+        this.dataManager.register(WORKSTATION_Y_POS, 0);
+        this.dataManager.register(WORKSTATION_Z_POS, 0);
     }
 
     @Override
@@ -133,6 +143,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
+        this.tasks.addTask(0, new RiftStegosaurusHitChoppingBlock(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftResetAnimatedPose(this, 0.56F, 1));
@@ -144,7 +155,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 3D));
         this.tasks.addTask(8, new RiftHerdMemberFollow(this));
-        //this.tasks.addTask(9, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(10, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(11, new RiftWander(this, 1.0D));
         this.tasks.addTask(12, new RiftLookAround(this));
@@ -180,6 +190,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.writeHarvestWanderDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);
         this.writeTurretModeDataToNBT(compound);
+        this.writeWorkstationDataToNBT(compound);
     }
 
     @Override
@@ -188,6 +199,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.readHarvestWanderDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
         this.readTurretModeDataFromNBT(compound);
+        this.readWorkstationDataFromNBT(compound);
     }
 
     private void manageCanStrongAttack() {
@@ -240,6 +252,62 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     public int pullPower() {
         return 15;
+    }
+
+    @Override
+    public boolean canUseWorkstation() {
+        return GeneralConfig.canUsePyrotech();
+    }
+
+    @Override
+    public boolean isWorkstation(BlockPos pos) {
+        Block block = this.world.getBlockState(pos).getBlock();
+        if (GeneralConfig.canUsePyrotech()) return block instanceof BlockChoppingBlock;
+        return false;
+    }
+
+    @Override
+    public BlockPos workstationUseFromPos() {
+        return this.getWorkstationPos();
+    }
+
+    @Override
+    public boolean isUsingWorkAnim() {
+        return this.isAttacking();
+    }
+
+    @Override
+    public void setUsingWorkAnim(boolean value) {
+        this.setAttacking(value);
+    }
+
+    @Override
+    public SoundEvent useAnimSound() {
+        return SoundEvents.BLOCK_WOOD_BREAK;
+    }
+
+    public void setUseWorkstation(double x, double y, double z) {
+        this.dataManager.set(USING_WORKSTATION, true);
+        this.dataManager.set(WORKSTATION_X_POS, (int)x);
+        this.dataManager.set(WORKSTATION_Y_POS, (int)y);
+        this.dataManager.set(WORKSTATION_Z_POS, (int)z);
+    }
+
+    public void clearWorkstation(boolean destroyed) {
+        this.dataManager.set(USING_WORKSTATION, false);
+        this.dataManager.set(WORKSTATION_X_POS, 0);
+        this.dataManager.set(WORKSTATION_Y_POS, 0);
+        this.dataManager.set(WORKSTATION_Z_POS, 0);
+        EntityPlayer owner = (EntityPlayer) this.getOwner();
+        if (!this.world.isRemote) this.clearWorkstationMessage(destroyed, owner);
+    }
+
+    public boolean isUsingWorkstation() {
+        return this.dataManager.get(USING_WORKSTATION);
+    }
+
+    public BlockPos getWorkstationPos() {
+        return new BlockPos(this.dataManager.get(WORKSTATION_X_POS), this.dataManager.get(WORKSTATION_Y_POS), this.dataManager.get(WORKSTATION_Z_POS));
     }
 
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {

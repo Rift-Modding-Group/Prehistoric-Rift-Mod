@@ -43,12 +43,22 @@ public class RiftChangeInventoryFromMenu implements IMessage {
     public static class Handler implements IMessageHandler<RiftChangeInventoryFromMenu, IMessage> {
         @Override
         public IMessage onMessage(RiftChangeInventoryFromMenu message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            if (ctx.side == Side.SERVER) FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> serverHandle(message, ctx));
+            if (ctx.side == Side.CLIENT) FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> clientHandle(message, ctx));
             return null;
         }
 
-        private void handle(RiftChangeInventoryFromMenu message, MessageContext ctx) {
+        private void serverHandle(RiftChangeInventoryFromMenu message, MessageContext ctx) {
             EntityPlayer messagePlayer = ctx.getServerHandler().player;
+
+            RiftCreature interacted = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
+
+            interacted.creatureInventory.setInventoryFromData(message.inventory);
+            PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
+        }
+
+        private void clientHandle(RiftChangeInventoryFromMenu message, MessageContext ctx) {
+            EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
             RiftCreature interacted = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
 
