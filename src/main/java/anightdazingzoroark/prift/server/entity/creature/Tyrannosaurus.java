@@ -54,9 +54,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/tyrannosaurus"));
@@ -387,17 +385,20 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     //end of roar stuff
 
     @Override
-    public boolean canUseWorkstation() {
-        return GeneralConfig.canUseMM();
-    }
-
-    @Override
-    public boolean isWorkstation(BlockPos pos) {
-        Block block = this.world.getBlockState(pos).getBlock();
+    public Map<String, Boolean> getWorkstations() {
+        Map<String, Boolean> workstations = new HashMap<>();
         if (GeneralConfig.canUseMM()) {
-            return block instanceof BlockBlowPoweredTurbine || block instanceof BlockSemiManualBase;
+            workstations.put("prift:semi_manual_extractor", true);
+            workstations.put("prift:semi_manual_extractor_top", false);
+            workstations.put("prift:semi_manual_presser", true);
+            workstations.put("prift:semi_manual_presser_top", false);
+            workstations.put("prift:semi_manual_extruder", true);
+            workstations.put("prift:semi_manual_extruder_top", false);
+            workstations.put("prift:semi_manual_hammerer", true);
+            workstations.put("prift:semi_manual_hammerer_false", false);
+            workstations.put("prift:blow_powered_turbine", true);
         }
-        return false;
+        return workstations;
     }
 
     @Override

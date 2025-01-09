@@ -95,6 +95,6 @@ public class RiftBlowIntoTurbine extends EntityAIBase {
                 this.creature.getMoveHelper().setMoveTo(this.user.workstationUseFromPos().getX(), this.user.workstationUseFromPos().getY(), this.user.workstationUseFromPos().getZ(), 1);
             }
         }
-        if (!this.user.isWorkstation(this.workstationPos)) this.destroyedFlag = true;
+        if (!this.user.isWorkstation(this.creature.world, this.workstationPos)) this.destroyedFlag = true;
     }
 }

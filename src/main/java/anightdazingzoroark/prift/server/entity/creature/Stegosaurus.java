@@ -48,7 +48,9 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttacker, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
@@ -255,15 +257,12 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
 
     @Override
-    public boolean canUseWorkstation() {
-        return GeneralConfig.canUsePyrotech();
-    }
-
-    @Override
-    public boolean isWorkstation(BlockPos pos) {
-        Block block = this.world.getBlockState(pos).getBlock();
-        if (GeneralConfig.canUsePyrotech()) return block instanceof BlockChoppingBlock;
-        return false;
+    public Map<String, Boolean> getWorkstations() {
+        Map<String, Boolean> workstations = new HashMap<>();
+        if (GeneralConfig.canUsePyrotech()) {
+            workstations.put("pyrotech:chopping_block", true);
+        }
+        return workstations;
     }
 
     @Override

@@ -372,21 +372,23 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public boolean canUseWorkstation() {
-        return GeneralConfig.canUsePyrotech() || GeneralConfig.canUseMM();
-    }
-
-    @Override
-    public boolean isWorkstation(BlockPos pos) {
-        Block block = this.world.getBlockState(pos).getBlock();
+    public Map<String, Boolean> getWorkstations() {
+        Map<String, Boolean> workstations = new HashMap<>();
         if (GeneralConfig.canUsePyrotech()) {
-            if (block instanceof BlockCombustionWorkerStoneBase) return true;
-            if (block instanceof BlockBloomery) return true;
+            workstations.put("pyrotech:stone_kiln", true);
+            workstations.put("pyrotech:stone_oven", true);
+            workstations.put("pyrotech:stone_sawmill", true);
+            workstations.put("pyrotech:stone_crucible", true);
+            workstations.put("pyrotech:brick_kiln", true);
+            workstations.put("pyrotech:brick_oven", true);
+            workstations.put("pyrotech:brick_sawmill", true);
+            workstations.put("pyrotech:brick_crucible", true);
+            workstations.put("pyrotech:bloomery", true);
         }
         if (GeneralConfig.canUseMM()) {
-            if (block instanceof BlockBlowPoweredTurbine) return true;
+            workstations.put("prift:blow_powered_turbine", true);
         }
-        return false;
+        return workstations;
     }
 
     @Override

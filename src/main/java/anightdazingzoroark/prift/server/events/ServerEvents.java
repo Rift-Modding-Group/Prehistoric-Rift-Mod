@@ -182,7 +182,7 @@ public class ServerEvents {
                 }
 
                 if (canUseFlag) {
-                    if (workstationUser.isWorkstation(event.getPos())) {
+                    if (workstationUser.isWorkstation(creature.world, event.getPos())) {
                         event.setCanceled(true);
 
                         //calculate distance of workstation from creature box

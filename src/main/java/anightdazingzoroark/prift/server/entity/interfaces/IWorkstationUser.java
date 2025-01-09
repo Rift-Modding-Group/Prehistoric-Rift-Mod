@@ -1,14 +1,25 @@
 package anightdazingzoroark.prift.server.entity.interfaces;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.World;
+
+import java.util.Map;
 
 public interface IWorkstationUser {
-    boolean canUseWorkstation();
-    boolean isWorkstation(BlockPos pos);
+    Map<String, Boolean> getWorkstations();
+    default boolean isWorkstation(World world, BlockPos pos) {
+        Block block = world.getBlockState(pos).getBlock();
+        for (String workstationName : this.getWorkstations().keySet()) {
+            Block blockFromString = Block.getBlockFromName(workstationName);
+            if (blockFromString != null && blockFromString.equals(block)) return true;
+        }
+        return false;
+    }
     BlockPos workstationUseFromPos();
     boolean isUsingWorkAnim();
     void setUsingWorkAnim(boolean value);

@@ -153,6 +153,6 @@ public class RiftStegosaurusHitChoppingBlock extends EntityAIBase {
                 this.stegosaurus.getMoveHelper().setMoveTo(this.stegosaurus.workstationUseFromPos().getX(), this.stegosaurus.workstationUseFromPos().getY(), this.stegosaurus.workstationUseFromPos().getZ(), 1);
             }
         }
-        if (!this.stegosaurus.isWorkstation(this.workstationPos)) this.destroyedFlag = true;
+        if (!this.stegosaurus.isWorkstation(this.stegosaurus.world, this.workstationPos)) this.destroyedFlag = true;
     }
 }

@@ -47,7 +47,9 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenWandering, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/ankylosaurus"));
@@ -307,15 +309,14 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     @Override
-    public boolean canUseWorkstation() {
-        return GeneralConfig.canUsePyrotech();
-    }
-
-    @Override
-    public boolean isWorkstation(BlockPos pos) {
-        Block block = this.world.getBlockState(pos).getBlock();
-        if (GeneralConfig.canUsePyrotech()) return block instanceof BlockAnvilBase;
-        return false;
+    public Map<String, Boolean> getWorkstations() {
+        Map<String, Boolean> workstations = new HashMap<>();
+        if (GeneralConfig.canUsePyrotech()) {
+            workstations.put("pyrotech:anvil_granite", true);
+            workstations.put("pyrotech:anvil_iron_plated", true);
+            workstations.put("pyrotech:anvil_obsidian", true);
+        }
+        return workstations;
     }
 
     @Override

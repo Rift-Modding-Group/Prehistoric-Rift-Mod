@@ -104,6 +104,6 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
                 this.parasaur.getMoveHelper().setMoveTo(this.parasaur.workstationUseFromPos().getX(), this.parasaur.workstationUseFromPos().getY(), this.parasaur.workstationUseFromPos().getZ(), 1);
             }
         }
-        if (!this.parasaur.isWorkstation(this.workstationPos)) this.destroyedFlag = true;
+        if (!this.parasaur.isWorkstation(this.parasaur.world, this.workstationPos)) this.destroyedFlag = true;
     }
 }

@@ -45,7 +45,9 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Triceratops extends RiftCreature implements IChargingMob, IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
     private static final DataParameter<Boolean> STOMPING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
@@ -214,19 +216,19 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     }
 
     @Override
-    public boolean canUseWorkstation() {
-        return GeneralConfig.canUseMM();
-    }
-
-    @Override
-    public boolean isWorkstation(BlockPos pos) {
-        Block block = this.world.getBlockState(pos).getBlock();
-        Block blockBottom = this.world.getBlockState(pos.down()).getBlock();
+    public Map<String, Boolean> getWorkstations() {
+        Map<String, Boolean> workstations = new HashMap<>();
         if (GeneralConfig.canUseMM()) {
-            if (block instanceof BlockSemiManualBase) return true;
-            else if (blockBottom instanceof BlockSemiManualBaseTop) return this.isWorkstation(pos.down());
+            workstations.put("prift:semi_manual_extractor", true);
+            workstations.put("prift:semi_manual_extractor_top", false);
+            workstations.put("prift:semi_manual_presser", true);
+            workstations.put("prift:semi_manual_presser_top", false);
+            workstations.put("prift:semi_manual_extruder", true);
+            workstations.put("prift:semi_manual_extruder_top", false);
+            workstations.put("prift:semi_manual_hammerer", true);
+            workstations.put("prift:semi_manual_hammerer_false", false);
         }
-        return false;
+        return workstations;
     }
 
     @Override

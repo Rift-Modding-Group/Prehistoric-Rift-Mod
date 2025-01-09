@@ -55,9 +55,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/apatosaurus"));
@@ -319,11 +317,21 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     @Override
-    public boolean canUseWorkstation() {
-        return GeneralConfig.canUseMM();
+    public Map<String, Boolean> getWorkstations() {
+        Map<String, Boolean> workstations = new HashMap<>();
+        if (GeneralConfig.canUseMM()) {
+            workstations.put("prift:semi_manual_extractor", true);
+            workstations.put("prift:semi_manual_extractor_top", false);
+            workstations.put("prift:semi_manual_presser", true);
+            workstations.put("prift:semi_manual_presser_top", false);
+            workstations.put("prift:semi_manual_extruder", true);
+            workstations.put("prift:semi_manual_extruder_top", false);
+            workstations.put("prift:semi_manual_hammerer", true);
+            workstations.put("prift:semi_manual_hammerer_false", false);
+        }
+        return workstations;
     }
 
-    @Override
     public boolean isWorkstation(BlockPos pos) {
         Block block = this.world.getBlockState(pos).getBlock();
         if (GeneralConfig.canUseMM()) {

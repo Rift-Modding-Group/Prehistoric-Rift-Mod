@@ -141,6 +141,6 @@ public class RiftAnkylosaurusHitAnvil extends EntityAIBase {
                 this.ankylosaurus.getMoveHelper().setMoveTo(this.ankylosaurus.workstationUseFromPos().getX(), this.ankylosaurus.workstationUseFromPos().getY(), this.ankylosaurus.workstationUseFromPos().getZ(), 1);
             }
         }
-        if (!this.ankylosaurus.isWorkstation(this.workstationPos)) this.destroyedFlag = true;
+        if (!this.ankylosaurus.isWorkstation(this.ankylosaurus.world, this.workstationPos)) this.destroyedFlag = true;
     }
 }
