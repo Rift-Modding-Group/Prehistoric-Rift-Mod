@@ -256,6 +256,7 @@ reminder.discovered_journal_entry=You have discovered the %s! Read about how to 
 reminder.unlocked_journal_entry=You have unlocked the journal entry for the %s! Check it out by pressing %s!
 reminder.taming_finished_to_party=%s has been added to your party! Press J to check it out!
 reminder.taming_finished_to_box=Your party is full! %s has been sent to your box! Craft a Creature Box to check it out!
+reminder.creature_wants_more=The %s wants more!
 reminder.creature_released=%s has been released! Goodbye %s!
 reminder.party_level_upgraded=Your party level has been upgraded to level %s! Two new extra party slots have been unlocked!
 reminder.party_level_max=Your party level has already been maxed out! You can't use this anymore!

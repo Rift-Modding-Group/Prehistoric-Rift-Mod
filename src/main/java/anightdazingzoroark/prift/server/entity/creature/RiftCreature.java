@@ -701,6 +701,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setTameProgress(this.getTameProgress() + this.getTamingFoodAdd(itemstack));
                     this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                     this.spawnItemCrackParticles(itemstack.getItem());
+                    player.sendStatusMessage(new TextComponentTranslation("reminder.creature_wants_more", this.creatureType.getTranslatedName()), false);
                 }
                 return true;
             }
