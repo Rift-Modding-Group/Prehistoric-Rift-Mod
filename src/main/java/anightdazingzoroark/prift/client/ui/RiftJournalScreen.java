@@ -19,7 +19,6 @@ import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
 import com.google.common.collect.Lists;
-import mezz.jei.api.IJeiRuntime;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiButton;
@@ -280,6 +279,9 @@ public class RiftJournalScreen extends GuiScreen {
 
         int imgOffset = 0;
         String journalString = "";
+        int tamingFoodsHeight = 0;
+        int favoriteFoodsHeight = 0;
+        int workstationsHeight = 0;
         if (this.entryType != null) {
             //image
             this.mc.getTextureManager().bindTexture(new ResourceLocation(RiftInitialize.MODID, "textures/journal/"+this.entryType.name().toLowerCase()+"_journal.png"));
@@ -294,8 +296,6 @@ public class RiftJournalScreen extends GuiScreen {
             GlStateManager.popMatrix();
 
             int textOffset = 0;
-            int tamingFoodsHeight = 0;
-            int favoriteFoodsHeight = 0;
 
             //for creatures that can only be tamed by killing and hoping they drop their egg
             //add a warning here about it
@@ -348,35 +348,38 @@ public class RiftJournalScreen extends GuiScreen {
             if (this.playerJournalProgress().getEncounteredCreatures().get(this.entryType) && (this.entryType.invokeClass(this.mc.player.world) instanceof IWorkstationUser || this.entryType.invokeClass(this.mc.player.world) instanceof ILeadWorkstationUser)) {
                 IWorkstationUser workstationUser = this.entryType.invokeClass(this.mc.player.world) instanceof IWorkstationUser ? (IWorkstationUser) this.entryType.invokeClass(this.mc.player.world) : null;
                 ILeadWorkstationUser leadWorkstationUser = this.entryType.invokeClass(this.mc.player.world) instanceof ILeadWorkstationUser ? (ILeadWorkstationUser) this.entryType.invokeClass(this.mc.player.world) : null;
-                imgOffset += 16;
-                int numWorkstationsSize = (workstationUser != null ? RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).size() : 0)
-                        + (leadWorkstationUser != null ? 1 : 0);
-                textOffset += 16 * (numWorkstationsSize / 8);
-                String workstationsLabel = I18n.format("journal.workstations");
-                Map<String, List<Integer>> tempWorkstationsList = new HashMap<>();
-                this.fontRenderer.drawString(workstationsLabel, this.width / 2 - 64, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + favoriteFoodsHeight + 41, 0x000000);
-                if (workstationUser != null) {
-                    for (int i = 0; i < RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).size(); i++) {
-                        String workstationString = RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).get(i);
+                if ((workstationUser != null && !workstationUser.getWorkstations().isEmpty()) || (leadWorkstationUser != null && leadWorkstationUser.canBeAttachedForWork())) {
+                    imgOffset += 16;
+                    int numWorkstationsSize = (workstationUser != null ? RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).size() : 0)
+                            + (leadWorkstationUser != null ? 1 : 0);
+                    textOffset += 16 * (numWorkstationsSize / 8);
+                    workstationsHeight = 16 * (numWorkstationsSize / 8);
+                    String workstationsLabel = I18n.format("journal.workstations");
+                    Map<String, List<Integer>> tempWorkstationsList = new HashMap<>();
+                    this.fontRenderer.drawString(workstationsLabel, this.width / 2 - 64, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + favoriteFoodsHeight + 41, 0x000000);
+                    if (workstationUser != null) {
+                        for (int i = 0; i < RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).size(); i++) {
+                            String workstationString = RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).get(i);
+                            List<Integer> pos = new ArrayList<>();
+                            pos.add((this.width - 16) / 2 + ((i % 8) * 20) - 56 + this.fontRenderer.getStringWidth(workstationsLabel) + 4);
+                            pos.add((this.height - 16) / 2 + ((i / 8) * 20) + 40 + imgOffset - this.entryScrollOffset + favoriteFoodsHeight);
+                            tempWorkstationsList.put(workstationString, pos);
+                            this.renderItem(workstationString, pos.get(0), pos.get(1));
+                        }
+                    }
+                    if (leadWorkstationUser != null) {
+                        //since the only item that can be utilized by lead workstation users is the lead powered crank
+                        //it will be used here lol
+                        String workstationString = "prift:lead_powered_crank";
                         List<Integer> pos = new ArrayList<>();
+                        int i = workstationUser != null ? RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).size() : 0;
                         pos.add((this.width - 16) / 2 + ((i % 8) * 20) - 56 + this.fontRenderer.getStringWidth(workstationsLabel) + 4);
                         pos.add((this.height - 16) / 2 + ((i / 8) * 20) + 40 + imgOffset - this.entryScrollOffset + favoriteFoodsHeight);
                         tempWorkstationsList.put(workstationString, pos);
                         this.renderItem(workstationString, pos.get(0), pos.get(1));
                     }
+                    this.shownWorkstationsList = tempWorkstationsList;
                 }
-                if (leadWorkstationUser != null) {
-                    //since the only item that can be utilized by lead workstation users is the lead powered crank
-                    //it will be used here lol
-                    String workstationString = "prift:lead_powered_crank";
-                    List<Integer> pos = new ArrayList<>();
-                    int i = workstationUser != null ? RiftUtil.getKeysByValue(workstationUser.getWorkstations(), true).size() : 0;
-                    pos.add((this.width - 16) / 2 + ((i % 8) * 20) - 56 + this.fontRenderer.getStringWidth(workstationsLabel) + 4);
-                    pos.add((this.height - 16) / 2 + ((i / 8) * 20) + 40 + imgOffset - this.entryScrollOffset + favoriteFoodsHeight);
-                    tempWorkstationsList.put(workstationString, pos);
-                    this.renderItem(workstationString, pos.get(0), pos.get(1));
-                }
-                this.shownWorkstationsList = tempWorkstationsList;
             }
 
             //text
@@ -398,7 +401,7 @@ public class RiftJournalScreen extends GuiScreen {
         List<String> wrappedTextLines = this.fontRenderer.listFormattedStringToWidth(journalString, 248);
         int lineHeight = this.fontRenderer.FONT_HEIGHT;
         int displayedTextHeight = wrappedTextLines.size() * lineHeight;
-        this.journalEntryHeight = displayedTextHeight + imgOffset;
+        this.journalEntryHeight = displayedTextHeight + imgOffset + favoriteFoodsHeight + tamingFoodsHeight + workstationsHeight;
 
         //create scrollbar
         if (this.journalEntryHeight > 200) {
@@ -600,6 +603,12 @@ public class RiftJournalScreen extends GuiScreen {
                 RiftGuiJournalPartyButton jButton = (RiftGuiJournalPartyButton) guiButton;
                 if (this.partyPosToMove != -1 && jButton.id == this.partyPosToMove) jButton.toMove = true;
                 jButton.isSelected = jButton.id == this.selectedPartyPos;
+            }
+            else if (guiButton instanceof RiftGuiJournalButton) {
+                RiftGuiJournalButton jButton = (RiftGuiJournalButton) guiButton;
+                if (this.entryType != null) {
+                    jButton.enabled = !jButton.getTriggerString().equals(this.entryType.toString());
+                }
             }
 
             //draw button

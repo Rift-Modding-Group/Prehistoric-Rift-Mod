@@ -137,7 +137,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftAnkylosaurusHideInShell(this));
-        this.tasks.addTask(1, new RiftAnkylosaurusHitAnvil(this));
+        if (GeneralConfig.canUsePyrotech()) this.tasks.addTask(1, new RiftAnkylosaurusHitAnvil(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftControlledAttack(this, 1.2F, 0.6F));

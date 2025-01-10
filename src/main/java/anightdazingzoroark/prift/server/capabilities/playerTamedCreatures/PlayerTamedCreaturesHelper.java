@@ -301,7 +301,7 @@ public class PlayerTamedCreaturesHelper {
                             //food based regen
                             if (GeneralConfig.creatureEatFromInventory && j % 60 == 0) {
                                 //manipulate based on item edibility
-                                for (int i = nbtItemList.tagList.size() - 1; i >= 0; i--) {
+                                for (int i = nbtItemList.tagCount() - 1; i >= 0; i--) {
                                     NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
 
                                     //skip if slot is at 0, which is reserved for saddles only
@@ -331,7 +331,7 @@ public class PlayerTamedCreaturesHelper {
                             //food based regen
                             if (GeneralConfig.creatureEatFromInventory && j % 60 == 0) {
                                 //manipulate based on item edibility
-                                for (int i = nbtItemList.tagList.size() - 1; i >= 0; i--) {
+                                for (int i = nbtItemList.tagCount() - 1; i >= 0; i--) {
                                     NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
 
                                     //skip if slot is at 0, which is reserved for saddles only
@@ -473,7 +473,7 @@ public class PlayerTamedCreaturesHelper {
                     //health regen from food
                     if (GeneralConfig.creatureEatFromInventory && time % 60 == 0) {
                         //manipulate based on item edibility
-                        for (int i = nbtItemList.tagList.size() - 1; i >= 0; i--) {
+                        for (int i = nbtItemList.tagCount() - 1; i >= 0; i--) {
                             NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
 
                             //skip if slot is at 0, which is reserved for saddles only
@@ -497,7 +497,7 @@ public class PlayerTamedCreaturesHelper {
                     //energy regen from food
                     if (GeneralConfig.creatureEatFromInventory && time % 60 == 0) {
                         //manipulate based on item edibility
-                        for (int i = nbtItemList.tagList.size() - 1; i >= 0; i--) {
+                        for (int i = nbtItemList.tagCount() - 1; i >= 0; i--) {
                             NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
 
                             //skip if slot is at 0, which is reserved for saddles only

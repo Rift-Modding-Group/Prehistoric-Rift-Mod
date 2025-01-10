@@ -395,7 +395,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void manageDiscoveryByPlayer() {
-        AxisAlignedBB axisAlignedBB = new AxisAlignedBB(this.posX - 8, this.posY - 4, this.posZ - 8, this.posX + 8, this.posY + 4, this.posZ + 8);
+        AxisAlignedBB axisAlignedBB = new AxisAlignedBB(this.posX - 12, this.posY - 8, this.posZ - 12, this.posX + 12, this.posY + 8, this.posZ + 12);
         for (EntityPlayer player : this.world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB, new Predicate<EntityPlayer>() {
             @Override
             public boolean apply(@Nullable EntityPlayer player) {
@@ -1883,15 +1883,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return list;
     }
 
-    public List<RiftTameRadialChoice> stateRadialChoices() {
-        List<RiftTameRadialChoice> list = new ArrayList<>();
-        list.add(RiftTameRadialChoice.BACK);
-        list.add(RiftTameRadialChoice.STAND);
-        list.add(RiftTameRadialChoice.SIT);
-        list.add(RiftTameRadialChoice.WANDER);
-        return list;
-    }
-
     public List<RiftTameRadialChoice> behaviorRadialChoices() {
         List<RiftTameRadialChoice> list = new ArrayList<>();
         list.add(RiftTameRadialChoice.BACK);
@@ -1905,7 +1896,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public List<RiftTameRadialChoice> optionsRadialChoices() {
         List<RiftTameRadialChoice> list = new ArrayList<>();
         list.add(RiftTameRadialChoice.BACK);
-        if (this instanceof IWorkstationUser) list.add(RiftTameRadialChoice.SET_WORKSTATION);
+        if (this instanceof IWorkstationUser && !((IWorkstationUser)this).getWorkstations().isEmpty()) list.add(RiftTameRadialChoice.SET_WORKSTATION);
         if (this instanceof IHarvestWhenWandering) list.add(RiftTameRadialChoice.SET_WANDER_HARVEST);
         if (this instanceof ITurretModeUser) list.add(RiftTameRadialChoice.SET_TURRET_MODE);
         return list;
