@@ -64,6 +64,10 @@ public class GeneralConfig {
     public static int spawnAroundPlayerRad = 24;
     public static int spawnInterval = 400;
 
+    //creature box
+    public static int creatureBoxReviveTime = 12000;
+    public static boolean creatureBoxPreventMobSpawn = true;
+
     //mod integration
     public static boolean mmIntegration = true;
     public static boolean pyrotechIntegration = true;
@@ -157,6 +161,10 @@ public class GeneralConfig {
         levelingRadius = config.getInt("Level based on distance from (0, 0)", "Creature Leveling", 1600, 0, 69420666, "Distance from (0, 0) from which creature levels get increased. This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");
         levelingRadisIncrement = config.getInt("Level increment based on distance from (0, 0)", "Creature Leveling", 10, 0, 69420666, "Level increment based on distance from (0, 0). This makes it so that the farther you are from the center, the higher the levels of wild creatures are.");
         difficultyIncrement = config.getStringList("Level increment based on difficulty", "Creature Leveling", new String[]{"EASY:0", "NORMAL:5", "HARD:5"}, "Level increment based on the difficulty setting of the world. Only the number may be edited, changing the names can cause crashes. Note that the numbers are additive, so if Easy, Normal, and Hard are set to 5, the increment will be 15. Changing the order of the strings may also cause a crash.");
+
+        //creature box
+        creatureBoxReviveTime = config.getInt("Creature Box Revive Time", "Creature Box", 12000, 0, 69420666, "Amount of time in ticks a dead creature placed in a creature box needs to be revived");
+        creatureBoxPreventMobSpawn = config.getBoolean("Creature Box can prevent mob spawns", "Creature Box", true, "Whether or not creature boxes can prevent entities spawning within their range");
 
         //mod integration
         mmIntegration = config.getBoolean("Activate Mystical Mechanics Integration", "Mod Integration", true, "Whether or not additional features will be turned on if Mystical Mechanics is detected in the mods folder");

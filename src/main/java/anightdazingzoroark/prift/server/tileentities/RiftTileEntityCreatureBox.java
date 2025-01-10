@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.tileentities;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -9,6 +10,8 @@ import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -41,14 +44,17 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         if (!this.world.isRemote) this.createCreaturesForWandering();
 
         //remove creatures that are not recently spawned from the wander range of the creature box
-        AxisAlignedBB removeAABB = new AxisAlignedBB(this.getPos().getX() - this.getWanderRange(), this.getPos().getY() - this.getWanderRange(), this.getPos().getZ() - this.getWanderRange(), this.getPos().getX() + this.getWanderRange(), this.getPos().getY() + this.getWanderRange(), this.getPos().getZ() + this.getWanderRange());
-        for (RiftCreature creature : this.world.getEntitiesWithinAABB(RiftCreature.class, removeAABB, new Predicate<RiftCreature>() {
-            @Override
-            public boolean apply(@Nullable RiftCreature riftCreature) {
-                return riftCreature != null && riftCreature.ticksExisted <= 100 && !riftCreature.isTamed();
+        if (GeneralConfig.creatureBoxPreventMobSpawn) {
+            AxisAlignedBB removeAABB = new AxisAlignedBB(this.getPos().getX() - this.getWanderRange(), this.getPos().getY() - this.getWanderRange(), this.getPos().getZ() - this.getWanderRange(), this.getPos().getX() + this.getWanderRange(), this.getPos().getY() + this.getWanderRange(), this.getPos().getZ() + this.getWanderRange());
+            for (EntityLiving creature : this.world.getEntitiesWithinAABB(EntityLiving.class, removeAABB, new Predicate<EntityLiving>() {
+                @Override
+                public boolean apply(@Nullable EntityLiving entityLiving) {
+                    return entityLiving != null && entityLiving.ticksExisted <= 100 && (!(entityLiving instanceof EntityTameable) || !((EntityTameable) entityLiving).isTamed());
+                }
+            })) {
+                if (creature instanceof RiftCreature) RiftUtil.removeCreature((RiftCreature) creature);
+                else this.world.removeEntity(creature);
             }
-        })) {
-            RiftUtil.removeCreature(creature);
         }
     }
 

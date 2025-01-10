@@ -1863,7 +1863,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
         this.setSitting(false);
-        this.setBoxReviveTime(12000);
+        this.getActivePotionEffects().clear();
+        this.setBoxReviveTime(GeneralConfig.creatureBoxReviveTime);
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY
                 || this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) PlayerTamedCreaturesHelper.updatePartyMem(this);
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
