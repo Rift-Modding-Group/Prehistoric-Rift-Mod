@@ -5,8 +5,10 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -49,7 +51,11 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
             for (EntityLiving creature : this.world.getEntitiesWithinAABB(EntityLiving.class, removeAABB, new Predicate<EntityLiving>() {
                 @Override
                 public boolean apply(@Nullable EntityLiving entityLiving) {
-                    return entityLiving != null && entityLiving.ticksExisted <= 100 && (!(entityLiving instanceof EntityTameable) || !((EntityTameable) entityLiving).isTamed());
+                    if (entityLiving == null) return false;
+                    else if (entityLiving instanceof RiftEgg) return false;
+                    else if (entityLiving instanceof RiftLargeWeapon) return false;
+                    else if (entityLiving instanceof EntityTameable) return !((EntityTameable) entityLiving).isTamed() && entityLiving.ticksExisted <= 100;
+                    else return entityLiving.ticksExisted <= 100;
                 }
             })) {
                 if (creature instanceof RiftCreature) RiftUtil.removeCreature((RiftCreature) creature);

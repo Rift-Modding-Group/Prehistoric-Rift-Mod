@@ -288,10 +288,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.onLivingUpdate();
 
         //disable default growth system
-        if (this.world.isRemote) this.setScaleForAge(false);
         if (this.getGrowingAge() < 0) this.setGrowingAge(0);
 
         if (!this.world.isRemote) {
+            this.setScaleForAge(false);
             this.setHasTarget(this.getAttackTarget() != null);
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();

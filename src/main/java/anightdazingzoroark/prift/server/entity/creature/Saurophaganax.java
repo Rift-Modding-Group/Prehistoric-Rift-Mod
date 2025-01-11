@@ -127,8 +127,7 @@ public class Saurophaganax extends RiftCreature {
         this.tasks.addTask(3, new RiftSaurophaganaxUseLightBlast(this));
         this.tasks.addTask(4, new RiftControlledAttack(this, 0.52F, 0.24F));
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
-        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 6.0F, 2.0F));
-        //this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(9, new RiftWander(this, 1.0D));
         this.tasks.addTask(10, new RiftLookAround(this));

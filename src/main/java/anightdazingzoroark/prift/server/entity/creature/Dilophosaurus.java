@@ -103,7 +103,7 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
         this.tasks.addTask(3, new RiftDilophosaurusControlledClawAttack(this));
         this.tasks.addTask(4, new RiftRangedAttack(this, false, 1.0D, 2.64F, 0.72F));
         this.tasks.addTask(5, new RiftAttack.DilophosaurusAttack(this, 1.0D));
-        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(7, new RiftWander(this, 1.0D));
         this.tasks.addTask(8, new RiftLookAround(this));
     }

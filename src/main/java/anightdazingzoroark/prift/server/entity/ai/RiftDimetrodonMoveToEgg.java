@@ -24,6 +24,7 @@ public class RiftDimetrodonMoveToEgg extends EntityAIBase {
     @Override
     public boolean shouldExecute() {
         if (this.dimetrodon.isTamed()
+                && !this.dimetrodon.isBaby()
                 && this.dimetrodon.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                 && !this.dimetrodon.isSitting()
                 && !this.dimetrodon.isTakingCareOfEgg()

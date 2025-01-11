@@ -60,11 +60,12 @@ public class RiftUpdatePartyDeployed implements IMessage {
     public static class Handler implements IMessageHandler<RiftUpdatePartyDeployed, IMessage> {
         @Override
         public IMessage onMessage(RiftUpdatePartyDeployed message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
+            if (ctx.side == Side.SERVER) FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handleServer(message, ctx));
+            if (ctx.side == Side.CLIENT) FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handleClient(message, ctx));
             return null;
         }
 
-        private void handle(RiftUpdatePartyDeployed message, MessageContext ctx) {
+        private void handleServer(RiftUpdatePartyDeployed message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
@@ -98,6 +99,9 @@ public class RiftUpdatePartyDeployed implements IMessage {
                     }
                 }
             }
+        }
+
+        private void handleClient(RiftUpdatePartyDeployed message, MessageContext ctx) {
             if (ctx.side == Side.CLIENT) {
                 EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 

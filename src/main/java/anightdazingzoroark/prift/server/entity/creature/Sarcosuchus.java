@@ -109,7 +109,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.52F));
         this.tasks.addTask(3, new RiftAttack.SarcosuchusAttack(this, 4.0D, 0.52f, 0.52f));
         this.tasks.addTask(4, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
-        //this.tasks.addTask(5, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(6, new RiftGoToWater(this, 16, 1.0D));
         this.tasks.addTask(7, new RiftWanderWater(this, 1.0D));
         this.tasks.addTask(8, new RiftWander(this, 1.0D));

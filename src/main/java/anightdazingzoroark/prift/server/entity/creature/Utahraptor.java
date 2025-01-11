@@ -23,6 +23,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathNavigateClimber;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -114,8 +115,7 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         this.tasks.addTask(4, new RiftControlledPackBuff(this, 1.68f, 0f));
         this.tasks.addTask(5, new RiftLeapAttack(this, 6f, 160));
         this.tasks.addTask(6, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
-        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        //this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));
         this.tasks.addTask(11, new RiftHerdMemberFollow(this));
