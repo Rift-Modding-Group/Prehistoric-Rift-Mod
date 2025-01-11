@@ -15,6 +15,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 public class RiftChangeInventoryFromMenu implements IMessage {
     private int creatureId;
+    private int playerId;
     private RiftCreatureInvData inventory;
     private PlayerInvData playerInventory;
 
@@ -22,6 +23,7 @@ public class RiftChangeInventoryFromMenu implements IMessage {
 
     public RiftChangeInventoryFromMenu(RiftCreature creature, EntityPlayer player) {
         this.creatureId = creature.getEntityId();
+        this.playerId = player.getEntityId();
         this.inventory = RiftCreatureInvData.fromRiftInventory(creature.creatureInventory);
         this.playerInventory = PlayerInvData.fromPlayerInventory(player.inventory);
     }
@@ -29,6 +31,7 @@ public class RiftChangeInventoryFromMenu implements IMessage {
     @Override
     public void fromBytes(ByteBuf buf) {
         this.creatureId = buf.readInt();
+        this.playerId = buf.readInt();
         this.inventory = RiftCreatureInvData.fromByteBuf(buf);
         this.playerInventory = PlayerInvData.fromByteBuf(buf);
     }
@@ -36,6 +39,7 @@ public class RiftChangeInventoryFromMenu implements IMessage {
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.creatureId);
+        buf.writeInt(this.playerId);
         RiftCreatureInvData.writeToByteBuf(buf);
         PlayerInvData.writeToByteBuf(buf);
     }
@@ -52,18 +56,20 @@ public class RiftChangeInventoryFromMenu implements IMessage {
             EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
             RiftCreature interacted = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
+            EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
 
-            interacted.creatureInventory.setInventoryFromData(message.inventory);
-            PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
+            if (interacted != null) interacted.creatureInventory.setInventoryFromData(message.inventory);
+            if (player != null) PlayerInvData.applyInventoryData(player, message.playerInventory);
         }
 
         private void clientHandle(RiftChangeInventoryFromMenu message, MessageContext ctx) {
             EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
             RiftCreature interacted = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
+            EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
 
-            interacted.creatureInventory.setInventoryFromData(message.inventory);
-            PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
+            if (interacted != null) interacted.creatureInventory.setInventoryFromData(message.inventory);
+            if (player != null) PlayerInvData.applyInventoryData(player, message.playerInventory);
         }
     }
 

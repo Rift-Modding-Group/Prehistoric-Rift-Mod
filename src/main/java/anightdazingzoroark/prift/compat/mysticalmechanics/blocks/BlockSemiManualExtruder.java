@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtruder;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,7 +27,7 @@ public class BlockSemiManualExtruder extends BlockSemiManualBase {
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
-            playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_SEMI_MANUAL_EXTRUDER, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            playerIn.openGui(RiftInitialize.instance, RiftGui.GUI_SEMI_MANUAL_EXTRUDER, worldIn, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }

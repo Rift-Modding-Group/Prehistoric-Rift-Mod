@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
@@ -226,7 +227,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
         this.mc.player.closeScreen();
         if (this.popupType == PopupFromCreatureBox.RELEASE && this.getPlayerParty().isEmpty() && this.getPlayerBox().isEmpty()) {}
         else if (this.popupType != PopupFromCreatureBox.NO_CREATURES) {
-            this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
         }
     }
 

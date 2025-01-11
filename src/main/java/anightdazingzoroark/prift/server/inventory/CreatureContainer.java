@@ -5,24 +5,27 @@ import anightdazingzoroark.prift.server.message.RiftChangeInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CreatureContainer extends Container {
     private final IInventory creatureInventory;
+    private EntityPlayer player;
+    private final int[] fields;
     private final RiftCreature creature;
-    private final EntityPlayer player;
-    private final int slots;
-    private final int rows;
 
     public CreatureContainer(final RiftCreature creature, EntityPlayer player) {
         this.creatureInventory = creature.creatureInventory;
-        this.creature = creature;
         this.player = player;
-        this.slots = creatureInventory.getSizeInventory() - (creature.canBeSaddled() ? 1 : 0);
-        this.rows = this.slots / 9;
-        creatureInventory.openInventory(player);
+        this.fields = new int[creature.creatureInventory.getFieldCount()];
+        this.creature = creature;
+        int slots = creatureInventory.getSizeInventory() - (creature.canBeSaddled() ? 1 : 0);
+        int rows = slots / 9;
+        this.creatureInventory.openInventory(player);
 
         //creature saddle slot
         if (!this.creature.isBaby() && this.creature.canBeSaddled()) {
@@ -39,7 +42,7 @@ public class CreatureContainer extends Container {
         }
 
         //creature inventory
-        for (int j = 0; j < this.rows; ++j) {
+        for (int j = 0; j < rows; ++j) {
             for (int k = 0; k < 9; ++k) {
                 this.addSlotToContainer(new Slot(creature.creatureInventory, (k + (this.creature.canBeSaddled() ? 1 : 0)) + (j * 9), 8 + k * 18, 50 + j * 18));
             }
@@ -64,31 +67,31 @@ public class CreatureContainer extends Container {
     }
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-        ItemStack itemStack = ItemStack.EMPTY;
+    public ItemStack transferStackInSlot(EntityPlayer player, int index) {
+        ItemStack transferred = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
 
         if (slot != null && slot.getHasStack()) {
-            ItemStack itemStack1 = slot.getStack();
-            itemStack = itemStack1.copy();
+            ItemStack current = slot.getStack();
+            transferred = current.copy();
 
             if (index < this.creatureInventory.getSizeInventory()) {
-                if (!this.mergeItemStack(itemStack1, this.creatureInventory.getSizeInventory(), this.inventorySlots.size(), true)) {
+                if (!this.mergeItemStack(current, this.creatureInventory.getSizeInventory(), this.inventorySlots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
             }
-            else if (this.getSlot(0).isItemValid(itemStack1)) {
-                if (!this.mergeItemStack(itemStack1, 0, 1, false)) {
+            else if (this.getSlot(0).isItemValid(current)) {
+                if (!this.mergeItemStack(current, 0, 1, false)) {
                     return ItemStack.EMPTY;
                 }
             }
-            else if (this.creatureInventory.getSizeInventory() <= 1 || !this.mergeItemStack(itemStack1, 1, this.creatureInventory.getSizeInventory(), false)) {
+            else if (this.creatureInventory.getSizeInventory() <= 1 || !this.mergeItemStack(current, 1, this.creatureInventory.getSizeInventory(), false)) {
                 return ItemStack.EMPTY;
             }
-            else if (itemStack1.isEmpty()) slot.putStack(ItemStack.EMPTY);
+            else if (current.isEmpty()) slot.putStack(ItemStack.EMPTY);
             else slot.onSlotChanged();
         }
-        return itemStack;
+        return transferred;
     }
 
     @Override

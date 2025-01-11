@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.enums.PopupFromCreatureBox;
 import io.netty.buffer.ByteBuf;
@@ -31,12 +32,6 @@ public class RiftOpenCreatureBoxNoCreaturesMenu implements IMessage {
         buf.writeInt(this.playerId);
     }
 
-    public void onClientReceived(Minecraft minecraft, RiftOpenCreatureBoxNoCreaturesMenu message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-        ClientProxy.popupFromRadial = PopupFromCreatureBox.NO_CREATURES;
-        player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, messagePlayer.world, 0, 0, 0);
-    }
-
     public static class Handler implements IMessageHandler<RiftOpenCreatureBoxNoCreaturesMenu, IMessage> {
         @Override
         public IMessage onMessage(RiftOpenCreatureBoxNoCreaturesMenu message, MessageContext ctx) {
@@ -49,7 +44,7 @@ public class RiftOpenCreatureBoxNoCreaturesMenu implements IMessage {
 
             EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
             ClientProxy.popupFromRadial = PopupFromCreatureBox.NO_CREATURES;
-            player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, messagePlayer.world, 0, 0, 0);
+            player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, messagePlayer.world, 0, 0, 0);
         }
     }
 }

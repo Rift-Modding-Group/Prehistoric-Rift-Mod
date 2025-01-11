@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
@@ -40,7 +41,7 @@ public class RiftOpenPopupFromRadial implements IMessage {
         private void handle(RiftOpenPopupFromRadial message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             World world = playerEntity.world;
-            playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_RADIAL, world, message.creatureId, 0, 0);
+            playerEntity.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_RADIAL, world, message.creatureId, 0, 0);
         }
     }
 }

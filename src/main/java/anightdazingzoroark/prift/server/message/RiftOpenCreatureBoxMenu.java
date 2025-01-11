@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -55,7 +56,7 @@ public class RiftOpenCreatureBoxMenu implements IMessage {
 
             EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
             ClientProxy.creatureBoxBlockPos = new BlockPos(message.posX, message.posY, message.posZ);
-            player.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_BOX, messagePlayer.world, -1, 0, 0);
+            player.openGui(RiftInitialize.instance, RiftGui.GUI_CREATURE_BOX, messagePlayer.world, -1, 0, 0);
         }
     }
 }

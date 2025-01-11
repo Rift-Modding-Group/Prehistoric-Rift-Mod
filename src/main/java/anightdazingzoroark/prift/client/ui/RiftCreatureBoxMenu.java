@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxBoxButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxDeployedButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiCreatureBoxPartyButton;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
@@ -196,7 +197,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             else {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxPosToMove, partyButton.id);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxPosToMove, partyButton.id);
                             }
                         }
                         //move box creature to party
@@ -269,7 +270,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         if (this.selectedCreature.getHealth() > 0) this.boxPosToMove = boxButton.id;
                         else {
                             ClientProxy.popupFromRadial = PopupFromCreatureBox.CREATURE_REVIVING;
-                            this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                         }
                     }
                 }
@@ -284,7 +285,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             //a message will pop out saying that it's not theirs
                             if (selectedForTest.getHealth() <= 0) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.CREATURE_REVIVING;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                                 return;
                             }
                         }
@@ -307,7 +308,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             else {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.partyPosToMove, boxButton.id);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.partyPosToMove, boxButton.id);
                             }
                         }
                         //move party creature to box
@@ -328,7 +329,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             else {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.partyPosToMove, 0);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.partyPosToMove, 0);
                             }
                         }
                     }
@@ -342,7 +343,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             //a message will pop out saying that it's not theirs
                             if (selectedForTest.getHealth() <= 0) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.CREATURE_REVIVING;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                                 return;
                             }
                         }
@@ -365,7 +366,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             else {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_BOX_SWAP;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxDeployedPosToMove, boxButton.id);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxDeployedPosToMove, boxButton.id);
                             }
                         }
                         //move box deployed creature to box
@@ -391,7 +392,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             else {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_BOX;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxDeployedPosToMove, 0);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxDeployedPosToMove, 0);
                             }
                         }
                     }
@@ -432,7 +433,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         if (this.selectedCreature.getOwner().equals(this.mc.player)) this.boxDeployedPosToMove = boxDeployedButton.id;
                         else {
                             ClientProxy.popupFromRadial = PopupFromCreatureBox.OWNED_BY_OTHER;
-                            this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                         }
                     }
                 }
@@ -448,7 +449,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             //a message will pop out saying that it's not theirs
                             if (!selectedForTest.getOwner().equals(this.mc.player)) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.OWNED_BY_OTHER;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                                 return;
                             }
 
@@ -489,7 +490,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             //a message will pop out saying that it's not theirs
                             if (!selectedForTest.getOwner().equals(this.mc.player)) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.OWNED_BY_OTHER;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                                 return;
                             }
 
@@ -509,7 +510,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                             else {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_BOX_DEPLOYED_SWAP;
-                                this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxPosToMove, boxDeployedButton.id);
+                                this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxPosToMove, boxDeployedButton.id);
                             }
                         }
                         //move box creature to box deployed
@@ -552,17 +553,17 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                     if (button.id == 0) {
                         ClientProxy.creatureUUID = this.selectedCreature.getUniqueID();
                         ClientProxy.popupFromRadial = PopupFromCreatureBox.CHANGE_NAME;
-                        this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                        this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                     }
                     else if (button.id == 1) {
                         ClientProxy.creatureUUID = this.selectedCreature.getUniqueID();
                         ClientProxy.popupFromRadial = PopupFromCreatureBox.RELEASE;
-                        this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                        this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                     }
                 }
                 else if (button.id == 0 || button.id == 1) {
                     ClientProxy.popupFromRadial = PopupFromCreatureBox.OWNED_BY_OTHER;
-                    this.mc.player.openGui(RiftInitialize.instance, ServerProxy.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                    this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                 }
             }
             if (button.id == 2) {

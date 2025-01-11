@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualHammerer;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.ModuleTechBloomery;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.item.spi.ItemTongsFullBase;
@@ -44,7 +45,7 @@ public class BlockSemiManualHammerer extends BlockSemiManualBase {
                     playerIn.setHeldItem(hand, BloomHelper.createItemTongsEmpty(playerIn.getHeldItem(hand), !playerIn.isCreative()));
                 }
             }
-            else playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_SEMI_MANUAL_HAMMERER, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            else playerIn.openGui(RiftInitialize.instance, RiftGui.GUI_SEMI_MANUAL_HAMMERER, worldIn, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityMillstone;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -58,7 +59,7 @@ public class BlockMillstone extends Block implements ITileEntityProvider {
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
-            playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_MILLSTONE, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            playerIn.openGui(RiftInitialize.instance, RiftGui.GUI_MILLSTONE, worldIn, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }

@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.blocks;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
 import net.minecraft.block.*;
@@ -88,7 +89,7 @@ public class RiftFeedingTroughBlock extends Block implements ITileEntityProvider
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
-            playerIn.openGui(RiftInitialize.instance, ServerProxy.GUI_FEEDING_TROUGH, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            playerIn.openGui(RiftInitialize.instance, RiftGui.GUI_FEEDING_TROUGH, worldIn, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }

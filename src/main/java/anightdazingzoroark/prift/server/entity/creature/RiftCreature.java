@@ -7,15 +7,18 @@ import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
-import anightdazingzoroark.prift.server.ServerProxy;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.entity.*;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftEgg;
+import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
-import anightdazingzoroark.prift.server.enums.*;
+import anightdazingzoroark.prift.server.enums.CreatureCategory;
+import anightdazingzoroark.prift.server.enums.CreatureDiet;
+import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
+import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -35,10 +38,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.ContainerHorseChest;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.IInventoryChangedListener;
+import net.minecraft.inventory.*;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -47,11 +47,13 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionUtils;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
@@ -167,7 +169,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setSpeed(0f);
         this.setWaterSpeed(1f);
         this.setScaleForAge(false);
-        this.initInventory();
         this.energyMod = 0;
         this.energyRegenMod = 0;
         this.energyRegenModDelay = 0;
@@ -188,6 +189,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.healthRegen = 0;
         this.resetParts(0);
         this.isFloatingOnWater = false;
+        this.initInventory();
     }
 
     @Override
@@ -658,15 +660,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         if (this instanceof IImpregnable) {
-                            if (((IImpregnable)this).isPregnant() && player.isSneaking()) player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, this.getEntityId() ,0, 0);
-                            else player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId(), 0, 0);
+                            if (((IImpregnable)this).isPregnant() && player.isSneaking()) player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId() ,0, 0);
+                            else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId(), 0, 0);
                         }
-                        else player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
+                        else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
                         if (this instanceof IImpregnable) {
                             if (!((IImpregnable)this).isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
-                            else player.openGui(RiftInitialize.instance, ServerProxy.GUI_EGG, world, this.getEntityId() ,0, 0);
+                            else player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId() ,0, 0);
                         }
                         else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {
                             boolean usingWorkstation = this instanceof IWorkstationUser && ((IWorkstationUser) this).isUsingWorkstation();
@@ -676,7 +678,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
-                        player.openGui(RiftInitialize.instance, ServerProxy.GUI_DIAL, world, this.getEntityId() ,0, 0);
+                        player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
                 }
                 else player.sendStatusMessage(new TextComponentTranslation("reminder.not_creature_owner", this.getOwner().getName()), false);
@@ -1011,6 +1013,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             for (int i = 0; i < nbtTagList.tagCount(); ++i) {
                 NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
                 int j = nbttagcompound.getByte("Slot") & 255;
+                this.initInventory();
                 this.creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
             }
         }
@@ -1025,13 +1028,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void initInventory() {
+        RiftCreatureInventory tempInventory = this.creatureInventory;
         int inventorySize = this.slotCount() + (this.canBeSaddled() ? 1 : 0);
         this.creatureInventory = new RiftCreatureInventory("creatureInventory", inventorySize, this);
         this.creatureInventory.setCustomName(this.getName());
-        if (this.creatureInventory != null) {
-            for (int i = 0; i < inventorySize; ++i) {
-                ItemStack itemStack = this.creatureInventory.getStackInSlot(i);
-                if (!itemStack.isEmpty()) this.creatureInventory.setInventorySlotContents(i, itemStack.copy());
+        if (tempInventory != null) {
+            for (int i = 0; i < inventorySize; i++) {
+                ItemStack itemStack = tempInventory.getStackInSlot(i);
+                if (!itemStack.isEmpty()) {
+                    this.creatureInventory.setInventorySlotContents(i, itemStack.copy());
+                }
             }
         }
     }
@@ -1974,9 +1980,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.factory;
     }
 
-    public class RiftCreatureInventory extends ContainerHorseChest {
+    public class RiftCreatureInventory extends InventoryBasic {
         public RiftCreatureInventory(String inventoryTitle, int slotCount, RiftCreature creature) {
-            super(inventoryTitle, slotCount);
+            super(inventoryTitle, false, slotCount);
             this.addInventoryChangeListener(new RiftCreatureInvListener(creature));
         }
 
@@ -2034,7 +2040,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     class RiftCreatureInvListener implements IInventoryChangedListener {
-        RiftCreature creature;
+        private RiftCreature creature;
 
         public RiftCreatureInvListener(RiftCreature creature) {
             this.creature = creature;
@@ -2042,7 +2048,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         @Override
         public void onInventoryChanged(IInventory invBasic) {
-            creature.refreshInventory();
+            this.creature.refreshInventory();
         }
     }
 }

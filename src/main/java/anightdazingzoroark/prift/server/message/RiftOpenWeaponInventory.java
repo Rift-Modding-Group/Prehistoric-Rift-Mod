@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import io.netty.buffer.ByteBuf;
@@ -40,7 +41,7 @@ public class RiftOpenWeaponInventory implements IMessage {
         private void handle(RiftOpenWeaponInventory message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             World world = playerEntity.getEntityWorld();
-            playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_WEAPON_INVENTORY, world, message.weaponId, 0, 0);
+            playerEntity.openGui(RiftInitialize.instance, RiftGui.GUI_WEAPON_INVENTORY, world, message.weaponId, 0, 0);
         }
     }
 }

@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
@@ -98,10 +99,12 @@ public class ClientEvents {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (event.getGui() instanceof GuiInventory && player.isRiding() && player.getRidingEntity() instanceof RiftCreature) {
             RiftMessages.WRAPPER.sendToServer(new RiftOpenInventoryFromMenu(player.getRidingEntity().getEntityId()));
+            player.closeScreen();
             event.setCanceled(true);
         }
         if (event.getGui() instanceof GuiInventory && player.isRiding() && player.getRidingEntity() instanceof RiftLargeWeapon) {
             RiftMessages.WRAPPER.sendToServer(new RiftOpenWeaponInventory((RiftLargeWeapon)player.getRidingEntity()));
+            player.closeScreen();
             event.setCanceled(true);
         }
     }
@@ -129,7 +132,7 @@ public class ClientEvents {
     public void openJournal(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (RiftControls.openJournal.isKeyDown()) {
-            player.openGui(RiftInitialize.instance, ServerProxy.GUI_JOURNAL, player.world, 0, 0, 0);
+            player.openGui(RiftInitialize.instance, RiftGui.GUI_JOURNAL, player.world, 0, 0, 0);
         }
     }
 }

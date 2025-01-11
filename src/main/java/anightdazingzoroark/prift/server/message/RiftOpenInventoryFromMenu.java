@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -39,7 +40,7 @@ public class RiftOpenInventoryFromMenu implements IMessage {
         private void handle(RiftOpenInventoryFromMenu message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             World world = playerEntity.getEntityWorld();
-            playerEntity.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_INVENTORY, world, message.creatureId, 0, 0);
+            playerEntity.openGui(RiftInitialize.instance, RiftGui.GUI_CREATURE_INVENTORY, world, message.creatureId, 0, 0);
         }
     }
 }
