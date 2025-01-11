@@ -632,11 +632,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
-                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getLoveCooldown() == 0 && !this.isSitting()) {
+                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getLoveCooldown() == 0 && !this.isSitting() && (PlayerTamedCreaturesHelper.getPlayerParty(player).size() < PlayerTamedCreaturesHelper.getMaxPartySize(player) || PlayerTamedCreaturesHelper.getPlayerBox(player).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(player))) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setInLove(player);
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
+                    }
+                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getLoveCooldown() == 0 && !this.isSitting() && PlayerTamedCreaturesHelper.getPlayerParty(player).size() == PlayerTamedCreaturesHelper.getMaxPartySize(player) && PlayerTamedCreaturesHelper.getPlayerBox(player).size() == PlayerTamedCreaturesHelper.getMaxBoxSize(player)) {
+                        player.sendStatusMessage(new TextComponentTranslation("reminder.cannot_breed_more_creatures"), false);
                     }
                     else if (this.isEnergyRegenItem(itemstack) && this.getEnergy() < 20) {
                         this.consumeItemFromStack(player, itemstack);
@@ -693,7 +696,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else if (!this.isTamed() && !this.isSleeping()) {
-            if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
+            if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && (PlayerTamedCreaturesHelper.getPlayerParty(player).size() < PlayerTamedCreaturesHelper.getMaxPartySize(player) || PlayerTamedCreaturesHelper.getPlayerBox(player).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(player)) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     this.consumeItemFromStack(player, itemstack);
                     this.tameCreature(player);
@@ -705,6 +708,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.spawnItemCrackParticles(itemstack.getItem());
                     player.sendStatusMessage(new TextComponentTranslation("reminder.creature_wants_more", this.creatureType.getTranslatedName()), false);
                 }
+                return true;
+            }
+            else if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && PlayerTamedCreaturesHelper.getPlayerParty(player).size() == PlayerTamedCreaturesHelper.getMaxPartySize(player) && PlayerTamedCreaturesHelper.getPlayerBox(player).size() == PlayerTamedCreaturesHelper.getMaxBoxSize(player) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
+                player.sendStatusMessage(new TextComponentTranslation("reminder.cannot_tame_more_creatures"), false);
                 return true;
             }
             else if (!itemstack.isEmpty() && (this.creatureType == RiftCreatureType.DODO) && this.isBaby() && this.isFavoriteFood(itemstack)) {

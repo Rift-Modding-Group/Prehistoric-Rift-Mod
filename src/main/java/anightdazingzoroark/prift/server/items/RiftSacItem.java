@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.items;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
@@ -10,6 +11,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 public class RiftSacItem extends Item {
@@ -37,17 +39,24 @@ public class RiftSacItem extends Item {
     }
 
     protected boolean spawnSac(World world, EntityPlayer player, RiftCreatureType creature, double x, double y, double z) {
-        RiftSac sac = new RiftSac(world);
-        sac.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
-        sac.setCreatureType(creature);
-        sac.setOwnerId(player.getUniqueID());
-        sac.setGrowingAge(0);
-        sac.enablePersistence();
-        sac.setHatchTime(creature.getHatchTime() * 20);
+        if (PlayerTamedCreaturesHelper.getPlayerParty(player).size() < PlayerTamedCreaturesHelper.getMaxPartySize(player)
+                || PlayerTamedCreaturesHelper.getPlayerBox(player).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(player)) {
+            RiftSac sac = new RiftSac(world);
+            sac.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
+            sac.setCreatureType(creature);
+            sac.setOwnerId(player.getUniqueID());
+            sac.setGrowingAge(0);
+            sac.enablePersistence();
+            sac.setHatchTime(creature.getHatchTime() * 20);
 
-        if (!world.isRemote) {
-            if (world.getBlockState(new BlockPos(x, y, z)).getMaterial() == Material.WATER) world.spawnEntity(sac);
+            if (!world.isRemote) {
+                if (world.getBlockState(new BlockPos(x, y, z)).getMaterial() == Material.WATER) world.spawnEntity(sac);
+            }
+            return true;
         }
-        return true;
+        else {
+            player.sendStatusMessage(new TextComponentTranslation("reminder.cannot_hatch_more_sacs"), false);
+            return false;
+        }
     }
 }

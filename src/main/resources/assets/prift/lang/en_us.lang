@@ -269,6 +269,10 @@ reminder.box_range_level_max=This box's range level has already been maxed out! 
 reminder.cannon_no_ammo=This cannon has no ammo! Open its inventory to insert cannonballs!
 reminder.mortar_no_ammo=This mortar has no ammo! Open its inventory to insert mortar shells!
 reminder.catapult_no_ammo=This catapult has no ammo! Open its inventory to insert catapult boulders!
+reminder.cannot_tame_more_creatures=Your party and creature box are full! You cannot tame any more creatures!
+reminder.cannot_breed_more_creatures=Your party and creature box are full! You cannot breed any more creatures!
+reminder.cannot_hatch_more_eggs=Your party and creature box are full! You cannot hatch any more eggs!
+reminder.cannot_hatch_more_sacs=Your party and creature box are full! You cannot hatch any more sacs!
 
 prift.pregnancy.name=%s pregnancy
 prift.egg.time=Time

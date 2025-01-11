@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.items;
 
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,6 +9,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 public class RiftEggItem extends Item {
@@ -36,17 +38,24 @@ public class RiftEggItem extends Item {
     }
 
     protected boolean spawnEgg(World world, EntityPlayer player, RiftCreatureType creature, double x, double y, double z) {
-        RiftEgg egg = new RiftEgg(world);
-        egg.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
-        egg.setCreatureType(creature);
-        egg.setOwnerId(player.getUniqueID());
-        egg.setGrowingAge(0);
-        egg.enablePersistence();
-        egg.setHatchTime(creature.getHatchTime() * 20);
+        if (PlayerTamedCreaturesHelper.getPlayerParty(player).size() < PlayerTamedCreaturesHelper.getMaxPartySize(player)
+                || PlayerTamedCreaturesHelper.getPlayerBox(player).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(player)) {
+            RiftEgg egg = new RiftEgg(world);
+            egg.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
+            egg.setCreatureType(creature);
+            egg.setOwnerId(player.getUniqueID());
+            egg.setGrowingAge(0);
+            egg.enablePersistence();
+            egg.setHatchTime(creature.getHatchTime() * 20);
 
-        if (!world.isRemote) {
-            world.spawnEntity(egg);
+            if (!world.isRemote) {
+                world.spawnEntity(egg);
+            }
+            return true;
         }
-        return true;
+        else {
+            player.sendStatusMessage(new TextComponentTranslation("reminder.cannot_hatch_more_eggs"), false);
+            return false;
+        }
     }
 }
