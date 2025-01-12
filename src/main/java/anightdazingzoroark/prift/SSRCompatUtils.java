@@ -7,6 +7,8 @@ import com.teamderpy.shouldersurfing.client.ShoulderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -17,81 +19,79 @@ import java.util.List;
 
 public class SSRCompatUtils {
     public static RayTraceResult getEntities(RiftCreature creature) {
-        final int reach = 64; //8 squared
-        Entity cameraEntity = Minecraft.getMinecraft().getRenderViewEntity();
+        final int reach = 16;
+        final float creatureReach = creature.width + creature.attackWidth() + 1f;
+        Entity cameraEntity = Minecraft.getMinecraft().player;
         float partialTick = Minecraft.getMinecraft().getRenderPartialTicks();
-        Vec3d viewVector = cameraEntity.getLook(1.0F).scale(reach);
-        Vec3d eyePosition = cameraEntity.getPositionEyes(partialTick);
-        AxisAlignedBB aabb = cameraEntity.getEntityBoundingBox().expand(viewVector.x * reach, viewVector.y * reach, viewVector.z * reach).grow(1.0D, 1.0D, 1.0D);
 
-        ShoulderHelper.ShoulderLook look = ShoulderHelper.shoulderSurfingLook(cameraEntity, partialTick, reach);
-        Vec3d from = eyePosition.add(look.headOffset());
-        Vec3d to = look.traceEndPos();
-        aabb = aabb.offset(look.headOffset());
+        ShoulderHelper.ShoulderLook look = ShoulderHelper.shoulderSurfingLook(cameraEntity, partialTick, reach * reach);
+        Vec3d startPos = cameraEntity.getPositionEyes(1.0F).add(look.headOffset());;
+        Vec3d endPos = look.traceEndPos();
 
-        List<Entity> entities = Minecraft.getMinecraft().world.getEntitiesWithinAABB(Entity.class, aabb, new Predicate<Entity>() {
+        Entity pointedEntity = null;
+        Vec3d entityHitVec = null;
+        double closestDistance = reach;
+
+        List<Entity> entities = creature.world.getEntitiesInAABBexcluding(creature, cameraEntity.getEntityBoundingBox().grow(reach), new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
-                int attackReach = (int) (creature.getEntityBoundingBox().maxX - creature.getEntityBoundingBox().minX + creature.attackWidth());
-                if (entity.equals(cameraEntity)) return false;
-                else if (entity instanceof RiftCreature && entity.equals(creature)) return false;
-                else if (entity instanceof RiftCreaturePart && ((RiftCreaturePart)entity).getParent().equals(creature)) return false;
-                return entity.getDistanceSq(creature) <= Math.pow(attackReach, 2);
+                boolean withinCreatureReach = entity.getDistance(creature) <= creatureReach;
+                if (entity == null) return false;
+                if (entity instanceof MultiPartEntityPart) {
+                    MultiPartEntityPart entityPart = (MultiPartEntityPart) entity;
+                    return !entityPart.parent.equals(creature) && withinCreatureReach;
+                }
+                else if (entity instanceof RiftCreature) {
+                    RiftCreature creatureIn = (RiftCreature) entity;
+                    return !creatureIn.equals(creature) && withinCreatureReach;
+                }
+                else if (entity instanceof EntityPlayer) {
+                    EntityPlayer player = (EntityPlayer) entity;
+                    return !player.isSpectator() && !player.equals(cameraEntity) && withinCreatureReach;
+                }
+                return withinCreatureReach;
             }
         });
-        Vec3d entityHitVec = null;
-        Entity entityResult = null;
-        double minEntityReachSq = reach;
 
         for (Entity entity : entities) {
-            AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().grow(entity.getCollisionBorderSize());
-            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(from, to);
+            AxisAlignedBB boundingBox = entity.getEntityBoundingBox().grow(0.3);
+            RayTraceResult entityResult = boundingBox.calculateIntercept(startPos, endPos);
 
-            if (axisalignedbb.contains(eyePosition)) {
-                if (minEntityReachSq >= 0.0D) {
-                    entityResult = entity;
-                    entityHitVec = raytraceresult == null ? eyePosition : raytraceresult.hitVec;
-                    minEntityReachSq = 0.0D;
-                }
-            }
-            else if (raytraceresult != null) {
-                double distanceSq = eyePosition.squareDistanceTo(raytraceresult.hitVec);
+            if (entityResult != null) {
+                double distance = startPos.distanceTo(entityResult.hitVec);
 
-                if (distanceSq < minEntityReachSq || minEntityReachSq == 0.0D) {
-                    if (entity == cameraEntity.getRidingEntity() && !entity.canRiderInteract()) {
-                        if (minEntityReachSq == 0.0D) {
-                            entityResult = entity;
-                            entityHitVec = raytraceresult.hitVec;
-                        }
+                if (distance < closestDistance) {
+                    if (entity instanceof MultiPartEntityPart) {
+                        pointedEntity = (Entity) ((MultiPartEntityPart) entity).parent;
+                        entityHitVec = entityResult.hitVec;
                     }
                     else {
-                        entityResult = entity;
-                        entityHitVec = raytraceresult.hitVec;
-                        minEntityReachSq = distanceSq;
+                        pointedEntity = entity;
+                        entityHitVec = entityResult.hitVec;
                     }
+                    closestDistance = distance;
                 }
             }
         }
 
-        return new RayTraceResult(entityResult, entityHitVec);
+        return new RayTraceResult(pointedEntity, entityHitVec);
     }
 
     public static BlockPos getBlock(RiftCreature creature) {
-        final int reach = 64; //8 squared
-        int attackReach = (int) (creature.getEntityBoundingBox().maxX - creature.getEntityBoundingBox().minX + creature.attackWidth());
-        Entity cameraEntity = Minecraft.getMinecraft().getRenderViewEntity();
+        final int reach = 16;
+        final float creatureReach = creature.width + creature.attackWidth() + 1f;
+        Entity cameraEntity = Minecraft.getMinecraft().player;
         float partialTick = Minecraft.getMinecraft().getRenderPartialTicks();
-        Vec3d eyesPos = cameraEntity.getPositionEyes(1.0F);
 
         ShoulderHelper.ShoulderLook look = ShoulderHelper.shoulderSurfingLook(cameraEntity, partialTick, reach * reach);
-        Vec3d from = eyesPos.add(look.headOffset());
-        Vec3d to = look.traceEndPos();
+        Vec3d startPos = cameraEntity.getPositionEyes(1.0F).add(look.headOffset());;
+        Vec3d endPos = look.traceEndPos();
 
-        RayTraceResult rayTraceResult = cameraEntity.world.rayTraceBlocks(from, to, false, false, false);
+        RayTraceResult rayTraceResult = cameraEntity.world.rayTraceBlocks(startPos, endPos, false, false, false);
 
         if (rayTraceResult != null
                 && rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK
-                && creature.getDistanceSq(rayTraceResult.getBlockPos()) <= attackReach * attackReach
+                && creature.getDistanceSq(rayTraceResult.getBlockPos()) <= Math.pow(creatureReach, 2)
         ) return rayTraceResult.getBlockPos();
         return null;
     }

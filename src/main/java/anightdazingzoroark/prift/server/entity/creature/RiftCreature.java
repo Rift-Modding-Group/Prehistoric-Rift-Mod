@@ -1651,10 +1651,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //to based on where the player is looking
     public EntityLivingBase getControlAttackTargets() {
         final int reach = 16;
+        final float creatureReach = this.width + this.attackWidth() + 1f;
         EntityPlayer playerRider = (EntityPlayer) this.getControllingPassenger();
-        Vec3d eyePosition = playerRider.getPositionEyes(1.0F);
+        Vec3d startPos = playerRider.getPositionEyes(1.0F);
         Vec3d lookDirection = playerRider.getLook(1.0F);
-        Vec3d rayEnd = eyePosition.add(lookDirection.scale(reach));
+        Vec3d endPos = startPos.add(lookDirection.scale(reach));
 
         Entity pointedEntity = null;
         double closestDistance = reach;
@@ -1663,29 +1664,29 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         List<Entity> entities = this.world.getEntitiesInAABBexcluding(this, playerRider.getEntityBoundingBox().grow(reach), new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
+                boolean withinCreatureReach = entity.getDistance(user) <= creatureReach;
                 if (entity == null) return false;
                 if (entity instanceof MultiPartEntityPart) {
                     MultiPartEntityPart entityPart = (MultiPartEntityPart) entity;
-                    return !entityPart.parent.equals(user);
+                    return !entityPart.parent.equals(user) && withinCreatureReach;
                 }
                 else if (entity instanceof RiftCreature) {
                     RiftCreature creature = (RiftCreature) entity;
-                    return !creature.equals(user);
+                    return !creature.equals(user) && withinCreatureReach;
                 }
                 else if (entity instanceof EntityPlayer) {
                     EntityPlayer player = (EntityPlayer) entity;
-                    return !player.isSpectator() && !player.equals(playerRider);
+                    return !player.isSpectator() && !player.equals(playerRider) && withinCreatureReach;
                 }
-                return true;
+                return withinCreatureReach;
             }
         });
-
         for (Entity entity : entities) {
             AxisAlignedBB boundingBox = entity.getEntityBoundingBox().grow(0.3);
-            RayTraceResult entityResult = boundingBox.calculateIntercept(eyePosition, rayEnd);
+            RayTraceResult entityResult = boundingBox.calculateIntercept(startPos, endPos);
 
             if (entityResult != null) {
-                double distance = eyePosition.distanceTo(entityResult.hitVec);
+                double distance = startPos.distanceTo(entityResult.hitVec);
 
                 if (distance < closestDistance) {
                     if (entity instanceof MultiPartEntityPart) pointedEntity = (Entity) ((MultiPartEntityPart) entity).parent;
@@ -1700,13 +1701,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //to based on where the player is looking
     public BlockPos getControlBlockPosToBreak() {
         final int reach = 16;
+        final float creatureReach = this.width + this.attackWidth() + 1f;
         EntityPlayer playerRider = (EntityPlayer) this.getControllingPassenger();
         Vec3d eyePosition = playerRider.getPositionEyes(1.0F);
         Vec3d lookDirection = playerRider.getLook(1.0F);
         Vec3d rayEnd = eyePosition.add(lookDirection.scale(reach));
 
         RayTraceResult rayTraceResult = this.world.rayTraceBlocks(eyePosition, rayEnd, false, false, false);
-        if (rayTraceResult != null && rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK) return rayTraceResult.getBlockPos();
+        if (rayTraceResult != null
+                && rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK
+                && this.getDistanceSqToCenter(rayTraceResult.getBlockPos()) <= Math.pow(creatureReach, 2)) return rayTraceResult.getBlockPos();
         return null;
     }
 

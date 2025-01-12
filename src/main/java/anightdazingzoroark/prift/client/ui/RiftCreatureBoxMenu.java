@@ -24,6 +24,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -95,17 +96,17 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         //set selected creature
         if (this.partyPosSelected != -1 && this.boxPosSelected == -1 && this.boxDeployedPosSelected == -1) {
             if (this.getPlayerParty().size() > this.partyPosSelected) {
-                this.selectedCreature = this.getPlayerParty().get(this.partyPosSelected);
+                this.selectedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerParty().get(this.partyPosSelected));
             }
         }
         else if (this.partyPosSelected == -1 && this.boxPosSelected != -1 && this.boxDeployedPosSelected == -1) {
             if (this.getPlayerBoxedCreatures().size() > this.boxPosSelected) {
-                this.selectedCreature = this.getPlayerBoxedCreatures().get(this.boxPosSelected);
+                this.selectedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerBoxedCreatures().get(this.boxPosSelected));
             }
         }
         else if (this.partyPosSelected == -1 && this.boxPosSelected == -1 && this.boxDeployedPosSelected != -1) {
             if (this.getCreatureBoxDeployedCreatures().size() > this.boxDeployedPosSelected) {
-                this.selectedCreature = this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosSelected);
+                this.selectedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosSelected));
             }
         }
     }
@@ -173,7 +174,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             if (this.changeCreaturesMode) {
                 if (this.partyPosToMove == -1 && this.boxPosToMove == -1 && this.boxDeployedPosToMove == -1) {
                     if (partyButton.id < this.getPlayerParty().size()) {
-                        this.selectedCreature = this.getPlayerParty().get(partyButton.id);
+                        this.selectedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerParty().get(partyButton.id));
                         this.partyPosToMove = partyButton.id;
                     }
                 }
@@ -182,10 +183,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //swap box creature w party creature
                         if (partyButton.id < this.getPlayerParty().size()) {
                             //if inventory except saddle not empty, just swap box and party creatures
-                            if (this.getPlayerParty().get(partyButton.id).creatureInventory.isEmptyExceptSaddle()) {
+                            RiftCreature selectedPartyMem = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerParty().get(partyButton.id));
+                            if (selectedPartyMem != null && selectedPartyMem.creatureInventory.isEmptyExceptSaddle()) {
                                 //if creature is deployed, remove it from world
-                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(partyButton.id), true));
-                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(partyButton.id), true));
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
 
                                 PlayerTamedCreaturesHelper.boxPartySwap(this.mc.player, this.boxPosToMove, partyButton.id);
 
@@ -194,7 +196,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 this.boxDeployedPosSelected = -1;
                             }
                             //otherwise, open a prompt that asks whether or not to have em dropped
-                            else {
+                            else if (selectedPartyMem != null) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_PARTY_SWAP;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxPosToMove, partyButton.id);
@@ -213,8 +215,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //swap box deployed creature w party creature
                         if (partyButton.id < this.getPlayerParty().size()) {
                             //if creature is deployed, remove it from world
-                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove), true));
-                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove), true));
+                            RiftCreature selectedDeployedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove));
+                            if (selectedDeployedCreature != null) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
+                            }
 
                             PlayerTamedCreaturesHelper.boxDeployedPartySwap(this.mc.player, this.creatureBoxPos, this.boxDeployedPosToMove, partyButton.id);
 
@@ -225,8 +230,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //move box deployed creature to party
                         else {
                             //if creature is deployed, remove it from world
-                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove), true));
-                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove), true));
+                            RiftCreature selectedDeployedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove));
+                            if (selectedDeployedCreature != null) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
+                            }
 
                             PlayerTamedCreaturesHelper.boxDeployedToParty(this.mc.player, this.creatureBoxPos, this.boxDeployedPosToMove);
 
@@ -251,7 +259,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             }
             else {
                 if (partyButton.id < this.getPlayerParty().size()) {
-                    this.selectedCreature = this.getPlayerParty().get(partyButton.id);
+                    this.selectedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerParty().get(partyButton.id));
                 }
                 else this.selectedCreature = null;
 
@@ -265,10 +273,10 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             if (this.changeCreaturesMode) {
                 if (this.partyPosToMove == -1 && this.boxPosToMove == -1 && this.boxDeployedPosToMove == -1) {
                     if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
-                        this.selectedCreature = this.getPlayerBoxedCreatures().get(boxButton.id);
+                        this.selectedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerBoxedCreatures().get(boxButton.id));
 
-                        if (this.selectedCreature.getHealth() > 0) this.boxPosToMove = boxButton.id;
-                        else {
+                        if (this.selectedCreature != null && this.selectedCreature.getHealth() > 0) this.boxPosToMove = boxButton.id;
+                        else if (this.selectedCreature != null) {
                             ClientProxy.popupFromRadial = PopupFromCreatureBox.CREATURE_REVIVING;
                             this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                         }
@@ -279,11 +287,9 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //if selected creature is still regenerating,
                         //a message will pop out saying so
                         if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
-                            RiftCreature selectedForTest = this.getPlayerBoxedCreatures().get(boxButton.id);
-
                             //if selected creature that is deployed isn't owned by the person using the box,
                             //a message will pop out saying that it's not theirs
-                            if (selectedForTest.getHealth() <= 0) {
+                            if (this.getPlayerBoxedCreatures().get(boxButton.id).getFloat("Health") <= 0) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.CREATURE_REVIVING;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                                 return;
@@ -293,10 +299,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //swap party creature w box creature
                         if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
                             //if inventory except saddle not empty, just move to box
-                            if (this.getPlayerParty().get(this.partyPosToMove).creatureInventory.isEmptyExceptSaddle()) {
+                            RiftCreature selectedPartyMem = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerParty().get(this.partyPosToMove));
+                            if (selectedPartyMem != null && selectedPartyMem.creatureInventory.isEmptyExceptSaddle()) {
                                 //if creature is deployed, remove it from world
-                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
-                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
 
                                 PlayerTamedCreaturesHelper.partyBoxSwap(this.mc.player, this.partyPosToMove, boxButton.id);
 
@@ -305,7 +312,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 this.boxDeployedPosSelected = -1;
                             }
                             //otherwise, open a prompt that asks whether or not to have em dropped
-                            else {
+                            else if (selectedPartyMem != null) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.PARTY_BOX_SWAP;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.partyPosToMove, boxButton.id);
@@ -314,10 +321,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //move party creature to box
                         else {
                             //if inventory except saddle not empty, just move to box
-                            if (this.getPlayerParty().get(this.partyPosToMove).creatureInventory.isEmptyExceptSaddle()) {
+                            RiftCreature selectedPartyMem = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerParty().get(this.partyPosToMove));
+                            if (selectedPartyMem != null && selectedPartyMem.creatureInventory.isEmptyExceptSaddle()) {
                                 //if creature is deployed, remove it from world
-                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
-                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
 
                                 PlayerTamedCreaturesHelper.partyToBox(this.mc.player, this.partyPosToMove);
 
@@ -326,7 +334,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 this.boxDeployedPosSelected = -1;
                             }
                             //otherwise, open a prompt that asks whether or not to have em dropped
-                            else {
+                            else if (selectedPartyMem != null) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.PARTY_TO_BOX;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.partyPosToMove, 0);
@@ -337,11 +345,9 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //if selected creature is still regenerating,
                         //a message will pop out saying so
                         if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
-                            RiftCreature selectedForTest = this.getPlayerBoxedCreatures().get(boxButton.id);
-
                             //if selected creature that is deployed isn't owned by the person using the box,
                             //a message will pop out saying that it's not theirs
-                            if (selectedForTest.getHealth() <= 0) {
+                            if (this.getPlayerBoxedCreatures().get(boxButton.id).getFloat("Health") <= 0) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.CREATURE_REVIVING;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                                 return;
@@ -351,10 +357,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //swap box deployed creature with box creature
                         if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
                             //if inventory except saddle not empty, just move to box
-                            if (this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove).creatureInventory.isEmptyExceptSaddle()) {
+                            RiftCreature selectedDeployedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove));
+                            if (selectedDeployedCreature != null && selectedDeployedCreature.creatureInventory.isEmptyExceptSaddle()) {
                                 //if creature is deployed, remove it from world
-                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove), true));
-                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove), true));
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
 
                                 PlayerTamedCreaturesHelper.boxDeployedBoxSwap(this.mc.player, this.creatureBoxPos, this.boxDeployedPosToMove, boxButton.id);
 
@@ -363,7 +370,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 this.boxDeployedPosSelected = -1;
                             }
                             //otherwise, open a prompt that asks whether or not to have em dropped
-                            else {
+                            else if (selectedDeployedCreature != null) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_BOX_SWAP;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxDeployedPosToMove, boxButton.id);
@@ -372,15 +379,16 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //move box deployed creature to box
                         else {
                             //if inventory except saddle not empty, just move to box
-                            if (this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove).creatureInventory.isEmptyExceptSaddle()) {
+                            RiftCreature selectedDeployedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove));
+                            if (selectedDeployedCreature != null && selectedDeployedCreature.creatureInventory.isEmptyExceptSaddle()) {
                                 //drop items from box deployed creature's inventory
                                 NBTTagList inventoryNBT = this.getCreatureBox().getCreatureList().get(this.boxDeployedPosToMove).getTagList("Items", 10);
                                 RiftMessages.WRAPPER.sendToServer(new RiftDropCreatureBoxDeployedMemberInventory(ClientProxy.creatureBoxBlockPos, this.boxDeployedPosToMove, inventoryNBT));
                                 this.playerTamedCreatures().removeBoxCreatureDeployedInventory(this.mc.player.world, this.creatureBoxPos, this.boxDeployedPosToMove);
 
                                 //if creature is deployed, remove it from world
-                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove), true));
-                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.boxDeployedPosToMove), true));
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
 
                                 PlayerTamedCreaturesHelper.boxDeployedToBox(this.mc.player, this.creatureBoxPos, this.boxDeployedPosToMove);
 
@@ -389,7 +397,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 this.boxDeployedPosSelected = -1;
                             }
                             //otherwise, open a prompt that asks whether or not to have em dropped
-                            else {
+                            else if (selectedDeployedCreature != null) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_DEPLOYED_TO_BOX;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxDeployedPosToMove, 0);
@@ -412,7 +420,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             }
             else {
                 if (boxButton.id < this.getPlayerBoxedCreatures().size()) {
-                    this.selectedCreature = this.getPlayerBoxedCreatures().get(boxButton.id);
+                    this.selectedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerBoxedCreatures().get(boxButton.id));
                 }
                 else this.selectedCreature = null;
 
@@ -426,7 +434,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             if (this.changeCreaturesMode) {
                 if (this.partyPosToMove == -1 && this.boxPosToMove == -1 && this.boxDeployedPosToMove == -1) {
                     if (boxDeployedButton.id < this.getCreatureBoxDeployedCreatures().size()) {
-                        this.selectedCreature = this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id);
+                        this.selectedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id));
 
                         //if selected creature that is deployed isn't owned by the person using the box,
                         //a message will pop out saying that it's not theirs
@@ -443,22 +451,24 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         if (boxDeployedButton.id < this.getCreatureBoxDeployedCreatures().size()) {
                             //if selected creature that is deployed isn't owned by the person using the box,
                             //a message will pop out saying that it's not theirs
-                            RiftCreature selectedForTest = this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id);
-
-                            //if selected creature that is deployed isn't owned by the person using the box,
-                            //a message will pop out saying that it's not theirs
-                            if (!selectedForTest.getOwner().equals(this.mc.player)) {
+                            if (!this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id).getString("OwnerUUID").equals(this.mc.player.getUniqueID().toString())) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.OWNED_BY_OTHER;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                                 return;
                             }
 
                             //if creature is deployed, remove it from world
-                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
-                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+                            RiftCreature selectedPartyMem = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerParty().get(this.partyPosToMove));
+                            if (selectedPartyMem != null) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
+                            }
 
-                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id), true));
-                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id), true));
+                            RiftCreature selectedDeployedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id));
+                            if (selectedDeployedCreature != null) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
+                            }
 
                             PlayerTamedCreaturesHelper.partyBoxDeployedSwap(this.mc.player, this.creatureBoxPos, this.partyPosToMove, boxDeployedButton.id);
 
@@ -469,8 +479,11 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         //move party creature to box deployed
                         else {
                             //if creature is deployed, remove it from world
-                            RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
-                            RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.partyPosToMove), true));
+                            RiftCreature selectedPartyMem = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerParty().get(this.partyPosToMove));
+                            if (selectedPartyMem != null) {
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedPartyMem, true));
+                            }
 
                             PlayerTamedCreaturesHelper.partyToBoxDeployed(this.mc.player, this.creatureBoxPos, this.partyPosToMove);
 
@@ -484,21 +497,18 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                         if (boxDeployedButton.id < this.getCreatureBoxDeployedCreatures().size()) {
                             //if selected creature that is deployed isn't owned by the person using the box,
                             //a message will pop out saying that it's not theirs
-                            RiftCreature selectedForTest = this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id);
-
-                            //if selected creature that is deployed isn't owned by the person using the box,
-                            //a message will pop out saying that it's not theirs
-                            if (!selectedForTest.getOwner().equals(this.mc.player)) {
+                            if (!this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id).getString("OwnerUUID").equals(this.mc.player.getUniqueID().toString())) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.OWNED_BY_OTHER;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
                                 return;
                             }
 
                             //if inventory except saddle not empty, just move to box
-                            if (this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id).creatureInventory.isEmptyExceptSaddle()) {
+                            RiftCreature selectedDeployedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id));
+                            if (selectedDeployedCreature != null && selectedDeployedCreature.creatureInventory.isEmptyExceptSaddle()) {
                                 //if creature is deployed, remove it from world
-                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id), true));
-                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id), true));
+                                RiftMessages.WRAPPER.sendToServer(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
+                                RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(selectedDeployedCreature, true));
 
                                 PlayerTamedCreaturesHelper.boxBoxDeployedSwap(this.mc.player, this.creatureBoxPos, this.boxPosToMove, boxDeployedButton.id);
 
@@ -507,7 +517,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
                                 this.boxDeployedPosSelected = boxDeployedButton.id;
                             }
                             //otherwise, open a prompt that asks whether or not to have em dropped
-                            else {
+                            else if (selectedDeployedCreature != null) {
                                 ClientProxy.popupFromRadial = PopupFromCreatureBox.REMOVE_INVENTORY;
                                 ClientProxy.swapTypeForPopup = RiftChangePartyOrBoxOrder.SwapType.BOX_BOX_DEPLOYED_SWAP;
                                 this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, this.boxPosToMove, boxDeployedButton.id);
@@ -538,7 +548,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             }
             else {
                 if (boxDeployedButton.id < this.getCreatureBoxDeployedCreatures().size()) {
-                    this.selectedCreature = this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id);
+                    this.selectedCreature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(boxDeployedButton.id));
                 }
                 else this.selectedCreature = null;
 
@@ -582,7 +592,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         int size = this.getPlayerParty().size() + (this.getPlayerParty().size() < this.playerTamedCreatures().getMaxPartySize() ? 1 : 0);
         for (int x = 0; x < size; x++) {
             if (x < this.getPlayerParty().size()) {
-                RiftCreature creature = this.getPlayerParty().get(x);
+                RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerParty().get(x));
                 this.buttonList.add(new RiftGuiCreatureBoxPartyButton(creature, x, (this.width - 96)/2 - 147, (this.height - 32) / 2 - 78 + (40 * x), (this.height - 170) / 2 - 10, (this.height - 170) / 2 + 160));
                 this.partyBarHeight += 40;
             }
@@ -600,11 +610,23 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         int size = this.getPlayerBoxedCreatures().size() + (this.getPlayerBoxedCreatures().size() < this.playerTamedCreatures().getMaxBoxSize() ? 1 : 0);
         int rows = (int) Math.ceil(size / 5D);
         for (int x = 0; x < size; x++) {
-            if (x < this.getPlayerBoxedCreatures().size()) {
-                RiftCreature creature = this.getPlayerBoxedCreatures().get(x);
-                this.creaturesInBoxButtons.add(new RiftGuiCreatureBoxBoxButton(creature, x, (this.width - 30)/2 - 72 + (33 * (x % 5)), (this.height - 30)/2 - 66 + (33 * (int)(x/5))));
+            int visibleHeight = 0;
+            int buttonPosX = (this.width - 30)/2 - 72 + (33 * (x % 5));
+            int buttonPosY = (this.height - 30)/2 - 66 + (33 * (x/5)) - this.scrollBoxedCreaturesOffset;
+
+            int minY = (this.height - 96) / 2 - 33;
+            int maxY = (this.height - 96) / 2 + 63;
+            for (int y = buttonPosY; y <= buttonPosY + 30; y++) {
+                if (minY <= y && maxY >= y) visibleHeight++;
             }
-            else this.creaturesInBoxButtons.add(new RiftGuiCreatureBoxBoxButton(null, x, (this.width - 30)/2 - 72 + (33 * (x % 5)), (this.height - 30)/2 - 66 + (33 * (int)(x/5))));
+
+            if (visibleHeight > 0) {
+                if (x < this.getPlayerBoxedCreatures().size()) {
+                    RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getPlayerBoxedCreatures().get(x));
+                    this.creaturesInBoxButtons.add(new RiftGuiCreatureBoxBoxButton(creature, x, buttonPosX, buttonPosY));
+                }
+                else this.creaturesInBoxButtons.add(new RiftGuiCreatureBoxBoxButton(null, x, buttonPosX, buttonPosY));
+            }
         }
         for (int x = 0; x < rows; x++) {
             if (x == 0) this.boxedCreaturesHeight += 30;
@@ -622,7 +644,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
             for (int x = 0; x < size; x++) {
                 if (x < this.getCreatureBoxDeployedCreatures().size()) {
-                    RiftCreature creature = this.getCreatureBoxDeployedCreatures().get(x);
+                    RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.player.world, this.getCreatureBoxDeployedCreatures().get(x));
                     this.creaturesInBoxDeployedButtons.add(new RiftGuiCreatureBoxDeployedButton(creature, x, (this.width - 30)/2 - 72 + (33 * (x % 5)), (this.height - 30)/2 + 52 + (33 * (int)(x/5))));
                 }
                 else this.creaturesInBoxDeployedButtons.add(new RiftGuiCreatureBoxDeployedButton(null, x, (this.width - 30)/2 - 72 + (33 * (x % 5)), (this.height - 30)/2 + 52 + (33 * (int)(x/5))));
@@ -913,9 +935,6 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         //update boxed creatures area
         this.boxedCreaturesButtonListInit();
         for (GuiButton button : this.creaturesInBoxButtons) {
-            //change positions based on how far the user scrolled
-            button.y -= this.scrollBoxedCreaturesOffset;
-
             //disable buttons depending on whether or not they are visible
             int minY = (this.height - 96) / 2 - 33;
             int maxY = (this.height - 96) / 2 + 63;
@@ -1064,12 +1083,12 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         return this.mc.player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
     }
 
-    private List<RiftCreature> getPlayerParty() {
-        return this.playerTamedCreatures().getPartyCreatures(this.mc.player.world);
+    private List<NBTTagCompound> getPlayerParty() {
+        return this.playerTamedCreatures().getPartyNBT();
     }
 
-    private List<RiftCreature> getPlayerBoxedCreatures() {
-        return this.playerTamedCreatures().getBoxCreatures(this.mc.player.world);
+    private List<NBTTagCompound> getPlayerBoxedCreatures() {
+        return this.playerTamedCreatures().getBoxNBT();
     }
 
     private RiftTileEntityCreatureBox getCreatureBox() {
@@ -1079,8 +1098,8 @@ public class RiftCreatureBoxMenu extends GuiScreen {
         return null;
     }
 
-    private List<RiftCreature> getCreatureBoxDeployedCreatures() {
-        if (this.getCreatureBox() != null) return this.getCreatureBox().getCreatures();
+    private List<NBTTagCompound> getCreatureBoxDeployedCreatures() {
+        if (this.getCreatureBox() != null) return this.getCreatureBox().getCreatureList();
         return new ArrayList<>();
     }
 }
