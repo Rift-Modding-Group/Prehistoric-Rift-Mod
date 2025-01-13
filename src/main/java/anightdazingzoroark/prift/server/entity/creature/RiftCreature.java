@@ -1778,16 +1778,27 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : moveSpeed);
 
-                //get out of 2 block or more deep water pits
+                //for getting out of bodies of water easily
                 if (forward > 0) {
                     if (this.bodyPart != null) {
                         if (this.bodyPart.isInWater()) {
                             if (this.posY >= RiftUtil.highestWaterPos(this) - 2 && this.posY <= RiftUtil.highestWaterPos(this) + 2) {
-                                double xMove = (this.width)*Math.sin(-Math.toRadians(this.rotationYaw));
-                                double zMove = (this.width)*Math.cos(Math.toRadians(this.rotationYaw));
-                                BlockPos ahead = new BlockPos(this.posX + xMove, RiftUtil.highestWaterPos(this), this.posZ + zMove);
-                                BlockPos above = ahead.up();
-                                if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid()) {
+                                double xMove = this.width * Math.sin(-Math.toRadians(this.rotationYaw));
+                                double zMove = this.width * Math.cos(Math.toRadians(this.rotationYaw));
+
+                                //if creature is in water, is breaching, and if bottom of their body hitbox is in front of
+                                //solid block with air on top, it will leave water
+                                BlockPos aheadBodyHitbox = new BlockPos(this.posX + xMove, RiftUtil.highestWaterPos(this), this.posZ + zMove);
+                                BlockPos aboveAheadBodyHitbox = aheadBodyHitbox.up();
+                                if (this.world.getBlockState(aheadBodyHitbox).getMaterial().isSolid() && !this.world.getBlockState(aboveAheadBodyHitbox).getMaterial().isSolid()) {
+                                    RiftMessages.WRAPPER.sendToServer(new RiftForceChangePos(this, this.posX + xMove, RiftUtil.highestWaterPos(this) + 1.0, this.posZ + zMove));
+                                }
+
+                                //if creature is in water, is breaching, and if bottom of their main collision hitbox is in front of
+                                //solid block with water on top, it will go there
+                                BlockPos aheadMainHitbox = new BlockPos(this.posX + xMove, this.posY, this.posZ + zMove);
+                                BlockPos aboveAheadMainHitbox = aheadMainHitbox.up();
+                                if (this.world.getBlockState(aheadMainHitbox).getMaterial().isSolid() && this.world.getBlockState(aboveAheadMainHitbox).getMaterial().isLiquid()) {
                                     RiftMessages.WRAPPER.sendToServer(new RiftForceChangePos(this, this.posX + xMove, RiftUtil.highestWaterPos(this) + 1.0, this.posZ + zMove));
                                 }
                             }

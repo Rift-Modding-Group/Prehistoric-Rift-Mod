@@ -725,7 +725,9 @@ public class PlayerTamedCreaturesHelper {
                     && ((RiftWaterCreature)creature).isAmphibious()) return true;
         }
         else {
-            if (player.world.getBlockState(player.getPosition().down()).getMaterial() != Material.AIR) return true;
+            if (player.world.getBlockState(player.getPosition().down()).getMaterial() == Material.AIR
+                && player.isRiding()) return true;
+            else if (player.world.getBlockState(player.getPosition().down()).getMaterial() != Material.AIR) return true;
         }
         return false;
     }
