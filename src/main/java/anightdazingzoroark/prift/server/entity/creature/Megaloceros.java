@@ -12,11 +12,15 @@ import anightdazingzoroark.prift.server.entity.interfaces.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -133,6 +137,22 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
         if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
         if (this.frontBodyPart != null) this.frontBodyPart.setPositionAndUpdate(this.frontBodyPart.posX, this.frontBodyPart.posY + sitOffset, this.frontBodyPart.posZ);
+    }
+
+    @Override
+    public boolean processInteract(EntityPlayer player, EnumHand hand) {
+        ItemStack itemstack = player.getHeldItem(hand);
+        if (this.isTamed() && this.getOwner().equals(player) && !this.isBaby() && itemstack.getItem() == Items.BUCKET) {
+            player.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
+            itemstack.shrink(1);
+
+            if (itemstack.isEmpty()) player.setHeldItem(hand, new ItemStack(Items.MILK_BUCKET));
+            else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MILK_BUCKET))) {
+                player.dropItem(new ItemStack(Items.MILK_BUCKET), false);
+            }
+            return true;
+        }
+        else return super.processInteract(player, hand);
     }
 
     @Override

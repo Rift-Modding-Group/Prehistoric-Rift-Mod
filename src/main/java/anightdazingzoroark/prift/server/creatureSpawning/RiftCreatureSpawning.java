@@ -124,6 +124,7 @@ public class RiftCreatureSpawning {
             try {
                 List<BlockPos> spawnPositions = new ArrayList<>();
                 for (int x = 0; x < 10; x++) spawnPositions.add(this.getRandomChunkPosition(world, event.getChunk().x, event.getChunk().z));
+                System.out.println("spawn positions: "+spawnPositions);
 
                 //remove positions too close to players
                 List<BlockPos> playerPositions = new ArrayList<>();
@@ -207,40 +208,6 @@ public class RiftCreatureSpawning {
         });
     }
 
-    private boolean spawnFromBiomeSpawnerLists(World world, List<RiftCreatureSpawnLists.BiomeSpawner> biomeSpawners, List<BlockPos> spawnPositions) {
-        boolean flag = false;
-        for (BlockPos pos : spawnPositions) {
-            for (RiftCreatureSpawnLists.BiomeSpawner biomeSpawner : biomeSpawners) {
-                if (world.getBiome(pos).equals(biomeSpawner.biome)) {
-                    //make biome spawner based on position
-                    RiftCreatureSpawnLists.BiomeSpawner newBiomeSpawner = biomeSpawner.changeSpawnerBasedOnPos(world, pos);
-                    if (newBiomeSpawner.spawnerList.isEmpty()) continue;
-                    RiftCreatureSpawnLists.Spawner spawnerToSpawn = newBiomeSpawner.getSpawnerRandomly();
-
-                    //now spawn a creature
-                    int spawnAmnt = spawnerToSpawn.getSpawnAmnt();
-                    for (int x = 0; x < spawnAmnt; x++) {
-                        //create creature
-                        RiftCreature creatureToSpawn = spawnerToSpawn.getCreatureType().invokeClass(world);
-                        creatureToSpawn.setPosition(pos.getX(), pos.getY(), pos.getZ());
-                        creatureToSpawn.onInitialSpawn(world.getDifficultyForLocation(pos), null);
-
-                        if (this.canFitInArea(creatureToSpawn, spawnerToSpawn)
-                                && this.otherCreaturesFarAway(creatureToSpawn)
-                                && this.testOtherCreatures(creatureToSpawn, spawnerToSpawn.getDensityLimit())
-                                && this.testForDangerNearSpawn(creatureToSpawn)
-                        ) {
-                            world.spawnEntity(creatureToSpawn);
-                            if (GeneralConfig.spawnCreatureNotify) RiftInitialize.logger.info("Spawned "+creatureToSpawn.getName()+" at x=: "+pos.getX()+", y="+pos.getY()+", z="+pos.getZ());
-                            if (!flag) flag = true;
-                        }
-                    }
-                }
-            }
-        }
-        return flag;
-    }
-
     private BlockPos getRandomChunkPosition(World worldIn, int x, int z) {
         Chunk chunk = worldIn.getChunk(x, z);
         int i = x * 16 + worldIn.rand.nextInt(16);
@@ -278,40 +245,11 @@ public class RiftCreatureSpawning {
                     boolean isValidSpot = state.getMaterial() == Material.AIR
                             || state.getMaterial() == Material.PLANTS
                             || state.getMaterial() == Material.VINE;
-                    if (!isValidSpot && cantFitInWater) return false;
+                    if (!isValidSpot) return false;
                 }
             }
         }
         return true;
-    }
-
-    private boolean canSpawnAtPos(RiftCreature creature, RiftCreatureSpawnLists.Spawner spawner) {
-        boolean spawnAboveBlock = spawner.getCanSpawnOnLand() && this.canSpawnAboveBlock(creature.world, creature.getPosition(), spawner.getSpawnBlocksWhitelist());
-        boolean spawnInWater = spawner.getCanSpawnInWater() && creature.world.getBlockState(creature.getPosition()).getMaterial() == Material.WATER;
-        boolean spawnInAir = spawner.getCanSpawnInAir() && creature.world.getBlockState(creature.getPosition().down()).getMaterial() == Material.AIR;
-        return spawnAboveBlock || spawnInWater || spawnInAir;
-    }
-
-    private boolean canSpawnAboveBlock(World world, BlockPos pos, List<String> whitelist) {
-        boolean flag = false;
-        IBlockState blockState = world.getBlockState(pos.down());
-        List<String> blockList = RiftUtil.uniteTwoLists(Arrays.asList(GeneralConfig.universalSpawnBlocks), whitelist);
-        for (String blockString : blockList) {
-            if (!flag) flag = RiftUtil.blockstateEqualToString(blockState, blockString);
-        }
-        return flag;
-    }
-
-    private boolean canSeeSkySpawn(World world, BlockPos pos) {
-        boolean flag = true;
-        for (int y = pos.getY(); y <= 256; y++) {
-            if (flag) {
-                BlockPos newPos = new BlockPos(pos.getX(), y, pos.getZ());
-                flag = world.getBlockState(newPos).getMaterial() == Material.AIR || world.getBlockState(newPos).getMaterial() == Material.LEAVES || world.getBlockState(newPos).getMaterial() == Material.GLASS || world.getBlockState(newPos).getMaterial() == Material.WATER;
-            }
-            else break;
-        }
-        return flag;
     }
 
     private boolean testOtherCreatures(RiftCreature creature, int densityLimit) {

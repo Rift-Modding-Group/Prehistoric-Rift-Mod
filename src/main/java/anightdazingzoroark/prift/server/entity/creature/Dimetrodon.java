@@ -321,23 +321,18 @@ public class Dimetrodon extends RiftCreature {
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         if (this.isTamed()) {
-            try {
-                if (this.getOwnerId().equals(player.getUniqueID())) {
-                    if (this.isTemperatureSettingItem(itemstack)) {
-                        this.setTemperatureForced(true);
-                        this.setTemperature(this.getTemperatureFromItem(itemstack));
-                        this.setForcedTemperatureTime(this.getTemperatureTimeFromItem(itemstack));
-                        if (!player.capabilities.isCreativeMode) {
-                            itemstack.shrink(1);
-                            if (itemstack.isEmpty()) player.setHeldItem(hand, new ItemStack(Items.BOWL));
-                            else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.BOWL))) player.dropItem(new ItemStack(Items.BOWL), false);
-                        }
-                        return true;
+            if (this.getOwner().equals(player) && !this.isBaby()) {
+                if (this.isTemperatureSettingItem(itemstack)) {
+                    this.setTemperatureForced(true);
+                    this.setTemperature(this.getTemperatureFromItem(itemstack));
+                    this.setForcedTemperatureTime(this.getTemperatureTimeFromItem(itemstack));
+                    if (!player.capabilities.isCreativeMode) {
+                        itemstack.shrink(1);
+                        if (itemstack.isEmpty()) player.setHeldItem(hand, new ItemStack(Items.BOWL));
+                        else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.BOWL))) player.dropItem(new ItemStack(Items.BOWL), false);
                     }
+                    return true;
                 }
-            }
-            catch (Exception e) {
-                return true;
             }
         }
         return super.processInteract(player, hand);

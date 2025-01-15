@@ -165,7 +165,7 @@ public class RiftCreatureSpawnLists {
                     spawner -> spawner.getDimensionId() == world.provider.getDimension()
             ).collect(Collectors.toList());
 
-            //change spawnerList based on whether or not the position is not below a block
+            //change spawnerList based on whether or not the position is below a block
             //note that glass and leaves are considered the same as air blocks
             tempSpawnerList = tempSpawnerList.stream().filter(
                     spawner -> {
@@ -173,7 +173,7 @@ public class RiftCreatureSpawnLists {
                         for (int y = pos.getY(); y <= 256; y++) {
                             if (flag) {
                                 BlockPos newPos = new BlockPos(pos.getX(), y, pos.getZ());
-                                flag = world.getBlockState(newPos).getMaterial() == Material.AIR || world.getBlockState(newPos).getMaterial() == Material.LEAVES || world.getBlockState(newPos).getMaterial() == Material.GLASS || world.getBlockState(newPos).getMaterial() == Material.WATER;
+                                flag = world.getBlockState(newPos).getMaterial() == Material.AIR || world.getBlockState(newPos).getMaterial() == Material.LEAVES || world.getBlockState(newPos).getMaterial() == Material.PLANTS || world.getBlockState(newPos).getMaterial() == Material.VINE || world.getBlockState(newPos).getMaterial() == Material.GLASS || world.getBlockState(newPos).getMaterial() == Material.WATER;
                             }
                             else break;
                         }

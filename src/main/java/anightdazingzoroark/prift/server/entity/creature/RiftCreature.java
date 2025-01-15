@@ -1649,7 +1649,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //to based on where the player is looking
-    public EntityLivingBase getControlAttackTargets() {
+    public Entity getControlAttackTargets() {
         final int reach = 16;
         final float creatureReach = this.width + this.attackWidth() + 1f;
         EntityPlayer playerRider = (EntityPlayer) this.getControllingPassenger();
@@ -1689,13 +1689,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 double distance = startPos.distanceTo(entityResult.hitVec);
 
                 if (distance < closestDistance) {
-                    if (entity instanceof MultiPartEntityPart) pointedEntity = (Entity) ((MultiPartEntityPart) entity).parent;
-                    else pointedEntity = entity;
+                    pointedEntity = entity;
                     closestDistance = distance;
                 }
             }
         }
-        return (EntityLivingBase) pointedEntity;
+        return pointedEntity;
     }
 
     //to based on where the player is looking

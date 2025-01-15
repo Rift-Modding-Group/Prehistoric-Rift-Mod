@@ -61,14 +61,8 @@ public class SSRCompatUtils {
                 double distance = startPos.distanceTo(entityResult.hitVec);
 
                 if (distance < closestDistance) {
-                    if (entity instanceof MultiPartEntityPart) {
-                        pointedEntity = (Entity) ((MultiPartEntityPart) entity).parent;
-                        entityHitVec = entityResult.hitVec;
-                    }
-                    else {
-                        pointedEntity = entity;
-                        entityHitVec = entityResult.hitVec;
-                    }
+                    pointedEntity = entity;
+                    entityHitVec = entityResult.hitVec;
                     closestDistance = distance;
                 }
             }

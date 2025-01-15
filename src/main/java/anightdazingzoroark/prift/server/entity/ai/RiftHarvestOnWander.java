@@ -3,7 +3,9 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.Stegosaurus;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
@@ -99,13 +101,16 @@ public class RiftHarvestOnWander extends EntityAIBase {
     }
 
     private BlockPos calculatePos() {
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.creature.world.getTileEntity(this.creature.getHomePos());
+        if (creatureBox == null) return null;
+
         List<BlockPos> posList = new ArrayList<>();
-        int homePosMinX = this.creature.getHomePos().getX() - 16;
-        int homePosMinY = this.creature.getHomePos().getY() - 7;
-        int homePosMinZ = this.creature.getHomePos().getZ() - 16;
-        for (int x = homePosMinX; x <= homePosMinX + 32; x++) {
-            for (int y = homePosMinY; y <= homePosMinY + 14; y++) {
-                for (int z = homePosMinZ; z <= homePosMinZ + 32; z++) {
+        int homePosMinX = this.creature.getHomePos().getX() - creatureBox.getWanderRange();
+        int homePosMinY = this.creature.getHomePos().getY() - creatureBox.getWanderRange();
+        int homePosMinZ = this.creature.getHomePos().getZ() - creatureBox.getWanderRange();
+        for (int x = homePosMinX; x <= homePosMinX + creatureBox.getWanderRange() * 2; x++) {
+            for (int y = homePosMinY; y <= homePosMinY + creatureBox.getWanderRange() * 2; y++) {
+                for (int z = homePosMinZ; z <= homePosMinZ + creatureBox.getWanderRange() * 2; z++) {
                     BlockPos newPos = new BlockPos(x, y, z);
                     if (this.creatureHarvester.isValidBlockToHarvest(this.creature.world, newPos) && this.blockExposedToAir(this.creature.world, newPos)) {
                         Path testPath = this.creature.getNavigator().getPathToPos(newPos);
