@@ -29,14 +29,14 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
     public boolean shouldExecute() {
         TileEntity te = this.parasaur.world.getTileEntity(this.parasaur.getWorkstationPos());
         if (te != null) {
-            if (GeneralConfig.canUsePyrotech()) return (te instanceof TileCombustionWorkerStoneBase || te instanceof TileBloomery) && this.parasaur.isUsingWorkstation();
+            if (GeneralConfig.canUsePyrotech()) return (te instanceof TileCombustionWorkerStoneBase || te instanceof TileBloomery) && this.parasaur.busyAtWorkWithNoTargets();
         }
         return false;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.parasaur.isUsingWorkstation() && !this.destroyedFlag;
+        return this.parasaur.busyAtWorkWithNoTargets() && !this.destroyedFlag;
     }
 
     @Override

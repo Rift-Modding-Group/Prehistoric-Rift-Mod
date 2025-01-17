@@ -35,7 +35,7 @@ public class RiftInitialize {
     public static final String GAME_STAGES_MOD_ID = "gamestages";
     public static final String JEI_MOD_ID = "jei";
     public static final String MODNAME = "Prehistoric Rift";
-    public static final String MODVERSION= "0.0.15";
+    public static final String MODVERSION= "0.0.14.1";
     @SidedProxy(clientSide = "anightdazingzoroark.prift.client.ClientProxy", serverSide = "anightdazingzoroark.prift.server.ServerProxy")
     public static ServerProxy PROXY;
     @Mod.Instance(MODID)

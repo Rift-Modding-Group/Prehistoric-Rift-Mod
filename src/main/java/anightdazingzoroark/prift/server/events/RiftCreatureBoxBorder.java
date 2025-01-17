@@ -12,16 +12,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 public class RiftCreatureBoxBorder {
-    private final double minX, maxX, minY, maxY, minZ, maxZ;
+    private final double centerX, centerY, centerZ, radius;
     private int timer;
 
-    public RiftCreatureBoxBorder(double minX, double maxX, double minY, double maxY, double minZ, double maxZ, int displayTime) {
-        this.minX = minX;
-        this.maxX = maxX;
-        this.minY = minY;
-        this.maxY = maxY;
-        this.minZ = minZ;
-        this.maxZ = maxZ;
+    public RiftCreatureBoxBorder(double centerX, double centerY, double centerZ, double radius, int displayTime) {
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.centerZ = centerZ;
+        this.radius = radius;
         this.timer = displayTime;
     }
 
@@ -44,10 +42,7 @@ public class RiftCreatureBoxBorder {
         GL11.glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
 
         GL11.glBegin(GL11.GL_LINES);
-        this.drawLine(this.minX, this.minZ, this.maxX, this.minZ); // Bottom border
-        this.drawLine(this.maxX, this.minZ, this.maxX, this.maxZ); // Right border
-        this.drawLine(this.maxX, this.maxZ, this.minX, this.maxZ); // Top border
-        this.drawLine(this.minX, this.maxZ, this.minX, this.minZ); // Left border
+        drawSphereLines(this.centerX, this.centerY, this.centerZ, this.radius);
         GL11.glEnd();
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -56,12 +51,40 @@ public class RiftCreatureBoxBorder {
         this.timer--;
     }
 
-    private void drawLine(double x1, double z1, double x2, double z2) {
-        for (int y = this.minY < 0 ? 0 : (int)this.minY; y <= this.maxY; y++ ) {
-            GL11.glVertex3d(x1, y, z1);
-            GL11.glVertex3d(x2, y, z2);
+    private void drawSphereLines(double centerX, double centerY, double centerZ, double radius) {
+        int segments = 36; // Number of segments to approximate the sphere
+
+        // Draw latitude lines
+        for (int i = 0; i <= segments; i++) {
+            double theta1 = Math.PI * i / segments;
+            double theta2 = Math.PI * (i + 1) / segments;
+
+            for (int j = 0; j < segments; j++) {
+                double phi1 = 2 * Math.PI * j / segments;
+                double phi2 = 2 * Math.PI * (j + 1) / segments;
+
+                double x1 = centerX + radius * Math.sin(theta1) * Math.cos(phi1);
+                double y1 = centerY + radius * Math.cos(theta1);
+                double z1 = centerZ + radius * Math.sin(theta1) * Math.sin(phi1);
+
+                double x2 = centerX + radius * Math.sin(theta1) * Math.cos(phi2);
+                double y2 = centerY + radius * Math.cos(theta1);
+                double z2 = centerZ + radius * Math.sin(theta1) * Math.sin(phi2);
+
+                double x3 = centerX + radius * Math.sin(theta2) * Math.cos(phi1);
+                double y3 = centerY + radius * Math.cos(theta2);
+                double z3 = centerZ + radius * Math.sin(theta2) * Math.sin(phi1);
+
+                // Draw lines
+                GL11.glVertex3d(x1, y1, z1);
+                GL11.glVertex3d(x2, y2, z2);
+
+                GL11.glVertex3d(x1, y1, z1);
+                GL11.glVertex3d(x3, y3, z3);
+            }
         }
     }
+
 
     public static class RiftCreatureBorderHandler {
         @SubscribeEvent
@@ -71,15 +94,7 @@ public class RiftCreatureBoxBorder {
 
             if (iblockstate.getBlock() instanceof RiftCreatureBox && player.isSneaking() && event.getWorld().isRemote) {
                 RiftTileEntityCreatureBox tileEntity = (RiftTileEntityCreatureBox) event.getWorld().getTileEntity(event.getPos());
-                double minX = event.getPos().getX() - tileEntity.getWanderRange();
-                double maxX = event.getPos().getX() + tileEntity.getWanderRange();
-                double minY = event.getPos().getY() - tileEntity.getWanderRange();
-                double maxY = event.getPos().getY() + tileEntity.getWanderRange();
-                double minZ = event.getPos().getZ() - tileEntity.getWanderRange();
-                double maxZ = event.getPos().getZ() + tileEntity.getWanderRange();
-
-                // Start rendering the world border
-                RiftCreatureBoxBorder renderer = new RiftCreatureBoxBorder(minX, maxX, minY, maxY, minZ, maxZ, 100);
+                RiftCreatureBoxBorder renderer = new RiftCreatureBoxBorder(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), tileEntity.getWanderRange(),  100);
                 MinecraftForge.EVENT_BUS.register(renderer);
             }
         }

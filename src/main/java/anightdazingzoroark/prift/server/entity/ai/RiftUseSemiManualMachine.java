@@ -31,9 +31,7 @@ public class RiftUseSemiManualMachine extends EntityAIBase {
         if (this.creature instanceof IWorkstationUser) {
             this.workstationUser = (IWorkstationUser) this.creature;
             TileEntity te = this.creature.world.getTileEntity(this.workstationUser.getWorkstationPos());
-            if (te != null) {
-                if (GeneralConfig.canUseMM()) return te instanceof TileEntitySemiManualBase && this.workstationUser.isUsingWorkstation();
-            }
+            if (te != null && GeneralConfig.canUseMM()) return te instanceof TileEntitySemiManualBase && this.creature.busyAtWorkWithNoTargets();
         }
         return false;
     }
@@ -49,7 +47,7 @@ public class RiftUseSemiManualMachine extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.workstationUser.isUsingWorkstation() && !this.destroyedFlag;
+        return this.creature.busyAtWorkWithNoTargets() && !this.destroyedFlag;
     }
 
     @Override

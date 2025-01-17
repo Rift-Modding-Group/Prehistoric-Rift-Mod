@@ -459,7 +459,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         if (!this.world.isRemote) this.clearWorkstationMessage(destroyed, owner);
     }
 
-    public boolean isUsingWorkstation() {
+    public boolean hasWorkstation() {
         return this.dataManager.get(USING_WORKSTATION);
     }
 

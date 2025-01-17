@@ -25,8 +25,8 @@ public interface IWorkstationUser {
     void setUsingWorkAnim(boolean value);
     SoundEvent useAnimSound();
     default void writeWorkstationDataToNBT(NBTTagCompound compound) {
-        compound.setBoolean("UsingWorkstation", this.isUsingWorkstation());
-        if (compound.getBoolean("UsingWorkstation")) {
+        compound.setBoolean("HasWorkstation", this.hasWorkstation());
+        if (compound.getBoolean("HasWorkstation")) {
             compound.setInteger("WorkstationX", this.getWorkstationPos().getX());
             compound.setInteger("WorkstationY", this.getWorkstationPos().getY());
             compound.setInteger("WorkstationZ", this.getWorkstationPos().getZ());
@@ -34,7 +34,7 @@ public interface IWorkstationUser {
 
     }
     default void readWorkstationDataFromNBT(NBTTagCompound compound) {
-        if (compound.getBoolean("UsingWorkstation")) this.setUseWorkstation(compound.getInteger("WorkstationX"), compound.getInteger("WorkstationY"), compound.getInteger("WorkstationZ"));
+        if (compound.getBoolean("HasWorkstation")) this.setUseWorkstation(compound.getInteger("WorkstationX"), compound.getInteger("WorkstationY"), compound.getInteger("WorkstationZ"));
     }
     void setUseWorkstation(double x, double y, double z);
     void clearWorkstation(boolean destroyed);
@@ -42,6 +42,6 @@ public interface IWorkstationUser {
         if (destroyed) owner.sendStatusMessage(new TextComponentTranslation("action.creature_workstation_destroyed"), false);
         else owner.sendStatusMessage(new TextComponentTranslation("action.clear_creature_workstation"), false);
     }
-    boolean isUsingWorkstation();
+    boolean hasWorkstation();
     BlockPos getWorkstationPos();
 }

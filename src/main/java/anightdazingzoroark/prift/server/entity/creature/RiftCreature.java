@@ -674,7 +674,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                             else player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId() ,0, 0);
                         }
                         else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {
-                            boolean usingWorkstation = this instanceof IWorkstationUser && ((IWorkstationUser) this).isUsingWorkstation();
+                            boolean usingWorkstation = this instanceof IWorkstationUser && ((IWorkstationUser) this).hasWorkstation();
                             boolean usingLeadForWork = this instanceof ILeadWorkstationUser && ((ILeadWorkstationUser) this).isUsingLeadForWork();
                             if (!usingWorkstation && !usingLeadForWork) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                         }
@@ -1515,14 +1515,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean busyAtWork() {
-        boolean usingWorkstation = (this instanceof IWorkstationUser) && ((IWorkstationUser)this).isUsingWorkstation();
+        boolean usingWorkstation = (this instanceof IWorkstationUser) && ((IWorkstationUser)this).hasWorkstation();
         boolean usingLeadForWork = (this instanceof ILeadWorkstationUser) && ((ILeadWorkstationUser)this).isUsingLeadForWork();
         return usingWorkstation || usingLeadForWork;
     }
 
+    public boolean busyAtWorkWithNoTargets() {
+        return this.busyAtWork() && this.getAttackTarget() == null && this.getRevengeTarget() == null;
+    }
+
     public boolean busyAtTurretMode() {
-        if (this instanceof ITurretModeUser) return ((ITurretModeUser)this).isTurretMode();
-        return false;
+        return this instanceof ITurretModeUser && ((ITurretModeUser)this).isTurretMode();
+    }
+
+    public boolean busyAtWanderOnHarvest() {
+        return this instanceof IHarvestWhenWandering && ((IHarvestWhenWandering)this).isHarvesting();
     }
 
     public boolean isBaby() {
@@ -1871,7 +1878,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean canBeLeashedTo(EntityPlayer player) {
         boolean leashOperatingFlag = true;
         if (this instanceof IWorkstationUser) {
-            leashOperatingFlag = !((IWorkstationUser)this).isUsingWorkstation();
+            leashOperatingFlag = !((IWorkstationUser)this).hasWorkstation();
         }
         return !this.getLeashed() && this.isTamed() && !this.isSitting() && (!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode()) && leashOperatingFlag;
     }

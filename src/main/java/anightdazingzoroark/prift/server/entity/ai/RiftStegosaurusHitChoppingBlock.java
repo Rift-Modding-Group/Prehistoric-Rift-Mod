@@ -39,7 +39,9 @@ public class RiftStegosaurusHitChoppingBlock extends EntityAIBase {
     @Override
     public boolean shouldExecute() {
         TileEntity te = this.stegosaurus.world.getTileEntity(this.stegosaurus.getWorkstationPos());
-        return GeneralConfig.canUsePyrotech() && te instanceof TileChoppingBlock && this.stegosaurus.isUsingWorkstation();
+        return GeneralConfig.canUsePyrotech()
+                && te instanceof TileChoppingBlock
+                && this.stegosaurus.busyAtWorkWithNoTargets();
     }
 
     @Override
@@ -52,7 +54,7 @@ public class RiftStegosaurusHitChoppingBlock extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.stegosaurus.isUsingWorkstation() && !this.destroyedFlag;
+        return !this.destroyedFlag && this.stegosaurus.busyAtWorkWithNoTargets();
     }
 
     @Override

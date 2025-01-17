@@ -246,10 +246,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
 
     public boolean isAttachableForWork(BlockPos pos) {
         Block block = this.world.getBlockState(pos).getBlock();
-        if (GeneralConfig.canUseMM()) {
-            if (block instanceof BlockLeadPoweredCrank) return true;
-        }
-        return false;
+        return GeneralConfig.canUseMM() && block instanceof BlockLeadPoweredCrank;
     }
 
     public int pullPower() {
@@ -301,7 +298,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         if (!this.world.isRemote) this.clearWorkstationMessage(destroyed, owner);
     }
 
-    public boolean isUsingWorkstation() {
+    public boolean hasWorkstation() {
         return this.dataManager.get(USING_WORKSTATION);
     }
 

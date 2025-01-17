@@ -12,11 +12,11 @@ public interface IHerder {
     default boolean canDoHerding() {
         return true;
     }
-    public RiftCreature getHerder();
-    public RiftCreature getHerdLeader();
-    public void setHerdLeader(RiftCreature creature);
-    public int getHerdSize();
-    public void setHerdSize(int value);
+    RiftCreature getHerder();
+    RiftCreature getHerdLeader();
+    void setHerdLeader(RiftCreature creature);
+    int getHerdSize();
+    void setHerdSize(int value);
     default boolean hasHerdLeader() {
         return this.getHerdLeader() != null && this.getHerdLeader().isEntityAlive();
     }

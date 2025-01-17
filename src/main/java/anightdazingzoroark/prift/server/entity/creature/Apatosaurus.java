@@ -388,7 +388,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         if (!this.world.isRemote) this.clearWorkstationMessage(destroyed, owner);
     }
 
-    public boolean isUsingWorkstation() {
+    public boolean hasWorkstation() {
         return this.dataManager.get(USING_WORKSTATION);
     }
 

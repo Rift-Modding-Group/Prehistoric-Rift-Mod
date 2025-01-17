@@ -435,7 +435,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             }
         }
         //for creatures with workstations
-        if (compoundBoxDepSelected.hasKey("UsingWorkstation")) compoundBoxDepSelected.setBoolean("UsingWorkstation", false);
+        if (compoundBoxDepSelected.hasKey("HasWorkstation")) compoundBoxDepSelected.setBoolean("HasWorkstation", false);
         //for creatures with lead based workstations
         if (compoundBoxDepSelected.hasKey("UsingLeadForWork")) compoundBoxDepSelected.setBoolean("UsingLeadForWork", false);
         //for turret mode users

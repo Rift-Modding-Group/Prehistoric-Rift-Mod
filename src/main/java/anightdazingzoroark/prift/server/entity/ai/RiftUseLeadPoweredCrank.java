@@ -33,16 +33,14 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
         if (this.creature instanceof ILeadWorkstationUser) {
             this.leadWorkstationUser = (ILeadWorkstationUser) this.creature;
             TileEntity te = this.creature.world.getTileEntity(this.leadWorkstationUser.getLeadWorkPos());
-            if (te != null) {
-                return te instanceof TileEntityLeadPoweredCrank && this.leadWorkstationUser.isUsingLeadForWork();
-            }
+            if (te != null) return te instanceof TileEntityLeadPoweredCrank && this.creature.busyAtWorkWithNoTargets();
         }
         return false;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.leadWorkstationUser.isUsingLeadForWork() && this.creature.world.getBlockState(this.leadWorkstationUser.getLeadWorkPos()).getMaterial().isSolid();
+        return this.creature.busyAtWorkWithNoTargets() && this.creature.world.getBlockState(this.leadWorkstationUser.getLeadWorkPos()).getMaterial().isSolid();
     }
 
     @Override

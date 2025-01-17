@@ -38,7 +38,9 @@ public class RiftHarvestOnWander extends EntityAIBase {
                 && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                 && !this.creature.isBeingRidden()
                 && this.creature instanceof IHarvestWhenWandering
-                && ((IHarvestWhenWandering)this.creature).canHarvest();
+                && ((IHarvestWhenWandering)this.creature).canHarvest()
+                && !this.creature.busyAtWork()
+                && !this.creature.busyAtTurretMode();
     }
 
     @Override

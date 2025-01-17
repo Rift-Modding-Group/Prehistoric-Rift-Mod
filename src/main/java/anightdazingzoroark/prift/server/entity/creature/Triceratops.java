@@ -281,7 +281,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         if (!this.world.isRemote) this.clearWorkstationMessage(destroyed, owner);
     }
 
-    public boolean isUsingWorkstation() {
+    public boolean hasWorkstation() {
         return this.dataManager.get(USING_WORKSTATION);
     }
 
@@ -296,10 +296,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
 
     public boolean isAttachableForWork(BlockPos pos) {
         Block block = this.world.getBlockState(pos).getBlock();
-        if (GeneralConfig.canUseMM()) {
-            if (block instanceof BlockLeadPoweredCrank) return true;
-        }
-        return false;
+        return GeneralConfig.canUseMM() && block instanceof BlockLeadPoweredCrank;
     }
 
     public int pullPower() {

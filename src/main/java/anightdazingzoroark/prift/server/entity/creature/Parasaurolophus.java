@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
-import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.GeneralConfig;
@@ -10,12 +9,9 @@ import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.config.ParasaurolophusConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
-import com.codetaylor.mc.pyrotech.modules.tech.bloomery.block.BlockBloomery;
-import com.codetaylor.mc.pyrotech.modules.tech.machine.block.spi.BlockCombustionWorkerStoneBase;
 import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
@@ -442,7 +438,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         if (!this.world.isRemote) this.clearWorkstationMessage(destroyed, owner);
     }
 
-    public boolean isUsingWorkstation() {
+    public boolean hasWorkstation() {
         return this.dataManager.get(USING_WORKSTATION);
     }
 
@@ -457,10 +453,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     public boolean isAttachableForWork(BlockPos pos) {
         Block block = this.world.getBlockState(pos).getBlock();
-        if (GeneralConfig.canUseMM()) {
-            if (block instanceof BlockLeadPoweredCrank) return true;
-        }
-        return false;
+        return GeneralConfig.canUseMM() && block instanceof BlockLeadPoweredCrank;
     }
 
     public int pullPower() {
@@ -581,7 +574,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     private <E extends IAnimatable> PlayState parasaurolophusMovement(AnimationEvent<E> event) {
         if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget() && !this.isUsingWorkstation()) {
+            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget() && !this.hasWorkstation()) {
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.sitting", true));
                 return PlayState.CONTINUE;
             }

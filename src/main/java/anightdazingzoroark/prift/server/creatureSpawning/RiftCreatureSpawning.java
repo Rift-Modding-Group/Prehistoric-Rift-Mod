@@ -124,7 +124,6 @@ public class RiftCreatureSpawning {
             try {
                 List<BlockPos> spawnPositions = new ArrayList<>();
                 for (int x = 0; x < 10; x++) spawnPositions.add(this.getRandomChunkPosition(world, event.getChunk().x, event.getChunk().z));
-                System.out.println("spawn positions: "+spawnPositions);
 
                 //remove positions too close to players
                 List<BlockPos> playerPositions = new ArrayList<>();

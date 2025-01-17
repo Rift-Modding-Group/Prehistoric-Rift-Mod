@@ -33,16 +33,14 @@ public class RiftBlowIntoTurbine extends EntityAIBase {
         if (this.creature instanceof IWorkstationUser) {
             this.workstationUser = (IWorkstationUser) this.creature;
             TileEntity te = this.creature.world.getTileEntity(this.workstationUser.getWorkstationPos());
-            if (te != null) {
-                if (GeneralConfig.canUseMM()) return te instanceof TileEntityBlowPoweredTurbine && this.workstationUser.isUsingWorkstation();
-            }
+            if (GeneralConfig.canUseMM() && te != null) return te instanceof TileEntityBlowPoweredTurbine && this.creature.busyAtWorkWithNoTargets();
         }
         return false;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.workstationUser.isUsingWorkstation() && !this.destroyedFlag;
+        return this.creature.busyAtWorkWithNoTargets() && !this.destroyedFlag;
     }
 
     @Override
