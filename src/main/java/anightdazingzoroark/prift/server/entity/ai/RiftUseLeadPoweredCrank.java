@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityLeadPoweredCrank;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -58,7 +59,7 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
     @Override
     public void updateTask() {
         if (this.creature.getEnergy() > 6 && !this.restFlag) {
-            if (this.hasMoveSpace()) {
+            if (this.hasMoveSpace() && !this.pathingOutsideCreatureBoxBounds()) {
                 double markAngle = Math.toRadians((this.posMark * 45) - 90);
                 double xPos = (this.radius * Math.cos(markAngle)) + this.leadWorkstationUser.getLeadWorkPos().getX();
                 double zPos = (this.radius * Math.sin(markAngle)) + this.leadWorkstationUser.getLeadWorkPos().getZ();
@@ -73,10 +74,18 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
                 }
             }
             else {
-                //send message
-                if (!this.creature.getNavigator().noPath()) {
-                    EntityPlayer player = (EntityPlayer)this.creature.getOwner();
-                    player.sendStatusMessage(new TextComponentTranslation("reminder.crank_blocked", this.creature.getName()), false);
+                if (!this.hasMoveSpace()) {
+                    //send message
+                    if (!this.creature.getNavigator().noPath()) {
+                        EntityPlayer player = (EntityPlayer)this.creature.getOwner();
+                        player.sendStatusMessage(new TextComponentTranslation("reminder.crank_blocked", this.creature.getName(false)), false);
+                    }
+                }
+                if (this.pathingOutsideCreatureBoxBounds()) {
+                    if (!this.creature.getNavigator().noPath()) {
+                        EntityPlayer player = (EntityPlayer)this.creature.getOwner();
+                        player.sendStatusMessage(new TextComponentTranslation("reminder.crank_path_outside_creature_box_bounds", this.creature.getName(false)), false);
+                    }
                 }
 
                 //clear path
@@ -110,7 +119,7 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
     }
 
     private boolean hasMoveSpace() {
-        final int xzBound = 3 + Math.round(this.creature.width);
+        final int xzBound = 3 + (int)Math.ceil(this.creature.width);
         final int lowerY = (int)(this.creature.posY - this.leadWorkstationUser.getLeadWorkPos().getY());
         final int boundY = 3 + (int)(this.creature.height + Math.abs(this.yRotPos - this.leadWorkstationUser.getLeadWorkPos().getY()));
 
@@ -125,5 +134,26 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
         }
 
         return true;
+    }
+
+    private boolean pathingOutsideCreatureBoxBounds() {
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.creature.world.getTileEntity(this.creature.getHomePos());
+        if (creatureBox == null) return false;
+        final int xzBound = 3 + (int)Math.ceil(this.creature.width);
+        final int lowerY = (int)(this.creature.posY - this.leadWorkstationUser.getLeadWorkPos().getY());
+        final int boundY = 3 + (int)(this.creature.height + Math.abs(this.yRotPos - this.leadWorkstationUser.getLeadWorkPos().getY()));
+
+        for (double x = -xzBound; x <= xzBound; x++) {
+            for (int y = lowerY; y <= boundY; y++) {
+                for (double z = -xzBound; z <= xzBound; z++) {
+                    BlockPos spacePos = this.leadWorkstationUser.getLeadWorkPos().add(x, y, z);
+                    if (x == 0 && z == 0) continue;
+                    if (spacePos.distanceSqToCenter(this.creature.getHomePos().getX(), this.creature.getHomePos().getY(), this.creature.getHomePos().getZ()) >=
+                            Math.pow(creatureBox.getWanderRange(), 2)) return true;
+                }
+            }
+        }
+        return false;
+
     }
 }
