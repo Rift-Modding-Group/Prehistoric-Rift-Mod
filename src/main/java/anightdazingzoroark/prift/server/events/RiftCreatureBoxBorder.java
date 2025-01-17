@@ -52,7 +52,7 @@ public class RiftCreatureBoxBorder {
     }
 
     private void drawSphereLines(double centerX, double centerY, double centerZ, double radius) {
-        int segments = 36; // Number of segments to approximate the sphere
+        int segments = 36;
 
         // Draw latitude lines
         for (int i = 0; i <= segments; i++) {

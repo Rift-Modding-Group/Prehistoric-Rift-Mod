@@ -64,9 +64,9 @@ public class RiftCreatureBoxMenu extends GuiScreen {
 
     private int guiTimePassed = 0;
 
-    public RiftCreatureBoxMenu(int selectType, int posToSelect) {
+    public RiftCreatureBoxMenu(int selectType, int posToSelect, int changeCreaturesMode) {
         this.creatureBoxPos = ClientProxy.creatureBoxBlockPos;
-        this.changeCreaturesMode = false;
+        this.changeCreaturesMode = changeCreaturesMode > 0;
 
         switch (selectType) {
             case 0: //for party
@@ -561,9 +561,25 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             if (this.selectedCreature != null) {
                 if (this.selectedCreature.getOwner().equals(this.mc.player)) {
                     if (button.id == 0) {
+                        //create variables involving the selected creature so that the game
+                        //can come back to select this creature after closing the gui
+                        int selectType = -1;
+                        int posToSelect = -1;
+                        if (this.partyPosSelected != -1 && this.boxPosSelected == -1 && this.boxDeployedPosSelected == -1) {
+                            selectType = 0;
+                            posToSelect = this.partyPosSelected;
+                        }
+                        else if (this.partyPosSelected == -1 && this.boxPosSelected != -1 && this.boxDeployedPosSelected == -1) {
+                            selectType = 1;
+                            posToSelect = this.boxPosSelected;
+                        }
+                        else if (this.partyPosSelected == -1 && this.boxPosSelected == -1 && this.boxDeployedPosSelected != -1) {
+                            selectType = 2;
+                            posToSelect = this.boxDeployedPosSelected;
+                        }
                         ClientProxy.creatureUUID = this.selectedCreature.getUniqueID();
                         ClientProxy.popupFromRadial = PopupFromCreatureBox.CHANGE_NAME;
-                        this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+                        this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_CREATURE_BOX, this.mc.player.world, selectType, posToSelect, 0);
                     }
                     else if (button.id == 1) {
                         ClientProxy.creatureUUID = this.selectedCreature.getUniqueID();

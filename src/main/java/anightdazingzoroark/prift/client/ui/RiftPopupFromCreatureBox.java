@@ -119,6 +119,9 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
 
     @Override
     public void actionPerformed(GuiButton button) {
+        int selectType = -1;
+        int posToSelect = -1;
+        int toChangeCreaturesMode = 0;
         if (this.popupType == PopupFromCreatureBox.REMOVE_INVENTORY) {
             if (button.id == 0) {
                 RiftChangePartyOrBoxOrder.SwapType swapType = (RiftChangePartyOrBoxOrder.SwapType) ClientProxy.swapTypeForPopup;
@@ -133,6 +136,9 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valTwo), true));
 
                         PlayerTamedCreaturesHelper.boxPartySwap(this.mc.player, this.valOne, this.valTwo);
+                        selectType = 0;
+                        posToSelect = this.valTwo;
+                        toChangeCreaturesMode = 1;
                         break;
                     case PARTY_BOX_SWAP:
                         //drop items from party creature's inventory
@@ -144,6 +150,9 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valOne), true));
 
                         PlayerTamedCreaturesHelper.partyBoxSwap(this.mc.player, this.valOne, this.valTwo);
+                        selectType = 1;
+                        posToSelect = this.valTwo;
+                        toChangeCreaturesMode = 1;
                         break;
                     case PARTY_TO_BOX:
                         //drop items from party creature's inventory
@@ -155,6 +164,9 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getPlayerParty().get(this.valOne), true));
 
                         PlayerTamedCreaturesHelper.partyToBox(this.mc.player, this.valOne);
+                        selectType = 1;
+                        posToSelect = PlayerTamedCreaturesHelper.getPlayerBoxNBT(this.mc.player).size() - 1;
+                        toChangeCreaturesMode = 1;
                         break;
                     case BOX_DEPLOYED_BOX_SWAP:
                         //drop items from box deployed creature's inventory
@@ -167,6 +179,9 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valOne), true));
 
                         PlayerTamedCreaturesHelper.boxDeployedBoxSwap(this.mc.player, ClientProxy.creatureBoxBlockPos, this.valOne, this.valTwo);
+                        selectType = 1;
+                        posToSelect = this.valTwo;
+                        toChangeCreaturesMode = 1;
                         break;
                     case BOX_DEPLOYED_TO_BOX:
                         //drop items from box deployed creature's inventory
@@ -179,6 +194,9 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valOne), true));
 
                         PlayerTamedCreaturesHelper.boxDeployedToBox(this.mc.player, ClientProxy.creatureBoxBlockPos, this.valOne);
+                        selectType = 1;
+                        posToSelect = PlayerTamedCreaturesHelper.getPlayerBoxNBT(this.mc.player).size() - 1;
+                        toChangeCreaturesMode = 1;
                         break;
                     case BOX_BOX_DEPLOYED_SWAP:
                         //drop items from box deployed creature's inventory
@@ -191,10 +209,11 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                         RiftMessages.WRAPPER.sendToAll(new RiftRemoveAfterSendToBox(this.getCreatureBoxDeployedCreatures().get(this.valTwo), true));
 
                         PlayerTamedCreaturesHelper.boxBoxDeployedSwap(this.mc.player, ClientProxy.creatureBoxBlockPos, this.valOne, this.valTwo);
+                        selectType = 2;
+                        posToSelect = this.valTwo;
+                        toChangeCreaturesMode = 1;
                         break;
                 }
-                ClientProxy.swapTypeForPopup = null;
-                ClientProxy.popupFromRadial = null;
             }
         }
         else if (this.popupType == PopupFromCreatureBox.CHANGE_NAME) {
@@ -203,11 +222,12 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                 NBTTagCompound compound = new NBTTagCompound();
                 compound.setString("CustomName", this.textField.getText());
                 this.playerTamedCreatures().modifyCreature(ClientProxy.creatureUUID , compound);
+                selectType = this.valOne;
+                posToSelect = this.valTwo;
 
                 //change creature name in the world
                 RiftMessages.WRAPPER.sendToServer(new RiftChangeNameFromBox(ClientProxy.creatureUUID, this.textField.getText()));
                 ClientProxy.creatureUUID = null;
-                ClientProxy.popupFromRadial = null;
             }
         }
         else if (this.popupType == PopupFromCreatureBox.RELEASE) {
@@ -220,15 +240,16 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                 RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreatureFromBox(ClientProxy.creatureUUID));
                 RiftMessages.WRAPPER.sendToServer(new RiftRemoveCreatureFromBox(ClientProxy.creatureUUID));
                 ClientProxy.creatureUUID = null;
-                ClientProxy.popupFromRadial = null;
             }
         }
 
         this.mc.player.closeScreen();
         if (this.popupType == PopupFromCreatureBox.RELEASE && this.getPlayerParty().isEmpty() && this.getPlayerBox().isEmpty()) {}
         else if (this.popupType != PopupFromCreatureBox.NO_CREATURES) {
-            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_CREATURE_BOX, this.mc.player.world, 0, 0, 0);
+            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_CREATURE_BOX, this.mc.player.world, selectType, posToSelect, toChangeCreaturesMode);
         }
+        ClientProxy.swapTypeForPopup = null;
+        ClientProxy.popupFromRadial = null;
     }
 
     @Override
