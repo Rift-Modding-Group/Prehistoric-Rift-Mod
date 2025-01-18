@@ -10,8 +10,8 @@ public class RiftStompMove extends RiftCreatureMove {
     }
 
     @Override
-    public boolean canBeExecuted(RiftCreature user, EntityLivingBase target) {
-        return true;
+    public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
+        return MovePriority.LOW;
     }
 
     @Override

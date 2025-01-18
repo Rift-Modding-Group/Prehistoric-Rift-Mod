@@ -116,18 +116,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CAN_USE_MOVE_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_MOVE_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> MOVE_ONE_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> MOVE_ONE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     private static final DataParameter<Boolean> CAN_USE_MOVE_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_MOVE_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> MOVE_TWO_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> MOVE_TWO_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     private static final DataParameter<Boolean> CAN_USE_MOVE_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_MOVE_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> MOVE_THREE_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> MOVE_THREE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+
+    protected final List<CreatureMove> learnedMoves = new ArrayList<>();
 
     private int boxReviveTime;
     private int energyMod;
@@ -174,6 +173,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected int densityLimit;
     protected List<String> targetList;
     public boolean isFloatingOnWater;
+    public boolean recentlyHit;
+    private int recentlyHitTicks;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -250,19 +251,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(INCAPACITATED, false);
 
         this.dataManager.register(CURRENT_MOVE, -1);
+
         this.dataManager.register(CAN_USE_MOVE_ONE, true);
         this.dataManager.register(USING_MOVE_ONE, false);
-        this.dataManager.register(MOVE_ONE_USE, 0);
         this.dataManager.register(MOVE_ONE_COOLDOWN, 0);
 
         this.dataManager.register(CAN_USE_MOVE_TWO, true);
         this.dataManager.register(USING_MOVE_TWO, false);
-        this.dataManager.register(MOVE_TWO_USE, 0);
         this.dataManager.register(MOVE_TWO_COOLDOWN, 0);
 
         this.dataManager.register(CAN_USE_MOVE_THREE, true);
         this.dataManager.register(USING_MOVE_THREE, false);
-        this.dataManager.register(MOVE_THREE_USE, 0);
         this.dataManager.register(MOVE_THREE_COOLDOWN, 0);
     }
 
@@ -283,6 +282,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         double distFromCenter = Math.sqrt(this.posX * this.posX + this.posZ * this.posZ);
         double level = Math.floor((distFromCenter / GeneralConfig.levelingRadius)) * GeneralConfig.levelingRadisIncrement + RiftUtil.randomInRange(1, 10) + this.levelAddFromDifficulty();
         this.setLevel(RiftUtil.clamp((int) level, 0, 100));
+        //add moves
+        this.learnedMoves.addAll(this.initialMoves());
         if (this instanceof IHerder &&  ((IHerder)this).canDoHerding()) {
             if (!(livingdata instanceof IHerder.HerdData)) return new IHerder.HerdData(this);
             ((IHerder)this).addToHerdLeader(((IHerder.HerdData)livingdata).herdLeader);
@@ -357,6 +358,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
+
+        //other minor stuff
+        if (this.recentlyHitTicks > 0) this.recentlyHitTicks--;
+        else if (this.recentlyHitTicks == 0) this.recentlyHit = false;
     }
 
     @SideOnly(Side.CLIENT)
@@ -1034,6 +1039,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         compound.setByte("DeploymentType", (byte) this.getDeploymentType().ordinal());
         compound.setInteger("BoxReviveTime", this.boxReviveTime);
+        if (!this.learnedMoves.isEmpty()) {
+            NBTTagList nbttaglist = new NBTTagList();
+            for (CreatureMove learnedMove : this.learnedMoves) {
+                NBTTagCompound nbttagcompound = new NBTTagCompound();
+                nbttagcompound.setInteger("Move", learnedMove.ordinal());
+                nbttaglist.appendTag(nbttagcompound);
+            }
+            compound.setTag("LearnedMoves", nbttaglist);
+        }
     }
 
     @Override
@@ -1080,7 +1094,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return new ArrayList<>();
     }
 
-    public List<CreatureMove> learnedMoves() {
+    public List<CreatureMove> getLearnedMoves() {
+        return this.learnedMoves;
+    }
+
+    public void changeLearnedMove(int pos, CreatureMove move) {
+        this.learnedMoves.set(pos, move);
+    }
+
+    public List<CreatureMove> initialMoves() {
         return new ArrayList<>();
     }
 
@@ -1112,14 +1134,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(USING_MOVE_ONE, value);
     }
 
-    public int getMoveOneUse() {
-        return this.dataManager.get(MOVE_ONE_USE);
-    }
-
-    public void setMoveOneUse(int value) {
-        this.dataManager.set(MOVE_ONE_USE, value);
-    }
-
     public int getMoveOneCooldown() {
         return this.dataManager.get(MOVE_ONE_COOLDOWN);
     }
@@ -1146,14 +1160,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(USING_MOVE_TWO, value);
     }
 
-    public int getMoveTwoUse() {
-        return this.dataManager.get(MOVE_TWO_USE);
-    }
-
-    public void setMoveTwoUse(int value) {
-        this.dataManager.set(MOVE_TWO_USE, value);
-    }
-
     public int getMoveTwoCooldown() {
         return this.dataManager.get(MOVE_TWO_COOLDOWN);
     }
@@ -1178,14 +1184,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setUsingMoveThree(boolean value) {
         this.dataManager.set(USING_MOVE_THREE, value);
-    }
-
-    public int getMoveThreeUse() {
-        return this.dataManager.get(MOVE_THREE_USE);
-    }
-
-    public void setMoveThreeUse(int value) {
-        this.dataManager.set(MOVE_THREE_USE, value);
     }
 
     public int getMoveThreeCooldown() {
@@ -1316,6 +1314,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(VARIANT, variant);
     }
 
+    //move anims start here
     public boolean isAttacking() {
         return this.dataManager.get(ATTACKING);
     }
@@ -1329,9 +1328,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return false;
     }
 
-    public void setStomping(boolean value) {
+    public void setStomping(boolean value) {}
 
+    public boolean isRoaring() {
+        return false;
     }
+
+    public void setRoaring(boolean value) {}
 
     public boolean isRangedAttacking() {
         return this.dataManager.get(RANGED_ATTACKING);
@@ -1341,6 +1344,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(RANGED_ATTACKING, value);
         this.setActing(value);
     }
+
+    //move anims end here
 
     public boolean isSitting() {
         return this.dataManager.get(SITTING);
@@ -1431,8 +1436,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
+        //set a boolean that lasts 60 ticks to true, its for whether or not the creature has been recently hit
+        this.recentlyHit = true;
+        this.recentlyHitTicks = 60;
+
+        //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
         if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
-            //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
             Entity attacker = source.getImmediateSource();
             RiftCreaturePart closestPart = null;
             float closestDist = RiftUtil.funnyNumber;

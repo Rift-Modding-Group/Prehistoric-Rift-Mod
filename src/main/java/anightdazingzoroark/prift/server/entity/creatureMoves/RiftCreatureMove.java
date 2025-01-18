@@ -15,7 +15,9 @@ public abstract class RiftCreatureMove {
         this.animPercentOnUse = animPercentOnUse;
     }
 
-    public abstract boolean canBeExecuted(RiftCreature user, EntityLivingBase target);
+    //if return false, its low priority
+    //if return true, its high priority
+    public abstract MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target);
 
     public abstract void onStartExecuting(RiftCreature user);
 
@@ -33,5 +35,11 @@ public abstract class RiftCreatureMove {
 
     public boolean hasChargeBar() {
         return this.creatureMove.chargeType != CreatureMove.ChargeType.NONE;
+    }
+
+    public enum MovePriority {
+        HIGH, //move is put at top of list
+        LOW, //move is put at bottom of list
+        NONE; //move cannot be used at all
     }
 }

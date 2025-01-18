@@ -254,10 +254,13 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.readWorkstationDataFromNBT(compound);
     }
 
-
     //move related stuff starts here
     public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP);
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR);
+    }
+
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR);
     }
     //move related stuff ends here
 

@@ -2,16 +2,19 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.MobEffects;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.BlockPos;
 
-public class RiftHeadbuttMove extends RiftCreatureMove {
-    public RiftHeadbuttMove() {
-        super(CreatureMove.HEADBUTT, 10, 0.5);
+public class RiftSnarlMove extends RiftCreatureMove {
+    public RiftSnarlMove() {
+        super(CreatureMove.SNARL, 40, 0.25);
     }
 
     @Override
     public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
-        return MovePriority.LOW;
+        if (user.world.rand.nextInt(4) == 0) return MovePriority.HIGH;
+        return MovePriority.NONE;
     }
 
     @Override
@@ -25,7 +28,9 @@ public class RiftHeadbuttMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target) {}
+    public void onReachUsePoint(RiftCreature user, EntityLivingBase target) {
+        target.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 200));
+    }
 
     @Override
     public void onStopExecuting(RiftCreature user) {

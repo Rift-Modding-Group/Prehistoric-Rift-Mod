@@ -6,6 +6,8 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 
+import java.util.*;
+
 public class RiftCreatureUseMove extends EntityAIBase {
     private final RiftCreature creature;
     private RiftCreatureMove currentInvokedMove;
@@ -60,9 +62,8 @@ public class RiftCreatureUseMove extends EntityAIBase {
         if (this.finishedMarker) {
             if (this.moveChoiceCooldown > 0) this.moveChoiceCooldown--;
             else {
-                int movePos = this.creature.world.rand.nextInt(this.creature.learnableMoves().size());
-                if (!this.isCoolingDown(movePos)) {
-                    CreatureMove selectedMove = this.creature.learnableMoves().get(movePos);
+                CreatureMove selectedMove = this.selectMoveForUse();
+                if (selectedMove != null) {
                     this.creature.setCurrentCreatureMove(selectedMove);
                     this.currentInvokedMove = this.creature.currentCreatureMove().invokeMove();
                     this.animTime = 0;
@@ -89,7 +90,7 @@ public class RiftCreatureUseMove extends EntityAIBase {
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.animTime = 0;
                     this.currentInvokedMove.onStopExecuting(this.creature);
-                    this.setCoolDown(this.creature.learnableMoves().indexOf(this.creature.currentCreatureMove()), 0);
+                    this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), 0);
                     this.finishedMarker = true;
                     this.canAttackInRange = false;
                     this.moveChoiceCooldown = 20;
@@ -133,6 +134,24 @@ public class RiftCreatureUseMove extends EntityAIBase {
         && this.currentInvokedMove.creatureMove.moveType != CreatureMove.MoveType.STATUS) {
             return this.creature.getDistance(this.target) <= this.creature.attackWidth();
         }
-        else return false;
+        else return this.creature.getDistance(this.target) <= 16;
+    }
+
+    private CreatureMove selectMoveForUse() {
+        Deque<CreatureMove> movesForSelecting = new ArrayDeque<>();
+        List<CreatureMove> creatureMovesRandomized = new ArrayList<>(this.creature.getLearnedMoves());
+        Collections.shuffle(creatureMovesRandomized);
+        for (CreatureMove creatureMove : creatureMovesRandomized) {
+            if (!this.isCoolingDown(this.creature.getLearnedMoves().indexOf(creatureMove))) {
+                CreatureMove move = creatureMove;
+                RiftCreatureMove moveInvoked = move.invokeMove();
+                if (moveInvoked.canBeExecuted(this.creature, this.target) == RiftCreatureMove.MovePriority.HIGH)
+                    movesForSelecting.addFirst(move);
+                if (moveInvoked.canBeExecuted(this.creature, this.target) == RiftCreatureMove.MovePriority.LOW)
+                    movesForSelecting.addLast(move);
+            }
+        }
+        if (movesForSelecting.isEmpty()) return null;
+        else return movesForSelecting.getFirst();
     }
 }

@@ -6,7 +6,9 @@ public enum CreatureMove {
     HEADBUTT(RiftHeadbuttMove.class, MoveType.CHARGE, ChargeType.NONE, 25),
     STOMP(RiftStompMove.class, MoveType.STOMP, ChargeType.NONE, 25),
     SCRATCH(RiftScratchMove.class, MoveType.CLAW, ChargeType.NONE, 25),
-    BITE(RiftBiteMove.class, MoveType.JAW, ChargeType.NONE, 25);
+    BITE(RiftBiteMove.class, MoveType.JAW, ChargeType.NONE, 25),
+    SNARL(RiftSnarlMove.class, MoveType.STATUS, ChargeType.NONE, 0),
+    POWER_ROAR(RiftPowerRoarMove.class, MoveType.STATUS, ChargeType.GRADIENT_THEN_USE, 0);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveType moveType;

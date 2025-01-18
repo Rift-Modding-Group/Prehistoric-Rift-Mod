@@ -475,3 +475,8 @@ creature_control.right_mouse.dilophosaurus=Spit
 large_weapon_control.left_mouse.cannon=Fire
 large_weapon_control.left_mouse.mortar=Fire (Chargeable)
 large_weapon_control.left_mouse.catapult=Launch (Chargeable)
+
+creature_move.bounce.name=Bounce
+creature_move.bounce.description=The user bounces around, causing no effects
+creature_move.tackle.name=Tackle
+creature_move.tackle.description=The user charges over a short distance towards the target
