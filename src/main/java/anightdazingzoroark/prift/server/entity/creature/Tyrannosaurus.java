@@ -13,6 +13,7 @@ import anightdazingzoroark.prift.config.TyrannosaurusConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IApexPredator;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import com.google.common.base.Predicate;
@@ -197,7 +198,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     }
 
     protected void initEntityAI() {
-        this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
+        //this.targetTasks.addTask(0, new RiftTyrannosaurusRoar(this));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftGetTargets(this, false, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
@@ -210,7 +211,8 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.tasks.addTask(2, new RiftMate(this));
         this.tasks.addTask(3, new RiftResetAnimatedPose(this, 1.68F, 1));
         this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.24F));
-        this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
+        //this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
+        this.tasks.addTask(4, new RiftCreatureUseMove(this));
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
         //this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(7, new RiftGoToLandFromWater(this, 16, 1.0D));
@@ -251,6 +253,13 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         super.readEntityFromNBT(compound);
         this.readWorkstationDataFromNBT(compound);
     }
+
+
+    //move related stuff starts here
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP);
+    }
+    //move related stuff ends here
 
     private void manageCanRoar() {
         if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);

@@ -14,6 +14,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.enums.CreatureDiet;
@@ -111,6 +112,23 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+
+    private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> CAN_USE_MOVE_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_MOVE_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> MOVE_ONE_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> MOVE_ONE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+
+    private static final DataParameter<Boolean> CAN_USE_MOVE_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_MOVE_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> MOVE_TWO_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> MOVE_TWO_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+
+    private static final DataParameter<Boolean> CAN_USE_MOVE_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_MOVE_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> MOVE_THREE_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> MOVE_THREE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+
     private int boxReviveTime;
     private int energyMod;
     private int energyRegenMod;
@@ -230,6 +248,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) PlayerTamedCreatures.DeploymentType.NONE.ordinal());
         this.dataManager.register(INCAPACITATED, false);
+
+        this.dataManager.register(CURRENT_MOVE, -1);
+        this.dataManager.register(CAN_USE_MOVE_ONE, true);
+        this.dataManager.register(USING_MOVE_ONE, false);
+        this.dataManager.register(MOVE_ONE_USE, 0);
+        this.dataManager.register(MOVE_ONE_COOLDOWN, 0);
+
+        this.dataManager.register(CAN_USE_MOVE_TWO, true);
+        this.dataManager.register(USING_MOVE_TWO, false);
+        this.dataManager.register(MOVE_TWO_USE, 0);
+        this.dataManager.register(MOVE_TWO_COOLDOWN, 0);
+
+        this.dataManager.register(CAN_USE_MOVE_THREE, true);
+        this.dataManager.register(USING_MOVE_THREE, false);
+        this.dataManager.register(MOVE_THREE_USE, 0);
+        this.dataManager.register(MOVE_THREE_COOLDOWN, 0);
     }
 
     @Override
@@ -298,6 +332,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();
             this.manageDiscoveryByPlayer();
+            this.manageMoveCooldown();
             if (this.isTamed()) {
                 this.updateEnergyMove();
                 this.updateEnergyActions();
@@ -394,6 +429,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
         }
+    }
+
+    private void manageMoveCooldown() {
+        if (this.getMoveOneCooldown() > 0) this.setMoveOneCooldown(this.getMoveOneCooldown() - 1);
+        if (this.getMoveTwoCooldown() > 0) this.setMoveTwoCooldown(this.getMoveTwoCooldown() - 1);
+        if (this.getMoveThreeCooldown() > 0) this.setMoveThreeCooldown(this.getMoveThreeCooldown() - 1);
     }
 
     private void manageDiscoveryByPlayer() {
@@ -1034,6 +1075,128 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
     }
 
+    //move related stuff starts here
+    public List<CreatureMove> learnableMoves() {
+        return new ArrayList<>();
+    }
+
+    public List<CreatureMove> learnedMoves() {
+        return new ArrayList<>();
+    }
+
+    public CreatureMove currentCreatureMove() {
+        if (this.dataManager.get(CURRENT_MOVE) >= 0) return CreatureMove.values()[this.dataManager.get(CURRENT_MOVE)];
+        else return null;
+    }
+
+    public void setCurrentCreatureMove(CreatureMove value) {
+        if (value != null) this.dataManager.set(CURRENT_MOVE, value.ordinal());
+        else this.dataManager.set(CURRENT_MOVE, -1);
+    }
+
+
+
+    public boolean canUseMoveOne() {
+        return this.dataManager.get(CAN_USE_MOVE_ONE);
+    }
+
+    public void setCanUseMoveOne(boolean value) {
+        this.dataManager.set(CAN_USE_MOVE_ONE, value);
+    }
+
+    public boolean usingMoveOne() {
+        return this.dataManager.get(USING_MOVE_ONE);
+    }
+
+    public void setUsingMoveOne(boolean value) {
+        this.dataManager.set(USING_MOVE_ONE, value);
+    }
+
+    public int getMoveOneUse() {
+        return this.dataManager.get(MOVE_ONE_USE);
+    }
+
+    public void setMoveOneUse(int value) {
+        this.dataManager.set(MOVE_ONE_USE, value);
+    }
+
+    public int getMoveOneCooldown() {
+        return this.dataManager.get(MOVE_ONE_COOLDOWN);
+    }
+
+    public void setMoveOneCooldown(int value) {
+        this.dataManager.set(MOVE_ONE_COOLDOWN, value);
+    }
+
+
+
+    public boolean canUseMoveTwo() {
+        return this.dataManager.get(CAN_USE_MOVE_TWO);
+    }
+
+    public void setCanUseMoveTwo(boolean value) {
+        this.dataManager.set(CAN_USE_MOVE_TWO, value);
+    }
+
+    public boolean usingMoveTwo() {
+        return this.dataManager.get(USING_MOVE_TWO);
+    }
+
+    public void setUsingMoveTwo(boolean value) {
+        this.dataManager.set(USING_MOVE_TWO, value);
+    }
+
+    public int getMoveTwoUse() {
+        return this.dataManager.get(MOVE_TWO_USE);
+    }
+
+    public void setMoveTwoUse(int value) {
+        this.dataManager.set(MOVE_TWO_USE, value);
+    }
+
+    public int getMoveTwoCooldown() {
+        return this.dataManager.get(MOVE_TWO_COOLDOWN);
+    }
+
+    public void setMoveTwoCooldown(int value) {
+        this.dataManager.set(MOVE_TWO_COOLDOWN, value);
+    }
+
+
+
+    public boolean canUseMoveThree() {
+        return this.dataManager.get(CAN_USE_MOVE_THREE);
+    }
+
+    public void setCanUseMoveThree(boolean value) {
+        this.dataManager.set(CAN_USE_MOVE_THREE, value);
+    }
+
+    public boolean usingMoveThree() {
+        return this.dataManager.get(USING_MOVE_THREE);
+    }
+
+    public void setUsingMoveThree(boolean value) {
+        this.dataManager.set(USING_MOVE_THREE, value);
+    }
+
+    public int getMoveThreeUse() {
+        return this.dataManager.get(MOVE_THREE_USE);
+    }
+
+    public void setMoveThreeUse(int value) {
+        this.dataManager.set(MOVE_THREE_USE, value);
+    }
+
+    public int getMoveThreeCooldown() {
+        return this.dataManager.get(MOVE_THREE_COOLDOWN);
+    }
+
+    public void setMoveThreeCooldown(int value) {
+        this.dataManager.set(MOVE_THREE_COOLDOWN, value);
+    }
+    //move related stuff ends here
+
     private void initInventory() {
         RiftCreatureInventory tempInventory = this.creatureInventory;
         int inventorySize = this.slotCount() + (this.canBeSaddled() ? 1 : 0);
@@ -1160,6 +1323,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setAttacking(boolean value) {
         this.dataManager.set(ATTACKING, value);
         this.setActing(value);
+    }
+
+    public boolean isStomping() {
+        return false;
+    }
+
+    public void setStomping(boolean value) {
+
     }
 
     public boolean isRangedAttacking() {
