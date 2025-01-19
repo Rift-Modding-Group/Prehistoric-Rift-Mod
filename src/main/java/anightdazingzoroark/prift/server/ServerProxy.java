@@ -17,6 +17,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlaye
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesStorage;
 import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawning;
+import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import anightdazingzoroark.prift.server.events.RiftCreatureBoxBorder;
 import anightdazingzoroark.prift.server.events.ServerEvents;
@@ -27,9 +28,8 @@ import anightdazingzoroark.prift.server.recipes.RiftRecipes;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntities;
 import anightdazingzoroark.prift.server.world.RiftPlantGenerator;
 import anightdazingzoroark.prift.server.world.RiftStructureGenerator;
+import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
 import com.charles445.simpledifficulty.api.temperature.TemperatureRegistry;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Loader;
@@ -45,7 +45,12 @@ import javax.annotation.Nullable;
 
 @Mod.EventBusSubscriber
 public class ServerProxy {
+    public static InternalRegistryPrimer registryPrimer;
+
     public void preInit(FMLPreInitializationEvent e) {
+        registryPrimer = new InternalRegistryPrimer();
+        MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));
+
         CapabilityManager.INSTANCE.register(IPlayerTamedCreatures.class, new PlayerTamedCreaturesStorage(), PlayerTamedCreatures::new);
         CapabilityManager.INSTANCE.register(IPlayerJournalProgress.class, new PlayerJournalProgressStorage(), PlayerJournalProgress::new);
         CapabilityManager.INSTANCE.register(INonPotionEffects.class, new NonPotionEffectsStorage(), NonPotionEffects::new);

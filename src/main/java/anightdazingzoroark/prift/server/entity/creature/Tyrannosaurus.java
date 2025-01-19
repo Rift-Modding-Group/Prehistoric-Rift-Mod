@@ -1,15 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
-import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
-import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.GeneralConfig;
-import anightdazingzoroark.prift.config.TyrannosaurusConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -210,11 +207,9 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.tasks.addTask(1, new RiftLandDwellerSwim(this));
         this.tasks.addTask(2, new RiftMate(this));
         this.tasks.addTask(3, new RiftResetAnimatedPose(this, 1.68F, 1));
-        this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.24F));
-        //this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
-        this.tasks.addTask(4, new RiftCreatureUseMove(this));
-        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
-        //this.tasks.addTask(6, new RiftMoveToHomePos(this, 1.0D));
+        this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
         this.tasks.addTask(7, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(8, new RiftWander(this, 1.0D));
         this.tasks.addTask(9, new RiftLookAround(this));
@@ -259,6 +254,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR);
     }
 
+    @Override
     public List<CreatureMove> initialMoves() {
         return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR);
     }
@@ -535,6 +531,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     @Override
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
+        /*
         if (control == 0) {
             if (this.getEnergy() > 0) {
                 if (!this.isActing()) {
@@ -558,6 +555,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
             }
             else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
         }
+        */
     }
 
     @Override

@@ -8,7 +8,7 @@ import net.minecraft.entity.ai.EntityAIBase;
 
 import java.util.*;
 
-public class RiftCreatureUseMove extends EntityAIBase {
+public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     private final RiftCreature creature;
     private RiftCreatureMove currentInvokedMove;
     private EntityLivingBase target;
@@ -19,14 +19,14 @@ public class RiftCreatureUseMove extends EntityAIBase {
     private int moveChoiceCooldown;
     private boolean canAttackInRange;
 
-    public RiftCreatureUseMove(RiftCreature creature) {
+    public RiftCreatureUseMoveUnmounted(RiftCreature creature) {
         this.creature = creature;
         this.setMutexBits(3);
     }
 
     @Override
     public boolean shouldExecute() {
-        return this.creature.getAttackTarget() != null || this.creature.getRevengeTarget() != null;
+        return (this.creature.getAttackTarget() != null || this.creature.getRevengeTarget() != null) && !this.creature.isBeingRidden();
     }
 
     @Override
