@@ -23,7 +23,11 @@ public abstract class RiftCreatureMove {
 
     public abstract void whileExecuting(RiftCreature user);
 
-    public abstract void onReachUsePoint(RiftCreature user, EntityLivingBase target);
+    public void onReachUsePoint(RiftCreature user, EntityLivingBase target) {
+        this.onReachUsePoint(user, target, 0);
+    }
+
+    public abstract void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount);
 
     public abstract void onStopExecuting(RiftCreature user);
 

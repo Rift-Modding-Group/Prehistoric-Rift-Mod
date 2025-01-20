@@ -26,8 +26,8 @@ public class RiftStompMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target) {
-        user.attackEntityAsMob(target);
+    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
+        if (target != null) user.attackEntityAsMob(target);
     }
 
     @Override

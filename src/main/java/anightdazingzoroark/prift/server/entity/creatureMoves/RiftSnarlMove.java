@@ -28,8 +28,8 @@ public class RiftSnarlMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target) {
-        target.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 200));
+    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
+        if (target != null) target.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 200));
     }
 
     @Override

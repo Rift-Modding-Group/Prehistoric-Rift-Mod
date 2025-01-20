@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -30,24 +31,35 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
 
     @Override
     public void startExecuting() {
-        System.out.println("start");
         if (this.creature.usingMoveOne()) {
             this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(0));
             this.currentInvokedMove = this.creature.getLearnedMoves().get(0).invokeMove();
-            this.maxMoveAnimTime = this.currentInvokedMove.animTotalLength;
-            this.moveAnimUseTime = (int)(this.maxMoveAnimTime * this.currentInvokedMove.animPercentOnUse);
+
+            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.NONE) {
+                this.maxMoveAnimTime = this.currentInvokedMove.animTotalLength;
+                this.moveAnimUseTime = (int)(this.maxMoveAnimTime * this.currentInvokedMove.animPercentOnUse);
+            }
+            else this.currentInvokedMove.onStartExecuting(this.creature);
         }
         else if (this.creature.usingMoveTwo()) {
             this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(1));
             this.currentInvokedMove = this.creature.getLearnedMoves().get(1).invokeMove();
-            this.maxMoveAnimTime = this.currentInvokedMove.animTotalLength;
-            this.moveAnimUseTime = (int)(this.maxMoveAnimTime * this.currentInvokedMove.animPercentOnUse);
+
+            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.NONE) {
+                this.maxMoveAnimTime = this.currentInvokedMove.animTotalLength;
+                this.moveAnimUseTime = (int) (this.maxMoveAnimTime * this.currentInvokedMove.animPercentOnUse);
+            }
+            else this.currentInvokedMove.onStartExecuting(this.creature);
         }
         else if (this.creature.usingMoveThree()) {
             this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(2));
             this.currentInvokedMove = this.creature.getLearnedMoves().get(2).invokeMove();
-            this.maxMoveAnimTime = this.currentInvokedMove.animTotalLength;
-            this.moveAnimUseTime = (int)(this.maxMoveAnimTime * this.currentInvokedMove.animPercentOnUse);
+
+            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.NONE) {
+                this.maxMoveAnimTime = this.currentInvokedMove.animTotalLength;
+                this.moveAnimUseTime = (int) (this.maxMoveAnimTime * this.currentInvokedMove.animPercentOnUse);
+            }
+            else this.currentInvokedMove.onStartExecuting(this.creature);
         }
         this.animTime = 0;
         this.finishFlag = false;
@@ -55,7 +67,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
 
     @Override
     public void resetTask() {
-        System.out.println("stop");
         if (this.currentInvokedMove != null) {
             this.currentInvokedMove.onStopExecuting(this.creature);
             this.currentInvokedMove = null;
@@ -69,25 +80,69 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     @Override
     public void updateTask() {
         if (!this.finishFlag) {
-            if (this.animTime == 0) {
-                this.currentInvokedMove.onStartExecuting(this.creature);
-            }
-            if (this.animTime == this.moveAnimUseTime) {
-                EntityLivingBase entityTarget = this.creature.getControlAttackTargets() instanceof EntityLivingBase ? (EntityLivingBase) this.creature.getControlAttackTargets() : null;
-                if (entityTarget != null) this.currentInvokedMove.onReachUsePoint(this.creature, entityTarget);
-            }
-            if (this.animTime >= this.maxMoveAnimTime) {
-                this.animTime = 0;
-                this.currentInvokedMove.onStopExecuting(this.creature);
-                this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), 0);
-                this.finishFlag = true;
-            }
-            if (this.animTime < this.maxMoveAnimTime) {
-                this.currentInvokedMove.whileExecuting(this.creature);
-            }
+            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.NONE) {
+                if (this.animTime == 0) {
+                    this.currentInvokedMove.onStartExecuting(this.creature);
+                }
+                if (this.animTime == this.moveAnimUseTime) {
+                    EntityLivingBase entityTarget = this.creature.getControlAttackTargets() instanceof EntityLivingBase ? (EntityLivingBase) this.creature.getControlAttackTargets() : null;
+                    this.currentInvokedMove.onReachUsePoint(this.creature, entityTarget);
+                }
+                if (this.animTime >= this.maxMoveAnimTime) {
+                    this.animTime = 0;
+                    this.currentInvokedMove.onStopExecuting(this.creature);
+                    this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), this.creature.currentCreatureMove().maxCooldown);
+                    this.finishFlag = true;
+                }
+                if (this.animTime < this.maxMoveAnimTime) {
+                    this.currentInvokedMove.whileExecuting(this.creature);
+                }
 
-            if (!this.finishFlag) this.animTime++;
+                if (!this.finishFlag) this.animTime++;
+            }
+            else {
+                int movePos = this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove());
+                if (!this.getMoveIsUsing(movePos)) {
+                    this.currentInvokedMove.onReachUsePoint(this.creature, null, this.getUse(movePos));
+
+                    //everything after this point is temporary
+                    //and will be executed when the associated anim ends
+                    int cooldownGradient = 1;
+                    if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
+                        cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
+                    }
+                    this.setCoolDown(movePos, this.getUse(movePos) * cooldownGradient);
+                    this.finishFlag = true;
+                    this.creature.setMoveOneUse(0);
+                    this.creature.setMoveTwoUse(0);
+                    this.creature.setMoveThreeUse(0);
+                }
+            }
         }
+    }
+
+    private int getUse(int movePos) {
+        switch (movePos) {
+            case 0:
+                return this.creature.getMoveOneUse();
+            case 1:
+                return this.creature.getMoveTwoUse();
+            case 2:
+                return this.creature.getMoveThreeUse();
+        }
+        return 0;
+    }
+
+    private boolean getMoveIsUsing(int movePos) {
+        switch (movePos) {
+            case 0:
+                return this.creature.usingMoveOne();
+            case 1:
+                return this.creature.usingMoveTwo();
+            case 2:
+                return this.creature.usingMoveThree();
+        }
+        return false;
     }
 
     private void setCoolDown(int movePos, int moveCooldown) {

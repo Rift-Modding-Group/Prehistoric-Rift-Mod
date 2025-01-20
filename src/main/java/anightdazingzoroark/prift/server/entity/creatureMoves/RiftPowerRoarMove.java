@@ -14,7 +14,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -71,15 +70,15 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target) {
-        this.roar(user, 1.5f);
+    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
+        this.roar(user,  0.015f * useAmount + 1.5f);
         user.playSound(RiftSounds.TYRANNOSAURUS_ROAR, 2, 1);
     }
 
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.setRoaring(false);
-        user.removeSpeed();
+        user.resetSpeed();
     }
 
     @Override

@@ -13,29 +13,29 @@ import net.minecraftforge.fml.relauncher.Side;
 public class RiftManualUseMove implements IMessage {
     private int creatureId;
     private int control; //0 is left click, 1 is right click, 2 is middle click, -1 disables all
-    private CreatureMove.ChargeType chargeType;
+    private CreatureMove creatureMove;
 
     public RiftManualUseMove() {}
 
-    public RiftManualUseMove(RiftCreature creature, int control, CreatureMove.ChargeType chargeType) {
+    public RiftManualUseMove(RiftCreature creature, int control, CreatureMove creatureMove) {
         this.creatureId = creature.getEntityId();
         this.control = control;
-        this.chargeType = chargeType;
+        this.creatureMove = creatureMove;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.creatureId = buf.readInt();
         this.control = buf.readInt();
-        int tempChargeTypeInt = buf.readInt();
-        this.chargeType = tempChargeTypeInt >= 0 ? CreatureMove.ChargeType.values()[tempChargeTypeInt] : null;
+        int tempCreatureMoveInt = buf.readInt();
+        this.creatureMove = tempCreatureMoveInt >= 0 ? CreatureMove.values()[tempCreatureMoveInt] : null;
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.creatureId);
         buf.writeInt(this.control);
-        if (this.chargeType != null) buf.writeInt(this.chargeType.ordinal());
+        if (this.creatureMove != null) buf.writeInt(this.creatureMove.ordinal());
         else buf.writeInt(-1);
     }
 
@@ -60,15 +60,15 @@ public class RiftManualUseMove implements IMessage {
                             break;
                         case 0:
                             creature.setUsingMoveOne(true);
-                            if (message.chargeType != CreatureMove.ChargeType.NONE) creature.setMoveOneUse(creature.getMoveOneUse() + 1);
+                            if (message.creatureMove.chargeType != CreatureMove.ChargeType.NONE) creature.setMoveOneUse(Math.min(creature.getMoveOneUse() + 1, message.creatureMove.maxUse));
                             break;
                         case 1:
                             creature.setUsingMoveTwo(true);
-                            if (message.chargeType != CreatureMove.ChargeType.NONE) creature.setMoveTwoUse(creature.getMoveTwoUse() + 1);
+                            if (message.creatureMove.chargeType != CreatureMove.ChargeType.NONE) creature.setMoveTwoUse(Math.min(creature.getMoveTwoUse() + 1, message.creatureMove.maxUse));
                             break;
                         case 2:
                             creature.setUsingMoveThree(true);
-                            if (message.chargeType != CreatureMove.ChargeType.NONE) creature.setMoveThreeUse(creature.getMoveThreeUse() + 1);
+                            if (message.creatureMove.chargeType != CreatureMove.ChargeType.NONE) creature.setMoveThreeUse(Math.min(creature.getMoveThreeUse() + 1, message.creatureMove.maxUse));
                             break;
                     }
                 }

@@ -24,8 +24,6 @@ public class TyrannosaurusRenderer extends RiftCreatureRenderer {
 
         //variables
         GeckoLibCache.getInstance().parser.setValue("use_roar", animatable.getRightClickUse());
-//        GeckoLibCache.getInstance().parser.setValue("look_pitch", (double) animatable.rotationPitch);
-//        GeckoLibCache.getInstance().parser.setValue("look_yaw", (double) animatable.rotationYaw);
 
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());

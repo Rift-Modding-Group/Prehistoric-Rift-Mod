@@ -25,7 +25,7 @@ public class RiftBounceMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target) {}
+    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {}
 
     @Override
     public void onStopExecuting(RiftCreature user) {

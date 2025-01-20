@@ -496,8 +496,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         //move usability based on move charge type
         if (canUse) {
-            CreatureMove.ChargeType chargeTypeToSend = control >= 0 ? this.getLearnedMoves().get(control).chargeType : null;
-            RiftMessages.WRAPPER.sendToServer(new RiftManualUseMove(this, control, chargeTypeToSend));
+            CreatureMove creatureMoveToSend = control >= 0 ? this.getLearnedMoves().get(control) : null;
+            RiftMessages.WRAPPER.sendToServer(new RiftManualUseMove(this, control, creatureMoveToSend));
         }
     }
 
