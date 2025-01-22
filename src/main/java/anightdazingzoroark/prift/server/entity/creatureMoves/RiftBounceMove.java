@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class RiftBounceMove extends RiftCreatureMove {
     public RiftBounceMove() {
-        super(CreatureMove.BOUNCE, 20, 0);
+        super(CreatureMove.BOUNCE);
     }
 
     @Override

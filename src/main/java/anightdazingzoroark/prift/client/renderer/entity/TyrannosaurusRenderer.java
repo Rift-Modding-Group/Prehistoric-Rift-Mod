@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.model.entity.RiftCreatureModel;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.Tyrannosaurus;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -23,7 +24,7 @@ public class TyrannosaurusRenderer extends RiftCreatureRenderer {
         float scale = RiftUtil.setModelScale(animatable, 0.5f, 3.25f);
 
         //variables
-        GeckoLibCache.getInstance().parser.setValue("use_roar", animatable.getRightClickUse());
+        GeckoLibCache.getInstance().parser.setValue("move_use", this.moveAnimModifier(animatable));
 
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());
@@ -35,5 +36,13 @@ public class TyrannosaurusRenderer extends RiftCreatureRenderer {
         GlStateManager.scale(scale, scale, scale);
         super.render(model, animatable, partialTicks, red, green, blue, alpha);
         GlStateManager.popMatrix();
+    }
+
+    public double moveAnimModifier(RiftCreature animatable) {
+        if (animatable.currentCreatureMove() == null) return 0;
+        if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.STATUS) {
+            return RiftUtil.slopeResult(animatable.getCurrentMoveUse(), true, 0, animatable.currentCreatureMove().maxUse, 0, 20D);
+        }
+        return 0;
     }
 }

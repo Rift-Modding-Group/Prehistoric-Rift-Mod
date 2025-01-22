@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class RiftScratchMove extends RiftCreatureMove {
     public RiftScratchMove() {
-        super(CreatureMove.SCRATCH, 10, 0.5);
+        super(CreatureMove.SCRATCH);
     }
 
     @Override

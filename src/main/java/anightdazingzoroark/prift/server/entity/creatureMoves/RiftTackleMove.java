@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class RiftTackleMove extends RiftCreatureMove {
     public RiftTackleMove() {
-        super(CreatureMove.TACKLE, 10, 0.5);
+        super(CreatureMove.TACKLE);
     }
 
     @Override

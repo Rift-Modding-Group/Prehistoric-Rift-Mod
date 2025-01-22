@@ -133,6 +133,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
 
+    private static final DataParameter<Boolean> USING_HEAD_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_TAIL_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_STOMP_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_CLAW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_JAW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_RANGED_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_STATUS_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+
     private int boxReviveTime;
     private int energyMod;
     private int energyRegenMod;
@@ -273,6 +281,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(MOVE_THREE_COOLDOWN, 0);
 
         this.dataManager.register(MOVE_LIST, new ArrayList<>());
+
+        this.dataManager.register(USING_HEAD_TYPE_MOVE, false);
+        this.dataManager.register(USING_TAIL_TYPE_MOVE, false);
+        this.dataManager.register(USING_STOMP_TYPE_MOVE, false);
+        this.dataManager.register(USING_CLAW_TYPE_MOVE, false);
+        this.dataManager.register(USING_JAW_TYPE_MOVE, false);
+        this.dataManager.register(USING_RANGED_TYPE_MOVE, false);
+        this.dataManager.register(USING_STATUS_TYPE_MOVE, false);
     }
 
     @Override
@@ -1196,6 +1212,36 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else this.dataManager.set(CURRENT_MOVE, -1);
     }
 
+    public int getCurrentMoveUse() {
+        if (this.dataManager.get(CURRENT_MOVE) < 0) return 0;
+        int movePos = this.getLearnedMoves().indexOf(CreatureMove.values()[this.dataManager.get(CURRENT_MOVE)]);
+        switch (movePos) {
+            case 0:
+                return this.getMoveOneUse();
+            case 1:
+                return this.getMoveTwoUse();
+            case 2:
+                return this.getMoveThreeUse();
+        }
+        return 0;
+    }
+
+    public void setCurrentMoveUse(int value) {
+        if (this.dataManager.get(CURRENT_MOVE) < 0) return;
+        int movePos = this.getLearnedMoves().indexOf(CreatureMove.values()[this.dataManager.get(CURRENT_MOVE)]);
+        switch (movePos) {
+            case 0:
+                this.setMoveOneUse(value);
+                break;
+            case 1:
+                this.setMoveTwoUse(value);
+                break;
+            case 2:
+                this.setMoveThreeUse(value);
+                break;
+        }
+    }
+
 
 
     public boolean canUseMoveOne() {
@@ -1419,6 +1465,98 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //move anims start here
+    public void setUsingUnchargedAnim(boolean value) {
+        if (this.currentCreatureMove() == null) return;
+        if (this.currentCreatureMove().chargeType.requiresCharge()) return;
+        switch (this.currentCreatureMove().moveType) {
+            case HEAD:
+                this.setUsingHeadTypeMove(value);
+                break;
+            case TAIL:
+                this.setUsingTailTypeMove(value);
+                break;
+            case STOMP:
+                this.setUsingStompTypeMove(value);
+                break;
+            case CLAW:
+                this.setUsingClawTypeMove(value);
+                break;
+            case JAW:
+                this.setUsingJawTypeMove(value);
+                break;
+            case RANGED:
+                this.setUsingRangedTypeMove(value);
+                break;
+            case STATUS:
+                this.setUsingStatusTypeMove(value);
+                break;
+        }
+    }
+
+    public boolean isUsingChargeTypeMove() {
+        return false;
+    }
+
+    public void setUsingChargeTypeMove(boolean value) {}
+
+    public boolean isUsingHeadTypeMove() {
+        return this.dataManager.get(USING_HEAD_TYPE_MOVE);
+    }
+
+    public void setUsingHeadTypeMove(boolean value) {
+        this.dataManager.set(USING_HEAD_TYPE_MOVE, value);
+    }
+
+    public boolean isUsingTailTypeMove() {
+        return this.dataManager.get(USING_TAIL_TYPE_MOVE);
+    }
+
+    public void setUsingTailTypeMove(boolean value) {
+        this.dataManager.set(USING_TAIL_TYPE_MOVE, value);
+    }
+
+    public boolean isUsingStompTypeMove() {
+        return this.dataManager.get(USING_STOMP_TYPE_MOVE);
+    }
+
+    public void setUsingStompTypeMove(boolean value) {
+        this.dataManager.set(USING_STOMP_TYPE_MOVE, value);
+    }
+
+    public boolean isUsingClawTypeMove() {
+        return this.dataManager.get(USING_CLAW_TYPE_MOVE);
+    }
+
+    public void setUsingClawTypeMove(boolean value) {
+        this.dataManager.set(USING_CLAW_TYPE_MOVE, value);
+    }
+
+    public boolean isUsingJawTypeMove() {
+        return this.dataManager.get(USING_JAW_TYPE_MOVE);
+    }
+
+    public void setUsingJawTypeMove(boolean value) {
+        this.dataManager.set(USING_JAW_TYPE_MOVE, value);
+    }
+
+    public boolean isUsingRangedTypeMove() {
+        return this.dataManager.get(USING_RANGED_TYPE_MOVE);
+    }
+
+    public void setUsingRangedTypeMove(boolean value) {
+        this.dataManager.set(USING_RANGED_TYPE_MOVE, value);
+    }
+
+    public boolean isUsingStatusTypeMove() {
+        return this.dataManager.get(USING_STATUS_TYPE_MOVE);
+    }
+
+    public void setUsingStatusTypeMove(boolean value) {
+        this.dataManager.set(USING_STATUS_TYPE_MOVE, value);
+    }
+    //move anims end here
+
+    //old move anims start here
     public boolean isAttacking() {
         return this.dataManager.get(ATTACKING);
     }
@@ -1449,7 +1587,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setActing(value);
     }
 
-    //move anims end here
+    //old move anims end here
 
     public boolean isSitting() {
         return this.dataManager.get(SITTING);
@@ -2274,6 +2412,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public void registerControllers(AnimationData data) {
+        //for sleeping
         data.addAnimationController(new AnimationController(this, "sleep", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
@@ -2283,6 +2422,63 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 event.getController().clearAnimationCache();
                 return PlayState.STOP;
+            }
+        }));
+        //for use of uncharged moves
+        data.addAnimationController(new AnimationController(this, "useUnchargedMove", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent event) {
+                if (currentCreatureMove() != null && !currentCreatureMove().chargeType.requiresCharge()) {
+                    if (isUsingJawTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_jaw_type_move", false));
+                    else if (isUsingStompTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_stomp_type_move", false));
+                    else event.getController().clearAnimationCache();
+                }
+                return PlayState.CONTINUE;
+            }
+        }));
+        //for use of charged moves
+        data.addAnimationController(new AnimationController(this, "useChargedMove", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent event) {
+                int movePos = currentCreatureMove() != null ? getLearnedMoves().indexOf(currentCreatureMove()) : -1;
+                if (currentCreatureMove() != null && currentCreatureMove().chargeType.requiresCharge()) {
+                    if (movePos == 0) {
+                        if (getMoveOneCooldown() == 0 && usingMoveOne()) {
+                            if (getMoveOneUse() > 0 && getMoveOneUse() < currentCreatureMove().maxUse) {
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1", false));
+                            }
+                            else if (getMoveOneUse() >= currentCreatureMove().maxUse) {
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
+                            }
+                        }
+                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt2", false));
+                    }
+                    else if (movePos == 1) {
+                        if (getMoveTwoCooldown() == 0 && usingMoveTwo()) {
+                            if (getMoveTwoUse() > 0 && getMoveTwoUse() < currentCreatureMove().maxUse) {
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1", false));
+                            }
+                            else if (getMoveTwoUse() >= currentCreatureMove().maxUse) {
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
+                            }
+                        }
+                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt2", false));
+                    }
+                    else if (movePos == 2) {
+                        if (getMoveThreeCooldown() == 0 && usingMoveThree()) {
+                            if (getMoveThreeUse() > 0 && getMoveThreeUse() < currentCreatureMove().maxUse) {
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1", false));
+                            }
+                            else if (getMoveThreeUse() >= currentCreatureMove().maxUse) {
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
+                            }
+                        }
+                        else if (getMoveThreeCooldown() == 0 && !usingMoveThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
+                    }
+                    else event.getController().clearAnimationCache();
+                }
+                else event.getController().clearAnimationCache();
+                return PlayState.CONTINUE;
             }
         }));
     }

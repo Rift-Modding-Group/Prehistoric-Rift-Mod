@@ -551,4 +551,10 @@ public class RiftUtil {
         }
         return 1f;
     }
+
+    public static double slopeResult(int x, boolean clamped, double xMin, double xMax, double yMin, double yMax) {
+        double slope = (yMax - yMin)/(xMax - xMin);
+        if (clamped) return clamp(slope * (x - xMin) + yMin, yMin, yMax);
+        return slope * (x - xMin) + yMin;
+    }
 }

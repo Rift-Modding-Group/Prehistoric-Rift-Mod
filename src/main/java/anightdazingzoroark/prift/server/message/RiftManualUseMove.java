@@ -60,15 +60,15 @@ public class RiftManualUseMove implements IMessage {
                             break;
                         case 0:
                             creature.setUsingMoveOne(true);
-                            if (message.creatureMove.chargeType != CreatureMove.ChargeType.NONE) creature.setMoveOneUse(Math.min(creature.getMoveOneUse() + 1, message.creatureMove.maxUse));
+                            if (message.creatureMove.chargeType.requiresCharge()) creature.setMoveOneUse(Math.min(creature.getMoveOneUse() + 1, message.creatureMove.maxUse));
                             break;
                         case 1:
                             creature.setUsingMoveTwo(true);
-                            if (message.creatureMove.chargeType != CreatureMove.ChargeType.NONE) creature.setMoveTwoUse(Math.min(creature.getMoveTwoUse() + 1, message.creatureMove.maxUse));
+                            if (message.creatureMove.chargeType.requiresCharge()) creature.setMoveTwoUse(Math.min(creature.getMoveTwoUse() + 1, message.creatureMove.maxUse));
                             break;
                         case 2:
                             creature.setUsingMoveThree(true);
-                            if (message.creatureMove.chargeType != CreatureMove.ChargeType.NONE) creature.setMoveThreeUse(Math.min(creature.getMoveThreeUse() + 1, message.creatureMove.maxUse));
+                            if (message.creatureMove.chargeType.requiresCharge()) creature.setMoveThreeUse(Math.min(creature.getMoveThreeUse() + 1, message.creatureMove.maxUse));
                             break;
                     }
                 }

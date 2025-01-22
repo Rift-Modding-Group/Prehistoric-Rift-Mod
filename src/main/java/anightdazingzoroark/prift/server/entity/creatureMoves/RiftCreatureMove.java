@@ -6,13 +6,9 @@ import net.minecraft.util.math.BlockPos;
 
 public abstract class RiftCreatureMove {
     public final CreatureMove creatureMove;
-    public final int animTotalLength; //this is in ticks
-    public final double animPercentOnUse;
 
-    public RiftCreatureMove(CreatureMove creatureMove, int animTotalLength, double animPercentOnUse) {
+    public RiftCreatureMove(CreatureMove creatureMove) {
         this.creatureMove = creatureMove;
-        this.animTotalLength = animTotalLength; //this is in ticks
-        this.animPercentOnUse = animPercentOnUse;
     }
 
     //if return false, its low priority

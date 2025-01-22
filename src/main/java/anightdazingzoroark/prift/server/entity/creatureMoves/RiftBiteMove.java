@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class RiftBiteMove extends RiftCreatureMove {
     public RiftBiteMove() {
-        super(CreatureMove.BITE, 20, 0.6D);
+        super(CreatureMove.BITE);
     }
 
     @Override
@@ -16,7 +16,6 @@ public class RiftBiteMove extends RiftCreatureMove {
 
     @Override
     public void onStartExecuting(RiftCreature user) {
-        user.setAttacking(true);
         user.removeSpeed();
     }
 
@@ -32,7 +31,6 @@ public class RiftBiteMove extends RiftCreatureMove {
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-        user.setAttacking(false);
         user.resetSpeed();
         if (user.isTamed()) user.energyActionMod++;
     }

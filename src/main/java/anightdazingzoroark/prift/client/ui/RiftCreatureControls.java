@@ -36,70 +36,10 @@ public class RiftCreatureControls {
         if (entity instanceof RiftCreature) {
             if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                 RiftCreature creature = (RiftCreature) entity;
-
-                switch (creature.creatureType) {
-                    case TYRANNOSAURUS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        break;
-                    case STEGOSAURUS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        break;
-                    case TRICERATOPS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        break;
-                    case UTAHRAPTOR:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 30);
-                        this.showSpacebarControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 45);
-                        break;
-                    case APATOSAURUS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 30);
-                        break;
-                    case PARASAUROLOPHUS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        break;
-                    case SARCOSUCHUS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        break;
-                    case ANOMALOCARIS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 30);
-                        break;
-                    case SAUROPHAGANAX:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        break;
-                    case DIREWOLF:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 30);
-                        break;
-                    case MEGALOCEROS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        this.showSpacebarControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 30);
-                        break;
-                    case BARYONYX:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        break;
-                    case ANKYLOSAURUS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        break;
-                    case DILOPHOSAURUS:
-                        this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                        this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                        break;
+                for (int x = 0; x < creature.getLearnedMoves().size(); x++) {
+                    if (x == 0) this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
+                    if (x == 1) this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
+                    if (x == 2) this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 30);
                 }
             }
         }
@@ -119,9 +59,8 @@ public class RiftCreatureControls {
         GlStateManager.popMatrix();
 
         //show text
-        RiftCreatureType creatureType = creature.creatureType;
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-        String controlName = I18n.format("creature_control.left_mouse."+creatureType.toString().toLowerCase());
+        String controlName = I18n.format("creature_move."+creature.getLearnedMoves().get(0).toString().toLowerCase()+".name");
         int textPosX = (int) ((width / 2D) / this.textScale + 440 * this.textScale);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
 
@@ -145,9 +84,8 @@ public class RiftCreatureControls {
         GlStateManager.popMatrix();
 
         //show text
-        RiftCreatureType creatureType = creature.creatureType;
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-        String controlName = I18n.format("creature_control.right_mouse."+creatureType.toString().toLowerCase());
+        String controlName = I18n.format("creature_move."+creature.getLearnedMoves().get(1).toString().toLowerCase()+".name");
         int textPosX = (int) ((width / 2D) / this.textScale + 440 * this.textScale);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
 
@@ -171,9 +109,8 @@ public class RiftCreatureControls {
         GlStateManager.popMatrix();
 
         //show text
-        RiftCreatureType creatureType = creature.creatureType;
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-        String controlName = I18n.format("creature_control.middle_mouse."+creatureType.toString().toLowerCase());
+        String controlName = I18n.format("creature_move."+creature.getLearnedMoves().get(2).toString().toLowerCase()+".name");
         int textPosX = (int) ((width / 2D) / this.textScale + 440 * this.textScale);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
 

@@ -583,10 +583,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
         data.addAnimationController(new AnimationController(this, "movement", 0, this::tyrannosaurusMovement));
-        data.addAnimationController(new AnimationController(this, "attacking", 0, this::tyrannosaurusAttack));
-        data.addAnimationController(new AnimationController(this, "roaring", 0, this::tyrannosaurusRoar));
         data.addAnimationController(new AnimationController(this, "stomping", 0, this::tyrannosaurusStomp));
-        data.addAnimationController(new AnimationController(this, "controlled_roar", 0, this::tyrannosaurusControlledRoar));
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusMovement(AnimationEvent<E> event) {
@@ -602,26 +599,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState tyrannosaurusAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.attack", false));
-        }
-        else {
-            event.getController().clearAnimationCache();
-        }
-        return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState tyrannosaurusRoar(AnimationEvent<E> event) {
-        if (this.isRoaring()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.roar", false));
-        }
-        else {
-            event.getController().clearAnimationCache();
-        }
-        return PlayState.CONTINUE;
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusStomp(AnimationEvent<E> event) {

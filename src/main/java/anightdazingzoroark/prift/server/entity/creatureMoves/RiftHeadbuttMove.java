@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class RiftHeadbuttMove extends RiftCreatureMove {
     public RiftHeadbuttMove() {
-        super(CreatureMove.HEADBUTT, 10, 0.5);
+        super(CreatureMove.HEADBUTT);
     }
 
     @Override

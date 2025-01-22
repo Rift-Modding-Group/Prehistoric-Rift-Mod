@@ -35,31 +35,43 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(0));
             this.currentInvokedMove = this.creature.getLearnedMoves().get(0).invokeMove();
 
-            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.NONE) {
-                this.maxMoveAnimTime = this.currentInvokedMove.animTotalLength;
-                this.moveAnimUseTime = (int)(this.maxMoveAnimTime * this.currentInvokedMove.animPercentOnUse);
+            if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength - (int) (this.creature.currentCreatureMove().moveType.animPercentToCharge * this.creature.currentCreatureMove().moveType.animTotalLength);
+                this.moveAnimUseTime = (int)(this.creature.currentCreatureMove().moveType.animTotalLength * (this.creature.currentCreatureMove().moveType.animPercentOnUse - this.creature.currentCreatureMove().moveType.animPercentToCharge));
+                this.currentInvokedMove.onStartExecuting(this.creature);
             }
-            else this.currentInvokedMove.onStartExecuting(this.creature);
+            else {
+                this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength;
+                this.moveAnimUseTime = (int)(this.maxMoveAnimTime * this.creature.currentCreatureMove().moveType.animPercentOnUse);
+            }
         }
         else if (this.creature.usingMoveTwo()) {
             this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(1));
             this.currentInvokedMove = this.creature.getLearnedMoves().get(1).invokeMove();
 
-            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.NONE) {
-                this.maxMoveAnimTime = this.currentInvokedMove.animTotalLength;
-                this.moveAnimUseTime = (int) (this.maxMoveAnimTime * this.currentInvokedMove.animPercentOnUse);
+            if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength - (int) (this.creature.currentCreatureMove().moveType.animPercentToCharge * this.creature.currentCreatureMove().moveType.animTotalLength);
+                this.moveAnimUseTime = (int)(this.creature.currentCreatureMove().moveType.animTotalLength * (this.creature.currentCreatureMove().moveType.animPercentOnUse - this.creature.currentCreatureMove().moveType.animPercentToCharge));
+                this.currentInvokedMove.onStartExecuting(this.creature);
             }
-            else this.currentInvokedMove.onStartExecuting(this.creature);
+            else {
+                this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength;
+                this.moveAnimUseTime = (int)(this.maxMoveAnimTime * this.creature.currentCreatureMove().moveType.animPercentOnUse);
+            }
         }
         else if (this.creature.usingMoveThree()) {
             this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(2));
             this.currentInvokedMove = this.creature.getLearnedMoves().get(2).invokeMove();
 
-            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.NONE) {
-                this.maxMoveAnimTime = this.currentInvokedMove.animTotalLength;
-                this.moveAnimUseTime = (int) (this.maxMoveAnimTime * this.currentInvokedMove.animPercentOnUse);
+            if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength - (int) (this.creature.currentCreatureMove().moveType.animPercentToCharge * this.creature.currentCreatureMove().moveType.animTotalLength);
+                this.moveAnimUseTime = (int)(this.creature.currentCreatureMove().moveType.animTotalLength * (this.creature.currentCreatureMove().moveType.animPercentOnUse - this.creature.currentCreatureMove().moveType.animPercentToCharge));
+                this.currentInvokedMove.onStartExecuting(this.creature);
             }
-            else this.currentInvokedMove.onStartExecuting(this.creature);
+            else {
+                this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength;
+                this.moveAnimUseTime = (int)(this.maxMoveAnimTime * this.creature.currentCreatureMove().moveType.animPercentOnUse);
+            }
         }
         this.animTime = 0;
         this.finishFlag = false;
@@ -80,8 +92,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     @Override
     public void updateTask() {
         if (!this.finishFlag) {
-            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.NONE) {
+            if (!this.creature.currentCreatureMove().chargeType.requiresCharge()) {
                 if (this.animTime == 0) {
+                    this.creature.setUsingUnchargedAnim(true);
                     this.currentInvokedMove.onStartExecuting(this.creature);
                 }
                 if (this.animTime == this.moveAnimUseTime) {
@@ -90,6 +103,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.animTime = 0;
+                    this.creature.setUsingUnchargedAnim(false);
                     this.currentInvokedMove.onStopExecuting(this.creature);
                     this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), this.creature.currentCreatureMove().maxCooldown);
                     this.finishFlag = true;
@@ -103,19 +117,22 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             else {
                 int movePos = this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove());
                 if (!this.getMoveIsUsing(movePos)) {
-                    this.currentInvokedMove.onReachUsePoint(this.creature, null, this.getUse(movePos));
-
-                    //everything after this point is temporary
-                    //and will be executed when the associated anim ends
-                    int cooldownGradient = 1;
-                    if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
-                        cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
+                    if (this.animTime == this.moveAnimUseTime) this.currentInvokedMove.onReachUsePoint(this.creature, null, this.getUse(movePos));
+                    if (this.animTime >= this.maxMoveAnimTime) {
+                        //everything after this point is temporary
+                        //and will be executed when the associated anim ends
+                        int cooldownGradient = 1;
+                        if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
+                            cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
+                        }
+                        this.setCoolDown(movePos, this.getUse(movePos) * cooldownGradient);
+                        this.finishFlag = true;
+                        this.animTime = 0;
+                        this.creature.setMoveOneUse(0);
+                        this.creature.setMoveTwoUse(0);
+                        this.creature.setMoveThreeUse(0);
                     }
-                    this.setCoolDown(movePos, this.getUse(movePos) * cooldownGradient);
-                    this.finishFlag = true;
-                    this.creature.setMoveOneUse(0);
-                    this.creature.setMoveTwoUse(0);
-                    this.creature.setMoveThreeUse(0);
+                    if (!this.finishFlag) this.animTime++;
                 }
             }
         }

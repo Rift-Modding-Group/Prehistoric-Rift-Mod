@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class RiftStompMove extends RiftCreatureMove {
     public RiftStompMove() {
-        super(CreatureMove.STOMP, 20, 0.6D);
+        super(CreatureMove.STOMP);
     }
 
     @Override
@@ -16,7 +16,6 @@ public class RiftStompMove extends RiftCreatureMove {
 
     @Override
     public void onStartExecuting(RiftCreature user) {
-        user.setStomping(true);
         user.removeSpeed();
     }
 
@@ -32,7 +31,6 @@ public class RiftStompMove extends RiftCreatureMove {
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-        user.setStomping(false);
         user.resetSpeed();
         if (user.isTamed()) user.energyActionMod++;
     }

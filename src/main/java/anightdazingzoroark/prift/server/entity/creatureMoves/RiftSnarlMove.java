@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class RiftSnarlMove extends RiftCreatureMove {
     public RiftSnarlMove() {
-        super(CreatureMove.SNARL, 40, 0.25);
+        super(CreatureMove.SNARL);
     }
 
     @Override

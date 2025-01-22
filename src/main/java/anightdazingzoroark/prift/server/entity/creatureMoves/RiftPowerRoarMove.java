@@ -49,12 +49,12 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
     };
 
     public RiftPowerRoarMove() {
-        super(CreatureMove.POWER_ROAR, 40, 0.25);
+        super(CreatureMove.POWER_ROAR);
     }
 
     @Override
     public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
-        if (user.world.rand.nextInt(8) == 0 && user.recentlyHit) return MovePriority.HIGH;
+        if (user.world.rand.nextInt(4) == 0 && user.recentlyHit) return MovePriority.HIGH;
         return MovePriority.NONE;
     }
 
@@ -71,7 +71,7 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
-        this.roar(user,  0.015f * useAmount + 1.5f);
+        this.roar(user,  RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 1D, 2D));
         user.playSound(RiftSounds.TYRANNOSAURUS_ROAR, 2, 1);
     }
 
@@ -87,15 +87,13 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onHitBlock(RiftCreature user, BlockPos targetPos) {
+    public void onHitBlock(RiftCreature user, BlockPos targetPos) {}
 
-    }
-
-    private void roar(RiftCreature roarUser, float strength) {
+    private void roar(RiftCreature roarUser, double strength) {
         Predicate<EntityLivingBase> targetPredicate = RiftConfigHandler.getConfig(roarUser.creatureType).general.useRoarBlacklistAsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
-        for (EntityLivingBase entity : roarUser.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea(roarUser, (double)strength * 6d), targetPredicate)) {
+        for (EntityLivingBase entity : roarUser.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea(roarUser, strength * 6d), targetPredicate)) {
             if (entity != roarUser && RiftUtil.checkForNoAssociations(roarUser, entity)) {
-                entity.attackEntityFrom(DamageSource.causeMobDamage(roarUser), 2f);
+                entity.attackEntityFrom(DamageSource.causeMobDamage(roarUser), 2);
                 this.roarKnockback(roarUser, entity, strength);
             }
         }
@@ -106,14 +104,14 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
         return roarUser.getEntityBoundingBox().grow(targetDistance, 4.0D, targetDistance);
     }
 
-    private void roarKnockback(RiftCreature roarUser, EntityLivingBase target, float strength) {
+    private void roarKnockback(RiftCreature roarUser, EntityLivingBase target, double strength) {
         double d0 = roarUser.posX - target.posX;
         double d1 = roarUser.posZ - target.posZ;
         double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
-        target.knockBack(roarUser, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
+        target.knockBack(roarUser, (float) strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
     }
 
-    private void roarBreakBlocks(RiftCreature roarUser, float strength) {
+    private void roarBreakBlocks(RiftCreature roarUser, double strength) {
         List<BlockPos> affectedBlockPositions = Lists.<BlockPos>newArrayList();
         boolean canBreak = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(roarUser.world, roarUser);
         if (canBreak) {
@@ -130,15 +128,14 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
                                 d0 = d0 / d3;
                                 d1 = d1 / d3;
                                 d2 = d2 / d3;
-                                float f = (strength * 4) * (0.7F + roarUser.world.rand.nextFloat() * 0.6F);
+                                float f = ((float) strength * 4) * (0.7f + roarUser.world.rand.nextFloat() * 0.6f);
                                 double d4 = roarUser.posX;
                                 double d6 = roarUser.posY;
                                 double d8 = roarUser.posZ;
 
-                                for (float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
+                                for (float f1 = 0.3f; f > 0.0f; f -= 0.22500001f) {
                                     BlockPos blockpos = new BlockPos(d4, d6, d8);
                                     IBlockState iblockstate = roarUser.world.getBlockState(blockpos);
-                                    Block block = iblockstate.getBlock();
 
                                     if (iblockstate.getMaterial() != Material.AIR) {
                                         if (roarUser.checkBasedOnStrength(iblockstate)) f -= 0.24F;
