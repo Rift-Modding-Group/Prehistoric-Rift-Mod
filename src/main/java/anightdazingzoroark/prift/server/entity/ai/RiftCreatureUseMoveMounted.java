@@ -117,7 +117,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             else {
                 int movePos = this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove());
                 if (!this.getMoveIsUsing(movePos)) {
-                    if (this.animTime == this.moveAnimUseTime) this.currentInvokedMove.onReachUsePoint(this.creature, null, this.getUse(movePos));
+                    if (this.animTime == this.moveAnimUseTime) {
+                        EntityLivingBase entityTarget = this.creature.getControlAttackTargets() instanceof EntityLivingBase ? (EntityLivingBase) this.creature.getControlAttackTargets() : null;
+                        this.currentInvokedMove.onReachUsePoint(this.creature, entityTarget, this.getUse(movePos));
+                    }
                     if (this.animTime >= this.maxMoveAnimTime) {
                         int cooldownGradient = 1;
                         if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {

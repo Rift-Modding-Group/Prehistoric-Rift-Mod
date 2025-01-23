@@ -1,7 +1,5 @@
 package anightdazingzoroark.prift.server.capabilities.nonPotionEffects;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-
 public class NonPotionEffects implements INonPotionEffects {
     private boolean isBleeding;
     private int bleedStrength;

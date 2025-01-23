@@ -710,7 +710,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
-        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
+        return this.attackEntityAsMob(entityIn, 0);
+    }
+
+    public boolean attackEntityAsMob(Entity entityIn, float damageAdditional) {
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()) + damageAdditional);
         if (flag) this.applyEnchantments(this, entityIn);
         this.setLastAttackedEntity(entityIn);
         return flag;
@@ -2431,6 +2435,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 if (currentCreatureMove() != null && !currentCreatureMove().chargeType.requiresCharge()) {
                     if (isUsingJawTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_jaw_type_move", false));
                     else if (isUsingStompTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_stomp_type_move", false));
+                    else if (isUsingTailTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_tail_type_move", false));
                     else event.getController().clearAnimationCache();
                 }
                 return PlayState.CONTINUE;

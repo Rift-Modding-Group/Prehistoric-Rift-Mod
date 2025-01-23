@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.config.StegosaurusConfig;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
@@ -48,9 +49,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttacker, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
@@ -148,11 +147,10 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         if (GeneralConfig.canUsePyrotech()) this.tasks.addTask(0, new RiftStegosaurusHitChoppingBlock(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftResetAnimatedPose(this, 0.56F, 1));
-        this.tasks.addTask(3, new RiftRangedAttack(this, false, 1.0D, 1.52F, 1.04F));
-        this.tasks.addTask(3, new RiftControlledAttack(this, 0.96F, 0.36F));
-        this.tasks.addTask(3, new RiftStegosaurusControlledStrongAttack(this, 0.72F, 0.12F));
-        this.tasks.addTask(4, new RiftAttack(this, 1.0D, 0.96F, 0.36F));
+
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+
         this.tasks.addTask(5, new RiftHarvestOnWander(this, 0.96F, 0.36F));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
         this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 3D));
@@ -203,6 +201,17 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         this.readTurretModeDataFromNBT(compound);
         this.readWorkstationDataFromNBT(compound);
     }
+
+    //move related stuff starts here
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.PLATE_FLING, CreatureMove.THAGOMIZE, CreatureMove.POWER_PLATE_FLING);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.PLATE_FLING, (new Random().nextBoolean() ? CreatureMove.THAGOMIZE : CreatureMove.POWER_PLATE_FLING));
+    }
+    //move related stuff ends here
 
     private void manageCanStrongAttack() {
         if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);

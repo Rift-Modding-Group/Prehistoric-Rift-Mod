@@ -85,12 +85,9 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     this.currentInvokedMove = this.creature.currentCreatureMove().invokeMove();
                     this.animTime = 0;
                     if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
-                        System.out.println("start using charge move");
                         this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength - (int) (this.creature.currentCreatureMove().moveType.animPercentToCharge * this.creature.currentCreatureMove().moveType.animTotalLength);
                         this.moveAnimUseTime = (int)(this.creature.currentCreatureMove().moveType.animTotalLength * (this.creature.currentCreatureMove().moveType.animPercentOnUse - this.creature.currentCreatureMove().moveType.animPercentToCharge));
                         this.maxChargeTime = RiftUtil.randomInRange((int)(this.creature.currentCreatureMove().maxUse * 0.3), this.creature.currentCreatureMove().maxUse);
-                        System.out.println("charge: "+this.maxChargeTime);
-                        System.out.println("current use: "+this.creature.getCurrentMoveUse());
                     }
                     else {
                         this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength;

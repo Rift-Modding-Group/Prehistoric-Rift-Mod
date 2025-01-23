@@ -24,7 +24,7 @@ public class TyrannosaurusRenderer extends RiftCreatureRenderer {
         float scale = RiftUtil.setModelScale(animatable, 0.5f, 3.25f);
 
         //variables
-        GeckoLibCache.getInstance().parser.setValue("move_use", this.moveAnimModifier(animatable));
+        GeckoLibCache.getInstance().parser.setValue("tyrannosaurus_move_use", this.moveAnimModifier(animatable));
 
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());

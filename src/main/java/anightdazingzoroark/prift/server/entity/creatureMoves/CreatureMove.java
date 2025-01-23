@@ -8,7 +8,11 @@ public enum CreatureMove {
     SCRATCH(RiftScratchMove.class, MoveType.CLAW, ChargeType.NONE, 25, 0, 0),
     BITE(RiftBiteMove.class, MoveType.JAW, ChargeType.NONE, 25, 0, 0),
     SNARL(RiftSnarlMove.class, MoveType.STATUS, ChargeType.NONE, 0, 0, 60),
-    POWER_ROAR(RiftPowerRoarMove.class, MoveType.STATUS, ChargeType.GRADIENT_THEN_USE, 0, 100, 200);
+    POWER_ROAR(RiftPowerRoarMove.class, MoveType.STATUS, ChargeType.GRADIENT_THEN_USE, 0, 100, 200),
+    TAIL_SLAP(RiftTailSlapMove.class, MoveType.TAIL, ChargeType.NONE, 25, 0, 0),
+    THAGOMIZE(RiftThagomizeMove.class, MoveType.TAIL, ChargeType.GRADIENT_THEN_USE, 80, 100, 200),
+    PLATE_FLING(RiftPlateFlingMove.class, MoveType.RANGED, ChargeType.NONE, 25, 0, 200),
+    POWER_PLATE_FLING(RiftPowerPlateFlingMove.class, MoveType.RANGED, ChargeType.GRADIENT_THEN_USE, 80, 100, 200);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveType moveType;
@@ -43,7 +47,7 @@ public enum CreatureMove {
     public enum MoveType {
         CHARGE(0, 0, 0), //movement based (always requires movement to use)
         HEAD(0, 0, 0), //head hitting based
-        TAIL(12, 0.6667D, 0), //tail based
+        TAIL(20, 0.375D, 0), //tail based
         STOMP(20, 0.6D, 0), //stomp based
         CLAW(10, 0.5D, 0), //claw based
         JAW(20, 0.6D, 0), //jaw/mouth based attacks
