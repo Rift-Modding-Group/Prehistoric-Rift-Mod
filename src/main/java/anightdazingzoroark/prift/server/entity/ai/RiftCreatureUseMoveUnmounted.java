@@ -111,23 +111,19 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 this.creature.getNavigator().clearPath();
                 if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
                     if (!this.usingChargeMove) {
-                        System.out.println("start executing");
                         this.currentInvokedMove.onStartExecuting(this.creature);
                         this.usingChargeMove = true;
                     }
                     else {
                         if (this.creature.getCurrentMoveUse() < this.maxChargeTime) {
-                            System.out.println("charge up");
                             this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
                         }
                         else {
-                            if (this.animTime == 0) this.setMoveBeingUsed(false);
+                            this.setMoveBeingUsed(false);
                             if (this.animTime == this.moveAnimUseTime) {
-                                System.out.println("activate");
                                 this.currentInvokedMove.onReachUsePoint(this.creature, this.target, this.creature.getCurrentMoveUse());
                             }
                             if (this.animTime >= this.maxMoveAnimTime) {
-                                System.out.println("end");
                                 this.animTime = 0;
                                 this.currentInvokedMove.onStopExecuting(this.creature);
 

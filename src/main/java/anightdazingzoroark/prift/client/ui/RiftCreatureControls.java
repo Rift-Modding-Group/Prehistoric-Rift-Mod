@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.Minecraft;
@@ -38,8 +39,8 @@ public class RiftCreatureControls {
                 RiftCreature creature = (RiftCreature) entity;
                 for (int x = 0; x < creature.getLearnedMoves().size(); x++) {
                     if (x == 0) this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                    if (x == 1) this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 15);
-                    if (x == 2) this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 30);
+                    if (x == 1) this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 20);
+                    if (x == 2) this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 40);
                 }
             }
         }
@@ -49,11 +50,13 @@ public class RiftCreatureControls {
         //show left mouse button icon
         int iconXPos = (int) (((width - 16 * this.iconScale) / 2D + 135 * this.iconScale) / this.iconScale);
         int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
+        float alpha = creature.getMoveOneCooldown() > 0 ? 0.2f : 1f;
+
         Minecraft.getMinecraft().getTextureManager().bindTexture(leftMouseIcon);
         GlStateManager.pushMatrix();
         GlStateManager.scale(this.iconScale, this.iconScale, this.iconScale);
         GlStateManager.enableBlend();
-        GlStateManager.color(1.0f, 1.0f, 1.0f);
+        GlStateManager.color(1.0f, 1.0f, 1.0f, alpha);
         Gui.drawModalRectWithCustomSizedTexture(iconXPos, iconYPos, 0, 0, 16, 16, 16, 16);
         GlStateManager.disableBlend();
         GlStateManager.popMatrix();
@@ -63,22 +66,42 @@ public class RiftCreatureControls {
         String controlName = I18n.format("creature_move."+creature.getLearnedMoves().get(0).toString().toLowerCase()+".name");
         int textPosX = (int) ((width / 2D) / this.textScale + 440 * this.textScale);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
+        int textColorHex = ((int)(alpha * 255f) << 24) | (255 << 16) | (255 << 8) | 255;
 
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.5f, 0.5f, 0.5f);
-        fontRenderer.drawString(controlName, textPosX, textPosY, 0xffffff);
+        fontRenderer.drawString(controlName, textPosX, textPosY, textColorHex);
         GlStateManager.popMatrix();
+
+        //use bar
+        if (creature.getMoveOneUse() > 0 || creature.getMoveOneCooldown() > 0) {
+            int useBarPosX = (int)((width - 48) / 2D) + 120;
+            int useBarPosY = (int)((height - 1) / 2D) + 70 + yOffset;
+            int useBarFill = (int)RiftUtil.slopeResult(creature.getMoveOneCooldown() > 0 ? creature.getMoveOneCooldown() : creature.getMoveOneUse(),
+                    true,
+                    0,
+                    creature.getMoveOneCooldown() > 0 ? creature.getLearnedMoves().get(0).maxCooldown : creature.getLearnedMoves().get(0).maxUse,
+                    0, 48);
+            int useBarColor = (255 << 24) | ((creature.getMoveOneCooldown() > 0 ? 128 : 255) << 16) | ((creature.getMoveOneCooldown() > 0 ? 128 : 255) << 8) | (creature.getMoveOneCooldown() > 0 ? 128 : 255);
+            GlStateManager.pushMatrix();
+            GlStateManager.enableBlend();
+            Gui.drawRect(useBarPosX, useBarPosY, useBarPosX + useBarFill, useBarPosY + 1, useBarColor);
+            GlStateManager.disableBlend();
+            GlStateManager.popMatrix();
+        }
     }
 
     private void showRightMouseControls(RiftCreature creature, int width, int height, int yOffset) {
-        //show left mouse button icon
+        //show right mouse button icon
         int iconXPos = (int) (((width - 16 * this.iconScale) / 2D + 135 * this.iconScale) / this.iconScale);
         int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
+        float alpha = creature.getMoveTwoCooldown() > 0 ? 0.2f : 1f;
+
         Minecraft.getMinecraft().getTextureManager().bindTexture(rightMouseIcon);
         GlStateManager.pushMatrix();
         GlStateManager.scale(this.iconScale, this.iconScale, this.iconScale);
         GlStateManager.enableBlend();
-        GlStateManager.color(1.0f, 1.0f, 1.0f);
+        GlStateManager.color(1.0f, 1.0f, 1.0f, alpha);
         Gui.drawModalRectWithCustomSizedTexture(iconXPos, iconYPos, 0, 0, 16, 16, 16, 16);
         GlStateManager.disableBlend();
         GlStateManager.popMatrix();
@@ -88,22 +111,42 @@ public class RiftCreatureControls {
         String controlName = I18n.format("creature_move."+creature.getLearnedMoves().get(1).toString().toLowerCase()+".name");
         int textPosX = (int) ((width / 2D) / this.textScale + 440 * this.textScale);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
+        int textColorHex = ((int)(alpha * 255) << 24) | (255 << 16) | (255 << 8) | 255;
 
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.5f, 0.5f, 0.5f);
-        fontRenderer.drawString(controlName, textPosX, textPosY, 0xffffff);
+        fontRenderer.drawString(controlName, textPosX, textPosY, textColorHex);
         GlStateManager.popMatrix();
+
+        //use bar
+        if (creature.getMoveTwoUse() > 0 || creature.getMoveTwoCooldown() > 0) {
+            int useBarPosX = (int)((width - 48) / 2D) + 120;
+            int useBarPosY = (int)((height - 1) / 2D) + 70 + yOffset;
+            int useBarFill = (int)RiftUtil.slopeResult(creature.getMoveTwoCooldown() > 0 ? creature.getMoveTwoCooldown() : creature.getMoveTwoUse(),
+                    true,
+                    0,
+                    creature.getMoveTwoCooldown() > 0 ? creature.getLearnedMoves().get(1).maxCooldown : creature.getLearnedMoves().get(1).maxUse,
+                    0, 48);
+            int useBarColor = (255 << 24) | ((creature.getMoveTwoCooldown() > 0 ? 128 : 255) << 16) | ((creature.getMoveTwoCooldown() > 0 ? 128 : 255) << 8) | (creature.getMoveTwoCooldown() > 0 ? 128 : 255);
+            GlStateManager.pushMatrix();
+            GlStateManager.enableBlend();
+            Gui.drawRect(useBarPosX, useBarPosY, useBarPosX + useBarFill, useBarPosY + 1, useBarColor);
+            GlStateManager.disableBlend();
+            GlStateManager.popMatrix();
+        }
     }
 
     private void showMiddleMouseControls(RiftCreature creature, int width, int height, int yOffset) {
-        //show left mouse button icon
+        //show middle mouse button icon
         int iconXPos = (int) (((width - 16 * this.iconScale) / 2D + 135 * this.iconScale) / this.iconScale);
         int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
+        float alpha = creature.getMoveThreeCooldown() > 0 ? 0.2f : 1f;
+
         Minecraft.getMinecraft().getTextureManager().bindTexture(middleMouseIcon);
         GlStateManager.pushMatrix();
         GlStateManager.scale(this.iconScale, this.iconScale, this.iconScale);
         GlStateManager.enableBlend();
-        GlStateManager.color(1.0f, 1.0f, 1.0f);
+        GlStateManager.color(1.0f, 1.0f, 1.0f, alpha);
         Gui.drawModalRectWithCustomSizedTexture(iconXPos, iconYPos, 0, 0, 16, 16, 16, 16);
         GlStateManager.disableBlend();
         GlStateManager.popMatrix();
@@ -113,11 +156,31 @@ public class RiftCreatureControls {
         String controlName = I18n.format("creature_move."+creature.getLearnedMoves().get(2).toString().toLowerCase()+".name");
         int textPosX = (int) ((width / 2D) / this.textScale + 440 * this.textScale);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
+        int textColorHex = ((int)(alpha * 255f) << 24) | (255 << 16) | (255 << 8) | 255;
 
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.5f, 0.5f, 0.5f);
-        fontRenderer.drawString(controlName, textPosX, textPosY, 0xffffff);
+        GlStateManager.enableBlend();
+        fontRenderer.renderString(controlName, textPosX, textPosY, textColorHex, false);
+        GlStateManager.disableBlend();
         GlStateManager.popMatrix();
+
+        //use bar
+        if (creature.getMoveThreeUse() > 0 || creature.getMoveThreeCooldown() > 0) {
+            int useBarPosX = (int)((width - 48) / 2D) + 120;
+            int useBarPosY = (int)((height - 1) / 2D) + 70 + yOffset;
+            int useBarFill = (int)RiftUtil.slopeResult(creature.getMoveThreeCooldown() > 0 ? creature.getMoveThreeCooldown() : creature.getMoveThreeUse(),
+                    true,
+                    0,
+                    creature.getMoveThreeCooldown() > 0 ? creature.getLearnedMoves().get(2).maxCooldown : creature.getLearnedMoves().get(2).maxUse,
+                    0, 48);
+            int useBarColor = (255 << 24) | ((creature.getMoveThreeCooldown() > 0 ? 128 : 255) << 16) | ((creature.getMoveThreeCooldown() > 0 ? 128 : 255) << 8) | (creature.getMoveThreeCooldown() > 0 ? 128 : 255);
+            GlStateManager.pushMatrix();
+            GlStateManager.enableBlend();
+            Gui.drawRect(useBarPosX, useBarPosY, useBarPosX + useBarFill, useBarPosY + 1, useBarColor);
+            GlStateManager.disableBlend();
+            GlStateManager.popMatrix();
+        }
     }
 
     private void showSpacebarControls(RiftCreature creature, int width, int height, int yOffset) {

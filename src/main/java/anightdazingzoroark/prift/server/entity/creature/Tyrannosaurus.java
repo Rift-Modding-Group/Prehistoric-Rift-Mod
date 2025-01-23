@@ -218,7 +218,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        this.manageCanRoar();
         if (!this.isBaby()) this.manageApplyApexEffect();
     }
 
@@ -259,11 +258,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR);
     }
     //move related stuff ends here
-
-    private void manageCanRoar() {
-        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
-        if (this.getRightClickCooldown() == 0) this.setCanRoar(true);
-    }
 
     @Override
     public void manageApplyApexEffect() {
@@ -530,33 +524,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        /*
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (this.getEnergy() > 6) {
-                if (this.canRoar() && !this.isActing()) {
-                    this.setActing(true);
-                    this.setCanRoar(false);
-                    this.roar(0.015f * Math.min(holdAmount, 100) + 1.5f);
-                    this.setEnergy(this.getEnergy() - (int)(0.06d * (double)Math.min(holdAmount, 100) + 6d));
-                    this.setRightClickCooldown(Math.max(60, holdAmount * 2));
-                    this.playSound(RiftSounds.TYRANNOSAURUS_ROAR, 2, 1);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        */
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     public boolean hasLeftClickChargeBar() {
@@ -565,7 +533,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return true;
+        return false;
     }
 
     @Override
@@ -608,15 +576,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         else {
             event.getController().clearAnimationCache();
         }
-        return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState tyrannosaurusControlledRoar(AnimationEvent<E> event) {
-        if (this.getRightClickCooldown() == 0) {
-            if (this.getRightClickUse() > 0 && this.getRightClickUse() < 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.use_roar_p1", false));
-            else if (this.getRightClickUse() >= 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.use_roar_p1_hold", true));
-        }
-        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.use_roar_p2", false));
         return PlayState.CONTINUE;
     }
 

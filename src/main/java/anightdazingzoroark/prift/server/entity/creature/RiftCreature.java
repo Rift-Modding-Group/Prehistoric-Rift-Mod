@@ -2451,7 +2451,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
                             }
                         }
-                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt2", false));
+                        else if (getMoveOneCooldown() == 0 && getMoveOneUse() > 0 && !usingMoveOne()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt2", false));
                     }
                     else if (movePos == 1) {
                         if (getMoveTwoCooldown() == 0 && usingMoveTwo()) {
@@ -2462,7 +2462,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
                             }
                         }
-                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt2", false));
+                        else if (getMoveTwoCooldown() == 0 && getMoveTwoUse() > 0 && !usingMoveTwo()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt2", false));
                     }
                     else if (movePos == 2) {
                         if (getMoveThreeCooldown() == 0 && usingMoveThree()) {
@@ -2473,7 +2473,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
                             }
                         }
-                        else if (getMoveThreeCooldown() == 0 && !usingMoveThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
+                        else if (getMoveThreeCooldown() == 0 && getMoveThreeUse() > 0 && !usingMoveThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
                     }
                     else event.getController().clearAnimationCache();
                 }

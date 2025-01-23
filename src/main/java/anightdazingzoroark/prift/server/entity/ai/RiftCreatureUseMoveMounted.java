@@ -119,8 +119,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (!this.getMoveIsUsing(movePos)) {
                     if (this.animTime == this.moveAnimUseTime) this.currentInvokedMove.onReachUsePoint(this.creature, null, this.getUse(movePos));
                     if (this.animTime >= this.maxMoveAnimTime) {
-                        //everything after this point is temporary
-                        //and will be executed when the associated anim ends
                         int cooldownGradient = 1;
                         if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
                             cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
