@@ -24,7 +24,7 @@ public class StegosaurusRenderer extends RiftCreatureRenderer {
         float scale = RiftUtil.setModelScale(animatable, 0.3f, 2.125f);
 
         //variables
-        GeckoLibCache.getInstance().parser.setValue("stegosaurus_move_use", this.moveAnimModifier(animatable));
+        GeckoLibCache.getInstance().parser.setValue("stegosaurus_tail_move_use", this.tailTypeMoveAnimModifier(animatable));
 
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());
@@ -38,7 +38,7 @@ public class StegosaurusRenderer extends RiftCreatureRenderer {
         GlStateManager.popMatrix();
     }
 
-    public double moveAnimModifier(RiftCreature animatable) {
+    public double tailTypeMoveAnimModifier(RiftCreature animatable) {
         if (animatable.currentCreatureMove() == null) return 0;
         if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.TAIL) {
             return RiftUtil.slopeResult(animatable.getCurrentMoveUse(), true, 0, animatable.currentCreatureMove().maxUse, 0, 27.5D);

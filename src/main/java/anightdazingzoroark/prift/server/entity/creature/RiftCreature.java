@@ -2022,6 +2022,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public abstract float attackWidth();
 
+    public float rangedWidth() {
+        return 16f;
+    }
+
     public abstract Vec3d riderPos();
 
     //this is for when shoulder surfing is not utilized
@@ -2436,6 +2440,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (isUsingJawTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_jaw_type_move", false));
                     else if (isUsingStompTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_stomp_type_move", false));
                     else if (isUsingTailTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_tail_type_move", false));
+                    else if (isUsingRangedTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_ranged_type_move", false));
                     else event.getController().clearAnimationCache();
                 }
                 return PlayState.CONTINUE;

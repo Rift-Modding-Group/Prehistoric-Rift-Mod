@@ -217,7 +217,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         && this.currentInvokedMove.creatureMove.moveType != CreatureMove.MoveType.STATUS) {
             return this.creature.getDistance(this.target) <= this.creature.attackWidth();
         }
-        else return this.creature.getDistance(this.target) <= 16;
+        else return this.creature.getDistance(this.target) <= this.creature.rangedWidth();
     }
 
     private CreatureMove selectMoveForUse() {

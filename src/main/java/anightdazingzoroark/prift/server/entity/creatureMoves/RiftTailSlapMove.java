@@ -11,7 +11,12 @@ public class RiftTailSlapMove extends RiftCreatureMove {
 
     @Override
     public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
-        return MovePriority.LOW;
+        if (user.getDistance(target) <= user.attackWidth()) {
+            user.getNavigator().tryMoveToEntityLiving(target, 1.0D);
+            user.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
+            return MovePriority.LOW;
+        }
+        return MovePriority.NONE;
     }
 
     @Override

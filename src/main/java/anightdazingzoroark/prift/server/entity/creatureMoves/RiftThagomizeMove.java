@@ -13,7 +13,11 @@ public class RiftThagomizeMove extends RiftCreatureMove {
 
     @Override
     public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
-        if (user.world.rand.nextInt(4) == 0) return MovePriority.HIGH;
+        if (user.world.rand.nextInt(4) == 0 && user.getDistance(target) <= user.attackWidth()) {
+            user.getNavigator().tryMoveToEntityLiving(target, 1.0D);
+            user.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
+            return MovePriority.HIGH;
+        }
         return MovePriority.NONE;
     }
 
@@ -23,9 +27,7 @@ public class RiftThagomizeMove extends RiftCreatureMove {
     }
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
