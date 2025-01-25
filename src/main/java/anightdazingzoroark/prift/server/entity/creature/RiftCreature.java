@@ -143,6 +143,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_RANGED_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_STATUS_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
+    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MOVING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+
     private int boxReviveTime;
     private int energyMod;
     private int energyRegenMod;
@@ -293,6 +296,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_JAW_TYPE_MOVE, false);
         this.dataManager.register(USING_RANGED_TYPE_MOVE, false);
         this.dataManager.register(USING_STATUS_TYPE_MOVE, false);
+
+        this.dataManager.register(USING_CHARGE_TYPE_MOVE_DELAY, false);
+        this.dataManager.register(USING_CHARGE_TYPE_MOVE_MOVING, false);
     }
 
     @Override
@@ -1570,6 +1576,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setUsingStatusTypeMove(boolean value) {
         this.dataManager.set(USING_STATUS_TYPE_MOVE, value);
     }
+
+    public boolean usingChargeTypeMoveDelay() {
+        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_DELAY);
+    }
+
+    public void setUsingChargeTypeMoveDelay(boolean value) {
+        this.dataManager.set(USING_CHARGE_TYPE_MOVE_DELAY, value);
+    }
+
+    public boolean usingChargeTypeMoveMoving() {
+        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_MOVING);
+    }
+
+    public void setUsingChargeTypeMoveMoving(boolean value) {
+        this.dataManager.set(USING_CHARGE_TYPE_MOVE_MOVING, value);
+    }
     //move anims end here
 
     //old move anims start here
@@ -2447,6 +2469,30 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public void registerControllers(AnimationData data) {
+        //for movement
+        data.addAnimationController(new AnimationController(this, "movement", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent event) {
+                if (usingChargeTypeMoveMoving()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charge_type_move_charge", true));
+                    return PlayState.CONTINUE;
+                }
+                else  {
+                    if (isSitting() && !isBeingRidden() && !hasTarget()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sitting", true));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (event.isMoving() || (isSitting() && hasTarget())) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".walk", true));
+                        return PlayState.CONTINUE;
+                    }
+                    else {
+                        event.getController().clearAnimationCache();
+                        return PlayState.STOP;
+                    }
+                }
+            }
+        }));
         //for sleeping
         data.addAnimationController(new AnimationController(this, "sleep", 0, new AnimationController.IAnimationPredicate() {
             @Override
@@ -2521,18 +2567,27 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else if (getMoveTwoCooldown() == 0 && getMoveTwoUse() > 0 && !usingMoveTwo()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt2", false));
                     }
                     else if (movePos == 2) {
-                        if (getMoveThreeCooldown() == 0 && usingMoveThree()) {
-                            if (getMoveThreeUse() > 0 && getMoveThreeUse() < currentCreatureMove().maxUse) {
-                                System.out.println("charge up");
-                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1", false));
-                            }
-                            else if (getMoveThreeUse() >= currentCreatureMove().maxUse) {
-                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
-                            }
+                        //when delay goes off, prioritize it
+                        if (usingChargeTypeMoveDelay()) {
+                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_start", false));
                         }
-                        else if (getMoveThreeCooldown() == 0 && getMoveThreeUse() > 0 && !usingMoveThree()) {
-                            System.out.println("use");
-                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
+                        //once delay is over, utilize the following below
+                        else {
+                            //do not use when charging
+                            if (usingChargeTypeMoveMoving()) event.getController().clearAnimationCache();
+                            else {
+                                if (getMoveThreeCooldown() == 0 && usingMoveThree()) {
+                                    if (getMoveThreeUse() > 0 && getMoveThreeUse() < currentCreatureMove().maxUse) {
+                                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1", false));
+                                    }
+                                    else if (getMoveThreeUse() >= currentCreatureMove().maxUse) {
+                                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
+                                    }
+                                }
+                                else if (getMoveThreeCooldown() == 0 && getMoveThreeUse() > 0 && !usingMoveThree()) {
+                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
+                                }
+                            }
                         }
                     }
                     else event.getController().clearAnimationCache();

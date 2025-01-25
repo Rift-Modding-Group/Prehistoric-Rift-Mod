@@ -557,23 +557,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     @Override
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::tyrannosaurusMovement));
         data.addAnimationController(new AnimationController(this, "stomping", 0, this::tyrannosaurusStomp));
-    }
-
-    private <E extends IAnimatable> PlayState tyrannosaurusMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if (event.isMoving() || (this.isSitting() && this.hasTarget())) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     private <E extends IAnimatable> PlayState tyrannosaurusStomp(AnimationEvent<E> event) {

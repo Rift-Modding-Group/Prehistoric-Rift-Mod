@@ -200,12 +200,12 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP);
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP, CreatureMove.CHARGE);
     }
 
     @Override
     public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP);
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP, CreatureMove.CHARGE);
     }
     //move related stuff ends here
 
@@ -346,34 +346,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (this.getEnergy() > 6) {
-                if (this.getRightClickCooldown() == 0) {
-                    if (!this.isActing()) {
-                        this.setActing(true);
-                        this.forcedChargePower = this.chargeCooldown = holdAmount;
-                    }
-                }
-                else this.setRightClickUse(0);
-            }
-            else {
-                ((EntityPlayer) this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-                this.setRightClickUse(0);
-                this.setRightClickCooldown(0);
-            }
-        }
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     public List<String> blocksToHarvest() {
@@ -521,78 +494,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     @Override
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::triceratopsMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::triceratopsAttack));
-        data.addAnimationController(new AnimationController(this, "charge", 0, this::triceratopsCharge));
-        data.addAnimationController(new AnimationController(this, "controlledCharge", 0, this::triceratopsControlledCharge));
         data.addAnimationController(new AnimationController(this, "stomp", 0, this::triceratopsStomp));
-    }
-
-    private <E extends IAnimatable> PlayState triceratopsMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isCharging()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState triceratopsAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.attack", false));
-            return PlayState.CONTINUE;
-        }
-        else event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState triceratopsCharge(AnimationEvent<E> event) {
-        if (!this.isBeingRidden()) {
-            if (this.isLoweringHead()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_start", true));
-                return PlayState.CONTINUE;
-            }
-            else if (this.isStartCharging()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_charging", true));
-                return PlayState.CONTINUE;
-            }
-            else if (this.isCharging()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charging", true));
-                return PlayState.CONTINUE;
-            }
-            else if (this.isEndCharging()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_end", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState triceratopsControlledCharge(AnimationEvent<E> event) {
-        if (this.isBeingRidden()) {
-            if (this.getRightClickCooldown() == 0) {
-                if (this.getRightClickUse() > 0 && this.getEnergy() > 6) {
-                    if (this.isLoweringHead()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_start", true));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (this.isStartCharging() && this.getEnergy() > 6) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charge_charging", true));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (this.isCharging()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.charging", true));
-                        return PlayState.CONTINUE;
-                    }
-                }
-            }
-        }
-        return PlayState.STOP;
     }
 
     private <E extends IAnimatable> PlayState triceratopsStomp(AnimationEvent<E> event) {

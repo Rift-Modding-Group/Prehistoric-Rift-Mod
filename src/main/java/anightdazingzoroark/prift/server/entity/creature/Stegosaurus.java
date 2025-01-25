@@ -504,27 +504,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return LOOT;
     }
 
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::stegosaurusMovement));
-    }
-
-    private <E extends IAnimatable> PlayState stegosaurusMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if (event.isMoving() || (this.isSitting() && this.hasTarget())) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.stegosaurus.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
     protected SoundEvent getAmbientSound() {
         return RiftSounds.STEGOSAURUS_IDLE;
     }

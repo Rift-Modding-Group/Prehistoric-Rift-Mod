@@ -22,7 +22,7 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onStartExecuting(RiftCreature user) {
+    public void onStartExecuting(RiftCreature user, EntityLivingBase target) {
         user.removeSpeed();
     }
 

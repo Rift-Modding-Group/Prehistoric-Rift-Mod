@@ -6,6 +6,7 @@ import net.minecraft.util.math.BlockPos;
 
 public abstract class RiftCreatureMove {
     public final CreatureMove creatureMove;
+    public boolean forceStopFlag = false;
 
     public RiftCreatureMove(CreatureMove creatureMove) {
         this.creatureMove = creatureMove;
@@ -15,7 +16,11 @@ public abstract class RiftCreatureMove {
     //if return true, its high priority
     public abstract MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target);
 
-    public abstract void onStartExecuting(RiftCreature user);
+    public void onStartExecuting(RiftCreature user) {
+        this.onStartExecuting(user, null);
+    }
+
+    public abstract void onStartExecuting(RiftCreature user, EntityLivingBase target);
 
     public abstract void whileExecuting(RiftCreature user);
 
