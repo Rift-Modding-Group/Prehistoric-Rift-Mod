@@ -47,10 +47,10 @@ public enum CreatureMove {
     public enum MoveType {
         CHARGE(0, 0, 0), //movement based (always requires movement to use)
         HEAD(0, 0, 0), //head hitting based
-        TAIL(20, 0.375D, 0), //tail based
-        STOMP(20, 0.6D, 0), //stomp based
-        CLAW(10, 0.5D, 0), //claw based
-        JAW(20, 0.6D, 0), //jaw/mouth based attacks
+        TAIL(20, 0.625D, 0.5), //tail based
+        STOMP(20, 0.625D, 0), //stomp based
+        CLAW(20, 0.625D, 0), //claw based
+        JAW(20, 0.625D, 0), //jaw/mouth based attacks
         RANGED(20, 0.625D, 0.5D), //attacks that are ranged or elemental attacks
         STATUS(40, 0.25D, 0.125D); //do not do damage
 

@@ -508,7 +508,15 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     }
 
     public float attackWidth() {
-        return 6.5f;
+        return 4f;
+    }
+
+    public double attackChargeUpSpeed() {
+        return 0.5D;
+    }
+
+    public double attackRecoverSpeed() {
+        return 0.5D;
     }
 
     @Override

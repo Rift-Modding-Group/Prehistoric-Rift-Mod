@@ -116,19 +116,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
+    public static final DataParameter<Integer> MOVE_REGULAR_TICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+
     private static final DataParameter<Boolean> CAN_USE_MOVE_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_MOVE_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> MOVE_ONE_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> MOVE_ONE_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT); //for charging only
     private static final DataParameter<Integer> MOVE_ONE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     private static final DataParameter<Boolean> CAN_USE_MOVE_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_MOVE_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> MOVE_TWO_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> MOVE_TWO_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT); //for charging only
     private static final DataParameter<Integer> MOVE_TWO_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     private static final DataParameter<Boolean> CAN_USE_MOVE_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_MOVE_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> MOVE_THREE_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> MOVE_THREE_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT); //for charging only
     private static final DataParameter<Integer> MOVE_THREE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
@@ -264,6 +266,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(INCAPACITATED, false);
 
         this.dataManager.register(CURRENT_MOVE, -1);
+
+        this.dataManager.register(MOVE_REGULAR_TICK, 0);
 
         this.dataManager.register(CAN_USE_MOVE_ONE, true);
         this.dataManager.register(USING_MOVE_ONE, false);
@@ -1246,6 +1250,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    public int getRegularMoveTick() {
+        return this.dataManager.get(MOVE_REGULAR_TICK);
+    }
+
+    public void setRegularMoveTick(int value) {
+        this.dataManager.set(MOVE_REGULAR_TICK, value);
+    }
+
 
 
     public boolean canUseMoveOne() {
@@ -2026,6 +2038,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return 16f;
     }
 
+    //this is for normal attacks only
+    public double attackChargeUpSpeed() {
+        return 1D;
+    }
+
+    //also for normal attacks only
+    public double chargeUpToUseSpeed() {
+        return 1D;
+    }
+
+    //also for normal attacks only
+    public double attackRecoverSpeed() {
+        return 1D;
+    }
+
     public abstract Vec3d riderPos();
 
     //this is for when shoulder surfing is not utilized
@@ -2437,13 +2464,29 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             @Override
             public PlayState test(AnimationEvent event) {
                 if (currentCreatureMove() != null && !currentCreatureMove().chargeType.requiresCharge()) {
-                    if (isUsingJawTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_jaw_type_move", false));
-                    else if (isUsingStompTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_stomp_type_move", false));
-                    else if (isUsingTailTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_tail_type_move", false));
-                    else if (isUsingRangedTypeMove()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_ranged_type_move", false));
-                    else event.getController().clearAnimationCache();
+                    if (isUsingJawTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_jaw_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (isUsingStompTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_stomp_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (isUsingTailTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_tail_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (isUsingRangedTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_ranged_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
+                    else {
+                        event.getController().clearAnimationCache();
+                        return PlayState.STOP;
+                    }
                 }
-                return PlayState.CONTINUE;
+                event.getController().clearAnimationCache();
+                return PlayState.STOP;
             }
         }));
         //for use of charged moves

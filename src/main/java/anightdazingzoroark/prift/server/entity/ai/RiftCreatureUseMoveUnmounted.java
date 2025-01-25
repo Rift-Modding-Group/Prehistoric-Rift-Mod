@@ -15,13 +15,13 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     private EntityLivingBase target;
     private int maxMoveAnimTime;
     private int moveAnimUseTime;
-    private int animTime;
+    private int chargeMoveAnimTime;
     private boolean finishedMoveMarker;
     private boolean finishedAnimMarker;
     private int moveChoiceCooldown;
-    private boolean canAttackInRange;
     private int maxChargeTime;
     private boolean usingChargeMove;
+    private int moveResetTimer = 0;
 
     public RiftCreatureUseMoveUnmounted(RiftCreature creature) {
         this.creature = creature;
@@ -47,10 +47,12 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.currentInvokedMove = null;
         this.maxMoveAnimTime = 0;
         this.moveAnimUseTime = 0;
-        this.animTime = 0;
+        this.creature.setRegularMoveTick(0);
+        this.chargeMoveAnimTime = 0;
         this.moveChoiceCooldown = 0;
         this.maxChargeTime = 0;
         this.usingChargeMove = false;
+        this.moveResetTimer = 0;
     }
 
     @Override
@@ -67,10 +69,12 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.creature.setCurrentCreatureMove(null);
         this.maxMoveAnimTime = 0;
         this.moveAnimUseTime = 0;
-        this.animTime = 0;
+        this.creature.setRegularMoveTick(0);
+        this.chargeMoveAnimTime = 0;
         this.moveChoiceCooldown = 0;
         this.maxChargeTime = 0;
         this.usingChargeMove = false;
+        this.moveResetTimer = 0;
     }
 
     @Override
@@ -79,94 +83,120 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         if (this.finishedMoveMarker) {
             if (this.moveChoiceCooldown > 0) this.moveChoiceCooldown--;
             else {
-                CreatureMove selectedMove = this.selectMoveForUse();
-                if (selectedMove != null) {
-                    this.creature.setCurrentCreatureMove(selectedMove);
-                    this.currentInvokedMove = this.creature.currentCreatureMove().invokeMove();
-                    this.animTime = 0;
-                    if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
-                        this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength - (int) (this.creature.currentCreatureMove().moveType.animPercentToCharge * this.creature.currentCreatureMove().moveType.animTotalLength);
-                        this.moveAnimUseTime = (int)(this.creature.currentCreatureMove().moveType.animTotalLength * (this.creature.currentCreatureMove().moveType.animPercentOnUse - this.creature.currentCreatureMove().moveType.animPercentToCharge));
-                        this.maxChargeTime = RiftUtil.randomInRange((int)(this.creature.currentCreatureMove().maxUse * 0.3), this.creature.currentCreatureMove().maxUse);
+                this.creature.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
+
+                //manage pathing towards target
+                if (this.creature.getLearnedMoves().stream().anyMatch(m -> m.moveType == CreatureMove.MoveType.RANGED)) {
+                    if (this.creature.getDistance(this.target) > this.creature.rangedWidth()) {
+                        this.creature.getNavigator().tryMoveToEntityLiving(this.target, 1.0D);
                     }
-                    else {
-                        this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength;
-                        this.moveAnimUseTime = (int)(this.maxMoveAnimTime * this.creature.currentCreatureMove().moveType.animPercentOnUse);
+                    else if (this.creature.getDistance(this.target) <= this.creature.rangedWidth()
+                            && this.creature.getDistance(this.target) > this.creature.attackWidth() + 1
+                            && this.creature.hasPath()) {
+                        this.creature.getNavigator().clearPath();
                     }
-                    this.finishedMoveMarker = false;
+                    else if (this.creature.getDistance(this.target) <= this.creature.attackWidth() + 1
+                            && this.creature.getDistance(this.target) > this.creature.attackWidth()) {
+                        this.creature.getNavigator().tryMoveToEntityLiving(this.target, 1.0D);
+                    }
+                    else if (this.creature.getDistance(this.target) <= this.creature.attackWidth()
+                            && this.creature.hasPath()) {
+                        this.creature.getNavigator().clearPath();
+                    }
+                }
+                else {
+                    if (this.creature.getDistance(this.target) > this.creature.attackWidth()) {
+                        this.creature.getNavigator().tryMoveToEntityLiving(this.target, 1.0D);
+                    }
+                    else if (this.creature.getDistance(this.target) <= this.creature.attackWidth() && this.creature.hasPath()) {
+                        this.creature.getNavigator().clearPath();
+                    }
+                }
+
+                //select move
+                if (this.creature.getNavigator().noPath()) {
+                    CreatureMove selectedMove = this.selectMoveForUse();
+                    if (selectedMove != null && this.moveCanHitTarget(selectedMove)) {
+                        this.creature.setCurrentCreatureMove(selectedMove);
+                        this.currentInvokedMove = this.creature.currentCreatureMove().invokeMove();
+                        this.creature.setRegularMoveTick(0);
+                        this.chargeMoveAnimTime = 0;
+                        if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                            this.maxMoveAnimTime = this.creature.currentCreatureMove().moveType.animTotalLength - (int) (this.creature.currentCreatureMove().moveType.animPercentToCharge * this.creature.currentCreatureMove().moveType.animTotalLength);
+                            this.moveAnimUseTime = (int)(this.creature.currentCreatureMove().moveType.animTotalLength * (this.creature.currentCreatureMove().moveType.animPercentOnUse - this.creature.currentCreatureMove().moveType.animPercentToCharge));
+                            this.maxChargeTime = RiftUtil.randomInRange((int)(this.creature.currentCreatureMove().maxUse * 0.3), this.creature.currentCreatureMove().maxUse);
+                        }
+                        else {
+                            this.maxMoveAnimTime = (int)(10 * this.creature.attackChargeUpSpeed() + 2.5 * this.creature.chargeUpToUseSpeed() + 7.5 * this.creature.attackRecoverSpeed());
+                            this.moveAnimUseTime = (int)(10 * this.creature.attackChargeUpSpeed() + 2.5 * this.creature.chargeUpToUseSpeed());
+                        }
+                        this.finishedMoveMarker = false;
+                    }
                 }
             }
         }
         else {
-            if (!this.canAttackInRange) {
-                this.creature.getNavigator().tryMoveToEntityLiving(this.target, 1.0D);
-                this.creature.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
-                this.canAttackInRange = this.isWithinRange();
-                if (this.canAttackInRange && this.creature.currentCreatureMove().chargeType.requiresCharge()) this.setMoveBeingUsed(true);
-            }
-            else {
-                this.creature.getNavigator().clearPath();
-                if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
-                    if (!this.usingChargeMove) {
-                        this.currentInvokedMove.onStartExecuting(this.creature);
-                        this.usingChargeMove = true;
-                    }
-                    else {
-                        if (this.creature.getCurrentMoveUse() < this.maxChargeTime) {
-                            this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
-                        }
-                        else {
-                            this.setMoveBeingUsed(false);
-                            if (this.animTime == this.moveAnimUseTime) {
-                                this.currentInvokedMove.onReachUsePoint(this.creature, this.target, this.creature.getCurrentMoveUse());
-                            }
-                            if (this.animTime >= this.maxMoveAnimTime) {
-                                this.animTime = 0;
-                                this.currentInvokedMove.onStopExecuting(this.creature);
+            this.creature.getNavigator().clearPath();
+            this.creature.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
 
-                                int cooldownGradient = 1;
-                                if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
-                                    cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
-                                }
-                                this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), this.creature.getCurrentMoveUse() * cooldownGradient);
-                                this.creature.setCurrentMoveUse(0);
-
-                                this.finishedMoveMarker = true;
-                                this.finishedAnimMarker = true;
-                                this.usingChargeMove = false;
-                                this.canAttackInRange = false;
-                                this.moveChoiceCooldown = 20;
-                            }
-                            if (this.animTime < this.maxMoveAnimTime) {
-                                this.currentInvokedMove.whileExecuting(this.creature);
-                            }
-                            if (!this.finishedMoveMarker) this.animTime++;
-                        }
-                    }
+            if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                if (!this.usingChargeMove) {
+                    this.currentInvokedMove.onStartExecuting(this.creature);
+                    this.usingChargeMove = true;
                 }
                 else {
-                    if (this.animTime == 0) {
-                        this.creature.setUsingUnchargedAnim(true);
-                        this.currentInvokedMove.onStartExecuting(this.creature);
+                    if (this.creature.getCurrentMoveUse() < this.maxChargeTime) {
+                        this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
                     }
-                    if (this.animTime == this.moveAnimUseTime) {
-                        this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    else {
+                        this.setMoveBeingUsed(false);
+                        if (this.chargeMoveAnimTime == this.moveAnimUseTime && this.moveCanHitTarget(this.creature.currentCreatureMove())) {
+                            this.currentInvokedMove.onReachUsePoint(this.creature, this.target, this.creature.getCurrentMoveUse());
+                        }
+                        if (this.chargeMoveAnimTime >= this.maxMoveAnimTime) {
+                            this.chargeMoveAnimTime = 0;
+                            this.currentInvokedMove.onStopExecuting(this.creature);
+
+                            int cooldownGradient = 1;
+                            if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
+                                cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
+                            }
+                            this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), this.creature.getCurrentMoveUse() * cooldownGradient);
+                            this.creature.setCurrentMoveUse(0);
+
+                            this.finishedMoveMarker = true;
+                            this.finishedAnimMarker = true;
+                            this.usingChargeMove = false;
+                            this.moveChoiceCooldown = 20;
+                        }
+                        if (this.chargeMoveAnimTime < this.maxMoveAnimTime) {
+                            this.currentInvokedMove.whileExecuting(this.creature);
+                        }
+                        if (!this.finishedMoveMarker) this.chargeMoveAnimTime++;
                     }
-                    if (this.animTime >= this.maxMoveAnimTime) {
-                        this.animTime = 0;
-                        this.creature.setUsingUnchargedAnim(false);
-                        this.currentInvokedMove.onStopExecuting(this.creature);
-                        this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), 0);
-                        this.finishedMoveMarker = true;
-                        this.finishedAnimMarker = true;
-                        this.canAttackInRange = false;
-                        this.moveChoiceCooldown = 20;
-                    }
-                    if (this.animTime < this.maxMoveAnimTime) {
-                        this.currentInvokedMove.whileExecuting(this.creature);
-                    }
-                    if (!this.finishedMoveMarker) this.animTime++;
                 }
+            }
+            else {
+                if (this.creature.getRegularMoveTick() == 0) {
+                    this.creature.setUsingUnchargedAnim(true);
+                    this.currentInvokedMove.onStartExecuting(this.creature);
+                }
+                if (this.creature.getRegularMoveTick() == this.moveAnimUseTime) {
+                    if (this.moveCanHitTarget(this.creature.currentCreatureMove())) this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                }
+                if (this.creature.getRegularMoveTick() >= this.maxMoveAnimTime) {
+                    this.creature.setRegularMoveTick(0);
+                    this.creature.setUsingUnchargedAnim(false);
+                    this.currentInvokedMove.onStopExecuting(this.creature);
+                    this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), this.creature.currentCreatureMove().maxCooldown);
+                    this.finishedMoveMarker = true;
+                    this.finishedAnimMarker = true;
+                    this.moveChoiceCooldown = 20;
+                }
+                if (this.creature.getRegularMoveTick() < this.maxMoveAnimTime) {
+                    this.currentInvokedMove.whileExecuting(this.creature);
+                }
+                if (!this.finishedMoveMarker) this.creature.setRegularMoveTick(this.creature.getRegularMoveTick() + 1);
             }
         }
     }
@@ -212,12 +242,9 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         return false;
     }
 
-    private boolean isWithinRange() {
-        if (this.currentInvokedMove.creatureMove.moveType != CreatureMove.MoveType.RANGED
-        && this.currentInvokedMove.creatureMove.moveType != CreatureMove.MoveType.STATUS) {
-            return this.creature.getDistance(this.target) <= this.creature.attackWidth();
-        }
-        else return this.creature.getDistance(this.target) <= this.creature.rangedWidth();
+    private boolean moveCanHitTarget(CreatureMove move) {
+        if (move.moveType == CreatureMove.MoveType.RANGED || move.moveType == CreatureMove.MoveType.STATUS) return true;
+        else return this.creature.getDistance(this.target) < this.creature.attackWidth();
     }
 
     private CreatureMove selectMoveForUse() {

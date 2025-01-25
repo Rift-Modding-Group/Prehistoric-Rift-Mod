@@ -24,6 +24,18 @@ public class TyrannosaurusRenderer extends RiftCreatureRenderer {
         float scale = RiftUtil.setModelScale(animatable, 0.5f, 3.25f);
 
         //variables
+        GeckoLibCache.getInstance().parser.setValue("jaw_type_move_lower_jaw", this.jawTypeMoveAnimModifier(animatable, "lowerJaw"));
+        GeckoLibCache.getInstance().parser.setValue("jaw_type_move_head", this.jawTypeMoveAnimModifier(animatable, "head"));
+        GeckoLibCache.getInstance().parser.setValue("jaw_type_move_neck", this.jawTypeMoveAnimModifier(animatable, "neck"));
+        GeckoLibCache.getInstance().parser.setValue("jaw_type_move_body", this.jawTypeMoveAnimModifier(animatable, "body"));
+
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_left_shin_rot", this.stompTypeMoveRotationModifier(animatable, "leftShin"));
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_left_shin_pos_y", this.stompTypeMovePosModifier(animatable, "leftShin", 1));
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_left_shin_pos_z", this.stompTypeMovePosModifier(animatable, "leftShin", 2));
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_left_leg_rot", this.stompTypeMoveRotationModifier(animatable, "leftLeg"));
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_neck_rot", this.stompTypeMoveRotationModifier(animatable, "neck"));
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_body_rot", this.stompTypeMoveRotationModifier(animatable, "body"));
+
         GeckoLibCache.getInstance().parser.setValue("tyrannosaurus_move_use", this.moveAnimModifier(animatable));
 
         //hide saddle stuff
@@ -38,7 +50,48 @@ public class TyrannosaurusRenderer extends RiftCreatureRenderer {
         GlStateManager.popMatrix();
     }
 
-    public double moveAnimModifier(RiftCreature animatable) {
+    private double jawTypeMoveAnimModifier(RiftCreature animatable, String partName) {
+        switch (partName) {
+            case "lowerJaw":
+                return this.partRotationBasedOnMove(animatable, 0, 30D, 0, 0);
+            case "head":
+                return this.partRotationBasedOnMove(animatable, 0, 22.5D, 22.5D, 0);
+            case "neck":
+                return this.partRotationBasedOnMove(animatable, 0, 2.5D, 2.5D, 0);
+            case "body":
+                return this.partRotationBasedOnMove(animatable, 0, -7.5D, 9, 2.5D);
+        }
+        return 0;
+    }
+
+    private double stompTypeMoveRotationModifier(RiftCreature animatable, String partName) {
+        switch (partName) {
+            case "leftShin":
+                return this.partRotationBasedOnMove(animatable, 0, 75, 40, 40, 0.75D, 0);
+            case "leftLeg":
+                return this.partRotationBasedOnMove(animatable, 0, -75, -40, -40, 0.75D, 0);
+            case "neck":
+                return this.partRotationBasedOnMove(animatable, 0, 17.5D, 17.5D, 0);
+            case "body":
+                return this.partRotationBasedOnMove(animatable, 0, -17.5D, 5D, 0);
+        }
+        return 0;
+    }
+
+    private double stompTypeMovePosModifier(RiftCreature animatable, String partName, int axis) {
+        //for axis
+        //0 is x
+        //1 is y
+        //2 is z
+        switch (partName) {
+            case "leftShin":
+                if (axis == 1) return this.partRotationBasedOnMove(animatable, 0, -1, -1, -1, 0.75D, 0);
+                else if (axis == 2) return this.partRotationBasedOnMove(animatable, 0, -1, -0.375, -0.375, 0.75D, 0);
+        }
+        return 0;
+    }
+
+    private double moveAnimModifier(RiftCreature animatable) {
         if (animatable.currentCreatureMove() == null) return 0;
         if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.STATUS) {
             return RiftUtil.slopeResult(animatable.getCurrentMoveUse(), true, 0, animatable.currentCreatureMove().maxUse, 0, 20D);

@@ -385,81 +385,39 @@
 			}
 		},
 		"animation.stegosaurus.use_tail_type_move": {
-			"animation_length": 1,
+			"animation_length": 69420666,
 			"bones": {
 				"tail0": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.25": [27.5, 0, 0],
-						"0.375": [83.11758, 66.97934, 77.12241],
-						"0.75": [27.5, 0, 0],
-						"1.0": [0, 0, 0]
-					}
+					"rotation": ["tail_type_move_tail_0_x", "tail_type_move_tail_0_y", "tail_type_move_tail_0_z"]
 				},
 				"tail1": {
-					"rotation": {
-						"0.25": [0, 0, 0],
-						"0.375": [0, 37.5, 0],
-						"0.75": [0, 0, 0]
-					}
+					"rotation": [0, "tail_type_move_tail_1", 0]
 				},
 				"tail2": {
-					"rotation": {
-						"0.25": [0, 0, 0],
-						"0.375": [0, 50, 0],
-						"0.75": [0, 0, 0]
-					}
+					"rotation": [0, "tail_type_move_tail_2", 0]
 				}
 			}
 		},
 		"animation.stegosaurus.use_ranged_type_move": {
-			"animation_length": 1,
+			"animation_length": 69420666,
 			"bones": {
 				"bodyFront": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.5": [7.5, 0, 0],
-						"0.75": [7.5, 0, 0],
-						"1.0": [0, 0, 0]
-					}
+					"rotation": ["ranged_type_move_body_front", 0, 0]
 				},
 				"leftFrontLeg": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.5": [-7.5, 0, 17.5],
-						"0.75": [-7.5, 0, 17.5],
-						"1.0": [0, 0, 0]
-					}
+					"rotation": ["ranged_type_move_left_front_leg_x", 0, "ranged_type_move_left_front_leg_z"]
 				},
 				"rightFrontLeg": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.5": [-7.5, 0, -17.5],
-						"0.75": [-7.5, 0, -17.5],
-						"1.0": [0, 0, 0]
-					}
+					"rotation": ["ranged_type_move_right_front_leg_x", 0, "ranged_type_move_right_front_leg_z"]
 				},
 				"tail0": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.5": [-15, 0, 0],
-						"0.625": [60, 0, 0],
-						"0.75": [0, 0, 0]
-					}
+					"rotation": ["ranged_type_move_tail_0", 0, 0]
 				},
 				"tail1": {
-					"rotation": {
-						"0.5": [0, 0, 0],
-						"0.625": [17.5, 0, 0],
-						"0.75": [0, 0, 0]
-					}
+					"rotation": ["ranged_type_move_tail_1", 0, 0]
 				},
 				"tail2": {
-					"rotation": {
-						"0.5": [0, 0, 0],
-						"0.625": [17.5, 0, 0],
-						"0.75": [0, 0, 0]
-					}
+					"rotation": ["ranged_type_move_tail_2", 0, 0]
 				}
 			}
 		},

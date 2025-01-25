@@ -15,10 +15,7 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
 
     @Override
     public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
-        if (user.getDistance(target) > user.attackWidth() && user.getDistance(target) <= user.rangedWidth()) return MovePriority.HIGH;
-        else if (user.getDistance(target) > user.rangedWidth()) {
-            user.getNavigator().tryMoveToEntityLiving(target, 1.0D);
-            user.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
+        if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth()) {
             return MovePriority.HIGH;
         }
         return MovePriority.NONE;

@@ -206,8 +206,12 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
     //move related stuff ends here
 
-    public float rangedWidth() {
-        return 12f;
+    public float attackWidth() {
+        return 7.5f;
+    }
+
+    public double attackRecoverSpeed() {
+        return 1.5D;
     }
 
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
@@ -221,10 +225,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         thrownStegoPlate.setDamage(4D + (double)(this.getLevel())/10D);
         this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
         this.world.spawnEntity(thrownStegoPlate);
-    }
-
-    public float attackWidth() {
-        return 7.5f;
     }
 
     public Vec3d riderPos() {
