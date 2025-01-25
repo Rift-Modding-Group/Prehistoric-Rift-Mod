@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
+import software.bernie.geckolib3.resource.GeckoLibCache;
 
 public class TriceratopsRenderer extends RiftCreatureRenderer {
     public TriceratopsRenderer(RenderManager renderManager) {
@@ -22,7 +23,14 @@ public class TriceratopsRenderer extends RiftCreatureRenderer {
         float scale = RiftUtil.setModelScale(animatable, 0.3f, 1.75f);
 
         //variables
-
+        GeckoLibCache.getInstance().parser.setValue("head_type_move_body_front", this.headTypeMoveAnimModifier(animatable, "bodyFront", -1));
+        GeckoLibCache.getInstance().parser.setValue("head_type_move_neck", this.headTypeMoveAnimModifier(animatable, "neck", -1));
+        GeckoLibCache.getInstance().parser.setValue("head_type_move_left_front_leg_x", this.headTypeMoveAnimModifier(animatable, "leftFrontLeg", 0));
+        GeckoLibCache.getInstance().parser.setValue("head_type_move_left_front_leg_y", this.headTypeMoveAnimModifier(animatable, "leftFrontLeg", 1));
+        GeckoLibCache.getInstance().parser.setValue("head_type_move_left_front_leg_z", this.headTypeMoveAnimModifier(animatable, "leftFrontLeg", 2));
+        GeckoLibCache.getInstance().parser.setValue("head_type_move_right_front_leg_x", this.headTypeMoveAnimModifier(animatable, "rightFrontLeg", 0));
+        GeckoLibCache.getInstance().parser.setValue("head_type_move_right_front_leg_y", this.headTypeMoveAnimModifier(animatable, "rightFrontLeg", 1));
+        GeckoLibCache.getInstance().parser.setValue("head_type_move_right_front_leg_z", this.headTypeMoveAnimModifier(animatable, "rightFrontLeg", 2));
 
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());
@@ -33,5 +41,23 @@ public class TriceratopsRenderer extends RiftCreatureRenderer {
         GlStateManager.scale(scale, scale, scale);
         super.render(model, animatable, partialTicks, red, green, blue, alpha);
         GlStateManager.popMatrix();
+    }
+
+    private double headTypeMoveAnimModifier(RiftCreature animatable, String bodyPart, int axis) {
+        switch (bodyPart) {
+            case "bodyFront":
+                return this.partRotationBasedOnMove(animatable, 0, 5, 5, 5, 0.8, 0);
+            case "neck":
+                return this.partRotationBasedOnMove(animatable, 0, 12.5, -17.5, 0, 0.75, 0);
+            case "leftFrontLeg":
+                if (axis == 0) return this.partRotationBasedOnMove(animatable, 0, -4.83, -4.83, -4.83, 0.8, 0);
+                else if (axis == 1) return this.partRotationBasedOnMove(animatable, 0, 1.29, 1.29, 1.29, 0.8, 0);
+                else if (axis == 2) return this.partRotationBasedOnMove(animatable, 0, 14.95, 14.95, 14.95, 0.8, 0);
+            case "rightFrontLeg":
+                if (axis == 0) return this.partRotationBasedOnMove(animatable, 0, -4.83, -4.83, -4.83, 0.8, 0);
+                else if (axis == 1) return this.partRotationBasedOnMove(animatable, 0, -1.29, -1.29, -1.29, 0.8, 0);
+                else if (axis == 2) return this.partRotationBasedOnMove(animatable, 0, -14.95, -14.95, -14.95, 0.8, 0);
+        }
+        return 0;
     }
 }

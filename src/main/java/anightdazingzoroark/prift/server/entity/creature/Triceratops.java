@@ -12,6 +12,7 @@ import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -45,6 +46,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,18 +144,17 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 0.60f, 0.48f));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftControlledCharge(this, 0.24f, 4f));
-        this.tasks.addTask(3, new RiftControlledAttack(this, 0.72F, 0.48F));
-        this.tasks.addTask(4, new RiftChargeAttack(this, 1.75f, 0.24f, 4f, 8f));
-        this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.72F, 0.48F));
-        this.tasks.addTask(6, new RiftHarvestOnWander(this, 0.72F, 0.48F));
-        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
-        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(9, new RiftHerdMemberFollow(this));
-        //this.tasks.addTask(10, new RiftMoveToHomePos(this, 1.0D));
-        this.tasks.addTask(11, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(12, new RiftWander(this, 1.0D));
-        this.tasks.addTask(13, new RiftLookAround(this));
+
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+
+        this.tasks.addTask(5, new RiftHarvestOnWander(this, 0.72F, 0.48F));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
+        this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(8, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(10, new RiftWander(this, 1.0D));
+        this.tasks.addTask(11, new RiftLookAround(this));
     }
 
     @Override
@@ -195,6 +196,18 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
         if (this.getRightClickCooldown() == 0) this.setCanCharge(true);
     }
+
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.HEADBUTT);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.HEADBUTT);
+    }
+    //move related stuff ends here
 
     public float attackWidth() {
         return 5f;

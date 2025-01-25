@@ -16,7 +16,7 @@ public class RiftHeadbuttMove extends RiftCreatureMove {
 
     @Override
     public void onStartExecuting(RiftCreature user) {
-
+        user.removeSpeed();
     }
 
     @Override
@@ -25,11 +25,14 @@ public class RiftHeadbuttMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {}
+    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
+        if (target != null) user.attackEntityAsMob(target);
+    }
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-
+        user.resetSpeed();
+        if (user.isTamed()) user.energyActionMod++;
     }
 
     @Override

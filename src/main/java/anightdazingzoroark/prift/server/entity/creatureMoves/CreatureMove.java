@@ -12,6 +12,7 @@ public enum CreatureMove {
     TAIL_SLAP(RiftTailSlapMove.class, MoveType.TAIL, ChargeType.NONE, 25, 0, 0),
     THAGOMIZE(RiftThagomizeMove.class, MoveType.TAIL, ChargeType.GRADIENT_THEN_USE, 80, 100, 200),
     PLATE_FLING(RiftPlateFlingMove.class, MoveType.RANGED, ChargeType.NONE, 25, 0, 100),
+    CHARGE(null, MoveType.CHARGE, ChargeType.GRADIENT_THEN_USE, 75, 100, 200),
     SELF_DESTRUCT(null, MoveType.RANGED, ChargeType.NONE, 300, 0, 0); //will be given only to anky for now
 
     public final Class<? extends RiftCreatureMove> creatureMove;
@@ -46,13 +47,13 @@ public enum CreatureMove {
 
     public enum MoveType {
         CHARGE(0, 0, 0), //movement based (always requires movement to use)
-        HEAD(0, 0, 0), //head hitting based
+        HEAD(0, 0.625D, 0.5), //head hitting based
         TAIL(20, 0.625D, 0.5), //tail based
         STOMP(20, 0.625D, 0), //stomp based
         CLAW(20, 0.625D, 0), //claw based
         JAW(20, 0.625D, 0), //jaw/mouth based attacks
         RANGED(20, 0.625D, 0.5D), //attacks that are ranged or elemental attacks
-        STATUS(40, 0.25D, 0.125D); //do not do damage
+        STATUS(40, 0.25D, 0.125D); //do not do damage, or damage isn't really important
 
         public final int animTotalLength; //this is in ticks
         public final double animPercentOnUse;

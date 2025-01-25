@@ -21,7 +21,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     private int moveChoiceCooldown;
     private int maxChargeTime;
     private boolean usingChargeMove;
-    private int moveResetTimer = 0;
 
     public RiftCreatureUseMoveUnmounted(RiftCreature creature) {
         this.creature = creature;
@@ -52,7 +51,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.moveChoiceCooldown = 0;
         this.maxChargeTime = 0;
         this.usingChargeMove = false;
-        this.moveResetTimer = 0;
     }
 
     @Override
@@ -74,7 +72,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.moveChoiceCooldown = 0;
         this.maxChargeTime = 0;
         this.usingChargeMove = false;
-        this.moveResetTimer = 0;
     }
 
     @Override
@@ -142,6 +139,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
                 if (!this.usingChargeMove) {
                     this.currentInvokedMove.onStartExecuting(this.creature);
+                    if (this.creature.currentCreatureMove().chargeType.requiresCharge()) this.setMoveBeingUsed(true);
                     this.usingChargeMove = true;
                 }
                 else {
@@ -244,7 +242,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     private boolean moveCanHitTarget(CreatureMove move) {
         if (move.moveType == CreatureMove.MoveType.RANGED || move.moveType == CreatureMove.MoveType.STATUS) return true;
-        else return this.creature.getDistance(this.target) < this.creature.attackWidth();
+        else return this.creature.getDistance(this.target) <= this.creature.attackWidth();
     }
 
     private CreatureMove selectMoveForUse() {

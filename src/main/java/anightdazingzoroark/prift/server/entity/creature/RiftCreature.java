@@ -2480,13 +2480,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_ranged_type_move", false));
                         return PlayState.CONTINUE;
                     }
+                    else if (isUsingHeadTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_head_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
                     else {
                         event.getController().clearAnimationCache();
                         return PlayState.STOP;
                     }
                 }
-                event.getController().clearAnimationCache();
-                return PlayState.STOP;
+                return PlayState.CONTINUE;
             }
         }));
         //for use of charged moves
@@ -2520,17 +2523,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else if (movePos == 2) {
                         if (getMoveThreeCooldown() == 0 && usingMoveThree()) {
                             if (getMoveThreeUse() > 0 && getMoveThreeUse() < currentCreatureMove().maxUse) {
+                                System.out.println("charge up");
                                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1", false));
                             }
                             else if (getMoveThreeUse() >= currentCreatureMove().maxUse) {
                                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
                             }
                         }
-                        else if (getMoveThreeCooldown() == 0 && getMoveThreeUse() > 0 && !usingMoveThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
+                        else if (getMoveThreeCooldown() == 0 && getMoveThreeUse() > 0 && !usingMoveThree()) {
+                            System.out.println("use");
+                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
+                        }
                     }
                     else event.getController().clearAnimationCache();
                 }
-                else event.getController().clearAnimationCache();
                 return PlayState.CONTINUE;
             }
         }));

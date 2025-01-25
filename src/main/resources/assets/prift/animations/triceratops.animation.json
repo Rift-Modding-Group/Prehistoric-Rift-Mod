@@ -245,6 +245,23 @@
 					}
 				}
 			}
+		},
+		"animation.triceratops.use_head_type_move": {
+			"animation_length": 69420666,
+			"bones": {
+				"bodyFront": {
+					"rotation": ["head_type_move_body_front", 0, 0]
+				},
+				"neck": {
+					"rotation": ["head_type_move_neck", 0, 0]
+				},
+				"leftFrontLeg": {
+					"rotation": ["head_type_move_left_front_leg_x", "head_type_move_left_front_leg_y", "head_type_move_left_front_leg_z"]
+				},
+				"rightFrontLeg": {
+					"rotation": ["head_type_move_right_front_leg_x", "head_type_move_right_front_leg_y", "head_type_move_right_front_leg_z"]
+				}
+			}
 		}
 	}
 }

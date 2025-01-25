@@ -60,7 +60,6 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
 
     @Override
     public void onStartExecuting(RiftCreature user) {
-        user.setRoaring(true);
         user.removeSpeed();
     }
 
@@ -77,7 +76,6 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-        user.setRoaring(false);
         user.resetSpeed();
     }
 

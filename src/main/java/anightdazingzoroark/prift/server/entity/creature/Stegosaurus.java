@@ -196,6 +196,7 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     }
 
     //move related stuff starts here
+    @Override
     public List<CreatureMove> learnableMoves() {
         return Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.PLATE_FLING, CreatureMove.THAGOMIZE);
     }

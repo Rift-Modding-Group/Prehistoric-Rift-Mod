@@ -247,6 +247,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     }
 
     //move related stuff starts here
+    @Override
     public List<CreatureMove> learnableMoves() {
         return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR);
     }
