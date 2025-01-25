@@ -32,6 +32,11 @@ public class TriceratopsRenderer extends RiftCreatureRenderer {
         GeckoLibCache.getInstance().parser.setValue("head_type_move_right_front_leg_y", this.headTypeMoveAnimModifier(animatable, "rightFrontLeg", 1));
         GeckoLibCache.getInstance().parser.setValue("head_type_move_right_front_leg_z", this.headTypeMoveAnimModifier(animatable, "rightFrontLeg", 2));
 
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_body_back", this.stompTypeMoveModifier(animatable, "bodyBack"));
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_neck", this.stompTypeMoveModifier(animatable, "neck"));
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_left_front_leg", this.stompTypeMoveModifier(animatable, "leftFrontLeg"));
+        GeckoLibCache.getInstance().parser.setValue("stomp_type_move_right_front_leg", this.stompTypeMoveModifier(animatable, "rightFrontLeg"));
+
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());
         model.getBone("headSaddle").get().setHidden(!animatable.isSaddled());
@@ -57,6 +62,20 @@ public class TriceratopsRenderer extends RiftCreatureRenderer {
                 if (axis == 0) return this.partRotationBasedOnMove(animatable, 0, -4.83, -4.83, -4.83, 0.8, 0);
                 else if (axis == 1) return this.partRotationBasedOnMove(animatable, 0, -1.29, -1.29, -1.29, 0.8, 0);
                 else if (axis == 2) return this.partRotationBasedOnMove(animatable, 0, -14.95, -14.95, -14.95, 0.8, 0);
+        }
+        return 0;
+    }
+
+    private double stompTypeMoveModifier(RiftCreature animatable, String bodyPart) {
+        switch (bodyPart) {
+            case "bodyBack":
+                return this.partRotationBasedOnMove(animatable, 0, -20, 0, 0);
+            case "neck":
+                return this.partRotationBasedOnMove(animatable, 0, 20, 20, 0);
+            case "leftFrontLeg":
+                return this.partRotationBasedOnMove(animatable, 0, 20, 0, 0);
+            case "rightFrontLeg":
+                return this.partRotationBasedOnMove(animatable, 0, 20, 0, 0);
         }
         return 0;
     }

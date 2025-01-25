@@ -200,12 +200,12 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.HEADBUTT);
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP);
     }
 
     @Override
     public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.HEADBUTT);
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP);
     }
     //move related stuff ends here
 
