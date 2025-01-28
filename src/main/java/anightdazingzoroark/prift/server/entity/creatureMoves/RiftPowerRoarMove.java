@@ -9,7 +9,6 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityList;
@@ -24,30 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 public class RiftPowerRoarMove extends RiftCreatureMove {
-    private static final Predicate<EntityLivingBase> ROAR_BLACKLIST = new Predicate<EntityLivingBase>() {
-        @Override
-        public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = RiftConfigHandler.getConfig(RiftCreatureType.TYRANNOSAURUS).general.affectedByRoarBlacklist;
-            if (!blacklist.isEmpty()) {
-                if (entity instanceof EntityPlayer) return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
-                else return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
-            }
-            else return entity.isEntityAlive() && !(entity instanceof RiftEgg);
-        }
-    };
-    private static final Predicate<EntityLivingBase> ROAR_WHITELIST = new Predicate<EntityLivingBase>() {
-        @Override
-        public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = RiftConfigHandler.getConfig(RiftCreatureType.TYRANNOSAURUS).general.affectedByRoarBlacklist;
-
-            if (!blacklist.isEmpty()) {
-                if (entity instanceof EntityPlayer) return entity.isEntityAlive() && blacklist.contains("minecraft:player");
-                else return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
-            }
-            else return false;
-        }
-    };
-
     public RiftPowerRoarMove() {
         super(CreatureMove.POWER_ROAR);
     }
@@ -88,9 +63,13 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
     public void onHitBlock(RiftCreature user, BlockPos targetPos) {}
 
     private void roar(RiftCreature roarUser, double strength) {
-        Predicate<EntityLivingBase> targetPredicate = RiftConfigHandler.getConfig(roarUser.creatureType).general.useRoarBlacklistAsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
-        for (EntityLivingBase entity : roarUser.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea(roarUser, strength * 6d), targetPredicate)) {
-            if (entity != roarUser && RiftUtil.checkForNoAssociations(roarUser, entity)) {
+        for (EntityLivingBase entity : roarUser.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea(roarUser, strength * 6d), new Predicate<EntityLivingBase>() {
+            @Override
+            public boolean apply(@Nullable EntityLivingBase entityLivingBase) {
+                return RiftUtil.isAppropriateSize(entityLivingBase, RiftUtil.getMobSize(roarUser)) && RiftUtil.checkForNoAssociations(roarUser, entityLivingBase);
+            }
+        })) {
+            if (entity != roarUser) {
                 entity.attackEntityFrom(DamageSource.causeMobDamage(roarUser), 2);
                 this.roarKnockback(roarUser, entity, strength);
             }

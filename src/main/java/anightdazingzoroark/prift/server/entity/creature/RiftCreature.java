@@ -400,11 +400,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //other minor stuff
         if (this.recentlyHitTicks > 0) this.recentlyHitTicks--;
         else if (this.recentlyHitTicks == 0) this.recentlyHit = false;
-
-        //for move use testing
-        //System.out.println("move one use: "+this.usingMoveOne());
-        //System.out.println("move two use: "+this.usingMoveTwo());
-        //System.out.println("move three use: "+this.usingMoveThree());
     }
 
     @SideOnly(Side.CLIENT)
@@ -1511,6 +1506,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 break;
             case STATUS:
                 this.setUsingStatusTypeMove(value);
+                break;
+        }
+    }
+
+    public void setUsingChargeDelayAnim(boolean value) {
+        if (this.currentCreatureMove() == null) return;
+        switch (this.currentCreatureMove().moveType) {
+            case CHARGE:
+                this.setUsingChargeTypeMoveDelay(value);
                 break;
         }
     }
