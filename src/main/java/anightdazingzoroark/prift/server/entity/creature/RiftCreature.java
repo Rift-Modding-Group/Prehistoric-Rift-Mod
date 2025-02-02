@@ -73,9 +73,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable, IRiftMultipart {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -1360,6 +1358,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setMoveThreeCooldown(int value) {
         this.dataManager.set(MOVE_THREE_COOLDOWN, value);
     }
+
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        return new HashMap<>();
+    }
     //move related stuff ends here
 
     private void initInventory() {
@@ -1510,7 +1512,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    public void setUsingChargeDelayAnim(boolean value) {
+    public void setUsingDelayAnim(boolean value) {
         if (this.currentCreatureMove() == null) return;
         switch (this.currentCreatureMove().moveType) {
             case CHARGE:

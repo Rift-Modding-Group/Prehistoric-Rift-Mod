@@ -24,21 +24,6 @@ public class StegosaurusRenderer extends RiftCreatureRenderer {
         float scale = RiftUtil.setModelScale(animatable, 0.3f, 2.125f);
 
         //variables
-        GeckoLibCache.getInstance().parser.setValue("tail_type_move_tail_0_x", this.tailTypeMoveAnimModifier(animatable, "tail0", 0));
-        GeckoLibCache.getInstance().parser.setValue("tail_type_move_tail_0_y", this.tailTypeMoveAnimModifier(animatable, "tail0", 1));
-        GeckoLibCache.getInstance().parser.setValue("tail_type_move_tail_0_z", this.tailTypeMoveAnimModifier(animatable, "tail0", 2));
-        GeckoLibCache.getInstance().parser.setValue("tail_type_move_tail_1", this.tailTypeMoveAnimModifier(animatable, "tail1", -1));
-        GeckoLibCache.getInstance().parser.setValue("tail_type_move_tail_2", this.tailTypeMoveAnimModifier(animatable, "tail2", -1));
-
-        GeckoLibCache.getInstance().parser.setValue("ranged_type_move_body_front", this.rangedTypeMoveAnimModifier(animatable, "bodyFront", -1));
-        GeckoLibCache.getInstance().parser.setValue("ranged_type_move_left_front_leg_x", this.rangedTypeMoveAnimModifier(animatable, "leftFrontLeg", 0));
-        GeckoLibCache.getInstance().parser.setValue("ranged_type_move_left_front_leg_z", this.rangedTypeMoveAnimModifier(animatable, "leftFrontLeg", 2));
-        GeckoLibCache.getInstance().parser.setValue("ranged_type_move_right_front_leg_x", this.rangedTypeMoveAnimModifier(animatable, "rightFrontLeg", 0));
-        GeckoLibCache.getInstance().parser.setValue("ranged_type_move_right_front_leg_z", this.rangedTypeMoveAnimModifier(animatable, "rightFrontLeg", 2));
-        GeckoLibCache.getInstance().parser.setValue("ranged_type_move_tail_0", this.rangedTypeMoveAnimModifier(animatable, "tail0", -1));
-        GeckoLibCache.getInstance().parser.setValue("ranged_type_move_tail_1", this.rangedTypeMoveAnimModifier(animatable, "tail1", -1));
-        GeckoLibCache.getInstance().parser.setValue("ranged_type_move_tail_2", this.rangedTypeMoveAnimModifier(animatable, "tail2", -1));
-
         GeckoLibCache.getInstance().parser.setValue("stegosaurus_tail_move_use", this.chargedTailTypeMoveAnimModifier(animatable));
 
         //hide saddle stuff

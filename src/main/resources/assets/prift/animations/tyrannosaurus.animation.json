@@ -244,37 +244,84 @@
 			}
 		},
 		"animation.tyrannosaurus.use_stomp_type_move": {
-			"animation_length": 69420666,
+			"animation_length": 1,
 			"bones": {
 				"body": {
-					"rotation": ["stomp_type_move_body_rot", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [-17.5, 0, 0],
+						"0.625": [5, 0, 0],
+						"1.0": [0, 0, 0]
+					}
 				},
 				"neck": {
-					"rotation": ["stomp_type_move_neck_rot", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [17.5, 0, 0],
+						"0.625": [17.5, 0, 0],
+						"1.0": [0, 0, 0]
+					}
 				},
 				"leftLeg": {
-					"rotation": ["stomp_type_move_left_leg_rot", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [-75, 0, 0],
+						"0.625": [-40, 0, 0],
+						"0.75": [-40, 0, 0],
+						"1.0": [0, 0, 0]
+					}
 				},
 				"leftShin": {
-					"rotation": ["stomp_type_move_left_shin_rot", 0, 0],
-					"position": [0, "stomp_type_move_left_shin_pos_y", "stomp_type_move_left_shin_pos_z"]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [75, 0, 0],
+						"0.625": [40, 0, 0],
+						"0.75": [40, 0, 0],
+						"1.0": [0, 0, 0]
+					},
+					"position": {
+						"0.0": [0, 0, 0],
+						"0.5": [0, -1, -1],
+						"0.625": [0, -1, -0.375],
+						"0.75": [0, -1, -0.375],
+						"1.0": [0, 0, 0]
+					}
 				}
 			}
 		},
 		"animation.tyrannosaurus.use_jaw_type_move": {
-			"animation_length": 69420666,
+			"animation_length": 0.5,
 			"bones": {
 				"body": {
-					"rotation": ["jaw_type_move_body", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [-7.5, 0, 0],
+						"0.25": [9, 0, 0],
+						"0.5": [0, 0, 0]
+					}
 				},
 				"neck": {
-					"rotation": ["jaw_type_move_neck", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [2.5, 0, 0],
+						"0.25": [2.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
 				},
 				"head": {
-					"rotation": ["jaw_type_move_head", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [22.5, 0, 0],
+						"0.25": [22.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
 				},
 				"lowerJaw": {
-					"rotation": ["jaw_type_move_lower_jaw", 0, 0]
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [30, 0, 0],
+						"0.25": [0, 0, 0]
+					}
 				}
 			}
 		},

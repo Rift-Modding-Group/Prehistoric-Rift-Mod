@@ -512,6 +512,28 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         return 4f;
     }
 
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpPoint(2.5D)
+                .defineChargeUpToUsePoint(2.5D)
+                .defineRecoverFromUsePoint(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpPoint(10D)
+                .defineChargeUpToUsePoint(2.5D)
+                .defineRecoverFromUsePoint(7.5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpPoint(5D)
+                .defineChargeUpToUsePoint(5D)
+                .defineUseDurationPoint(22.5)
+                .defineRecoverFromUsePoint(7.5)
+                .finalizePoints());
+        return moveMap;
+    }
+
     public double attackChargeUpSpeed() {
         return 0.5D;
     }

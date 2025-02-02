@@ -65,7 +65,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.creature.resetSpeed();
         if (this.currentInvokedMove != null) {
             this.creature.setUsingUnchargedAnim(false);
-            this.creature.setUsingChargeDelayAnim(false);
+            this.creature.setUsingDelayAnim(false);
             this.currentInvokedMove.onStopExecuting(this.creature);
             this.currentInvokedMove = null;
         }
@@ -144,18 +144,18 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             else this.maxChargeTime = RiftUtil.randomInRange((int)(this.creature.currentCreatureMove().maxUse * 0.3), this.creature.currentCreatureMove().maxUse);
 
                             //set move anim markers
-                            this.moveAnimInitDelayTime = (int)this.creature.currentCreatureMove().startMoveDelay;
+                            this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
                             this.moveAnimChargeUpTime = this.moveAnimInitDelayTime + this.maxChargeTime;
-                            this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)(this.creature.currentCreatureMove().chargeUpToUse);
-                            this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)(this.creature.currentCreatureMove().useDuration);
-                            this.maxMoveAnimTime = this.moveAnimUseTime + (int)(this.creature.currentCreatureMove().recoverFromUse);
+                            this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
+                            this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
+                            this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
                         }
                         else {
-                            this.moveAnimInitDelayTime = (int)this.creature.currentCreatureMove().startMoveDelay;
-                            this.moveAnimChargeUpTime = this.moveAnimInitDelayTime + (int)(this.creature.currentCreatureMove().chargeUp * this.creature.attackChargeUpSpeed());
-                            this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)(this.creature.currentCreatureMove().chargeUpToUse * this.creature.chargeUpToUseSpeed());
-                            this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)(this.creature.currentCreatureMove().useDuration);
-                            this.maxMoveAnimTime = this.moveAnimUseTime + (int)(this.creature.currentCreatureMove().recoverFromUse * this.creature.attackRecoverSpeed());
+                            this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                            this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
+                            this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).defineChargeUpToUsePoint();
+                            this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
+                            this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
                         }
                         this.finishedMoveMarker = false;
                     }
@@ -167,10 +167,10 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             this.creature.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
 
             if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
-                this.creature.setUsingChargeDelayAnim(true);
+                this.creature.setUsingDelayAnim(true);
             }
             if (this.animTime == this.moveAnimInitDelayTime) {
-                this.creature.setUsingChargeDelayAnim(false);
+                this.creature.setUsingDelayAnim(false);
                 this.currentInvokedMove.onStartExecuting(this.creature);
                 if (this.creature.currentCreatureMove().chargeType.requiresCharge()) this.setChargedMoveBeingUsed(true);
                 else this.creature.setUsingUnchargedAnim(true);
