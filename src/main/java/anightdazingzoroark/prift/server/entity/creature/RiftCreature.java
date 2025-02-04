@@ -111,10 +111,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CAN_ROTATE_MOUNTED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-
-    public static final DataParameter<Integer> MOVE_REGULAR_TICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     private static final DataParameter<Boolean> CAN_USE_MOVE_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_MOVE_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -265,10 +264,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) PlayerTamedCreatures.DeploymentType.NONE.ordinal());
         this.dataManager.register(INCAPACITATED, false);
+        this.dataManager.register(CAN_ROTATE_MOUNTED, true);
 
         this.dataManager.register(CURRENT_MOVE, -1);
-
-        this.dataManager.register(MOVE_REGULAR_TICK, 0);
 
         this.dataManager.register(CAN_USE_MOVE_ONE, true);
         this.dataManager.register(USING_MOVE_ONE, false);
@@ -1249,14 +1247,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    public int getRegularMoveTick() {
-        return this.dataManager.get(MOVE_REGULAR_TICK);
-    }
-
-    public void setRegularMoveTick(int value) {
-        this.dataManager.set(MOVE_REGULAR_TICK, value);
-    }
-
 
 
     public boolean canUseMoveOne() {
@@ -1957,6 +1947,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(JUST_SPAWNED, value);
     }
 
+    public boolean canRotateMounted() {
+        return this.dataManager.get(CAN_ROTATE_MOUNTED);
+    }
+
+    public void disableCanRotateMounted() {
+        this.dataManager.set(CAN_ROTATE_MOUNTED, false);
+    }
+
+    public void enableCanRotateMounted() {
+        this.dataManager.set(CAN_ROTATE_MOUNTED, true);
+    }
+
     public void setHomePos() {
         this.dataManager.set(HAS_HOME_POS, true);
         this.homePosition = new BlockPos(this);
@@ -2045,8 +2047,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void updatePassenger(Entity passenger) {
-        boolean canRotate = !(this instanceof IChargingMob) || ((IChargingMob) this).isNotUtilizingCharging();
-        if (this.canBeSteered() && canRotate) {
+        if (this.canBeSteered() && this.canRotateMounted()) {
             this.rotationYaw = passenger.rotationYaw;
             this.prevRotationYaw = this.rotationYaw;
             this.rotationPitch = passenger.rotationPitch * 0.5f;
@@ -2064,21 +2065,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public float rangedWidth() {
         return 16f;
-    }
-
-    //this is for normal attacks only
-    public double attackChargeUpSpeed() {
-        return 1D;
-    }
-
-    //also for normal attacks only
-    public double chargeUpToUseSpeed() {
-        return 1D;
-    }
-
-    //also for normal attacks only
-    public double attackRecoverSpeed() {
-        return 1D;
     }
 
     public abstract Vec3d riderPos();
@@ -2317,12 +2303,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.motionY = velY;
                     this.velocityChanged = true;
                     leapAttackingMob.setStartLeapToTarget(false);
-                }
-
-                //charge for charging mobs
-                if (this instanceof IChargingMob && ((IChargingMob)this).isCharging()) {
-                    this.motionX = this.getLookVec().x * ((IChargingMob)this).chargeBoost();
-                    this.motionZ = this.getLookVec().z * ((IChargingMob)this).chargeBoost();
                 }
 
                 //float above water

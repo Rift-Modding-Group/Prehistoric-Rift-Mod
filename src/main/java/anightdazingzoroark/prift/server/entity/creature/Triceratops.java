@@ -427,6 +427,27 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     }
 
     @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.HEAD, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpPoint(10D)
+                .defineChargeUpToUsePoint(2.5D)
+                .defineRecoverFromUsePoint(7.5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpPoint(10D)
+                .defineChargeUpToUsePoint(2.5D)
+                .defineRecoverFromUsePoint(7.5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
+                .defineStartMoveDelayPoint(5D)
+                .defineChargeUpToUsePoint(2.5D)
+                .defineRecoverFromUsePoint(5D)
+                .finalizePoints());
+        return moveMap;
+    }
+
+    @Override
     public boolean hasLeftClickChargeBar() {
         return false;
     }

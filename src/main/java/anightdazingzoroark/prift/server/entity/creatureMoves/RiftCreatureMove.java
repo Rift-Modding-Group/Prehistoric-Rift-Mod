@@ -7,6 +7,7 @@ import net.minecraft.util.math.BlockPos;
 public abstract class RiftCreatureMove {
     public final CreatureMove creatureMove;
     public boolean forceStopFlag = false;
+    protected int useValue;
 
     public RiftCreatureMove(CreatureMove creatureMove) {
         this.creatureMove = creatureMove;
@@ -21,6 +22,8 @@ public abstract class RiftCreatureMove {
     }
 
     public abstract void onStartExecuting(RiftCreature user, EntityLivingBase target);
+
+    public void onEndChargeUp(RiftCreature user, int useAmount) {}
 
     public abstract void whileExecuting(RiftCreature user);
 
@@ -38,8 +41,20 @@ public abstract class RiftCreatureMove {
     //executes when the attack hits a block
     public abstract void onHitBlock(RiftCreature user, BlockPos targetPos);
 
+    public void lookAtTarget(RiftCreature user, EntityLivingBase target) {
+        if (target != null) user.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
+    }
+
     public boolean hasChargeBar() {
         return this.creatureMove.chargeType != CreatureMove.ChargeType.NONE;
+    }
+
+    public void setUseValue(int value) {
+        this.useValue = value;
+    }
+
+    public int getUseValue() {
+        return this.useValue;
     }
 
     public enum MovePriority {

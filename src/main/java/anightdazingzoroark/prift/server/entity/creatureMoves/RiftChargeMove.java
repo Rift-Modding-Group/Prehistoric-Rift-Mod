@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RiftChargeMove extends RiftCreatureMove {
+    private BlockPos lookAtPosition;
+    private BlockPos targetPosForCharge;
     private double chargePosX;
     private double chargePosZ;
     private double chargeDirectionToPosX;
@@ -35,22 +37,29 @@ public class RiftChargeMove extends RiftCreatureMove {
     @Override
     public void onStartExecuting(RiftCreature user, EntityLivingBase target) {
         user.removeSpeed();
-        if (target != null) {
-            double unnormalizedDirectionX = target.posX - user.posX;
-            double unnormalizedDirectionZ = target.posZ - user.posZ;
+        user.disableCanRotateMounted();
+        if (target != null) this.targetPosForCharge = new BlockPos(target.posX, user.posY, target.posZ);
+    }
+
+    @Override
+    public void onEndChargeUp(RiftCreature user, int useAmount) {
+        if (this.targetPosForCharge != null) {
+            double unnormalizedDirectionX = this.targetPosForCharge.getX() - user.posX;
+            double unnormalizedDirectionZ = this.targetPosForCharge.getZ() - user.posZ;
             double angleToTarget = Math.atan2(unnormalizedDirectionZ, unnormalizedDirectionX);
-            this.chargePosX = user.rangedWidth() * Math.cos(Math.toRadians(angleToTarget));
-            this.chargePosZ = user.rangedWidth() * Math.sin(Math.toRadians(angleToTarget));
+            this.chargePosX = Math.min(user.rangedWidth() * Math.cos(angleToTarget), unnormalizedDirectionX) + user.posX;
+            this.chargePosZ = Math.min(user.rangedWidth() * Math.sin(angleToTarget), unnormalizedDirectionZ) + user.posZ;
 
             double unnormalizedMagnitude = Math.sqrt(Math.pow(unnormalizedDirectionX, 2) + Math.pow(unnormalizedDirectionZ, 2));
             this.chargeDirectionToPosX = unnormalizedDirectionX / unnormalizedMagnitude;
             this.chargeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
         }
         else {
-            this.chargePosX = -user.rangedWidth() * Math.sin(Math.toRadians(user.rotationYaw));
-            this.chargePosZ = user.rangedWidth() * Math.cos(Math.toRadians(user.rotationYaw));
-            double unnormalizedDirectionX = this.chargePosX - user.posX;
-            double unnormalizedDirectionZ = this.chargePosZ - user.posZ;
+            double unnormalizedDirectionX = user.getLookVec().x;
+            double unnormalizedDirectionZ = user.getLookVec().z;
+            double angleToTarget = Math.atan2(unnormalizedDirectionZ, unnormalizedDirectionX);
+            this.chargePosX = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth() * Math.cos(angleToTarget)) + user.posX;
+            this.chargePosZ = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth() * Math.sin(angleToTarget)) + user.posZ;
 
             double unnormalizedMagnitude = Math.sqrt(Math.pow(unnormalizedDirectionX, 2) + Math.pow(unnormalizedDirectionZ, 2));
             this.chargeDirectionToPosX = unnormalizedDirectionX / unnormalizedMagnitude;
@@ -69,11 +78,10 @@ public class RiftChargeMove extends RiftCreatureMove {
                     RiftCreature parent = ((RiftCreaturePart)entity).getParent();
                     return !parent.equals(user) && RiftUtil.checkForNoAssociations(user, parent);
                 }
-                else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity);
+                else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity) && !entity.equals(user);
                 else return false;
             }
         });
-        chargedIntoEntities.remove(user);
 
         //stop if it hits a block
         boolean breakBlocksFlag = false;
@@ -93,6 +101,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             //stop charging
             user.motionX = 0;
             user.motionZ = 0;
+            user.velocityChanged = true;
 
             //damage all entities it charged into
             if (!chargedIntoEntities.isEmpty()) for (Entity entity : chargedIntoEntities) {
@@ -126,19 +135,22 @@ public class RiftChargeMove extends RiftCreatureMove {
             this.forceStopFlag = true;
         }
         else {
-            user.motionX = this.chargeDirectionToPosX * 4;
-            user.motionZ = this.chargeDirectionToPosZ * 4;
+            user.motionX = this.chargeDirectionToPosX * 8;
+            user.motionZ = this.chargeDirectionToPosZ * 8;
+            user.velocityChanged = true;
+            if (this.useValue > 0) this.useValue--;
         }
     }
 
     @Override
     public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
-
+        this.setUseValue(useAmount);
     }
 
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.resetSpeed();
+        user.enableCanRotateMounted();
     }
 
     @Override
@@ -149,6 +161,12 @@ public class RiftChargeMove extends RiftCreatureMove {
     @Override
     public void onHitBlock(RiftCreature user, BlockPos targetPos) {
 
+    }
+
+    @Override
+    public void lookAtTarget(RiftCreature user, EntityLivingBase target) {
+        if (this.lookAtPosition != null) user.getLookHelper().setLookPosition(this.lookAtPosition.getX(), this.lookAtPosition.getY(), this.lookAtPosition.getZ(), 30.0F, 30.0F);
+        else this.lookAtPosition = target.getPosition();
     }
 
     private boolean atSpotToChargeTo(RiftCreature user) {

@@ -32,7 +32,9 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return (this.creature.getAttackTarget() != null || this.creature.getRevengeTarget() != null) && !this.creature.isBeingRidden();
+        return ((this.creature.getAttackTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getAttackTarget()))
+                || (this.creature.getRevengeTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getRevengeTarget())))
+                && !this.creature.isBeingRidden();
     }
 
     @Override
@@ -55,7 +57,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.moveAnimUseTime = 0;
         this.animTime = 0;
 
-        this.creature.setRegularMoveTick(0);
         this.moveChoiceCooldown = 0;
         this.maxChargeTime = 0;
     }
@@ -80,7 +81,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.moveAnimUseTime = 0;
         this.animTime = 0;
 
-        this.creature.setRegularMoveTick(0);
         this.moveChoiceCooldown = 0;
         this.maxChargeTime = 0;
     }
@@ -127,19 +127,11 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     if (selectedMove != null && this.moveCanHitTarget(selectedMove)) {
                         this.creature.setCurrentCreatureMove(selectedMove);
                         this.currentInvokedMove = this.creature.currentCreatureMove().invokeMove();
-                        this.creature.setRegularMoveTick(0);
                         if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
-                            //if move involves charging into target, the max charge time is based on max charge distance
+                            //if move involves charging into target, the max charge time is the whole value
                             //otherwise its random between 30% of max value and max value
                             if (selectedMove.moveType == CreatureMove.MoveType.CHARGE && selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
-                                this.maxChargeTime = (int) RiftUtil.slopeResult(
-                                        ((int)Math.ceil(Math.min(this.creature.getDistance(this.target), this.creature.rangedWidth()))),
-                                        true,
-                                        0,
-                                        this.creature.rangedWidth(),
-                                        0,
-                                        this.creature.currentCreatureMove().maxUse
-                                );
+                                this.maxChargeTime = this.creature.currentCreatureMove().maxUse;
                             }
                             else this.maxChargeTime = RiftUtil.randomInRange((int)(this.creature.currentCreatureMove().maxUse * 0.3), this.creature.currentCreatureMove().maxUse);
 
@@ -158,13 +150,14 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
                         }
                         this.finishedMoveMarker = false;
+                        this.animTime = 0;
                     }
                 }
             }
         }
         else {
             this.creature.getNavigator().clearPath();
-            this.creature.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
+            this.currentInvokedMove.lookAtTarget(this.creature, this.target);
 
             if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
                 this.creature.setUsingDelayAnim(true);
@@ -176,6 +169,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 else this.creature.setUsingUnchargedAnim(true);
             }
             if (this.animTime == this.moveAnimChargeUpTime) {
+                this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 if (this.creature.currentCreatureMove().chargeType.requiresCharge()) this.setChargedMoveBeingUsed(false);
             }
             if (this.animTime == this.moveAnimChargeToUseTime) {
@@ -189,7 +183,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 //also dont know what to put here
             }
             if (this.animTime >= this.maxMoveAnimTime) {
-                this.creature.setRegularMoveTick(0);
                 this.creature.setUsingUnchargedAnim(false);
                 this.currentInvokedMove.onStopExecuting(this.creature);
                 if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
@@ -213,15 +206,10 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 this.animTime++;
                 if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
                     //updating use tick for move that requires charge when charging
-                    if (this.creature.getRegularMoveTick() >= this.moveAnimInitDelayTime
-                            && this.creature.getRegularMoveTick() < this.moveAnimChargeUpTime
+                    if (this.animTime >= this.moveAnimInitDelayTime
+                            && this.animTime < this.moveAnimChargeUpTime
                             && this.creature.getCurrentMoveUse() < this.maxChargeTime) {
                         this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
-                    }
-                }
-                else {
-                    if (this.creature.getRegularMoveTick() < this.maxMoveAnimTime) {
-                        this.creature.setRegularMoveTick(this.animTime);
                     }
                 }
             }

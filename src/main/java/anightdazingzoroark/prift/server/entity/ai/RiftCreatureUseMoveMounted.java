@@ -119,7 +119,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.currentInvokedMove.onStartExecuting(this.creature);
                     this.creature.setUsingUnchargedAnim(true);
                 }
-                if (this.animTime == this.moveAnimChargeUpTime) {}
+                if (this.animTime == this.moveAnimChargeUpTime) {
+                    this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
+                }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     EntityLivingBase entityTarget = this.creature.getControlAttackTargets() instanceof EntityLivingBase ? (EntityLivingBase) this.creature.getControlAttackTargets() : null;
                     this.currentInvokedMove.onReachUsePoint(this.creature, entityTarget);
@@ -151,10 +153,17 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimChargeUpTime) {
                     this.setChargedMoveBeingUsed(false);
+                    System.out.println("end charge up");
+                    this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     EntityLivingBase entityTarget = this.creature.getControlAttackTargets() instanceof EntityLivingBase ? (EntityLivingBase) this.creature.getControlAttackTargets() : null;
                     this.currentInvokedMove.onReachUsePoint(this.creature, entityTarget);
+                    if (this.creature.currentCreatureMove().chargeUpAffectsUseTime) {
+                        this.currentInvokedMove.setUseValue(this.getUse());
+                        this.moveAnimUseTime += this.getUse();
+                        this.maxMoveAnimTime += this.getUse();
+                    }
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
@@ -162,6 +171,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag) {
                     //also dont know what to put here
+                    if (this.currentInvokedMove.forceStopFlag && this.creature.currentCreatureMove().chargeUpAffectsUseTime) {
+                        this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
+                        this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
+                    }
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     int cooldownGradient = 1;

@@ -534,14 +534,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         return moveMap;
     }
 
-    public double attackChargeUpSpeed() {
-        return 0.5D;
-    }
-
-    public double attackRecoverSpeed() {
-        return 0.5D;
-    }
-
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY + 2.125, this.posZ);

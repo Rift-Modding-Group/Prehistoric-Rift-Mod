@@ -227,10 +227,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return moveMap;
     }
 
-    public double attackRecoverSpeed() {
-        return 1.5D;
-    }
-
     public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
         ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this);
         double d0 = target.posX - this.posX;

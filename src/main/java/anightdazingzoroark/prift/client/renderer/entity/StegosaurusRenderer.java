@@ -38,49 +38,6 @@ public class StegosaurusRenderer extends RiftCreatureRenderer {
         GlStateManager.popMatrix();
     }
 
-    private double tailTypeMoveAnimModifier(RiftCreature animatable, String partName, int axis) {
-        //for axis
-        //0 is x
-        //1 is y
-        //2 is z
-        switch (partName) {
-            case "tail0":
-                if (axis == 0) return this.partRotationBasedOnMove(animatable, 0, 27.5, 83.11758, 27.5, 0.75D, 0);
-                else if (axis == 1) return this.partRotationBasedOnMove(animatable, 0, 0, 66.97934, 0, 0.75D, 0);
-                else if (axis == 2) return this.partRotationBasedOnMove(animatable, 0, 0, 77.12241, 0, 0.75D, 0);
-            case "tail1":
-                return this.partRotationBasedOnMove(animatable, 0, 0, 37.5, 0, 0.75D, 0);
-            case "tail2":
-                return this.partRotationBasedOnMove(animatable, 0, 0, 50, 0, 0.75D, 0);
-        }
-        return 0;
-    }
-
-    private double rangedTypeMoveAnimModifier(RiftCreature animatable, String partName, int axis) {
-        //for axis
-        //0 is x
-        //1 is y
-        //2 is z
-        switch (partName) {
-            case "bodyFront":
-                return this.partRotationBasedOnMove(animatable, 0, 7.5, 7.5, 7.5, 0.75D, 0);
-            case "leftFrontLeg":
-                if (axis == 0) return this.partRotationBasedOnMove(animatable, 0, -7.5, -7.5, -7.5, 0.75D, 0);
-                else if (axis == 2) return this.partRotationBasedOnMove(animatable, 0, 17.5, 17.5, 17.5, 0.75D, 0);
-            case "rightFrontLeg":
-                if (axis == 0) return this.partRotationBasedOnMove(animatable, 0, -7.5, -7.5, -7.5, 0.75D, 0);
-                else if (axis == 2) return this.partRotationBasedOnMove(animatable, 0, -17.5, -17.5, -17.5, 0.75D, 0);
-            case "tail0":
-                return this.partRotationBasedOnMove(animatable, 0, -15, 60, 0, 0.75D, 0);
-            case "tail1":
-                return this.partRotationBasedOnMove(animatable, 0, 0, 17.5, 0, 0.75D, 0);
-            case "tail2":
-                return this.partRotationBasedOnMove(animatable, 0, 0, 17.5, 0, 0.75D, 0);
-        }
-
-        return 0;
-    }
-
     private double chargedTailTypeMoveAnimModifier(RiftCreature animatable) {
         if (animatable.currentCreatureMove() == null) return 0;
         if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.TAIL) {
