@@ -48,7 +48,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             else {
                 this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
                 this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).defineChargeUpToUsePoint();
+                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
             }
@@ -67,7 +67,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             else {
                 this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
                 this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).defineChargeUpToUsePoint();
+                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
             }
@@ -86,12 +86,13 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             else {
                 this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
                 this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).defineChargeUpToUsePoint();
+                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
             }
         }
         this.animTime = 0;
+        this.creature.setPlayingInfiniteMoveAnim(false);
         this.finishFlag = false;
     }
 
@@ -101,6 +102,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.currentInvokedMove.onStopExecuting(this.creature);
             this.currentInvokedMove = null;
         }
+        this.creature.setPlayingInfiniteMoveAnim(false);
         this.creature.setCurrentCreatureMove(null);
         this.maxMoveAnimTime = 0;
         this.moveAnimUseTime = 0;
@@ -150,10 +152,13 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.creature.setUsingDelayAnim(false);
                     this.currentInvokedMove.onStartExecuting(this.creature);
                     this.setChargedMoveBeingUsed(true);
+
+                    //this is here because putting this in this.animTime == this.moveAnimChargeToUseTime
+                    //makes the anim prematurely stop
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
                 }
                 if (this.animTime == this.moveAnimChargeUpTime) {
                     this.setChargedMoveBeingUsed(false);
-                    System.out.println("end charge up");
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
@@ -170,11 +175,11 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag) {
-                    //also dont know what to put here
                     if (this.currentInvokedMove.forceStopFlag && this.creature.currentCreatureMove().chargeUpAffectsUseTime) {
                         this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
                         this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
                     }
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(false);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     int cooldownGradient = 1;

@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.RiftInitialize;
@@ -20,7 +19,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
@@ -39,7 +37,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
@@ -516,20 +513,20 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
         Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
         moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpPoint(2.5D)
-                .defineChargeUpToUsePoint(2.5D)
-                .defineRecoverFromUsePoint(5D)
+                .defineChargeUpLength(2.5D)
+                .getChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpPoint(10D)
-                .defineChargeUpToUsePoint(2.5D)
-                .defineRecoverFromUsePoint(7.5D)
+                .defineChargeUpLength(10D)
+                .getChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpPoint(5D)
-                .defineChargeUpToUsePoint(5D)
-                .defineUseDurationPoint(22.5)
-                .defineRecoverFromUsePoint(7.5)
+                .defineChargeUpLength(5D)
+                .getChargeUpToUseLength(5D)
+                .defineUseDurationLength(22.5)
+                .defineRecoverFromUseLength(7.5)
                 .finalizePoints());
         return moveMap;
     }

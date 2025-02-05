@@ -27,27 +27,27 @@ public class RiftCreatureMoveAnimator {
         return this.creature.currentCreatureMove().moveType;
     }
 
-    public RiftCreatureMoveAnimator defineStartMoveDelayPoint(double value) {
+    public RiftCreatureMoveAnimator defineStartMoveDelayLength(double value) {
         this.startMoveDelayTime = value;
         return this;
     }
 
-    public RiftCreatureMoveAnimator defineChargeUpPoint(double value) {
+    public RiftCreatureMoveAnimator defineChargeUpLength(double value) {
         this.chargeUpTime = value;
         return this;
     }
 
-    public RiftCreatureMoveAnimator defineChargeUpToUsePoint(double value) {
+    public RiftCreatureMoveAnimator getChargeUpToUseLength(double value) {
         this.chargeUpToUseTime = value;
         return this;
     }
 
-    public RiftCreatureMoveAnimator defineUseDurationPoint(double value) {
+    public RiftCreatureMoveAnimator defineUseDurationLength(double value) {
         this.useDurationTime = value;
         return this;
     }
 
-    public RiftCreatureMoveAnimator defineRecoverFromUsePoint(double value) {
+    public RiftCreatureMoveAnimator defineRecoverFromUseLength(double value) {
         this.recoverFromUseTime = value;
         return this;
     }
@@ -70,7 +70,7 @@ public class RiftCreatureMoveAnimator {
         return this.chargeUpFinal;
     }
 
-    public double defineChargeUpToUsePoint() {
+    public double getChargeUpToUsePoint() {
         return this.chargeUpToUseFinal;
     }
 

@@ -1,15 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
-import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
-import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBaseTop;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.config.TriceratopsConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -17,7 +12,6 @@ import anightdazingzoroark.prift.server.entity.interfaces.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -33,7 +27,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
@@ -430,19 +423,18 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
         Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
         moveMap.put(CreatureMove.MoveType.HEAD, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpPoint(10D)
-                .defineChargeUpToUsePoint(2.5D)
-                .defineRecoverFromUsePoint(7.5D)
+                .defineChargeUpLength(10D)
+                .getChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpPoint(10D)
-                .defineChargeUpToUsePoint(2.5D)
-                .defineRecoverFromUsePoint(7.5D)
+                .defineChargeUpLength(10D)
+                .getChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
-                .defineStartMoveDelayPoint(5D)
-                .defineChargeUpToUsePoint(2.5D)
-                .defineRecoverFromUsePoint(5D)
+                .defineStartMoveDelayLength(5D)
+                .defineRecoverFromUseLength(5D)
                 .finalizePoints());
         return moveMap;
     }

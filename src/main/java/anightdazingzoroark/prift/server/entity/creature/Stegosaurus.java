@@ -3,11 +3,9 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.config.StegosaurusConfig;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -15,12 +13,9 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
-import com.codetaylor.mc.pyrotech.modules.tech.basic.block.BlockChoppingBlock;
-import com.codetaylor.mc.pyrotech.modules.tech.basic.block.spi.BlockAnvilBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -37,16 +32,10 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -215,14 +204,14 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
         Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
         moveMap.put(CreatureMove.MoveType.TAIL, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpPoint(10D)
-                .defineChargeUpToUsePoint(2.5D)
-                .defineRecoverFromUsePoint(17.5D)
+                .defineChargeUpLength(10D)
+                .getChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(17.5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.RANGED, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpPoint(10D)
-                .defineChargeUpToUsePoint(2.5D)
-                .defineRecoverFromUsePoint(7.5D)
+                .defineChargeUpLength(10D)
+                .getChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
         return moveMap;
     }

@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import net.minecraft.entity.EntityLivingBase;
@@ -71,6 +70,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             this.currentInvokedMove = null;
         }
         this.creature.setCurrentMoveUse(0);
+        this.creature.setPlayingInfiniteMoveAnim(false);
         this.setChargedMoveBeingUsed(false);
         this.creature.setCurrentCreatureMove(null);
 
@@ -145,12 +145,13 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         else {
                             this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
                             this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                            this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).defineChargeUpToUsePoint();
+                            this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
                             this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
                             this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
                         }
                         this.finishedMoveMarker = false;
                         this.animTime = 0;
+                        this.creature.setPlayingInfiniteMoveAnim(false);
                     }
                 }
             }
@@ -165,7 +166,13 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             if (this.animTime == this.moveAnimInitDelayTime) {
                 this.creature.setUsingDelayAnim(false);
                 this.currentInvokedMove.onStartExecuting(this.creature);
-                if (this.creature.currentCreatureMove().chargeType.requiresCharge()) this.setChargedMoveBeingUsed(true);
+                if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                    this.setChargedMoveBeingUsed(true);
+
+                    //this is here because putting this in this.animTime == this.moveAnimChargeToUseTime
+                    //makes the anim prematurely stop
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
+                }
                 else this.creature.setUsingUnchargedAnim(true);
             }
             if (this.animTime == this.moveAnimChargeUpTime) {
@@ -181,6 +188,8 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                     || this.currentInvokedMove.forceStopFlag) {
                 //also dont know what to put here
+                if (this.creature.currentCreatureMove().chargeType.requiresCharge()
+                        && this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(false);
             }
             if (this.animTime >= this.maxMoveAnimTime) {
                 this.creature.setUsingUnchargedAnim(false);

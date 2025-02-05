@@ -373,6 +373,62 @@
 				}
 			}
 		},
+		"animation.triceratops.use_charged_infinite_charge_type_move_pt2": {
+			"loop": true,
+			"animation_length": 1,
+			"bones": {
+				"neck": {
+					"rotation": [25, 0, 0]
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [15, 0, 0],
+						"0.5": [0, 0, 0],
+						"0.75": [-15, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [15, 0, 0],
+						"0.5": [0, 0, 0],
+						"0.75": [-15, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"leftBackLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-15, 0, 0],
+						"0.5": [0, 0, 0],
+						"0.75": [15, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"rightBackLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-15, 0, 0],
+						"0.5": [0, 0, 0],
+						"0.75": [15, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.triceratops.use_charged_infinite_charge_type_move_pt3": {
+			"animation_length": 0.25,
+			"bones": {
+				"neck": {
+					"rotation": {
+						"0.0": [25, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				}
+			}
+		},
 		"animation.triceratops.use_charged_charge_type_move_pt2": {
 			"animation_length": 0.25,
 			"bones": {
