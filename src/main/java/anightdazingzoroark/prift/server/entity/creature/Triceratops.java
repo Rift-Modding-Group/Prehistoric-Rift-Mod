@@ -12,7 +12,6 @@ import anightdazingzoroark.prift.server.entity.interfaces.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,8 +28,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -333,11 +330,6 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         if (!this.world.isRemote) this.clearLeadAttachPosMessage(destroyed, player);
     }
 
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        return super.shouldRender(camera) || this.inFrustrum(camera, this.hipPart) || this.inFrustrum(camera, this.leftBackLegPart) || this.inFrustrum(camera, this.rightBackLegPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part);
-    }
-
     @Override
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
@@ -424,12 +416,12 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
         moveMap.put(CreatureMove.MoveType.HEAD, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
-                .getChargeUpToUseLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
-                .getChargeUpToUseLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
@@ -446,7 +438,7 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return true;
+        return false;
     }
 
     @Override

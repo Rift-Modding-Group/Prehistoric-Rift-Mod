@@ -1,8 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.entity.Entity;
 
 public class RiftScratchMove extends RiftCreatureMove {
     public RiftScratchMove() {
@@ -10,13 +9,13 @@ public class RiftScratchMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
+    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
         return MovePriority.LOW;
     }
 
     @Override
-    public void onStartExecuting(RiftCreature user, EntityLivingBase target) {
-
+    public void onStartExecuting(RiftCreature user, Entity target) {
+        user.removeSpeed();
     }
 
     @Override
@@ -25,20 +24,13 @@ public class RiftScratchMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {}
+    public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
+        if (target != null) user.attackEntityAsMob(target);
+    }
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-
-    }
-
-    @Override
-    public void onHitEntity(RiftCreature user, EntityLivingBase target) {
-
-    }
-
-    @Override
-    public void onHitBlock(RiftCreature user, BlockPos targetPos) {
-
+        user.resetSpeed();
+        if (user.isTamed()) user.energyActionMod++;
     }
 }

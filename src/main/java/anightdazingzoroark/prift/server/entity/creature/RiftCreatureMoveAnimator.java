@@ -37,7 +37,7 @@ public class RiftCreatureMoveAnimator {
         return this;
     }
 
-    public RiftCreatureMoveAnimator getChargeUpToUseLength(double value) {
+    public RiftCreatureMoveAnimator defineChargeUpToUseLength(double value) {
         this.chargeUpToUseTime = value;
         return this;
     }

@@ -2,18 +2,14 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityList;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -28,23 +24,21 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
+    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
         if (user.world.rand.nextInt(4) == 0 && user.recentlyHit) return MovePriority.HIGH;
         return MovePriority.NONE;
     }
 
     @Override
-    public void onStartExecuting(RiftCreature user, EntityLivingBase target) {
+    public void onStartExecuting(RiftCreature user, Entity target) {
         user.removeSpeed();
     }
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
+    public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         this.roar(user,  RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 1D, 2D));
         user.playSound(RiftSounds.TYRANNOSAURUS_ROAR, 2, 1);
     }
@@ -53,14 +47,6 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
     public void onStopExecuting(RiftCreature user) {
         user.resetSpeed();
     }
-
-    @Override
-    public void onHitEntity(RiftCreature user, EntityLivingBase target) {
-
-    }
-
-    @Override
-    public void onHitBlock(RiftCreature user, BlockPos targetPos) {}
 
     private void roar(RiftCreature roarUser, double strength) {
         for (EntityLivingBase entity : roarUser.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea(roarUser, strength * 6d), new Predicate<EntityLivingBase>() {

@@ -205,12 +205,12 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
         moveMap.put(CreatureMove.MoveType.TAIL, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
-                .getChargeUpToUseLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(17.5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.RANGED, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
-                .getChargeUpToUseLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
         return moveMap;

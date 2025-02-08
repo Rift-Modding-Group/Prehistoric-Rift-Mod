@@ -27,7 +27,7 @@ public class RiftChargeMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
+    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
         if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth()) {
             return MovePriority.HIGH;
         }
@@ -35,7 +35,7 @@ public class RiftChargeMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onStartExecuting(RiftCreature user, EntityLivingBase target) {
+    public void onStartExecuting(RiftCreature user, Entity target) {
         user.removeSpeed();
         user.disableCanRotateMounted();
         if (target != null) this.targetPosForCharge = new BlockPos(target.posX, user.posY, target.posZ);
@@ -143,7 +143,7 @@ public class RiftChargeMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
+    public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         this.setUseValue(useAmount);
     }
 
@@ -154,17 +154,7 @@ public class RiftChargeMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onHitEntity(RiftCreature user, EntityLivingBase target) {
-
-    }
-
-    @Override
-    public void onHitBlock(RiftCreature user, BlockPos targetPos) {
-
-    }
-
-    @Override
-    public void lookAtTarget(RiftCreature user, EntityLivingBase target) {
+    public void lookAtTarget(RiftCreature user, Entity target) {
         if (this.lookAtPosition != null) user.getLookHelper().setLookPosition(this.lookAtPosition.getX(), this.lookAtPosition.getY(), this.lookAtPosition.getZ(), 30.0F, 30.0F);
         else this.lookAtPosition = target.getPosition();
     }

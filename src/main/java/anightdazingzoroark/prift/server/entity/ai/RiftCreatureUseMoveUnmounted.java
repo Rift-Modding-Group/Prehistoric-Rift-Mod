@@ -279,9 +279,9 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         for (CreatureMove creatureMove : creatureMovesRandomized) {
             if (!this.isCoolingDown(this.creature.getLearnedMoves().indexOf(creatureMove))) {
                 RiftCreatureMove moveInvoked = creatureMove.invokeMove();
-                if (moveInvoked.canBeExecuted(this.creature, this.target) == RiftCreatureMove.MovePriority.HIGH)
+                if (moveInvoked.canBeExecutedUnmounted(this.creature, this.target) == RiftCreatureMove.MovePriority.HIGH)
                     movesForSelecting.addFirst(creatureMove);
-                if (moveInvoked.canBeExecuted(this.creature, this.target) == RiftCreatureMove.MovePriority.LOW)
+                if (moveInvoked.canBeExecutedUnmounted(this.creature, this.target) == RiftCreatureMove.MovePriority.LOW)
                     movesForSelecting.addLast(creatureMove);
             }
         }

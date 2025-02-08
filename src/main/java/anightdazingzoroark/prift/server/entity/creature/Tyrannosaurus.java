@@ -19,7 +19,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -39,8 +38,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -514,17 +511,17 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
         moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(2.5D)
-                .getChargeUpToUseLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
-                .getChargeUpToUseLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
-                .getChargeUpToUseLength(5D)
+                .defineChargeUpToUseLength(5D)
                 .defineUseDurationLength(22.5)
                 .defineRecoverFromUseLength(7.5)
                 .finalizePoints());
@@ -534,11 +531,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     @Override
     public Vec3d riderPos() {
         return new Vec3d(this.posX, this.posY + 2.125, this.posZ);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        return super.shouldRender(camera) || this.inFrustrum(camera, this.neckPart) || this.inFrustrum(camera, this.hipPart) || this.inFrustrum(camera, this.leftLegPart) || this.inFrustrum(camera, this.rightLegPart) || this.inFrustrum(camera, this.tail0Part) || this.inFrustrum(camera, this.tail1Part) || this.inFrustrum(camera, this.tail2Part) || this.inFrustrum(camera, this.tail3Part);
     }
 
     @Override

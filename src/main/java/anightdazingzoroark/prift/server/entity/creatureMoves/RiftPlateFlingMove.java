@@ -2,10 +2,9 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public class RiftPlateFlingMove extends RiftCreatureMove {
@@ -14,7 +13,7 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
+    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
         if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth()) {
             return MovePriority.HIGH;
         }
@@ -22,7 +21,7 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onStartExecuting(RiftCreature user, EntityLivingBase target) {
+    public void onStartExecuting(RiftCreature user, Entity target) {
         user.removeSpeed();
     }
 
@@ -32,7 +31,7 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
+    public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         if (user.getControllingPassenger() == null) this.shootEntityUnmounted(user, target);
         else this.shootEntityMounted(user);
     }
@@ -42,17 +41,7 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
         user.resetSpeed();
     }
 
-    @Override
-    public void onHitEntity(RiftCreature user, EntityLivingBase target) {
-
-    }
-
-    @Override
-    public void onHitBlock(RiftCreature user, BlockPos targetPos) {
-
-    }
-
-    private void shootEntityUnmounted(RiftCreature creature, EntityLivingBase target) {
+    private void shootEntityUnmounted(RiftCreature creature, Entity target) {
         ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(creature.world, creature);
         double d0 = target.posX - creature.posX;
         double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - thrownStegoPlate.posY;

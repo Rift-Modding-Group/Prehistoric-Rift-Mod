@@ -3,8 +3,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.entity.Entity;
 
 public class RiftThagomizeMove extends RiftCreatureMove {
     public RiftThagomizeMove() {
@@ -12,13 +11,13 @@ public class RiftThagomizeMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecuted(RiftCreature user, EntityLivingBase target) {
+    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
         if (user.world.rand.nextInt(4) == 0) return MovePriority.HIGH;
         return MovePriority.NONE;
     }
 
     @Override
-    public void onStartExecuting(RiftCreature user, EntityLivingBase target) {
+    public void onStartExecuting(RiftCreature user, Entity target) {
         user.removeSpeed();
     }
 
@@ -26,7 +25,7 @@ public class RiftThagomizeMove extends RiftCreatureMove {
     public void whileExecuting(RiftCreature user) {}
 
     @Override
-    public void onReachUsePoint(RiftCreature user, EntityLivingBase target, int useAmount) {
+    public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         if (target != null) {
             user.attackEntityAsMob(target, (float) RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, 4) * 5f);
             NonPotionEffectsHelper.setBleeding(target,
@@ -38,15 +37,5 @@ public class RiftThagomizeMove extends RiftCreatureMove {
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.resetSpeed();
-    }
-
-    @Override
-    public void onHitEntity(RiftCreature user, EntityLivingBase target) {
-
-    }
-
-    @Override
-    public void onHitBlock(RiftCreature user, BlockPos targetPos) {
-
     }
 }

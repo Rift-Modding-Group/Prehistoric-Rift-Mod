@@ -1,9 +1,13 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class RiftCreatureUseMoveMounted extends EntityAIBase {
     private final RiftCreature creature;
@@ -16,6 +20,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     private int moveAnimChargeToUseTime; //time until end of charge up to use point
     private int moveAnimUseTime; //time until end of use anim
     private int animTime = 0;
+
+    private Entity target;
 
     public RiftCreatureUseMoveMounted(RiftCreature creature) {
         this.creature = creature;
@@ -35,65 +41,100 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     @Override
     public void startExecuting() {
         if (this.creature.usingMoveOne()) {
-            this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(0));
             this.currentInvokedMove = this.creature.getLearnedMoves().get(0).invokeMove();
+            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
 
-            if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
-                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                this.moveAnimChargeUpTime = this.moveAnimInitDelayTime;
-                this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
-                this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
-                this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+            if (this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+                this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(0));
+
+                if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                    this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                    this.moveAnimChargeUpTime = this.moveAnimInitDelayTime;
+                    this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
+                    this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
+                    this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+                }
+                else {
+                    this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                    this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
+                    this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
+                    this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
+                    this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                }
             }
             else {
-                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
-                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
-                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                if (this.currentInvokedMove.cannotExecuteMountedMessage() != null) {
+                    ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage()), false);
+                }
+                this.currentInvokedMove = null;
+                this.target = null;
             }
         }
         else if (this.creature.usingMoveTwo()) {
-            this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(1));
             this.currentInvokedMove = this.creature.getLearnedMoves().get(1).invokeMove();
+            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
 
-            if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
-                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                this.moveAnimChargeUpTime = this.moveAnimInitDelayTime;
-                this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
-                this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
-                this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+            if (this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+                this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(1));
+
+                if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                    this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                    this.moveAnimChargeUpTime = this.moveAnimInitDelayTime;
+                    this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
+                    this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
+                    this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+                }
+                else {
+                    this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                    this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
+                    this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
+                    this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
+                    this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                }
             }
             else {
-                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
-                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
-                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                if (this.currentInvokedMove.cannotExecuteMountedMessage() != null) {
+                    ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage()), false);
+                }
+                this.currentInvokedMove = null;
+                this.target = null;
             }
         }
         else if (this.creature.usingMoveThree()) {
             this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(2));
-            this.currentInvokedMove = this.creature.getLearnedMoves().get(2).invokeMove();
+            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
 
-            if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
-                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                this.moveAnimChargeUpTime = this.moveAnimInitDelayTime;
-                this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
-                this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
-                this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+            if (this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+                this.currentInvokedMove = this.creature.getLearnedMoves().get(2).invokeMove();
+
+                if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                    this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                    this.moveAnimChargeUpTime = this.moveAnimInitDelayTime;
+                    this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
+                    this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
+                    this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+                }
+                else {
+                    this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                    this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
+                    this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
+                    this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
+                    this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                }
             }
             else {
-                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
-                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
-                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                if (this.currentInvokedMove.cannotExecuteMountedMessage() != null) {
+                    ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage()), false);
+                }
+                this.currentInvokedMove = null;
+                this.target = null;
             }
         }
-        this.animTime = 0;
-        this.creature.setPlayingInfiniteMoveAnim(false);
-        this.finishFlag = false;
+        if (this.currentInvokedMove != null && this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+            this.animTime = 0;
+            this.creature.setPlayingInfiniteMoveAnim(false);
+            this.finishFlag = false;
+        }
     }
 
     @Override
@@ -111,6 +152,11 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
 
     @Override
     public void updateTask() {
+        if (this.currentInvokedMove == null || !this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+            this.finishFlag = true;
+            return;
+        }
+
         if (!this.finishFlag) {
             if (!this.creature.currentCreatureMove().chargeType.requiresCharge()) {
                 if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
@@ -125,8 +171,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
-                    EntityLivingBase entityTarget = this.creature.getControlAttackTargets() instanceof EntityLivingBase ? (EntityLivingBase) this.creature.getControlAttackTargets() : null;
-                    this.currentInvokedMove.onReachUsePoint(this.creature, entityTarget);
+                    this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
@@ -142,7 +187,13 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.setCoolDown(this.creature.currentCreatureMove().maxCooldown);
                     this.finishFlag = true;
                 }
-                if (!this.finishFlag) this.animTime++;
+                if (!this.finishFlag) {
+                    this.animTime++;
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite && this.animTime >= this.moveAnimUseTime && !this.currentInvokedMove.forceStopFlag) {
+                        this.moveAnimUseTime++;
+                        this.maxMoveAnimTime++;
+                    }
+                }
             }
             else {
                 if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
@@ -162,8 +213,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
-                    EntityLivingBase entityTarget = this.creature.getControlAttackTargets() instanceof EntityLivingBase ? (EntityLivingBase) this.creature.getControlAttackTargets() : null;
-                    this.currentInvokedMove.onReachUsePoint(this.creature, entityTarget);
+                    this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
                     if (this.creature.currentCreatureMove().chargeUpAffectsUseTime) {
                         this.currentInvokedMove.setUseValue(this.getUse());
                         this.moveAnimUseTime += this.getUse();
@@ -264,5 +314,12 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 this.creature.setMoveThreeCooldown(moveCooldown);
                 break;
         }
+    }
+
+    private Entity getAttackTarget(CreatureMove.MoveType creatureMoveType) {
+        if (creatureMoveType != CreatureMove.MoveType.RANGED && creatureMoveType != CreatureMove.MoveType.CHARGE) {
+            return this.creature.getControlAttackTargets(this.creature.attackWidth());
+        }
+        else return this.creature.getControlAttackTargets(this.creature.rangedWidth());
     }
 }

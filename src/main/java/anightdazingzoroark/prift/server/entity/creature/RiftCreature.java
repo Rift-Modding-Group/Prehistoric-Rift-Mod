@@ -2083,7 +2083,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //this is for when shoulder surfing is not utilized
     public void controlInput(int control, int holdAmount) {
-        this.controlInput(control, holdAmount, this.getControlAttackTargets(), this.getControlBlockPosToBreak());
+        this.controlInput(control, holdAmount, this.getControlAttackTargets(0), this.getControlBlockPosToBreak());
     }
 
     //this is for when shoulder surfing is utilized
@@ -2139,9 +2139,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //to based on where the player is looking
-    public Entity getControlAttackTargets() {
+    public Entity getControlAttackTargets(float attackWidth) {
         final int reach = 16;
-        final float creatureReach = this.width + this.attackWidth() + 1f;
+        final float creatureReach = this.width + attackWidth + 1f;
         EntityPlayer playerRider = (EntityPlayer) this.getControllingPassenger();
         Vec3d startPos = this.riderPos().add(0, playerRider.getEyeHeight() + playerRider.height, 0);
         Vec3d lookDirection = playerRider.getLook(1.0F);
@@ -2528,6 +2528,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_head_type_move", false));
                         return PlayState.CONTINUE;
                     }
+                    else if (isUsingClawTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_claw_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (isUsingStatusTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_status_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (isUsingChargeTypeMove()) {}
                     else {
                         event.getController().clearAnimationCache();
                         return PlayState.STOP;

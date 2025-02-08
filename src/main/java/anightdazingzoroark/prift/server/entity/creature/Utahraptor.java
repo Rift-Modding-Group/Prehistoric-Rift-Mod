@@ -3,27 +3,21 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.config.UtahraptorConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
-import com.google.common.base.Predicate;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.passive.EntityTameable;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigate;
-import net.minecraft.pathfinding.PathNavigateClimber;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -31,20 +25,11 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPackHunter, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/utahraptor"));
@@ -111,10 +96,8 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftPackBuff(this, 1.68f, 0f, 90f));
-        this.tasks.addTask(4, new RiftControlledAttack(this, 0.28F, 0.28F));
-        this.tasks.addTask(4, new RiftControlledPackBuff(this, 1.68f, 0f));
-        this.tasks.addTask(5, new RiftLeapAttack(this, 6f, 160));
-        this.tasks.addTask(6, new RiftAttack(this, 1.0D, 0.28F, 0.28F));
+        this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));
@@ -278,8 +261,41 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         return packBuffEffects;
     }
 
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LEAP, CreatureMove.PACK_CALL);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LEAP, CreatureMove.PACK_CALL);
+    }
+    //move related stuff ends here
+
     public float attackWidth() {
         return 2f;
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.CLAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(1.5D)
+                .defineRecoverFromUseLength(1D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(30D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(1D)
+                .defineRecoverFromUseLength(1D)
+                .finalizePoints());
+        return moveMap;
     }
 
     @Override
@@ -290,90 +306,7 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (!this.isActing()) {
-                UUID ownerID =  this.getOwnerId();
-                List<Utahraptor> tamedPackList = this.world.getEntitiesWithinAABB(Utahraptor.class, this.herdBoundingBox(), new Predicate<RiftCreature>() {
-                    @Override
-                    public boolean apply(@Nullable RiftCreature input) {
-                        if (input.isTamed()) {
-                            return ownerID.equals(input.getOwnerId());
-                        }
-                        return false;
-                    }
-                });
-                tamedPackList.remove(this);
-                if (tamedPackList.size() >= 2) this.setPackBuffing(true);
-                else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_pack_members", this.getName()), false);
-                this.setRightClickUse(0);
-            }
-        }
-        if (control == 2) {
-            final float leapHeight = Math.min(6f, 0.25f * holdAmount + 1);
-            if (this.getEnergy() > 6 && !this.isLeaping() && !this.isInWater()) {
-                this.setLeapPower((float) Math.sqrt(2f * leapHeight * RiftUtil.gravity));
-                this.setEnergy(this.getEnergy() - Math.min(6, (int)(0.25D * holdAmount + 1D)));
-            }
-            else if (this.getEnergy() <= 6) ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-            this.setSpacebarUse(0);
-        }
-        if (control == 3) {
-            if (this.getEnergy() >= 6) {
-                if (target == null) {
-                    if (!this.isActing() && this.onGround() && !this.isMoving(false)) {
-                        UUID ownerID =  this.getOwnerId();
-                        List<EntityLivingBase> potTargetListL = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.leapWidth()), new Predicate<EntityLivingBase>() {
-                            @Override
-                            public boolean apply(@Nullable EntityLivingBase input) {
-                                if (input instanceof EntityTameable) {
-                                    EntityTameable inpTameable = (EntityTameable)input;
-                                    if (inpTameable.isTamed()) {
-                                        return !ownerID.equals(inpTameable.getOwnerId());
-                                    }
-                                    else return true;
-                                }
-                                return true;
-                            }
-                        });
-                        potTargetListL.remove(this);
-                        potTargetListL.remove(this.getControllingPassenger());
-                        if (!potTargetListL.isEmpty() && !this.isInWater()) {
-                            this.setControlledLeapTarget(RiftUtil.findClosestEntity(this, potTargetListL));
-                            this.setStartLeapToTarget(true);
-                            this.setEnergy(this.getEnergy() - 3);
-                        }
-                    }
-                }
-                else {
-                    if (!this.isActing() && this.onGround() && !this.isMoving(false)) {
-                        boolean canLeapFlag = true;
-
-                        if (target instanceof EntityTameable) {
-                            canLeapFlag = !((EntityTameable)target).isTamed();
-                        }
-
-                        if (canLeapFlag && !this.isInWater()) {
-                            this.setControlledLeapTarget(target);
-                            this.setStartLeapToTarget(true);
-                            this.setEnergy(this.getEnergy() - 3);
-                        }
-                    }
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     public boolean hasLeftClickChargeBar() {
@@ -382,12 +315,12 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean hasSpacebarChargeBar() {
-        return true;
+        return false;
     }
 
     @Override
@@ -399,53 +332,6 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::utahraptorMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::utahraptorAttack));
-        data.addAnimationController(new AnimationController(this, "pack_buff", 0, this::utahraptorPackBuff));
-    }
-
-    private <E extends IAnimatable> PlayState utahraptorMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (event.isMoving() && this.onGround()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.walk", true));
-                return PlayState.CONTINUE;
-            }
-            else if (event.isMoving() && !this.onGround() && !this.isSitting()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.pounce", true));
-                return PlayState.CONTINUE;
-            }
-            else if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.sitting", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState utahraptorAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.attack", false));
-        }
-        else {
-            event.getController().clearAnimationCache();
-        }
-        return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState utahraptorPackBuff(AnimationEvent<E> event) {
-        if (this.isPackBuffing()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.utahraptor.pack_buffing", false));
-        }
-        else {
-            event.getController().clearAnimationCache();
-        }
-        return PlayState.CONTINUE;
     }
 
     protected SoundEvent getAmbientSound() {
