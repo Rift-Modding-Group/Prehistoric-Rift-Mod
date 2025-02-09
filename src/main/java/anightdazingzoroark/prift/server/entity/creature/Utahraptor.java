@@ -291,7 +291,7 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
                 .defineRecoverFromUseLength(30D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpLength(5D)
+                .defineChargeUpLength(6D)
                 .defineChargeUpToUseLength(1D)
                 .defineRecoverFromUseLength(1D)
                 .finalizePoints());

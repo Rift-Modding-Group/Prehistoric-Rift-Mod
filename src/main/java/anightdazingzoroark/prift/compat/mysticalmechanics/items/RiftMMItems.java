@@ -22,8 +22,12 @@ public class RiftMMItems {
     public static Item SEMI_MANUAL_PRESSER;
     public static Item SEMI_MANUAL_EXTRUDER;
     public static Item SEMI_MANUAL_HAMMERER;
+    public static Item COPPER_INGOT;
+    public static Item COPPER_NUGGET;
+    public static Item COPPER_PLATE;
     public static Item IRON_PLATE;
     public static Item GOLD_PLATE;
+    public static Item COPPER_ROD;
     public static Item IRON_ROD;
     public static Item GOLD_ROD;
     public static Item HAMMER;

@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import net.minecraft.entity.EntityCreature;
@@ -26,7 +27,12 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
             else return super.shouldExecute();
         }
         else {
-            if (this.creature.getTameBehavior() != TameBehaviorType.PASSIVE && !this.creature.isBeingRidden() && !this.creature.busyAtWorkWithNoTargets()) return super.shouldExecute();
+            if (this.creature.getTameBehavior() != TameBehaviorType.PASSIVE
+                    && !this.creature.isBeingRidden()
+                    && !this.creature.busyAtWorkWithNoTargets()
+                    && RiftUtil.checkForNoAssociations(this.creature, this.creature.getRevengeTarget())) {
+                return super.shouldExecute();
+            }
             else return false;
         }
     }

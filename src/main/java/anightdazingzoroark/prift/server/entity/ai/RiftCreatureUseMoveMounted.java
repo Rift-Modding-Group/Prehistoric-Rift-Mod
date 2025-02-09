@@ -20,6 +20,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     private int moveAnimChargeToUseTime; //time until end of charge up to use point
     private int moveAnimUseTime; //time until end of use anim
     private int animTime = 0;
+    private boolean canBeExecutedMountedResult = false;
 
     private Entity target;
 
@@ -43,8 +44,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         if (this.creature.usingMoveOne()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(0).invokeMove();
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
+            this.canBeExecutedMountedResult = this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
 
-            if (this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+            if (this.canBeExecutedMountedResult) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(0));
 
                 if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
@@ -73,8 +75,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         else if (this.creature.usingMoveTwo()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(1).invokeMove();
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
+            this.canBeExecutedMountedResult = this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
 
-            if (this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+            if (this.canBeExecutedMountedResult) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(1));
 
                 if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
@@ -103,8 +106,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         else if (this.creature.usingMoveThree()) {
             this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(2));
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
+            this.canBeExecutedMountedResult = this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
 
-            if (this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+            if (this.canBeExecutedMountedResult) {
                 this.currentInvokedMove = this.creature.getLearnedMoves().get(2).invokeMove();
 
                 if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
@@ -130,7 +134,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 this.target = null;
             }
         }
-        if (this.currentInvokedMove != null && this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+        if (this.currentInvokedMove != null && this.canBeExecutedMountedResult) {
             this.animTime = 0;
             this.creature.setPlayingInfiniteMoveAnim(false);
             this.finishFlag = false;
@@ -143,6 +147,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.currentInvokedMove.onStopExecuting(this.creature);
             this.currentInvokedMove = null;
         }
+        this.canBeExecutedMountedResult = false;
         this.creature.setPlayingInfiniteMoveAnim(false);
         this.creature.setCurrentCreatureMove(null);
         this.maxMoveAnimTime = 0;
@@ -152,7 +157,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
 
     @Override
     public void updateTask() {
-        if (this.currentInvokedMove == null || !this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target)) {
+        if (this.currentInvokedMove == null || !this.canBeExecutedMountedResult) {
             this.finishFlag = true;
             return;
         }
@@ -166,6 +171,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.creature.setUsingDelayAnim(false);
                     this.currentInvokedMove.onStartExecuting(this.creature);
                     this.creature.setUsingUnchargedAnim(true);
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
+                        this.creature.setMultistepMoveStep(0);
+                    }
                 }
                 if (this.animTime == this.moveAnimChargeUpTime) {
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
@@ -175,21 +183,27 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
+                        this.creature.setMultistepMoveStep(1);
+                    }
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag) {
-                    //also dont know what to put here
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
+                        this.creature.setMultistepMoveStep(2);
+                    }
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.animTime = 0;
                     this.creature.setUsingUnchargedAnim(false);
                     this.currentInvokedMove.onStopExecuting(this.creature);
                     this.setCoolDown(this.creature.currentCreatureMove().maxCooldown);
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setMultistepMoveStep(0);
                     this.finishFlag = true;
                 }
                 if (!this.finishFlag) {
                     this.animTime++;
-                    if (this.creature.currentCreatureMove().useTimeIsInfinite && this.animTime >= this.moveAnimUseTime && !this.currentInvokedMove.forceStopFlag) {
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite && this.animTime >= this.moveAnimChargeToUseTime && !this.currentInvokedMove.forceStopFlag) {
                         this.moveAnimUseTime++;
                         this.maxMoveAnimTime++;
                     }

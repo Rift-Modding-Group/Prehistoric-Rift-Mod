@@ -134,6 +134,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
 
+
+    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_HEAD_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_TAIL_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_STOMP_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -141,9 +147,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_JAW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_RANGED_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_STATUS_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-
-    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MOVING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private int boxReviveTime;
     private int energyMod;
@@ -289,6 +292,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         this.dataManager.register(MOVE_LIST, new ArrayList<>());
 
+        this.dataManager.register(USING_CHARGE_TYPE_MOVE, false);
+        this.dataManager.register(USING_CHARGE_TYPE_MOVE_DELAY, false);
+        this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE, false);
+        this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO, false);
+        this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE, false);
         this.dataManager.register(USING_HEAD_TYPE_MOVE, false);
         this.dataManager.register(USING_TAIL_TYPE_MOVE, false);
         this.dataManager.register(USING_STOMP_TYPE_MOVE, false);
@@ -296,9 +304,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_JAW_TYPE_MOVE, false);
         this.dataManager.register(USING_RANGED_TYPE_MOVE, false);
         this.dataManager.register(USING_STATUS_TYPE_MOVE, false);
-
-        this.dataManager.register(USING_CHARGE_TYPE_MOVE_DELAY, false);
-        this.dataManager.register(USING_CHARGE_TYPE_MOVE_MOVING, false);
     }
 
     @Override
@@ -1511,6 +1516,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             case STATUS:
                 this.setUsingStatusTypeMove(value);
                 break;
+            case CHARGE:
+                this.setUsingChargeTypeMove(value);
+                break;
         }
     }
 
@@ -1523,11 +1531,65 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    public boolean isUsingChargeTypeMove() {
-        return false;
+    public void setMultistepMoveStep(int step) {
+        if (this.currentCreatureMove() == null) return;
+        switch (this.currentCreatureMove().moveType) {
+            case CHARGE:
+                if (step == 0) {
+                    this.setUsingChargeTypeMoveMultistepOne(true);
+                    this.setUsingChargeTypeMoveMultistepTwo(false);
+                    this.setUsingChargeTypeMoveMultistepThree(false);
+                }
+                else if (step == 1) {
+                    this.setUsingChargeTypeMoveMultistepOne(false);
+                    this.setUsingChargeTypeMoveMultistepTwo(true);
+                    this.setUsingChargeTypeMoveMultistepThree(false);
+                }
+                else if (step == 2) {
+                    this.setUsingChargeTypeMoveMultistepOne(false);
+                    this.setUsingChargeTypeMoveMultistepTwo(false);
+                    this.setUsingChargeTypeMoveMultistepThree(true);
+                }
+                else {
+                    this.setUsingChargeTypeMoveMultistepOne(false);
+                    this.setUsingChargeTypeMoveMultistepTwo(false);
+                    this.setUsingChargeTypeMoveMultistepThree(false);
+                }
+                break;
+        }
     }
 
-    public void setUsingChargeTypeMove(boolean value) {}
+    public boolean isUsingChargeTypeMove() {
+        return this.dataManager.get(USING_CHARGE_TYPE_MOVE);
+    }
+
+    public void setUsingChargeTypeMove(boolean value) {
+        this.dataManager.set(USING_CHARGE_TYPE_MOVE, value);
+    }
+
+    public boolean usingChargeTypeMoveMultistepOne() {
+        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE);
+    }
+
+    public void setUsingChargeTypeMoveMultistepOne(boolean value) {
+        this.dataManager.set(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE, value);
+    }
+
+    public boolean usingChargeTypeMoveMultistepTwo() {
+        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO);
+    }
+
+    public void setUsingChargeTypeMoveMultistepTwo(boolean value) {
+        this.dataManager.set(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO, value);
+    }
+
+    public boolean usingChargeTypeMoveMultistepThree() {
+        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE);
+    }
+
+    public void setUsingChargeTypeMoveMultistepThree(boolean value) {
+        this.dataManager.set(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE, value);
+    }
 
     public boolean isUsingHeadTypeMove() {
         return this.dataManager.get(USING_HEAD_TYPE_MOVE);
@@ -1591,14 +1653,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setUsingChargeTypeMoveDelay(boolean value) {
         this.dataManager.set(USING_CHARGE_TYPE_MOVE_DELAY, value);
-    }
-
-    public boolean usingChargeTypeMoveMoving() {
-        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_MOVING);
-    }
-
-    public void setUsingChargeTypeMoveMoving(boolean value) {
-        this.dataManager.set(USING_CHARGE_TYPE_MOVE_MOVING, value);
     }
     //move anims end here
 
@@ -2471,11 +2525,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         data.addAnimationController(new AnimationController(this, "movement", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
-                if (usingChargeTypeMoveMoving()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charge_type_move_charge", true));
-                    return PlayState.CONTINUE;
-                }
-                else  {
+                if (currentCreatureMove() == null) {
                     if (isSitting() && !isBeingRidden() && !hasTarget()) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sitting", true));
                         return PlayState.CONTINUE;
@@ -2488,6 +2538,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         event.getController().clearAnimationCache();
                         return PlayState.STOP;
                     }
+                }
+                else {
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
                 }
             }
         }));
@@ -2536,7 +2590,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_status_type_move", false));
                         return PlayState.CONTINUE;
                     }
-                    else if (isUsingChargeTypeMove()) {}
+                    else if (isUsingChargeTypeMove()) {
+                        if (currentCreatureMove().useTimeIsInfinite) {
+                            if (usingChargeTypeMoveMultistepOne()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move_pt1", false));
+                            else if (usingChargeTypeMoveMultistepTwo()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move_pt2", true));
+                            else if (usingChargeTypeMoveMultistepThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move_pt3", false));
+                        }
+                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
                     else {
                         event.getController().clearAnimationCache();
                         return PlayState.STOP;
