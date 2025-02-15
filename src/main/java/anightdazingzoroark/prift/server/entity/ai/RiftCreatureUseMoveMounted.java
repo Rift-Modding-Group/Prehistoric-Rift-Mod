@@ -147,6 +147,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.currentInvokedMove.onStopExecuting(this.creature);
             this.currentInvokedMove = null;
         }
+        this.creature.setMultistepMoveStep(0);
         this.canBeExecutedMountedResult = false;
         this.creature.setPlayingInfiniteMoveAnim(false);
         this.creature.setCurrentCreatureMove(null);

@@ -148,6 +148,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_RANGED_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_STATUS_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
+    private static final DataParameter<Float> LEAP_X_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
+    private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
+    private static final DataParameter<Float> LEAP_Z_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
+
     private int boxReviveTime;
     private int energyMod;
     private int energyRegenMod;
@@ -304,6 +308,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_JAW_TYPE_MOVE, false);
         this.dataManager.register(USING_RANGED_TYPE_MOVE, false);
         this.dataManager.register(USING_STATUS_TYPE_MOVE, false);
+
+        this.dataManager.register(LEAP_X_VELOCITY, 0.0f);
+        this.dataManager.register(LEAP_Y_VELOCITY, 0.0f);
+        this.dataManager.register(LEAP_Z_VELOCITY, 0.0f);
     }
 
     @Override
@@ -1750,6 +1758,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(BEHAVIOR, (byte) tameBehavior.ordinal());
     }
 
+    public void setLeapDirection(float velocityX, float velocityY, float velocityZ) {
+        this.dataManager.set(LEAP_X_VELOCITY, velocityX);
+        this.dataManager.set(LEAP_Y_VELOCITY, velocityY);
+        this.dataManager.set(LEAP_Z_VELOCITY, velocityZ);
+    }
+
+    public Vec3d getLeapDirection() {
+        return new Vec3d(this.dataManager.get(LEAP_X_VELOCITY), this.dataManager.get(LEAP_Y_VELOCITY), this.dataManager.get(LEAP_Z_VELOCITY));
+    }
+
     //for multi hitbox stuff
     public World getWorld() {
         return this.world;
@@ -2284,6 +2302,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
+        if (this.getLeapDirection().length() > 0f && this.onGround()) {
+            this.motionX = this.getLeapDirection().x;
+            this.motionY = this.getLeapDirection().y;
+            this.motionZ = this.getLeapDirection().z;
+        }
+        else this.setLeapDirection(0f, 0f, 0f);
+
         if (this.isSaddled() && this.isBeingRidden() && this.canBeSteered()) {
             EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();
             if (controller != null) {
@@ -2304,6 +2329,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 float moveSpeedMod = (this.getEnergy() > 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = (float)(Math.max(0, this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - riderSpeed)) * moveSpeedMod;
+                /*
                 if (this instanceof ILeapingMob) {
                     ILeapingMob leapingMob = (ILeapingMob) this;
                     if (!leapingMob.isLeaping() && leapingMob.getLeapPower() > 0) {
@@ -2319,6 +2345,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         leapingMob.setLeapPower(0);
                     }
                 }
+                 */
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : moveSpeed);
 
                 //for getting out of bodies of water easily
@@ -2347,28 +2374,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                             }
                         }
                     }
-                }
-
-                //leap to target for leap attackers
-                if (this instanceof ILeapAttackingMob && ((ILeapAttackingMob)this).startLeapingToTarget()) {
-                    ILeapAttackingMob leapAttackingMob = (ILeapAttackingMob)this;
-                    leapAttackingMob.setLeaping(true);
-
-                    double dx = leapAttackingMob.getControlledLeapTarget().posX - this.posX;
-                    double dz = leapAttackingMob.getControlledLeapTarget().posZ - this.posZ;
-                    double dist = Math.sqrt(dx * dx + dz * dz);
-
-                    double velY = Math.sqrt(2 * RiftUtil.gravity * 6f);
-                    double totalTime = velY / RiftUtil.gravity;
-                    double velXZ = dist * 2 / totalTime;
-
-                    double angleToTarget = Math.atan2(dz, dx);
-
-                    this.motionX = velXZ * Math.cos(angleToTarget);
-                    this.motionZ = velXZ * Math.sin(angleToTarget);
-                    this.motionY = velY;
-                    this.velocityChanged = true;
-                    leapAttackingMob.setStartLeapToTarget(false);
                 }
 
                 //float above water

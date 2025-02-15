@@ -138,6 +138,7 @@ public class PlayerTamedCreaturesHelper {
     }
 
     public static void updatePartyMem(RiftCreature creature) {
+        if (creature.getOwner() == null) return;
         if (creature.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyDeployed((EntityPlayer) creature.getOwner(), creature));
         else RiftMessages.WRAPPER.sendToAll(new RiftUpdatePartyDeployed((EntityPlayer) creature.getOwner(), creature));
     }

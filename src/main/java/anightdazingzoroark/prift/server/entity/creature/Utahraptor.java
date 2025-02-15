@@ -107,32 +107,6 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     }
 
     @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-        this.manageCanLeap();
-        this.manageCanPackBuff();
-        if (!this.world.isRemote) {
-            this.setClimbing(this.collidedHorizontally);
-
-            //manage leaping
-            if (this.onGround() && this.isLeaping()) {
-                this.setLeaping(false);
-                this.setControlledLeapTarget(null);
-            }
-            if (!this.onGround() && this.isLeaping() && this.isBeingRidden()) {
-                if (this.contLeapTarget != null) {
-                    AxisAlignedBB leapHithbox = this.getEntityBoundingBox().grow(0.75D);
-                    List<EntityLivingBase> leapedEntities = this.world.getEntitiesWithinAABB(EntityLivingBase.class, leapHithbox, null);
-                    if (leapedEntities.contains(this.contLeapTarget)) {
-                        this.attackEntityAsMob(this.contLeapTarget);
-                        this.setControlledLeapTarget(null);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
 
@@ -146,20 +120,12 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
     }
 
-    private void manageCanLeap() {
-        if (this.leapCooldown > 0) this.leapCooldown--;
-    }
-
-    private void manageCanPackBuff() {
-        if (this.packBuffCooldown > 0) this.packBuffCooldown--;
-        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
-    }
-
     public void fall(float distance, float damageMultiplier) {}
 
     protected PathNavigate createNavigator(World worldIn) {
         return new PathNavigateRiftClimber(this, worldIn);
     }
+
 
     public boolean isLeaping() {
         return this.dataManager.get(LEAPING);

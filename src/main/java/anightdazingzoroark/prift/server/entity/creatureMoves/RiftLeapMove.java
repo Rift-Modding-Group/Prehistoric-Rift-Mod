@@ -13,6 +13,7 @@ import java.util.List;
 
 public class RiftLeapMove extends RiftCreatureMove {
     private boolean notOnGroundFlag = false;
+    private boolean alreadyJumping = false;
 
     public RiftLeapMove() {
         super(CreatureMove.LEAP);
@@ -32,16 +33,20 @@ public class RiftLeapMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onStartExecuting(RiftCreature user, Entity target) {}
+    public void onStartExecuting(RiftCreature user, Entity target) {
+        user.disableCanRotateMounted();
+    }
 
     @Override
     public void whileExecuting(RiftCreature user) {
         //print velocities for testing
+        /*
         if (user.isTamed()) {
             System.out.println("x velocity: "+user.motionX);
             System.out.println("y velocity: "+user.motionY);
             System.out.println("z velocity: "+user.motionZ);
         }
+        */
 
         if (!user.onGround && !this.notOnGroundFlag) this.notOnGroundFlag = true;
 
@@ -81,11 +86,7 @@ public class RiftLeapMove extends RiftCreatureMove {
             double velXZ = dist * 2 / totalTime;
 
             double angleToTarget = Math.atan2(dz, dx);
-
-            user.motionX = velXZ * Math.cos(angleToTarget);
-            user.motionZ = velXZ * Math.sin(angleToTarget);
-            user.motionY = velY;
-            user.velocityChanged = true;
+            user.setLeapDirection((float) (velXZ * Math.cos(angleToTarget)), (float) velY, (float) (velXZ * Math.sin(angleToTarget)));
         }
         else {
             double dx = user.getLookVec().normalize().scale(user.rangedWidth()).x;
@@ -97,21 +98,19 @@ public class RiftLeapMove extends RiftCreatureMove {
             double velXZ = dist * 2 / totalTime;
 
             double angleToTarget = Math.atan2(dz, dx);
-
-            user.motionX = velXZ * Math.cos(angleToTarget);
-            user.motionZ = velXZ * Math.sin(angleToTarget);
-            user.motionY = velY;
-            user.velocityChanged = true;
+            user.setLeapDirection((float) (velXZ * Math.cos(angleToTarget)), (float) velY, (float) (velXZ * Math.sin(angleToTarget)));
+            /*
             if (user.isTamed()) {
                 System.out.println("init x velocity: "+(velXZ * Math.cos(angleToTarget)));
                 System.out.println("init y velocity: "+velY);
                 System.out.println("init z velocity: "+(velXZ * Math.sin(angleToTarget)));
             }
+            */
         }
     }
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-
+        user.enableCanRotateMounted();
     }
 }
