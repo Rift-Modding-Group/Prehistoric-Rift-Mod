@@ -171,7 +171,7 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP, CreatureMove.CHARGE);
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP, CreatureMove.CHARGE, CreatureMove.BIDE);
     }
 
     @Override

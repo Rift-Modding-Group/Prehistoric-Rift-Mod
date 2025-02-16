@@ -95,9 +95,8 @@ public class Utahraptor extends RiftCreature implements IHerder {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftPackBuff(this, 1.68f, 0f, 90f));
-        this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));

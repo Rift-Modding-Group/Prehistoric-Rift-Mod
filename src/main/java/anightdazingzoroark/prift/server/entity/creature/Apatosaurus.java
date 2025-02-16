@@ -13,6 +13,7 @@ import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
@@ -158,9 +159,10 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 3f, 3f));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftApatosaurusControlledTailWhip(this, 0.6F, 0.4F));
-        this.tasks.addTask(3, new RiftControlledAttack(this, 3F, 3F));
-        this.tasks.addTask(4, new RiftAttack.ApatosaurusAttack(this, 1.0D, 3F, 3F));
+
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
         this.tasks.addTask(7, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(8, new RiftWander(this, 1.0D));
@@ -449,6 +451,35 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         }
     }
 
+
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.STOMP, CreatureMove.TAIL_WHIP, CreatureMove.BIDE);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.STOMP, CreatureMove.TAIL_WHIP, CreatureMove.BIDE);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(50D)
+                .defineChargeUpToUseLength(2D)
+                .defineRecoverFromUseLength(8D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.TAIL, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(1D)
+                .defineRecoverFromUseLength(4D)
+                .finalizePoints());
+        return moveMap;
+    }
+    //move related stuff ends here
+
     public float attackWidth() {
         return 6f;
     }
@@ -473,47 +504,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
-        if (control == 0) {
-            if (rider.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) {
-                if (this.getLeftClickCooldown() == 0) {
-                    switch (this.getWeapon()) {
-                        case CANNON:
-                            this.manageCannonFiring();
-                            break;
-                        case MORTAR:
-                            this.manageMortarFiring(holdAmount);
-                            break;
-                        case CATAPULT:
-                            this.manageCatapultFiring(holdAmount);
-                            break;
-                    }
-                }
-            }
-            else {
-                if (this.getEnergy() > 0) {
-                    if (!this.isActing()) {
-                        this.forcedAttackTarget = target;
-                        this.forcedBreakPos = pos;
-                        this.setAttacking(true);
-                    }
-                }
-                else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-            }
-            this.setLeftClickUse(0);
-        }
-        else if (control == 1) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) this.setTailWhipping(true);
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        else if (control == 3) {
-            if (!this.isActing()) RiftMessages.WRAPPER.sendToServer(new RiftApatosaurusManagePassengers(this));
-            this.setMiddleClickUse(0);
-        }
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     private void manageCannonFiring() {
         EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
