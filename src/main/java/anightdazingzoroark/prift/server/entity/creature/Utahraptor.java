@@ -31,7 +31,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPackHunter, IHerder {
+public class Utahraptor extends RiftCreature implements IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/utahraptor"));
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Utahraptor.class, DataSerializers.BOOLEAN);
@@ -126,44 +126,6 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
         return new PathNavigateRiftClimber(this, worldIn);
     }
 
-
-    public boolean isLeaping() {
-        return this.dataManager.get(LEAPING);
-    }
-
-    public void setLeaping(boolean value) {
-        this.dataManager.set(LEAPING, value);
-        this.setActing(value);
-    }
-
-    public float getLeapPower() {
-        return this.leapPower;
-    }
-
-    public void setLeapPower(float value) {
-        this.leapPower = value;
-    }
-
-    public float leapWidth() {
-        return 16f;
-    }
-
-    public Entity getControlledLeapTarget() {
-        return this.contLeapTarget;
-    }
-
-    public void setControlledLeapTarget(Entity value) {
-        this.contLeapTarget = value;
-    }
-
-    public boolean startLeapingToTarget() {
-        return this.startLeapingToTarget;
-    }
-
-    public void setStartLeapToTarget(boolean value) {
-        this.startLeapingToTarget = value;
-    }
-
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
@@ -201,30 +163,6 @@ public class Utahraptor extends RiftCreature implements ILeapAttackingMob, IPack
     @Override
     public int slotCount() {
         return 18;
-    }
-
-    public void setPackBuffing(boolean value) {
-        this.dataManager.set(PACK_BUFFING, Boolean.valueOf(value));
-        this.setActing(value);
-    }
-
-    public boolean isPackBuffing() {
-        return this.dataManager.get(PACK_BUFFING);
-    }
-
-    public void setPackBuffCooldown(int value) {
-        this.packBuffCooldown = value;
-    }
-
-    public int getPackBuffCooldown() {
-        return this.packBuffCooldown;
-    }
-
-    public List<PotionEffect> packBuffEffect() {
-        List<PotionEffect> packBuffEffects = new ArrayList<>();
-        packBuffEffects.add(new PotionEffect(MobEffects.SPEED, 90 * 20, 2));
-        packBuffEffects.add(new PotionEffect(MobEffects.STRENGTH, 90 * 20, 2));
-        return packBuffEffects;
     }
 
     //move related stuff starts here

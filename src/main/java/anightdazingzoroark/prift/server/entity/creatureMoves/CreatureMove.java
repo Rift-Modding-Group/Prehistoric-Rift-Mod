@@ -16,7 +16,8 @@ public enum CreatureMove {
     BIDE(null, MoveType.DEFENSE, ChargeType.GRADIENT_THEN_USE, 80, 100, 200, false, false), //basically like the since removed move from pokemon, absorb all damage you take, then reflect it all back to the opponent
     SELF_DESTRUCT(null, MoveType.RANGED, ChargeType.NONE, 300, 0, 0, false, false), //will be given only to anky for now
     LEAP(RiftLeapMove.class, MoveType.CHARGE, ChargeType.COOLDOWN_ONLY, 50, 0, 100, false, true),
-    PACK_CALL(RiftPackCallMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 3600, false, false);
+    PACK_CALL(RiftPackCallMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 3600, false, false),
+    TAIL_WHIP(null, MoveType.TAIL, ChargeType.NONE, 0, 0, 0, false, false);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveType moveType;

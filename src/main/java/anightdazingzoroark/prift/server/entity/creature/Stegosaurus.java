@@ -40,9 +40,8 @@ import software.bernie.geckolib3.core.IAnimatable;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAttacker, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder, IWorkstationUser {
+public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
-    private static final DataParameter<Boolean> STRONG_ATTACKING = EntityDataManager.<Boolean>createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_LEAD_FOR_WORK = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
@@ -105,7 +104,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(STRONG_ATTACKING, false);
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
         this.dataManager.register(USING_LEAD_FOR_WORK, false);
@@ -390,61 +388,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
         return false;
     }
 
-    public boolean canDoTurretMode() {
-        return true;
-    }
-
-    public void strongControlAttack() {
-        boolean breakFlag = false;
-
-        //attack entity
-        if (this.forcedAttackTarget != null && RiftUtil.checkForNoAssociations(this, this.forcedAttackTarget)) {
-            breakFlag = this.attackEntityAsMobStrong(this.forcedAttackTarget);
-        }
-
-        //break blocks
-        if (this.forcedBreakPos != null && !breakFlag) {
-            IBlockState blockState = this.world.getBlockState(this.forcedBreakPos);
-            if (blockState.getMaterial() != Material.AIR && this.checkBasedOnStrength(blockState)) {
-                for (int x = -1; x <= 1; x++) {
-                    for (int y = 0; y <= 2; y++) {
-                        for (int z = -1; z <= 1; z++) {
-                            BlockPos toBreakPos = this.forcedBreakPos.add(x, y, z);
-                            IBlockState toBreakState = this.world.getBlockState(toBreakPos);
-                            if (toBreakState.getMaterial() != Material.AIR && this.checkBasedOnStrength(toBreakState)) {
-                                this.world.destroyBlock(toBreakPos, true);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        //reset
-        this.forcedAttackTarget = null;
-        this.forcedBreakPos = null;
-    }
-
-    @Override
-    public void controlRangedAttack(double strength) {
-        ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this, (EntityPlayer)this.getControllingPassenger());
-        thrownStegoPlate.setDamage(strength * 0.04D + 4D + (double)(this.getLevel())/10D);
-        thrownStegoPlate.setIsCritical(strength >= 50);
-        thrownStegoPlate.setVariant(this.getVariant());
-        float velocity = (float) strength * 0.015f + 1.5f;
-        thrownStegoPlate.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, velocity, 1.0F);
-        this.world.spawnEntity(thrownStegoPlate);
-    }
-
-    private boolean attackEntityAsMobStrong(Entity entityIn) {
-        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), ((float) this.strongAttackCharge - 100f)/3f + 30f + (float)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
-        if (flag) {
-            this.applyEnchantments(this, entityIn);
-            if (RiftConfigHandler.getConfig(this.creatureType).general.canInflictBleed) NonPotionEffectsHelper.setBleeding(entityIn, 0, 200);
-        }
-        return flag;
-    }
-
     @Override
     public boolean canDoHerding() {
         return !this.isTamed();
@@ -487,16 +430,6 @@ public class Stegosaurus extends RiftCreature implements IAnimatable, IRangedAtt
     @Override
     public float[] ageScaleParams() {
         return new float[]{0.3f, 2.125f};
-    }
-
-    public boolean isStrongAttacking() {
-        return this.dataManager.get(STRONG_ATTACKING);
-    }
-
-    public void setIsStrongAttacking(boolean value) {
-        this.dataManager.set(STRONG_ATTACKING, value);
-        this.setUsingLeftClick(value);
-        this.setActing(value);
     }
 
     @Override

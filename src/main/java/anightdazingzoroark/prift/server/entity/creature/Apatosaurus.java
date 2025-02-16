@@ -200,6 +200,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);
     }
 
+    /*
     @SideOnly(Side.CLIENT)
     @Override
     public void setControls() {
@@ -263,6 +264,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
             }
         }
     }
+    */
 
     //i have no fucking idea why but this breaks the apato's ability to use catapults
     //just wtf

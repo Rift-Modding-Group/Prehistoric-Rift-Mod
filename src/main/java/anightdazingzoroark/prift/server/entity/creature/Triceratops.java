@@ -41,15 +41,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Triceratops extends RiftCreature implements IChargingMob, IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
+public class Triceratops extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
     private static final DataParameter<Boolean> STOMPING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOWER_HEAD = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> CAN_CHARGE = EntityDataManager.<Boolean>createKey(Triceratops.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> START_CHARGING = EntityDataManager.<Boolean>createKey(Triceratops.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> CHARGING = EntityDataManager.<Boolean>createKey(Triceratops.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> END_CHARGING = EntityDataManager.<Boolean>createKey(Triceratops.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(Triceratops.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(Triceratops.class, DataSerializers.VARINT);
@@ -105,10 +101,6 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
         this.dataManager.register(LOWER_HEAD, false);
-        this.dataManager.register(CAN_CHARGE, true);
-        this.dataManager.register(START_CHARGING, false);
-        this.dataManager.register(CHARGING, false);
-        this.dataManager.register(END_CHARGING, false);
         this.dataManager.register(USING_WORKSTATION, false);
         this.dataManager.register(WORKSTATION_X_POS, 0);
         this.dataManager.register(WORKSTATION_Y_POS, 0);
@@ -148,12 +140,6 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     }
 
     @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-        this.manageCanCharge();
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
 
@@ -180,11 +166,6 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
         this.readHarvestWanderDataFromNBT(compound);
         this.readWorkstationDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
-    }
-
-    private void manageCanCharge() {
-        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
-        if (this.getRightClickCooldown() == 0) this.setCanCharge(true);
     }
 
     //move related stuff starts here
@@ -361,54 +342,6 @@ public class Triceratops extends RiftCreature implements IChargingMob, IWorkstat
     @Override
     public AxisAlignedBB breakRange() {
         return new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
-    }
-
-    public boolean isLoweringHead() {
-        return this.dataManager.get(LOWER_HEAD);
-    }
-
-    public void setLowerHead(boolean value) {
-        this.dataManager.set(LOWER_HEAD, value);
-    }
-
-    public boolean canCharge() {
-        return this.dataManager.get(CAN_CHARGE);
-    }
-
-    public void setCanCharge(boolean value) {
-        this.dataManager.set(CAN_CHARGE, value);
-    }
-
-    public boolean isStartCharging() {
-        return this.dataManager.get(START_CHARGING);
-    }
-
-    public void setStartCharging(boolean value) {
-        this.dataManager.set(START_CHARGING, value);
-    }
-
-    public boolean isCharging() {
-        return this.dataManager.get(CHARGING);
-    }
-
-    public void setIsCharging(boolean value) {
-        this.dataManager.set(CHARGING, value);
-    }
-
-    public boolean isEndCharging() {
-        return this.dataManager.get(END_CHARGING);
-    }
-
-    public void setEndCharging(boolean value) {
-        this.dataManager.set(END_CHARGING, value);
-    }
-
-    public double chargeBoost() {
-        return 1.75D;
-    }
-
-    public float chargeWidth() {
-        return 20f;
     }
 
     @Override
