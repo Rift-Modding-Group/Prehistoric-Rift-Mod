@@ -55,6 +55,11 @@ public enum CreatureMove {
         return move;
     }
 
+    public String moveTypeName() {
+        if (this == BIDE) return "bide";
+        return this.moveType.toString().toLowerCase()+"_type";
+    }
+
     public enum MoveType {
         CHARGE, //movement based (always requires movement to use)
         HEAD, //head hitting based

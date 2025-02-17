@@ -476,7 +476,7 @@
 				}
 			}
 		},
-		"animation.apatosaurus.use_bide_move_start": {
+		"animation.apatosaurus.use_charged_bide_move_start": {
 			"animation_length": 0.25,
 			"bones": {
 				"neck0": {
@@ -509,7 +509,7 @@
 				}
 			}
 		},
-		"animation.apatosaurus.use_bide_move_pt1": {
+		"animation.apatosaurus.use_charged_bide_move_pt1": {
 			"animation_length": 5,
 			"bones": {
 				"body": {
@@ -545,7 +545,7 @@
 				}
 			}
 		},
-		"animation.apatosaurus.use_bide_move_pt1_hold": {
+		"animation.apatosaurus.use_charged_bide_move_pt1_hold": {
 			"loop": true,
 			"bones": {
 				"body": {
@@ -581,7 +581,7 @@
 				}
 			}
 		},
-		"animation.apatosaurus.use_bide_move_pt2": {
+		"animation.apatosaurus.use_charged_bide_move_pt2": {
 			"animation_length": 0.5,
 			"bones": {
 				"body": {

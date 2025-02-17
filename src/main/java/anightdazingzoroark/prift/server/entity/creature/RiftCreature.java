@@ -147,6 +147,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_JAW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_RANGED_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_STATUS_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_DEFENSE_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Float> LEAP_X_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
@@ -309,6 +310,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_JAW_TYPE_MOVE, false);
         this.dataManager.register(USING_RANGED_TYPE_MOVE, false);
         this.dataManager.register(USING_STATUS_TYPE_MOVE, false);
+        this.dataManager.register(USING_DEFENSE_TYPE_MOVE_DELAY, false);
 
         this.dataManager.register(LEAP_X_VELOCITY, 0.0f);
         this.dataManager.register(LEAP_Y_VELOCITY, 0.0f);
@@ -1537,7 +1539,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             case CHARGE:
                 this.setUsingChargeTypeMoveDelay(value);
                 break;
+            case DEFENSE:
+                this.setUsingDefenseTypeMoveDelay(value);
+                break;
         }
+    }
+
+    public boolean usingDelayAnim() {
+        if (this.currentCreatureMove() == null) return false;
+        switch (this.currentCreatureMove().moveType) {
+            case CHARGE:
+                return this.usingChargeTypeMoveDelay();
+            case DEFENSE:
+                return this.usingDefenseTypeMoveDelay();
+        }
+        return false;
     }
 
     public void setMultistepMoveStep(int step) {
@@ -1662,6 +1678,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setUsingChargeTypeMoveDelay(boolean value) {
         this.dataManager.set(USING_CHARGE_TYPE_MOVE_DELAY, value);
+    }
+
+    public boolean usingDefenseTypeMoveDelay() {
+        return this.dataManager.get(USING_DEFENSE_TYPE_MOVE_DELAY);
+    }
+
+    public void setUsingDefenseTypeMoveDelay(boolean value) {
+        this.dataManager.set(USING_DEFENSE_TYPE_MOVE_DELAY, value);
     }
     //move anims end here
 
@@ -2629,73 +2653,73 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 if (currentCreatureMove() != null && currentCreatureMove().chargeType.requiresCharge()) {
                     if (movePos == 0) {
                         //when delay goes off, prioritize it
-                        if (usingChargeTypeMoveDelay()) {
-                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_start", false));
+                        if (usingDelayAnim()) {
+                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_start", false));
                         }
                         //once delay is over, utilize the following below
                         else {
                             if (getMoveOneCooldown() == 0 && usingMoveOne()) {
                                 if (getMoveOneUse() > 0 && getMoveOneUse() < currentCreatureMove().maxUse) {
-                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1", false));
+                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1", false));
                                 }
                                 else if (getMoveOneUse() >= currentCreatureMove().maxUse) {
-                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
+                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1_hold", true));
                                 }
                             }
                             else if (getMoveOneCooldown() == 0 && getMoveOneUse() > 0 && !usingMoveOne()) {
                                 if (currentCreatureMove().useTimeIsInfinite) {
-                                    if (getPlayingInfiniteMoveAnim()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", true));
-                                    else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt3", false));
+                                    if (getPlayingInfiniteMoveAnim()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_infinite_"+currentCreatureMove().moveTypeName()+"_move_pt2", true));
+                                    else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_"+currentCreatureMove().moveTypeName()+"_move_pt3", false));
                                 }
-                                else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
+                                else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt2", false));
                             }
                         }
                     }
                     else if (movePos == 1) {
                         //when delay goes off, prioritize it
-                        if (usingChargeTypeMoveDelay()) {
-                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_start", false));
+                        if (usingDelayAnim()) {
+                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_start", false));
                         }
                         //once delay is over, utilize the following below
                         else {
                             if (getMoveTwoCooldown() == 0 && usingMoveTwo()) {
                                 if (getMoveTwoUse() > 0 && getMoveTwoUse() < currentCreatureMove().maxUse) {
-                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1", false));
+                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1", false));
                                 }
                                 else if (getMoveTwoUse() >= currentCreatureMove().maxUse) {
-                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
+                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1_hold", true));
                                 }
                             }
                             else if (getMoveTwoCooldown() == 0 && getMoveTwoUse() > 0 && !usingMoveTwo()) {
                                 if (currentCreatureMove().useTimeIsInfinite) {
-                                    if (getPlayingInfiniteMoveAnim()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", true));
-                                    else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt3", false));
+                                    if (getPlayingInfiniteMoveAnim()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase()+".use_charged_infinite_"+currentCreatureMove().moveTypeName()+"_move_pt2", true));
+                                    else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_"+currentCreatureMove().moveTypeName()+"_move_pt3", false));
                                 }
-                                else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
+                                else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt2", false));
                             }
                         }
                     }
                     else if (movePos == 2) {
                         //when delay goes off, prioritize it
-                        if (usingChargeTypeMoveDelay()) {
-                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_start", false));
+                        if (usingDelayAnim()) {
+                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_start", false));
                         }
                         //once delay is over, utilize the following below
                         else {
                             if (getMoveThreeCooldown() == 0 && usingMoveThree()) {
                                 if (getMoveThreeUse() > 0 && getMoveThreeUse() < currentCreatureMove().maxUse) {
-                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1", false));
+                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1", false));
                                 }
                                 else if (getMoveThreeUse() >= currentCreatureMove().maxUse) {
-                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveType.toString().toLowerCase()+"_type_move_pt1_hold", true));
+                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+ creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1_hold", true));
                                 }
                             }
                             else if (getMoveThreeCooldown() == 0 && getMoveThreeUse() > 0 && !usingMoveThree()) {
                                 if (currentCreatureMove().useTimeIsInfinite) {
-                                    if (getPlayingInfiniteMoveAnim()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", true));
-                                    else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt3", false));
+                                    if (getPlayingInfiniteMoveAnim()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_infinite_"+currentCreatureMove().moveTypeName()+"_move_pt2", true));
+                                    else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_infinite_"+currentCreatureMove().moveTypeName()+"_move_pt3", false));
                                 }
-                                else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveType.toString().toLowerCase() + "_type_move_pt2", false));
+                                else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt2", false));
                             }
                         }
                     }

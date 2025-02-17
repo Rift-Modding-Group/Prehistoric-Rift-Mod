@@ -227,7 +227,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     //makes the anim prematurely stop
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
                 }
-                if (this.animTime == this.moveAnimChargeUpTime) {
+                if (this.animTime == this.moveAnimChargeUpTime || (this.creature.currentCreatureMove().stopUponFullCharge && this.getUse() >= this.creature.currentCreatureMove().maxUse)) {
                     this.setChargedMoveBeingUsed(false);
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 }
