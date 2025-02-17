@@ -26,6 +26,9 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
     }
 
     @Override
+    public void whileChargingUp(RiftCreature user) {}
+
+    @Override
     public void whileExecuting(RiftCreature user) {
 
     }

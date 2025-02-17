@@ -13,7 +13,6 @@ import java.util.List;
 
 public class RiftLeapMove extends RiftCreatureMove {
     private boolean notOnGroundFlag = false;
-    private boolean alreadyJumping = false;
 
     public RiftLeapMove() {
         super(CreatureMove.LEAP);
@@ -38,16 +37,10 @@ public class RiftLeapMove extends RiftCreatureMove {
     }
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-        //print velocities for testing
-        /*
-        if (user.isTamed()) {
-            System.out.println("x velocity: "+user.motionX);
-            System.out.println("y velocity: "+user.motionY);
-            System.out.println("z velocity: "+user.motionZ);
-        }
-        */
+    public void whileChargingUp(RiftCreature user) {}
 
+    @Override
+    public void whileExecuting(RiftCreature user) {
         if (!user.onGround && !this.notOnGroundFlag) this.notOnGroundFlag = true;
 
         if (this.notOnGroundFlag) {

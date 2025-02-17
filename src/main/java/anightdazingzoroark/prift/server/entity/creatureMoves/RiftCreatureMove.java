@@ -32,6 +32,8 @@ public abstract class RiftCreatureMove {
 
     public void onEndChargeUp(RiftCreature user, int useAmount) {}
 
+    public abstract void whileChargingUp(RiftCreature user);
+
     public abstract void whileExecuting(RiftCreature user);
 
     public void onReachUsePoint(RiftCreature user, Entity target) {

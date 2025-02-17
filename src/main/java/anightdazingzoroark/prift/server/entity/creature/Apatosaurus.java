@@ -476,6 +476,13 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
                 .defineChargeUpToUseLength(1D)
                 .defineRecoverFromUseLength(4D)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.DEFENSE, this.currentCreatureMove() == CreatureMove.BIDE ?
+                new RiftCreatureMoveAnimator(this)
+                        .defineStartMoveDelayLength(5D)
+                        .defineChargeUpToUseLength(2.5D)
+                        .defineRecoverFromUseLength(7.5D)
+                        .finalizePoints()
+        : null);
         return moveMap;
     }
     //move related stuff ends here

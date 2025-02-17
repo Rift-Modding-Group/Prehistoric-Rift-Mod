@@ -22,6 +22,9 @@ public class RiftThagomizeMove extends RiftCreatureMove {
     }
 
     @Override
+    public void whileChargingUp(RiftCreature user) {}
+
+    @Override
     public void whileExecuting(RiftCreature user) {}
 
     @Override

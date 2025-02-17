@@ -21,6 +21,9 @@ public class RiftTackleMove extends RiftCreatureMove {
     }
 
     @Override
+    public void whileChargingUp(RiftCreature user) {}
+
+    @Override
     public void whileExecuting(RiftCreature user) {
 
     }

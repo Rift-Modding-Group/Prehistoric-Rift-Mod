@@ -104,6 +104,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             }
         }
         else if (this.creature.usingMoveThree()) {
+            this.currentInvokedMove = this.creature.getLearnedMoves().get(1).invokeMove();
             this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(2));
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
             this.canBeExecutedMountedResult = this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
@@ -179,6 +180,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime == this.moveAnimChargeUpTime) {
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 }
+                if (this.animTime >= this.moveAnimInitDelayTime && this.animTime <= this.moveAnimChargeUpTime) {
+                    this.currentInvokedMove.whileChargingUp(this.creature);
+                }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
                 }
@@ -226,6 +230,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime == this.moveAnimChargeUpTime) {
                     this.setChargedMoveBeingUsed(false);
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
+                }
+                if (this.animTime >= this.moveAnimInitDelayTime && this.animTime <= this.moveAnimChargeUpTime) {
+                    this.currentInvokedMove.whileChargingUp(this.creature);
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);

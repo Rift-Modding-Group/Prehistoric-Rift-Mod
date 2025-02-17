@@ -27,6 +27,9 @@ public class RiftTailWhipMove extends RiftCreatureMove {
     }
 
     @Override
+    public void whileChargingUp(RiftCreature user) {}
+
+    @Override
     public void whileExecuting(RiftCreature user) {
 
     }
@@ -40,7 +43,8 @@ public class RiftTailWhipMove extends RiftCreatureMove {
             public boolean apply(@Nullable Entity entity) {
                 if (entity instanceof EntityLivingBase) {
                     return RiftUtil.isAppropriateSize((EntityLivingBase) entity, RiftUtil.getMobSize(user))
-                            && RiftUtil.checkForNoAssociations(user, entity);
+                            && RiftUtil.checkForNoAssociations(user, entity)
+                            && !user.equals(entity);
                 }
                 return true;
             }

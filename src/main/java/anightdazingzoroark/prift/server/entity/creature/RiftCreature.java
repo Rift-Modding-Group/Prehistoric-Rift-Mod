@@ -198,6 +198,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected List<String> targetList;
     public boolean isFloatingOnWater;
     public boolean recentlyHit;
+    private float recentlyHitDamage;
     private int recentlyHitTicks;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
@@ -1800,6 +1801,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.recentlyHit = true;
         this.recentlyHitTicks = 60;
 
+        //additionally, get the damage received for use later
+        this.recentlyHitDamage = amount;
+
         //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
         if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
             Entity attacker = source.getImmediateSource();
@@ -1820,6 +1824,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return super.attackEntityFrom(source, amount);
     }
 
+    public float getRecentlyHitDamage() {
+        float valueToReturn = this.recentlyHitDamage;
+        this.recentlyHitDamage = 0;
+        return valueToReturn;
+    }
 
     @Override
     public boolean canBeCollidedWith() {
