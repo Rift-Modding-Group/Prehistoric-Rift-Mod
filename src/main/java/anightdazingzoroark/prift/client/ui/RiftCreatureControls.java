@@ -58,7 +58,7 @@ public class RiftCreatureControls {
         //show left mouse button icon
         int iconXPos = (int) (((width - 16 * this.iconScale) / 2D + 135 * this.iconScale) / this.iconScale);
         int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
-        float alpha = creature.getMoveOneCooldown() > 0 ? 0.2f : 1f;
+        float alpha = (forLargeWeapons ? creature.getLargeWeaponCooldown() > 0 : creature.getMoveOneCooldown() > 0) ? 0.2f : 1f;
 
         Minecraft.getMinecraft().getTextureManager().bindTexture(leftMouseIcon);
         GlStateManager.pushMatrix();
@@ -71,7 +71,7 @@ public class RiftCreatureControls {
 
         //show text
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-        String controlName = forLargeWeapons ? I18n.format("large_weapon_control.cannon") : I18n.format("creature_move."+creature.getLearnedMoves().get(0).toString().toLowerCase()+".name");
+        String controlName = forLargeWeapons ? I18n.format("large_weapon_control."+creature.getLargeWeapon().toString().toLowerCase()) : I18n.format("creature_move."+creature.getLearnedMoves().get(0).toString().toLowerCase()+".name");
         int textPosX = (int) ((width / 2D) / this.textScale + 440 * this.textScale);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
         int textColorHex = ((int)(alpha * 255f) << 24) | (255 << 16) | (255 << 8) | 255;

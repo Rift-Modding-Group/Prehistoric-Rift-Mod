@@ -46,7 +46,6 @@ public class RiftCannonball extends EntityArrow implements IRiftProjectile {
                     (raytraceResultIn.entityHit == null
                     || (!(raytraceResultIn.entityHit instanceof MultiPartEntityPart) && RiftUtil.checkForNoAssociations((RiftCreature) this.firer, raytraceResultIn.entityHit) && !raytraceResultIn.entityHit.equals(this.firer))
                     || (raytraceResultIn.entityHit instanceof MultiPartEntityPart && !((MultiPartEntityPart)raytraceResultIn.entityHit).parent.equals(this.firer)))) {
-                System.out.println("pew");
                 this.hasAlreadyHitFlag = false;
                 boolean flag = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this.firer);
                 this.world.newExplosion(this.firer, this.posX, this.posY, this.posZ, 6f, false, flag);

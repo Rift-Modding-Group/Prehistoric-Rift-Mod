@@ -19,6 +19,7 @@ import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
+import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.enums.CreatureDiet;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
@@ -495,11 +496,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void manageLargeWeaponFiring() {
-        if (this.getLargeWeaponCooldown() == 0 && ((this.getLargeWeaponUse() > 0 && this.getLargeWeapon().maxCooldown > 0 && !this.getUsingLargeWeapon()) ||
-                (this.getUsingLargeWeapon() && this.getLargeWeapon().maxCooldown == 0))) {
+        //System.out.println("can fire cannon: "+((this.getUsingLargeWeapon() && this.getLargeWeapon().maxCooldown == 0)));
+        if (this.getLargeWeaponCooldown() == 0 && (((this.getLargeWeaponUse() > 0 && this.getLargeWeapon().maxUse > 0 && !this.getUsingLargeWeapon()) ||
+                (this.getUsingLargeWeapon() && this.getLargeWeapon().maxUse == 0)))) {
             switch (this.getLargeWeapon()) {
                 case CANNON:
                     this.manageCannonFiring();
+                    break;
+                case MORTAR:
+                    this.manageMortarFiring();
                     break;
             }
         }
@@ -529,6 +534,35 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         else {
             rider.sendStatusMessage(new TextComponentTranslation("reminder.creature_cannon_no_ammo"), false);
+            this.setLargeWeaponUse(0);
+        }
+    }
+
+    private void manageMortarFiring() {
+        EntityPlayer rider = (EntityPlayer)this.getControllingPassenger();
+        int launchDist = RiftUtil.clamp((int)(0.1D * this.getLargeWeaponUse()) + 6, 6, 16);
+        boolean flag1 = false;
+        boolean flag2 = rider.isCreative();
+        int indexToRemove = -1;
+        for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
+            if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
+                if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.MORTAR_SHELL)) {
+                    flag1 = true;
+                    indexToRemove = x;
+                    break;
+                }
+            }
+        }
+        if (flag1 || flag2) {
+            RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, rider);
+            mortarShell.shoot(this, launchDist);
+            this.world.spawnEntity(mortarShell);
+            this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
+            this.setLargeWeaponCooldown(Math.max(this.getLargeWeaponUse() * 2, this.getLargeWeapon().maxCooldown));
+            this.setLargeWeaponUse(0);
+        }
+        else {
+            rider.sendStatusMessage(new TextComponentTranslation("reminder.creature_mortar_no_ammo"), false);
             this.setLargeWeaponUse(0);
         }
     }

@@ -514,30 +514,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
-    private void manageMortarFiring(int holdAmount) {
-        EntityPlayer rider = (EntityPlayer)this.getControllingPassenger();
-        int launchDist = RiftUtil.clamp((int)(0.1D * holdAmount) + 6, 6, 16);
-        boolean flag1 = false;
-        boolean flag2 = rider.isCreative();
-        int indexToRemove = -1;
-        for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
-            if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
-                if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.MORTAR_SHELL)) {
-                    flag1 = true;
-                    indexToRemove = x;
-                    break;
-                }
-            }
-        }
-        if (flag1 || flag2) {
-            RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, rider);
-            mortarShell.shoot(this, launchDist);
-            this.world.spawnEntity(mortarShell);
-            this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
-            this.setLeftClickCooldown(Math.max(holdAmount * 2, 60));
-        }
-    }
-
     private void manageCatapultFiring(int holdAmount) {
         EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
         boolean flag1 = false;

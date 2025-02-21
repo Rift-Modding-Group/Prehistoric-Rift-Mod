@@ -47,8 +47,9 @@ public class RiftManualUseLargeWeapon implements IMessage {
 
                 if (creature != null) {
                     if (message.using) {
+                        System.out.println("large weapon use: "+creature.getLargeWeaponUse());
                         creature.setUsingLargeWeapon(true);
-                        if (creature.getLargeWeapon().maxCooldown > 0) creature.setLargeWeaponUse(Math.max(creature.getLargeWeaponUse() + 1, creature.getLargeWeapon().maxCooldown));
+                        if (creature.getLargeWeapon().maxCooldown > 0) creature.setLargeWeaponUse(Math.min(creature.getLargeWeaponUse() + 1, creature.getLargeWeapon().maxUse));
                     }
                     else creature.setUsingLargeWeapon(false);
                 }
