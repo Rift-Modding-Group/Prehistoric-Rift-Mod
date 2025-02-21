@@ -15,24 +15,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class CreatureContainer extends Container {
     private final IInventory creatureInventory;
     private EntityPlayer player;
-    private final int[] fields;
     private final RiftCreature creature;
 
     public CreatureContainer(final RiftCreature creature, EntityPlayer player) {
         this.creatureInventory = creature.creatureInventory;
         this.player = player;
-        this.fields = new int[creature.creatureInventory.getFieldCount()];
         this.creature = creature;
-        int slots = creatureInventory.getSizeInventory() - (creature.canBeSaddled() ? 1 : 0);
+        int slots = creatureInventory.getSizeInventory() - creature.gearSlotCount();
         int rows = slots / 9;
         this.creatureInventory.openInventory(player);
 
-        //creature saddle slot
+        //saddle slot
         if (!this.creature.isBaby() && this.creature.canBeSaddled()) {
-            this.addSlotToContainer(new Slot(creature.creatureInventory, 0, 8, 18) {
+            this.addSlotToContainer(new Slot(creature.creatureInventory, creature.slotIndexForGear(RiftCreature.InventoryGearType.SADDLE), 8, 18) {
                 @Override
                 public boolean isItemValid(ItemStack stack) {
-                    return !stack.isEmpty() && creature.saddleItemEqual(stack);
+                    return !stack.isEmpty() && creature.saddleItemStack().getItem() == stack.getItem() && creature.saddleItemStack().getMetadata() == stack.getMetadata();
                 }
 
                 public boolean canTakeStack(EntityPlayer playerIn) {
@@ -41,10 +39,20 @@ public class CreatureContainer extends Container {
             });
         }
 
+        //large weapon slot
+        if (!this.creature.isBaby() && this.creature.canHoldLargeWeapon()) {
+            this.addSlotToContainer(new Slot(creature.creatureInventory, creature.slotIndexForGear(RiftCreature.InventoryGearType.LARGE_WEAPON), 26, 18) {
+                @Override
+                public boolean isItemValid(ItemStack stack) {
+                    return !stack.isEmpty() && creature.itemStackIsLargeWeapon(stack);
+                }
+            });
+        }
+
         //creature inventory
         for (int j = 0; j < rows; ++j) {
             for (int k = 0; k < 9; ++k) {
-                this.addSlotToContainer(new Slot(creature.creatureInventory, (k + (this.creature.canBeSaddled() ? 1 : 0)) + (j * 9), 8 + k * 18, 50 + j * 18));
+                this.addSlotToContainer(new Slot(creature.creatureInventory, (k + this.creature.gearSlotCount()) + (j * 9), 8 + k * 18, 50 + j * 18));
             }
         }
 

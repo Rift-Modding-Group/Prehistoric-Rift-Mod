@@ -113,7 +113,7 @@ public class RiftLeftClickChargeBar {
         float fillUpBar;
         if (creature instanceof Apatosaurus) {
             Apatosaurus apatosaurus = (Apatosaurus) creature;
-            if (apatosaurus.getWeapon().equals(RiftLargeWeaponType.CANNON)) {
+            if (apatosaurus.getLargeWeapon().equals(RiftLargeWeaponType.CANNON)) {
                 fillUpBar = (float) textureXSize / 30f * fill;
             }
             else {

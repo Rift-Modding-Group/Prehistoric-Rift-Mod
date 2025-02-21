@@ -60,7 +60,6 @@ import java.util.*;
 
 public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/apatosaurus"));
-    private static final DataParameter<Byte> WEAPON = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> LAUNCHING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOADED = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
@@ -132,7 +131,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(WEAPON, (byte)RiftLargeWeaponType.NONE.ordinal());
         this.dataManager.register(LAUNCHING, false);
         this.dataManager.register(CHARGING, false);
         this.dataManager.register(LOADED, false);
@@ -271,7 +269,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     //i have no fucking idea why but this breaks the apato's ability to use catapults
     //just wtf
     public void manageLoaded() {
-        if (this.getWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
+        if (this.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
             boolean flag1 = false;
             boolean flag2 = this.isBeingRidden() && (this.getControllingPassenger() instanceof EntityPlayer && ((EntityPlayer) this.getControllingPassenger()).isCreative());
             for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
@@ -288,7 +286,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     private void manageCatapultAnims() {
-        if (this.getWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
+        if (this.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
             if (!this.world.isRemote) {
                 EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
                 if (!this.isCharging() && this.isUsingLeftClick() && rider.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) this.setCharging(true);
@@ -308,14 +306,12 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setByte("Weapon", (byte) this.getWeapon().ordinal());
         this.writeWorkstationDataToNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        if (compound.hasKey("Weapon")) this.setWeapon(RiftLargeWeaponType.values()[compound.getByte("Weapon")]);
         this.readWorkstationDataFromNBT(compound);
     }
 
@@ -406,6 +402,11 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
 
     @Override
     public boolean canBeSaddled() {
+        return true;
+    }
+
+    @Override
+    public boolean canHoldLargeWeapon() {
         return true;
     }
 
@@ -513,29 +514,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
-    private void manageCannonFiring() {
-        EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
-        boolean flag1 = false;
-        boolean flag2 = rider.isCreative();
-        int indexToRemove = -1;
-        for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
-            if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
-                if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.CANNONBALL)) {
-                    flag1 = true;
-                    indexToRemove = x;
-                    break;
-                }
-            }
-        }
-        if (flag1 || flag2) {
-            RiftCannonball cannonball = new RiftCannonball(this.world, this, rider);
-            cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);
-            this.world.spawnEntity(cannonball);
-            this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
-            this.setLeftClickCooldown(30);
-        }
-    }
-
     private void manageMortarFiring(int holdAmount) {
         EntityPlayer rider = (EntityPlayer)this.getControllingPassenger();
         int launchDist = RiftUtil.clamp((int)(0.1D * holdAmount) + 6, 6, 16);
@@ -585,55 +563,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
             this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
             this.setLeftClickCooldown(Math.max(holdAmount * 2, 60));
         }
-    }
-
-    @Override
-    public boolean processInteract(EntityPlayer player, EnumHand hand) {
-        ItemStack itemstack = player.getHeldItem(hand);
-        if (this.isTamed()) {
-            try {
-                if (this.getOwnerId().equals(player.getUniqueID())) {
-                    if (itemstack.getItem() instanceof RiftLargeWeaponItem && this.getWeapon().equals(RiftLargeWeaponType.NONE)) {
-                        if (itemstack.getItem().equals(RiftItems.CANNON)) {
-                            this.setWeapon(RiftLargeWeaponType.CANNON);
-                            this.consumeItemFromStack(player, itemstack);
-                            return true;
-                        }
-                        else if (itemstack.getItem().equals(RiftItems.MORTAR)) {
-                            this.setWeapon(RiftLargeWeaponType.MORTAR);
-                            this.consumeItemFromStack(player, itemstack);
-                            return true;
-                        }
-                        else if (itemstack.getItem().equals(RiftItems.CATAPULT)) {
-                            this.setWeapon(RiftLargeWeaponType.CATAPULT);
-                            this.consumeItemFromStack(player, itemstack);
-                            return true;
-                        }
-                    }
-                    else if (itemstack.getItem().equals(RiftItems.WRENCH) && !this.getWeapon().equals(RiftLargeWeaponType.NONE)) {
-                        if (!player.capabilities.isCreativeMode) {
-                            switch (this.getWeapon()) {
-                                case CANNON:
-                                    player.inventory.addItemStackToInventory(new ItemStack(RiftItems.CANNON));
-                                    break;
-                                case MORTAR:
-                                    player.inventory.addItemStackToInventory(new ItemStack(RiftItems.MORTAR));
-                                    break;
-                                case CATAPULT:
-                                    player.inventory.addItemStackToInventory(new ItemStack(RiftItems.CATAPULT));
-                                    break;
-                            }
-                        }
-                        this.setWeapon(RiftLargeWeaponType.NONE);
-                        return true;
-                    }
-                }
-            }
-            catch (Exception e) {
-                return false;
-            }
-        }
-        return super.processInteract(player, hand);
     }
 
     public void useWhipAttack() {
@@ -715,7 +644,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
 
     @Override
     public boolean hasLeftClickChargeBar() {
-        return !this.getWeapon().equals(RiftLargeWeaponType.NONE);
+        return !this.getLargeWeapon().equals(RiftLargeWeaponType.NONE);
     }
 
     @Override
@@ -731,20 +660,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     public float[] ageScaleParams() {
         return new float[]{0.35f, 2.25f};
-    }
-
-    @Override
-    public void refreshInventory() {
-        ItemStack saddle = this.creatureInventory.getStackInSlot(0);
-        if (!this.world.isRemote) this.setSaddled(saddle.getItem() == RiftItems.APATOSAURUS_PLATFORM && !saddle.isEmpty());
-    }
-
-    public RiftLargeWeaponType getWeapon() {
-        return RiftLargeWeaponType.values()[this.dataManager.get(WEAPON).byteValue()];
-    }
-
-    public void setWeapon(RiftLargeWeaponType value) {
-        this.dataManager.set(WEAPON, (byte) value.ordinal());
     }
 
     public boolean isLaunching() {
@@ -848,7 +763,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     private <E extends IAnimatable> PlayState apatosaurusCatapultCharge(AnimationEvent<E> event) {
-        if (this.getWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
+        if (this.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
             if (this.isCharging()) {
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.charge_catapult", true));
                 return PlayState.CONTINUE;
@@ -859,7 +774,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     private <E extends IAnimatable> PlayState apatosaurusCatapultLaunch(AnimationEvent<E> event) {
-        if (this.getWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
+        if (this.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
             if (this.isLaunching()) {
                 event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.launch_catapult", false));
                 return PlayState.CONTINUE;

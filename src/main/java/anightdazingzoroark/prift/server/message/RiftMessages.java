@@ -111,5 +111,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftAddToBoxNBT.Handler.class, RiftAddToBoxNBT.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftAddToBoxNBT.Handler.class, RiftAddToBoxNBT.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftManualUseMove.Handler.class, RiftManualUseMove.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftManualUseLargeWeapon.Handler.class, RiftManualUseLargeWeapon.class, id++, Side.SERVER);
     }
 }

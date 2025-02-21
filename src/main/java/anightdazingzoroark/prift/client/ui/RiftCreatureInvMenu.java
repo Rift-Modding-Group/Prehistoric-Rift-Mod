@@ -42,8 +42,13 @@ public class RiftCreatureInvMenu extends GuiContainer {
             this.drawTexturedModalRect(k + 7, l + 17, 212, 0, 18, 18);
         }
 
+        //large weapon slot
+        if (this.creature.canHoldLargeWeapon() && !this.creature.isBaby()) {
+            this.drawTexturedModalRect(k + 25, l + 17, 212, 0, 18, 18);
+        }
+
         //normal inventory slots
-        int slots = this.creatureInventory.getSizeInventory() - (this.creature.canBeSaddled() ? 1 : 0);
+        int slots = this.creatureInventory.getSizeInventory() - this.creature.gearSlotCount();
         for (int i = 0; i < slots / 9; i++) {
             for (int j = 0; j < 9; j++) {
                 this.drawTexturedModalRect(k + 7 + (j * 18), l + 49 + (i * 18), 176, 0, 18, 18);

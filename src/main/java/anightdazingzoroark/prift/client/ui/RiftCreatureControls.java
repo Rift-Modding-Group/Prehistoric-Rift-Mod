@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
@@ -37,16 +38,23 @@ public class RiftCreatureControls {
         if (entity instanceof RiftCreature) {
             if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                 RiftCreature creature = (RiftCreature) entity;
-                for (int x = 0; x < creature.getLearnedMoves().size(); x++) {
-                    if (x == 0) this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0);
-                    if (x == 1) this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 20);
-                    if (x == 2) this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 40);
+                if (creature.canHoldLargeWeapon()
+                        && creature.itemStackIsLargeWeapon(creature.creatureInventory.getStackInSlot(creature.slotIndexForGear(RiftCreature.InventoryGearType.LARGE_WEAPON)))
+                        && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
+                    this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 20, true);
+                }
+                else {
+                    for (int x = 0; x < creature.getLearnedMoves().size(); x++) {
+                        if (x == 0) this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 0, false);
+                        if (x == 1) this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 20);
+                        if (x == 2) this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 40);
+                    }
                 }
             }
         }
     }
 
-    private void showLeftMouseControls(RiftCreature creature, int width, int height, int yOffset) {
+    private void showLeftMouseControls(RiftCreature creature, int width, int height, int yOffset, boolean forLargeWeapons) {
         //show left mouse button icon
         int iconXPos = (int) (((width - 16 * this.iconScale) / 2D + 135 * this.iconScale) / this.iconScale);
         int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
@@ -63,7 +71,7 @@ public class RiftCreatureControls {
 
         //show text
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-        String controlName = I18n.format("creature_move."+creature.getLearnedMoves().get(0).toString().toLowerCase()+".name");
+        String controlName = forLargeWeapons ? I18n.format("large_weapon_control.cannon") : I18n.format("creature_move."+creature.getLearnedMoves().get(0).toString().toLowerCase()+".name");
         int textPosX = (int) ((width / 2D) / this.textScale + 440 * this.textScale);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
         int textColorHex = ((int)(alpha * 255f) << 24) | (255 << 16) | (255 << 8) | 255;
@@ -74,20 +82,39 @@ public class RiftCreatureControls {
         GlStateManager.popMatrix();
 
         //use bar
-        if (creature.getMoveOneUse() > 0 || creature.getMoveOneCooldown() > 0) {
-            int useBarPosX = (int)((width - 48) / 2D) + 120;
-            int useBarPosY = (int)((height - 1) / 2D) + 70 + yOffset;
-            int useBarFill = (int)RiftUtil.slopeResult(creature.getMoveOneCooldown() > 0 ? creature.getMoveOneCooldown() : creature.getMoveOneUse(),
-                    true,
-                    0,
-                    creature.getMoveOneCooldown() > 0 ? creature.getLearnedMoves().get(0).maxCooldown : creature.getLearnedMoves().get(0).maxUse,
-                    0, 48);
-            int useBarColor = (255 << 24) | ((creature.getMoveOneCooldown() > 0 ? 128 : 255) << 16) | ((creature.getMoveOneCooldown() > 0 ? 128 : 255) << 8) | (creature.getMoveOneCooldown() > 0 ? 128 : 255);
-            GlStateManager.pushMatrix();
-            GlStateManager.enableBlend();
-            Gui.drawRect(useBarPosX, useBarPosY, useBarPosX + useBarFill, useBarPosY + 1, useBarColor);
-            GlStateManager.disableBlend();
-            GlStateManager.popMatrix();
+        if (forLargeWeapons) {
+            if (creature.getLargeWeaponUse() > 0 || creature.getLargeWeaponCooldown() > 0) {
+                int useBarPosX = (int)((width - 48) / 2D) + 120;
+                int useBarPosY = (int)((height - 1) / 2D) + 70 + yOffset;
+                int useBarFill = (int)RiftUtil.slopeResult(creature.getLargeWeaponCooldown() > 0 ? creature.getLargeWeaponCooldown() : creature.getLargeWeaponUse(),
+                        true,
+                        0,
+                        creature.getLargeWeaponCooldown() > 0 ? creature.getLargeWeapon().maxCooldown : creature.getLargeWeapon().maxUse,
+                        0, 48);
+                int useBarColor = (255 << 24) | ((creature.getLargeWeaponCooldown() > 0 ? 128 : 255) << 16) | ((creature.getLargeWeaponCooldown() > 0 ? 128 : 255) << 8) | (creature.getLargeWeaponCooldown() > 0 ? 128 : 255);
+                GlStateManager.pushMatrix();
+                GlStateManager.enableBlend();
+                Gui.drawRect(useBarPosX, useBarPosY, useBarPosX + useBarFill, useBarPosY + 1, useBarColor);
+                GlStateManager.disableBlend();
+                GlStateManager.popMatrix();
+            }
+        }
+        else {
+            if (creature.getMoveOneUse() > 0 || creature.getMoveOneCooldown() > 0) {
+                int useBarPosX = (int)((width - 48) / 2D) + 120;
+                int useBarPosY = (int)((height - 1) / 2D) + 70 + yOffset;
+                int useBarFill = (int)RiftUtil.slopeResult(creature.getMoveOneCooldown() > 0 ? creature.getMoveOneCooldown() : creature.getMoveOneUse(),
+                        true,
+                        0,
+                        creature.getMoveOneCooldown() > 0 ? creature.getLearnedMoves().get(0).maxCooldown : creature.getLearnedMoves().get(0).maxUse,
+                        0, 48);
+                int useBarColor = (255 << 24) | ((creature.getMoveOneCooldown() > 0 ? 128 : 255) << 16) | ((creature.getMoveOneCooldown() > 0 ? 128 : 255) << 8) | (creature.getMoveOneCooldown() > 0 ? 128 : 255);
+                GlStateManager.pushMatrix();
+                GlStateManager.enableBlend();
+                Gui.drawRect(useBarPosX, useBarPosY, useBarPosX + useBarFill, useBarPosY + 1, useBarColor);
+                GlStateManager.disableBlend();
+                GlStateManager.popMatrix();
+            }
         }
     }
 

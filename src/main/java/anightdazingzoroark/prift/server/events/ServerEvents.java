@@ -522,25 +522,19 @@ public class ServerEvents {
             }
             event.getAffectedEntities().removeAll(tamedEntities);
         }
-        //manage explosions from apato weapons
-        if (event.getExplosion().getExplosivePlacedBy() instanceof Apatosaurus) {
-            Apatosaurus apatosaurus = (Apatosaurus) event.getExplosion().getExplosivePlacedBy();
-            EntityPlayer user = (EntityPlayer) apatosaurus.getControllingPassenger();
+        //manage explosions from large weapons on creatures
+        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCreature) {
+            RiftCreature creature = (RiftCreature) event.getExplosion().getExplosivePlacedBy();
+            EntityPlayer user = (EntityPlayer) creature.getControllingPassenger();
             //remove catapult and user
-            event.getAffectedEntities().remove(apatosaurus);
+            event.getAffectedEntities().remove(creature);
             event.getAffectedEntities().remove(user);
-            //remove creatures tamed to user
-            List<EntityTameable> tamedEntities = new ArrayList<>();
+            //remove creatures tamed to user and body parts of user
+            List<Entity> entitiesToRemove = new ArrayList<>();
             for (Entity entity : event.getAffectedEntities()) {
-                if (entity instanceof EntityTameable) {
-                    if ((((EntityTameable) entity).isTamed())) {
-                        if (!((EntityTameable) entity).getOwner().equals(user)) {
-                            tamedEntities.add((EntityTameable) entity);
-                        }
-                    }
-                }
+                if (!RiftUtil.checkForNoAssociations(creature, entity)) entitiesToRemove.add(entity);
             }
-            event.getAffectedEntities().removeAll(tamedEntities);
+            event.getAffectedEntities().removeAll(entitiesToRemove);
         }
     }
 }

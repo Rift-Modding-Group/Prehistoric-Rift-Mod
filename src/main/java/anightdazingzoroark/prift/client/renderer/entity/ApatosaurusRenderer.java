@@ -33,14 +33,14 @@ public class ApatosaurusRenderer extends RiftCreatureRenderer {
         model.getBone("headSaddle").get().setHidden(!animatable.isSaddled());
         model.getBone("furnace").get().setHidden(true);
         model.getBone("craftingTable").get().setHidden(true);
-        model.getBone("leftCannon").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CANNON));
-        model.getBone("rightCannon").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CANNON));
-        model.getBone("leftMortar").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.MORTAR));
-        model.getBone("rightMortar").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.MORTAR));
-        model.getBone("leftCatapult").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT));
-        model.getBone("rightCatapult").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT));
-        model.getBone("leftCatapultBoulder").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT) || !apatosaurus.isLoaded());
-        model.getBone("rightCatapultBoulder").get().setHidden(!apatosaurus.getWeapon().equals(RiftLargeWeaponType.CATAPULT) || !apatosaurus.isLoaded());
+        model.getBone("leftCannon").get().setHidden(!apatosaurus.getLargeWeapon().equals(RiftLargeWeaponType.CANNON));
+        model.getBone("rightCannon").get().setHidden(!apatosaurus.getLargeWeapon().equals(RiftLargeWeaponType.CANNON));
+        model.getBone("leftMortar").get().setHidden(!apatosaurus.getLargeWeapon().equals(RiftLargeWeaponType.MORTAR));
+        model.getBone("rightMortar").get().setHidden(!apatosaurus.getLargeWeapon().equals(RiftLargeWeaponType.MORTAR));
+        model.getBone("leftCatapult").get().setHidden(!apatosaurus.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT));
+        model.getBone("rightCatapult").get().setHidden(!apatosaurus.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT));
+        model.getBone("leftCatapultBoulder").get().setHidden(!apatosaurus.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT) || !apatosaurus.isLoaded());
+        model.getBone("rightCatapultBoulder").get().setHidden(!apatosaurus.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT) || !apatosaurus.isLoaded());
 
 
         GlStateManager.pushMatrix();

@@ -268,8 +268,11 @@ reminder.box_wanderer_level_max=This box's wanderer level has already been maxed
 reminder.box_range_level_upgraded=This box's range level has been upgraded to level %s! Wandering and spawn blocking for wild creatures has been increased!
 reminder.box_range_level_max=This box's range level has already been maxed out! You can't use this anymore!
 reminder.cannon_no_ammo=This cannon has no ammo! Open its inventory to insert cannonballs!
+reminder.creature_cannon_no_ammo=This creature's cannon has no ammo! Open its inventory to insert cannonballs!
 reminder.mortar_no_ammo=This mortar has no ammo! Open its inventory to insert mortar shells!
+reminder.creature_mortar_no_ammo=This creature's mortar has no ammo! Open its inventory to insert mortar shells!
 reminder.catapult_no_ammo=This catapult has no ammo! Open its inventory to insert catapult boulders!
+reminder.creature_catapult_no_ammo=This creature's catapult has no ammo! Open its inventory to insert catapult boulders!
 reminder.cannot_tame_more_creatures=Your party and creature box are full! You cannot tame any more creatures!
 reminder.cannot_breed_more_creatures=Your party and creature box are full! You cannot breed any more creatures!
 reminder.cannot_hatch_more_eggs=Your party and creature box are full! You cannot hatch any more eggs!
@@ -472,9 +475,9 @@ creature_control.right_mouse.ankylosaurus=Toggle Shell Mode
 creature_control.left_mouse.dilophosaurus=Slash
 creature_control.right_mouse.dilophosaurus=Spit
 
-large_weapon_control.left_mouse.cannon=Fire
-large_weapon_control.left_mouse.mortar=Fire (Chargeable)
-large_weapon_control.left_mouse.catapult=Launch (Chargeable)
+large_weapon_control.cannon=Fire Cannon
+large_weapon_control.mortar=Fire Mortar
+large_weapon_control.catapult=Launch Catapult
 
 creature_move.bounce.name=Bounce
 creature_move.bounce.description=The user bounces around, causing no effects

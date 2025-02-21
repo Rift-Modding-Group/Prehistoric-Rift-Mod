@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -400,6 +401,10 @@ public class RiftUtil {
                 }
                 else return true;
             }
+        }
+        else if (target instanceof MultiPartEntityPart) {
+            Entity parentOfPart = (Entity) ((MultiPartEntityPart)target).parent;
+            return checkForNoAssociations(user, parentOfPart);
         }
         return true;
     }

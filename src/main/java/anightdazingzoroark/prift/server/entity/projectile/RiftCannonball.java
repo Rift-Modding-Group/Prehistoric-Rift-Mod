@@ -1,8 +1,12 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
+import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityMultiPart;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.ItemStack;
@@ -12,6 +16,7 @@ import net.minecraft.world.World;
 
 public class RiftCannonball extends EntityArrow implements IRiftProjectile {
     private EntityLivingBase firer = null;
+    private boolean hasAlreadyHitFlag = true;
 
     public RiftCannonball(World worldIn) {
         super(worldIn);
@@ -37,9 +42,16 @@ public class RiftCannonball extends EntityArrow implements IRiftProjectile {
 
     protected void onHit(RayTraceResult raytraceResultIn) {
         if (!this.world.isRemote) {
-            boolean flag = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this.firer);
-            this.world.newExplosion(this.firer, this.posX, this.posY, this.posZ, 6f, false, flag);
-            this.setDead();
+            if (this.hasAlreadyHitFlag &&
+                    (raytraceResultIn.entityHit == null
+                    || (!(raytraceResultIn.entityHit instanceof MultiPartEntityPart) && RiftUtil.checkForNoAssociations((RiftCreature) this.firer, raytraceResultIn.entityHit) && !raytraceResultIn.entityHit.equals(this.firer))
+                    || (raytraceResultIn.entityHit instanceof MultiPartEntityPart && !((MultiPartEntityPart)raytraceResultIn.entityHit).parent.equals(this.firer)))) {
+                System.out.println("pew");
+                this.hasAlreadyHitFlag = false;
+                boolean flag = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this.firer);
+                this.world.newExplosion(this.firer, this.posX, this.posY, this.posZ, 6f, false, flag);
+                this.setDead();
+            }
         }
         else super.onHit(raytraceResultIn);
     }

@@ -12,17 +12,21 @@ import net.minecraft.world.World;
 import java.util.function.Function;
 
 public enum RiftLargeWeaponType {
-    NONE(null, null),
-    CANNON(RiftCannon.class, RiftCannon::new),
-    MORTAR(RiftMortar.class, RiftMortar::new),
-    CATAPULT(RiftCatapult.class, RiftCatapult::new);
+    NONE(null, null, 0, 0),
+    CANNON(RiftCannon.class, RiftCannon::new, 0, 30),
+    MORTAR(RiftMortar.class, RiftMortar::new, 30, 60),
+    CATAPULT(RiftCatapult.class, RiftCatapult::new, 30, 60);
 
     private final Class<? extends RiftLargeWeapon> weaponClass;
     private final Function<World, RiftLargeWeapon> weaponConstructor;
+    public final int maxUse;
+    public final int maxCooldown;
 
-    RiftLargeWeaponType(Class<? extends RiftLargeWeapon> weaponClass, Function<World, RiftLargeWeapon> weaponConstructor) {
+    RiftLargeWeaponType(Class<? extends RiftLargeWeapon> weaponClass, Function<World, RiftLargeWeapon> weaponConstructor, int maxUse, int maxCooldown) {
         this.weaponClass = weaponClass;
         this.weaponConstructor = weaponConstructor;
+        this.maxUse = maxUse;
+        this.maxCooldown = maxCooldown;
     }
 
     public Class<? extends RiftLargeWeapon> getWeaponClass() {

@@ -14,9 +14,11 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
+import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.enums.CreatureDiet;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
@@ -85,6 +87,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> LARGE_WEAPON = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ACTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_USE_LEFT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -134,6 +137,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
 
+    private static final DataParameter<Boolean> USING_LARGE_WEAPON = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> LARGE_WEAPON_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> LARGE_WEAPON_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -249,6 +255,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(SITTING, false);
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
         this.dataManager.register(SADDLED, false);
+        this.dataManager.register(LARGE_WEAPON, (byte) RiftLargeWeaponType.NONE.ordinal());
         this.dataManager.register(ENERGY, 20);
         this.dataManager.register(ACTING, false);
         this.dataManager.register(CAN_USE_LEFT_CLICK, true);
@@ -297,6 +304,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(PLAY_INFINITE_MOVE_ANIM, false);
 
         this.dataManager.register(MOVE_LIST, new ArrayList<>());
+
+        this.dataManager.register(USING_LARGE_WEAPON, false);
+        this.dataManager.register(LARGE_WEAPON_USE, 0);
+        this.dataManager.register(LARGE_WEAPON_COOLDOWN, 0);
 
         this.dataManager.register(USING_CHARGE_TYPE_MOVE, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_DELAY, false);
@@ -384,7 +395,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setAgeInTicks(this.getAgeInTicks() + 1);
             this.manageAttributes();
             this.manageDiscoveryByPlayer();
-            this.manageMoveCooldown();
+            this.manageMoveAndWeaponCooldown();
+            this.manageLargeWeaponFiring();
             if (this.isTamed()) {
                 this.updateEnergyMove();
                 this.updateEnergyActions();
@@ -406,8 +418,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         if (this.world.isRemote) {
-            //this.setControls();
-            this.setMoveControls();
+            this.setControls();
         }
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
@@ -419,96 +430,34 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @SideOnly(Side.CLIENT)
-    public void setControls() {
-        GameSettings settings = Minecraft.getMinecraft().gameSettings;
-        EntityPlayer player = Minecraft.getMinecraft().player;
-        if (this.isBeingRidden()) {
-            if (this.getControllingPassenger().equals(player)) {
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 2, settings.keyBindJump.isKeyDown()));
-                RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 3, !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown()));
-
-                if (settings.keyBindAttack.isKeyDown() && !this.isActing() && this.getLeftClickCooldown() == 0) {
-                    if (RiftUtil.isUsingSSR()) {
-                        SSRCompatUtils.SSRHitResult hitResult = SSRCompatUtils.createHitResult(this);
-
-                        if (this.hasLeftClickChargeBar()) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                        else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, 0, hitResult.entity, hitResult.blockPos));
-                    }
-                    else {
-                        if (this.hasLeftClickChargeBar()) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                        else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, 0));
-                    }
-                }
-                else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.getRightClickCooldown() == 0 && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
-                    if (this.hasRightClickChargeBar()) {
-                        if (this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, this.getRightClickUse()));
-                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 1));
-                    }
-                    else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, 0));
-                }
-                else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
-                }
-                else if (settings.keyBindJump.isKeyDown() && this.getSpacebarCooldown() == 0) {
-                    if (this.hasSpacebarChargeBar()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 2));
-                    }
-                }
-                else if (settings.keyBindPickBlock.isKeyDown() && !this.isActing()) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 3));
-                }
-                else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()) {
-                    if (RiftUtil.isUsingSSR()) {
-                        SSRCompatUtils.SSRHitResult hitResult = SSRCompatUtils.createHitResult(this);
-                        if (this.hasLeftClickChargeBar()) {
-                            if (this.getLeftClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, this.getLeftClickUse(), hitResult.entity, hitResult.blockPos));
-                        }
-                        if (this.hasRightClickChargeBar()) {
-                            if (this.getRightClickUse() > 0 && !this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, this.getRightClickUse(), hitResult.entity, hitResult.blockPos));
-                        }
-                    }
-                    else {
-                        if (this.hasLeftClickChargeBar()) {
-                            if (this.getLeftClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, this.getLeftClickUse()));
-                        }
-                        if (this.hasRightClickChargeBar()) {
-                            if (this.getRightClickUse() > 0 && !this.alwaysShowRightClickUse()) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, this.getRightClickUse()));
-                        }
-                    }
-
-                    if (this.hasSpacebarChargeBar()) {
-                        if (this.getSpacebarUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 2, this.getSpacebarUse()));
-                    }
-                    if (this.getMiddleClickUse() > 0) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 3, 0));
-                        this.setMiddleClickUse(0);
-                    }
-                }
-            }
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
-    private void setMoveControls() {
+    private void setControls() {
         GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (this.isBeingRidden() && this.getControllingPassenger().equals(player)) {
-            boolean leftClickOnly = settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown();
-            boolean rightClickOnly = !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown();
-            boolean middleClickOnly = !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown();
+            //for using large weapons
+            if (this.canHoldLargeWeapon()
+                    && this.itemStackIsLargeWeapon(this.creatureInventory.getStackInSlot(this.slotIndexForGear(RiftCreature.InventoryGearType.LARGE_WEAPON)))
+                    && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
 
-            if (leftClickOnly && this.getMoveOneCooldown() == 0) {
-                this.playerUseMove(0);
+                RiftMessages.WRAPPER.sendToServer(new RiftManualUseLargeWeapon(this, settings.keyBindAttack.isKeyDown() && this.getLargeWeaponCooldown() == 0));
             }
-            else if (rightClickOnly && this.getMoveTwoCooldown() == 0) {
-                this.playerUseMove(1);
+            //for using moves
+            else {
+                boolean leftClickOnly = settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown();
+                boolean rightClickOnly = !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown();
+                boolean middleClickOnly = !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown();
+
+                if (leftClickOnly && this.getMoveOneCooldown() == 0) {
+                    this.playerUseMove(0);
+                }
+                else if (rightClickOnly && this.getMoveTwoCooldown() == 0) {
+                    this.playerUseMove(1);
+                }
+                else if (middleClickOnly && this.getMoveThreeCooldown() == 0) {
+                    this.playerUseMove(2);
+                }
+                else this.playerUseMove(-1);
             }
-            else if (middleClickOnly && this.getMoveThreeCooldown() == 0) {
-                this.playerUseMove(2);
-            }
-            else this.playerUseMove(-1);
         }
     }
 
@@ -538,10 +487,50 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    private void manageMoveCooldown() {
+    private void manageMoveAndWeaponCooldown() {
         if (this.getMoveOneCooldown() > 0) this.setMoveOneCooldown(this.getMoveOneCooldown() - 1);
         if (this.getMoveTwoCooldown() > 0) this.setMoveTwoCooldown(this.getMoveTwoCooldown() - 1);
         if (this.getMoveThreeCooldown() > 0) this.setMoveThreeCooldown(this.getMoveThreeCooldown() - 1);
+        if (this.getLargeWeaponCooldown() > 0) this.setLargeWeaponCooldown(this.getLargeWeaponCooldown() - 1);
+    }
+
+    private void manageLargeWeaponFiring() {
+        if (this.getLargeWeaponCooldown() == 0 && ((this.getLargeWeaponUse() > 0 && this.getLargeWeapon().maxCooldown > 0 && !this.getUsingLargeWeapon()) ||
+                (this.getUsingLargeWeapon() && this.getLargeWeapon().maxCooldown == 0))) {
+            switch (this.getLargeWeapon()) {
+                case CANNON:
+                    this.manageCannonFiring();
+                    break;
+            }
+        }
+    }
+
+    private void manageCannonFiring() {
+        EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
+        boolean flag1 = false;
+        boolean flag2 = rider.isCreative();
+        int indexToRemove = -1;
+        for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
+            if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
+                if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.CANNONBALL)) {
+                    flag1 = true;
+                    indexToRemove = x;
+                    break;
+                }
+            }
+        }
+        if (flag1 || flag2) {
+            RiftCannonball cannonball = new RiftCannonball(this.world, this, rider);
+            cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 2.4F, 1.0F);
+            this.world.spawnEntity(cannonball);
+            this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
+            this.setLargeWeaponCooldown(this.getLargeWeapon().maxCooldown);
+            this.setLargeWeaponUse(0);
+        }
+        else {
+            rider.sendStatusMessage(new TextComponentTranslation("reminder.creature_cannon_no_ammo"), false);
+            this.setLargeWeaponUse(0);
+        }
     }
 
     private void manageDiscoveryByPlayer() {
@@ -664,7 +653,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void eatFromInventory() {
-        int minSlot = this.canBeSaddled() ? 1 : 0;
+        int minSlot = this.gearSlotCount();
         if (this.getHealth() < this.getMaxHealth()) {
             this.eatFromInvCooldown++;
             for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
@@ -1092,8 +1081,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    public boolean saddleItemEqual(ItemStack itemStack) {
-        return RiftUtil.itemStackEqualToString(itemStack, this.saddleItem);
+    public ItemStack saddleItemStack() {
+        return RiftUtil.getItemStackFromString(this.saddleItem);
+    }
+
+    public boolean itemStackIsLargeWeapon(ItemStack itemStack) {
+        return itemStack.getItem() == RiftItems.CANNON || itemStack.getItem() == RiftItems.MORTAR || itemStack.getItem() == RiftItems.CATAPULT;
     }
 
     @Override
@@ -1120,6 +1113,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setByte("CreatureType", (byte) this.creatureType.ordinal());
         compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
         compound.setBoolean("Saddled", this.isSaddled());
+        compound.setByte("LargeWeapon", (byte) this.getLargeWeapon().ordinal());
         if (this.creatureInventory != null) {
             NBTTagList nbttaglist = new NBTTagList();
             for (int i = 0; i < this.creatureInventory.getSizeInventory(); ++i) {
@@ -1165,13 +1159,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setVariant(compound.getInteger("Variant"));
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
         this.setSaddled(compound.getBoolean("Saddled"));
+        if (compound.hasKey("LargeWeapon")) this.setLargeWeapon(RiftLargeWeaponType.values()[compound.getByte("LargeWeapon")]);
         if (this.creatureInventory != null) {
             NBTTagList nbtTagList = compound.getTagList("Items", 10);
             this.initInventory();
             for (int i = 0; i < nbtTagList.tagCount(); ++i) {
                 NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
                 int j = nbttagcompound.getByte("Slot") & 255;
-                int inventorySize = this.slotCount() + (this.canBeSaddled() ? 1 : 0);
+                int inventorySize = this.slotCount() + this.gearSlotCount();
                 if (j < inventorySize) this.creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
             }
         }
@@ -1382,9 +1377,33 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
     //move related stuff ends here
 
+    public boolean getUsingLargeWeapon() {
+        return this.dataManager.get(USING_LARGE_WEAPON);
+    }
+
+    public void setUsingLargeWeapon(boolean value) {
+        this.dataManager.set(USING_LARGE_WEAPON, value);
+    }
+
+    public int getLargeWeaponUse() {
+        return this.dataManager.get(LARGE_WEAPON_USE);
+    }
+
+    public void setLargeWeaponUse(int value) {
+        this.dataManager.set(LARGE_WEAPON_USE, value);
+    }
+
+    public int getLargeWeaponCooldown() {
+        return this.dataManager.get(LARGE_WEAPON_COOLDOWN);
+    }
+
+    public void setLargeWeaponCooldown(int value) {
+        this.dataManager.set(LARGE_WEAPON_COOLDOWN, value);
+    }
+
     private void initInventory() {
         RiftCreatureInventory tempInventory = this.creatureInventory;
-        int inventorySize = this.slotCount() + (this.canBeSaddled() ? 1 : 0);
+        int inventorySize = this.slotCount() + this.gearSlotCount();
         this.creatureInventory = new RiftCreatureInventory("creatureInventory", inventorySize, this);
         this.creatureInventory.setCustomName(this.getName());
         if (tempInventory != null) {
@@ -1460,8 +1479,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void refreshInventory() {
-        ItemStack saddle = this.creatureInventory.getStackInSlot(0);
-        if (!this.world.isRemote && this.canBeSaddled()) this.setSaddled(this.saddleItemEqual(saddle) && !saddle.isEmpty());
+        ItemStack saddle = this.creatureInventory.getStackInSlot(this.slotIndexForGear(InventoryGearType.SADDLE));
+        ItemStack largeWeapon = this.creatureInventory.getStackInSlot(this.slotIndexForGear(InventoryGearType.LARGE_WEAPON));
+        if (!this.world.isRemote && this.canBeSaddled()) this.setSaddled(this.saddleItemStack().getItem() == saddle.getItem() && this.saddleItemStack().getMetadata() == saddle.getMetadata() && !saddle.isEmpty());
+        if (!this.world.isRemote && this.canHoldLargeWeapon()) {
+            if (largeWeapon.isEmpty()) this.setLargeWeapon(RiftLargeWeaponType.NONE);
+            else if (largeWeapon.getItem() == RiftItems.CANNON) this.setLargeWeapon(RiftLargeWeaponType.CANNON);
+            else if (largeWeapon.getItem() == RiftItems.CATAPULT) this.setLargeWeapon(RiftLargeWeaponType.CATAPULT);
+            else if (largeWeapon.getItem() == RiftItems.MORTAR) this.setLargeWeapon(RiftLargeWeaponType.MORTAR);
+            else this.setLargeWeapon(RiftLargeWeaponType.NONE);
+        }
     }
 
     public int getLevel() {
@@ -1867,6 +1894,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(SADDLED, Boolean.valueOf(value));
     }
 
+    public RiftLargeWeaponType getLargeWeapon() {
+        return RiftLargeWeaponType.values()[this.dataManager.get(LARGE_WEAPON).byteValue()];
+    }
+
+    public void setLargeWeapon(RiftLargeWeaponType value) {
+        this.dataManager.set(LARGE_WEAPON, (byte) value.ordinal());
+    }
+
     public boolean isActing() {
         return this.dataManager.get(ACTING);
     }
@@ -2157,6 +2192,27 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public boolean canBeSaddled() {
         return false;
+    }
+
+    public boolean canHoldLargeWeapon() {
+        return false;
+    }
+
+    public int gearSlotCount() {
+        return (this.canBeSaddled() ? 1 : 0) + (this.canHoldLargeWeapon() ? 1 : 0);
+    }
+
+    public int slotIndexForGear(InventoryGearType gearType) {
+        if (this.canBeSaddled() && this.canHoldLargeWeapon()) {
+            if (gearType == InventoryGearType.SADDLE) return 0;
+            else if (gearType == InventoryGearType.LARGE_WEAPON) return 1;
+            else return -1;
+        }
+        else if (this.canBeSaddled() && !this.canHoldLargeWeapon()) {
+            if (gearType == InventoryGearType.SADDLE) return 0;
+            else return -1;
+        }
+        return -1;
     }
 
     public int slotCount() {
@@ -2456,8 +2512,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (!this.world.isRemote && this.creatureInventory != null) {
             for (int i = 0; i < this.creatureInventory.getSizeInventory(); i++) {
                 ItemStack itemStack = this.creatureInventory.getStackInSlot(i);
-                boolean hasSaddleFlag = !this.canBeSaddled() || i != 0;
-                if (!itemStack.isEmpty() && hasSaddleFlag) {
+                boolean hasSaddleFlag = !this.canBeSaddled() || i != this.slotIndexForGear(InventoryGearType.SADDLE);
+                boolean hasLargeWeaponFlag = !this.canHoldLargeWeapon() || i != this.slotIndexForGear(InventoryGearType.LARGE_WEAPON);
+                if (!itemStack.isEmpty() && (hasSaddleFlag || hasLargeWeaponFlag)) {
                     this.entityDropItem(itemStack, 0.0f);
                     this.creatureInventory.setInventorySlotContents(i, new ItemStack(Items.AIR));
                 }
@@ -2756,7 +2813,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         @Override
         public ItemStack addItem(ItemStack stack) {
             ItemStack itemstack = stack.copy();
-            for (int i = canBeSaddled() ? 1 : 0; i < getSizeInventory(); ++i) {
+            for (int i = gearSlotCount(); i < getSizeInventory(); ++i) {
                 ItemStack itemstack1 = this.getStackInSlot(i);
 
                 if (itemstack1.isEmpty()) {
@@ -2787,7 +2844,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
 
         public boolean isEmptyExceptSaddle() {
-            for (int i = canBeSaddled() ? 1 : 0; i < getSizeInventory(); ++i) {
+            for (int i = 0; i < getSizeInventory(); ++i) {
+                if (i == slotIndexForGear(InventoryGearType.SADDLE)) continue;
                 if (!this.getStackInSlot(i).isEmpty()) return false;
             }
             return true;
@@ -2805,5 +2863,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         public void onInventoryChanged(IInventory invBasic) {
             this.creature.refreshInventory();
         }
+    }
+
+    public enum InventoryGearType {
+        SADDLE,
+        LARGE_WEAPON
     }
 }

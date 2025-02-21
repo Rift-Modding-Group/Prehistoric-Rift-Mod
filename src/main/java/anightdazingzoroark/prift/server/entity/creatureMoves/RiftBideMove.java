@@ -45,11 +45,7 @@ public class RiftBideMove extends RiftCreatureMove {
         List<Entity> hitEntitiesList = user.world.getEntitiesWithinAABB(Entity.class, area, new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
-                if (entity instanceof EntityLivingBase) {
-                    return RiftUtil.checkForNoAssociations(user, entity)
-                            && !user.equals(entity);
-                }
-                return true;
+                return RiftUtil.checkForNoAssociations(user, entity) && !user.equals(entity);
             }
         });
 
