@@ -19,6 +19,7 @@ import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
 import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.enums.CreatureDiet;
@@ -141,6 +142,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_LARGE_WEAPON = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> LARGE_WEAPON_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LARGE_WEAPON_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+
+    private static final DataParameter<Boolean> FIRING_CATAPULT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -310,6 +313,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(LARGE_WEAPON_USE, 0);
         this.dataManager.register(LARGE_WEAPON_COOLDOWN, 0);
 
+        this.dataManager.register(FIRING_CATAPULT, false);
+
         this.dataManager.register(USING_CHARGE_TYPE_MOVE, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_DELAY, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE, false);
@@ -397,7 +402,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageAttributes();
             this.manageDiscoveryByPlayer();
             this.manageMoveAndWeaponCooldown();
-            this.manageLargeWeaponFiring();
             if (this.isTamed()) {
                 this.updateEnergyMove();
                 this.updateEnergyActions();
@@ -495,77 +499,67 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.getLargeWeaponCooldown() > 0) this.setLargeWeaponCooldown(this.getLargeWeaponCooldown() - 1);
     }
 
-    private void manageLargeWeaponFiring() {
-        //System.out.println("can fire cannon: "+((this.getUsingLargeWeapon() && this.getLargeWeapon().maxCooldown == 0)));
-        if (this.getLargeWeaponCooldown() == 0 && (((this.getLargeWeaponUse() > 0 && this.getLargeWeapon().maxUse > 0 && !this.getUsingLargeWeapon()) ||
-                (this.getUsingLargeWeapon() && this.getLargeWeapon().maxUse == 0)))) {
-            switch (this.getLargeWeapon()) {
-                case CANNON:
-                    this.manageCannonFiring();
-                    break;
-                case MORTAR:
-                    this.manageMortarFiring();
-                    break;
-            }
+    //checks for large weapon use start here
+    public boolean canFireLargeWeapon() {
+        switch (this.getLargeWeapon()) {
+            case CANNON:
+                return this.canFireCannon();
+            case MORTAR:
+                return this.canFireMortar();
+            case CATAPULT:
+                return this.canFireCatapult();
         }
+        return false;
     }
 
-    private void manageCannonFiring() {
+    private boolean canFireCannon() {
         EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
+        if (rider == null) return false;
         boolean flag1 = false;
         boolean flag2 = rider.isCreative();
-        int indexToRemove = -1;
         for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
             if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
                 if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.CANNONBALL)) {
                     flag1 = true;
-                    indexToRemove = x;
                     break;
                 }
             }
         }
-        if (flag1 || flag2) {
-            RiftCannonball cannonball = new RiftCannonball(this.world, this, rider);
-            cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 2.4F, 1.0F);
-            this.world.spawnEntity(cannonball);
-            this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
-            this.setLargeWeaponCooldown(this.getLargeWeapon().maxCooldown);
-            this.setLargeWeaponUse(0);
-        }
-        else {
-            rider.sendStatusMessage(new TextComponentTranslation("reminder.creature_cannon_no_ammo"), false);
-            this.setLargeWeaponUse(0);
-        }
+        return flag1 || flag2;
     }
 
-    private void manageMortarFiring() {
+    private boolean canFireMortar() {
         EntityPlayer rider = (EntityPlayer)this.getControllingPassenger();
-        int launchDist = RiftUtil.clamp((int)(0.1D * this.getLargeWeaponUse()) + 6, 6, 16);
+        if (rider == null) return false;
         boolean flag1 = false;
         boolean flag2 = rider.isCreative();
-        int indexToRemove = -1;
         for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
             if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
                 if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.MORTAR_SHELL)) {
                     flag1 = true;
-                    indexToRemove = x;
                     break;
                 }
             }
         }
-        if (flag1 || flag2) {
-            RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, rider);
-            mortarShell.shoot(this, launchDist);
-            this.world.spawnEntity(mortarShell);
-            this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
-            this.setLargeWeaponCooldown(Math.max(this.getLargeWeaponUse() * 2, this.getLargeWeapon().maxCooldown));
-            this.setLargeWeaponUse(0);
-        }
-        else {
-            rider.sendStatusMessage(new TextComponentTranslation("reminder.creature_mortar_no_ammo"), false);
-            this.setLargeWeaponUse(0);
-        }
+        return flag1 || flag2;
     }
+
+    private boolean canFireCatapult() {
+        EntityPlayer rider = (EntityPlayer)this.getControllingPassenger();
+        if (rider == null) return false;
+        boolean flag1 = false;
+        boolean flag2 = rider.isCreative();
+        for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
+            if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
+                if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.CATAPULT_BOULDER)) {
+                    flag1 = true;
+                    break;
+                }
+            }
+        }
+        return flag1 || flag2;
+    }
+    //checks for large weapon use end here
 
     private void manageDiscoveryByPlayer() {
         AxisAlignedBB axisAlignedBB = new AxisAlignedBB(this.posX - 12, this.posY - 8, this.posZ - 12, this.posX + 12, this.posY + 8, this.posZ + 12);
@@ -1434,6 +1428,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setLargeWeaponCooldown(int value) {
         this.dataManager.set(LARGE_WEAPON_COOLDOWN, value);
     }
+
+    public boolean isFiringCatapult() {
+        return this.dataManager.get(FIRING_CATAPULT);
+    }
+
+    public void setFiringCatapult(boolean value) {
+        this.dataManager.set(FIRING_CATAPULT, value);
+    }
+
+
 
     private void initInventory() {
         RiftCreatureInventory tempInventory = this.creatureInventory;
@@ -2819,6 +2823,28 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 return PlayState.CONTINUE;
             }
         }));
+        //for use of large weapons
+        data.addAnimationController(new AnimationController(this, "useLargeWeapon", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent event) {
+                //for use of catapult
+                if (getLargeWeapon() == RiftLargeWeaponType.CATAPULT) {
+                    if (getUsingLargeWeapon() && canFireLargeWeapon()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".charge_catapult", true));
+                    else {
+                        if (isFiringCatapult()) {
+                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".launch_catapult", false));
+                            return PlayState.CONTINUE;
+                        }
+                        else {
+                            event.getController().clearAnimationCache();
+                            return PlayState.STOP;
+                        }
+                    }
+                }
+
+                return PlayState.CONTINUE;
+            }
+        }));
     }
 
     @Override
@@ -2875,6 +2901,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (itemstack.getCount() != stack.getCount()) this.markDirty();
 
             return itemstack;
+        }
+
+        public void removeItemStackStartingFromLast(ItemStack stack, int decrementAmount) {
+            ItemStack itemStack = stack.copy();
+            for (int x = this.getSizeInventory() - 1; x >= gearSlotCount(); x--) {
+                if (this.getStackInSlot(x).getItem() == itemStack.getItem() && this.getStackInSlot(x).getMetadata() == itemStack.getMetadata()) {
+                    if (itemStack.getCount() - decrementAmount >= 0) this.getStackInSlot(x).setCount(itemStack.getCount() - decrementAmount);
+                    else this.getStackInSlot(x).setCount(0);
+                }
+            }
         }
 
         public boolean isEmptyExceptSaddle() {

@@ -476,8 +476,8 @@ creature_control.left_mouse.dilophosaurus=Slash
 creature_control.right_mouse.dilophosaurus=Spit
 
 large_weapon_control.cannon=Fire Cannon
-large_weapon_control.mortar=Fire Mortar
-large_weapon_control.catapult=Launch Catapult
+large_weapon_control.mortar=Charge Mortar
+large_weapon_control.catapult=Charge Catapult
 
 creature_move.bounce.name=Bounce
 creature_move.bounce.description=The user bounces around, causing no effects

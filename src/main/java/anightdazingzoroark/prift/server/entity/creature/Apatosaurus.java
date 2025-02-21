@@ -60,7 +60,6 @@ import java.util.*;
 
 public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/apatosaurus"));
-    private static final DataParameter<Boolean> LAUNCHING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOADED = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> TAIL_WHIPPING = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.BOOLEAN);
@@ -131,7 +130,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(LAUNCHING, false);
         this.dataManager.register(CHARGING, false);
         this.dataManager.register(LOADED, false);
         this.dataManager.register(TAIL_WHIPPING, false);
@@ -158,10 +156,11 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
 
-        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(3, new RiftCreatureUseLargeWeaponMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
 
-        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
         this.tasks.addTask(7, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(8, new RiftWander(this, 1.0D));
         this.tasks.addTask(9, new RiftLookAround(this));
@@ -171,7 +170,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageWeaponCooldown();
-        if (!this.world.isRemote) this.manageCatapultAnims();
         //passenger stuff
         if (this.getPassengers().size() == 1) this.dismount = false;
         else if (this.getPassengers().size() > 1) this.dismount = true;
@@ -283,24 +281,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
             this.setLoaded(flag1 || flag2);
         }
         else this.setLoaded(false);
-    }
-
-    private void manageCatapultAnims() {
-        if (this.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
-            if (!this.world.isRemote) {
-                EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
-                if (!this.isCharging() && this.isUsingLeftClick() && rider.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) this.setCharging(true);
-                else if (this.isCharging() && !this.isUsingLeftClick()) this.setCharging(false);
-
-                if (this.isLaunching()) {
-                    this.launchTick++;
-                    if (this.launchTick > 8) {
-                        this.setLaunching(false);
-                        this.launchTick = 0;
-                    }
-                }
-            }
-        }
     }
 
     @Override
@@ -514,33 +494,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
-    private void manageCatapultFiring(int holdAmount) {
-        EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
-        boolean flag1 = false;
-        boolean flag2 = rider.isCreative();
-        int indexToRemove = -1;
-        for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
-            if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
-                if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.CATAPULT_BOULDER)) {
-                    flag1 = true;
-                    indexToRemove = x;
-                    break;
-                }
-            }
-        }
-        if (flag1 || flag2) {
-            this.setLaunching(true);
-            RiftCatapultBoulder boulder = new RiftCatapultBoulder(this.world, this, rider);
-            float velocity = RiftUtil.clamp((float) holdAmount * 0.015f + 1.5f, 1.5f, 3f);
-            float power = RiftUtil.clamp(0.03f * holdAmount + 3f, 3f, 6f);
-            boulder.setPower(power);
-            boulder.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, velocity, 1.0F);
-            this.world.spawnEntity(boulder);
-            this.creatureInventory.getStackInSlot(indexToRemove).setCount(0);
-            this.setLeftClickCooldown(Math.max(holdAmount * 2, 60));
-        }
-    }
-
     public void useWhipAttack() {
         AxisAlignedBB area = this.getEntityBoundingBox().grow(4D, 4D, 4D);
         List<EntityLivingBase> list = new ArrayList<>();
@@ -620,7 +573,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
 
     @Override
     public boolean hasLeftClickChargeBar() {
-        return !this.getLargeWeapon().equals(RiftLargeWeaponType.NONE);
+        return false;
     }
 
     @Override
@@ -636,14 +589,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     public float[] ageScaleParams() {
         return new float[]{0.35f, 2.25f};
-    }
-
-    public boolean isLaunching() {
-        return this.dataManager.get(LAUNCHING);
-    }
-
-    public void setLaunching(boolean value) {
-        this.dataManager.set(LAUNCHING, value);
     }
 
     public boolean isCharging() {
@@ -698,66 +643,12 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::apatosaurusMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::apatosaurusAttack));
         data.addAnimationController(new AnimationController(this, "weaponResize", 0, this::apatosaurusWeaponSize));
-        data.addAnimationController(new AnimationController(this, "catapultCharge", 0, this::apatosaurusCatapultCharge));
-        data.addAnimationController(new AnimationController(this, "catapultLaunch", 0, this::apatosaurusCatapultLaunch));
-    }
-
-    private <E extends IAnimatable> PlayState apatosaurusMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking() && !this.isTailWhipping()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState apatosaurusAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.stomp", false));
-            return PlayState.CONTINUE;
-        }
-        else if (this.isTailWhipping()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.tail_whip", false));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     private <E extends IAnimatable> PlayState apatosaurusWeaponSize(AnimationEvent<E> event) {
         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.weapon_size_change", true));
         return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState apatosaurusCatapultCharge(AnimationEvent<E> event) {
-        if (this.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
-            if (this.isCharging()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.charge_catapult", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState apatosaurusCatapultLaunch(AnimationEvent<E> event) {
-        if (this.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
-            if (this.isLaunching()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.launch_catapult", false));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     protected SoundEvent getAmbientSound() {
