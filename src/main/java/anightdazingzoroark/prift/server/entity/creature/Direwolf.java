@@ -181,11 +181,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 18;
     }

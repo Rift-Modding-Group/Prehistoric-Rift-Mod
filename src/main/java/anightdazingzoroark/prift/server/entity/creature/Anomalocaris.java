@@ -329,11 +329,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 27;
     }

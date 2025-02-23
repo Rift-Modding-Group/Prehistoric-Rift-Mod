@@ -299,7 +299,7 @@ public class RiftJournalScreen extends GuiScreen {
 
             //for creatures that can only be tamed by killing and hoping they drop their egg
             //add a warning here about it
-            if (this.entryType.isTameable() && !this.entryType.isTameableByFeeding()) {
+            if (this.entryType.isTameable && !this.entryType.isTameableByFeeding) {
                 imgOffset += 24;
                 String labelString = I18n.format("journal.must_kill_for_egg");
                 this.fontRenderer.drawSplitString(labelString, (this.width - 248) / 2 + 60, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + 40, 248,0xff0000);
@@ -310,8 +310,8 @@ public class RiftJournalScreen extends GuiScreen {
                 imgOffset += 24;
                 textOffset += 16 * (RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.size() / 6);
                 tamingFoodsHeight = 16 * (RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.size() / 6);
-                String tamingFoodsLabel = this.entryType.isTameableByFeeding() ?  I18n.format("journal.taming_or_breeding_foods") : I18n.format("journal.breeding_foods");
-                int tamingFoodsLabelOffset = this.entryType.isTameableByFeeding() ? -5 : -24;
+                String tamingFoodsLabel = this.entryType.isTameableByFeeding ?  I18n.format("journal.taming_or_breeding_foods") : I18n.format("journal.breeding_foods");
+                int tamingFoodsLabelOffset = this.entryType.isTameableByFeeding ? -5 : -24;
                 Map<String, List<Integer>> tempItemList = new HashMap<>();
                 this.fontRenderer.drawString(tamingFoodsLabel, (this.width - this.fontRenderer.getStringWidth(tamingFoodsLabel)) / 2 + tamingFoodsLabelOffset, (this.height - this.fontRenderer.FONT_HEIGHT) / 2 + imgOffset - this.entryScrollOffset + 41, 0x000000);
                 for (int i = 0; i < RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals.size(); i++) {

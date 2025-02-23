@@ -414,11 +414,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 27;
     }

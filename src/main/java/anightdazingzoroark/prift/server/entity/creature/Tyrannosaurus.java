@@ -488,15 +488,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         return this.dataManager.get(CAN_ROAR);
     }
 
-    public boolean isTameableByFeeding() {
-        return false;
-    }
-
-    @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
     @Override
     public int slotCount() {
         return 54;

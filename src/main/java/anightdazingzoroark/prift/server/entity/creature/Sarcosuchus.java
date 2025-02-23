@@ -288,11 +288,6 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 27;
     }

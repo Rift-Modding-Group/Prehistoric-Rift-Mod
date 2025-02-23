@@ -531,11 +531,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 27;
     }

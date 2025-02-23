@@ -25,7 +25,7 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.creature.canHoldLargeWeapon()
+        return this.creature.creatureType.canHoldLargeWeapon
                 && this.creature.isBeingRidden()
                 && (this.creature.getControllingPassenger() instanceof EntityPlayer && ((EntityPlayer)this.creature.getControllingPassenger()).getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE)
                 && this.creature.getLargeWeaponCooldown() == 0;

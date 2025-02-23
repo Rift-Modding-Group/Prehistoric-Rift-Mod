@@ -73,7 +73,7 @@ public class RiftDropCreatureBoxDeployedMemberInventory implements IMessage {
 
             NBTTagCompound partyMemNBT = creatureBox.getCreatureList().get(message.creatureBoxDeployedPos);
             NBTTagList nbtItemList = message.inventoryTagCompound;
-            boolean canBeSaddled = RiftCreatureType.values()[partyMemNBT.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).canBeSaddled();
+            boolean canBeSaddled = RiftCreatureType.values()[partyMemNBT.getByte("CreatureType")].canBeSaddled;
 
             for (int x = 0; x < nbtItemList.tagCount(); x++) {
                 //get the real creature first to make the item spawn in its location

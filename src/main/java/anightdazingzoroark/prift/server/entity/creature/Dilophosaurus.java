@@ -218,11 +218,6 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 18;
     }

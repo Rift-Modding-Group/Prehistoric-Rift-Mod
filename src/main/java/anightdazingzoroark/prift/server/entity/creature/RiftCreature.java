@@ -440,7 +440,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (this.isBeingRidden() && this.getControllingPassenger().equals(player)) {
             //for using large weapons
-            if (this.canHoldLargeWeapon()
+            if (this.creatureType.canHoldLargeWeapon
                     && this.itemStackIsLargeWeapon(this.creatureInventory.getStackInSlot(this.slotIndexForGear(RiftCreature.InventoryGearType.LARGE_WEAPON)))
                     && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
 
@@ -569,7 +569,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 return !PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(creatureType);
             }
         })) {
-            if (this.creatureType.isTameable()) {
+            if (this.creatureType.isTameable) {
                 PlayerJournalProgressHelper.discoverCreature(player, this.creatureType);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.discovered_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
             }
@@ -865,7 +865,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else if (!this.isTamed() && !this.isSleeping()) {
-            if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && (PlayerTamedCreaturesHelper.getPlayerParty(player).size() < PlayerTamedCreaturesHelper.getMaxPartySize(player) || PlayerTamedCreaturesHelper.getPlayerBox(player).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(player)) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
+            if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.creatureType.isTameableByFeeding && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && (PlayerTamedCreaturesHelper.getPlayerParty(player).size() < PlayerTamedCreaturesHelper.getMaxPartySize(player) || PlayerTamedCreaturesHelper.getPlayerBox(player).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(player)) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     this.consumeItemFromStack(player, itemstack);
                     this.tameCreature(player);
@@ -879,7 +879,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 return true;
             }
-            else if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.isTameableByFeeding() && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && PlayerTamedCreaturesHelper.getPlayerParty(player).size() == PlayerTamedCreaturesHelper.getMaxPartySize(player) && PlayerTamedCreaturesHelper.getPlayerBox(player).size() == PlayerTamedCreaturesHelper.getMaxBoxSize(player) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
+            else if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.creatureType.isTameableByFeeding && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && PlayerTamedCreaturesHelper.getPlayerParty(player).size() == PlayerTamedCreaturesHelper.getMaxPartySize(player) && PlayerTamedCreaturesHelper.getPlayerBox(player).size() == PlayerTamedCreaturesHelper.getMaxBoxSize(player) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                 player.sendStatusMessage(new TextComponentTranslation("reminder.cannot_tame_more_creatures"), false);
                 return true;
             }
@@ -1187,7 +1187,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setVariant(compound.getInteger("Variant"));
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
         this.setSaddled(compound.getBoolean("Saddled"));
-        if (compound.hasKey("LargeWeapon")) this.setLargeWeapon(RiftLargeWeaponType.values()[compound.getByte("LargeWeapon")]);
+        this.setLargeWeapon(RiftLargeWeaponType.values()[compound.getByte("LargeWeapon")]);
         if (this.creatureInventory != null) {
             NBTTagList nbtTagList = compound.getTagList("Items", 10);
             this.initInventory();
@@ -1519,8 +1519,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void refreshInventory() {
         ItemStack saddle = this.creatureInventory.getStackInSlot(this.slotIndexForGear(InventoryGearType.SADDLE));
         ItemStack largeWeapon = this.creatureInventory.getStackInSlot(this.slotIndexForGear(InventoryGearType.LARGE_WEAPON));
-        if (!this.world.isRemote && this.canBeSaddled()) this.setSaddled(this.saddleItemStack().getItem() == saddle.getItem() && this.saddleItemStack().getMetadata() == saddle.getMetadata() && !saddle.isEmpty());
-        if (!this.world.isRemote && this.canHoldLargeWeapon()) {
+        if (!this.world.isRemote && this.creatureType.canBeSaddled) this.setSaddled(this.saddleItemStack().getItem() == saddle.getItem() && this.saddleItemStack().getMetadata() == saddle.getMetadata() && !saddle.isEmpty());
+        if (!this.world.isRemote && this.creatureType.canHoldLargeWeapon) {
             if (largeWeapon.isEmpty()) this.setLargeWeapon(RiftLargeWeaponType.NONE);
             else if (largeWeapon.getItem() == RiftItems.CANNON) this.setLargeWeapon(RiftLargeWeaponType.CANNON);
             else if (largeWeapon.getItem() == RiftItems.CATAPULT) this.setLargeWeapon(RiftLargeWeaponType.CATAPULT);
@@ -2224,29 +2224,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return true;
     }
 
-    public boolean isTameableByFeeding() {
-        return this.creatureType.isTameableByFeeding();
-    }
-
-    public boolean canBeSaddled() {
-        return false;
-    }
-
-    public boolean canHoldLargeWeapon() {
-        return false;
-    }
-
     public int gearSlotCount() {
-        return (this.canBeSaddled() ? 1 : 0) + (this.canHoldLargeWeapon() ? 1 : 0);
+        return (this.creatureType.canBeSaddled ? 1 : 0) + (this.creatureType.canHoldLargeWeapon ? 1 : 0);
     }
 
     public int slotIndexForGear(InventoryGearType gearType) {
-        if (this.canBeSaddled() && this.canHoldLargeWeapon()) {
+        if (this.creatureType.canBeSaddled && this.creatureType.canHoldLargeWeapon) {
             if (gearType == InventoryGearType.SADDLE) return 0;
             else if (gearType == InventoryGearType.LARGE_WEAPON) return 1;
             else return -1;
         }
-        else if (this.canBeSaddled() && !this.canHoldLargeWeapon()) {
+        else if (this.creatureType.canBeSaddled && !this.creatureType.canHoldLargeWeapon) {
             if (gearType == InventoryGearType.SADDLE) return 0;
             else return -1;
         }
@@ -2550,8 +2538,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (!this.world.isRemote && this.creatureInventory != null) {
             for (int i = 0; i < this.creatureInventory.getSizeInventory(); i++) {
                 ItemStack itemStack = this.creatureInventory.getStackInSlot(i);
-                boolean hasSaddleFlag = !this.canBeSaddled() || i != this.slotIndexForGear(InventoryGearType.SADDLE);
-                boolean hasLargeWeaponFlag = !this.canHoldLargeWeapon() || i != this.slotIndexForGear(InventoryGearType.LARGE_WEAPON);
+                boolean hasSaddleFlag = !this.creatureType.canBeSaddled || i != this.slotIndexForGear(InventoryGearType.SADDLE);
+                boolean hasLargeWeaponFlag = !this.creatureType.canHoldLargeWeapon || i != this.slotIndexForGear(InventoryGearType.LARGE_WEAPON);
                 if (!itemStack.isEmpty() && (hasSaddleFlag || hasLargeWeaponFlag)) {
                     this.entityDropItem(itemStack, 0.0f);
                     this.creatureInventory.setInventorySlotContents(i, new ItemStack(Items.AIR));
@@ -2577,7 +2565,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public List<RiftTameRadialChoice> mainRadialChoices() {
         List<RiftTameRadialChoice> list = new ArrayList<>();
         list.add(RiftTameRadialChoice.INVENTORY);
-        if (this.canBeSaddled() && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY && this.isRideable) list.add(RiftTameRadialChoice.RIDE);
+        if (this.creatureType.canBeSaddled && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY && this.isRideable) list.add(RiftTameRadialChoice.RIDE);
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) list.add(RiftTameRadialChoice.OPTIONS);
         list.add(RiftTameRadialChoice.BEHAVIOR);
         return list;

@@ -265,11 +265,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 27;
     }

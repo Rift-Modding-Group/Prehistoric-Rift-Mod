@@ -26,7 +26,7 @@ public class CreatureContainer extends Container {
         this.creatureInventory.openInventory(player);
 
         //saddle slot
-        if (!this.creature.isBaby() && this.creature.canBeSaddled()) {
+        if (!this.creature.isBaby() && this.creature.creatureType.canBeSaddled) {
             this.addSlotToContainer(new Slot(creature.creatureInventory, creature.slotIndexForGear(RiftCreature.InventoryGearType.SADDLE), 8, 18) {
                 @Override
                 public boolean isItemValid(ItemStack stack) {
@@ -40,7 +40,7 @@ public class CreatureContainer extends Container {
         }
 
         //large weapon slot
-        if (!this.creature.isBaby() && this.creature.canHoldLargeWeapon()) {
+        if (!this.creature.isBaby() && this.creature.creatureType.canHoldLargeWeapon) {
             this.addSlotToContainer(new Slot(creature.creatureInventory, creature.slotIndexForGear(RiftCreature.InventoryGearType.LARGE_WEAPON), 26, 18) {
                 @Override
                 public boolean isItemValid(ItemStack stack) {

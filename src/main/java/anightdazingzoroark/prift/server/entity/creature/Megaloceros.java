@@ -199,11 +199,6 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 18;
     }

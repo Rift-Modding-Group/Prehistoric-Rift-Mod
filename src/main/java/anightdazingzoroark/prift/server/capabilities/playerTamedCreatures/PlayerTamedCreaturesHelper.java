@@ -306,7 +306,7 @@ public class PlayerTamedCreaturesHelper {
                                     NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
 
                                     //skip if slot is at 0, which is reserved for saddles only
-                                    if (creature.canBeSaddled() && itemNBT.getByte("Slot") == 0) continue;
+                                    if (creature.creatureType.canBeSaddled && itemNBT.getByte("Slot") == 0) continue;
 
                                     ItemStack itemStack = new ItemStack(itemNBT);
                                     if (creature.isFavoriteFood(itemStack) && !creature.isEnergyRegenItem(itemStack)) {
@@ -336,7 +336,7 @@ public class PlayerTamedCreaturesHelper {
                                     NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
 
                                     //skip if slot is at 0, which is reserved for saddles only
-                                    if (creature.canBeSaddled() && itemNBT.getByte("Slot") == 0) continue;
+                                    if (creature.creatureType.canBeSaddled && itemNBT.getByte("Slot") == 0) continue;
 
                                     ItemStack itemStack = new ItemStack(itemNBT);
                                     if (creature.isEnergyRegenItem(itemStack)) {
@@ -478,7 +478,7 @@ public class PlayerTamedCreaturesHelper {
                             NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
 
                             //skip if slot is at 0, which is reserved for saddles only
-                            if (creature.canBeSaddled() && itemNBT.getByte("Slot") == 0) continue;
+                            if (creature.creatureType.canBeSaddled && itemNBT.getByte("Slot") == 0) continue;
 
                             //create item, use it to heal up, then reduce count
                             ItemStack itemStack = new ItemStack(itemNBT);
@@ -502,7 +502,7 @@ public class PlayerTamedCreaturesHelper {
                             NBTTagCompound itemNBT = (NBTTagCompound) nbtItemList.get(i);
 
                             //skip if slot is at 0, which is reserved for saddles only
-                            if (creature.canBeSaddled() && itemNBT.getByte("Slot") == 0) continue;
+                            if (creature.creatureType.canBeSaddled && itemNBT.getByte("Slot") == 0) continue;
 
                             ItemStack itemStack = new ItemStack(itemNBT);
                             if (creature.isEnergyRegenItem(itemStack)) {

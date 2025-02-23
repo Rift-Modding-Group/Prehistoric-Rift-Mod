@@ -418,11 +418,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 27;
     }

@@ -155,11 +155,6 @@ public class Utahraptor extends RiftCreature implements IHerder {
     }
 
     @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
     public int slotCount() {
         return 18;
     }

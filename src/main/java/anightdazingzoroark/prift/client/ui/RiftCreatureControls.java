@@ -38,7 +38,7 @@ public class RiftCreatureControls {
         if (entity instanceof RiftCreature) {
             if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                 RiftCreature creature = (RiftCreature) entity;
-                if (creature.canHoldLargeWeapon()
+                if (creature.creatureType.canHoldLargeWeapon
                         && creature.itemStackIsLargeWeapon(creature.creatureInventory.getStackInSlot(creature.slotIndexForGear(RiftCreature.InventoryGearType.LARGE_WEAPON)))
                         && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
                     this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 20, true);

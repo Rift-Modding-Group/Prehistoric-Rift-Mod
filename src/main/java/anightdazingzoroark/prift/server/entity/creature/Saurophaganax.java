@@ -167,10 +167,6 @@ public class Saurophaganax extends RiftCreature {
         return new float[]{0.2f, 2f};
     }
 
-    public boolean canBeSaddled() {
-        return true;
-    }
-
     @Override
     public int slotCount() {
         return 27;

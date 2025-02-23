@@ -378,7 +378,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     public void removePartyCreatureInventory(int partyPos) {
         NBTTagCompound partyMember = this.partyCreatures.get(partyPos);
         NBTTagList nbtItemList = partyMember.getTagList("Items", 10);
-        boolean canBeSaddled = RiftCreatureType.values()[partyMember.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).canBeSaddled();
+        boolean canBeSaddled = RiftCreatureType.values()[partyMember.getByte("CreatureType")].canBeSaddled;
         for (int x = 0; x < nbtItemList.tagCount(); x++) {
             NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
             int j = nbttagcompound.getByte("Slot") & 255;
@@ -395,7 +395,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             if (creatureBox != null) {
                 NBTTagCompound creature = creatureBox.getCreatureList().get(partyPos);
                 NBTTagList nbtItemList = creature.getTagList("Items", 10);
-                boolean canBeSaddled = RiftCreatureType.values()[creature.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).canBeSaddled();
+                boolean canBeSaddled = RiftCreatureType.values()[creature.getByte("CreatureType")].canBeSaddled;
                 for (int x = 0; x < nbtItemList.tagCount(); x++) {
                     NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
                     int j = nbttagcompound.getByte("Slot") & 255;

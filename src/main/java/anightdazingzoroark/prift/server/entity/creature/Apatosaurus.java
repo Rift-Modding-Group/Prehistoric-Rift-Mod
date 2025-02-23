@@ -376,20 +376,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         return new BlockPos(this.dataManager.get(WORKSTATION_X_POS), this.dataManager.get(WORKSTATION_Y_POS), this.dataManager.get(WORKSTATION_Z_POS));
     }
 
-    public boolean isTameableByFeeding() {
-        return false;
-    }
-
-    @Override
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    @Override
-    public boolean canHoldLargeWeapon() {
-        return true;
-    }
-
     @Override
     public int slotCount() {
         return 54;
