@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.inventory;
 
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.RiftChangeInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -21,13 +22,13 @@ public class CreatureContainer extends Container {
         this.creatureInventory = creature.creatureInventory;
         this.player = player;
         this.creature = creature;
-        int slots = creatureInventory.getSizeInventory() - creature.gearSlotCount();
+        int slots = creatureInventory.getSizeInventory() - creature.creatureType.gearSlotCount();
         int rows = slots / 9;
         this.creatureInventory.openInventory(player);
 
         //saddle slot
         if (!this.creature.isBaby() && this.creature.creatureType.canBeSaddled) {
-            this.addSlotToContainer(new Slot(creature.creatureInventory, creature.slotIndexForGear(RiftCreature.InventoryGearType.SADDLE), 8, 18) {
+            this.addSlotToContainer(new Slot(creature.creatureInventory, creature.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE), 8, 18) {
                 @Override
                 public boolean isItemValid(ItemStack stack) {
                     return !stack.isEmpty() && creature.saddleItemStack().getItem() == stack.getItem() && creature.saddleItemStack().getMetadata() == stack.getMetadata();
@@ -41,7 +42,7 @@ public class CreatureContainer extends Container {
 
         //large weapon slot
         if (!this.creature.isBaby() && this.creature.creatureType.canHoldLargeWeapon) {
-            this.addSlotToContainer(new Slot(creature.creatureInventory, creature.slotIndexForGear(RiftCreature.InventoryGearType.LARGE_WEAPON), 26, 18) {
+            this.addSlotToContainer(new Slot(creature.creatureInventory, creature.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON), 26, 18) {
                 @Override
                 public boolean isItemValid(ItemStack stack) {
                     return !stack.isEmpty() && creature.itemStackIsLargeWeapon(stack);
@@ -52,7 +53,7 @@ public class CreatureContainer extends Container {
         //creature inventory
         for (int j = 0; j < rows; ++j) {
             for (int k = 0; k < 9; ++k) {
-                this.addSlotToContainer(new Slot(creature.creatureInventory, (k + this.creature.gearSlotCount()) + (j * 9), 8 + k * 18, 50 + j * 18));
+                this.addSlotToContainer(new Slot(creature.creatureInventory, (k + this.creature.creatureType.gearSlotCount()) + (j * 9), 8 + k * 18, 50 + j * 18));
             }
         }
 

@@ -445,6 +445,23 @@ public enum RiftCreatureType {
         return this.config;
     }
 
+    public int gearSlotCount() {
+        return (this.canBeSaddled ? 1 : 0) + (this.canHoldLargeWeapon ? 1 : 0);
+    }
+
+    public int slotIndexForGear(InventoryGearType gearType) {
+        if (this.canBeSaddled && this.canHoldLargeWeapon) {
+            if (gearType == InventoryGearType.SADDLE) return 0;
+            else if (gearType == InventoryGearType.LARGE_WEAPON) return 1;
+            else return -1;
+        }
+        else if (this.canBeSaddled && !this.canHoldLargeWeapon) {
+            if (gearType == InventoryGearType.SADDLE) return 0;
+            else return -1;
+        }
+        return -1;
+    }
+
     public CreatureCategory getCreatureCategory() {
         return this.creatureCategory;
     }
@@ -592,5 +609,10 @@ public enum RiftCreatureType {
                 creature.sacItem = RiftItems.riftSacItem(creature.name().toLowerCase()+"_sac", creature);
             }
         }
+    }
+
+    public enum InventoryGearType {
+        SADDLE,
+        LARGE_WEAPON
     }
 }

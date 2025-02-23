@@ -48,7 +48,7 @@ public class RiftCreatureInvMenu extends GuiContainer {
         }
 
         //normal inventory slots
-        int slots = this.creatureInventory.getSizeInventory() - this.creature.gearSlotCount();
+        int slots = this.creatureInventory.getSizeInventory() - this.creature.creatureType.gearSlotCount();
         for (int i = 0; i < slots / 9; i++) {
             for (int j = 0; j < 9; j++) {
                 this.drawTexturedModalRect(k + 7 + (j * 18), l + 49 + (i * 18), 176, 0, 18, 18);

@@ -441,7 +441,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isBeingRidden() && this.getControllingPassenger().equals(player)) {
             //for using large weapons
             if (this.creatureType.canHoldLargeWeapon
-                    && this.itemStackIsLargeWeapon(this.creatureInventory.getStackInSlot(this.slotIndexForGear(RiftCreature.InventoryGearType.LARGE_WEAPON)))
+                    && this.itemStackIsLargeWeapon(this.creatureInventory.getStackInSlot(this.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)))
                     && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
 
                 RiftMessages.WRAPPER.sendToServer(new RiftManualUseLargeWeapon(this, settings.keyBindAttack.isKeyDown() && this.getLargeWeaponCooldown() == 0));
@@ -681,7 +681,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void eatFromInventory() {
-        int minSlot = this.gearSlotCount();
+        int minSlot = this.creatureType.gearSlotCount();
         if (this.getHealth() < this.getMaxHealth()) {
             this.eatFromInvCooldown++;
             for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
@@ -1194,7 +1194,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             for (int i = 0; i < nbtTagList.tagCount(); ++i) {
                 NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
                 int j = nbttagcompound.getByte("Slot") & 255;
-                int inventorySize = this.slotCount() + this.gearSlotCount();
+                int inventorySize = this.slotCount() + this.creatureType.gearSlotCount();
                 if (j < inventorySize) this.creatureInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
             }
         }
@@ -1441,7 +1441,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private void initInventory() {
         RiftCreatureInventory tempInventory = this.creatureInventory;
-        int inventorySize = this.slotCount() + this.gearSlotCount();
+        int inventorySize = this.slotCount() + this.creatureType.gearSlotCount();
         this.creatureInventory = new RiftCreatureInventory("creatureInventory", inventorySize, this);
         this.creatureInventory.setCustomName(this.getName());
         if (tempInventory != null) {
@@ -1517,8 +1517,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void refreshInventory() {
-        ItemStack saddle = this.creatureInventory.getStackInSlot(this.slotIndexForGear(InventoryGearType.SADDLE));
-        ItemStack largeWeapon = this.creatureInventory.getStackInSlot(this.slotIndexForGear(InventoryGearType.LARGE_WEAPON));
+        ItemStack saddle = this.creatureInventory.getStackInSlot(this.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE));
+        ItemStack largeWeapon = this.creatureInventory.getStackInSlot(this.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON));
         if (!this.world.isRemote && this.creatureType.canBeSaddled) this.setSaddled(this.saddleItemStack().getItem() == saddle.getItem() && this.saddleItemStack().getMetadata() == saddle.getMetadata() && !saddle.isEmpty());
         if (!this.world.isRemote && this.creatureType.canHoldLargeWeapon) {
             if (largeWeapon.isEmpty()) this.setLargeWeapon(RiftLargeWeaponType.NONE);
@@ -2224,23 +2224,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return true;
     }
 
-    public int gearSlotCount() {
-        return (this.creatureType.canBeSaddled ? 1 : 0) + (this.creatureType.canHoldLargeWeapon ? 1 : 0);
-    }
-
-    public int slotIndexForGear(InventoryGearType gearType) {
-        if (this.creatureType.canBeSaddled && this.creatureType.canHoldLargeWeapon) {
-            if (gearType == InventoryGearType.SADDLE) return 0;
-            else if (gearType == InventoryGearType.LARGE_WEAPON) return 1;
-            else return -1;
-        }
-        else if (this.creatureType.canBeSaddled && !this.creatureType.canHoldLargeWeapon) {
-            if (gearType == InventoryGearType.SADDLE) return 0;
-            else return -1;
-        }
-        return -1;
-    }
-
     public int slotCount() {
         return 0;
     }
@@ -2538,8 +2521,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (!this.world.isRemote && this.creatureInventory != null) {
             for (int i = 0; i < this.creatureInventory.getSizeInventory(); i++) {
                 ItemStack itemStack = this.creatureInventory.getStackInSlot(i);
-                boolean hasSaddleFlag = !this.creatureType.canBeSaddled || i != this.slotIndexForGear(InventoryGearType.SADDLE);
-                boolean hasLargeWeaponFlag = !this.creatureType.canHoldLargeWeapon || i != this.slotIndexForGear(InventoryGearType.LARGE_WEAPON);
+                boolean hasSaddleFlag = !this.creatureType.canBeSaddled || i != this.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE);
+                boolean hasLargeWeaponFlag = !this.creatureType.canHoldLargeWeapon || i != this.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON);
                 if (!itemStack.isEmpty() && (hasSaddleFlag || hasLargeWeaponFlag)) {
                     this.entityDropItem(itemStack, 0.0f);
                     this.creatureInventory.setInventorySlotContents(i, new ItemStack(Items.AIR));
@@ -2861,7 +2844,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         @Override
         public ItemStack addItem(ItemStack stack) {
             ItemStack itemstack = stack.copy();
-            for (int i = gearSlotCount(); i < getSizeInventory(); ++i) {
+            for (int i = creatureType.gearSlotCount(); i < getSizeInventory(); ++i) {
                 ItemStack itemstack1 = this.getStackInSlot(i);
 
                 if (itemstack1.isEmpty()) {
@@ -2893,7 +2876,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         public void removeItemStackStartingFromLast(ItemStack stack, int decrementAmount) {
             ItemStack itemStack = stack.copy();
-            for (int x = this.getSizeInventory() - 1; x >= gearSlotCount(); x--) {
+            for (int x = this.getSizeInventory() - 1; x >= creatureType.gearSlotCount(); x--) {
                 if (this.getStackInSlot(x).getItem() == itemStack.getItem() && this.getStackInSlot(x).getMetadata() == itemStack.getMetadata()) {
                     if (itemStack.getCount() - decrementAmount >= 0) this.getStackInSlot(x).setCount(itemStack.getCount() - decrementAmount);
                     else this.getStackInSlot(x).setCount(0);
@@ -2903,7 +2886,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         public boolean isEmptyExceptSaddle() {
             for (int i = 0; i < getSizeInventory(); ++i) {
-                if (i == slotIndexForGear(InventoryGearType.SADDLE)) continue;
+                if (i == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)) continue;
                 if (!this.getStackInSlot(i).isEmpty()) return false;
             }
             return true;
@@ -2921,10 +2904,5 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         public void onInventoryChanged(IInventory invBasic) {
             this.creature.refreshInventory();
         }
-    }
-
-    public enum InventoryGearType {
-        SADDLE,
-        LARGE_WEAPON
     }
 }
