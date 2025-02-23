@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPowere
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
@@ -33,7 +34,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -131,9 +131,10 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftResetAnimatedPose(this, 1.52F, 1));
-        this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.24F));
-        this.tasks.addTask(4, new RiftParasaurolophusBlow(this));
+
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+
         this.tasks.addTask(5, new RiftHarvestOnWander(this, 0.52F, 0.24F));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
         this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 1.5D));
@@ -284,6 +285,45 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
     //blowing stuff ends here
 
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.POWER_BLOW, CreatureMove.SHOCK_BLAST);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.POWER_BLOW, CreatureMove.SHOCK_BLAST);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.HEAD, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5)
+                .defineChargeUpToUseLength(1.25)
+                .defineRecoverFromUseLength(3.75)
+                .finalizePoints()
+        );
+        moveMap.put(CreatureMove.MoveType.RANGED, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5)
+                .defineChargeUpToUseLength(5)
+                .defineUseDurationLength(20)
+                .defineRecoverFromUseLength(5)
+                .finalizePoints()
+        );
+        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+                .defineStartMoveDelayLength(5)
+                .defineChargeUpLength(10)
+                .defineChargeUpToUseLength(2.5)
+                .defineUseDurationLength(17.5)
+                .defineRecoverFromUseLength(5)
+                .finalizePoints()
+        );
+        return moveMap;
+    }
+    //move related stuff ends here
+
     public float attackWidth() {
         return 3.5f;
     }
@@ -294,32 +334,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (this.getEnergy() > 6) {
-                if (this.canBlow() && !this.isActing()) {
-                    this.setActing(true);
-                    this.setCanBlow(false);
-                    this.useBlow(target, RiftUtil.clamp(0.04f * holdAmount + 2f, 2f, 6f));
-                    this.setEnergy(this.getEnergy() - (int)(0.05d * (double)Math.min(holdAmount, 100) + 1d));
-                    this.setRightClickCooldown(Math.max(60, holdAmount * 2));
-                    this.playSound(RiftSounds.PARASAUROLOPHUS_BLOW, 2, 1);
-                    if (GeneralConfig.canUsePyrotech()) this.parsaurManualStokeHeater(holdAmount);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     public List<String> blocksToHarvest() {
@@ -353,7 +368,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return true;
+        return false;
     }
 
     @Override
@@ -561,34 +576,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     @Override
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::parasaurolophusMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::parasaurolophusAttack));
         data.addAnimationController(new AnimationController(this, "blow", 0, this::parasaurolophusBlow));
-        data.addAnimationController(new AnimationController(this, "controlledBlow", 0, this::parasaurolophusControlledBlow));
-    }
-
-    private <E extends IAnimatable> PlayState parasaurolophusMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget() && !this.hasWorkstation()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState parasaurolophusAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.attack", false));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     private <E extends IAnimatable> PlayState parasaurolophusBlow(AnimationEvent<E> event) {
@@ -598,15 +586,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         }
         event.getController().clearAnimationCache();
         return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState parasaurolophusControlledBlow(AnimationEvent<E> event) {
-        if (this.getRightClickCooldown() == 0) {
-            if (this.getRightClickUse() > 0 && this.getRightClickUse() < 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.use_blow_p1", false));
-            else if (this.getRightClickUse() >= 100) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.use_blow_p1_hold", true));
-        }
-        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.use_blow_p2", false));
-        return PlayState.CONTINUE;
     }
 
     protected SoundEvent getAmbientSound() {

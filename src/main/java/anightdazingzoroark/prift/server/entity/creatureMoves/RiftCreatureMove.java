@@ -60,6 +60,10 @@ public abstract class RiftCreatureMove {
         return this.useValue;
     }
 
+    public int[] unmountedChargeBounds() {
+        return new int[]{(int)(this.creatureMove.maxUse * 0.3), this.creatureMove.maxUse};
+    }
+
     public enum MovePriority {
         HIGH, //move is put at top of list
         LOW, //move is put at bottom of list

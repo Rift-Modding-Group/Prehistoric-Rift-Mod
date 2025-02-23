@@ -129,11 +129,11 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         this.currentInvokedMove = this.creature.currentCreatureMove().invokeMove();
                         if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
                             //if move involves charging into target, the max charge time is the whole value
-                            //otherwise its random between 30% of max value and max value
+                            //otherwise its random based on whats given in the invoked creature move's class
                             if (selectedMove.moveType == CreatureMove.MoveType.CHARGE && selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
                                 this.maxChargeTime = this.creature.currentCreatureMove().maxUse;
                             }
-                            else this.maxChargeTime = RiftUtil.randomInRange((int)(this.creature.currentCreatureMove().maxUse * 0.3), this.creature.currentCreatureMove().maxUse);
+                            else this.maxChargeTime = RiftUtil.randomInRange(this.currentInvokedMove.unmountedChargeBounds()[0], this.currentInvokedMove.unmountedChargeBounds()[1]);
 
                             //set move anim markers
                             this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();

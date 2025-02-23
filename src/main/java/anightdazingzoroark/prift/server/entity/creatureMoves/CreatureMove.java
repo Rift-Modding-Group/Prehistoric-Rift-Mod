@@ -17,7 +17,9 @@ public enum CreatureMove {
     SELF_DESTRUCT(null, MoveType.RANGED, ChargeType.NONE, 300, 0, 0, false, false, false), //will be given only to anky for now
     LEAP(RiftLeapMove.class, MoveType.CHARGE, ChargeType.COOLDOWN_ONLY, 50, 0, 100, false, true, false),
     PACK_CALL(RiftPackCallMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 3600, false, false, false),
-    TAIL_WHIP(RiftTailWhipMove.class, MoveType.TAIL, ChargeType.NONE, 0, 0, 0, false, false, false);
+    TAIL_WHIP(RiftTailWhipMove.class, MoveType.TAIL, ChargeType.NONE, 0, 0, 0, false, false, false),
+    POWER_BLOW(RiftPowerBlowMove.class, MoveType.RANGED, ChargeType.GRADIENT_THEN_USE, 0, 100, 200, false, false, false),
+    SHOCK_BLAST(RiftShockBlastMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 3600, false, false, false);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveType moveType;
