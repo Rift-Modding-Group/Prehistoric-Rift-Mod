@@ -14,10 +14,10 @@ import net.minecraft.util.text.TextComponentTranslation;
 public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
     private final RiftCreature creature;
     private boolean finishFlag;
-    private boolean canFireWeaponWithAnim;
-    private int animTime;
+    private boolean canFireWeapon;
+    private int pauseTime;
     private final int catapultLaunchTime = 2;
-    private final int catapultAnimTime = 10;
+    private final int maxLaunchPauseTime = 10;
 
     public RiftCreatureUseLargeWeaponMounted(RiftCreature creature) {
         this.creature = creature;
@@ -39,8 +39,8 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
     @Override
     public void resetTask() {
         this.finishFlag = false;
-        this.canFireWeaponWithAnim = false;
-        this.animTime = 0;
+        this.canFireWeapon = false;
+        this.pauseTime = 0;
         this.creature.setLargeWeaponUse(0);
         this.creature.resetSpeed();
     }
@@ -49,8 +49,12 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
     public void updateTask() {
         switch (this.creature.getLargeWeapon()) {
             case CANNON:
-                if (this.creature.getUsingLargeWeapon()) {
-                    if (this.creature.canFireLargeWeapon()) this.manageCannonFiring();
+                if (this.canFireWeapon) this.manageCannonFiring();
+                else if (this.creature.getUsingLargeWeapon()) {
+                    if (this.creature.canFireLargeWeapon()) {
+                        this.creature.removeSpeed();
+                        this.canFireWeapon = true;
+                    }
                     else {
                         EntityPlayer rider = (EntityPlayer) this.creature.getControllingPassenger();
                         if (rider != null) rider.sendStatusMessage(new TextComponentTranslation("reminder.creature_catapult_no_ammo"), false);
@@ -60,27 +64,26 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
                 }
                 break;
             case MORTAR:
-                if (this.creature.canFireLargeWeapon() && this.creature.getUsingLargeWeapon() && this.creature.getLargeWeaponUse() > 0) {
-                    this.creature.removeSpeed();
-                }
-                if (this.creature.canFireLargeWeapon() && !this.creature.getUsingLargeWeapon() && this.creature.getLargeWeaponUse() > 0) {
-                    this.manageMortarFiring();
-                }
-                else if (!this.creature.canFireLargeWeapon() && this.creature.getUsingLargeWeapon()) {
-                    EntityPlayer rider = (EntityPlayer) this.creature.getControllingPassenger();
-                    if (rider != null) rider.sendStatusMessage(new TextComponentTranslation("reminder.creature_mortar_no_ammo"), false);
-                    this.creature.setLargeWeaponUse(0);
-                    this.finishFlag = true;
+                if (this.canFireWeapon) this.manageMortarFiring();
+                else {
+                    if (this.creature.canFireLargeWeapon() && !this.creature.getUsingLargeWeapon() && this.creature.getLargeWeaponUse() > 0) {
+                        this.creature.removeSpeed();
+                        this.canFireWeapon = true;
+                    }
+                    else if (!this.creature.canFireLargeWeapon() && this.creature.getUsingLargeWeapon()) {
+                        EntityPlayer rider = (EntityPlayer) this.creature.getControllingPassenger();
+                        if (rider != null) rider.sendStatusMessage(new TextComponentTranslation("reminder.creature_mortar_no_ammo"), false);
+                        this.creature.setLargeWeaponUse(0);
+                        this.finishFlag = true;
+                    }
                 }
                 break;
             case CATAPULT:
-                if (this.canFireWeaponWithAnim) this.manageCatapultFiring();
+                if (this.canFireWeapon) this.manageCatapultFiring();
                 else {
-                    if (this.creature.canFireLargeWeapon() && this.creature.getUsingLargeWeapon() && this.creature.getLargeWeaponUse() > 0) {
-                        this.creature.removeSpeed();
-                    }
                     if (this.creature.canFireLargeWeapon() && !this.creature.getUsingLargeWeapon() && this.creature.getLargeWeaponUse() > 0) {
-                        this.canFireWeaponWithAnim = true;
+                        this.creature.removeSpeed();
+                        this.canFireWeapon = true;
                     }
                     else if (!this.creature.canFireLargeWeapon() && this.creature.getUsingLargeWeapon()) {
                         EntityPlayer rider = (EntityPlayer) this.creature.getControllingPassenger();
@@ -95,31 +98,37 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
 
     private void manageCannonFiring() {
         EntityPlayer rider = (EntityPlayer) this.creature.getControllingPassenger();
-        RiftCannonball cannonball = new RiftCannonball(this.creature.world, this.creature, rider);
-        cannonball.shoot(this.creature, RiftUtil.clamp(this.creature.rotationPitch, -180f, 0f), this.creature.rotationYaw, 0.0F, 2.4F, 1.0F);
-        this.creature.world.spawnEntity(cannonball);
-        this.creature.creatureInventory.removeItemStackStartingFromLast(new ItemStack(RiftItems.CANNONBALL), 1);
-        this.creature.setLargeWeaponCooldown(this.creature.getLargeWeapon().maxCooldown);
-        this.creature.setLargeWeaponUse(0);
-        this.finishFlag = true;
+        if (this.pauseTime == 0) {
+            RiftCannonball cannonball = new RiftCannonball(this.creature.world, this.creature, rider);
+            cannonball.shoot(this.creature, RiftUtil.clamp(this.creature.rotationPitch, -180f, 0f), this.creature.rotationYaw, 0.0F, 2.4F, 1.0F);
+            this.creature.world.spawnEntity(cannonball);
+            this.creature.creatureInventory.removeItemStackStartingFromLast(new ItemStack(RiftItems.CANNONBALL), 1);
+            this.creature.setLargeWeaponCooldown(this.creature.getLargeWeapon().maxCooldown);
+            this.creature.setLargeWeaponUse(0);
+        }
+        if (this.pauseTime >= this.maxLaunchPauseTime) this.finishFlag = true;
+        this.pauseTime++;
     }
 
     private void manageMortarFiring() {
         EntityPlayer rider = (EntityPlayer)this.creature.getControllingPassenger();
-        int launchDist = (int)RiftUtil.slopeResult(this.creature.getLargeWeaponUse(), true, 0, this.creature.getLargeWeapon().maxUse, 6, 16);
-        RiftMortarShell mortarShell = new RiftMortarShell(this.creature.world, this.creature, rider);
-        mortarShell.shoot(this.creature, launchDist);
-        this.creature.world.spawnEntity(mortarShell);
-        this.creature.creatureInventory.removeItemStackStartingFromLast(new ItemStack(RiftItems.MORTAR_SHELL), 1);
-        this.creature.setLargeWeaponCooldown(Math.min(this.creature.getLargeWeaponUse() * 2, this.creature.getLargeWeapon().maxCooldown));
-        this.creature.setLargeWeaponUse(0);
-        this.finishFlag = true;
+        if (this.pauseTime == 0) {
+            int launchDist = (int)RiftUtil.slopeResult(this.creature.getLargeWeaponUse(), true, 0, this.creature.getLargeWeapon().maxUse, 6, 16);
+            RiftMortarShell mortarShell = new RiftMortarShell(this.creature.world, this.creature, rider);
+            mortarShell.shoot(this.creature, launchDist);
+            this.creature.world.spawnEntity(mortarShell);
+            this.creature.creatureInventory.removeItemStackStartingFromLast(new ItemStack(RiftItems.MORTAR_SHELL), 1);
+            this.creature.setLargeWeaponCooldown(Math.min(this.creature.getLargeWeaponUse() * 2, this.creature.getLargeWeapon().maxCooldown));
+            this.creature.setLargeWeaponUse(0);
+        }
+        if (this.pauseTime >= this.maxLaunchPauseTime) this.finishFlag = true;
+        this.pauseTime++;
     }
 
     private void manageCatapultFiring() {
         EntityPlayer rider = (EntityPlayer) this.creature.getControllingPassenger();
-        if (this.animTime == 0) this.creature.setFiringCatapult(true);
-        if (this.animTime == this.catapultLaunchTime) {
+        if (this.pauseTime == 0) this.creature.setFiringCatapult(true);
+        if (this.pauseTime == this.catapultLaunchTime) {
             RiftCatapultBoulder boulder = new RiftCatapultBoulder(this.creature.world, this.creature, rider);
             float velocity = RiftUtil.slopeResult(this.creature.getLargeWeaponUse(), true, 0, this.creature.getLargeWeapon().maxUse, 1.5f, 3f);
             float power = RiftUtil.slopeResult(this.creature.getLargeWeaponUse(), true, 0, this.creature.getLargeWeapon().maxUse, 3f, 6f);
@@ -128,12 +137,12 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
             this.creature.world.spawnEntity(boulder);
             this.creature.creatureInventory.removeItemStackStartingFromLast(new ItemStack(RiftItems.CATAPULT_BOULDER), 1);
         }
-        if (this.animTime >= this.catapultAnimTime) {
+        if (this.pauseTime >= this.maxLaunchPauseTime) {
             this.creature.setLargeWeaponCooldown(Math.min(this.creature.getLargeWeaponUse() * 2, this.creature.getLargeWeapon().maxCooldown));
             this.creature.setLargeWeaponUse(0);
             this.creature.setFiringCatapult(false);
             this.finishFlag = true;
         }
-        this.animTime++;
+        this.pauseTime++;
     }
 }

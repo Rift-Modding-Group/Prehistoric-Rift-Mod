@@ -169,7 +169,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        this.manageWeaponCooldown();
         //passenger stuff
         if (this.getPassengers().size() == 1) this.dismount = false;
         else if (this.getPassengers().size() > 1) this.dismount = true;
@@ -192,95 +191,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
         if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
         if (this.tail3Part != null) this.tail3Part.setPositionAndUpdate(this.tail3Part.posX, this.tail3Part.posY + sitOffset, this.tail3Part.posZ);
-    }
-
-    private void manageWeaponCooldown() {
-        if (this.getLeftClickCooldown() > 0) this.setLeftClickCooldown(this.getLeftClickCooldown() - 1);
-    }
-
-    /*
-    @SideOnly(Side.CLIENT)
-    @Override
-    public void setControls() {
-        GameSettings settings = Minecraft.getMinecraft().gameSettings;
-        EntityPlayer player = Minecraft.getMinecraft().player;
-        if (this.isBeingRidden()) {
-            if (this.getControllingPassenger() != null) {
-                if (this.getControllingPassenger().equals(player)) {
-                    RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 0, settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
-                        RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 1, !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()));
-                        RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, 3, !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown()));
-
-                    if (settings.keyBindAttack.isKeyDown() && !this.isActing()) {
-                        if (RiftUtil.isUsingSSR()) {
-                            SSRCompatUtils.SSRHitResult hitResult = SSRCompatUtils.createHitResult(this);
-
-                            if (this.hasLeftClickChargeBar()) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                            else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, 0, hitResult.entity, hitResult.blockPos));
-                        }
-                        else {
-                            if (player.getHeldItemMainhand().getItem().equals(RiftItems.COMMAND_CONSOLE)) {
-                                if (this.getLeftClickCooldown() == 0) RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 0));
-                            }
-                            else RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, 0));
-                        }
-                    }
-                    else if (settings.keyBindUseItem.isKeyDown() && !this.isActing() && this.canUseRightClick() && !(player.getHeldItemMainhand().getItem() instanceof ItemFood) && !(player.getHeldItemMainhand().getItem() instanceof ItemMonsterPlacer) && !RiftUtil.checkInMountItemWhitelist(player.getHeldItemMainhand().getItem())) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 1, 0));
-                    }
-                    else if (!settings.keyBindUseItem.isKeyDown() && !this.canUseRightClick()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 1, true));
-                    }
-//                    else if (this.isUsingSpacebar() && this.canUseSpacebar()) {
-//                        RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 2, false));
-//                        RiftMessages.WRAPPER.sendToServer(new RiftApatosaurusManagePassengers(this));
-//                        this.addPassengersFromSpacebar();
-//                    }
-                    else if (settings.keyBindPickBlock.isKeyDown() && !this.isActing()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this, 3));
-                    }
-                    else if (!settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown()) {
-                        if (RiftUtil.isUsingSSR()) {
-                            SSRCompatUtils.SSRHitResult hitResult = SSRCompatUtils.createHitResult(this);
-                            if (this.hasLeftClickChargeBar()) {
-                                if (this.getLeftClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, this.getLeftClickUse(), hitResult.entity, hitResult.blockPos));
-                            }
-                        }
-                        else {
-                            if (this.hasLeftClickChargeBar()) {
-                                if (this.getLeftClickUse() > 0) RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 0, this.getLeftClickUse()));
-                            }
-                        }
-
-//                        if (!this.canUseSpacebar()) RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(this, 2, true));
-                        if (this.getMiddleClickUse() > 0) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftMountControl(this, 3, 0));
-                            this.setMiddleClickUse(0);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    */
-
-    //i have no fucking idea why but this breaks the apato's ability to use catapults
-    //just wtf
-    public void manageLoaded() {
-        if (this.getLargeWeapon().equals(RiftLargeWeaponType.CATAPULT)) {
-            boolean flag1 = false;
-            boolean flag2 = this.isBeingRidden() && (this.getControllingPassenger() instanceof EntityPlayer && ((EntityPlayer) this.getControllingPassenger()).isCreative());
-            for (int x = this.creatureInventory.getSizeInventory() - 1; x >= 0; x--) {
-                if (!this.creatureInventory.getStackInSlot(x).isEmpty()) {
-                    if (this.creatureInventory.getStackInSlot(x).getItem().equals(RiftItems.CATAPULT_BOULDER)) {
-                        flag1 = true;
-                        break;
-                    }
-                }
-            }
-            this.setLoaded(flag1 || flag2);
-        }
-        else this.setLoaded(false);
     }
 
     @Override
@@ -322,8 +232,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     @Override
     public BlockPos workstationUseFromPos() {
         IBlockState blockState = this.world.getBlockState(this.getWorkstationPos());
-        TileEntity te = this.world.getTileEntity(this.getWorkstationPos());
-        int dirF = te instanceof TileEntitySemiManualBase ? -1 : 1;
         if (blockState.getMaterial().isSolid()) {
             EnumFacing direction = blockState.getValue(BlockHorizontal.FACING);
             switch (direction) {
