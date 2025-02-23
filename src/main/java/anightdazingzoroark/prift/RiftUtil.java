@@ -359,7 +359,7 @@ public class RiftUtil {
         if (colonTwo != -1) {
             Item item = Item.getByNameOrId(string.substring(0, colonTwo));
             int metadata = Integer.parseInt(string.substring(colonTwo + 1));
-            return itemStack.getItem().equals(item) && itemStack.getMetadata() == metadata;
+            return itemStack.getItem().equals(item) && (itemStack.getMetadata() == metadata || metadata == -1);
 
         }
         else {
