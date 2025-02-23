@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.client.Minecraft;
@@ -39,7 +40,7 @@ public class RiftCreatureControls {
             if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                 RiftCreature creature = (RiftCreature) entity;
                 if (creature.creatureType.canHoldLargeWeapon
-                        && creature.itemStackIsLargeWeapon(creature.creatureInventory.getStackInSlot(creature.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)))
+                        && creature.getLargeWeapon() != RiftLargeWeaponType.NONE
                         && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
                     this.showLeftMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 20, true);
                 }

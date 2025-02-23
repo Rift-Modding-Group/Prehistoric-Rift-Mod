@@ -441,9 +441,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isBeingRidden() && this.getControllingPassenger().equals(player)) {
             //for using large weapons
             if (this.creatureType.canHoldLargeWeapon
-                    && this.itemStackIsLargeWeapon(this.creatureInventory.getStackInSlot(this.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)))
+                    && this.getLargeWeapon() != RiftLargeWeaponType.NONE
                     && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
-
                 RiftMessages.WRAPPER.sendToServer(new RiftManualUseLargeWeapon(this, settings.keyBindAttack.isKeyDown() && this.getLargeWeaponCooldown() == 0));
             }
             //for using moves
@@ -1519,8 +1518,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void refreshInventory() {
         ItemStack saddle = this.creatureInventory.getStackInSlot(this.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE));
         ItemStack largeWeapon = this.creatureInventory.getStackInSlot(this.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON));
-        if (!this.world.isRemote && this.creatureType.canBeSaddled) this.setSaddled(this.saddleItemStack().getItem() == saddle.getItem() && this.saddleItemStack().getMetadata() == saddle.getMetadata() && !saddle.isEmpty());
-        if (!this.world.isRemote && this.creatureType.canHoldLargeWeapon) {
+        if (this.creatureType.canBeSaddled) this.setSaddled(this.saddleItemStack().getItem() == saddle.getItem() && this.saddleItemStack().getMetadata() == saddle.getMetadata() && !saddle.isEmpty());
+        if (this.creatureType.canHoldLargeWeapon) {
             if (largeWeapon.isEmpty()) this.setLargeWeapon(RiftLargeWeaponType.NONE);
             else if (largeWeapon.getItem() == RiftItems.CANNON) this.setLargeWeapon(RiftLargeWeaponType.CANNON);
             else if (largeWeapon.getItem() == RiftItems.CATAPULT) this.setLargeWeapon(RiftLargeWeaponType.CATAPULT);
@@ -1929,11 +1928,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void setSaddled(boolean value) {
-        this.dataManager.set(SADDLED, Boolean.valueOf(value));
+        this.dataManager.set(SADDLED, value);
     }
 
     public RiftLargeWeaponType getLargeWeapon() {
-        return RiftLargeWeaponType.values()[this.dataManager.get(LARGE_WEAPON).byteValue()];
+        return RiftLargeWeaponType.values()[this.dataManager.get(LARGE_WEAPON)];
     }
 
     public void setLargeWeapon(RiftLargeWeaponType value) {

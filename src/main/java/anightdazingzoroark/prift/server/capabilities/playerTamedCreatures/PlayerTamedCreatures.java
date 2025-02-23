@@ -378,11 +378,14 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     public void removePartyCreatureInventory(int partyPos) {
         NBTTagCompound partyMember = this.partyCreatures.get(partyPos);
         NBTTagList nbtItemList = partyMember.getTagList("Items", 10);
-        boolean canBeSaddled = RiftCreatureType.values()[partyMember.getByte("CreatureType")].canBeSaddled;
+        RiftCreatureType creatureType = RiftCreatureType.values()[partyMember.getByte("CreatureType")];
         for (int x = 0; x < nbtItemList.tagCount(); x++) {
             NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
             int j = nbttagcompound.getByte("Slot") & 255;
-            if ((canBeSaddled && j != 0) || !canBeSaddled) {
+            if ((creatureType.canBeSaddled && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)) || !creatureType.canBeSaddled) {
+                nbtItemList.removeTag(x);
+            }
+            if ((creatureType.canHoldLargeWeapon && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) || !creatureType.canHoldLargeWeapon) {
                 nbtItemList.removeTag(x);
             }
         }
@@ -395,11 +398,14 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             if (creatureBox != null) {
                 NBTTagCompound creature = creatureBox.getCreatureList().get(partyPos);
                 NBTTagList nbtItemList = creature.getTagList("Items", 10);
-                boolean canBeSaddled = RiftCreatureType.values()[creature.getByte("CreatureType")].canBeSaddled;
+                RiftCreatureType creatureType = RiftCreatureType.values()[creature.getByte("CreatureType")];
                 for (int x = 0; x < nbtItemList.tagCount(); x++) {
                     NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
                     int j = nbttagcompound.getByte("Slot") & 255;
-                    if ((canBeSaddled && j != 0) || !canBeSaddled) {
+                    if ((creatureType.canBeSaddled && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)) || !creatureType.canBeSaddled) {
+                        nbtItemList.removeTag(x);
+                    }
+                    if ((creatureType.canHoldLargeWeapon && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) || !creatureType.canHoldLargeWeapon) {
                         nbtItemList.removeTag(x);
                     }
                 }

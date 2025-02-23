@@ -45,7 +45,7 @@ public class CreatureContainer extends Container {
             this.addSlotToContainer(new Slot(creature.creatureInventory, creature.creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON), 26, 18) {
                 @Override
                 public boolean isItemValid(ItemStack stack) {
-                    return !stack.isEmpty() && creature.itemStackIsLargeWeapon(stack);
+                    return !stack.isEmpty() && creature.itemStackIsLargeWeapon(stack) && creature.getLargeWeaponCooldown() <= 0 && creature.getLargeWeaponUse() <= 0;
                 }
             });
         }
