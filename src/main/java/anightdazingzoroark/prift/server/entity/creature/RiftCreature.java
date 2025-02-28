@@ -2390,9 +2390,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.posZ + (this.width / 2) * Math.sin(Math.atan2(this.getLookVec().z, this.getLookVec().x))
         );
         BlockPos lastAABBPos = new BlockPos(
-                this.posX + ((useRanged ? this.rangedWidth() : this.attackWidth()) - (this.width / 2)) * Math.cos(Math.atan2(this.getLookVec().z, this.getLookVec().x)),
+                this.posX + ((useRanged ? this.rangedWidth() + this.width : this.attackWidth() + this.width) - (this.width / 2)) * Math.cos(Math.atan2(this.getLookVec().z, this.getLookVec().x)),
                 this.posY,
-                this.posZ + ((useRanged ? this.rangedWidth() : this.attackWidth()) - (this.width / 2)) * Math.sin(Math.atan2(this.getLookVec().z, this.getLookVec().x))
+                this.posZ + ((useRanged ? this.rangedWidth() + this.width : this.attackWidth() + this.width) - (this.width / 2)) * Math.sin(Math.atan2(this.getLookVec().z, this.getLookVec().x))
         );
 
         //fill aabb list

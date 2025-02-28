@@ -340,8 +340,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
 
     private Entity getAttackTarget(CreatureMove.MoveType creatureMoveType) {
         if (creatureMoveType != CreatureMove.MoveType.RANGED && creatureMoveType != CreatureMove.MoveType.CHARGE) {
-            return this.creature.getControlAttackTargets(this.creature.attackWidth());
+            return this.creature.getClosestTargetInFront();
         }
-        else return this.creature.getControlAttackTargets(this.creature.rangedWidth());
+        else return this.creature.getClosestTargetInFront(true);
     }
 }
