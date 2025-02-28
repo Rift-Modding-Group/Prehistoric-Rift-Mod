@@ -78,6 +78,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable, IRiftMultipart {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -785,7 +786,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         if (this.isTamed()) {
-            System.out.println(itemstack+" is favorite?: "+this.isFavoriteFood(itemstack));
             if (this.getOwner() != null) {
                 if (this.isOwner(player)) {
                     if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
@@ -2371,6 +2371,111 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 && rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK
                 && this.getDistanceSqToCenter(rayTraceResult.getBlockPos()) <= Math.pow(creatureReach, 2)) return rayTraceResult.getBlockPos();
         return null;
+    }
+
+
+    public List<Entity> getAllTargetsInFront() {
+        return this.getAllTargetsInFront(false);
+    }
+
+    //create a series of aabbs based on creature width and attack width
+    //entities that are inside will be considered as targets and will be attacked
+    public List<Entity> getAllTargetsInFront(boolean useRanged) {
+        RiftCreature user = this;
+        List<AxisAlignedBB> aabbList = new ArrayList<>();
+        List<Entity> entityList = new ArrayList<>();
+        BlockPos firstAABBPos = new BlockPos(
+                this.posX + (this.width / 2) * Math.cos(Math.atan2(this.getLookVec().z, this.getLookVec().x)),
+                this.posY,
+                this.posZ + (this.width / 2) * Math.sin(Math.atan2(this.getLookVec().z, this.getLookVec().x))
+        );
+        BlockPos lastAABBPos = new BlockPos(
+                this.posX + ((useRanged ? this.rangedWidth() : this.attackWidth()) - (this.width / 2)) * Math.cos(Math.atan2(this.getLookVec().z, this.getLookVec().x)),
+                this.posY,
+                this.posZ + ((useRanged ? this.rangedWidth() : this.attackWidth()) - (this.width / 2)) * Math.sin(Math.atan2(this.getLookVec().z, this.getLookVec().x))
+        );
+
+        //fill aabb list
+        double aabbStepSize = this.width - 0.5; //each aabb overlaps by at most 0.5 blocks
+        double aabbDist = Math.sqrt(firstAABBPos.distanceSq(lastAABBPos.getX(), lastAABBPos.getY(), lastAABBPos.getZ()));
+        int steps = (int) Math.ceil(aabbDist / aabbStepSize); //no of aabbs needed
+
+        for (int i = 0; i <= steps; i++) {
+            double t = i / (double) steps;
+            double interpX = firstAABBPos.getX() + t * (lastAABBPos.getX() - firstAABBPos.getX());
+            double interpZ = firstAABBPos.getZ() + t * (lastAABBPos.getZ() - firstAABBPos.getZ());
+
+            AxisAlignedBB aabb = new AxisAlignedBB(
+                    interpX - this.width / 2, this.posY, interpZ - this.width / 2,
+                    interpX + this.width / 2, this.posY + this.height, interpZ + this.width / 2
+            );
+            aabbList.add(aabb);
+        }
+
+        //find entities detected in aabbs in aabblist
+        for (AxisAlignedBB aabb : aabbList) {
+            List<Entity> tempEntityList = this.world.getEntitiesWithinAABB(Entity.class, aabb, new Predicate<Entity>() {
+                @Override
+                public boolean apply(@Nullable Entity entity) {
+                    return RiftUtil.checkForNoAssociations(user, entity) && !user.equals(entity) && user.canEntityBeSeen(entity);
+                }
+            });
+            entityList.addAll(tempEntityList);
+        }
+
+        //prioritize nearest hitbox of a creature to this creature over the targeted creature
+        List<Entity> entitiesToRemove = new ArrayList<>();
+        for (Entity entity : entityList) {
+            if (entity instanceof MultiPartEntityPart) {
+                //get parent of multipart and make array of all multiparts with same parent
+                MultiPartEntityPart hitbox = (MultiPartEntityPart) entity;
+                Entity hitboxParent = (Entity) hitbox.parent;
+
+                //get all hitboxes that share the same parent
+                List<Entity> hitboxesOfSameParent = entityList.stream().filter(
+                        e -> e instanceof MultiPartEntityPart && ((MultiPartEntityPart)e).parent.equals(hitboxParent)
+                ).collect(Collectors.toList());
+
+                //if parent is no longer in entitiesToRemove or if there is already a closest hitbox, skip
+                if (entitiesToRemove.contains(hitboxParent) ||
+                        entitiesToRemove.stream().anyMatch(e -> e instanceof MultiPartEntityPart && ((MultiPartEntityPart) e).parent.equals(hitboxParent))) continue;
+
+                //now for getting the closest hitbox
+                MultiPartEntityPart closestHitbox = null;
+                for (Entity hitboxForTest : hitboxesOfSameParent) {
+                    if (closestHitbox == null) closestHitbox = (MultiPartEntityPart) hitboxForTest;
+                    else if (closestHitbox.getDistance(this) >= hitboxForTest.getDistance(this)) closestHitbox = (MultiPartEntityPart) hitboxForTest;
+                }
+
+                //remove extra hitboxes and the parent from the tempEntityList
+                if (closestHitbox != null) {
+                    MultiPartEntityPart finalClosestHitbox = closestHitbox;
+                    hitboxesOfSameParent = hitboxesOfSameParent.stream().filter(e -> !e.equals(finalClosestHitbox)).collect(Collectors.toList());
+                }
+                entitiesToRemove.add(hitboxParent);
+                if (!hitboxesOfSameParent.isEmpty()) entitiesToRemove.addAll(hitboxesOfSameParent);
+            }
+        }
+        entityList.removeAll(entitiesToRemove);
+
+        //remove duplicates
+        entityList = entityList.stream().distinct().collect(Collectors.toList());
+
+        return entityList;
+    }
+
+    public Entity getClosestTargetInFront() {
+        return this.getClosestTargetInFront(false);
+    }
+
+    public Entity getClosestTargetInFront(boolean useRanged) {
+        List<Entity> targetsInFront = this.getAllTargetsInFront(useRanged);
+        Entity closestTargetInFront = null;
+        for (Entity entity : targetsInFront) {
+            if (closestTargetInFront == null) closestTargetInFront = entity;
+            else if (closestTargetInFront.getDistance(this) >= entity.getDistance(this)) closestTargetInFront = entity;
+        }
+        return closestTargetInFront;
     }
 
     public void controlRangedAttack(double strength) {}
