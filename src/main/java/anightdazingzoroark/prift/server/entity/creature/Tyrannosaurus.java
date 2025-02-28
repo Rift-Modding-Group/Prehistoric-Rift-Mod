@@ -199,12 +199,12 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 1.04f, 0.64f));
         this.tasks.addTask(1, new RiftLandDwellerSwim(this));
         this.tasks.addTask(2, new RiftMate(this));
-        this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
-        this.tasks.addTask(7, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(8, new RiftWander(this, 1.0D));
-        this.tasks.addTask(9, new RiftLookAround(this));
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
+        this.tasks.addTask(6, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(7, new RiftWander(this, 1.0D));
+        this.tasks.addTask(8, new RiftLookAround(this));
     }
 
     @Override

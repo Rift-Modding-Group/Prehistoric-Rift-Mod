@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
 import com.charles445.simpledifficulty.api.config.json.JsonTemperature;
@@ -49,6 +50,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.*;
 
 public class Dimetrodon extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dimetrodon"));
@@ -109,7 +111,7 @@ public class Dimetrodon extends RiftCreature {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftAttack(this, 1.0D, 0.52F, 0.52F));
+        this.tasks.addTask(3, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(4, new RiftFollowOwner(this, 1.0D, 8.0F, 2.0F));
         this.tasks.addTask(5, new RiftDimetrodonEggCaring(this));
         this.tasks.addTask(6, new RiftDimetrodonMoveToEgg(this, 1.0D));
@@ -416,6 +418,30 @@ public class Dimetrodon extends RiftCreature {
     public float[] ageScaleParams() {
         return new float[]{0.4f, 1.25f};
     }
+
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Collections.singletonList(CreatureMove.BITE);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Collections.singletonList(CreatureMove.BITE);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints()
+        );
+        return moveMap;
+    }
+    //move related stuff ends here
 
     public float attackWidth() {
         return 3f;
