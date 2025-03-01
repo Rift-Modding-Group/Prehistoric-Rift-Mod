@@ -513,37 +513,6 @@ public class Dimetrodon extends RiftCreature {
         return LOOT;
     }
 
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::dimetrodonMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::dimetrodonAttack));
-    }
-
-    private <E extends IAnimatable> PlayState dimetrodonMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dimetrodon.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dimetrodon.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState dimetrodonAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dimetrodon.attack", false));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
     protected SoundEvent getAmbientSound() {
         return RiftSounds.DIMETRODON_IDLE;
     }

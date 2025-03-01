@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -19,6 +20,8 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 public class Coelacanth extends RiftWaterCreature implements IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/coelacanth"));
@@ -94,6 +97,18 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
         return 2D;
     }
 
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Collections.singletonList(CreatureMove.BOUNCE);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Collections.singletonList(CreatureMove.BOUNCE);
+    }
+    //move related stuff ends here
+
     @Override
     public float[] ageScaleParams() {
         return new float[]{1f, 1f};
@@ -134,20 +149,5 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::coelacanthMovement));
-    }
-
-    private <E extends IAnimatable> PlayState coelacanthMovement(AnimationEvent<E> event) {
-        if (this.isInWater()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.coelacanth.move", true));
-        }
-        else {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.coelacanth.flop", true));
-        }
-        return PlayState.CONTINUE;
     }
 }

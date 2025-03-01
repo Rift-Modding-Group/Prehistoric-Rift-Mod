@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.config.MegapiranhaConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -24,6 +25,10 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Megapiranha extends RiftWaterCreature implements IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megapiranha"));
@@ -56,7 +61,7 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
         this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this, true));
         this.tasks.addTask(1, new EntityAIAvoidEntity<>(this, Sarcosuchus.class, 8.0F, 4.0D, 4D));
-        this.tasks.addTask(2, new EntityAIAttackMelee(this, 4.0D, true));
+        this.tasks.addTask(3, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(4, new RiftHerdMemberFollow(this));
         this.tasks.addTask(5, new RiftWanderWater(this, 1.0D));
     }
@@ -95,6 +100,30 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
         return new float[]{1f, 1f};
     }
 
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Collections.singletonList(CreatureMove.BITE);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Collections.singletonList(CreatureMove.BITE);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(1D)
+                .defineChargeUpToUseLength(1.5D)
+                .defineRecoverFromUseLength(2.5D)
+                .finalizePoints()
+        );
+        return moveMap;
+    }
+    //move related stuff ends here
+
     public float attackWidth() {
         return 2f;
     }
@@ -125,21 +154,6 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
 
     @Override
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::megapiranhaMovement));
-    }
-
-    private <E extends IAnimatable> PlayState megapiranhaMovement(AnimationEvent<E> event) {
-        if (this.isInWater()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megapiranha.move", true));
-        }
-        else {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megapiranha.flop", true));
-        }
-        return PlayState.CONTINUE;
-    }
 
     @Override
     @Nullable

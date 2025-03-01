@@ -2730,13 +2730,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public void registerControllers(AnimationData data) {
+        RiftCreature user = this;
         //for movement
         data.addAnimationController(new AnimationController(this, "movement", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
                 if (currentCreatureMove() == null) {
-                    if (isSitting() && !isBeingRidden() && !hasTarget()) {
+                    if (isSitting() && !isBeingRidden() && !hasTarget() && !isInWater()) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sitting", true));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (user instanceof RiftWaterCreature && user.isInWater()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".swim", true));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (user instanceof RiftWaterCreature && ((RiftWaterCreature)user).canFlop() && !user.isInWater()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".flop", true));
                         return PlayState.CONTINUE;
                     }
                     else if (event.isMoving() || (isSitting() && hasTarget())) {

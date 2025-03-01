@@ -1,7 +1,7 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"animation.coelacanth.move": {
+		"animation.coelacanth.swim": {
 			"loop": true,
 			"animation_length": 0.96,
 			"bones": {
