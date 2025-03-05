@@ -446,22 +446,26 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
                 RiftMessages.WRAPPER.sendToServer(new RiftManualUseLargeWeapon(this, settings.keyBindAttack.isKeyDown() && this.getLargeWeaponCooldown() == 0));
             }
-            //for using moves
+            //for using moves and controlling movement
             else {
                 boolean leftClickOnly = settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown();
                 boolean rightClickOnly = !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown();
                 boolean middleClickOnly = !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown();
+                boolean jump = settings.keyBindJump.isKeyDown();
 
-                if (leftClickOnly && this.getMoveOneCooldown() == 0) {
+                //for using moves
+                if (leftClickOnly && this.getMoveOneCooldown() == 0)
                     this.playerUseMove(0);
-                }
-                else if (rightClickOnly && this.getMoveTwoCooldown() == 0) {
+                else if (rightClickOnly && this.getMoveTwoCooldown() == 0)
                     this.playerUseMove(1);
-                }
-                else if (middleClickOnly && this.getMoveThreeCooldown() == 0) {
+                else if (middleClickOnly && this.getMoveThreeCooldown() == 0)
                     this.playerUseMove(2);
-                }
-                else this.playerUseMove(-1);
+                else
+                    this.playerUseMove(-1);
+
+                //for using jump in navigating
+                if (this instanceof RiftWaterCreature)
+                    RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, jump));
             }
         }
     }

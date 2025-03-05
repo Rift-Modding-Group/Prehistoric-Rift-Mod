@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -50,6 +51,11 @@ public class RiftCreatureControls {
                         if (x == 1) this.showRightMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 20);
                         if (x == 2) this.showMiddleMouseControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 40);
                     }
+                }
+
+                //for changing y pos thru spacebar
+                if (creature instanceof RiftWaterCreature && creature.isInWater()) {
+                    this.showSpacebarControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 20);
                 }
             }
         }
@@ -213,7 +219,7 @@ public class RiftCreatureControls {
 
     private void showSpacebarControls(RiftCreature creature, int width, int height, int yOffset) {
         //show left mouse button icon
-        int iconXPos = (int) (((width - 24 * this.iconScale) / 2D + 135 * this.iconScale) / this.iconScale);
+        int iconXPos = (int) (((width - 24 * this.iconScale) / 2D - 135 * this.iconScale) / this.iconScale);
         int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
         Minecraft.getMinecraft().getTextureManager().bindTexture(spacebarIcon);
         GlStateManager.pushMatrix();
@@ -225,10 +231,9 @@ public class RiftCreatureControls {
         GlStateManager.popMatrix();
 
         //show text
-        RiftCreatureType creatureType = creature.creatureType;
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-        String controlName = I18n.format("creature_control.spacebar."+creatureType.toString().toLowerCase());
-        int textPosX = (int) ((width / 2D) / this.textScale + 440 * this.textScale) + 4;
+        String controlName = I18n.format("creature_control.spacebar."+(creature instanceof RiftWaterCreature ? "water" : "air"));
+        int textPosX = (int) ((width / 2D) / this.textScale - 440 * this.textScale) - 4 - fontRenderer.getStringWidth(controlName);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
 
         GlStateManager.pushMatrix();

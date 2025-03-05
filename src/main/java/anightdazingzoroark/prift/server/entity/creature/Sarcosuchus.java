@@ -6,15 +6,14 @@ import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.config.SarcosuchusConfig;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
 import com.google.common.base.Predicate;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -31,16 +30,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Sarcosuchus extends RiftWaterCreature {
     private static final DataParameter<Boolean> SPINNING = EntityDataManager.<Boolean>createKey(Sarcosuchus.class, DataSerializers.BOOLEAN);
@@ -106,8 +98,10 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.52F));
-        this.tasks.addTask(3, new RiftAttack.SarcosuchusAttack(this, 4.0D, 0.52f, 0.52f));
+
+        this.tasks.addTask(2, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(3, new RiftCreatureUseMoveUnmounted(this));
+
         this.tasks.addTask(4, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(6, new RiftGoToWater(this, 16, 1.0D));
         this.tasks.addTask(7, new RiftWanderWater(this, 1.0D));
@@ -261,6 +255,33 @@ public class Sarcosuchus extends RiftWaterCreature {
         if (this.getAttackTarget() != null) NonPotionEffectsHelper.setCaptured(this.getAttackTarget(), false);
     }
 
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.LUNGE, CreatureMove.DEATH_ROLL);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.LUNGE, CreatureMove.DEATH_ROLL);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(4D)
+                .defineChargeUpToUseLength(1D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        return moveMap;
+    }
+    //move related stuff ends here
+
     public float attackWidth() {
         return 3f;
     }
@@ -279,7 +300,7 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return true;
+        return false;
     }
 
     @Override
@@ -293,74 +314,12 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing() && !this.isUsingRightClick()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (this.getEnergy() > 6) {
-                if (this.getRightClickCooldown() == 0) {
-                    this.setRightClickCooldown(holdAmount * 2);
-                    this.setRightClickUse(0);
-                }
-            }
-        }
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::sarcosuchusMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::sarcosuchusAttack));
-    }
-
-    private <E extends IAnimatable> PlayState sarcosuchusMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isInWater()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.swim", true));
-                return PlayState.CONTINUE;
-            }
-            else {
-                if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.sitting", true));
-                    return PlayState.CONTINUE;
-                }
-                if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.walk", true));
-                    return PlayState.CONTINUE;
-                }
-                event.getController().clearAnimationCache();
-                return PlayState.STOP;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState sarcosuchusAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.attack", false));
-            return PlayState.CONTINUE;
-        }
-        if (this.isSpinning()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.sarcosuchus.spin_attack", true));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     protected SoundEvent getAmbientSound() {

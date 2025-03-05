@@ -52,10 +52,13 @@ public abstract class RiftCreatureMove {
         return this.creatureMove.chargeType != CreatureMove.ChargeType.NONE;
     }
 
+    //this is for advanced anim time controls when managing animations for moves used while creature is mounted
+    //the use value of the move is set here
     public void setUseValue(int value) {
         this.useValue = value;
     }
 
+    //if the move is disrupted, the use value left goes here to be subtracted from the anim times
     public int getUseValue() {
         return this.useValue;
     }

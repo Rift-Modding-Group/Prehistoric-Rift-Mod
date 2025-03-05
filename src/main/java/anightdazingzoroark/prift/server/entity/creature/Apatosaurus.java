@@ -326,7 +326,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         }
     }
 
-
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {

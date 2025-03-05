@@ -11,28 +11,24 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftHoverChangeControl implements IMessage {
     private int creatureId;
-    private int control; //0 is ascend, 1 is descend
     private boolean isUsing;
 
     public RiftHoverChangeControl() {}
 
-    public RiftHoverChangeControl(RiftCreature creature, int control, boolean isUsing) {
+    public RiftHoverChangeControl(RiftCreature creature, boolean isUsing) {
         this.creatureId = creature.getEntityId();
-        this.control = control;
         this.isUsing = isUsing;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.creatureId = buf.readInt();
-        this.control = buf.readInt();
         this.isUsing = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.creatureId);
-        buf.writeInt(this.control);
         buf.writeBoolean(this.isUsing);
     }
 
@@ -47,8 +43,16 @@ public class RiftHoverChangeControl implements IMessage {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             RiftWaterCreature creature = (RiftWaterCreature)playerEntity.world.getEntityByID(message.creatureId);
             if (creature.isInWater()) {
-                if (message.control == 0) creature.setIsAscending(message.isUsing);
-                else if (message.control == 1) creature.setIsDescending(message.isUsing);
+                //the players look direction shall affect ascending or descending
+                //look up is ascend, look down is descend
+                if (playerEntity.rotationPitch <= 0) {
+                    creature.setIsAscending(message.isUsing);
+                    creature.setIsDescending(false);
+                }
+                else {
+                    creature.setIsAscending(false);
+                    creature.setIsDescending(message.isUsing);
+                }
             }
         }
     }

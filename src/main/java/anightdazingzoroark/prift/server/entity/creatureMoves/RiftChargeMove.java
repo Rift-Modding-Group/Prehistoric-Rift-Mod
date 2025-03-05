@@ -17,8 +17,8 @@ import java.util.List;
 public class RiftChargeMove extends RiftCreatureMove {
     private BlockPos lookAtPosition;
     private BlockPos targetPosForCharge;
-    private double chargePosX;
-    private double chargePosZ;
+    private int chargeTime;
+    private int maxChargeTime;
     private double chargeDirectionToPosX;
     private double chargeDirectionToPosZ;
 
@@ -44,26 +44,29 @@ public class RiftChargeMove extends RiftCreatureMove {
     @Override
     public void onEndChargeUp(RiftCreature user, int useAmount) {
         if (this.targetPosForCharge != null) {
+            //get charge distance
             double unnormalizedDirectionX = this.targetPosForCharge.getX() - user.posX;
             double unnormalizedDirectionZ = this.targetPosForCharge.getZ() - user.posZ;
             double angleToTarget = Math.atan2(unnormalizedDirectionZ, unnormalizedDirectionX);
-            this.chargePosX = Math.min(user.rangedWidth() * Math.cos(angleToTarget), unnormalizedDirectionX) + user.posX;
-            this.chargePosZ = Math.min(user.rangedWidth() * Math.sin(angleToTarget), unnormalizedDirectionZ) + user.posZ;
+            double chargeDistX = Math.min(user.rangedWidth() * Math.cos(angleToTarget), unnormalizedDirectionX);
+            double chargeDistZ = Math.min(user.rangedWidth() * Math.sin(angleToTarget), unnormalizedDirectionZ);
 
+            //get charge direction
             double unnormalizedMagnitude = Math.sqrt(Math.pow(unnormalizedDirectionX, 2) + Math.pow(unnormalizedDirectionZ, 2));
             this.chargeDirectionToPosX = unnormalizedDirectionX / unnormalizedMagnitude;
             this.chargeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
+
+            //get charge time
+            this.maxChargeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) * 1.5D / 8);
         }
         else {
-            double unnormalizedDirectionX = user.getLookVec().x;
-            double unnormalizedDirectionZ = user.getLookVec().z;
-            double angleToTarget = Math.atan2(unnormalizedDirectionZ, unnormalizedDirectionX);
-            this.chargePosX = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth() * Math.cos(angleToTarget)) + user.posX;
-            this.chargePosZ = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth() * Math.sin(angleToTarget)) + user.posZ;
+            //get charge direction
+            double unnormalizedMagnitude = Math.sqrt(Math.pow(user.getLookVec().x, 2) + Math.pow(user.getLookVec().z, 2));
+            this.chargeDirectionToPosX = user.getLookVec().x / unnormalizedMagnitude;
+            this.chargeDirectionToPosZ = user.getLookVec().z / unnormalizedMagnitude;
 
-            double unnormalizedMagnitude = Math.sqrt(Math.pow(unnormalizedDirectionX, 2) + Math.pow(unnormalizedDirectionZ, 2));
-            this.chargeDirectionToPosX = unnormalizedDirectionX / unnormalizedMagnitude;
-            this.chargeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
+            //get charge time
+            this.maxChargeTime = (int) Math.ceil(RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth()) * 1.5D / 8);
         }
     }
 
@@ -100,7 +103,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             }
         }
 
-        if (breakBlocksFlag || !chargedIntoEntities.isEmpty() || this.atSpotToChargeTo(user)) {
+        if (breakBlocksFlag || !chargedIntoEntities.isEmpty() || this.chargeTime >= this.maxChargeTime) {
             //stop charging
             user.motionX = 0;
             user.motionZ = 0;
@@ -141,6 +144,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             user.motionX = this.chargeDirectionToPosX * 8;
             user.motionZ = this.chargeDirectionToPosZ * 8;
             user.velocityChanged = true;
+            this.chargeTime++;
             if (this.useValue > 0) this.useValue--;
         }
     }
@@ -160,12 +164,5 @@ public class RiftChargeMove extends RiftCreatureMove {
     public void lookAtTarget(RiftCreature user, Entity target) {
         if (this.lookAtPosition != null) user.getLookHelper().setLookPosition(this.lookAtPosition.getX(), this.lookAtPosition.getY(), this.lookAtPosition.getZ(), 30.0F, 30.0F);
         else this.lookAtPosition = target.getPosition();
-    }
-
-    private boolean atSpotToChargeTo(RiftCreature user) {
-        return user.posX >= this.chargePosX - 1
-                && user.posX <= this.chargePosX + 1
-                && user.posZ >= this.chargePosZ - 1
-                && user.posZ <= this.chargePosZ + 1;
     }
 }

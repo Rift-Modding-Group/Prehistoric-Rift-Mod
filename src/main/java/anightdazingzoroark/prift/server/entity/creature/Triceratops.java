@@ -184,6 +184,10 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         return 5f;
     }
 
+    public float rangedWidth() {
+        return 32f;
+    }
+
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX + (-0.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));

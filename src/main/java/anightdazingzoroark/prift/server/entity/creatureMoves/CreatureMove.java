@@ -19,7 +19,9 @@ public enum CreatureMove {
     PACK_CALL(RiftPackCallMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 3600, false, false, false),
     TAIL_WHIP(RiftTailWhipMove.class, MoveType.TAIL, ChargeType.NONE, 0, 0, 0, false, false, false),
     POWER_BLOW(RiftPowerBlowMove.class, MoveType.RANGED, ChargeType.GRADIENT_THEN_USE, 0, 100, 200, false, false, false),
-    SHOCK_BLAST(RiftShockBlastMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 3600, false, false, false);
+    SHOCK_BLAST(RiftShockBlastMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 3600, false, false, false),
+    DEATH_ROLL(RiftDeathRollMove.class, MoveType.SPIN, ChargeType.GRADIENT_WHILE_USE, 60, 100, 200, false, true, true),
+    LUNGE(RiftLungeMove.class, MoveType.CHARGE, ChargeType.COOLDOWN_ONLY, 25, 0, 100, false, true, false);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveType moveType;
@@ -71,6 +73,7 @@ public enum CreatureMove {
         JAW, //jaw/mouth based attacks
         RANGED, //attacks that are ranged or elemental attacks
         DEFENSE, //for things that involve defending like hiding in shell or using a shield
+        SPIN, //attacks that involve spinning
         STATUS //do not do damage, or damage isn't really important
     }
 

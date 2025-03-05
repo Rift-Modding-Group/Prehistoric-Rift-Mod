@@ -35,10 +35,6 @@ public class Utahraptor extends RiftCreature implements IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/utahraptor"));
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Utahraptor.class, DataSerializers.BOOLEAN);
-    private int packBuffCooldown;
-    private float leapPower;
-    private boolean startLeapingToTarget;
-    private Entity contLeapTarget;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
     private RiftCreaturePart tail0Part;
@@ -55,7 +51,6 @@ public class Utahraptor extends RiftCreature implements IHerder {
         this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.speed = 0.35D;
         this.isRideable = true;
-        this.packBuffCooldown = 0;
         this.maxRightClickCooldown = 1800f;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);

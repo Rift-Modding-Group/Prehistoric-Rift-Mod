@@ -385,7 +385,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             if ((creatureType.canBeSaddled && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)) || !creatureType.canBeSaddled) {
                 nbtItemList.removeTag(x);
             }
-            if ((creatureType.canHoldLargeWeapon && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) || !creatureType.canHoldLargeWeapon) {
+            else if ((creatureType.canHoldLargeWeapon && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) || !creatureType.canHoldLargeWeapon) {
                 nbtItemList.removeTag(x);
             }
         }
@@ -405,7 +405,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                     if ((creatureType.canBeSaddled && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)) || !creatureType.canBeSaddled) {
                         nbtItemList.removeTag(x);
                     }
-                    if ((creatureType.canHoldLargeWeapon && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) || !creatureType.canHoldLargeWeapon) {
+                    else if ((creatureType.canHoldLargeWeapon && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) || !creatureType.canHoldLargeWeapon) {
                         nbtItemList.removeTag(x);
                     }
                 }

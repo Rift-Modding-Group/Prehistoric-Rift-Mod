@@ -92,13 +92,6 @@ public class RiftLeapMove extends RiftCreatureMove {
 
             double angleToTarget = Math.atan2(dz, dx);
             user.setLeapDirection((float) (velXZ * Math.cos(angleToTarget)), (float) velY, (float) (velXZ * Math.sin(angleToTarget)));
-            /*
-            if (user.isTamed()) {
-                System.out.println("init x velocity: "+(velXZ * Math.cos(angleToTarget)));
-                System.out.println("init y velocity: "+velY);
-                System.out.println("init z velocity: "+(velXZ * Math.sin(angleToTarget)));
-            }
-            */
         }
     }
 
