@@ -21,6 +21,7 @@ public class RiftLungeMove extends RiftCreatureMove {
     private int maxLungeTime;
     private double lungeDirectionToPosX;
     private double lungeDirectionToPosZ;
+    private final double lungeVelocity = 8D;
 
     public RiftLungeMove() {
         super(CreatureMove.LUNGE);
@@ -28,7 +29,7 @@ public class RiftLungeMove extends RiftCreatureMove {
 
     @Override
     public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth() / 2 && (user.onGround || user.isInWater())) {
+        if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth() && (user.onGround || user.isInWater())) {
             return MovePriority.HIGH;
         }
         return MovePriority.NONE;
@@ -53,8 +54,10 @@ public class RiftLungeMove extends RiftCreatureMove {
     @Override
     public void whileExecuting(RiftCreature user) {
         //stop if it hits a mob
-        AxisAlignedBB chargerHitbox = user.getEntityBoundingBox().grow(1.5D);
-        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, chargerHitbox, new Predicate<Entity>() {
+        AxisAlignedBB lungeHitbox = user.frontOfHeadAABB();
+        System.out.println("lunge hitbox center: "+lungeHitbox.getCenter());
+        System.out.println("lunge hitbox: "+lungeHitbox);
+        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, lungeHitbox, new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
                 if (entity instanceof RiftCreaturePart) {
@@ -67,24 +70,25 @@ public class RiftLungeMove extends RiftCreatureMove {
         });
 
         //stop if it hits a block
-        boolean breakBlocksFlag = false;
-        breakBlocksLoop: for (int x = MathHelper.floor(chargerHitbox.minX); x < MathHelper.ceil(chargerHitbox.maxX); x++) {
-            for (int z = MathHelper.floor(chargerHitbox.minZ); z < MathHelper.ceil(chargerHitbox.maxZ); z++) {
+        boolean hitBlocksFlag = false;
+        hitBlocksLoop: for (int x = MathHelper.floor(lungeHitbox.minX); x < MathHelper.ceil(lungeHitbox.maxX); x++) {
+            for (int z = MathHelper.floor(lungeHitbox.minZ); z < MathHelper.ceil(lungeHitbox.maxZ); z++) {
                 IBlockState state = user.world.getBlockState(new BlockPos(x, user.posY, z));
                 IBlockState stateUp = user.world.getBlockState(new BlockPos(x, user.posY + 1, z));
 
-                if (state.getMaterial() != Material.AIR && stateUp.getMaterial() != Material.AIR) {
-                    breakBlocksFlag = true;
-                    break breakBlocksLoop;
+                if (state.getMaterial() != Material.AIR && stateUp.getMaterial() != Material.AIR
+                && state.getMaterial() != Material.WATER && stateUp.getMaterial() != Material.WATER) {
+                    hitBlocksFlag = true;
+                    break hitBlocksLoop;
                 }
             }
         }
 
-        if (breakBlocksFlag || !chargedIntoEntities.isEmpty() || this.lungeTime >= this.maxLungeTime) {
+        if (hitBlocksFlag || !chargedIntoEntities.isEmpty() || this.lungeTime > this.maxLungeTime) {
             //stop charging
+            user.velocityChanged = true;
             user.motionX = 0;
             user.motionZ = 0;
-            user.velocityChanged = true;
 
             //damage all entities it charged into
             if (!chargedIntoEntities.isEmpty()) for (Entity entity : chargedIntoEntities) {
@@ -99,9 +103,9 @@ public class RiftLungeMove extends RiftCreatureMove {
             this.forceStopFlag = true;
         }
         else {
-            user.motionX = this.lungeDirectionToPosX * 8;
-            user.motionZ = this.lungeDirectionToPosZ * 8;
             user.velocityChanged = true;
+            user.motionX = this.lungeDirectionToPosX * this.lungeVelocity;
+            user.motionZ = this.lungeDirectionToPosZ * this.lungeVelocity;
             this.lungeTime++;
         }
     }
@@ -122,7 +126,7 @@ public class RiftLungeMove extends RiftCreatureMove {
             this.lungeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
 
             //get charge time
-            this.maxLungeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) * 1.5D / 8);
+            this.maxLungeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) * 1.5D / this.lungeVelocity);
         }
         else {
             //get lunge direction
@@ -131,7 +135,7 @@ public class RiftLungeMove extends RiftCreatureMove {
             this.lungeDirectionToPosZ = user.getLookVec().z / unnormalizedMagnitude;
 
             //get lunge time
-            this.maxLungeTime = (int) Math.ceil(user.rangedWidth() * 1.5D / 8);
+            this.maxLungeTime = (int) Math.ceil(user.rangedWidth() * 1.5D / this.lungeVelocity);
         }
     }
 

@@ -3,23 +3,19 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 
-public class RiftDeathRollMove extends RiftCreatureMove {
-    public RiftDeathRollMove() {
-        super(CreatureMove.DEATH_ROLL);
+public class RiftGrabMove extends RiftCreatureMove {
+    public RiftGrabMove() {
+        super(CreatureMove.GRAB);
     }
 
     @Override
     public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth()) {
-            return MovePriority.NONE;
-        }
-        return MovePriority.HIGH;
+        return MovePriority.LOW;
     }
 
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
-        user.setGrabVictim(null);
-        user.removeSpeed();
+
     }
 
     @Override
@@ -29,18 +25,17 @@ public class RiftDeathRollMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
-        if (user.getGrabVictim() != null) user.attackEntityAsMobWithMultiplier(user.getGrabVictim(), 0.25f);
-        else this.forceStopFlag = true;
+
     }
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        user.setGrabVictim(target);
+        if (user.getGrabVictim() != null) user.setGrabVictim(null);
+        else user.setGrabVictim(target);
     }
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-        user.setGrabVictim(null);
-        user.resetSpeed();
+
     }
 }

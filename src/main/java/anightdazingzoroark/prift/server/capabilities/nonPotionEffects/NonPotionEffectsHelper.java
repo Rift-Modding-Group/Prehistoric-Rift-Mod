@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.server.capabilities.nonPotionEffects;
 
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.Vec3d;
 
 public class NonPotionEffectsHelper {
     public static void setBleeding(Entity entity, int strength, int ticks) {
@@ -67,6 +69,24 @@ public class NonPotionEffectsHelper {
         INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
         if (nonPotionEffects != null) return nonPotionEffects.isBolaCaptured();
         else return false;
+    }
+
+    public static void setGrabbed(Entity entity, boolean isGrabbed) {
+        if (entity == null) return;
+        if (entity.world.isRemote) {
+            INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+            if (nonPotionEffects != null) {
+                nonPotionEffects.setGrabbed(isGrabbed);
+                RiftMessages.WRAPPER.sendToServer(new RiftSetEntityGrabbed(entity, isGrabbed));
+            }
+        }
+        else {
+            INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+            if (nonPotionEffects != null) {
+                nonPotionEffects.setGrabbed(isGrabbed);
+                RiftMessages.WRAPPER.sendToAll(new RiftSetEntityGrabbed(entity, isGrabbed));
+            }
+        }
     }
 
     public static void setRiding(Entity entity, boolean value) {

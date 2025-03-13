@@ -235,6 +235,7 @@ public class RiftAttack extends EntityAIBase {
         }
     }
 
+    /*
     public static class SarcosuchusAttack extends RiftAttack {
         private final Sarcosuchus sarcosuchus;
         private EntityLivingBase spinVictim;
@@ -318,6 +319,7 @@ public class RiftAttack extends EntityAIBase {
             else this.sarcosuchus.setIsSpinning(false);
         }
     }
+     */
 
     public static class BaryonyxAttack extends RiftAttack {
         private final Baryonyx baryonyx;

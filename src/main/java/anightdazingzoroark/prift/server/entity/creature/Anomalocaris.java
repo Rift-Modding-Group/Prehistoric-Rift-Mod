@@ -3,14 +3,12 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.config.AnomalocarisConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
 import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.message.RiftGrabberTargeting;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSetGrabTarget;
 import com.google.common.base.Predicate;
@@ -91,7 +89,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.manageInvisibility();
-        this.manageGrabVictim();
         this.resetIsActing();
     }
 
@@ -119,32 +116,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
             if (this.invisibilityTimeout > 0) this.invisibilityTimeout--;
         }
     }
-
-    public void manageGrabVictim() {
-        if (this.getGrabVictim() != null) {
-            this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1);
-            if (!this.getGrabVictim().isEntityAlive()) RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, null));
-            else RiftMessages.WRAPPER.sendToServer(new RiftGrabberTargeting(this, this.getGrabVictim()));
-        }
-        else this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(0);
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-    }
-
-    /*
-    @Override
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            for (RiftCreaturePart creaturePart : this.hitboxArray) {
-                if (creaturePart != null) creaturePart.resize(1);
-            }
-        }
-    }
-    */
 
     @Override
     public float[] ageScaleParams() {

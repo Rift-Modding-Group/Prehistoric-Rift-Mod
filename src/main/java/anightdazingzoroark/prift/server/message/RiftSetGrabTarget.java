@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IGrabber;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -42,8 +41,7 @@ public class RiftSetGrabTarget implements IMessage {
 
         private void handle(RiftSetGrabTarget message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            RiftCreature creature = (RiftCreature) playerEntity.world.getEntityByID(message.grabberId);
-            IGrabber grabber = (IGrabber) creature;
+            RiftCreature grabber = (RiftCreature) playerEntity.world.getEntityByID(message.grabberId);
 
             if (message.targetId != -1) {
                 EntityLivingBase target = (EntityLivingBase) playerEntity.world.getEntityByID(message.targetId);

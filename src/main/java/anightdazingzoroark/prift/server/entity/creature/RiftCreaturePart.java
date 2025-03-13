@@ -14,7 +14,7 @@ import java.util.List;
 
 public class RiftCreaturePart extends MultiPartEntityPart {
     private final RiftCreature partParent;
-    private final float radius;
+    public final float radius;
     private final float angleYaw;
     private final float offsetY;
     private final float damageMultiplier;

@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.RiftGui;
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
@@ -151,6 +152,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_HEAD_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_TAIL_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_STOMP_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -212,6 +218,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean recentlyHit;
     private float recentlyHitDamage;
     private int recentlyHitTicks;
+    private Entity grabVictim;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -321,6 +328,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE, false);
+        this.dataManager.register(USING_SPIN_TYPE_MOVE, false);
+        this.dataManager.register(USING_SPIN_TYPE_MOVE_DELAY, false);
+        this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_ONE, false);
+        this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_TWO, false);
+        this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_THREE, false);
         this.dataManager.register(USING_HEAD_TYPE_MOVE, false);
         this.dataManager.register(USING_TAIL_TYPE_MOVE, false);
         this.dataManager.register(USING_STOMP_TYPE_MOVE, false);
@@ -429,6 +441,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
+        this.manageGrabVictim();
 
         //other minor stuff
         if (this.recentlyHitTicks > 0) this.recentlyHitTicks--;
@@ -752,11 +765,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
-        return this.attackEntityAsMob(entityIn, 0);
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
+        if (flag) this.applyEnchantments(this, entityIn);
+        this.setLastAttackedEntity(entityIn);
+        return flag;
     }
 
-    public boolean attackEntityAsMob(Entity entityIn, float damageAdditional) {
+    public boolean attackEntityAsMobWithAdditionalDamage(Entity entityIn, float damageAdditional) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()) + damageAdditional);
+        if (flag) this.applyEnchantments(this, entityIn);
+        this.setLastAttackedEntity(entityIn);
+        return flag;
+    }
+
+    public boolean attackEntityAsMobWithMultiplier(Entity entityIn, float multiplier) {
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()) * multiplier);
         if (flag) this.applyEnchantments(this, entityIn);
         this.setLastAttackedEntity(entityIn);
         return flag;
@@ -1650,6 +1673,28 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setUsingChargeTypeMoveMultistepThree(false);
                 }
                 break;
+            case SPIN:
+                if (step == 0) {
+                    this.setUsingSpinTypeMoveMultistepOne(true);
+                    this.setUsingSpinTypeMoveMultistepTwo(false);
+                    this.setUsingSpinTypeMoveMultistepThree(false);
+                }
+                else if (step == 1) {
+                    this.setUsingSpinTypeMoveMultistepOne(false);
+                    this.setUsingSpinTypeMoveMultistepTwo(true);
+                    this.setUsingSpinTypeMoveMultistepThree(false);
+                }
+                else if (step == 2) {
+                    this.setUsingSpinTypeMoveMultistepOne(false);
+                    this.setUsingSpinTypeMoveMultistepTwo(false);
+                    this.setUsingSpinTypeMoveMultistepThree(true);
+                }
+                else {
+                    this.setUsingSpinTypeMoveMultistepOne(false);
+                    this.setUsingSpinTypeMoveMultistepTwo(false);
+                    this.setUsingSpinTypeMoveMultistepThree(false);
+                }
+                break;
         }
     }
 
@@ -1683,6 +1728,38 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setUsingChargeTypeMoveMultistepThree(boolean value) {
         this.dataManager.set(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE, value);
+    }
+
+    public boolean isUsingSpinTypeMove() {
+        return this.dataManager.get(USING_SPIN_TYPE_MOVE);
+    }
+
+    public void setUsingSpinTypeMove(boolean value) {
+        this.dataManager.set(USING_SPIN_TYPE_MOVE, value);
+    }
+
+    public boolean usingSpinTypeMoveMultistepOne() {
+        return this.dataManager.get(USING_SPIN_TYPE_MOVE_MULTISTEP_ONE);
+    }
+
+    public void setUsingSpinTypeMoveMultistepOne(boolean value) {
+        this.dataManager.set(USING_SPIN_TYPE_MOVE_MULTISTEP_ONE, value);
+    }
+
+    public boolean usingSpinTypeMoveMultistepTwo() {
+        return this.dataManager.get(USING_SPIN_TYPE_MOVE_MULTISTEP_TWO);
+    }
+
+    public void setUsingSpinTypeMoveMultistepTwo(boolean value) {
+        this.dataManager.set(USING_SPIN_TYPE_MOVE_MULTISTEP_TWO, value);
+    }
+
+    public boolean usingSpinTypeMoveMultistepThree() {
+        return this.dataManager.get(USING_SPIN_TYPE_MOVE_MULTISTEP_THREE);
+    }
+
+    public void setUsingSpinTypeMoveMultistepThree(boolean value) {
+        this.dataManager.set(USING_SPIN_TYPE_MOVE_MULTISTEP_THREE, value);
     }
 
     public boolean isUsingHeadTypeMove() {
@@ -1757,6 +1834,49 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(USING_DEFENSE_TYPE_MOVE_DELAY, value);
     }
     //move anims end here
+
+    //mob grabbing management starts here
+    private boolean targetIsGrabbable(Entity target) {
+        if (target == null) return false;
+        else if (target instanceof MultiPartEntityPart) {
+            //if an entity part was targeted, test the parent
+            Entity partParent = (Entity) ((MultiPartEntityPart) target).parent;
+            return this.targetIsGrabbable(partParent);
+        }
+        else return RiftUtil.checkForNoAssociations(this, target)
+                && RiftUtil.isAppropriateSize(target, RiftUtil.getMobSize(this));
+    }
+
+    public Entity getGrabVictim() {
+        return this.grabVictim;
+    }
+
+    public void setGrabVictim(Entity entity) {
+        if (this.targetIsGrabbable(entity)) {
+            this.grabVictim = entity;
+            NonPotionEffectsHelper.setGrabbed(entity, true);
+        }
+        else {
+            NonPotionEffectsHelper.setGrabbed(this.grabVictim, false);
+            this.grabVictim = null;
+        }
+    }
+
+    public void manageGrabVictim() {
+        if (this.grabVictim != null) {
+            this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1);
+            if (!this.getGrabVictim().isEntityAlive()) {
+                RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, null));
+            }
+            else RiftMessages.WRAPPER.sendToServer(new RiftGrabbedEntitySetPos(this, this.grabVictim));
+        }
+        else this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(0);
+    }
+
+    public Vec3d grabLocation() {
+        return new Vec3d(this.headPart.posX, this.headPart.posY, this.headPart.posZ);
+    }
+    //mob grabbing management ends here
 
     //old move anims start here
     public boolean isAttacking() {
@@ -2377,6 +2497,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return null;
     }
 
+    //create an AABB in front of the creature based on the head hitbox's position
+    //and the head's width
+    public AxisAlignedBB frontOfHeadAABB() {
+        double xPoint = this.posX + (this.headPart.width + this.headPart.radius) * Math.cos(Math.atan2(this.getLookVec().z, this.getLookVec().x));
+        double minYPoint = this.posY;
+        double maxYPoint = Math.max(this.headPart.posY + this.headPart.height, this.posY + this.height);
+        double zPoint = this.posZ + (this.headPart.width + this.headPart.radius) * Math.sin(Math.atan2(this.getLookVec().z, this.getLookVec().x));
+        return new AxisAlignedBB(xPoint - (this.headPart.width / 2), minYPoint, zPoint - (this.headPart.width / 2),
+                xPoint + (this.headPart.width / 2), maxYPoint, zPoint + (this.headPart.width / 2));
+    }
 
     public List<Entity> getAllTargetsInFront() {
         return this.getAllTargetsInFront(false);
@@ -2385,6 +2515,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //create a series of aabbs based on creature width and attack width
     //entities that are inside will be considered as targets and will be attacked
     public List<Entity> getAllTargetsInFront(boolean useRanged) {
+        //if this creature has grabbed something, the grabbed creature will always be targeted
+        if (this.grabVictim != null && this.grabVictim.isEntityAlive()) return Collections.singletonList(this.grabVictim);
+
         RiftCreature user = this;
         List<AxisAlignedBB> aabbList = new ArrayList<>();
         List<Entity> entityList = new ArrayList<>();
@@ -2627,6 +2760,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void onDeath(DamageSource cause) {
+        //for dropping inventory of creature upon death
         if (!this.world.isRemote && this.creatureInventory != null) {
             for (int i = 0; i < this.creatureInventory.getSizeInventory(); i++) {
                 ItemStack itemStack = this.creatureInventory.getStackInSlot(i);
@@ -2639,6 +2773,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
 
+        //for releasing entities grabbed by this creature
+        if (this.grabVictim != null) NonPotionEffectsHelper.setGrabbed(this.grabVictim, false);
+        if (this.getAttackTarget() != null) NonPotionEffectsHelper.setGrabbed(this.getAttackTarget(), false);
+
+        //for undeploying a creature
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
         this.setSitting(false);

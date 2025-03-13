@@ -165,56 +165,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         }
 
         if (!this.finishFlag) {
-            if (!this.creature.currentCreatureMove().chargeType.requiresCharge()) {
-                if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
-                    this.creature.setUsingDelayAnim(true);
-                }
-                if (this.animTime == this.moveAnimInitDelayTime) {
-                    this.creature.setUsingDelayAnim(false);
-                    this.currentInvokedMove.onStartExecuting(this.creature);
-                    this.creature.setUsingUnchargedAnim(true);
-                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
-                        this.creature.setMultistepMoveStep(0);
-                    }
-                }
-                if (this.animTime == this.moveAnimChargeUpTime) {
-                    this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
-                }
-                if (this.animTime >= this.moveAnimInitDelayTime && this.animTime <= this.moveAnimChargeUpTime) {
-                    this.currentInvokedMove.whileChargingUp(this.creature);
-                }
-                if (this.animTime == this.moveAnimChargeToUseTime) {
-                    this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
-                }
-                if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
-                    this.currentInvokedMove.whileExecuting(this.creature);
-                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
-                        this.creature.setMultistepMoveStep(1);
-                    }
-                }
-                if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
-                        || this.currentInvokedMove.forceStopFlag) {
-                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
-                        this.creature.setMultistepMoveStep(2);
-                    }
-                }
-                if (this.animTime >= this.maxMoveAnimTime) {
-                    this.animTime = 0;
-                    this.creature.setUsingUnchargedAnim(false);
-                    this.currentInvokedMove.onStopExecuting(this.creature);
-                    this.setCoolDown(this.creature.currentCreatureMove().maxCooldown);
-                    if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setMultistepMoveStep(0);
-                    this.finishFlag = true;
-                }
-                if (!this.finishFlag) {
-                    this.animTime++;
-                    if (this.creature.currentCreatureMove().useTimeIsInfinite && this.animTime >= this.moveAnimChargeToUseTime && !this.currentInvokedMove.forceStopFlag) {
-                        this.moveAnimUseTime++;
-                        this.maxMoveAnimTime++;
-                    }
-                }
-            }
-            else {
+            //gradient then use, aka holding click charges up, then releasing it activates the move
+            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
                 if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
                     this.creature.setUsingDelayAnim(true);
                 }
@@ -270,6 +222,58 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     if (this.getMoveIsUsing()) {
                         this.moveAnimChargeUpTime++;
                         this.moveAnimChargeToUseTime++;
+                        this.moveAnimUseTime++;
+                        this.maxMoveAnimTime++;
+                    }
+                }
+            }
+            //gradient while use, aka holding click uses the move, reaching max use automatically stops the move
+            else if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {}
+            //no gradients or whatever, so just clicking activates the move
+            else {
+                if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
+                    this.creature.setUsingDelayAnim(true);
+                }
+                if (this.animTime == this.moveAnimInitDelayTime) {
+                    this.creature.setUsingDelayAnim(false);
+                    this.currentInvokedMove.onStartExecuting(this.creature);
+                    this.creature.setUsingUnchargedAnim(true);
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
+                        this.creature.setMultistepMoveStep(0);
+                    }
+                }
+                if (this.animTime == this.moveAnimChargeUpTime) {
+                    this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
+                }
+                if (this.animTime >= this.moveAnimInitDelayTime && this.animTime <= this.moveAnimChargeUpTime) {
+                    this.currentInvokedMove.whileChargingUp(this.creature);
+                }
+                if (this.animTime == this.moveAnimChargeToUseTime) {
+                    this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                }
+                if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
+                    this.currentInvokedMove.whileExecuting(this.creature);
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
+                        this.creature.setMultistepMoveStep(1);
+                    }
+                }
+                if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
+                        || this.currentInvokedMove.forceStopFlag) {
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
+                        this.creature.setMultistepMoveStep(2);
+                    }
+                }
+                if (this.animTime >= this.maxMoveAnimTime) {
+                    this.animTime = 0;
+                    this.creature.setUsingUnchargedAnim(false);
+                    this.currentInvokedMove.onStopExecuting(this.creature);
+                    this.setCoolDown(this.creature.currentCreatureMove().maxCooldown);
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setMultistepMoveStep(0);
+                    this.finishFlag = true;
+                }
+                if (!this.finishFlag) {
+                    this.animTime++;
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite && this.animTime >= this.moveAnimChargeToUseTime && !this.currentInvokedMove.forceStopFlag) {
                         this.moveAnimUseTime++;
                         this.maxMoveAnimTime++;
                     }

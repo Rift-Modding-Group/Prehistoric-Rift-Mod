@@ -30,7 +30,7 @@ public class RiftThagomizeMove extends RiftCreatureMove {
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         if (target != null) {
-            user.attackEntityAsMob(target, (float) RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, 4) * 5f);
+            user.attackEntityAsMobWithAdditionalDamage(target, (float) RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, 4) * 5f);
             NonPotionEffectsHelper.setBleeding(target,
                     (int) RiftUtil.slopeResult(user.getLevel(), true, 0, 100, 0, 4),
                     (int) RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 100, 600));

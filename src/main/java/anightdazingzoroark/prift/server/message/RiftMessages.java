@@ -21,7 +21,9 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftChangeWeaponInvFromMenu.Handler.class, RiftChangeWeaponInvFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeWeaponInvFromMenu.Handler.class, RiftChangeWeaponInvFromMenu.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftForceChangePos.Handler.class, RiftForceChangePos.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftGrabberTargeting.Handler.class, RiftGrabberTargeting.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftSetEntityGrabbed.Handler.class, RiftSetEntityGrabbed.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftSetEntityGrabbed.Handler.class, RiftSetEntityGrabbed.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftGrabbedEntitySetPos.Handler.class, RiftGrabbedEntitySetPos.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftHoverChangeControl.Handler.class, RiftHoverChangeControl.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftIncrementControlUse.Handler.class, RiftIncrementControlUse.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftJournalEditOne.Handler.class, RiftJournalEditOne.class, id++, Side.SERVER);

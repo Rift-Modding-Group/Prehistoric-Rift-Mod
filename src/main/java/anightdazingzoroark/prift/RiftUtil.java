@@ -286,7 +286,7 @@ public class RiftUtil {
         return finalTargets;
     }
 
-    public static MobSize getMobSize(EntityLivingBase entity) {
+    public static MobSize getMobSize(Entity entity) {
         List<String> verySmallSize = Arrays.asList(GeneralConfig.verySmallMobs);
         List<String> smallSize = Arrays.asList(GeneralConfig.smallMobs);
         List<String> mediumSize = Arrays.asList(GeneralConfig.mediumMobs);
@@ -312,7 +312,7 @@ public class RiftUtil {
         return MobSize.MEDIUM;
     }
 
-    public static boolean isAppropriateSize(EntityLivingBase entity, MobSize size) {
+    public static boolean isAppropriateSize(Entity entity, MobSize size) {
         if (size != null) return getMobSize(entity).ordinal() <= size.ordinal();
         else return true;
     }

@@ -2,23 +2,15 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
-import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.passive.EntityTameable;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -27,7 +19,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
@@ -37,9 +28,6 @@ import java.util.*;
 public class Sarcosuchus extends RiftWaterCreature {
     private static final DataParameter<Boolean> SPINNING = EntityDataManager.<Boolean>createKey(Sarcosuchus.class, DataSerializers.BOOLEAN);
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/sarcosuchus"));
-    private EntityLivingBase forcedSpinVictim;
-    private int spinTime;
-    private boolean messageSent;
     private RiftCreaturePart snoutPart;
     private RiftCreaturePart frontBodyPart;
     private RiftCreaturePart tail0;
@@ -58,8 +46,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.2D;
         this.waterSpeed = 10D;
-        this.spinTime = 0;
-        this.messageSent = true;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 
         this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.125f, 0.75f, 0.675f, 1f);
@@ -112,6 +98,7 @@ public class Sarcosuchus extends RiftWaterCreature {
     public void onLivingUpdate() {
         super.onLivingUpdate();
 
+        /*
         if (this.isBeingRidden() && this.canUseRightClick() && this.getRightClickCooldown() == 0 && this.isUsingRightClick() && (this.getRightClickUse() >= 0 && this.getRightClickUse() <= 100) && this.getEnergy() > 6) this.forcedSpinAttack();
         else if (!this.isBeingRidden() || !this.canUseRightClick() || this.getRightClickCooldown() > 0 || !this.isUsingRightClick()) {
             this.spinTime = 0;
@@ -133,8 +120,10 @@ public class Sarcosuchus extends RiftWaterCreature {
             }
             if (this.forcedSpinVictim == null) this.setIsSpinning(false);
         }
+        */
     }
 
+    /*
     private void forcedSpinAttack() {
         if (this.forcedSpinVictim != null) {
             if (this.forcedSpinVictim.isEntityAlive()) {
@@ -195,6 +184,7 @@ public class Sarcosuchus extends RiftWaterCreature {
             }
         }
     }
+    */
 
     @Override
     public void updateParts() {
@@ -217,26 +207,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         return new float[]{0.3f, 1.5f};
     }
 
-    public boolean isSpinning() {
-        return this.dataManager.get(SPINNING);
-    }
-
-    public void setIsSpinning(boolean value) {
-        this.dataManager.set(SPINNING, value);
-        if (value) this.removeSpeed();
-        else this.resetSpeed();
-//        this.setActing(value);
-    }
-
-    public void setRightClickUse(int value) {
-       if (this.getRightClickUse() > value) super.setRightClickUse(value);
-       else {
-           if (this.forcedSpinVictim != null) {
-               if (this.forcedSpinVictim.isEntityAlive()) super.setRightClickUse(value);
-           }
-       }
-    }
-
     public boolean attackEntityUsingSpin(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)(this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()/4D)));
         if (flag) this.applyEnchantments(this, entityIn);
@@ -244,26 +214,15 @@ public class Sarcosuchus extends RiftWaterCreature {
         return flag;
     }
 
-    public void knockBack(Entity entityIn, float strength, double xRatio, double zRatio) {
-        if (!this.isSpinning()) super.knockBack(entityIn, strength, xRatio, zRatio);
-    }
-
-    @Override
-    public void onDeath(DamageSource source) {
-        super.onDeath(source);
-        if (this.forcedSpinVictim != null) NonPotionEffectsHelper.setCaptured(this.forcedSpinVictim, false);
-        if (this.getAttackTarget() != null) NonPotionEffectsHelper.setCaptured(this.getAttackTarget(), false);
-    }
-
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.BITE, CreatureMove.LUNGE, CreatureMove.DEATH_ROLL);
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.LUNGE, CreatureMove.DEATH_ROLL, CreatureMove.GRAB);
     }
 
     @Override
     public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.BITE, CreatureMove.LUNGE, CreatureMove.DEATH_ROLL);
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.LUNGE, CreatureMove.GRAB);
     }
 
     @Override
@@ -275,6 +234,14 @@ public class Sarcosuchus extends RiftWaterCreature {
                 .defineRecoverFromUseLength(5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.SPIN, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpToUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.GRAB, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
                 .finalizePoints());

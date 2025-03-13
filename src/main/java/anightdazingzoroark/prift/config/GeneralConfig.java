@@ -75,8 +75,58 @@ public class GeneralConfig {
 
     //creature size
     public static String[] verySmallMobs = {"minecraft:bat", "minecraft:rabbit", "minecraft:silverfish", "minecraft:endermite", "minecraft:vex"};
-    public static String[] smallMobs = {"prift:dodo", "prift:coelacanth", "prift:megapiranha", "prift:palaeocastor", "minecraft:pig", "minecraft:sheep", "minecraft:chicken", "minecraft:spider", "minecraft:cave_spider", "minecraft:squid", "minecraft:ocelot", "minecraft:parrot", "minecraft:shulker", "minecraft:wolf"};
-    public static String[] mediumMobs = {"prift:utahraptor", "prift:parasaurolophus", "prift:dimetrodon", "prift:sarcosuchus", "prift:anomalocaris", "prift:direwolf", "prift:megaloceros", "prift:dilophosaurus", "minecraft:player", "minecraft:blaze", "minecraft:cow", "minecraft:creeper", "minecraft:donkey", "minecraft:enderman", "minecraft:evocation_illager", "minecraft:guardian", "minecraft:horse", "minecraft:husk", "minecraft:llama", "minecraft:mooshroom", "minecraft:mule", "minecraft:polar_bear", "minecraft:skeleton", "minecraft:skeleton_horse", "minecraft:stray", "minecraft:villager", "minecraft:vindication_illager", "minecraft:witch", "minecraft:zombie", "minecraft:zombie_horse", "minecraft:zombie_pigman", "minecraft:zombie_villager"};
+    public static String[] smallMobs = {
+            "prift:dodo",
+            "prift:coelacanth",
+            "prift:megapiranha",
+            "prift:palaeocastor",
+            "minecraft:pig",
+            "minecraft:sheep",
+            "minecraft:chicken",
+            "minecraft:spider",
+            "minecraft:cave_spider",
+            "minecraft:squid",
+            "minecraft:ocelot",
+            "minecraft:parrot",
+            "minecraft:shulker",
+            "minecraft:wolf",
+            "minecraft:minecart",
+            "minecraft:boat"
+    };
+    public static String[] mediumMobs = {
+            "prift:utahraptor",
+            "prift:parasaurolophus",
+            "prift:dimetrodon",
+            "prift:sarcosuchus",
+            "prift:anomalocaris",
+            "prift:direwolf",
+            "prift:megaloceros",
+            "prift:dilophosaurus",
+            "minecraft:player",
+            "minecraft:blaze",
+            "minecraft:cow",
+            "minecraft:creeper",
+            "minecraft:donkey",
+            "minecraft:enderman",
+            "minecraft:evocation_illager",
+            "minecraft:guardian",
+            "minecraft:horse",
+            "minecraft:husk",
+            "minecraft:llama",
+            "minecraft:mooshroom",
+            "minecraft:mule",
+            "minecraft:polar_bear",
+            "minecraft:skeleton",
+            "minecraft:skeleton_horse",
+            "minecraft:stray",
+            "minecraft:villager",
+            "minecraft:vindication_illager",
+            "minecraft:witch",
+            "minecraft:zombie",
+            "minecraft:zombie_horse",
+            "minecraft:zombie_pigman",
+            "minecraft:zombie_villager"
+    };
     public static String[] largeMobs = {"prift:stegosaurus", "prift:triceratops", "prift:saurophaganax", "prift:baryonyx", "minecraft:elder_guardian", "minecraft:wither_skeleton", "minecraft:wither"};
     public static String[] veryLargeMobs = {"prift:tyrannosaurus", "prift:apatosaurus", "minecraft:ghast", "minecraft:ender_dragon"};
 
