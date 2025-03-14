@@ -239,6 +239,7 @@ public class Sarcosuchus extends RiftWaterCreature {
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.SPIN, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpToUseLength(5D)
+                .defineUseDurationLength(5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.GRAB, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(2.5D)
