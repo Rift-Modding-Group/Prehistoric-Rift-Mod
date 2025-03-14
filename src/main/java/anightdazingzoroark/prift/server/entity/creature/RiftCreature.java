@@ -453,6 +453,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         GameSettings settings = Minecraft.getMinecraft().gameSettings;
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (this.isBeingRidden() && this.getControllingPassenger().equals(player)) {
+            //thru server events, the 2nd move, which is activated via right click, is disabled
+            //this line here ensures that when right click is released, the 2nd move can be
+            //used again
+            if (!this.canUseRightClick() && !settings.keyBindUseItem.isKeyDown()) RiftMessages.WRAPPER.sendToServer(new RiftCanUseRightClick(this, true));
+            
             //for using large weapons
             if (this.creatureType.canHoldLargeWeapon
                     && this.getLargeWeapon() != RiftLargeWeaponType.NONE
@@ -462,7 +467,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             //for using moves and controlling movement
             else {
                 boolean leftClickOnly = settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown();
-                boolean rightClickOnly = !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown();
+                boolean rightClickOnly = !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown() && this.canUseRightClick();
                 boolean middleClickOnly = !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown();
                 boolean jump = settings.keyBindJump.isKeyDown();
 

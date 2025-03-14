@@ -18,6 +18,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import anightdazingzoroark.prift.server.message.RiftCanUseRightClick;
 import anightdazingzoroark.prift.server.message.RiftJournalEditOne;
 import anightdazingzoroark.prift.server.message.RiftManageCanUseControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -267,13 +268,15 @@ public class ServerEvents {
 
     //make it so that upon mounting a creature then dismounting it
     //you dont take damage
+    //as well as making it so that on the instant they start riding
+    //they dont activate a right click ability
     @SubscribeEvent
     public void onStartRiding(EntityMountEvent event) {
         if (event.isDismounting() && event.getEntityMounting() instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer)event.getEntityMounting();
             if (event.getEntityBeingMounted() instanceof RiftCreature) {
                 RiftCreature creature = (RiftCreature) event.getEntityBeingMounted();
-                RiftMessages.WRAPPER.sendToServer(new RiftManageCanUseControl(creature, 1, false));
+                RiftMessages.WRAPPER.sendToServer(new RiftCanUseRightClick(creature, false));
                 NonPotionEffectsHelper.setRiding(player, true);
             }
         }
