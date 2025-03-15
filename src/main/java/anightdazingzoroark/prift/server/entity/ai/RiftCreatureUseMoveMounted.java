@@ -223,12 +223,19 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    this.currentInvokedMove.setUseValue(this.getUse());
+                    this.moveAnimUseTime += this.getUse();
+                    this.maxMoveAnimTime += this.getUse();
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag) {
+                    if (this.currentInvokedMove.forceStopFlag) {
+                        this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
+                        this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
+                    }
                     this.creature.setPlayingInfiniteMoveAnim(false);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {

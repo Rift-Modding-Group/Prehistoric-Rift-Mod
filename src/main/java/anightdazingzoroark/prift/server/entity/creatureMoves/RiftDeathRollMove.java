@@ -29,7 +29,7 @@ public class RiftDeathRollMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
-        if (user.getGrabVictim() != null) user.attackEntityAsMobWithMultiplier(user.getGrabVictim(), 0.25f);
+        if (user.getGrabVictim() != null && user.getGrabVictim().isEntityAlive()) user.attackEntityAsMobWithMultiplier(user.getGrabVictim(), 0.25f);
         else this.forceStopFlag = true;
     }
 

@@ -3068,16 +3068,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                             }
                             else if (getMoveThreeCooldown() == 0 && getMoveThreeUse() > 0 && !usingMoveThree()) {
                                 if (currentCreatureMove().useTimeIsInfinite) {
-                                    if (getPlayingInfiniteMoveAnim()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_infinite_"+currentCreatureMove().moveTypeName()+"_move_pt2", true));
-                                    else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_infinite_"+currentCreatureMove().moveTypeName()+"_move_pt3", false));
+                                    if (getPlayingInfiniteMoveAnim()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveTypeName() + "_move_pt2", true));
+                                    else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveTypeName() + "_move_pt3", false));
                                 }
-                                else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt2", false));
+                                else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveTypeName() + "_move_pt2", false));
                             }
+                            else event.getController().clearAnimationCache();
                         }
                     }
-                    else event.getController().clearAnimationCache();
+                    return PlayState.CONTINUE;
                 }
-                return PlayState.CONTINUE;
+                else {
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
+                }
             }
         }));
         //for use of large weapons

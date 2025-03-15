@@ -84,107 +84,13 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
-
         this.tasks.addTask(2, new RiftCreatureUseMoveMounted(this));
         this.tasks.addTask(3, new RiftCreatureUseMoveUnmounted(this));
-
         this.tasks.addTask(4, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(6, new RiftGoToWater(this, 16, 1.0D));
         this.tasks.addTask(7, new RiftWanderWater(this, 1.0D));
         this.tasks.addTask(8, new RiftWander(this, 1.0D));
     }
-
-    @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-
-        /*
-        if (this.isBeingRidden() && this.canUseRightClick() && this.getRightClickCooldown() == 0 && this.isUsingRightClick() && (this.getRightClickUse() >= 0 && this.getRightClickUse() <= 100) && this.getEnergy() > 6) this.forcedSpinAttack();
-        else if (!this.isBeingRidden() || !this.canUseRightClick() || this.getRightClickCooldown() > 0 || !this.isUsingRightClick()) {
-            this.spinTime = 0;
-            if (this.forcedSpinVictim != null) NonPotionEffectsHelper.setCaptured(this.forcedSpinVictim, false);
-            this.forcedSpinVictim = null;
-            if (this.getRightClickCooldown() > 0) {
-                this.setRightClickCooldown(this.getRightClickCooldown() - 1);
-            }
-        }
-        if (this.isBeingRidden() && this.getEnergy() <= 6 && this.isUsingRightClick() && !this.messageSent) {
-            ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-            this.messageSent = true;
-        }
-        else if (!this.isUsingRightClick() && this.messageSent) this.messageSent = false;
-        if (this.isBeingRidden()) {
-            if (this.getRightClickUse() > 100) {
-                if (this.forcedSpinVictim != null) NonPotionEffectsHelper.setCaptured(this.forcedSpinVictim, false);;
-                this.forcedSpinVictim = null;
-            }
-            if (this.forcedSpinVictim == null) this.setIsSpinning(false);
-        }
-        */
-    }
-
-    /*
-    private void forcedSpinAttack() {
-        if (this.forcedSpinVictim != null) {
-            if (this.forcedSpinVictim.isEntityAlive()) {
-                if (!this.isSpinning()) this.setIsSpinning(true);
-                RiftMessages.WRAPPER.sendToServer(new RiftSarcosuchusSpinTargeting(this, this.forcedSpinVictim));
-                if (this.isTamed() && this.spinTime % 10 == 0) this.setEnergy(this.getEnergy() - 1);
-                this.spinTime++;
-            }
-            else {
-                this.setIsSpinning(false);
-                this.setCanUseRightClick(false);
-            }
-        }
-        else {
-            MobSize spinMaxSize = MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumSpinAttackTargetSize);
-            if (RiftUtil.isUsingSSR()) {
-                EntityLivingBase target = (EntityLivingBase) SSRCompatUtils.getEntities(this).entityHit;
-                if (target != null) {
-                    boolean canSpinFlag;
-                    if (target instanceof EntityPlayer) {
-                        canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !target.getUniqueID().equals(this.getOwnerId()) && !NonPotionEffectsHelper.isCaptured(target);
-                    }
-                    else {
-                        if (target instanceof EntityTameable) {
-                            EntityTameable inpTameable = (EntityTameable)target;
-                            if (inpTameable.isTamed()) {
-                                canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !target.getUniqueID().equals(inpTameable.getOwnerId()) && !NonPotionEffectsHelper.isCaptured(target);
-                            }
-                            else canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !NonPotionEffectsHelper.isCaptured(target);
-                        }
-                        else canSpinFlag = RiftUtil.isAppropriateSize(target, spinMaxSize) && !NonPotionEffectsHelper.isCaptured(target);
-                    }
-                    if (canSpinFlag) this.forcedSpinVictim = target;
-                }
-            }
-            else {
-                UUID ownerID = this.getOwnerId();
-                List<EntityLivingBase> potTargetListM = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth()).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
-                    @Override
-                    public boolean apply(@Nullable EntityLivingBase input) {
-                        if (input instanceof EntityPlayer) {
-                            return RiftUtil.isAppropriateSize(input, spinMaxSize) && !input.getUniqueID().equals(ownerID) && !NonPotionEffectsHelper.isCaptured(input);
-                        }
-                        else {
-                            if (input instanceof EntityTameable) {
-                                EntityTameable inpTameable = (EntityTameable)input;
-                                if (inpTameable.isTamed()) {
-                                    return RiftUtil.isAppropriateSize(inpTameable, spinMaxSize) && !ownerID.equals(inpTameable.getOwnerId()) && !NonPotionEffectsHelper.isCaptured(input);
-                                }
-                                else return RiftUtil.isAppropriateSize(inpTameable, spinMaxSize) && !NonPotionEffectsHelper.isCaptured(input);
-                            }
-                            return RiftUtil.isAppropriateSize(input, spinMaxSize) && !NonPotionEffectsHelper.isCaptured(input);
-                        }
-                    }
-                });
-                potTargetListM.remove(this);
-                if (!potTargetListM.isEmpty()) this.forcedSpinVictim = potTargetListM.get(0);
-            }
-        }
-    }
-    */
 
     @Override
     public void updateParts() {
@@ -222,7 +128,7 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     @Override
     public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.BITE, CreatureMove.LUNGE, CreatureMove.GRAB);
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.LUNGE, CreatureMove.DEATH_ROLL);
     }
 
     @Override
