@@ -395,10 +395,10 @@ public class ServerEvents {
             }
         }
 
-        //make it so that when a mob tries to target an invisible anomalocaris nothing happens
-        if (event.getTarget() instanceof Anomalocaris) {
-            Anomalocaris anomalocaris = (Anomalocaris)event.getTarget();
-            if (anomalocaris.isUsingInvisibility()) ((EntityLiving)event.getEntityLiving()).setAttackTarget(null);
+        //make it so that when a mob tries to target an a cloaked creature nothing happens
+        if (event.getTarget() instanceof RiftCreature) {
+            RiftCreature creature = (RiftCreature)event.getTarget();
+            if (creature.isCloaked()) ((EntityLiving)event.getEntityLiving()).setAttackTarget(null);
         }
 
         //make it so when a player uses a large weapon on a mob, the mob will go after its operator
@@ -447,7 +447,7 @@ public class ServerEvents {
         }
 
         //make sure mobs dont fall when trapped
-        if (NonPotionEffectsHelper.isCaptured(entity)) entity.fallDistance = 0;
+        if (NonPotionEffectsHelper.isGrabbed(entity)) entity.fallDistance = 0;
     }
 
     //manage cannon impacting stuff

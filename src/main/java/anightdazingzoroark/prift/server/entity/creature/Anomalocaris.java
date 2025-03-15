@@ -39,8 +39,6 @@ import java.util.UUID;
 
 public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/anomalocaris"));
-    private static final DataParameter<Boolean> INVISIBLE = EntityDataManager.createKey(Anomalocaris.class, DataSerializers.BOOLEAN);
-    private int invisibilityTimeout = 0;
     private EntityLivingBase grabVictim = null;
     public RiftCreaturePart tailPart;
 
@@ -66,12 +64,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         };
     }
 
-    @Override
-    protected void entityInit() {
-        super.entityInit();
-        this.dataManager.register(INVISIBLE, true);
-    }
-
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
@@ -83,38 +75,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.36F));
         this.tasks.addTask(6, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(8, new RiftWanderWater(this, 1.0D));
-    }
-
-    @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-        this.manageInvisibility();
-        this.resetIsActing();
-    }
-
-    private void resetIsActing() {
-        if (this.isActing() && !this.isUsingRightClick() && !this.isUsingLeftClick()) {
-            this.setActing(false);
-        }
-    }
-
-    @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        compound.setBoolean("UsingInvis", this.isUsingInvisibility());
-    }
-
-    @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        this.setUseInvisibility(compound.getBoolean("UsingInvis"));
-    }
-
-    private void manageInvisibility() {
-        if (!this.world.isRemote) {
-            if (!this.isUsingInvisibility() && this.invisibilityTimeout == 0) this.setUseInvisibility(true);
-            if (this.invisibilityTimeout > 0) this.invisibilityTimeout--;
-        }
     }
 
     @Override
@@ -138,160 +98,7 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (target == null && this.grabVictim == null) {
-                    if (!this.isActing()) this.setAttacking(true);
-                }
-                else if (target != null && this.grabVictim == null) {
-                    if (!this.isActing() && !this.isUsingRightClick()) {
-                        this.forcedAttackTarget = target;
-                        this.forcedBreakPos = pos;
-                        this.setAttacking(true);
-                    }
-                }
-                else {
-                    if (!this.isActing() && !this.isUsingRightClick()) {
-                        this.forcedAttackTarget = this.grabVictim;
-                        this.setAttacking(true);
-                    }
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (!this.isActing()) {
-                if (this.getGrabVictim() == null) {
-                    if (target != null && RiftUtil.isUsingSSR()) {
-                        EntityLivingBase entityLivingBase = target instanceof RiftCreaturePart ? ((RiftCreaturePart)target).getParent() : (target instanceof EntityLivingBase ? (EntityLivingBase) target : null);
-                        if (entityLivingBase != null) {
-                            boolean canGrabFlag;
-
-                            if (target instanceof EntityPlayer) {
-                                canGrabFlag = !target.getUniqueID().equals(this.getOwnerId()) && !NonPotionEffectsHelper.isCaptured(target) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumGrabTargetSize ));
-                            }
-                            else {
-                                canGrabFlag = !target.equals(this) && !NonPotionEffectsHelper.isCaptured(target) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumGrabTargetSize));
-                            }
-
-                            if (canGrabFlag) {
-                                RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
-                                NonPotionEffectsHelper.setCaptured(target, true);
-                                this.setActing(true);
-                            }
-                        }
-                    }
-                    else if (target == null && !RiftUtil.isUsingSSR()) {
-                        UUID ownerID = this.getOwnerId();
-                        List<EntityLivingBase> potGrabList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(this.attackWidth()).grow(1.0D, 1.0D, 1.0D), new Predicate<EntityLivingBase>() {
-                            @Override
-                            public boolean apply(@Nullable EntityLivingBase input) {
-                                if (input instanceof EntityPlayer) {
-                                    return !input.getUniqueID().equals(ownerID) && !NonPotionEffectsHelper.isCaptured(input) && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(RiftConfigHandler.getConfig(creatureType).general.maximumGrabTargetSize));
-                                }
-                                else {
-                                    return !NonPotionEffectsHelper.isCaptured(input) && RiftUtil.isAppropriateSize(input, MobSize.safeValueOf(RiftConfigHandler.getConfig(creatureType).general.maximumGrabTargetSize));
-                                }
-                            }
-                        });
-                        potGrabList.remove(this);
-                        if (!potGrabList.isEmpty()) {
-                            RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, potGrabList.get(0)));
-                            NonPotionEffectsHelper.setCaptured(potGrabList.get(0), true);
-                            this.setActing(true);
-                        }
-                    }
-                }
-                else {
-                    NonPotionEffectsHelper.setCaptured(this.getGrabVictim(), false);
-                    RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, null));
-                    this.setActing(true);
-                }
-            }
-            this.setRightClickUse(0);
-        }
-        if (control == 3) {
-            if (!this.world.isRemote) {
-                this.invisibilityTimeout = !this.isUsingInvisibility() ? 0 : -1;
-                this.setUseInvisibility(!this.isUsingInvisibility());
-            }
-        }
-    }
-
-    @Override
-    public boolean attackEntityAsMob(Entity entityIn) {
-        if (!this.world.isRemote) {
-            this.setUseInvisibility(false);
-            this.invisibilityTimeout = 200;
-        }
-        this.heal((float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue())/2f);
-        boolean playerRideFlag = (this.isBeingRidden() && this.getControllingPassenger() instanceof EntityPlayer);
-        if (entityIn.isEntityAlive() && entityIn instanceof EntityLivingBase && !playerRideFlag) {
-            EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
-
-            if (RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumGrabTargetSize))) {
-                RiftMessages.WRAPPER.sendToServer(new RiftSetGrabTarget(this, entityLivingBase));
-                NonPotionEffectsHelper.setCaptured(entityLivingBase, true);
-            }
-        }
-        return super.attackEntityAsMob(entityIn);
-    }
-
-    @Override
-    public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (!this.world.isRemote) {
-            this.setUseInvisibility(false);
-            this.invisibilityTimeout = 200;
-        }
-        return super.attackEntityFrom(source, amount);
-    }
-
-    @Override
-    public void onDeath(DamageSource source) {
-        super.onDeath(source);
-        if (this.getGrabVictim() != null) NonPotionEffectsHelper.setCaptured(this.getGrabVictim(), false);
-    }
-
-    public void setTamedBy(EntityPlayer player) {
-        super.setTamedBy(player);
-        if (!this.world.isRemote) {
-            this.setUseInvisibility(false);
-            this.invisibilityTimeout = -1;
-        }
-    }
-
-    public void removePassenger(Entity passenger) {
-        super.removePassenger(passenger);
-        if (this.isSitting()) {
-            if (!this.world.isRemote) {
-                this.setUseInvisibility(false);
-                this.invisibilityTimeout = -1;
-            }
-        }
-        else {
-            if (!this.world.isRemote) {
-                this.setUseInvisibility(false);
-                this.invisibilityTimeout = 200;
-            }
-        }
-    }
-
-    public void setSitting(boolean value) {
-        super.setSitting(value);
-        if (value) {
-            if (!this.world.isRemote) {
-                this.setUseInvisibility(false);
-                this.invisibilityTimeout = -1;
-            }
-        }
-        else {
-            if (!this.world.isRemote) {
-                this.setUseInvisibility(false);
-                this.invisibilityTimeout = 200;
-            }
-        }
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     public EnumCreatureAttribute getCreatureAttribute()
@@ -319,14 +126,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
         return false;
     }
 
-    public boolean isUsingInvisibility() {
-        return this.dataManager.get(INVISIBLE);
-    }
-
-    public void setUseInvisibility(boolean value) {
-        this.dataManager.set(INVISIBLE, value);
-    }
-
     public EntityLivingBase getGrabVictim() {
         return this.grabVictim;
     }
@@ -339,27 +138,6 @@ public class Anomalocaris extends RiftWaterCreature implements IGrabber {
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::anomalocarisMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::anomalocarisAttack));
-    }
-
-    private <E extends IAnimatable> PlayState anomalocarisMovement(AnimationEvent<E> event) {
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.anomalocaris.swim", true));
-        return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState anomalocarisAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.anomalocaris.attack", false));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {

@@ -1,9 +1,7 @@
 package anightdazingzoroark.prift.server.capabilities.nonPotionEffects;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
 
 public class NonPotionEffectsHelper {
     public static void setBleeding(Entity entity, int strength, int ticks) {
@@ -21,30 +19,6 @@ public class NonPotionEffectsHelper {
                 RiftMessages.WRAPPER.sendToAll(new RiftSetBleeding(entity, strength, ticks));
             }
         }
-    }
-
-    public static void setCaptured(Entity entity, boolean isCaptured) {
-        if (entity.world.isRemote) {
-            INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-            if (nonPotionEffects != null) {
-                nonPotionEffects.setCaptured(isCaptured);
-                RiftMessages.WRAPPER.sendToServer(new RiftSetCaptured(entity, isCaptured));
-            }
-        }
-        else {
-            INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-            if (nonPotionEffects != null) {
-                nonPotionEffects.setCaptured(isCaptured);
-                RiftMessages.WRAPPER.sendToAll(new RiftSetCaptured(entity, isCaptured));
-            }
-        }
-    }
-
-    public static boolean isCaptured(Entity entity) {
-        if (entity == null) return false;
-        INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-        if (nonPotionEffects != null) return nonPotionEffects.isCaptured();
-        else return false;
     }
 
     public static void setBolaCaptured(Entity entity, int ticks) {
@@ -87,6 +61,13 @@ public class NonPotionEffectsHelper {
                 RiftMessages.WRAPPER.sendToAll(new RiftSetEntityGrabbed(entity, isGrabbed));
             }
         }
+    }
+
+    public static boolean isGrabbed(Entity entity) {
+        if (entity == null) return false;
+        INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+        if (nonPotionEffects != null) return nonPotionEffects.isGrabbed();
+        else return false;
     }
 
     public static void setRiding(Entity entity, boolean value) {

@@ -70,8 +70,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetBolaCaptured.Handler.class, RiftSetBolaCaptured.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetBolaCaptured.Handler.class, RiftSetBolaCaptured.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftManageBolaCaptured.Handler.class, RiftManageBolaCaptured.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftSetCaptured.Handler.class, RiftSetCaptured.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftSetCaptured.Handler.class, RiftSetCaptured.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetRiding.Handler.class, RiftSetRiding.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetRiding.Handler.class, RiftSetRiding.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftUpgradePlayerParty.Handler.class, RiftUpgradePlayerParty.class, id++, Side.SERVER);

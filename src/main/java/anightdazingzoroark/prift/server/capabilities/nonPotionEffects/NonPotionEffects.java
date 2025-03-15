@@ -1,13 +1,9 @@
 package anightdazingzoroark.prift.server.capabilities.nonPotionEffects;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-
 public class NonPotionEffects implements INonPotionEffects {
     private boolean isBleeding;
     private int bleedStrength;
     private int bleedTick;
-
-    private boolean isCaptured;
 
     private boolean isBolaCaptured;
     private int bolaCapturedTick;
@@ -44,16 +40,6 @@ public class NonPotionEffects implements INonPotionEffects {
     }
 
     @Override
-    public void setCaptured(boolean value) {
-        this.isCaptured = value;
-    }
-
-    @Override
-    public boolean isCaptured() {
-        return this.isCaptured;
-    }
-
-    @Override
     public void setBolaCaptured(int ticks) {
         this.isBolaCaptured = true;
         this.bolaCapturedTick = ticks;
@@ -80,7 +66,7 @@ public class NonPotionEffects implements INonPotionEffects {
     }
 
     @Override
-    public boolean getIsGrabbed() {
+    public boolean isGrabbed() {
         return this.isGrabbed;
     }
 

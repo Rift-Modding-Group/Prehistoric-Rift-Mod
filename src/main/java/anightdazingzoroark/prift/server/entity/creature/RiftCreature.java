@@ -119,6 +119,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROTATE_MOUNTED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CLOAKED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
@@ -219,6 +220,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private float recentlyHitDamage;
     private int recentlyHitTicks;
     private Entity grabVictim;
+    public int cloakingTimeout;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -295,6 +297,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) PlayerTamedCreatures.DeploymentType.NONE.ordinal());
         this.dataManager.register(INCAPACITATED, false);
         this.dataManager.register(CAN_ROTATE_MOUNTED, true);
+        this.dataManager.register(CLOAKED, false);
 
         this.dataManager.register(CURRENT_MOVE, -1);
 
@@ -434,6 +437,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (teleportPos != null) this.setPosition(teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
                 }
             }
+            else this.manageCloaking();
         }
         if (this.world.isRemote) {
             this.setControls();
@@ -512,6 +516,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             CreatureMove creatureMoveToSend = control >= 0 ? this.getLearnedMoves().get(control) : null;
             RiftMessages.WRAPPER.sendToServer(new RiftManualUseMove(this, control, creatureMoveToSend));
         }
+    }
+
+    private void manageCloaking() {
+        //when the creature is cloaked and uses an attack move, the cloak gets undone
+        //and there will be a cooldown on cloaking until it will come back
+        if (this.currentCreatureMove() != null && this.currentCreatureMove().moveType != CreatureMove.MoveType.STATUS) {
+            this.setCloaked(false);
+            this.cloakingTimeout = 200;
+        }
+
+        //countdown for cloaking timeout
+        if (this.cloakingTimeout-- <= 0) this.setCloaked(true);
     }
 
     private void manageMoveAndWeaponCooldown() {
@@ -2276,6 +2292,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void enableCanRotateMounted() {
         this.dataManager.set(CAN_ROTATE_MOUNTED, true);
+    }
+
+    public boolean isCloaked() {
+        return this.dataManager.get(CLOAKED);
+    }
+
+    public void setCloaked(boolean value) {
+        this.dataManager.set(CLOAKED, value);
     }
 
     public void setHomePos() {

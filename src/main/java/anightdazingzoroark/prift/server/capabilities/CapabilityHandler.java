@@ -92,7 +92,7 @@ public class CapabilityHandler {
         if (!event.isWasDeath()) {
             if (oldNonPotionEffects.isBleeding()) nonPotionEffects.setBleeding(oldNonPotionEffects.getBleedStrength(), oldNonPotionEffects.getBleedTick());
 
-            nonPotionEffects.setCaptured(oldNonPotionEffects.isCaptured());
+            nonPotionEffects.setGrabbed(oldNonPotionEffects.isGrabbed());
 
             if (oldNonPotionEffects.isBolaCaptured()) nonPotionEffects.setBolaCaptured(oldNonPotionEffects.getBolaCapturedTick());
         }
