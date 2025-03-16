@@ -149,6 +149,191 @@
 					"rotation": [0, 0, 15]
 				}
 			}
+		},
+		"animation.anomalocaris.use_claw_type_move": {
+			"animation_length": 0.5,
+			"bones": {
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [-12.5, 0, 0],
+						"0.25": [10, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"leftAppendage0": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [-24.39942, 19.84302, -10.82777],
+						"0.25": [13.1, 19.84, -10.83],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"leftAppendage2": {
+					"rotation": {
+						"0.125": [0, 0, 0],
+						"0.25": [22.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"rightAppendage0": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [-24.39942, -19.84302, 10.82777],
+						"0.25": [13.1, -19.84, 10.83],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"rightAppendage2": {
+					"rotation": {
+						"0.125": [0, 0, 0],
+						"0.25": [22.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.anomalocaris.use_charged_grab_type_move_pt1": {
+			"animation_length": 0.25,
+			"bones": {
+				"bodyFront": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [0, 0, 0],
+						"0.25": [-30, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [-12.5, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"leftAppendage0": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [-24.39942, 19.84302, -10.82777],
+						"0.25": [13.1, 19.84, -10.83]
+					}
+				},
+				"leftAppendage2": {
+					"rotation": {
+						"0.125": [0, 0, 0],
+						"0.25": [22.5, 0, 0]
+					}
+				},
+				"rightAppendage0": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [-24.39942, -19.84302, 10.82777],
+						"0.25": [13.1, -19.84, 10.83]
+					}
+				},
+				"rightAppendage2": {
+					"rotation": {
+						"0.125": [0, 0, 0],
+						"0.25": [22.5, 0, 0]
+					}
+				},
+				"bodyBack": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [0, 0, 0],
+						"0.25": [-65, 0, 0]
+					}
+				},
+				"tail": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [0, 0, 0],
+						"0.25": [-37.5, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.anomalocaris.use_charged_infinite_grab_type_move_pt2": {
+			"loop": true,
+			"animation_length": 0.25,
+			"bones": {
+				"bodyFront": {
+					"rotation": [-30, 0, 0]
+				},
+				"head": {
+					"rotation": [0, 0, 0]
+				},
+				"leftAppendage0": {
+					"rotation": [13.1, 19.84, -10.83]
+				},
+				"leftAppendage2": {
+					"rotation": [22.5, 0, 0]
+				},
+				"rightAppendage0": {
+					"rotation": [13.1, -19.84, 10.83]
+				},
+				"rightAppendage2": {
+					"rotation": [22.5, 0, 0]
+				},
+				"bodyBack": {
+					"rotation": [-65, 0, 0]
+				},
+				"tail": {
+					"rotation": [-37.5, 0, 0]
+				}
+			}
+		},
+		"animation.anomalocaris.use_charged_infinite_grab_type_move_pt3": {
+			"animation_length": 0.25,
+			"bones": {
+				"bodyFront": {
+					"rotation": {
+						"0.0": [-30, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"leftAppendage0": {
+					"rotation": {
+						"0.0": [13.1, 19.84, -10.83],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"leftAppendage2": {
+					"rotation": {
+						"0.0": [22.5, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"rightAppendage0": {
+					"rotation": {
+						"0.0": [13.1, -19.84, 10.83],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"rightAppendage2": {
+					"rotation": {
+						"0.0": [22.5, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"bodyBack": {
+					"rotation": {
+						"0.0": [-65, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"tail": {
+					"rotation": {
+						"0.0": [-37.5, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				}
+			}
 		}
 	}
 }

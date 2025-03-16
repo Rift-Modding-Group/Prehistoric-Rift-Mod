@@ -372,6 +372,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (!(livingdata instanceof IHerder.HerdData)) return new IHerder.HerdData(this);
             ((IHerder)this).addToHerdLeader(((IHerder.HerdData)livingdata).herdLeader);
         }
+        //if creature can use cloaking, instantly cloak it
+        if (this.canUtilizeCloaking()) this.setCloaked(true);
         return livingdata;
     }
 
@@ -437,7 +439,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (teleportPos != null) this.setPosition(teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
                 }
             }
-            else this.manageCloaking();
+            else if (this.canUtilizeCloaking()) this.manageCloaking();
         }
         if (this.world.isRemote) {
             this.setControls();
@@ -516,18 +518,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             CreatureMove creatureMoveToSend = control >= 0 ? this.getLearnedMoves().get(control) : null;
             RiftMessages.WRAPPER.sendToServer(new RiftManualUseMove(this, control, creatureMoveToSend));
         }
-    }
-
-    private void manageCloaking() {
-        //when the creature is cloaked and uses an attack move, the cloak gets undone
-        //and there will be a cooldown on cloaking until it will come back
-        if (this.currentCreatureMove() != null && this.currentCreatureMove().moveType != CreatureMove.MoveType.STATUS) {
-            this.setCloaked(false);
-            this.cloakingTimeout = 200;
-        }
-
-        //countdown for cloaking timeout
-        if (this.cloakingTimeout-- <= 0) this.setCloaked(true);
     }
 
     private void manageMoveAndWeaponCooldown() {
@@ -1899,6 +1889,33 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
     //mob grabbing management ends here
 
+    //cloaking management starts here
+    public boolean canUtilizeCloaking() {
+        return false;
+    }
+
+    public boolean isCloaked() {
+        return this.dataManager.get(CLOAKED);
+    }
+
+    public void setCloaked(boolean value) {
+        this.dataManager.set(CLOAKED, value);
+    }
+
+    private void manageCloaking() {
+        //when the creature is cloaked and uses an attack move, the cloak gets undone
+        //and there will be a cooldown on cloaking until it will come back
+        if (this.currentCreatureMove() != null && this.currentCreatureMove().moveType != CreatureMove.MoveType.STATUS) {
+            this.setCloaked(false);
+            this.cloakingTimeout = 200;
+        }
+
+        //countdown for cloaking timeout
+        if (this.cloakingTimeout-- <= 0) this.setCloaked(true);
+    }
+
+    //cloaking management ends here
+
     //old move anims start here
     public boolean isAttacking() {
         return this.dataManager.get(ATTACKING);
@@ -2292,14 +2309,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void enableCanRotateMounted() {
         this.dataManager.set(CAN_ROTATE_MOUNTED, true);
-    }
-
-    public boolean isCloaked() {
-        return this.dataManager.get(CLOAKED);
-    }
-
-    public void setCloaked(boolean value) {
-        this.dataManager.set(CLOAKED, value);
     }
 
     public void setHomePos() {

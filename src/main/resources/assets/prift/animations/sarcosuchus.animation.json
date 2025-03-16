@@ -342,7 +342,7 @@
 				}
 			}
 		},
-		"animation.sarcosuchus.use_charged_infinite_spin_type_move_pt1": {
+		"animation.sarcosuchus.use_charged_spin_type_move_pt1": {
 			"animation_length": 0.25,
 			"bones": {
 				"upperJaw": {
