@@ -47,10 +47,12 @@ public class RiftGrabbedEntitySetPos implements IMessage {
             RiftCreature grabberCreature = (RiftCreature) playerEntity.world.getEntityByID(message.grabberCreatureId);
             Entity grabbedEntity = playerEntity.world.getEntityByID(message.grabbedEntityId);
 
-            grabbedEntity.setPosition(grabberCreature.grabLocation().x, grabberCreature.grabLocation().y, grabberCreature.grabLocation().z);
-            grabbedEntity.motionX = 0;
-            grabbedEntity.motionY = 0;
-            grabbedEntity.motionZ = 0;
+            if (grabbedEntity != null && grabberCreature != null) {
+                grabbedEntity.setPosition(grabberCreature.grabLocation().x, grabberCreature.grabLocation().y, grabberCreature.grabLocation().z);
+                grabbedEntity.motionX = 0;
+                grabbedEntity.motionY = 0;
+                grabbedEntity.motionZ = 0;
+            }
         }
     }
 }

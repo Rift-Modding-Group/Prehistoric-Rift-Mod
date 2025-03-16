@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import net.minecraft.entity.EntityLivingBase;
@@ -129,14 +130,12 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     if (selectedMove != null && this.moveCanHitTarget(selectedMove)) {
                         this.creature.setCurrentCreatureMove(selectedMove);
                         this.currentInvokedMove = this.creature.currentCreatureMove().invokeMove();
-                        if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                        if (selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
                             //if move involves charging into target, or is gradient while use,
                             //the max charge time is the whole value
                             //otherwise its random based on whats given in the invoked creature move's class
-                            if ((selectedMove.moveType == CreatureMove.MoveType.CHARGE && selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE)
-                                || selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {
+                            if (selectedMove.moveType == CreatureMove.MoveType.CHARGE)
                                 this.maxChargeTime = this.creature.currentCreatureMove().maxUse;
-                            }
                             else this.maxChargeTime = RiftUtil.randomInRange(this.currentInvokedMove.unmountedChargeBounds()[0], this.currentInvokedMove.unmountedChargeBounds()[1]);
 
                             //set move anim markers
@@ -144,6 +143,15 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             this.moveAnimChargeUpTime = this.moveAnimInitDelayTime + this.maxChargeTime;
                             this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
                             this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
+                            this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+                        }
+                        else if (selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {
+                            this.maxChargeTime = RiftUtil.randomInRange(this.currentInvokedMove.unmountedChargeBounds()[0], this.currentInvokedMove.unmountedChargeBounds()[1]);
+
+                            this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                            this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
+                            this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
+                            this.moveAnimUseTime = this.moveAnimChargeToUseTime + this.maxChargeTime;
                             this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
                         }
                         else {
@@ -200,11 +208,12 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 this.currentInvokedMove.onStopExecuting(this.creature);
                 if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
                     this.setChargedMoveBeingUsed(false);
-                    int cooldownGradient = 1;
+                    double cooldownGradient = 1;
                     if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
-                        cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
+                        cooldownGradient = this.creature.currentCreatureMove().maxCooldown/(double)this.creature.currentCreatureMove().maxUse;
                     }
-                    this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), this.creature.getCurrentMoveUse() * cooldownGradient);
+                    if (this.creature instanceof Sarcosuchus) System.out.println("cooldown: "+(this.creature.getCurrentMoveUse() * cooldownGradient));
+                    this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), (int) (this.creature.getCurrentMoveUse() * cooldownGradient));
                     this.creature.setCurrentMoveUse(0);
                 }
                 else this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), this.creature.currentCreatureMove().maxCooldown);
@@ -217,10 +226,17 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             //updating move anim tick
             if (!this.finishedMoveMarker) {
                 this.animTime++;
-                if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+                if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
                     //updating use tick for move that requires charge when charging
                     if (this.animTime >= this.moveAnimInitDelayTime
                             && this.animTime < this.moveAnimChargeUpTime
+                            && this.creature.getCurrentMoveUse() < this.maxChargeTime) {
+                        this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
+                    }
+                }
+                else if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {
+                    if (this.animTime >= this.moveAnimChargeToUseTime
+                            && this.animTime <= this.moveAnimUseTime
                             && this.creature.getCurrentMoveUse() < this.maxChargeTime) {
                         this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
                     }
