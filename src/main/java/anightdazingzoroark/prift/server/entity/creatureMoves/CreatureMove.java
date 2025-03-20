@@ -23,7 +23,7 @@ public enum CreatureMove {
     DEATH_ROLL(RiftDeathRollMove.class, MoveType.SPIN, ChargeType.GRADIENT_WHILE_USE, 60, 100, 200, false, true, true),
     LUNGE(RiftLungeMove.class, MoveType.CHARGE, ChargeType.COOLDOWN_ONLY, 25, 0, 100, false, true, false),
     GRAB(RiftGrabMove.class, MoveType.GRAB, ChargeType.NONE, 0, 0, 0, false, false, false),
-    LIFE_DRAIN(RiftLifeDrain.class, MoveType.GRAB, ChargeType.GRADIENT_WHILE_USE, 60, 100, 200, false, true, true),
+    LIFE_DRAIN(RiftLifeDrain.class, MoveType.GRAB, ChargeType.GRADIENT_WHILE_USE, 60, 50, 100, false, true, true),
     CLOAK(null, MoveType.STATUS, ChargeType.NONE, 0, 0, 0, false, false, false);
 
     public final Class<? extends RiftCreatureMove> creatureMove;

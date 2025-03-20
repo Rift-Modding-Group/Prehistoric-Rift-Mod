@@ -90,7 +90,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     @Override
     public void updateTask() {
-        //randomly select a move to use
+        //randomly select a move to use, after which it will use that move
         if (this.finishedMoveMarker) {
             if (this.moveChoiceCooldown > 0) this.moveChoiceCooldown--;
             else {
@@ -168,9 +168,17 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
             }
         }
+        //use the selected move
         else {
             this.creature.getNavigator().clearPath();
             this.currentInvokedMove.lookAtTarget(this.creature, this.target);
+
+            //moves that require the player to hold a mouse key go here
+            if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {}
+            //anything else thats just one click then use goes here
+            else {
+
+            }
 
             if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
                 this.creature.setUsingDelayAnim(true);
@@ -212,7 +220,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/(double)this.creature.currentCreatureMove().maxUse;
                     }
-                    if (this.creature instanceof Sarcosuchus) System.out.println("cooldown: "+(this.creature.getCurrentMoveUse() * cooldownGradient));
                     this.setCoolDown(this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove()), (int) (this.creature.getCurrentMoveUse() * cooldownGradient));
                     this.creature.setCurrentMoveUse(0);
                 }

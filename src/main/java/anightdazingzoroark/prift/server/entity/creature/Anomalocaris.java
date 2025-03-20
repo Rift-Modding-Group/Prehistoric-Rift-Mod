@@ -86,7 +86,7 @@ public class Anomalocaris extends RiftWaterCreature {
                 .defineRecoverFromUseLength(5D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.GRAB, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpToUseLength(5D)
+                .defineChargeUpLength(5D)
                 .defineRecoverFromUseLength(5D)
                 .finalizePoints());
         return moveMap;
