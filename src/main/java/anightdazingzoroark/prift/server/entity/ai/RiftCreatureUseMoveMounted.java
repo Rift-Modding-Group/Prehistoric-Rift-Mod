@@ -128,6 +128,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         this.maxMoveAnimTime = 0;
         this.moveAnimUseTime = 0;
         this.animTime = 0;
+        this.creature.setPlayingChargedMoveAnim(-1);
     }
 
     @Override
