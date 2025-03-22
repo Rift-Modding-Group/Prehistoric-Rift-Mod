@@ -25,7 +25,7 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
 
     @Override
     public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.world.rand.nextInt(4) == 0 && user.recentlyHit) return MovePriority.HIGH;
+        if (user.world.rand.nextInt(4) == 0 && user.isRecentlyHit()) return MovePriority.HIGH;
         return MovePriority.NONE;
     }
 

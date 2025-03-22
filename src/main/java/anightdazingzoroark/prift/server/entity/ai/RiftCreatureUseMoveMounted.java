@@ -188,7 +188,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
                     }
-                    this.setCoolDown(this.getUse() * cooldownGradient);
+                    this.creature.setMoveCooldown(this.getUse() * cooldownGradient);
                     this.finishFlag = true;
                     this.animTime = 0;
                     this.creature.setMoveOneUse(0);
@@ -252,7 +252,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
                     }
-                    this.setCoolDown(this.getUse() * cooldownGradient);
+                    this.creature.setMoveCooldown(this.getUse() * cooldownGradient);
                     this.finishFlag = true;
                     this.animTime = 0;
                     this.creature.setMoveOneUse(0);
@@ -301,7 +301,12 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.animTime = 0;
                     this.creature.setUsingUnchargedAnim(false);
                     this.currentInvokedMove.onStopExecuting(this.creature);
-                    this.setCoolDown(this.creature.currentCreatureMove().maxCooldown);
+                    //the cloak move only has a cooldown when removing the cloaking
+                    if (this.creature.canUtilizeCloaking() && this.creature.currentCreatureMove() == CreatureMove.CLOAK && !this.creature.isCloaked()) {
+                        this.creature.setMoveCooldown(this.creature.currentCreatureMove().maxCooldown);
+                    }
+                    //all other moves should have their cooldown applied as usual
+                    else if (this.creature.currentCreatureMove() != CreatureMove.CLOAK) this.creature.setMoveCooldown(this.creature.currentCreatureMove().maxCooldown);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setMultistepMoveStep(0);
                     this.finishFlag = true;
                 }
@@ -358,22 +363,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 return this.creature.usingMoveThree();
         }
         return false;
-    }
-
-    private void setCoolDown(int moveCooldown) {
-        if (this.creature.currentCreatureMove() == null) return;
-        int movePos = this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove());
-        switch (movePos) {
-            case 0:
-                this.creature.setMoveOneCooldown(moveCooldown);
-                break;
-            case 1:
-                this.creature.setMoveTwoCooldown(moveCooldown);
-                break;
-            case 2:
-                this.creature.setMoveThreeCooldown(moveCooldown);
-                break;
-        }
     }
 
     private Entity getAttackTarget(CreatureMove.MoveType creatureMoveType) {

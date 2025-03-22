@@ -217,11 +217,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected int densityLimit;
     protected List<String> targetList;
     public boolean isFloatingOnWater;
-    public boolean recentlyHit;
+    private boolean recentlyHit;
     private float recentlyHitDamage;
-    private int recentlyHitTicks;
     private Entity grabVictim;
-    public int cloakingTimeout;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -375,7 +373,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             ((IHerder)this).addToHerdLeader(((IHerder.HerdData)livingdata).herdLeader);
         }
         //if creature can use cloaking, instantly cloak it
-        if (this.canUtilizeCloaking()) this.setCloaked(true);
+        if (this.canUtilizeCloaking()) {
+            System.out.println("apply cloaking");
+            this.setCloaked(true);
+        }
         return livingdata;
     }
 
@@ -422,6 +423,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageAttributes();
             this.manageDiscoveryByPlayer();
             this.manageMoveAndWeaponCooldown();
+            if (this.canUtilizeCloaking()) this.manageCloaking();
             if (this.isTamed()) {
                 this.updateEnergyMove();
                 this.updateEnergyActions();
@@ -441,7 +443,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (teleportPos != null) this.setPosition(teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
                 }
             }
-            else if (this.canUtilizeCloaking()) this.manageCloaking();
         }
         if (this.world.isRemote) {
             this.setControls();
@@ -450,10 +451,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
         this.manageGrabVictim();
-
-        //other minor stuff
-        if (this.recentlyHitTicks > 0) this.recentlyHitTicks--;
-        else if (this.recentlyHitTicks == 0) this.recentlyHit = false;
     }
 
     @SideOnly(Side.CLIENT)
@@ -1330,6 +1327,42 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    public void setMoveCooldown(int moveCooldown) {
+        if (this.currentCreatureMove() == null) return;
+        int movePos = this.getLearnedMoves().indexOf(this.currentCreatureMove());
+        this.setMoveCooldown(movePos, moveCooldown);
+    }
+
+    public void setMoveCooldown(int index, int moveCooldown) {
+        switch (index) {
+            case 0:
+                this.setMoveOneCooldown(moveCooldown);
+                break;
+            case 1:
+                this.setMoveTwoCooldown(moveCooldown);
+                break;
+            case 2:
+                this.setMoveThreeCooldown(moveCooldown);
+                break;
+        }
+    }
+
+    public int getMoveCooldown() {
+        if (this.currentCreatureMove() == null) return 0;
+        return this.getMoveCooldown(this.getLearnedMoves().indexOf(this.currentCreatureMove()));
+    }
+
+    public int getMoveCooldown(int index) {
+        switch (index) {
+            case 0:
+                return this.getMoveOneCooldown();
+            case 1:
+                return this.getMoveTwoCooldown();
+            case 2:
+                return this.getMoveThreeCooldown();
+        }
+        return 0;
+    }
 
 
     public boolean canUseMoveOne() {
@@ -1914,14 +1947,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private void manageCloaking() {
         //when the creature is cloaked and uses an attack move, the cloak gets undone
+        //cloak also gets undone if creature is recently hit
         //and there will be a cooldown on cloaking until it will come back
-        if (this.currentCreatureMove() != null && this.currentCreatureMove().moveType != CreatureMove.MoveType.STATUS) {
+        if ((this.currentCreatureMove() != null && this.isCloaked() && this.currentCreatureMove().moveType != CreatureMove.MoveType.STATUS)
+        || (this.isCloaked() && this.isRecentlyHit())) {
             this.setCloaked(false);
-            this.cloakingTimeout = 200;
-        }
 
-        //countdown for cloaking timeout
-        if (this.cloakingTimeout-- <= 0) this.setCloaked(true);
+            //find move slot that has cloaking move then put a cooldown on it
+            int cloakMovePos = this.getLearnedMoves().indexOf(CreatureMove.CLOAK);
+            if (cloakMovePos > -1 && this.getMoveCooldown(cloakMovePos) == 0) {
+                this.setMoveCooldown(cloakMovePos, 200);
+            }
+        }
     }
 
     //cloaking management ends here
@@ -2058,9 +2095,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        //set a boolean that lasts 60 ticks to true, its for whether or not the creature has been recently hit
+        //set a boolean that determines whether or not the creature has been recently hit
         this.recentlyHit = true;
-        this.recentlyHitTicks = 60;
 
         //additionally, get the damage received for use later
         this.recentlyHitDamage = amount;
@@ -2083,6 +2119,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         return super.attackEntityFrom(source, amount);
+    }
+
+    public boolean isRecentlyHit() {
+        boolean valueToReturn = this.recentlyHit;
+        this.recentlyHit = false;
+        return valueToReturn;
     }
 
     public float getRecentlyHitDamage() {
