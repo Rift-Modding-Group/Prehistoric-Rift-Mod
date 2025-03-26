@@ -174,7 +174,7 @@ public class Saurophaganax extends RiftCreature {
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveType.ROAR, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineChargeUpToUseLength(5D)
                 .defineUseDurationLength(22.5)
@@ -197,27 +197,6 @@ public class Saurophaganax extends RiftCreature {
 
     @Override
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    public void useLightBlast() {
-        List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(8D), new Predicate<EntityLivingBase>() {
-            @Override
-            public boolean apply(@Nullable EntityLivingBase entityLivingBase) {
-                if (entityLivingBase instanceof EntityPlayer) {
-                    return getTargetList().contains("minecraft:player") && !entityLivingBase.getUniqueID().equals(getOwnerId());
-                }
-                else if (entityLivingBase instanceof EntityTameable) {
-                    EntityTameable tameable = (EntityTameable) entityLivingBase;
-                    if (tameable.isTamed()) return getTargetList().contains(EntityList.getKey(tameable).toString()) && !tameable.getUniqueID().equals(getOwnerId());
-                    else return getTargetList().contains(EntityList.getKey(entityLivingBase).toString());
-                }
-                else return getTargetList().contains(EntityList.getKey(entityLivingBase).toString());
-            }
-        });
-        for (EntityLivingBase entityT : list) {
-            entityT.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue())/4F);
-            entityT.setFire(30);
-        }
-    }
 
     @Override
     public boolean isNocturnal() {

@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.DirewolfConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
@@ -45,16 +46,12 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable, IHerder {
+public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/direwolf"));
-    private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Direwolf.class, DataSerializers.VARINT);
-    private int packBuffCooldown;
     private int sniffCooldown;
     private RiftCreaturePart hipsPart;
     protected int herdSize = 1;
@@ -70,7 +67,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
         this.isRideable = true;
         this.maxRightClickCooldown = 1800f;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
-        this.packBuffCooldown = 0;
         this.sniffCooldown = 0;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 
@@ -87,7 +83,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(PACK_BUFFING, false);
         this.dataManager.register(PREGNANT, false);
         this.dataManager.register(PREGNANCY_TIMER, 0);
         this.setCanPickUpLoot(true);
@@ -103,12 +98,9 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
 
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftPackBuff(this, 2.28f, 0.76f, 90f));
-        this.tasks.addTask(4, new RiftControlledAttack(this, 0.28F, 0.28F));
-        this.tasks.addTask(4, new RiftControlledPackBuff(this, 2.28f, 0.76f));
-        this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.6F, 0.48F));
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        //this.tasks.addTask(7, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(9, new RiftHerdDistanceFromOtherMembers(this, 1D));
         this.tasks.addTask(10, new RiftHerdMemberFollow(this));
@@ -119,13 +111,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        //manage pack buff cooldown
-        if (this.packBuffCooldown > 0) this.packBuffCooldown--;
-        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
-
-        //manage sniffing cooldown
-        if (this.sniffCooldown > 0) this.sniffCooldown--;
-
         //manage birthin related stuff
         if (!this.world.isRemote) this.createBaby(this);
     }
@@ -185,23 +170,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
         return 18;
     }
 
-    public void setPackBuffing(boolean value) {
-        this.dataManager.set(PACK_BUFFING, Boolean.valueOf(value));
-        this.setActing(value);
-    }
-
-    public boolean isPackBuffing() {
-        return this.dataManager.get(PACK_BUFFING);
-    }
-
-    public void setPackBuffCooldown(int value) {
-        this.packBuffCooldown = value;
-    }
-
-    public int getPackBuffCooldown() {
-        return this.packBuffCooldown;
-    }
-
     public void setPregnant(boolean value, int timer) {
         this.dataManager.set(PREGNANT, value);
         this.dataManager.set(PREGNANCY_TIMER, timer);
@@ -219,17 +187,43 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
         return this.dataManager.get(PREGNANCY_TIMER);
     }
 
-    public List<PotionEffect> packBuffEffect() {
-        List<PotionEffect> packBuffEffects = new ArrayList<>();
-        packBuffEffects.add(new PotionEffect(MobEffects.SPEED, 90 * 20, 2));
-        packBuffEffects.add(new PotionEffect(MobEffects.STRENGTH, 90 * 20, 2));
-        return packBuffEffects;
-    }
-
     @Override
     public float[] ageScaleParams() {
         return new float[]{0.3f, 1.25f};
     }
+
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.SNARL, CreatureMove.POWER_BLOW, CreatureMove.PACK_CALL, CreatureMove.SNIFF);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.PACK_CALL, CreatureMove.SNIFF);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.ROAR, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpToUseLength(5D)
+                .defineUseDurationLength(30D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpToUseLength(5D)
+                .defineUseDurationLength(20D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        return moveMap;
+    }
+    //move related stuff ends here
 
     public float attackWidth() {
         return 2.5f;
@@ -244,34 +238,7 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
 
     @Override
     public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (!this.isActing()) {
-                UUID ownerID =  this.getOwnerId();
-                List<Direwolf> tamedPackList = this.world.getEntitiesWithinAABB(Direwolf.class, this.herdBoundingBox(), new Predicate<RiftCreature>() {
-                    @Override
-                    public boolean apply(@Nullable RiftCreature input) {
-                        if (input.isTamed()) {
-                            return ownerID.equals(input.getOwnerId());
-                        }
-                        return false;
-                    }
-                });
-                tamedPackList.remove(this);
-                if (tamedPackList.size() >= 2) this.setPackBuffing(true);
-                else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_pack_members", this.getName()), false);
-                this.setRightClickUse(0);
-            }
-        }
+        /*
         if (control == 3 && this.sniffCooldown == 0 && this.headPart != null) {
             if (!this.headPart.isUnderwater()) {
                 this.sniffCooldown = 100;
@@ -297,19 +264,7 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
                 }
             }
         }
-    }
-
-    private boolean isSniffableBlock(IBlockState blockState) {
-        Block block = blockState.getBlock();
-        boolean flag = false;
-        for (String blockEntry : RiftConfigHandler.getConfig(this.creatureType).general.sniffableBlocks) {
-            if (flag) break;
-            int blockIdFirst = blockEntry.indexOf(":");
-            int blockIdSecond = blockEntry.indexOf(":", blockIdFirst + 1);
-            int blockData = Integer.parseInt(blockEntry.substring(blockIdSecond + 1));
-            flag = Block.getBlockFromName(blockEntry.substring(0, blockIdSecond)).equals(block) && (blockData == -1 || block.getMetaFromState(blockState) == blockData);
-        }
-        return flag;
+         */
     }
 
     @Override
@@ -319,7 +274,7 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return true;
+        return false;
     }
 
     @Override
@@ -331,45 +286,6 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::direwolfMovement));
-        data.addAnimationController(new AnimationController(this, "attacking", 0, this::direwolfAttack));
-        data.addAnimationController(new AnimationController(this, "pack_buff", 0, this::direwolfPackBuff));
-    }
-
-    private <E extends IAnimatable> PlayState direwolfMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.direwolf.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if (event.isMoving() || (this.isSitting() && this.hasTarget())) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.direwolf.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState direwolfAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.direwolf.attack", false));
-        else event.getController().clearAnimationCache();
-        return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState direwolfPackBuff(AnimationEvent<E> event) {
-        if (this.isPackBuffing()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.direwolf.howl", false));
-        }
-        else {
-            event.getController().clearAnimationCache();
-        }
-        return PlayState.CONTINUE;
     }
 
     @Nullable
@@ -384,9 +300,5 @@ public class Direwolf extends RiftCreature implements IPackHunter, IImpregnable,
 
     protected SoundEvent getDeathSound() {
         return RiftSounds.DIREWOLF_DEATH;
-    }
-
-    public SoundEvent getCallSound() {
-        return RiftSounds.DIREWOLF_HOWL;
     }
 }

@@ -325,7 +325,7 @@
 				}
 			}
 		},
-		"animation.tyrannosaurus.use_status_type_move": {
+		"animation.tyrannosaurus.use_roar_type_move": {
 			"animation_length": 2,
 			"bones": {
 				"body": {
@@ -370,7 +370,7 @@
 				}
 			}
 		},
-		"animation.tyrannosaurus.use_charged_status_type_move_pt1": {
+		"animation.tyrannosaurus.use_charged_roar_type_move_pt1": {
 			"animation_length": 5,
 			"bones": {
 				"body": {
@@ -381,7 +381,7 @@
 				}
 			}
 		},
-		"animation.tyrannosaurus.use_charged_status_type_move_pt1_hold": {
+		"animation.tyrannosaurus.use_charged_roar_type_move_pt1_hold": {
 			"loop": true,
 			"bones": {
 				"body": {
@@ -392,7 +392,7 @@
 				}
 			}
 		},
-		"animation.tyrannosaurus.use_charged_status_type_move_pt2": {
+		"animation.tyrannosaurus.use_charged_roar_type_move_pt2": {
 			"animation_length": 1.75,
 			"bones": {
 				"body": {

@@ -68,7 +68,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.creature.resetSpeed();
         if (this.currentInvokedMove != null) {
             this.creature.setUsingUnchargedAnim(false);
-            this.creature.setUsingDelayAnim(false);
             this.currentInvokedMove.onStopExecuting(this.creature);
             this.currentInvokedMove = null;
         }

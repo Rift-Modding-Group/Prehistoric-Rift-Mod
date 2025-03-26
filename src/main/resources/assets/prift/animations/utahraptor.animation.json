@@ -275,7 +275,7 @@
 				}
 			}
 		},
-		"animation.utahraptor.use_status_type_move": {
+		"animation.utahraptor.use_roar_type_move": {
 			"animation_length": 1.75,
 			"bones": {
 				"hips": {

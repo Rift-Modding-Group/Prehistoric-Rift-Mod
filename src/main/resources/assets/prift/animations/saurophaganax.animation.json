@@ -334,7 +334,7 @@
 				}
 			}
 		},
-		"animation.saurophaganax.use_status_type_move": {
+		"animation.saurophaganax.use_roar_type_move": {
 			"animation_length": 2,
 			"bones": {
 				"body": {

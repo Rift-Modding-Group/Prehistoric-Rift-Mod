@@ -151,7 +151,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> FIRING_CATAPULT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -165,9 +164,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_STOMP_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CLAW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_JAW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_ROAR_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_RANGED_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_STATUS_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_DEFENSE_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Float> LEAP_X_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
@@ -330,7 +329,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(FIRING_CATAPULT, false);
 
         this.dataManager.register(USING_CHARGE_TYPE_MOVE, false);
-        this.dataManager.register(USING_CHARGE_TYPE_MOVE_DELAY, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE, false);
@@ -344,9 +342,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_STOMP_TYPE_MOVE, false);
         this.dataManager.register(USING_CLAW_TYPE_MOVE, false);
         this.dataManager.register(USING_JAW_TYPE_MOVE, false);
+        this.dataManager.register(USING_ROAR_TYPE_MOVE, false);
         this.dataManager.register(USING_RANGED_TYPE_MOVE, false);
         this.dataManager.register(USING_STATUS_TYPE_MOVE, false);
-        this.dataManager.register(USING_DEFENSE_TYPE_MOVE_DELAY, false);
 
         this.dataManager.register(LEAP_X_VELOCITY, 0.0f);
         this.dataManager.register(LEAP_Y_VELOCITY, 0.0f);
@@ -1706,6 +1704,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             case JAW:
                 this.setUsingJawTypeMove(value);
                 break;
+            case ROAR:
+                this.setUsingRoarTypeMove(value);
+                break;
             case RANGED:
                 this.setUsingRangedTypeMove(value);
                 break;
@@ -1716,29 +1717,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.setUsingChargeTypeMove(value);
                 break;
         }
-    }
-
-    public void setUsingDelayAnim(boolean value) {
-        if (this.currentCreatureMove() == null) return;
-        switch (this.currentCreatureMove().moveType) {
-            case CHARGE:
-                this.setUsingChargeTypeMoveDelay(value);
-                break;
-            case DEFENSE:
-                this.setUsingDefenseTypeMoveDelay(value);
-                break;
-        }
-    }
-
-    public boolean usingDelayAnim() {
-        if (this.currentCreatureMove() == null) return false;
-        switch (this.currentCreatureMove().moveType) {
-            case CHARGE:
-                return this.usingChargeTypeMoveDelay();
-            case DEFENSE:
-                return this.usingDefenseTypeMoveDelay();
-        }
-        return false;
     }
 
     public void setMultistepMoveStep(int step) {
@@ -1895,6 +1873,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(USING_JAW_TYPE_MOVE, value);
     }
 
+    public boolean isUsingRoarTypeMove() {
+        return this.dataManager.get(USING_ROAR_TYPE_MOVE);
+    }
+
+    public void setUsingRoarTypeMove(boolean value) {
+        this.dataManager.set(USING_ROAR_TYPE_MOVE, value);
+    }
+
     public boolean isUsingRangedTypeMove() {
         return this.dataManager.get(USING_RANGED_TYPE_MOVE);
     }
@@ -1909,22 +1895,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setUsingStatusTypeMove(boolean value) {
         this.dataManager.set(USING_STATUS_TYPE_MOVE, value);
-    }
-
-    public boolean usingChargeTypeMoveDelay() {
-        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_DELAY);
-    }
-
-    public void setUsingChargeTypeMoveDelay(boolean value) {
-        this.dataManager.set(USING_CHARGE_TYPE_MOVE_DELAY, value);
-    }
-
-    public boolean usingDefenseTypeMoveDelay() {
-        return this.dataManager.get(USING_DEFENSE_TYPE_MOVE_DELAY);
-    }
-
-    public void setUsingDefenseTypeMoveDelay(boolean value) {
-        this.dataManager.set(USING_DEFENSE_TYPE_MOVE_DELAY, value);
     }
     //move anims end here
 
@@ -3140,6 +3110,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (isUsingStatusTypeMove()) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_status_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (isUsingRoarTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_roar_type_move", false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingChargeTypeMove()) {

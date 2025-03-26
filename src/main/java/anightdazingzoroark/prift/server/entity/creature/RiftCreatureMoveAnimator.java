@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import net.minecraft.util.SoundEvent;
 
 //this class serves to define the speed of all the parts of an animation of a creature using a move
 public class RiftCreatureMoveAnimator {
@@ -17,6 +18,12 @@ public class RiftCreatureMoveAnimator {
     private double chargeUpToUseFinal; //stage three, for transition between charging up then use, this is in ticks
     private double useDurationFinal; //stage four, for utilizing the move, this is in ticks
     private double recoverFromUseFinal; //final stage, for stopping use of move, this is in ticks
+    //for sounds to make at certain points
+    private SoundEvent startMoveDelaySound;
+    private SoundEvent chargeUpSound;
+    private SoundEvent chargeUpToUseSound;
+    private SoundEvent useDurationSound;
+    private SoundEvent recoverFromUseSound;
 
     public RiftCreatureMoveAnimator(RiftCreature creature) {
         this.creature = creature;
@@ -101,5 +108,50 @@ public class RiftCreatureMoveAnimator {
 
     public double getRecoverFromUseTime() {
         return this.recoverFromUseTime;
+    }
+
+    public RiftCreatureMoveAnimator setStartMoveDelaySound(SoundEvent value) {
+        this.startMoveDelaySound = value;
+        return this;
+    }
+
+    public SoundEvent getStartMoveDelaySound() {
+        return this.startMoveDelaySound;
+    }
+
+    public RiftCreatureMoveAnimator setChargeUpSound(SoundEvent value) {
+        this.chargeUpSound = value;
+        return this;
+    }
+
+    public SoundEvent getChargeUpSound() {
+        return this.chargeUpSound;
+    }
+
+    public RiftCreatureMoveAnimator setChargeUpToUseSound(SoundEvent value) {
+        this.chargeUpToUseSound = value;
+        return this;
+    }
+
+    public SoundEvent getChargeUpToUseSound() {
+        return this.chargeUpToUseSound;
+    }
+
+    public RiftCreatureMoveAnimator setUseDurationSound(SoundEvent value) {
+        this.useDurationSound = value;
+        return this;
+    }
+
+    public SoundEvent getUseDurationSound() {
+        return this.useDurationSound;
+    }
+
+    public RiftCreatureMoveAnimator setRecoverFromUseSound(SoundEvent value) {
+        this.recoverFromUseSound = value;
+        return this;
+    }
+
+    public SoundEvent getRecoverFromUseSound() {
+        return this.recoverFromUseSound;
     }
 }

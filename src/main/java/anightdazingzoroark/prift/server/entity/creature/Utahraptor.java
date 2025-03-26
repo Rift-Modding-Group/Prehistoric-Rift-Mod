@@ -9,20 +9,14 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
-import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
-import anightdazingzoroark.prift.server.entity.interfaces.IPackHunter;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.MobEffects;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigate;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -164,11 +158,6 @@ public class Utahraptor extends RiftCreature implements IHerder {
     public List<CreatureMove> initialMoves() {
         return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LEAP, CreatureMove.PACK_CALL);
     }
-    //move related stuff ends here
-
-    public float attackWidth() {
-        return 2f;
-    }
 
     @Override
     public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
@@ -178,7 +167,7 @@ public class Utahraptor extends RiftCreature implements IHerder {
                 .defineChargeUpToUseLength(1.5D)
                 .defineRecoverFromUseLength(1D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveType.ROAR, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(30D)
@@ -189,6 +178,11 @@ public class Utahraptor extends RiftCreature implements IHerder {
                 .defineRecoverFromUseLength(1D)
                 .finalizePoints());
         return moveMap;
+    }
+    //move related stuff ends here
+
+    public float attackWidth() {
+        return 2f;
     }
 
     @Override
