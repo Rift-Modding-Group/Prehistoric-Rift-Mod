@@ -38,7 +38,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftOpenInventoryFromMenu.Handler.class, RiftOpenInventoryFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftOpenWeaponInventory.Handler.class, RiftOpenWeaponInventory.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftOpenPopupFromRadial.Handler.class, RiftOpenPopupFromRadial.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftSarcosuchusSpinTargeting.Handler.class, RiftSarcosuchusSpinTargeting.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetGrabTarget.Handler.class, RiftSetGrabTarget.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetCanWanderHarvest.Handler.class, RiftSetCanWanderHarvest.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSpawnChestDetectParticle.Handler.class, RiftSpawnChestDetectParticle.class, id++, Side.CLIENT);

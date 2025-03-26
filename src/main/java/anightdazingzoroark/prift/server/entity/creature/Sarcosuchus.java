@@ -113,13 +113,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         return new float[]{0.3f, 1.5f};
     }
 
-    public boolean attackEntityUsingSpin(Entity entityIn) {
-        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)(this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()/4D)));
-        if (flag) this.applyEnchantments(this, entityIn);
-        this.setLastAttackedEntity(entityIn);
-        return flag;
-    }
-
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {

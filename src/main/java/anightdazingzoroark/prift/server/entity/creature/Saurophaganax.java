@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.SaurophaganaxConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import com.google.common.base.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -35,7 +36,10 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Saurophaganax extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/saurophaganax"));
@@ -57,7 +61,7 @@ public class Saurophaganax extends RiftCreature {
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.25D;
-        this.targetList = RiftUtil.creatureTargets(((SaurophaganaxConfig) RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist);
+        this.targetList = RiftUtil.creatureTargets((RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist);
 
         this.headPart = new RiftCreaturePart(this, 3.5f, 0, 2f, 0.6f, 0.6f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, 0f, 0, 1.125f, 1f, 0.8f, 1f);
@@ -91,19 +95,9 @@ public class Saurophaganax extends RiftCreature {
         super.onLivingUpdate();
         //manage weakening
         if (!this.world.isRemote) {
-            this.setWeakened(this.world.isDaytime() && !this.isInCave());
             if (this.world.isDaytime() && !this.isInCave()) this.setLightBlastCharge(0);
             if (this.isTamed()) {
                 this.setRightClickUse(this.lightBlastCharge() * 10);
-            }
-
-            if (this.isWeakened() && !this.isInWater()) {
-                this.setSpeed(this.speed * 0.5);
-                this.setWaterSpeed(this.waterSpeed * 0.5);
-            }
-            else {
-                this.setSpeed(this.speed);
-                this.setWaterSpeed(this.waterSpeed);
             }
         }
     }
@@ -121,13 +115,13 @@ public class Saurophaganax extends RiftCreature {
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(0, new RiftSleepAtDay(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftSaurophaganaxUseLightBlast(this));
-        this.tasks.addTask(4, new RiftControlledAttack(this, 0.52F, 0.24F));
-        this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.24F));
-        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
+
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+
+        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(9, new RiftWander(this, 1.0D));
         this.tasks.addTask(10, new RiftLookAround(this));
@@ -153,16 +147,6 @@ public class Saurophaganax extends RiftCreature {
     }
 
     @Override
-    protected void manageAttributes() {
-        super.manageAttributes();
-        if (this.isWeakened()) {
-            //attack
-            double leveledAttackValue = this.attackDamage + (double)Math.round((this.getLevel() - 1) * this.damageLevelMultiplier);
-            this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(leveledAttackValue * 0.1);
-        }
-    }
-
-    @Override
     public float[] ageScaleParams() {
         return new float[]{0.2f, 2f};
     }
@@ -171,6 +155,34 @@ public class Saurophaganax extends RiftCreature {
     public int slotCount() {
         return 27;
     }
+
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.HEAD, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        return moveMap;
+    }
+    //move related stuff ends here
 
     public float attackWidth() {
         return 3.5f;
@@ -184,37 +196,7 @@ public class Saurophaganax extends RiftCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (this.getEnergy() > 6 && this.lightBlastCharge() >= 10) {
-                if (!this.isActing()) {
-                    this.setUsingLightBlast(true);
-                }
-            }
-            else if (this.getEnergy() > 6 && this.lightBlastCharge() < 10) ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_light_blast_charge", this.getName()), false);
-            else if (this.getEnergy() <= 6) ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-    }
-
-    @Override
-    public boolean attackEntityAsMob(Entity entityIn) {
-        if (!(entityIn instanceof EntityPlayer) && !this.isWeakened() && this.lightBlastCharge() < 10) {
-            if (this.getTargetList().contains(EntityList.getKey(entityIn).toString())) {
-                this.setLightBlastCharge(this.lightBlastCharge() + 1);
-            }
-        }
-        return super.attackEntityAsMob(entityIn);
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     public void useLightBlast() {
         List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(8D), new Predicate<EntityLivingBase>() {
@@ -235,6 +217,11 @@ public class Saurophaganax extends RiftCreature {
             entityT.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue())/4F);
             entityT.setFire(30);
         }
+    }
+
+    @Override
+    public boolean isNocturnal() {
+        return true;
     }
 
     @Override
@@ -274,74 +261,9 @@ public class Saurophaganax extends RiftCreature {
         this.dataManager.set(LIGHT_BLAST_CHARGE, value);
     }
 
-    public boolean isWeakened() {
-        return this.dataManager.get(WEAKENED);
-    }
-
-    public void setWeakened(boolean value) {
-        this.dataManager.set(WEAKENED, value);
-    }
-
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::saurophaganaxMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::saurophaganaxAttack));
-        data.addAnimationController(new AnimationController(this, "lightBlast", 0, this::saurophaganaxLightBlast));
-        data.addAnimationController(new AnimationController(this, "tiredPose", 0, this::saurophaganaxTired));
-    }
-
-    private <E extends IAnimatable> PlayState saurophaganaxMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (!this.isSleeping() && this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if (!this.isSleeping() && (event.isMoving() || (this.isSitting() && this.hasTarget()))) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.walk", true));
-                return PlayState.CONTINUE;
-            }
-            if (this.isSleeping()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.sleeping", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState saurophaganaxAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.attack", false));
-        }
-        else {
-            event.getController().clearAnimationCache();
-        }
-        return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState saurophaganaxLightBlast(AnimationEvent<E> event) {
-        if (this.isUsingLightBlast()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.light_blast", false));
-        }
-        else {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.setup", true));
-        }
-        return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState saurophaganaxTired(AnimationEvent<E> event) {
-        if (this.isWeakened() && !this.isSleeping()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.saurophaganax.tired_pose", true));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     protected SoundEvent getAmbientSound() {

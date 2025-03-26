@@ -1,18 +1,11 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.config.SarcosuchusConfig;
-import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeapAttackingMob;
 import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
 import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
-import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftSarcosuchusSpinTargeting;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -173,154 +166,6 @@ public class RiftAttack extends EntityAIBase {
     }
 
     //subclasses for different creatures
-    public static class ApatosaurusAttack extends RiftAttack {
-        private final Apatosaurus apatosaurus;
-        protected int whipAnimLength;
-        protected int whipAnimTime;
-        private int attackMode; //0 is stomp, 1 is tail whip
-
-        //apato has two attacks, stomp and tail whip
-        //the default attack stuff is for the stomp
-        public ApatosaurusAttack(Apatosaurus apatosaurus, double speedIn, float attackAnimLength, float attackAnimTime) {
-            super(apatosaurus, speedIn, attackAnimLength, attackAnimTime);
-            this.apatosaurus = apatosaurus;
-            this.whipAnimLength = (int) (0.6f * 20f);
-            this.whipAnimTime = (int) (0.4f * 20f);
-        }
-
-        @Override
-        public void startExecuting() {
-            super.startExecuting();
-            this.attackMode = RiftUtil.randomInRange(0, 1);
-        }
-
-        @Override
-        public void resetTask() {
-            super.resetTask();
-            this.apatosaurus.setTailWhipping(false);
-        }
-
-        @Override
-        protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
-            double d0 = this.getAttackReachSqr(enemy);
-
-            if (--this.attackCooldown <= 0) {
-                this.animTime++;
-
-                if (this.attackMode == 0) {
-                    if (distToEnemySqr <= d0) this.attacker.setAttacking(true);
-                    if (this.animTime == this.attackAnimTime) {
-                        if (distToEnemySqr <= d0) this.attacker.attackEntityAsMob(enemy);
-                    }
-                    if (this.animTime > this.attackAnimLength + 1) {
-                        this.animTime = 0;
-                        this.attacker.setAttacking(false);
-                        this.attackCooldown = 20;
-                        this.attackMode = RiftUtil.randomInRange(0, 1);
-                    }
-                }
-                else if (this.attackMode == 1) {
-                    if (distToEnemySqr <= d0) this.apatosaurus.setTailWhipping(true);
-                    if (this.animTime == this.whipAnimTime) {
-                        if (distToEnemySqr <= d0) this.apatosaurus.useWhipAttack();
-                    }
-                    if (this.animTime > this.whipAnimLength) {
-                        this.animTime = 0;
-                        this.apatosaurus.setTailWhipping(false);
-                        this.attackCooldown = 20;
-                        this.attackMode = RiftUtil.randomInRange(0, 1);
-                    }
-                }
-            }
-        }
-    }
-
-    /*
-    public static class SarcosuchusAttack extends RiftAttack {
-        private final Sarcosuchus sarcosuchus;
-        private EntityLivingBase spinVictim;
-        private int spinTime;
-        private boolean spinFlag;
-
-        public SarcosuchusAttack(Sarcosuchus sarcosuchus, double speedIn, float attackAnimLength, float attackAnimTime) {
-            super(sarcosuchus, speedIn, attackAnimLength, attackAnimTime);
-            this.sarcosuchus = sarcosuchus;
-        }
-
-        @Override
-        public void startExecuting() {
-            super.startExecuting();
-            this.spinTime = 0;
-            this.spinFlag = true;
-        }
-
-        public boolean shouldContinueExecuting() {
-            if (!this.spinFlag) return false;
-            else if (this.sarcosuchus.isSpinning()) return super.shouldContinueExecuting() && this.sarcosuchus.getEnergy() > 6;
-            return super.shouldContinueExecuting();
-        }
-
-        @Override
-        public void resetTask() {
-            super.resetTask();
-            this.spinTime = 0;
-            this.sarcosuchus.setIsSpinning(false);
-            if (this.spinVictim != null) NonPotionEffectsHelper.setCaptured(this.spinVictim, false);;
-            this.spinVictim = null;
-        }
-
-        @Override
-        public void updateTask() {
-            if (this.spinVictim == null) super.updateTask();
-            else this.manageSpin();
-        }
-
-        @Override
-        protected void checkAndPerformAttack(EntityLivingBase enemy, double distToEnemySqr) {
-            double d0 = this.getAttackReachSqr(enemy);
-
-            if (--this.attackCooldown <= 0) {
-                if (distToEnemySqr <= d0) this.sarcosuchus.setAttacking(true);
-                if (this.sarcosuchus.isAttacking()) {
-                    this.animTime++;
-                    if (this.animTime == this.attackAnimTime) {
-                        this.sarcosuchus.removeSpeed();
-                        if (distToEnemySqr <= d0) this.sarcosuchus.attackEntityAsMob(enemy);
-                    }
-                    if (this.animTime > this.attackAnimLength + 1) {
-                        this.animTime = 0;
-                        this.sarcosuchus.setAttacking(false);
-                        this.attackCooldown = 20;
-                        if (this.sarcosuchus.isTamed()) this.sarcosuchus.energyActionMod++;
-
-                        if (enemy.isEntityAlive() && this.sarcosuchus.getEnergy() > 6 && !NonPotionEffectsHelper.isCaptured(enemy)) {
-                            if (RiftUtil.isAppropriateSize(enemy, MobSize.safeValueOf(((SarcosuchusConfig) RiftConfigHandler.getConfig(RiftCreatureType.SARCOSUCHUS)).general.maximumSpinAttackTargetSize))) {
-                                this.sarcosuchus.setIsSpinning(true);
-                                this.spinVictim = enemy;
-                                NonPotionEffectsHelper.setCaptured(enemy, true);
-                            }
-                        }
-                        else this.sarcosuchus.resetSpeed();
-                    }
-                }
-            }
-        }
-
-        protected void manageSpin() {
-            if (this.spinVictim.isEntityAlive()) {
-                RiftMessages.WRAPPER.sendToServer(new RiftSarcosuchusSpinTargeting(this.sarcosuchus, this.spinVictim));
-                if (this.sarcosuchus.isTamed() && this.spinTime % 10 == 0) this.sarcosuchus.setEnergy(this.sarcosuchus.getEnergy() - 1);
-                if (this.spinTime >= 100) {
-                    this.spinFlag = false;
-                    NonPotionEffectsHelper.setCaptured(this.spinVictim, false);
-                }
-                this.spinTime++;
-            }
-            else this.sarcosuchus.setIsSpinning(false);
-        }
-    }
-     */
-
     public static class BaryonyxAttack extends RiftAttack {
         private final Baryonyx baryonyx;
         private final int clawAnimLength;

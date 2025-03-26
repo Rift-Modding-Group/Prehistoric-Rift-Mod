@@ -115,6 +115,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> TAME_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HAS_HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> FORCED_AWAKE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -212,8 +213,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float oldScale;
     private int healthRegen;
     protected double attackDamage;
-    public double healthLevelMultiplier;
-    public double damageLevelMultiplier;
+    private final double healthLevelMultiplier;
+    private final double damageLevelMultiplier;
+    private double damageMultiplier = 1D;
     protected int densityLimit;
     protected List<String> targetList;
     public boolean isFloatingOnWater;
@@ -292,6 +294,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(TAME_PROGRESS, 0);
         this.dataManager.register(HAS_HOME_POS, false);
         this.dataManager.register(SLEEPING, false);
+        this.dataManager.register(FORCED_AWAKE, false);
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) PlayerTamedCreatures.DeploymentType.NONE.ordinal());
         this.dataManager.register(INCAPACITATED, false);
@@ -424,6 +427,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageDiscoveryByPlayer();
             this.manageMoveAndWeaponCooldown();
             if (this.canUtilizeCloaking()) this.manageCloaking();
+            if (this.isNocturnal()) this.manageSleepSchedule();
             if (this.isTamed()) {
                 this.updateEnergyMove();
                 this.updateEnergyActions();
@@ -977,8 +981,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected void manageAttributes() {
         double healthValue = ((this.maxCreatureHealth - this.minCreatureHealth)/24000D) * (this.getAgeInTicks() - 24000D) + this.maxCreatureHealth;
         double baseHealthValue = RiftUtil.clamp(Math.floor(healthValue), this.minCreatureHealth, this.maxCreatureHealth);
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(baseHealthValue + (this.healthLevelMultiplier) * (this.getLevel() - 1) * baseHealthValue);
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(this.attackDamage + (double)Math.round((this.getLevel() - 1) * this.damageLevelMultiplier));
+
+        double leveledHealthValue = baseHealthValue + (this.healthLevelMultiplier) * (this.getLevel() - 1) * baseHealthValue;
+        double leveledDamageValue = this.attackDamage + (double)Math.round((this.getLevel() - 1) * this.damageLevelMultiplier);
+
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(leveledHealthValue);
+        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(leveledDamageValue * this.damageMultiplier);
+
         if (this.justSpawned()) {
             this.setLearnedMoves(this.initialMoves());
             this.heal((float) (this.maxCreatureHealth + (0.1D) * (this.getLevel() - 1) * this.maxCreatureHealth));
@@ -986,6 +995,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setWaterSpeed(this.waterSpeed);
             this.setJustSpawned(false);
         }
+    }
+
+    public void changeAttackByMultiplier(double value) {
+        this.damageMultiplier = value;
     }
 
     public boolean isFavoriteFood(ItemStack stack) {
@@ -2028,6 +2041,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.getEntityAttribute(EntityLivingBase.SWIM_SPEED).setBaseValue(value);
     }
 
+    public void changeSpeedByMultiplier(double multiplier) {
+        this.setSpeed(this.speed * multiplier);
+        this.setWaterSpeed(this.waterSpeed * multiplier);
+    }
+
     public double getSpeed() {
         return this.speed;
     }
@@ -2310,6 +2328,55 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(AGE_TICKS, value * 24000);
     }
 
+    //this is for managing nocturnal creatures
+    public boolean isNocturnal() {
+        return false;
+    }
+
+    private void manageSleepSchedule() {
+        System.out.println("has sleep schedule");
+        if (this.world.isDaytime() && !this.isInCave()) {
+            //if the creature somehow ends up in water, it forcibly wakes up
+            //this is here to prioritize waking up over everything else
+            if (this.isInWater()) {
+                this.setSleeping(false);
+                this.setForcedAwake(true);
+            }
+            //manage whether or not creature is sleeping or forced awake
+            else if (this.getAttackTarget() == null && this.getRevengeTarget() == null) {
+                System.out.println("eepy");
+                this.setSleeping(true);
+                this.setForcedAwake(false);
+                this.getNavigator().clearPath();
+                if (!this.isTamed()) this.setTameProgress(0);
+            }
+            else {
+                System.out.println("forced awake niggas");
+                this.setSleeping(false);
+                this.setForcedAwake(true);
+            }
+
+
+            //when a creature is forced awake, their stats get nerfed
+            if (this.isForcedAwake()) {
+                System.out.println("is forced awake");
+                this.changeSpeedByMultiplier(0.5);
+                this.changeAttackByMultiplier(0.1);
+            }
+            else {
+                System.out.println("is not forced awake");
+                this.resetSpeed();
+                this.changeAttackByMultiplier(1);
+            }
+        }
+        else if (this.isSleeping() || this.isForcedAwake()) {
+            this.setSleeping(false);
+            this.setForcedAwake(false);
+            this.resetSpeed();
+            this.changeAttackByMultiplier(1);
+        }
+    }
+
     public boolean isSleeping() {
         return this.dataManager.get(SLEEPING);
     }
@@ -2318,6 +2385,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(SLEEPING, value);
         this.removePassengers();
     }
+
+    public boolean isForcedAwake() {
+        return this.dataManager.get(FORCED_AWAKE);
+    }
+
+    public void setForcedAwake(boolean value) {
+        this.dataManager.set(FORCED_AWAKE, value);
+    }
+    //nocturnal creature management ends here
 
     public boolean isIncapacitated() {
         return this.dataManager.get(INCAPACITATED);
@@ -3001,7 +3077,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             @Override
             public PlayState test(AnimationEvent event) {
                 if (isSleeping()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".incapacitated", true));
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sleeping", true));
+                    return PlayState.CONTINUE;
+                }
+                else if (isForcedAwake()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".tired_pose", true));
                     return PlayState.CONTINUE;
                 }
                 event.getController().clearAnimationCache();

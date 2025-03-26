@@ -53,7 +53,7 @@ public class RiftGetTargets extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature.isSleeping()) return false;
+        if (this.creature.isSleeping() || this.creature.isForcedAwake()) return false;
         else if (this.creature.isTamed()) return false;
         else {
             List<EntityLivingBase> list = new ArrayList<>();

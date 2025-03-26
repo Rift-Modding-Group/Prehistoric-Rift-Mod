@@ -15,6 +15,6 @@ public class RiftProtectOwner extends EntityAIOwnerHurtByTarget {
 
     @Override
     public boolean shouldExecute() {
-        return !this.creature.isSleeping() && !this.creature.isBeingRidden() && (this.creature.getTameBehavior() == TameBehaviorType.ASSIST || this.creature.getTameBehavior() == TameBehaviorType.NEUTRAL) && !this.creature.busyAtWorkWithNoTargets() && super.shouldExecute();
+        return !this.creature.isSleeping() &&  !this.creature.isForcedAwake() && !this.creature.isBeingRidden() && (this.creature.getTameBehavior() == TameBehaviorType.ASSIST || this.creature.getTameBehavior() == TameBehaviorType.NEUTRAL) && !this.creature.busyAtWorkWithNoTargets() && super.shouldExecute();
     }
 }

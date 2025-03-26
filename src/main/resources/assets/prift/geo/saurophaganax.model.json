@@ -216,17 +216,6 @@
 					]
 				},
 				{
-					"name": "light_blast",
-					"parent": "saurophaganax",
-					"pivot": [0, 0, 0],
-					"cubes": [
-						{"origin": [-7.001, 0, -7.5], "size": [14, 18, 0], "uv": [84, 0]},
-						{"origin": [-7, 0, 6.499], "size": [14, 18, 0], "uv": [84, 18]},
-						{"origin": [7, 0, -7.5], "size": [0, 18, 14], "uv": [84, 22]},
-						{"origin": [-7, 0, -7.5], "size": [0, 18, 14], "uv": [84, 40]}
-					]
-				},
-				{
 					"name": "leftLeg",
 					"parent": "saurophaganax",
 					"pivot": [-6.5, 13.75, 0.5],
