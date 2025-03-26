@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -65,7 +66,9 @@ public class RiftCreatureControls {
         //show left mouse button icon
         int iconXPos = (int) (((width - 16 * this.iconScale) / 2D + 135 * this.iconScale) / this.iconScale);
         int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
-        float alpha = (forLargeWeapons ? creature.getLargeWeaponCooldown() > 0 : creature.getMoveOneCooldown() > 0) ? 0.2f : 1f;
+        float alpha = ((creature.getMoveOneCooldown() > 0) ||
+                (creature.getLearnedMoves().get(0).chargeType == CreatureMove.ChargeType.BUILDUP && creature.getMoveThreeUse() < creature.getLearnedMoves().get(0).maxUse))
+                ? 0.2f : 1f;
 
         Minecraft.getMinecraft().getTextureManager().bindTexture(leftMouseIcon);
         GlStateManager.pushMatrix();
@@ -129,7 +132,9 @@ public class RiftCreatureControls {
         //show right mouse button icon
         int iconXPos = (int) (((width - 16 * this.iconScale) / 2D + 135 * this.iconScale) / this.iconScale);
         int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
-        float alpha = creature.getMoveTwoCooldown() > 0 ? 0.2f : 1f;
+        float alpha = ((creature.getMoveTwoCooldown() > 0) ||
+                (creature.getLearnedMoves().get(1).chargeType == CreatureMove.ChargeType.BUILDUP && creature.getMoveThreeUse() < creature.getLearnedMoves().get(1).maxUse))
+                ? 0.2f : 1f;
 
         Minecraft.getMinecraft().getTextureManager().bindTexture(rightMouseIcon);
         GlStateManager.pushMatrix();
@@ -174,7 +179,9 @@ public class RiftCreatureControls {
         //show middle mouse button icon
         int iconXPos = (int) (((width - 16 * this.iconScale) / 2D + 135 * this.iconScale) / this.iconScale);
         int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
-        float alpha = creature.getMoveThreeCooldown() > 0 ? 0.2f : 1f;
+        float alpha = ((creature.getMoveThreeCooldown() > 0) ||
+                (creature.getLearnedMoves().get(2).chargeType == CreatureMove.ChargeType.BUILDUP && creature.getMoveThreeUse() < creature.getLearnedMoves().get(2).maxUse))
+                ? 0.2f : 1f;
 
         Minecraft.getMinecraft().getTextureManager().bindTexture(middleMouseIcon);
         GlStateManager.pushMatrix();

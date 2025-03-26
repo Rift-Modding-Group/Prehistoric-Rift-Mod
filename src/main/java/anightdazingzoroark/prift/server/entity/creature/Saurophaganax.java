@@ -43,9 +43,7 @@ import java.util.Map;
 
 public class Saurophaganax extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/saurophaganax"));
-    private static final DataParameter<Boolean> USING_LIGHT_BLAST = EntityDataManager.createKey(Saurophaganax.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> LIGHT_BLAST_CHARGE = EntityDataManager.createKey(Saurophaganax.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> WEAKENED = EntityDataManager.createKey(Saurophaganax.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart neckPart;
     private RiftCreaturePart bodyFrontPart;
     private RiftCreaturePart tail0Part;
@@ -85,9 +83,7 @@ public class Saurophaganax extends RiftCreature {
     protected void entityInit() {
         super.entityInit();
         this.setCanPickUpLoot(true);
-        this.dataManager.register(USING_LIGHT_BLAST, false);
         this.dataManager.register(LIGHT_BLAST_CHARGE, 0);
-        this.dataManager.register(WEAKENED, false);
     }
 
     @Override
@@ -117,10 +113,8 @@ public class Saurophaganax extends RiftCreature {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-
         this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
         this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
-
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(9, new RiftWander(this, 1.0D));
@@ -159,12 +153,12 @@ public class Saurophaganax extends RiftCreature {
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT);
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT, CreatureMove.LIGHT_BLAST);
     }
 
     @Override
     public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT);
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT, CreatureMove.LIGHT_BLAST);
     }
 
     @Override
@@ -179,6 +173,12 @@ public class Saurophaganax extends RiftCreature {
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(5D)
+                .defineUseDurationLength(22.5)
+                .defineRecoverFromUseLength(7.5)
                 .finalizePoints());
         return moveMap;
     }
@@ -231,26 +231,12 @@ public class Saurophaganax extends RiftCreature {
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return true;
-    }
-
-    @Override
-    public boolean alwaysShowRightClickUse() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean hasSpacebarChargeBar() {
         return false;
-    }
-
-    public boolean isUsingLightBlast() {
-        return this.dataManager.get(USING_LIGHT_BLAST);
-    }
-
-    public void setUsingLightBlast(boolean value) {
-        this.dataManager.set(USING_LIGHT_BLAST, value);
-        this.setActing(value);
     }
 
     public int lightBlastCharge() {

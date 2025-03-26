@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.entity.creature.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
@@ -115,8 +116,10 @@ public class ServerEvents {
 
     @SubscribeEvent
     public void onDeath(LivingDeathEvent event) {
-        //give xp to creature for every creature it kills
+        if (event.getEntityLiving().world.isRemote) return;
+
         if (event.getSource().getTrueSource() instanceof RiftCreature) {
+            //give xp to creature for every creature it kills
             RiftCreature creature = (RiftCreature) event.getSource().getTrueSource();
             if (creature.isTamed()) {
                 if (event.getEntity() instanceof EntityLiving) {
@@ -125,20 +128,28 @@ public class ServerEvents {
                     creature.setXP(creature.getXP() + newXp);
                 }
             }
+
+            //if source creature has a buildup type move, that moves use will be increased
+            if (creature.getLearnedMoves().stream().anyMatch(move -> move.chargeType == CreatureMove.ChargeType.BUILDUP)) {
+                if (creature.getLearnedMoves().contains(CreatureMove.LIGHT_BLAST)
+                && Arrays.asList(GeneralConfig.monsterMobs).contains(EntityList.getKey(event.getEntityLiving()).toString())
+                && creature.currentCreatureMove() != CreatureMove.LIGHT_BLAST) { //using light blast requires you to kill monsters
+                    int lightBlastPos = creature.getLearnedMoves().indexOf(CreatureMove.LIGHT_BLAST);
+                    if (creature.getMoveUse(lightBlastPos) < 10) {
+                        creature.setMoveUse(lightBlastPos, creature.getMoveUse(lightBlastPos) + 1);
+                    }
+                }
+            }
         }
 
         //make arthropods drop chitin and hemolymph
-        if (!event.getEntityLiving().world.isRemote) {
-            //event.getSource().getImmediateSource() instanceof RiftCreature
-            //((RiftCreature) event.getSource().getImmediateSource()).isTamed()
-            boolean creatureFlag = event.getSource().getImmediateSource() instanceof RiftCreature && ((RiftCreature) event.getSource().getImmediateSource()).isTamed();
-            boolean putInInvFlag = GeneralConfig.putDropsInCreatureInv && creatureFlag;
-            if (GeneralConfig.dropHemolymph && !putInInvFlag) {
-                if (event.getEntityLiving().getCreatureAttribute().equals(EnumCreatureAttribute.ARTHROPOD) && !(event.getEntityLiving() instanceof RiftCreature)) {
-                    event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.CHITIN, RiftUtil.randomInRange(1, 3)), 0);
-                    if (event.getEntityLiving().isBurning()) event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.COOKED_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
-                    else event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.RAW_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
-                }
+        boolean creatureFlag = event.getSource().getImmediateSource() instanceof RiftCreature && ((RiftCreature) event.getSource().getImmediateSource()).isTamed();
+        boolean putInInvFlag = GeneralConfig.putDropsInCreatureInv && creatureFlag;
+        if (GeneralConfig.dropHemolymph && !putInInvFlag) {
+            if (event.getEntityLiving().getCreatureAttribute().equals(EnumCreatureAttribute.ARTHROPOD) && !(event.getEntityLiving() instanceof RiftCreature)) {
+                event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.CHITIN, RiftUtil.randomInRange(1, 3)), 0);
+                if (event.getEntityLiving().isBurning()) event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.COOKED_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
+                else event.getEntityLiving().entityDropItem(new ItemStack(RiftItems.RAW_HEMOLYMPH, RiftUtil.randomInRange(1, 3)), 0);
             }
         }
 
@@ -146,11 +157,9 @@ public class ServerEvents {
         if (event.getSource().getTrueSource() instanceof EntityPlayer && event.getEntityLiving() instanceof RiftCreature) {
             EntityPlayer player = (EntityPlayer)event.getSource().getTrueSource();
             RiftCreature creature = (RiftCreature)event.getEntityLiving();
-            if (!player.world.isRemote) {
-                if (!PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(creature.creatureType)) {
-                    PlayerJournalProgressHelper.unlockCreature(player, creature.creatureType);
-                    player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
-                }
+            if (!PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(creature.creatureType)) {
+                PlayerJournalProgressHelper.unlockCreature(player, creature.creatureType);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
             }
         }
     }

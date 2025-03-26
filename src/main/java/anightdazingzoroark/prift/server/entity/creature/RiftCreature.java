@@ -377,7 +377,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         //if creature can use cloaking, instantly cloak it
         if (this.canUtilizeCloaking()) {
-            System.out.println("apply cloaking");
             this.setCloaked(true);
         }
         return livingdata;
@@ -1310,6 +1309,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else this.dataManager.set(CURRENT_MOVE, -1);
     }
 
+    public int getMoveUse(int pos) {
+        switch (pos) {
+            case 0:
+                return this.getMoveOneUse();
+            case 1:
+                return this.getMoveTwoUse();
+            case 2:
+                return this.getMoveThreeUse();
+        }
+        return 0;
+    }
+
     public int getCurrentMoveUse() {
         if (this.dataManager.get(CURRENT_MOVE) < 0) return 0;
         int movePos = this.getLearnedMoves().indexOf(CreatureMove.values()[this.dataManager.get(CURRENT_MOVE)]);
@@ -1322,6 +1333,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 return this.getMoveThreeUse();
         }
         return 0;
+    }
+
+    public void setMoveUse(int pos, int value) {
+        if (pos < 0 || pos >= this.getLearnedMoves().size()) return;
+        switch (pos) {
+            case 0:
+                this.setMoveOneUse(value);
+                break;
+            case 1:
+                this.setMoveTwoUse(value);
+                break;
+            case 2:
+                this.setMoveThreeUse(value);
+                break;
+        }
     }
 
     public void setCurrentMoveUse(int value) {
@@ -2334,7 +2360,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void manageSleepSchedule() {
-        System.out.println("has sleep schedule");
         if (this.world.isDaytime() && !this.isInCave()) {
             //if the creature somehow ends up in water, it forcibly wakes up
             //this is here to prioritize waking up over everything else
@@ -2344,14 +2369,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             //manage whether or not creature is sleeping or forced awake
             else if (this.getAttackTarget() == null && this.getRevengeTarget() == null) {
-                System.out.println("eepy");
                 this.setSleeping(true);
                 this.setForcedAwake(false);
                 this.getNavigator().clearPath();
                 if (!this.isTamed()) this.setTameProgress(0);
             }
             else {
-                System.out.println("forced awake niggas");
                 this.setSleeping(false);
                 this.setForcedAwake(true);
             }
@@ -2359,12 +2382,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
             //when a creature is forced awake, their stats get nerfed
             if (this.isForcedAwake()) {
-                System.out.println("is forced awake");
                 this.changeSpeedByMultiplier(0.5);
                 this.changeAttackByMultiplier(0.1);
             }
             else {
-                System.out.println("is not forced awake");
                 this.resetSpeed();
                 this.changeAttackByMultiplier(1);
             }

@@ -48,10 +48,6 @@ public abstract class RiftCreatureMove {
         if (target != null) user.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
     }
 
-    public boolean hasChargeBar() {
-        return this.creatureMove.chargeType != CreatureMove.ChargeType.NONE;
-    }
-
     //this is for advanced anim time controls when managing animations for moves used while creature is mounted
     //the use value of the move is set here
     public void setUseValue(int value) {

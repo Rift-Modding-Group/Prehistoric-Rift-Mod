@@ -25,7 +25,7 @@ public enum CreatureMove {
     GRAB(RiftGrabMove.class, MoveType.GRAB, ChargeType.NONE, 0, 0, 0, false, false, false),
     LIFE_DRAIN(RiftLifeDrain.class, MoveType.GRAB, ChargeType.GRADIENT_WHILE_USE, 60, 50, 100, false, true, true),
     CLOAK(RiftCloak.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 200, false, false, false),
-    LIGHT_BLAST(null, MoveType.STATUS, ChargeType.BUILDUP, 60, 0, 0, false, false, false);
+    LIGHT_BLAST(RiftLightBlastMove.class, MoveType.STATUS, ChargeType.BUILDUP, 60, 10, 0, false, false, false);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveType moveType;

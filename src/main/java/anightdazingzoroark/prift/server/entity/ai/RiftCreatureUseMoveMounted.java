@@ -44,7 +44,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         if (this.creature.usingMoveOne()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(0).invokeMove();
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
-            this.canBeExecutedMountedResult = this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
+            this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
             if (this.canBeExecutedMountedResult) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(0));
@@ -66,7 +66,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         else if (this.creature.usingMoveTwo()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(1).invokeMove();
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
-            this.canBeExecutedMountedResult = this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
+            this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
             if (this.canBeExecutedMountedResult) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(1));
@@ -86,13 +86,12 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             }
         }
         else if (this.creature.usingMoveThree()) {
-            this.currentInvokedMove = this.creature.getLearnedMoves().get(1).invokeMove();
-            this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(2));
+            this.currentInvokedMove = this.creature.getLearnedMoves().get(2).invokeMove();
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
-            this.canBeExecutedMountedResult = this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
+            this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
             if (this.canBeExecutedMountedResult) {
-                this.currentInvokedMove = this.creature.getLearnedMoves().get(2).invokeMove();
+                this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(2));
 
                 this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
                 this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
@@ -307,6 +306,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     }
                     //all other moves should have their cooldown applied as usual
                     else if (this.creature.currentCreatureMove() != CreatureMove.CLOAK) this.creature.setMoveCooldown(this.creature.currentCreatureMove().maxCooldown);
+                    //if move is build up type, upon reaching this phase the move use resets
+                    if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.BUILDUP) {
+                        this.creature.setCurrentMoveUse(0);
+                    }
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setMultistepMoveStep(0);
                     this.finishFlag = true;
                 }
@@ -370,5 +373,16 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             return this.creature.getClosestTargetInFront();
         }
         else return this.creature.getClosestTargetInFront(true);
+    }
+
+    private boolean setCanBeExecutedMountedResult() {
+        //if current invoked move is a buildup type move, make sure that in addition to the moves conditions,
+        //the moves use bar is full
+        if (this.currentInvokedMove.creatureMove.chargeType == CreatureMove.ChargeType.BUILDUP) {
+            int movePos = this.creature.getLearnedMoves().indexOf(this.currentInvokedMove.creatureMove);
+            return this.creature.getMoveUse(movePos) == this.currentInvokedMove.creatureMove.maxUse && this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
+        }
+        //otherwise, just use the moves conditions
+        return this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
     }
 }

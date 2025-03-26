@@ -250,6 +250,28 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     public List<CreatureMove> initialMoves() {
         return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR);
     }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(10D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(5D)
+                .defineUseDurationLength(22.5)
+                .defineRecoverFromUseLength(7.5)
+                .finalizePoints());
+        return moveMap;
+    }
     //move related stuff ends here
 
     @Override
@@ -286,98 +308,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     public float[] ageScaleParams() {
         return new float[]{0.5f, 3.25f};
     }
-
-    //stuff below this comment is for roar stuff
-    public void roar(float strength) {
-        Predicate<EntityLivingBase> targetPredicate = RiftConfigHandler.getConfig(this.creatureType).general.useRoarBlacklistAsWhitelist ? ROAR_WHITELIST : ROAR_BLACKLIST;
-        for (EntityLivingBase entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea((double)strength * 6d), targetPredicate)) {
-            if (entity != this) {
-                if (this.isTamed() && entity instanceof EntityTameable) {
-                    if (((EntityTameable) entity).isTamed()) {
-                        if (!((EntityTameable) entity).getOwner().equals(this.getOwner())) {
-                            entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
-                            this.roarKnockback(entity, strength);
-                        }
-                    }
-                    else {
-                        entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
-                        this.roarKnockback(entity, strength);
-                    }
-                }
-                else if (this.isTamed() && entity instanceof EntityPlayer) {
-                    if (!this.getOwner().equals(entity)) {
-                        entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
-                        this.roarKnockback(entity, strength);
-                    }
-                }
-                else {
-                    entity.attackEntityFrom(DamageSource.causeMobDamage(this), 8f * strength / 3f - 2f);
-                    this.roarKnockback(entity, strength);
-                }
-            }
-        }
-        this.roarBreakBlocks(strength);
-    }
-
-    private void roarKnockback(EntityLivingBase target, float strength) {
-        double d0 = this.posX - target.posX;
-        double d1 = this.posZ - target.posZ;
-        double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
-        target.knockBack(this, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
-    }
-
-    protected AxisAlignedBB getRoarArea(double targetDistance) {
-        return this.getEntityBoundingBox().grow(targetDistance, 4.0D, targetDistance);
-    }
-
-    private void roarBreakBlocks(float strength) {
-        List<BlockPos> affectedBlockPositions = Lists.<BlockPos>newArrayList();
-        boolean canBreak = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this);
-        if (canBreak) {
-            if (!this.world.isRemote) {
-                Set<BlockPos> set = Sets.<BlockPos>newHashSet();
-                for (int j = 0; j < 16; ++j) {
-                    for (int k = 0; k < 16; ++k) {
-                        for (int l = 0; l < 16; ++l) {
-                            if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
-                                double d0 = (double)((float)j / 15.0F * 2.0F - 1.0F);
-                                double d1 = Math.abs((double)((float)k / 15.0F * 2.0F - 1.0F));
-                                double d2 = (double)((float)l / 15.0F * 2.0F - 1.0F);
-                                double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-                                d0 = d0 / d3;
-                                d1 = d1 / d3;
-                                d2 = d2 / d3;
-                                float f = (strength * 4) * (0.7F + this.world.rand.nextFloat() * 0.6F);
-                                double d4 = this.posX;
-                                double d6 = this.posY;
-                                double d8 = this.posZ;
-
-                                for (float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
-                                    BlockPos blockpos = new BlockPos(d4, d6, d8);
-                                    IBlockState iblockstate = this.world.getBlockState(blockpos);
-                                    Block block = iblockstate.getBlock();
-
-                                    if (iblockstate.getMaterial() != Material.AIR) {
-                                        if (this.checkBasedOnStrength(iblockstate)) f -= 0.24F;
-                                        else f -= (1200F + 0.3F) * 0.3F;
-
-                                        if (f > 0.0F) set.add(blockpos);
-                                    }
-
-                                    d4 += d0 * 0.30000001192092896D;
-                                    d6 += d1 * 0.30000001192092896D;
-                                    d8 += d2 * 0.30000001192092896D;
-                                }
-                            }
-                        }
-                    }
-                }
-                affectedBlockPositions.addAll(set);
-                for (BlockPos blockPos : affectedBlockPositions) this.world.destroyBlock(blockPos, false);
-            }
-        }
-    }
-    //end of roar stuff
 
     @Override
     public Map<String, Boolean> getWorkstations() {
@@ -495,28 +425,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     public float attackWidth() {
         return 4f;
-    }
-
-    @Override
-    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
-        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
-        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpLength(2.5D)
-                .defineChargeUpToUseLength(2.5D)
-                .defineRecoverFromUseLength(5D)
-                .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpLength(10D)
-                .defineChargeUpToUseLength(2.5D)
-                .defineRecoverFromUseLength(7.5D)
-                .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpLength(5D)
-                .defineChargeUpToUseLength(5D)
-                .defineUseDurationLength(22.5)
-                .defineRecoverFromUseLength(7.5)
-                .finalizePoints());
-        return moveMap;
     }
 
     @Override
