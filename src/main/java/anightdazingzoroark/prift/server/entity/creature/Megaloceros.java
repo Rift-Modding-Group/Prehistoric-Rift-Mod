@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.MegalocerosConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -37,22 +38,18 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class Megaloceros extends RiftCreature implements IChargingMob, IImpregnable, IHarvestWhenWandering, ILeapingMob, IHerder {
+public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestWhenWandering, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megaloceros"));
-    private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Megaloceros.class, DataSerializers.VARINT);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> LOWER_HEAD = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> CAN_CHARGE = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> START_CHARGING = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> CHARGING = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> END_CHARGING = EntityDataManager.<Boolean>createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart frontBodyPart;
-    private float leapPower;
     protected int herdSize = 1;
     protected RiftCreature herdLeader;
 
@@ -79,16 +76,10 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(LEAPING, false);
         this.dataManager.register(PREGNANT, false);
         this.dataManager.register(PREGNANCY_TIMER, 0);
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
-        this.dataManager.register(LOWER_HEAD, false);
-        this.dataManager.register(CAN_CHARGE, true);
-        this.dataManager.register(START_CHARGING, false);
-        this.dataManager.register(CHARGING, false);
-        this.dataManager.register(END_CHARGING, false);
     }
 
     protected void initEntityAI() {
@@ -99,13 +90,11 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
 
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftControlledCharge(this, 0.24f, 4f));
-        this.tasks.addTask(3, new RiftControlledAttack(this, 0.52F, 0.36F));
-        this.tasks.addTask(4, new RiftChargeAttack(this, 2f, 0.24f, 4f, 2f));
-        this.tasks.addTask(5, new RiftAttack(this, 1.0D, 0.52F, 0.36F));
+
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(6, new RiftHarvestOnWander(this, 0.52F, 0.36F));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        //this.tasks.addTask(8, new RiftMoveToHomePos(this, 1.0D));
         this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));
         this.tasks.addTask(11, new RiftHerdMemberFollow(this));
@@ -116,16 +105,9 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        //managing ability to charge
-        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
-        if (this.getRightClickCooldown() == 0) this.setCanCharge(true);
-
         if (!this.world.isRemote) {
             //manage birthin related stuff
             this.createBaby(this);
-
-            //manage leaping
-            if (this.onGround() && this.isLeaping()) this.setLeaping(false);
         }
     }
 
@@ -208,8 +190,44 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         return new float[]{0.3f, 1.125f};
     }
 
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.CHARGE, CreatureMove.LEAP);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.CHARGE, CreatureMove.LEAP);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.HEAD, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.LEAP, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpToUseLength(5D)
+                .defineUseDurationLength(30D)
+                .defineRecoverFromUseLength(1D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
+                .defineStartMoveDelayLength(5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        return moveMap;
+    }
+    //move related stuff ends here
+
     public float attackWidth() {
         return 2.5f;
+    }
+
+    public float rangedWidth() {
+        return 32f;
     }
 
     @Override
@@ -217,23 +235,6 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         float xOffset = (float)(this.posX + (-0.125f) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-0.125f) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY - 0.75, zOffset);
-    }
-
-    public boolean isLeaping() {
-        return this.dataManager.get(LEAPING);
-    }
-
-    public void setLeaping(boolean value) {
-        this.dataManager.set(LEAPING, value);
-        this.setActing(value);
-    }
-
-    public float getLeapPower() {
-        return this.leapPower;
-    }
-
-    public void setLeapPower(float value) {
-        this.leapPower = value;
     }
 
     public void setPregnant(boolean value, int timer) {
@@ -260,52 +261,16 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
 
     @Override
     public boolean hasRightClickChargeBar() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean hasSpacebarChargeBar() {
-        return true;
+        return false;
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (this.getEnergy() > 6) {
-                if (this.getRightClickCooldown() == 0) {
-                    if (!this.isActing()) {
-                        this.setActing(true);
-                        this.forcedChargePower = this.chargeCooldown = holdAmount;
-                    }
-                }
-                else this.setRightClickUse(0);
-            }
-            else {
-                ((EntityPlayer) this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-                this.setRightClickUse(0);
-                this.setRightClickCooldown(0);
-            }
-        }
-        if (control == 2) {
-            final float leapHeight = Math.min(6f, 0.25f * holdAmount + 1);
-            if (this.getEnergy() > 6 && !this.isLeaping() && !this.isInWater()) {
-                this.setLeapPower((float) Math.sqrt(2f * leapHeight * RiftUtil.gravity));
-                this.setEnergy(this.getEnergy() - Math.min(6, (int)(0.25D * holdAmount + 1D)));
-            }
-            else if (this.getEnergy() <= 6) ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-            this.setSpacebarUse(0);
-        }
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     public List<String> blocksToHarvest() {
@@ -337,134 +302,10 @@ public class Megaloceros extends RiftCreature implements IChargingMob, IImpregna
         return new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
     }
 
-    public boolean isLoweringHead() {
-        return this.dataManager.get(LOWER_HEAD);
-    }
-
-    public void setLowerHead(boolean value) {
-        this.dataManager.set(LOWER_HEAD, value);
-    }
-
-    public boolean canCharge() {
-        return this.dataManager.get(CAN_CHARGE);
-    }
-
-    public void setCanCharge(boolean value) {
-        this.dataManager.set(CAN_CHARGE, value);
-    }
-
-    public boolean isStartCharging() {
-        return this.dataManager.get(START_CHARGING);
-    }
-
-    public void setStartCharging(boolean value) {
-        this.dataManager.set(START_CHARGING, value);
-    }
-
-    public boolean isCharging() {
-        return this.dataManager.get(CHARGING);
-    }
-
-    public void setIsCharging(boolean value) {
-        this.dataManager.set(CHARGING, value);
-    }
-
-    public boolean isEndCharging() {
-        return this.dataManager.get(END_CHARGING);
-    }
-
-    public void setEndCharging(boolean value) {
-        this.dataManager.set(END_CHARGING, value);
-    }
-
-    public double chargeBoost() {
-        return 2D;
-    }
-
-    public float chargeWidth() {
-        return 20f;
-    }
-
     @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::megalocerosMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::megalocerosAttack));
-        data.addAnimationController(new AnimationController(this, "charge", 0, this::megalocerosCharge));
-        data.addAnimationController(new AnimationController(this, "controlledCharge", 0, this::megalocerosControlledCharge));
-    }
-
-    private <E extends IAnimatable> PlayState megalocerosMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isCharging()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState megalocerosAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.attack", false));
-            return PlayState.CONTINUE;
-        }
-        else event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState megalocerosCharge(AnimationEvent<E> event) {
-        if (!this.isBeingRidden()) {
-            if (this.isLoweringHead()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.charge_start", true));
-                return PlayState.CONTINUE;
-            }
-            else if (this.isStartCharging()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.charge_charging", true));
-                return PlayState.CONTINUE;
-            }
-            else if (this.isCharging()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.charging", true));
-                return PlayState.CONTINUE;
-            }
-            else if (this.isEndCharging()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.charge_end", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState megalocerosControlledCharge(AnimationEvent<E> event) {
-        if (this.isBeingRidden()) {
-            if (this.getRightClickCooldown() == 0) {
-                if (this.getRightClickUse() > 0 && this.getEnergy() > 6) {
-                    if (this.isLoweringHead()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.charge_start", true));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (this.isStartCharging() && this.getEnergy() > 6) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.charge_charging", true));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (this.isCharging()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.megaloceros.charging", true));
-                        return PlayState.CONTINUE;
-                    }
-                }
-            }
-        }
-        return PlayState.STOP;
     }
 
     @Nullable

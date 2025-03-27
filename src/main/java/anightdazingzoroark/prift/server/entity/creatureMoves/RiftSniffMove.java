@@ -15,8 +15,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
-public class RiftSniff extends RiftCreatureMove {
-    public RiftSniff() {
+public class RiftSniffMove extends RiftCreatureMove {
+    public RiftSniffMove() {
         super(CreatureMove.SNIFF);
     }
 

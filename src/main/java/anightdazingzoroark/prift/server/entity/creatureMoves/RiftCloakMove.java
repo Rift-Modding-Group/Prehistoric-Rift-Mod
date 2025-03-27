@@ -3,8 +3,8 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 
-public class RiftCloak extends RiftCreatureMove {
-    public RiftCloak() {
+public class RiftCloakMove extends RiftCreatureMove {
+    public RiftCloakMove() {
         super(CreatureMove.CLOAK);
     }
 

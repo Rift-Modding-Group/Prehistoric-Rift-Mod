@@ -151,12 +151,12 @@ public class Utahraptor extends RiftCreature implements IHerder {
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LEAP, CreatureMove.PACK_CALL);
+        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LEAP_ATTACK, CreatureMove.PACK_CALL);
     }
 
     @Override
     public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LEAP, CreatureMove.PACK_CALL);
+        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LEAP_ATTACK, CreatureMove.PACK_CALL);
     }
 
     @Override
@@ -172,7 +172,7 @@ public class Utahraptor extends RiftCreature implements IHerder {
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(30D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveType.LEAP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(6D)
                 .defineChargeUpToUseLength(1D)
                 .defineRecoverFromUseLength(1D)

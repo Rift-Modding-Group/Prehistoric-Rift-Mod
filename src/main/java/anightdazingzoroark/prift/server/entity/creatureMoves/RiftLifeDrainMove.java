@@ -4,8 +4,8 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 
-public class RiftLifeDrain extends RiftCreatureMove {
-    public RiftLifeDrain() {
+public class RiftLifeDrainMove extends RiftCreatureMove {
+    public RiftLifeDrainMove() {
         super(CreatureMove.LIFE_DRAIN);
     }
 

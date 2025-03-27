@@ -178,6 +178,26 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     public List<CreatureMove> initialMoves() {
         return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP, CreatureMove.CHARGE);
     }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.HEAD, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(10D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(10D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
+                .defineStartMoveDelayLength(5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        return moveMap;
+    }
     //move related stuff ends here
 
     public float attackWidth() {
@@ -346,26 +366,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     @Override
     public AxisAlignedBB breakRange() {
         return new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
-    }
-
-    @Override
-    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
-        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
-        moveMap.put(CreatureMove.MoveType.HEAD, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpLength(10D)
-                .defineChargeUpToUseLength(2.5D)
-                .defineRecoverFromUseLength(7.5D)
-                .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
-                .defineChargeUpLength(10D)
-                .defineChargeUpToUseLength(2.5D)
-                .defineRecoverFromUseLength(7.5D)
-                .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
-                .defineStartMoveDelayLength(5D)
-                .defineRecoverFromUseLength(5D)
-                .finalizePoints());
-        return moveMap;
     }
 
     @Override

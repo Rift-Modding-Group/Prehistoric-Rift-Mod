@@ -237,35 +237,7 @@ public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        /*
-        if (control == 3 && this.sniffCooldown == 0 && this.headPart != null) {
-            if (!this.headPart.isUnderwater()) {
-                this.sniffCooldown = 100;
-                //for all entities nearby (except those that are submerged)
-                int mobSniffRange = RiftConfigHandler.getConfig(this.creatureType).general.mobSniffRange;
-                AxisAlignedBB mobDetectAABB = new AxisAlignedBB(this.posX - mobSniffRange, this.posY - mobSniffRange, this.posZ - mobSniffRange, this.posX + mobSniffRange, this.posY + mobSniffRange, this.posZ + mobSniffRange);
-                for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, mobDetectAABB, null)) {
-                    if (entityLivingBase != this && entityLivingBase != this.getOwner() && !RiftUtil.entityIsUnderwater(entityLivingBase) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumMobSniffSize))) {
-                        RiftMessages.WRAPPER.sendToAll(new RiftSpawnDetectParticle((EntityPlayer)this.getControllingPassenger(), (int)entityLivingBase.posX, (int)entityLivingBase.posY, (int)entityLivingBase.posZ));
-                    }
-                }
-                //for chests
-                int blockSniffRange = RiftConfigHandler.getConfig(this.creatureType).general.blockSniffRange;
-                for (int x = -blockSniffRange; x <= blockSniffRange; x++) {
-                    for (int y = -blockSniffRange; y <= blockSniffRange; y++) {
-                        for (int z = -blockSniffRange; z <= blockSniffRange; z++) {
-                            BlockPos testPos = this.getPosition().add(x, y, z);
-                            if (this.isSniffableBlock(this.world.getBlockState(testPos))) {
-                                RiftMessages.WRAPPER.sendToAll(new RiftSpawnChestDetectParticle((EntityPlayer)this.getControllingPassenger(), testPos.getX(), testPos.getY(), testPos.getZ()));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-         */
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     public boolean hasLeftClickChargeBar() {

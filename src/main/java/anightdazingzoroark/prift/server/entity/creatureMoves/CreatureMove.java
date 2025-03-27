@@ -15,7 +15,7 @@ public enum CreatureMove {
     CHARGE(RiftChargeMove.class, MoveType.CHARGE, ChargeType.GRADIENT_THEN_USE, 75, 100, 200, true, true, false),
     BIDE(RiftBideMove.class, MoveType.DEFENSE, ChargeType.GRADIENT_THEN_USE, 0, 100, 200, false, false, true), //basically like the since removed move from pokemon, absorb all damage you take, then reflect it all back to the opponent
     SELF_DESTRUCT(null, MoveType.RANGED, ChargeType.NONE, 300, 0, 0, false, false, false), //will be given only to anky for now
-    LEAP(RiftLeapMove.class, MoveType.CHARGE, ChargeType.COOLDOWN_ONLY, 50, 0, 100, false, true, false),
+    LEAP_ATTACK(RiftLeapAttackMove.class, MoveType.LEAP, ChargeType.COOLDOWN_ONLY, 50, 0, 100, false, true, false),
     PACK_CALL(RiftPackCallMove.class, MoveType.ROAR, ChargeType.COOLDOWN_ONLY, 0, 0, 3600, false, false, false),
     TAIL_WHIP(RiftTailWhipMove.class, MoveType.TAIL, ChargeType.NONE, 0, 0, 0, false, false, false),
     POWER_BLOW(RiftPowerBlowMove.class, MoveType.RANGED, ChargeType.GRADIENT_THEN_USE, 0, 100, 200, false, false, false),
@@ -23,10 +23,11 @@ public enum CreatureMove {
     DEATH_ROLL(RiftDeathRollMove.class, MoveType.SPIN, ChargeType.GRADIENT_WHILE_USE, 60, 100, 200, false, true, true),
     LUNGE(RiftLungeMove.class, MoveType.CHARGE, ChargeType.COOLDOWN_ONLY, 25, 0, 100, false, true, false),
     GRAB(RiftGrabMove.class, MoveType.GRAB, ChargeType.NONE, 0, 0, 0, false, false, false),
-    LIFE_DRAIN(RiftLifeDrain.class, MoveType.GRAB, ChargeType.GRADIENT_WHILE_USE, 60, 50, 100, false, true, true),
-    CLOAK(RiftCloak.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 200, false, false, false),
+    LIFE_DRAIN(RiftLifeDrainMove.class, MoveType.GRAB, ChargeType.GRADIENT_WHILE_USE, 60, 50, 100, false, true, true),
+    CLOAK(RiftCloakMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 200, false, false, false),
     LIGHT_BLAST(RiftLightBlastMove.class, MoveType.ROAR, ChargeType.BUILDUP, 60, 10, 0, false, false, false),
-    SNIFF(RiftSniff.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 100, false, false, false);
+    SNIFF(RiftSniffMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 100, false, false, false),
+    LEAP(RiftLeapMove.class, MoveType.LEAP, ChargeType.COOLDOWN_ONLY, 0, 0, 100, false, true, false);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveType moveType;
@@ -70,7 +71,8 @@ public enum CreatureMove {
     }
 
     public enum MoveType {
-        CHARGE, //movement based (always requires movement to use)
+        CHARGE, //movement based (always requires movement to use),
+        LEAP, //involves jumping
         HEAD, //head hitting based
         TAIL, //tail based
         STOMP, //stomp based

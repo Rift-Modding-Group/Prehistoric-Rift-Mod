@@ -154,6 +154,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_LEAP_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_LEAP_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_LEAP_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_LEAP_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -332,6 +336,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE, false);
+        this.dataManager.register(USING_LEAP_TYPE_MOVE, false);
+        this.dataManager.register(USING_LEAP_TYPE_MOVE_MULTISTEP_ONE, false);
+        this.dataManager.register(USING_LEAP_TYPE_MOVE_MULTISTEP_TWO, false);
+        this.dataManager.register(USING_LEAP_TYPE_MOVE_MULTISTEP_THREE, false);
         this.dataManager.register(USING_SPIN_TYPE_MOVE, false);
         this.dataManager.register(USING_SPIN_TYPE_MOVE_DELAY, false);
         this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_ONE, false);
@@ -1716,6 +1724,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             case CHARGE:
                 this.setUsingChargeTypeMove(value);
                 break;
+            case LEAP:
+                this.setUsingLeapTypeMove(value);
+                break;
         }
     }
 
@@ -1742,6 +1753,28 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setUsingChargeTypeMoveMultistepOne(false);
                     this.setUsingChargeTypeMoveMultistepTwo(false);
                     this.setUsingChargeTypeMoveMultistepThree(false);
+                }
+                break;
+            case LEAP:
+                if (step == 0) {
+                    this.setUsingLeapTypeMoveMultistepOne(true);
+                    this.setUsingLeapTypeMoveMultistepTwo(false);
+                    this.setUsingLeapTypeMoveMultistepThree(false);
+                }
+                else if (step == 1) {
+                    this.setUsingLeapTypeMoveMultistepOne(false);
+                    this.setUsingLeapTypeMoveMultistepTwo(true);
+                    this.setUsingLeapTypeMoveMultistepThree(false);
+                }
+                else if (step == 2) {
+                    this.setUsingLeapTypeMoveMultistepOne(false);
+                    this.setUsingLeapTypeMoveMultistepTwo(false);
+                    this.setUsingLeapTypeMoveMultistepThree(true);
+                }
+                else {
+                    this.setUsingLeapTypeMoveMultistepOne(false);
+                    this.setUsingLeapTypeMoveMultistepTwo(false);
+                    this.setUsingLeapTypeMoveMultistepThree(false);
                 }
                 break;
             case SPIN:
@@ -1799,6 +1832,38 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setUsingChargeTypeMoveMultistepThree(boolean value) {
         this.dataManager.set(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE, value);
+    }
+
+    public boolean isUsingLeapTypeMove() {
+        return this.dataManager.get(USING_LEAP_TYPE_MOVE);
+    }
+
+    public void setUsingLeapTypeMove(boolean value) {
+        this.dataManager.set(USING_LEAP_TYPE_MOVE, value);
+    }
+
+    public boolean usingLeapTypeMoveMultistepOne() {
+        return this.dataManager.get(USING_LEAP_TYPE_MOVE_MULTISTEP_ONE);
+    }
+
+    public void setUsingLeapTypeMoveMultistepOne(boolean value) {
+        this.dataManager.set(USING_LEAP_TYPE_MOVE_MULTISTEP_ONE, value);
+    }
+
+    public boolean usingLeapTypeMoveMultistepTwo() {
+        return this.dataManager.get(USING_LEAP_TYPE_MOVE_MULTISTEP_TWO);
+    }
+
+    public void setUsingLeapTypeMoveMultistepTwo(boolean value) {
+        this.dataManager.set(USING_LEAP_TYPE_MOVE_MULTISTEP_TWO, value);
+    }
+
+    public boolean usingLeapTypeMoveMultistepThree() {
+        return this.dataManager.get(USING_LEAP_TYPE_MOVE_MULTISTEP_THREE);
+    }
+
+    public void setUsingLeapTypeMoveMultistepThree(boolean value) {
+        this.dataManager.set(USING_LEAP_TYPE_MOVE_MULTISTEP_THREE, value);
     }
 
     public boolean isUsingSpinTypeMove() {
@@ -3125,6 +3190,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move", false));
                         return PlayState.CONTINUE;
                     }
+                    else if (isUsingLeapTypeMove()) {
+                        if (currentCreatureMove().useTimeIsInfinite) {
+                            if (usingLeapTypeMoveMultistepOne()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move_pt1", false));
+                            else if (usingLeapTypeMoveMultistepTwo()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move_pt2", true));
+                            else if (usingLeapTypeMoveMultistepThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move_pt3", false));
+                        }
+                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move", false));
+                        return PlayState.CONTINUE;
+                    }
                     else {
                         event.getController().clearAnimationCache();
                         return PlayState.STOP;
@@ -3145,7 +3219,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                         else if (getPlayingChargedMoveAnim() == 1) {
                             if (currentCreatureMove().useTimeIsInfinite) {
-                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1", false));
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1", true));
                             }
                             else {
                                 if (getMoveOneUse() > 0 && getMoveOneUse() < currentCreatureMove().maxUse) {
@@ -3171,7 +3245,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                         else if (getPlayingChargedMoveAnim() == 1) {
                             if (currentCreatureMove().useTimeIsInfinite) {
-                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1", false));
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1", true));
                             }
                             else {
                                 if (getMoveTwoUse() > 0 && getMoveTwoUse() < currentCreatureMove().maxUse) {
@@ -3197,7 +3271,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                         else if (getPlayingChargedMoveAnim() == 1) {
                             if (currentCreatureMove().useTimeIsInfinite) {
-                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1", false));
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_charged_"+currentCreatureMove().moveTypeName()+"_move_pt1", true));
                             }
                             else {
                                 if (getMoveThreeUse() > 0 && getMoveThreeUse() < currentCreatureMove().maxUse) {
