@@ -27,7 +27,8 @@ public enum CreatureMove {
     CLOAK(RiftCloakMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 200, false, false, false),
     LIGHT_BLAST(RiftLightBlastMove.class, MoveType.ROAR, ChargeType.BUILDUP, 60, 10, 0, false, false, false),
     SNIFF(RiftSniffMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 100, false, false, false),
-    LEAP(RiftLeapMove.class, MoveType.LEAP, ChargeType.COOLDOWN_ONLY, 0, 0, 100, false, true, false);
+    LEAP(RiftLeapMove.class, MoveType.LEAP, ChargeType.COOLDOWN_ONLY, 0, 0, 100, false, true, false),
+    POISON_CLAW(RiftPoisonClawMove.class, MoveType.CLAW, ChargeType.NONE, 25, 0, 0, false, false, false);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveType moveType;

@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.util.SoundEvent;
 
 //this class serves to define the speed of all the parts of an animation of a creature using a move
@@ -24,14 +23,11 @@ public class RiftCreatureMoveAnimator {
     private SoundEvent chargeUpToUseSound;
     private SoundEvent useDurationSound;
     private SoundEvent recoverFromUseSound;
+    //other stuff
+    private int numberOfAnims = 1; //this is for how many animations of same keyframes can be played
 
     public RiftCreatureMoveAnimator(RiftCreature creature) {
         this.creature = creature;
-    }
-
-    public CreatureMove.MoveType getMoveType() {
-        if (this.creature.currentCreatureMove() == null) return null;
-        return this.creature.currentCreatureMove().moveType;
     }
 
     public RiftCreatureMoveAnimator defineStartMoveDelayLength(double value) {
@@ -153,5 +149,15 @@ public class RiftCreatureMoveAnimator {
 
     public SoundEvent getRecoverFromUseSound() {
         return this.recoverFromUseSound;
+    }
+
+    //other things
+    public RiftCreatureMoveAnimator setNumberOfAnims(int value) {
+        this.numberOfAnims = value;
+        return this;
+    }
+
+    public int getNumberOfAnims() {
+        return this.numberOfAnims;
     }
 }

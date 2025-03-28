@@ -205,9 +205,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public List<RiftCreatureConfig.Food> favoriteFood;
     public List<RiftCreatureConfig.Meal> tamingFood;
     public List<String> breedingFood;
-    public int chargeCooldown;
-    public int forcedChargePower;
-    public int leapCooldown;
     public float maxRightClickCooldown;
     public String saddleItem;
     public RiftCreaturePart headPart;
@@ -225,6 +222,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private boolean recentlyHit;
     private float recentlyHitDamage;
     private Entity grabVictim;
+    private int chosenAnimFromMultiple = -1;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -252,7 +250,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.heal((float)maxCreatureHealth);
         this.herdCheckCountdown = 0;
         this.yFloatPos = 0D;
-        this.chargeCooldown = 0;
         this.maxRightClickCooldown = 100f;
         this.oldScale = 0;
         this.healthRegen = 0;
@@ -3149,36 +3146,43 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             @Override
             public PlayState test(AnimationEvent event) {
                 if (currentCreatureMove() != null && !currentCreatureMove().chargeType.requiresCharge()) {
+                    String multiNameNum = "";
+                    if (animatorsForMoveType().get(currentCreatureMove().moveType).getNumberOfAnims() > 1
+                    && chosenAnimFromMultiple == -1) {
+                        chosenAnimFromMultiple = RiftUtil.randomInRange(0, 1);
+                        multiNameNum = "_"+chosenAnimFromMultiple;
+                    }
+
                     if (isUsingJawTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_jaw_type_move", false));
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_jaw_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingStompTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_stomp_type_move", false));
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_stomp_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingTailTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_tail_type_move", false));
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_tail_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingRangedTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_ranged_type_move", false));
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_ranged_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingHeadTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_head_type_move", false));
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_head_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingClawTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_claw_type_move", false));
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_claw_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingStatusTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_status_type_move", false));
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_status_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingRoarTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_roar_type_move", false));
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_roar_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingChargeTypeMove()) {
@@ -3187,7 +3191,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                             else if (usingChargeTypeMoveMultistepTwo()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move_pt2", true));
                             else if (usingChargeTypeMoveMultistepThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move_pt3", false));
                         }
-                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move", false));
+                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingLeapTypeMove()) {
@@ -3196,10 +3200,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                             else if (usingLeapTypeMoveMultistepTwo()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move_pt2", true));
                             else if (usingLeapTypeMoveMultistepThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move_pt3", false));
                         }
-                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move", false));
+                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else {
+                        chosenAnimFromMultiple = -1;
                         event.getController().clearAnimationCache();
                         return PlayState.STOP;
                     }

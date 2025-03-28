@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.BaryonyxConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -36,10 +37,12 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Baryonyx extends RiftWaterCreature {
-    private static final DataParameter<Boolean> LEFT_CLAW = EntityDataManager.<Boolean>createKey(Baryonyx.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> RIGHT_CLAW = EntityDataManager.<Boolean>createKey(Baryonyx.class, DataSerializers.BOOLEAN);
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/baryonyx"));
     private RiftCreaturePart mainHeadPart;
     private RiftCreaturePart neckPart;
@@ -95,8 +98,6 @@ public class Baryonyx extends RiftWaterCreature {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(LEFT_CLAW, false);
-        this.dataManager.register(RIGHT_CLAW, false);
         this.setCanPickUpLoot(true);
     }
 
@@ -114,9 +115,8 @@ public class Baryonyx extends RiftWaterCreature {
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftControlledAttack(this, 0.52F, 0.24F));
-        this.tasks.addTask(2, new RiftBaryonyxControlledClawAttack(this));
-        this.tasks.addTask(3, new RiftAttack.BaryonyxAttack(this, 1.0D));
+        this.tasks.addTask(2, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(3, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(4, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(6, new RiftGoToWater(this, 16, 1.0D));
         this.tasks.addTask(7, new RiftWanderWater(this, 1.0D));
@@ -155,24 +155,6 @@ public class Baryonyx extends RiftWaterCreature {
         return flag;
     }
 
-    public boolean isUsingLeftClaw() {
-        return this.dataManager.get(LEFT_CLAW);
-    }
-
-    public void setUsingLeftClaw(boolean value) {
-        this.dataManager.set(LEFT_CLAW, value);
-        this.setActing(value);
-    }
-
-    public boolean isUsingRightClaw() {
-        return this.dataManager.get(RIGHT_CLAW);
-    }
-
-    public void setUsingRightClaw(boolean value) {
-        this.dataManager.set(RIGHT_CLAW, value);
-        this.setActing(value);
-    }
-
     @Override
     public int slotCount() {
         return 27;
@@ -183,6 +165,40 @@ public class Baryonyx extends RiftWaterCreature {
         return new float[]{0.5f, 1.5f};
     }
 
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.POISON_CLAW, CreatureMove.TAIL_WHIP);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.BITE, CreatureMove.POISON_CLAW, CreatureMove.TAIL_WHIP);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.CLAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .setNumberOfAnims(2)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.TAIL, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineUseDurationLength(7.5D)
+                .finalizePoints());
+        return moveMap;
+    }
+    //move related stuff ends here
+
     public float attackWidth() {
         return 6f;
     }
@@ -192,61 +208,8 @@ public class Baryonyx extends RiftWaterCreature {
         return new Vec3d(this.posX, this.posY + 0.125f, this.posZ);
     }
 
-    public void controlClawAttack() {
-        boolean breakFlag = false;
-
-        //attack entity
-        if (this.forcedAttackTarget != null && RiftUtil.checkForNoAssociations(this, this.forcedAttackTarget)) {
-            breakFlag = this.attackUsingClaw(this.forcedAttackTarget);
-        }
-
-        //break blocks
-        if (this.forcedBreakPos != null && !breakFlag) {
-            IBlockState blockState = this.world.getBlockState(this.forcedBreakPos);
-            if (blockState.getMaterial() != Material.AIR && this.checkBasedOnStrength(blockState)) {
-                for (int x = -1; x <= 1; x++) {
-                    for (int y = 0; y <= 2; y++) {
-                        for (int z = -1; z <= 1; z++) {
-                            BlockPos toBreakPos = this.forcedBreakPos.add(x, y, z);
-                            IBlockState toBreakState = this.world.getBlockState(toBreakPos);
-                            if (toBreakState.getMaterial() != Material.AIR && this.checkBasedOnStrength(toBreakState)) {
-                                this.world.destroyBlock(toBreakPos, true);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        //reset
-        this.forcedAttackTarget = null;
-        this.forcedBreakPos = null;
-    }
-
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    if (RiftUtil.randomInRange(0, 1) == 0) this.setUsingLeftClaw(true);
-                    else this.setUsingRightClaw(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     public boolean hasLeftClickChargeBar() {
@@ -262,58 +225,6 @@ public class Baryonyx extends RiftWaterCreature {
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::baryonyxMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::baryonyxAttack));
-        data.addAnimationController(new AnimationController(this, "armPose", 0, this::baryonyxArmPose));
-    }
-
-    private <E extends IAnimatable> PlayState baryonyxMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isInWater()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.swim", true));
-                return PlayState.CONTINUE;
-            }
-            else {
-                if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.sitting", true));
-                    return PlayState.CONTINUE;
-                }
-                if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.walk", true));
-                    return PlayState.CONTINUE;
-                }
-                return PlayState.STOP;
-            }
-        }
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState baryonyxAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.bite", false));
-        }
-        else if (this.isUsingLeftClaw()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.claw_two", false));
-        }
-        else if (this.isUsingRightClaw()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.claw_one", false));
-        }
-        else event.getController().clearAnimationCache();
-        return PlayState.CONTINUE;
-    }
-
-    private <E extends IAnimatable> PlayState baryonyxArmPose(AnimationEvent<E> event) {
-        if (!this.isUsingLeftClaw() && !this.isUsingRightClaw() && this.isInWater()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.baryonyx.swim_arms", true));
-            return PlayState.CONTINUE;
-        }
-        else event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     @Nullable
