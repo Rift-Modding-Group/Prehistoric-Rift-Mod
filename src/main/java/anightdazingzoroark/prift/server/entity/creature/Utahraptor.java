@@ -174,7 +174,6 @@ public class Utahraptor extends RiftCreature implements IHerder {
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.LEAP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(6D)
-                .defineChargeUpToUseLength(1D)
                 .defineRecoverFromUseLength(1D)
                 .finalizePoints());
         return moveMap;

@@ -341,7 +341,6 @@
 			}
 		},
 		"animation.megaloceros.use_leap_type_move_pt3": {
-			"loop": true,
 			"animation_length": 0.05,
 			"bones": {
 				"leftBackLeg": {

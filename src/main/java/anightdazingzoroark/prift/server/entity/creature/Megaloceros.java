@@ -211,7 +211,6 @@ public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestW
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.LEAP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpToUseLength(5D)
-                .defineUseDurationLength(30D)
                 .defineRecoverFromUseLength(1D)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)

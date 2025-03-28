@@ -38,10 +38,11 @@ public class RiftLeapMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
-        if ((!user.onGround || user.isInWater()) && !this.notOnGroundFlag) this.notOnGroundFlag = true;
+        if (!user.onGround && !this.notOnGroundFlag) this.notOnGroundFlag = true;
 
         if (this.notOnGroundFlag) {
             this.forceStopFlag = user.onGround || user.isInWater();
+            System.out.println("forced stop flag: "+this.forceStopFlag);
         }
     }
 
