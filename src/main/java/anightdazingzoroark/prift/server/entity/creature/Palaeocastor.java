@@ -1,18 +1,14 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
-import anightdazingzoroark.prift.config.PalaeocastorConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -24,15 +20,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvestWhenWandering {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/palaeocastor"));
@@ -80,7 +73,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new EntityAIAttackMelee(this, 1.0D, true));
+        this.tasks.addTask(3, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(4, new RiftHarvestOnWander(this, 1.25f, 1f));
         this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 8.0F, 2.0F));
         this.tasks.addTask(7, new RiftGoToLandFromWater(this, 16, 1.0D));
@@ -117,6 +110,29 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     public float[] ageScaleParams() {
         return new float[]{0.25f, 1f};
     }
+
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.BITE);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.BITE);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(1.25D)
+                .defineChargeUpToUseLength(1.25D)
+                .defineRecoverFromUseLength(2.5D)
+                .finalizePoints());
+        return moveMap;
+    }
+    //move related stuff ends here
 
     public float attackWidth() {
         return 2f;
@@ -192,36 +208,6 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::palaeocastorMovement));
-        data.addAnimationController(new AnimationController(this, "dig", 0, this::palaeocastorDig));
-    }
-
-    private <E extends IAnimatable> PlayState palaeocastorMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.hasTarget()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.palaeocastor.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if ((event.isMoving() || (this.isSitting() && this.hasTarget()))) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.palaeocastor.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState palaeocastorDig(AnimationEvent<E> event) {
-        if (this.isHarvesting()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.palaeocastor.dig", false));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     @Nullable
