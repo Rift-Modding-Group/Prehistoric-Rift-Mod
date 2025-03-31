@@ -3289,8 +3289,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                         else if (getPlayingChargedMoveAnim() == 2 || getPlayingChargedMoveAnim() == 3 || getPlayingChargedMoveAnim() == 4) {
                             if (currentCreatureMove().useTimeIsInfinite) {
-                                if (getPlayingInfiniteMoveAnim()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveTypeName() + "_move_pt2", true));
-                                else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveTypeName() + "_move_pt3", false));
+                                System.out.println("charged move anim stage: "+getPlayingChargedMoveAnim());
+                                if (getPlayingChargedMoveAnim() == 3) {
+                                    System.out.println("infinite");
+                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveTypeName() + "_move_pt2", true));
+                                }
+                                else if (getPlayingChargedMoveAnim() == 4) {
+                                    System.out.println("infinite end");
+                                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_infinite_" + currentCreatureMove().moveTypeName() + "_move_pt3", false));
+                                }
                             }
                             else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charged_" + currentCreatureMove().moveTypeName() + "_move_pt2", false));
                         }

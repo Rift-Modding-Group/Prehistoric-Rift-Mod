@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
@@ -49,6 +50,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,8 +153,8 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         if (GeneralConfig.canUsePyrotech()) this.tasks.addTask(1, new RiftAnkylosaurusHitAnvil(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftControlledAttack(this, 1.2F, 0.6F));
-        this.tasks.addTask(5, new RiftAttack(this, 1.0D, 1.2F, 0.6F));
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(6, new RiftHarvestOnWander(this, 1.2f, 0.6f));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 3D));
@@ -269,6 +271,33 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         return 27;
     }
 
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.SHELLTER, CreatureMove.SHELL_SPIN, CreatureMove.SELF_DESTRUCT);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.SHELLTER, CreatureMove.SHELL_SPIN);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.TAIL, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(10D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(12.5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.SPIN, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineUseDurationLength(5D)
+                .finalizePoints());
+        return moveMap;
+    }
+    //move related stuff ends here
+
     @Override
     public float attackWidth() {
         return 6f;
@@ -283,22 +312,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {
-        if (control == 0) {
-            if (this.getEnergy() > 0) {
-                if (!this.isActing() && !this.isStartHiding() && !this.isHiding() && !this.isStopHiding()) {
-                    this.forcedAttackTarget = target;
-                    this.forcedBreakPos = pos;
-                    this.setAttacking(true);
-                }
-            }
-            else ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.getName()), false);
-        }
-        if (control == 1) {
-            boolean isHidingTest = !this.isHiding() || this.getHealth()/this.getMaxHealth() >= 0.5;
-            if (!this.isActing() && !this.isStartHiding() && !this.isStopHiding() && isHidingTest) this.forceShellFlag = true;
-        }
-    }
+    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
 
     @Override
@@ -480,33 +494,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     @Override
     public void registerControllers(AnimationData data) {
         super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::ankylosaurusMovement));
-        data.addAnimationController(new AnimationController(this, "attack", 0, this::ankylosaurusAttack));
         data.addAnimationController(new AnimationController(this, "shellMode", 0, this::ankylosaurusShell));
-    }
-
-    private <E extends IAnimatable> PlayState ankylosaurusMovement(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isSitting() && !this.isBeingRidden() && !this.hasTarget() && !this.isStartHiding() && !this.isHiding() && !this.isStopHiding()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.sitting", true));
-                return PlayState.CONTINUE;
-            }
-            if ((event.isMoving() || (this.isSitting() && this.hasTarget())) && !this.isAttacking()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.walk", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState ankylosaurusAttack(AnimationEvent<E> event) {
-        if (this.isAttacking()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.attack", false));
-        }
-        else {
-            event.getController().clearAnimationCache();
-        }
-        return PlayState.CONTINUE;
     }
 
     private <E extends IAnimatable> PlayState ankylosaurusShell(AnimationEvent<E> event) {
