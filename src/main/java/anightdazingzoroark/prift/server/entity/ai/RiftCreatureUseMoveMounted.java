@@ -21,6 +21,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     private int moveAnimUseTime; //time until end of use anim
     private int animTime = 0;
     private boolean canBeExecutedMountedResult = false;
+    private boolean reduceFinalUseTimeFlag = true;
 
     private Entity target;
 
@@ -120,6 +121,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.currentInvokedMove.onStopExecuting(this.creature);
             this.currentInvokedMove = null;
         }
+        this.reduceFinalUseTimeFlag = true;
         this.creature.setMultistepMoveStep(0);
         this.canBeExecutedMountedResult = false;
         this.creature.setPlayingInfiniteMoveAnim(false);
@@ -218,7 +220,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     //(by infinite its until they release the mouse button associated with the move)
                     this.creature.setPlayingInfiniteMoveAnim(true);
                 }
-                if (this.animTime == this.moveAnimChargeUpTime || (this.creature.currentCreatureMove().stopUponFullCharge && this.getUse() >= this.creature.currentCreatureMove().maxUse)) {
+                if (this.animTime == this.moveAnimChargeUpTime) {
                     if (this.creature.getPlayingChargedMoveAnim() == 1) this.creature.setPlayingChargedMoveAnim(2);
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 }
@@ -235,12 +237,16 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
                 }
-                if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
+                if ((this.animTime >= this.moveAnimUseTime && this.animTime < this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag
-                        || (!this.getMoveIsUsing() && this.animTime > this.moveAnimInitDelayTime)) {
+                        || !this.getMoveIsUsing()
+                        || (this.getUse() >= this.creature.currentCreatureMove().maxUse)) {
                     this.creature.setPlayingChargedMoveAnim(4);
-                    this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
-                    this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
+                    if (this.reduceFinalUseTimeFlag) {
+                        this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
+                        this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
+                        this.reduceFinalUseTimeFlag = false;
+                    }
                     this.creature.setPlayingInfiniteMoveAnim(false);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
@@ -259,7 +265,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (!this.finishFlag) {
                     this.animTime++;
-                    if (this.getMoveIsUsing()) {
+                    if (this.getMoveIsUsing() && this.getUse() < this.creature.currentCreatureMove().maxUse) {
                         this.moveAnimUseTime++;
                         this.maxMoveAnimTime++;
                     }
