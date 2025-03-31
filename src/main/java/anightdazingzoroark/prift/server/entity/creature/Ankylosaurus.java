@@ -57,9 +57,6 @@ import java.util.Map;
 
 public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenWandering, IWorkstationUser, ILeadWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/ankylosaurus"));
-    private static final DataParameter<Boolean> START_HIDING = EntityDataManager.<Boolean>createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> STOP_HIDING = EntityDataManager.<Boolean>createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> HIDING = EntityDataManager.<Boolean>createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.VARINT);
@@ -80,7 +77,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     private RiftCreaturePart tailClub;
     protected int herdSize = 1;
     protected RiftCreature herdLeader;
-    protected boolean forceShellFlag;
 
     public Ankylosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.ANKYLOSAURUS);
@@ -123,9 +119,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(START_HIDING, false);
-        this.dataManager.register(STOP_HIDING, false);
-        this.dataManager.register(HIDING, false);
         this.dataManager.register(CAN_HARVEST, false);
         this.dataManager.register(USING_WORKSTATION, false);
         this.dataManager.register(WORKSTATION_X_POS, 0);
@@ -148,7 +141,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(0, new RiftAnkylosaurusHideInShell(this));
         this.tasks.addTask(1, new RiftUseLeadPoweredCrank(this));
         if (GeneralConfig.canUsePyrotech()) this.tasks.addTask(1, new RiftAnkylosaurusHitAnvil(this));
         this.tasks.addTask(1, new RiftMate(this));
@@ -169,23 +161,23 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
 
         //disable parts when hiding
         for (RiftCreaturePart part : this.hitboxArray) {
-            if (this.isSitting() && !this.isHiding()) {
+            if (this.isSitting() && !this.isHidingInShell()) {
                 part.setDisabled(!part.partName.equals("body") && !part.partName.equals("head"));
             }
-            else if (this.isHiding()) {
+            else if (this.isHidingInShell()) {
                 part.setDisabled(!part.partName.equals("body"));
             }
         }
 
         //change positions when sitting or hiding
-        float sitOffset = ((this.isSitting() && !this.isBeingRidden()) || this.isHiding()) ? -0.75f : 0;
+        float sitOffset = ((this.isSitting() && !this.isBeingRidden()) || this.isHidingInShell()) ? -0.75f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
         if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
     }
 
     public boolean attackEntityFromPart(MultiPartEntityPart part, DamageSource source, float damage) {
         RiftCreaturePart riftPart = (RiftCreaturePart) part;
-        if (riftPart.partName.equals("body") && this.isHiding()) {
+        if (riftPart.partName.equals("body") && this.isHidingInShell()) {
             Entity attackedEntity = source.getImmediateSource();
             if (attackedEntity != null && !source.isExplosion() && !source.isProjectile()) {
                 attackedEntity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
@@ -207,8 +199,8 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
                 }
             }
             if (closestPart != null) {
-                if (closestPart.partName.equals("body") && this.isHiding() && !source.isExplosion() && !source.isProjectile()) {
-                    attacker.attackEntityFrom(DamageSource.causeThornsDamage(this), 2f);
+                if (closestPart.partName.equals("body") && this.isHidingInShell() && !source.isExplosion() && !source.isProjectile()) {
+                    //attacker.attackEntityFrom(DamageSource.causeThornsDamage(this), 2f);
                 }
             }
         }
@@ -294,6 +286,10 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
                 .defineChargeUpLength(5D)
                 .defineUseDurationLength(5D)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.DEFENSE, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineUseDurationLength(5D)
+                .finalizePoints());
         return moveMap;
     }
     //move related stuff ends here
@@ -305,10 +301,14 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
 
     @Override
     public Vec3d riderPos() {
-        float offset = this.isStartHiding() || this.isHiding() ? -0.875f : -0.25f;
+        float offset = this.isHidingInShell() ? -0.875f : -0.25f;
         float xOffset = (float)(this.posX + (-0.125) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-0.125) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY + offset, zOffset);
+    }
+
+    private boolean isHidingInShell() {
+        return this.currentCreatureMove() != null && (this.currentCreatureMove().moveType == CreatureMove.MoveType.DEFENSE || this.currentCreatureMove().moveType == CreatureMove.MoveType.SPIN);
     }
 
     @Override
@@ -438,38 +438,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         return this.dataManager.get(CAN_HARVEST);
     }
 
-    public void setStartHiding(boolean value) {
-        this.dataManager.set(START_HIDING, value);
-    }
-
-    public boolean isStartHiding() {
-        return this.dataManager.get(START_HIDING);
-    }
-
-    public void setStopHiding(boolean value) {
-        this.dataManager.set(STOP_HIDING, value);
-    }
-
-    public boolean isStopHiding() {
-        return this.dataManager.get(STOP_HIDING);
-    }
-
-    public void setHiding(boolean value) {
-        this.dataManager.set(HIDING, value);
-    }
-
-    public boolean isHiding() {
-        return this.dataManager.get(HIDING);
-    }
-
-    public void setForceShellFlag(boolean value) {
-        this.forceShellFlag = value;
-    }
-
-    public boolean getForceShellFlag() {
-        return this.forceShellFlag;
-    }
-
     @Override
     public boolean hasLeftClickChargeBar() {
         return false;
@@ -489,30 +457,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "shellMode", 0, this::ankylosaurusShell));
-    }
-
-    private <E extends IAnimatable> PlayState ankylosaurusShell(AnimationEvent<E> event) {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof RiftJournalScreen)) {
-            if (this.isStartHiding()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.enter_shell", true));
-                return PlayState.CONTINUE;
-            }
-            else if (this.isHiding()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.shell_mode", true));
-                return PlayState.CONTINUE;
-            }
-            else if (this.isStopHiding()) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ankylosaurus.exit_shell", true));
-                return PlayState.CONTINUE;
-            }
-        }
-        return PlayState.STOP;
     }
 
     protected SoundEvent getAmbientSound() {

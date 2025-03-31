@@ -35,7 +35,7 @@ public class RiftAnkylosaurusHitAnvil extends EntityAIBase {
     @Override
     public boolean shouldExecute() {
         TileEntity te = this.ankylosaurus.world.getTileEntity(this.ankylosaurus.getWorkstationPos());
-        return GeneralConfig.canUsePyrotech() && te instanceof TileAnvilBase && this.ankylosaurus.busyAtWorkWithNoTargets() && !this.ankylosaurus.isHiding();
+        return GeneralConfig.canUsePyrotech() && te instanceof TileAnvilBase && this.ankylosaurus.busyAtWorkWithNoTargets() && this.ankylosaurus.currentCreatureMove() == null;
     }
 
     @Override

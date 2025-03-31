@@ -24,6 +24,8 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -573,5 +575,19 @@ public class RiftUtil {
             else return clamp(slope * (x - xMin) + yMin, yMax, yMin);
         }
         return slope * (x - xMin) + yMin;
+    }
+
+    public static boolean hasPotionEffect(EntityLivingBase entity, Potion potion) {
+        if (entity == null || potion == null) {
+            return false;
+        }
+
+        for (PotionEffect effect : entity.getActivePotionEffects()) {
+            if (effect.getPotion() == potion) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
