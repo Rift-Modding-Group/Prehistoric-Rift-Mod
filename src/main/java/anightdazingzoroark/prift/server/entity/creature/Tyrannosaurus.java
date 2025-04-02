@@ -116,7 +116,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     };
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> STOMPING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> CAN_ROAR = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(Tyrannosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(Tyrannosaurus.class, DataSerializers.VARINT);
@@ -172,7 +171,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(CAN_ROAR, true);
         this.dataManager.register(STOMPING, false);
         this.dataManager.register(ROARING, false);
         this.dataManager.register(USING_WORKSTATION, false);
@@ -410,14 +408,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         return this.dataManager.get(STOMPING);
     }
 
-    public void setCanRoar(boolean value) {
-        this.dataManager.set(CAN_ROAR, value);
-    }
-
-    public boolean canRoar() {
-        return this.dataManager.get(CAN_ROAR);
-    }
-
     @Override
     public int slotCount() {
         return 54;
@@ -437,23 +427,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     protected ResourceLocation getLootTable() {
         return LOOT;
     }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "stomping", 0, this::tyrannosaurusStomp));
-    }
-
-    private <E extends IAnimatable> PlayState tyrannosaurusStomp(AnimationEvent<E> event) {
-        if (this.isStomping()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.tyrannosaurus.stomp", false));
-        }
-        else {
-            event.getController().clearAnimationCache();
-        }
-        return PlayState.CONTINUE;
-    }
-
     protected SoundEvent getAmbientSound() {
         return RiftSounds.TYRANNOSAURUS_IDLE;
     }

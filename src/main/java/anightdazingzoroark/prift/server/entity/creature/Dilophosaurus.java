@@ -168,6 +168,12 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
                 .defineRecoverFromUseLength(5D)
                 .setNumberOfAnims(2)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.RANGED, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(5D)
+                .defineUseDurationLength(25D)
+                .defineRecoverFromUseLength(10D)
+                .finalizePoints());
         return moveMap;
     }
     //move related stuff ends here
@@ -238,6 +244,37 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
+    }
+
+    @Override
+    public void registerControllers(AnimationData data) {
+        super.registerControllers(data);
+        data.addAnimationController(new AnimationController(this, "frillSetup", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent event) {
+                if (currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveType != CreatureMove.MoveType.RANGED)) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".frill_setup", true));
+                    return PlayState.CONTINUE;
+                }
+                else {
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
+                }
+            }
+        }));
+        data.addAnimationController(new AnimationController(this, "sacSetup", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent event) {
+                if (currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveType != CreatureMove.MoveType.RANGED)) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sac_setup", true));
+                    return PlayState.CONTINUE;
+                }
+                else {
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
+                }
+            }
+        }));
     }
 
     protected SoundEvent getAmbientSound() {
