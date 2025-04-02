@@ -145,16 +145,6 @@ public class Baryonyx extends RiftWaterCreature {
         return true;
     }
 
-    public boolean attackUsingClaw(Entity entityIn) {
-        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()) / 2f);
-        if (flag) {
-            this.applyEnchantments(this, entityIn);
-            if (entityIn instanceof EntityLivingBase) ((EntityLivingBase)entityIn).addPotionEffect(new PotionEffect(MobEffects.POISON, 5 * 20, 1));
-        }
-        this.setLastAttackedEntity(entityIn);
-        return flag;
-    }
-
     @Override
     public int slotCount() {
         return 27;

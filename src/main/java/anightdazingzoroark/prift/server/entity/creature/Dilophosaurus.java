@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.DilophosaurusConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
 import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import anightdazingzoroark.prift.server.entity.projectile.DilophosaurusSpit;
@@ -37,11 +38,13 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITurretModeUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dilophosaurus"));
-    private static final DataParameter<Boolean> LEFT_CLAW = EntityDataManager.<Boolean>createKey(Dilophosaurus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> RIGHT_CLAW = EntityDataManager.<Boolean>createKey(Dilophosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Dilophosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Dilophosaurus.class, DataSerializers.BYTE);
     private RiftCreaturePart neckPart;
@@ -83,8 +86,6 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(LEFT_CLAW, false);
-        this.dataManager.register(RIGHT_CLAW, false);
         this.dataManager.register(TURRET_MODE, false);
         this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
         this.setCanPickUpLoot(true);
@@ -99,10 +100,8 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftControlledRangedAttack(this, 2.64F, 0.72F, 20));
-        this.tasks.addTask(3, new RiftDilophosaurusControlledClawAttack(this));
-        this.tasks.addTask(4, new RiftRangedAttack(this, false, 1.0D, 2.64F, 0.72F));
-        this.tasks.addTask(5, new RiftAttack.DilophosaurusAttack(this, 1.0D));
+        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(7, new RiftWander(this, 1.0D));
         this.tasks.addTask(8, new RiftLookAround(this));
@@ -149,6 +148,30 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
         return new float[]{0.3f, 1f};
     }
 
+    //move related stuff starts here
+    @Override
+    public List<CreatureMove> learnableMoves() {
+        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POISON_SPIT, CreatureMove.POISON_TRAP);
+    }
+
+    @Override
+    public List<CreatureMove> initialMoves() {
+        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POISON_SPIT, CreatureMove.POISON_TRAP);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveType.CLAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .setNumberOfAnims(2)
+                .finalizePoints());
+        return moveMap;
+    }
+    //move related stuff ends here
+
     @Override
     public float attackWidth() {
         return 2f;
@@ -157,24 +180,6 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
     @Override
     public float rangedWidth() {
         return 12f;
-    }
-
-    public boolean isUsingLeftClaw() {
-        return this.dataManager.get(LEFT_CLAW);
-    }
-
-    public void setUsingLeftClaw(boolean value) {
-        this.dataManager.set(LEFT_CLAW, value);
-        this.setActing(value);
-    }
-
-    public boolean isUsingRightClaw() {
-        return this.dataManager.get(RIGHT_CLAW);
-    }
-
-    public void setUsingRightClaw(boolean value) {
-        this.dataManager.set(RIGHT_CLAW, value);
-        this.setActing(value);
     }
 
     @Override
