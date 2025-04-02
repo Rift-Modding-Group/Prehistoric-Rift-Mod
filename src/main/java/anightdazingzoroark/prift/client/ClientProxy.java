@@ -106,6 +106,15 @@ public class ClientProxy extends ServerProxy {
         if (particle != null) this.particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
     }
 
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void spawnTrapParticle(int color, double x, double y, double z, double motX, double motY, double motZ) {
+        World world = Minecraft.getMinecraft().world;
+        RiftTrapParticle particle = new RiftTrapParticle(world, color, x, y, z, motX, motY, motZ);
+        if (world == null) return;
+        this.particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
+    }
+
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public static void registerModels(ModelRegistryEvent event) {

@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.entity.other.RiftEmbryo;
+import anightdazingzoroark.prift.server.entity.other.RiftTrap;
 import anightdazingzoroark.prift.server.entity.projectile.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
@@ -99,5 +100,13 @@ public class EntityRenderer {
             }
         });
         RiftProjectiles.DILOPHOSAURUS_SPIT.setTileEntityItemStackRenderer(new DilophosaurusSpitRenderer());
+
+
+        RenderingRegistry.registerEntityRenderingHandler(RiftTrap.class, new IRenderFactory<RiftTrap>() {
+            @Override
+            public Render<? super RiftTrap> createRenderFor(RenderManager manager) {
+                return new ProjectileRenderer<RiftTrap>(manager, Minecraft.getMinecraft().getRenderItem(), null);
+            }
+        });
     }
 }

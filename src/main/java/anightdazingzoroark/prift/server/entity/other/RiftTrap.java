@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.other;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -35,8 +37,14 @@ public class RiftTrap extends Entity {
     private static final DataParameter<Optional<UUID>> OWNER_ID = EntityDataManager.createKey(RiftTrap.class, DataSerializers.OPTIONAL_UNIQUE_ID);
 
     public RiftTrap(World worldIn) {
+        this(worldIn, null, 0xFFFFFF);
+    }
+
+    public RiftTrap(World worldIn, EntityPlayer owner, int color) {
         super(worldIn);
         this.setSize(1f, 1f);
+        if (owner != null) this.setOwnerUniqueId(owner.getUniqueID());
+        this.setParticleColor(color);
     }
 
     @Override
@@ -57,7 +65,15 @@ public class RiftTrap extends Entity {
         super.onUpdate();
 
         //for particle emission
-        if (this.world.isRemote) {}
+        if (this.world.isRemote) {
+            if (this.getDetectRange() > 0) {
+                for (int i = 0; i < 10; i++) {
+                    double x = RiftUtil.randomInRange(this.posX - this.getDetectRange(), this.posX + this.getDetectRange());
+                    double z = RiftUtil.randomInRange(this.posZ - this.getDetectRange(), this.posZ + this.getDetectRange());
+                    RiftInitialize.PROXY.spawnTrapParticle(this.getParticleColor(), x, this.posY, z, 0D, 0, 0D);
+                }
+            }
+        }
         else {
             //for what happens when the player gets too close to one
             if (this.getDetectRange() > 0) {
@@ -65,7 +81,7 @@ public class RiftTrap extends Entity {
                         this.posY,
                         this.posZ - this.getDetectRange(),
                         this.posX + this.getDetectRange(),
-                        this.posY + this.getDetectRange(),
+                        this.posY + 1,
                         this.posZ + this.getDetectRange());
 
                 List<EntityLivingBase> detectedEntities = this.world.getEntitiesWithinAABB(EntityLivingBase.class, detectionAABB, new Predicate<EntityLivingBase>() {
@@ -79,7 +95,7 @@ public class RiftTrap extends Entity {
                             this.posY,
                             this.posZ - this.getDetectRange(),
                             this.posX + this.getDetectRange(),
-                            this.posY + this.getDetectRange(),
+                            this.posY + 1,
                             this.posZ + this.getDetectRange());
 
                     List<EntityLivingBase> affectedEntities = this.world.getEntitiesWithinAABB(EntityLivingBase.class, effectAABB, new Predicate<EntityLivingBase>() {
@@ -141,7 +157,7 @@ public class RiftTrap extends Entity {
         compound.setUniqueId("OwnerUUID", this.getOwnerUniqueId());
     }
 
-    public void setParticleColor(int value) {
+    private void setParticleColor(int value) {
         this.dataManager.set(PARTICLE_COLOR, value);
     }
 
@@ -197,7 +213,7 @@ public class RiftTrap extends Entity {
         return this.dataManager.get(LIFESPAN);
     }
 
-    public void setOwnerUniqueId(UUID uniqueId) {
+    private void setOwnerUniqueId(UUID uniqueId) {
         this.dataManager.set(OWNER_ID, Optional.fromNullable(uniqueId));
     }
 
@@ -211,7 +227,7 @@ public class RiftTrap extends Entity {
             if (entityLivingBase instanceof EntityPlayer) return !(entityLivingBase.getUniqueID().equals(this.getOwnerUniqueId()));
             else if (entityLivingBase instanceof EntityTameable) {
                 EntityTameable tameable = (EntityTameable) entityLivingBase;
-                if (tameable.isTamed() && !this.getOwnerUniqueId().equals(RiftUtil.nilUUID)) {
+                if (tameable.isTamed() && tameable.getOwner() != null && !this.getOwnerUniqueId().equals(RiftUtil.nilUUID)) {
                     return !tameable.getOwner().getUniqueID().equals(this.getOwnerUniqueId());
                 }
                 else return true;
