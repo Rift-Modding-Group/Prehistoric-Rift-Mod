@@ -175,8 +175,8 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             this.creature.getNavigator().clearPath();
             this.currentInvokedMove.lookAtTarget(this.creature, this.target);
 
-            //moves that require the player to hold a mouse key go here
-            if (this.creature.currentCreatureMove().chargeType.requiresCharge()) {
+            //gradient then use, aka holding click charges up, then releasing it activates the move
+            if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
                 if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
                     this.creature.setPlayingChargedMoveAnim(0);
                 }
@@ -191,8 +191,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     this.setChargedMoveBeingUsed(false);
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 }
-                if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE &&
-                        this.animTime >= this.moveAnimInitDelayTime && this.animTime < this.moveAnimChargeUpTime && this.creature.getCurrentMoveUse() < this.maxChargeTime) {
+                if (this.animTime >= this.moveAnimInitDelayTime && this.animTime < this.moveAnimChargeUpTime && this.creature.getCurrentMoveUse() < this.maxChargeTime) {
                     this.currentInvokedMove.whileChargingUp(this.creature);
                     this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
                 }
@@ -202,12 +201,56 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
-                    if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE &&
-                            this.creature.getCurrentMoveUse() < this.maxChargeTime)
+                }
+                if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
+                        || this.currentInvokedMove.forceStopFlag) {
+                    this.creature.setPlayingChargedMoveAnim(4);
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(false);
+                }
+                if (this.animTime >= this.maxMoveAnimTime) {
+                    this.creature.setPlayingChargedMoveAnim(-1);
+                    this.currentInvokedMove.onStopExecuting(this.creature);
+                    this.setChargedMoveBeingUsed(false);
+                    double cooldownGradient = 1;
+                    if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
+                        cooldownGradient = this.creature.currentCreatureMove().maxCooldown/(double)this.creature.currentCreatureMove().maxUse;
+                    }
+                    this.creature.setMoveCooldown((int) (this.creature.getCurrentMoveUse() * cooldownGradient));
+                    this.creature.setCurrentMoveUse(0);
+                    this.moveChoiceCooldown = 20;
+                    this.animTime = 0;
+                    this.finishedAnimMarker = true;
+                    this.finishedMoveMarker = true;
+                }
+            }
+            //gradient while use, aka holding click uses the move, reaching max use automatically stops the move
+            else if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {
+                if (this.animTime == 0 && this.moveAnimInitDelayTime >= 0) {
+                    this.creature.setPlayingChargedMoveAnim(0);
+                }
+                if (this.animTime == this.moveAnimInitDelayTime) {
+                    this.creature.setPlayingChargedMoveAnim(1);
+                    this.currentInvokedMove.onStartExecuting(this.creature);
+                    this.setChargedMoveBeingUsed(true);
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
+                }
+                if (this.animTime == this.moveAnimChargeUpTime) {
+                    this.creature.setPlayingChargedMoveAnim(2);
+                    this.setChargedMoveBeingUsed(false);
+                    this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
+                }
+                if (this.animTime == this.moveAnimChargeToUseTime) {
+                    this.creature.setPlayingChargedMoveAnim(3);
+                    if (this.moveCanHitTarget(this.creature.currentCreatureMove())) this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                }
+                if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
+                    this.currentInvokedMove.whileExecuting(this.creature);
+                    if (this.creature.getCurrentMoveUse() < this.maxChargeTime)
                         this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag) {
+                    System.out.println("play exit anim");
                     this.creature.setPlayingChargedMoveAnim(4);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(false);
                 }
