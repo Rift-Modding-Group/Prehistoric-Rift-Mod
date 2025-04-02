@@ -143,8 +143,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
         return null;
     }
 
-    @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
+
 
     @Override
     public List<String> blocksToHarvest() {
@@ -187,21 +186,6 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     @Override
     public int slotCount() {
         return 9;
-    }
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
     }
 
     @Override

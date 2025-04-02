@@ -384,37 +384,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         return new Vec3d(seatTwoX, this.posY + 2.25, seatTwoZ);
     }
 
-    @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    public void useWhipAttack() {
-        AxisAlignedBB area = this.getEntityBoundingBox().grow(4D, 4D, 4D);
-        List<EntityLivingBase> list = new ArrayList<>();
-        for (EntityLivingBase entity : this.world.getEntitiesWithinAABB(EntityLivingBase.class, area, null)) {
-            if (!entity.isRiding()) {
-                if (entity instanceof EntityPlayer) {
-                    if (!entity.getUniqueID().equals(this.getOwnerId())) list.add(entity);
-                }
-                else if (entity instanceof EntityTameable) {
-                    if ((((EntityTameable) entity).isTamed())) {
-                        if (!((EntityTameable) entity).getOwner().equals(this.getOwner())) list.add(entity);
-                    }
-                    else list.add(entity);
-                }
-                else list.add(entity);
-            }
-        }
-        list.remove(this);
-
-        for (EntityLivingBase entity : list) {
-            double d0 = this.posX - entity.posX;
-            double d1 = this.posZ - entity.posZ;
-            double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
-            entity.knockBack(this, 1, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
-            entity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
-        }
-    }
-
     public void addPassengersManual() {
         AxisAlignedBB area = this.getEntityBoundingBox().grow(4D, 4D, 4D);
         int passengerSize = this.getPassengers().size();
@@ -462,21 +431,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
                 }
             }
         }
-    }
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
     }
 
     @Override

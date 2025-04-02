@@ -312,10 +312,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-
-    @Override
     public List<String> blocksToHarvest() {
         return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }
@@ -436,21 +432,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
 
     public boolean canHarvest() {
         return this.dataManager.get(CAN_HARVEST);
-    }
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
     }
 
     @Override

@@ -33,7 +33,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftDeployPartyMem.Handler.class, RiftDeployPartyMem.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftDeployPartyMem.Handler.class, RiftDeployPartyMem.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftManageUtilizingControl.Handler.class, RiftManageUtilizingControl.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftMountControl.Handler.class, RiftMountControl.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftMultipartInteract.Handler.class, RiftMultipartInteract.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftOpenInventoryFromMenu.Handler.class, RiftOpenInventoryFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftOpenWeaponInventory.Handler.class, RiftOpenWeaponInventory.class, id++, Side.SERVER);

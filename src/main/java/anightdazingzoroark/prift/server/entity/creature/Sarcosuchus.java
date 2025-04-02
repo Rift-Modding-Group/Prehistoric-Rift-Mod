@@ -161,16 +161,6 @@ public class Sarcosuchus extends RiftWaterCreature {
     }
 
     @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
     public boolean isAmphibious() {
         return true;
     }
@@ -179,9 +169,6 @@ public class Sarcosuchus extends RiftWaterCreature {
     public int slotCount() {
         return 27;
     }
-
-    @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     @Nullable

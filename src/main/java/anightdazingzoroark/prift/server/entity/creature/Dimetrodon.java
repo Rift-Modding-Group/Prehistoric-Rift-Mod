@@ -457,24 +457,6 @@ public class Dimetrodon extends RiftCreature {
         return 9;
     }
 
-    @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
-    }
-
     public EggTemperature getTemperature() {
         return EggTemperature.values()[this.dataManager.get(TEMPERATURE).byteValue()];
     }

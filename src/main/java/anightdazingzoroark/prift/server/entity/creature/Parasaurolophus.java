@@ -334,9 +334,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    @Override
     public List<String> blocksToHarvest() {
         return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }
@@ -359,21 +356,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     public boolean canHarvest() {
         return this.dataManager.get(CAN_HARVEST);
-    }
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
     }
 
     @Override

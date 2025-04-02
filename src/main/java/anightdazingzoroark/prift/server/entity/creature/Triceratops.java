@@ -335,8 +335,7 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         if (!this.world.isRemote) this.clearLeadAttachPosMessage(destroyed, player);
     }
 
-    @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
+
 
     @Override
     public List<String> blocksToHarvest() {
@@ -366,21 +365,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     @Override
     public AxisAlignedBB breakRange() {
         return new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
-    }
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
     }
 
     @Override

@@ -168,11 +168,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         return false;
     }
 
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
-    }
-
     public boolean isUsingSwimControls() {
         return this.getIsAscending() || this.getIsDescending();
     }

@@ -192,24 +192,6 @@ public class Utahraptor extends RiftCreature implements IHerder {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
-    }
-
-    @Override
     public float[] ageScaleParams() {
         return new float[]{0.3f, 1f};
     }

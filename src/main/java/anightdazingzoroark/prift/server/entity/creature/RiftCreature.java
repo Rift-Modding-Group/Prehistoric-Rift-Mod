@@ -2594,20 +2594,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public abstract Vec3d riderPos();
 
-    //this is for when shoulder surfing is not utilized
-    public void controlInput(int control, int holdAmount) {
-        this.controlInput(control, holdAmount, this.getControlAttackTargets(0), this.getControlBlockPosToBreak());
-    }
-
-    //this is for when shoulder surfing is utilized
-    public abstract void controlInput(int control, int holdAmount, Entity target, BlockPos pos);
-
-    public abstract boolean hasLeftClickChargeBar();
-
-    public abstract boolean hasRightClickChargeBar();
-
-    public abstract boolean hasSpacebarChargeBar();
-
     public boolean checkBasedOnStrength(IBlockState blockState) {
         Block block = blockState.getBlock();
         switch (this.creatureType.getBlockBreakTier()) {

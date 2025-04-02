@@ -134,16 +134,6 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
     }
 
     @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
     public boolean isAmphibious() {
         return false;
     }
@@ -151,9 +141,6 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
     public boolean canFlop() {
         return true;
     }
-
-    @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
 
     @Override
     @Nullable

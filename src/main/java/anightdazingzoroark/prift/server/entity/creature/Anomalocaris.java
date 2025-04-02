@@ -112,9 +112,6 @@ public class Anomalocaris extends RiftWaterCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    @Override
     public EnumCreatureAttribute getCreatureAttribute()
     {
         return EnumCreatureAttribute.ARTHROPOD;
@@ -127,16 +124,6 @@ public class Anomalocaris extends RiftWaterCreature {
 
     @Override
     public boolean isAmphibious() {
-        return false;
-    }
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
         return false;
     }
 

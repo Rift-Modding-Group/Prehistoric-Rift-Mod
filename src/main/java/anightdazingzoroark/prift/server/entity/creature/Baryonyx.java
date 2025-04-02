@@ -209,19 +209,6 @@ public class Baryonyx extends RiftWaterCreature {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;

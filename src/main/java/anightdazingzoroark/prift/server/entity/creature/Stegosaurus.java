@@ -300,8 +300,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         return new BlockPos(this.dataManager.get(WORKSTATION_X_POS), this.dataManager.get(WORKSTATION_Y_POS), this.dataManager.get(WORKSTATION_Z_POS));
     }
 
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
     @Override
     public List<String> blocksToHarvest() {
         return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
@@ -371,21 +369,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     }
     public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
         this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
-    }
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
     }
 
     @Override

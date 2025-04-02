@@ -212,24 +212,6 @@ public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
     }
 
     @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
-    }
-
-    @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;

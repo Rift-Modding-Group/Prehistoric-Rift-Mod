@@ -254,24 +254,6 @@ public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestW
     }
 
     @Override
-    public boolean hasLeftClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasRightClickChargeBar() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSpacebarChargeBar() {
-        return false;
-    }
-
-    @Override
-    public void controlInput(int control, int holdAmount, Entity target, BlockPos pos) {}
-
-    @Override
     public List<String> blocksToHarvest() {
         return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }
