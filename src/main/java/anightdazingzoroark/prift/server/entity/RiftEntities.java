@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.other.RiftTrap;
 import anightdazingzoroark.prift.server.entity.projectile.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
@@ -31,6 +32,7 @@ public class RiftEntities {
         registerEntity("catapult_boulder_projectile", RiftCatapultBoulder.class, miscId++, RiftInitialize.instance);
         registerEntity("thrown_bola", ThrownBola.class, miscId++, RiftInitialize.instance);
         registerEntity("dilophosaurus_spit", DilophosaurusSpit.class, miscId++, RiftInitialize.instance);
+        registerEntity("trap", RiftTrap.class, miscId++, RiftInitialize.instance);
     }
 
     public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {

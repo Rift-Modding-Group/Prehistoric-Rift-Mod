@@ -18,7 +18,7 @@
 				{
 					"name": "hips",
 					"parent": "base",
-					"pivot": [0, 0, 0],
+					"pivot": [0, 19, 0.5],
 					"cubes": [
 						{"origin": [-5, 12, -5], "size": [10, 14, 11], "uv": [41, 17]}
 					],

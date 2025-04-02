@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITurretModeUser {
+public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dilophosaurus"));
     private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Dilophosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Dilophosaurus.class, DataSerializers.BYTE);
@@ -174,6 +174,11 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
                 .defineUseDurationLength(25D)
                 .defineRecoverFromUseLength(10D)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(7.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(10D)
+                .finalizePoints());
         return moveMap;
     }
     //move related stuff ends here
@@ -206,26 +211,6 @@ public class Dilophosaurus extends RiftCreature implements IRangedAttacker, ITur
     @Override
     public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
         this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
-    }
-
-    @Override
-    public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
-        DilophosaurusSpit dilophosaurusSpit = new DilophosaurusSpit(this.world, this);
-        double d0 = target.posX - this.posX;
-        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 6.0F) - dilophosaurusSpit.posY;
-        double d2 = target.posZ - this.posZ;
-        double d3 = (double) MathHelper.sqrt(d0 * d0 + d2 * d2);
-        dilophosaurusSpit.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.5F, 1.0F);
-        dilophosaurusSpit.setDamage(2D + (double)(this.getLevel())/10D);
-        this.world.spawnEntity(dilophosaurusSpit);
-    }
-
-    @Override
-    public void controlRangedAttack(double strength) {
-        DilophosaurusSpit dilophosaurusSpit = new DilophosaurusSpit(this.world, this, (EntityPlayer)this.getControllingPassenger());
-        dilophosaurusSpit.setDamage(2D + (double)(this.getLevel())/10D);
-        dilophosaurusSpit.shoot(this, this.rotationPitch, this.rotationYaw, 0.0F, 1.5f, 1.0F);
-        this.world.spawnEntity(dilophosaurusSpit);
     }
 
     @Override

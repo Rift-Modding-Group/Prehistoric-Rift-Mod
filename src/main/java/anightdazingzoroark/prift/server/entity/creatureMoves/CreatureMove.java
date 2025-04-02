@@ -32,7 +32,7 @@ public enum CreatureMove {
     POISON_SPIT(RiftPoisonSpitMove.class, MoveType.RANGED, ChargeType.COOLDOWN_ONLY, 25, 0, 0, false, false, false),
     SHELLTER(RiftShellterMove.class, MoveType.DEFENSE, ChargeType.GRADIENT_WHILE_USE, 0, 100, 100, false, true, true),
     SHELL_SPIN(RiftShellSpinMove.class, MoveType.SPIN, ChargeType.GRADIENT_WHILE_USE, 45, 100, 300, false, true, true),
-    POISON_TRAP(null, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 200, false, false, false);
+    POISON_TRAP(RiftPoisonTrapMove.class, MoveType.STATUS, ChargeType.COOLDOWN_ONLY, 0, 0, 200, false, false, false);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveType moveType;
