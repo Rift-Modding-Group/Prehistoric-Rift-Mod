@@ -9,6 +9,7 @@ public class AnkylosaurusConfig extends RiftCreatureConfig {
     public AnkylosaurusConfig() {
         this.stats.baseHealth = 80;
         this.stats.baseDamage = 25;
+        this.stats.maxEnergy = 120;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

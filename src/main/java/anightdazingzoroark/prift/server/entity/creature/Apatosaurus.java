@@ -452,7 +452,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
 
     public void setLoaded(boolean value) {
         this.dataManager.set(LOADED, value);
-        this.setActing(value);
     }
 
     public boolean isTailWhipping() {

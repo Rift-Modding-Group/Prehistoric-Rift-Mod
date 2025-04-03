@@ -40,7 +40,7 @@ public class RiftGuiCreatureBoxPartyButton extends GuiButton {
                 drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 22, 0, 248, (int)(60 * healthPercentage), 3, 408, 300);
 
                 //energy bar
-                double energyPercentage = this.creature.getEnergy() / 20D;
+                double energyPercentage = this.creature.getEnergy() / (double)this.creature.getMaxEnergy();
                 drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 26, 0, 251, (int)(60 * energyPercentage), 3, 408, 300);
 
                 //creature icon

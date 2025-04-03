@@ -8,6 +8,7 @@ public class DilophosaurusConfig extends RiftCreatureConfig {
     public DilophosaurusConfig() {
         this.stats.baseHealth = 40;
         this.stats.baseDamage = 2;
+        this.stats.maxEnergy = 40;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

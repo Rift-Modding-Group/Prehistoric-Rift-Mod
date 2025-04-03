@@ -914,7 +914,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             //draw energy
             GlStateManager.pushMatrix();
             GlStateManager.scale(0.5f, 0.5f, 0.5f);
-            String energyString = I18n.format("tametrait.energy")+": "+ Math.ceil(this.selectedCreature.getEnergy()) +"/20";
+            String energyString = I18n.format("tametrait.energy", Math.ceil(this.selectedCreature.getEnergy()), this.selectedCreature.getMaxEnergy());
             this.fontRenderer.drawString(energyString, (int)((this.width / 2 + 86) / 0.5), (int)(((this.height - this.fontRenderer.FONT_HEIGHT) / 2 + 33) / 0.5), 0);
             GlStateManager.popMatrix();
 
@@ -923,7 +923,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
             this.mc.getTextureManager().bindTexture(background);
             drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 36, 252, 216, 110, 4, 408, 300);
 
-            double energyRatio = this.selectedCreature.getEnergy() / 20D;
+            double energyRatio = this.selectedCreature.getEnergy() / (double)this.selectedCreature.getMaxEnergy();
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.mc.getTextureManager().bindTexture(background);
             drawModalRectWithCustomSizedTexture((this.width - 110) / 2 + 141, (this.height - 4) / 2 + 36, 252, 228, (int)(110 * energyRatio), 4, 408, 300);

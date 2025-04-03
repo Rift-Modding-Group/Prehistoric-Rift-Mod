@@ -9,6 +9,7 @@ public class StegosaurusConfig extends RiftCreatureConfig {
     public StegosaurusConfig() {
         this.stats.baseHealth = 100;
         this.stats.baseDamage = 30;
+        this.stats.maxEnergy = 120;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

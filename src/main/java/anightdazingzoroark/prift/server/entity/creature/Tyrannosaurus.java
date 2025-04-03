@@ -276,24 +276,8 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     public void manageApplyApexEffect() {
         Predicate<EntityLivingBase> targetPredicate = GeneralConfig.apexAffectedWhitelist ? WEAKNESS_WHITELIST : WEAKNESS_BLACKLIST;
         for (EntityLivingBase entityLivingBase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEffectCastArea(), targetPredicate)) {
-            if (this.isTamed() && entityLivingBase instanceof EntityPlayer) {
-                if (!entityLivingBase.getUniqueID().equals(this.getOwnerId())) {
-                    entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
-                }
-            }
-            else if (this.isTamed() && entityLivingBase instanceof EntityTameable) {
-                if (((EntityTameable) entityLivingBase).isTamed()) {
-                    if (!((EntityTameable) entityLivingBase).getOwnerId().equals(this.getOwnerId())) {
-                        entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
-                    }
-                }
-                else {
-                    entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
-                }
-            }
-            else if (!this.isTamed()) {
-                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
-            }
+            if (RiftUtil.checkForNoAssociations(this, entityLivingBase)
+            && !RiftUtil.hasPotionEffect(entityLivingBase, MobEffects.WEAKNESS)) entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 600, 1));
         }
     }
 
@@ -392,7 +376,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     public void setRoaring(boolean value) {
         this.dataManager.set(ROARING, value);
-        this.setActing(value);
     }
 
     public boolean isRoaring() {
@@ -401,7 +384,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     public void setStomping(boolean value) {
         this.dataManager.set(STOMPING, value);
-        this.setActing(value);
     }
 
     public boolean isStomping() {

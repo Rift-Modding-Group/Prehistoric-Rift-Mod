@@ -140,7 +140,6 @@ public class RiftStegosaurusHitChoppingBlock extends EntityAIBase {
                         }
                         if (this.animTime == this.animLength) {
                             this.stegosaurus.setUsingWorkAnim(false);
-                            this.stegosaurus.energyActionMod++;
                             this.stegosaurus.setXP(this.stegosaurus.getXP() + 5);
                             this.animTime = -100;
                         }

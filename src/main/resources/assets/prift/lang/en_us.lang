@@ -397,7 +397,7 @@ turrettargeting.hostiles=%s will now target hostile mobs
 turrettargeting.all=%s will now target anything it deems unfriendly
 tametrait.level=Level %s
 tametrait.health=Health
-tametrait.energy=Energy
+tametrait.energy=Energy: %s/%s
 tametrait.owner=Owner: %s
 
 type.creature.back=Back

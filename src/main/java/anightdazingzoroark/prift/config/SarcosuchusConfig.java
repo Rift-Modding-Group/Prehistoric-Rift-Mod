@@ -1,13 +1,12 @@
 package anightdazingzoroark.prift.config;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.Arrays;
 
 public class SarcosuchusConfig extends RiftCreatureConfig {
     public SarcosuchusConfig() {
         this.stats.baseHealth = 80;
         this.stats.baseDamage = 15;
+        this.stats.maxEnergy = 40;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

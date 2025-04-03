@@ -9,6 +9,7 @@ public class ParasaurolophusConfig extends RiftCreatureConfig {
     public ParasaurolophusConfig() {
         this.stats.baseHealth = 60;
         this.stats.baseDamage = 0;
+        this.stats.maxEnergy = 60;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0;
         this.general.saddleItem = "minecraft:saddle";

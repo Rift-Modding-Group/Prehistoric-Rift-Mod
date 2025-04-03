@@ -40,6 +40,5 @@ public class RiftPoisonClawMove extends RiftCreatureMove {
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.resetSpeed();
-        if (user.isTamed()) user.energyActionMod++;
     }
 }

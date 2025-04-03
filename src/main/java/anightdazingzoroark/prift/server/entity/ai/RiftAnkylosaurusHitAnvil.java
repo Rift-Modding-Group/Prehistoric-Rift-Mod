@@ -126,7 +126,6 @@ public class RiftAnkylosaurusHitAnvil extends EntityAIBase {
                         }
                         if (this.animTime == this.animLength) {
                             this.ankylosaurus.setUsingWorkAnim(false);
-                            this.ankylosaurus.energyActionMod++;
                             this.ankylosaurus.setXP(this.ankylosaurus.getXP() + 5);
                             this.animTime = -100;
                         }

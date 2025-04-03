@@ -321,12 +321,12 @@ public class PlayerTamedCreaturesHelper {
                     }
 
                     //energy regen
-                    if (creature.getEnergy() < 20) {
+                    if (creature.getEnergy() < creature.getMaxEnergy()) {
                         for (int j = 0; j < timeToSubtract; j++) {
                             //natural regen
-                            if (j % creature.creatureType.getMaxEnergyRegenMod(creature.getLevel()) == 0) {
+                            if (j % creature.getMaxEnergy() == 0) {
                                 newEnergyLevel += 1;
-                                if (newEnergyLevel >= 20) break;
+                                if (creature.getEnergy() >= creature.getMaxEnergy()) break;
                             }
 
                             //food based regen
@@ -345,7 +345,7 @@ public class PlayerTamedCreaturesHelper {
                                         break;
                                     }
                                 }
-                                if (newEnergyLevel >= 20) break;
+                                if (newEnergyLevel >= creature.getMaxEnergy()) break;
                             }
                         }
                     }
@@ -368,9 +368,9 @@ public class PlayerTamedCreaturesHelper {
                     NBTTagCompound tagCompound = new NBTTagCompound();
 
                     //natural energy regen
-                    if (creature.getEnergy() < 20) {
+                    if (creature.getEnergy() < creature.getMaxEnergy()) {
                         int newEnergyLevel = creature.getEnergy();
-                        int energyDivideTimes = timeToSubtract / creature.creatureType.getMaxEnergyRegenMod(creature.getLevel());
+                        int energyDivideTimes = timeToSubtract / creature.getMaxEnergy();
                         for (int x = 0; x < energyDivideTimes; x++) {
                             newEnergyLevel += 1;
                         }
@@ -401,9 +401,9 @@ public class PlayerTamedCreaturesHelper {
     public static void regeneratePlayerBoxCreatures(EntityPlayer player) {
         for (RiftCreature creature : getPlayerTamedCreatures(player).getBoxCreatures(player.world)) {
             //regenerate energy
-            if (creature.getEnergy() < 20) {
+            if (creature.getEnergy() < creature.getMaxEnergy()) {
                 NBTTagCompound tagCompound = new NBTTagCompound();
-                tagCompound.setInteger("Energy", 20);
+                tagCompound.setInteger("Energy", creature.getMaxEnergy());
 
                 if (player.world.isRemote) {
                     getPlayerTamedCreatures(player).modifyCreature(creature.getUniqueID(), tagCompound);
@@ -491,9 +491,9 @@ public class PlayerTamedCreaturesHelper {
                     }
                 }
 
-                if (creature.getEnergy() < 20) {
+                if (creature.getEnergy() < creature.getMaxEnergy()) {
                     //natural energy regen
-                    if (time % creature.creatureType.getMaxEnergyRegenMod(creature.getLevel()) == 0) newEnergyValue++;
+                    if (time % creature.getMaxEnergy() == 0) newEnergyValue++;
 
                     //energy regen from food
                     if (GeneralConfig.creatureEatFromInventory && time % 60 == 0) {

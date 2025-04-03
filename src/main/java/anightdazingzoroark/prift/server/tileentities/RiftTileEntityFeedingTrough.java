@@ -62,7 +62,7 @@ public class RiftTileEntityFeedingTrough extends TileEntity implements IAnimatab
                                 if (!itemHandler.getStackInSlot(k).isEmpty() && creature.isFavoriteFood(itemInSlot) && creature.getHealth() < creature.getMaxHealth()) {
                                     creature.eatFoodForHealing(itemInSlot);
                                 }
-                                if (!itemHandler.getStackInSlot(k).isEmpty() && creature.isEnergyRegenItem(itemInSlot) && creature.getEnergy() < 20) {
+                                if (!itemHandler.getStackInSlot(k).isEmpty() && creature.isEnergyRegenItem(itemInSlot) && creature.getEnergy() < creature.getMaxEnergy()) {
                                     creature.eatFoodForEnergyRegen(itemInSlot);
                                 }
                             }

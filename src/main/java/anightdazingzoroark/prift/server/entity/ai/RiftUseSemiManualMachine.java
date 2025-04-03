@@ -77,7 +77,6 @@ public class RiftUseSemiManualMachine extends EntityAIBase {
                             }
                             if (this.animTime == this.animLength) {
                                 this.user.setUsingWorkAnim(false);
-                                this.creature.energyActionMod++;
                                 this.creature.setXP(this.creature.getXP() + 5);
                                 this.animTime = -1;
                             }

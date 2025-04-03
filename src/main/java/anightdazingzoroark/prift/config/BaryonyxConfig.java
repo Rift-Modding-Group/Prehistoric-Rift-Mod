@@ -8,6 +8,7 @@ public class BaryonyxConfig extends RiftCreatureConfig {
     public BaryonyxConfig() {
         this.stats.baseHealth = 60;
         this.stats.baseDamage = 10;
+        this.stats.maxEnergy = 80;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

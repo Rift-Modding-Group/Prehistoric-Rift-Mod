@@ -12,6 +12,7 @@ public class DimetrodonConfig extends RiftCreatureConfig {
     public DimetrodonConfig() {
         this.stats.baseHealth = 40;
         this.stats.baseDamage = 8;
+        this.stats.maxEnergy = 40;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.favoriteFood = RiftCreatureConfigDefaults.defaultCarnivoreFoods;

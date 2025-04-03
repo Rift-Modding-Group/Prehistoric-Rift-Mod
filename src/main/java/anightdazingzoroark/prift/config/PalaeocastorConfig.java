@@ -9,6 +9,7 @@ public class PalaeocastorConfig extends RiftCreatureConfig {
     public PalaeocastorConfig() {
         this.stats.baseHealth = 20;
         this.stats.baseDamage = 5;
+        this.stats.maxEnergy = 20;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.favoriteFood = Arrays.asList(

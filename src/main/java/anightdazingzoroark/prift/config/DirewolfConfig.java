@@ -9,6 +9,7 @@ public class DirewolfConfig extends RiftCreatureConfig {
     public DirewolfConfig() {
         this.stats.baseHealth = 30;
         this.stats.baseDamage = 6;
+        this.stats.maxEnergy = 30;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

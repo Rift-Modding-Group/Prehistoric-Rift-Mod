@@ -8,6 +8,7 @@ public class UtahraptorConfig extends RiftCreatureConfig {
     public UtahraptorConfig() {
         this.stats.baseHealth = 30;
         this.stats.baseDamage = 4;
+        this.stats.maxEnergy = 20;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

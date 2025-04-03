@@ -74,7 +74,6 @@ public class RiftHarvestOnWander extends EntityAIBase {
                 }
                 if (this.animTime == this.harvestAnimLength) {
                     this.creatureHarvester.setHarvesting(false);
-                    this.creature.energyActionMod++;
                 }
                 if (this.animTime > 30) {
                     this.animTime = -1;

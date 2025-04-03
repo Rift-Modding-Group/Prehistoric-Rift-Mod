@@ -59,6 +59,7 @@ public class ClientProxy extends ServerProxy {
         super.preInit(e);
         EntityRenderer.registerRenderers();
         BlockRenderer.registerRenderers();
+        MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());
         MinecraftForge.EVENT_BUS.register(new RiftCreatureControls());
         MinecraftForge.EVENT_BUS.register(new RiftLargeWeaponControls());
     }

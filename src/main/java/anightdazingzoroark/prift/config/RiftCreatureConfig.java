@@ -25,6 +25,9 @@ public abstract class RiftCreatureConfig {
         @SerializedName("baseDamage")
         public int baseDamage;
 
+        @SerializedName("maxEnergy")
+        public int maxEnergy;
+
         @SerializedName("healthMultiplier")
         public double healthMultiplier;
 
@@ -41,10 +44,6 @@ public abstract class RiftCreatureConfig {
 
         @SerializedName("favoriteMeals")
         public List<Meal> favoriteMeals;
-
-        //alternative to favoriteMeals for creatures that cannot be tamed but can still be bred
-        @SerializedName("breedingFood")
-        public List<String> breedingFood;
 
         @SerializedName("targetWhitelist")
         public List<String> targetWhitelist;

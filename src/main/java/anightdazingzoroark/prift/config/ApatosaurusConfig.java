@@ -8,6 +8,7 @@ public class ApatosaurusConfig extends RiftCreatureConfig {
     public ApatosaurusConfig() {
         this.stats.baseHealth = 200;
         this.stats.baseDamage = 80;
+        this.stats.maxEnergy = 160;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "prift:apatosaurus_platform";

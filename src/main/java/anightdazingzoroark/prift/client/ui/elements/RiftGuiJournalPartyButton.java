@@ -34,7 +34,7 @@ public class RiftGuiJournalPartyButton extends GuiButton {
             drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 22, 0, 32, (int)(60 * healthPercentage), 3, 192, 96);
 
             //energy bar
-            double energyPercentage = this.creature.getEnergy() / 20D;
+            double energyPercentage = this.creature.getEnergy() / (double)this.creature.getMaxEnergy();
             drawModalRectWithCustomSizedTexture(this.x + 32, this.y + 26, 0, 35, (int)(60 * energyPercentage), 3, 192, 96);
 
             //creature icon

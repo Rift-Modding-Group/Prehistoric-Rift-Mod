@@ -538,7 +538,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     public void setBlowing(boolean value) {
         this.dataManager.set(BLOWING, value);
-        this.setActing(value);
     }
 
     public boolean canBlow() {

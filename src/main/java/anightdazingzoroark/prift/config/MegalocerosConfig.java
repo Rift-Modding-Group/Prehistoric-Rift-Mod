@@ -9,6 +9,7 @@ public class MegalocerosConfig extends RiftCreatureConfig {
     public MegalocerosConfig() {
         this.stats.baseHealth = 6;
         this.stats.baseDamage = 4;
+        this.stats.maxEnergy = 20;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.2;
         this.general.saddleItem = "minecraft:saddle";

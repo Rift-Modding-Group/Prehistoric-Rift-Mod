@@ -14,6 +14,7 @@ import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.Sys;
 
 public class RiftMountEnergyBar {
     private static final ResourceLocation energyHud = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
@@ -35,29 +36,33 @@ public class RiftMountEnergyBar {
                 ScaledResolution resolution = event.getResolution();
 
                 Minecraft.getMinecraft().getTextureManager().bindTexture(energyHud);
-                renderEnergy(resolution.getScaledWidth(), resolution.getScaledHeight(), energy);
+                renderEnergy(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), energy);
                 Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
                 GuiIngameForge.right_height += 10;
             }
         }
     }
 
-    private void renderEnergy(int xSize, int ySize, int energy) {
+    private void renderEnergy(RiftCreature creature, int xSize, int ySize, int energy) {
         GlStateManager.enableBlend();
         GlStateManager.color(1.0f, 1.0f, 1.0f);
         int left = xSize / 2 + 82;
         int top = ySize - GuiIngameForge.right_height;
 
-        for (int i = 0; i < 10; i++) {
+        int renderableEnergy = Math.min(creature.getMaxEnergy(), 60) / 2;
+        for (int i = 0; i < renderableEnergy; i++) {
             int halfIcon = i * 2 + 1;
 
-            RiftUtil.drawTexturedModalRect(left - i * 8, top, 0, 0, textureXSize, textureYSize);
+            float xOffset = left - (i % 10 * 8);
+            float yOffset = top - ((float)Math.floor(i / 10f) * 8) - (4f * (float) Math.floor(i / 10f));
+
+            RiftUtil.drawTexturedModalRect(xOffset, yOffset, 0, 0, textureXSize, textureYSize);
 
             if (halfIcon < energy) {
-                RiftUtil.drawTexturedModalRect(left - i * 8, top, 9, posY, textureXSize, textureYSize);
+                RiftUtil.drawTexturedModalRect(xOffset, yOffset, 9, posY, textureXSize, textureYSize);
             }
             else if (halfIcon == energy) {
-                RiftUtil.drawTexturedModalRect(left - i * 8, top, 18, posY, textureXSize, textureYSize);
+                RiftUtil.drawTexturedModalRect(xOffset, yOffset, 18, posY, textureXSize, textureYSize);
             }
         }
         GlStateManager.disableBlend();

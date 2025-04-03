@@ -90,7 +90,6 @@ public class RiftParasaurStokeCombustor extends EntityAIBase {
                     }
                     if (this.animTime == this.animLength) {
                         this.parasaur.setBlowing(false);
-                        this.parasaur.energyActionMod++;
                     }
                     if (this.animTime > 120) {
                         this.animTime = -1;

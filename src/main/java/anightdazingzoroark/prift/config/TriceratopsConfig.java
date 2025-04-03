@@ -1,14 +1,12 @@
 package anightdazingzoroark.prift.config;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.Arrays;
-import java.util.List;
 
 public class TriceratopsConfig extends RiftCreatureConfig {
     public TriceratopsConfig() {
         this.stats.baseHealth = 80;
         this.stats.baseDamage = 25;
+        this.stats.maxEnergy = 120;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

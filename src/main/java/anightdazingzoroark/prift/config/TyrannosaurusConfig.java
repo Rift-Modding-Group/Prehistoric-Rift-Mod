@@ -9,6 +9,7 @@ public class TyrannosaurusConfig extends RiftCreatureConfig {
     public TyrannosaurusConfig() {
         this.stats.baseHealth = 160;
         this.stats.baseDamage = 35;
+        this.stats.maxEnergy = 160;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

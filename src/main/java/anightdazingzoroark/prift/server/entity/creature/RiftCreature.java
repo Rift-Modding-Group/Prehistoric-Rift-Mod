@@ -93,7 +93,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> SADDLED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> LARGE_WEAPON = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> ACTING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_USE_LEFT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_LEFT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> LEFT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -180,8 +179,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int energyMod;
     private int energyRegenMod;
     private int energyRegenModDelay;
-    public int energyActionMod;
-    private int energyActionModCountdown;
     private int eatFromInvCooldown;
     private int eatFromInvForEnergyCooldown;
     private int eatFromInvForGrowthCooldown;
@@ -193,8 +190,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
     private boolean steerable = true;
-    protected Entity forcedAttackTarget;
-    protected BlockPos forcedBreakPos;
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
     protected double speed;
@@ -213,6 +208,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public float oldScale;
     private int healthRegen;
     protected double attackDamage;
+    private final int maxEnergy;
     private final double healthLevelMultiplier;
     private final double damageLevelMultiplier;
     private double damageMultiplier = 1D;
@@ -226,21 +222,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
+        this.creatureType = creatureType;
         this.minCreatureHealth = ((double) RiftConfigHandler.getConfig(creatureType).stats.baseHealth)/8;
         this.maxCreatureHealth = RiftConfigHandler.getConfig(creatureType).stats.baseHealth;
         this.attackDamage = RiftConfigHandler.getConfig(creatureType).stats.baseDamage;
+        this.maxEnergy = RiftConfigHandler.getConfig(creatureType).stats.maxEnergy;
         this.healthLevelMultiplier = RiftConfigHandler.getConfig(creatureType).stats.healthMultiplier;
         this.damageLevelMultiplier = RiftConfigHandler.getConfig(creatureType).stats.damageMultiplier;
         this.ignoreFrustumCheck = true;
-        this.creatureType = creatureType;
         this.setSpeed(0f);
         this.setWaterSpeed(1f);
         this.setScaleForAge(false);
         this.energyMod = 0;
         this.energyRegenMod = 0;
         this.energyRegenModDelay = 0;
-        this.energyActionMod = 0;
-        this.energyActionModCountdown = 0;
         this.eatFromInvCooldown = 0;
         this.eatFromInvForEnergyCooldown = 0;
         this.eatFromInvForGrowthCooldown = 0;
@@ -271,8 +266,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(BEHAVIOR, (byte) TameBehaviorType.ASSIST.ordinal());
         this.dataManager.register(SADDLED, false);
         this.dataManager.register(LARGE_WEAPON, (byte) RiftLargeWeaponType.NONE.ordinal());
-        this.dataManager.register(ENERGY, 20);
-        this.dataManager.register(ACTING, false);
+        this.dataManager.register(ENERGY, this.getMaxEnergy());
         this.dataManager.register(CAN_USE_LEFT_CLICK, true);
         this.dataManager.register(USING_LEFT_CLICK, false);
         this.dataManager.register(LEFT_CLICK_USE, 0);
@@ -428,12 +422,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageAttributes();
             this.manageDiscoveryByPlayer();
             this.manageMoveAndWeaponCooldown();
+            this.updateEnergyMove();
             if (this.canUtilizeCloaking()) this.manageCloaking();
             if (this.isNocturnal()) this.manageSleepSchedule();
             if (this.isTamed()) {
-                this.updateEnergyMove();
-                this.updateEnergyActions();
-                this.resetEnergyActionMod();
                 this.lowEnergyEffects();
                 this.manageLoveCooldown();
                 if (GeneralConfig.creatureEatFromInventory) this.eatFromInventory();
@@ -657,49 +649,31 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void updateEnergyMove() {
-        if (this.isMoving(false) && !this.isActing()) {
+        //when moving and not using a move, energy reduces every 5 seconds, or 2.5 seconds when sprinting
+        if (this.isMoving(false) && this.currentCreatureMove() == null) {
             this.energyMod++;
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
-            if (this.isBeingRidden()) {
-                boolean isSprinting = this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting();
-                if (this.energyMod > (int)((double)this.creatureType.getMaxEnergyModMovement(this.getLevel()) * (isSprinting ? 0.75D : 1D))) {
-                    this.setEnergy(this.getEnergy() - 1);
-                    this.energyMod = 0;
-                }
-            }
-            else {
-                if (this.energyMod > this.creatureType.getMaxEnergyModMovement(this.getLevel())) {
-                    this.setEnergy(this.getEnergy() - 1);
-                    this.energyMod = 0;
-                }
+
+            int movementMaxMod = (this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting()) ? 50 : 100;
+
+            if (this.energyMod >= movementMaxMod) {
+                this.setEnergy(Math.max(this.getEnergy() - 1, 0));
+                this.energyMod = 0;
             }
         }
-        else if (!this.isMoving(false) && !this.isActing()) {
+        //when idle and not using a move, energy regenerates
+        else if (!this.isMoving(false) && this.currentCreatureMove() == null) {
             this.energyMod = 0;
-            if (this.energyRegenModDelay <= 20) this.energyRegenModDelay++;
+            //delay for energy regeneration immediately upon being idle
+            if (this.energyRegenModDelay < 20) this.energyRegenModDelay++;
+            //once delay is over the regen starts
             else this.energyRegenMod++;
-            if (this.energyRegenMod > this.creatureType.getMaxEnergyRegenMod(this.getLevel())) {
-                this.setEnergy(this.getEnergy() + 1);
+
+            //regen energy every 1 second
+            if (this.energyRegenModDelay >= 20 && this.energyRegenMod >= 20) {
+                this.setEnergy(Math.min(this.getEnergy() + 1, this.getMaxEnergy()));
                 this.energyRegenMod = 0;
-                this.energyActionMod = 0;
-            }
-        }
-    }
-
-    private void updateEnergyActions() {
-        if (this.energyActionMod >= this.creatureType.getMaxEnergyModAction(this.getLevel())) {
-            this.setEnergy(this.getEnergy() - 2);
-            this.energyActionMod = 0;
-        }
-    }
-
-    private void resetEnergyActionMod() {
-        if (!this.isActing() && this.energyActionMod > 0) {
-            this.energyActionModCountdown++;
-            if (this.energyActionModCountdown > 60) {
-                this.energyActionMod = 0;
-                this.energyActionModCountdown = 0;
             }
         }
     }
@@ -727,7 +701,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         else this.eatFromInvCooldown = 0;
 
-        if (this.getEnergy() < 20) {
+        if (this.getEnergy() < this.getMaxEnergy()) {
             this.eatFromInvForEnergyCooldown++;
             for (int i = this.creatureInventory.getSizeInventory(); i >= minSlot; i--) {
                 ItemStack itemInSlot = this.creatureInventory.getStackInSlot(i);
@@ -853,7 +827,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getLoveCooldown() == 0 && !this.isSitting() && PlayerTamedCreaturesHelper.getPlayerParty(player).size() == PlayerTamedCreaturesHelper.getMaxPartySize(player) && PlayerTamedCreaturesHelper.getPlayerBox(player).size() == PlayerTamedCreaturesHelper.getMaxBoxSize(player)) {
                         player.sendStatusMessage(new TextComponentTranslation("reminder.cannot_breed_more_creatures"), false);
                     }
-                    else if (this.isEnergyRegenItem(itemstack) && this.getEnergy() < 20) {
+                    else if (this.isEnergyRegenItem(itemstack) && this.getEnergy() < this.getMaxEnergy()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setEnergy(this.getEnergy() + this.getEnergyRegenItemValue(itemstack));
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
@@ -1280,9 +1254,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //move related stuff starts here
-    public List<CreatureMove> learnableMoves() {
-        return new ArrayList<>();
-    }
+    public abstract List<CreatureMove> learnableMoves();
 
     public List<CreatureMove> getLearnedMoves() {
         return this.dataManager.get(MOVE_LIST);
@@ -1298,9 +1270,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(MOVE_LIST, values);
     }
 
-    public List<CreatureMove> initialMoves() {
-        return new ArrayList<>();
-    }
+    public abstract List<CreatureMove> initialMoves();
 
     public CreatureMove currentCreatureMove() {
         if (this.dataManager.get(CURRENT_MOVE) >= 0) return CreatureMove.values()[this.dataManager.get(CURRENT_MOVE)];
@@ -1523,9 +1493,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(PLAY_INFINITE_MOVE_ANIM, value);
     }
 
-    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
-        return new HashMap<>();
-    }
+    public abstract Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType();
     //move related stuff ends here
 
     public boolean getUsingLargeWeapon() {
@@ -2041,7 +2009,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setAttacking(boolean value) {
         this.dataManager.set(ATTACKING, value);
-        this.setActing(value);
     }
 
     public boolean isStomping() {
@@ -2052,17 +2019,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public boolean isRoaring() {
         return false;
-    }
-
-    public void setRoaring(boolean value) {}
-
-    public boolean isRangedAttacking() {
-        return this.dataManager.get(RANGED_ATTACKING);
-    }
-
-    public void setRangedAttacking(boolean value) {
-        this.dataManager.set(RANGED_ATTACKING, value);
-        this.setActing(value);
     }
 
     //old move anims end here
@@ -2076,11 +2032,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public int getEnergy() {
-        return RiftUtil.clamp(this.dataManager.get(ENERGY).intValue(), 0, 20);
+        return this.dataManager.get(ENERGY);
     }
 
     public void setEnergy(int energy) {
-        this.dataManager.set(ENERGY, RiftUtil.clamp(energy, 0, 20));
+        this.dataManager.set(ENERGY, energy);
+    }
+
+    public int getMaxEnergy() {
+        return this.maxEnergy;
     }
 
     public int getTameProgress() {
@@ -2228,14 +2188,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setLargeWeapon(RiftLargeWeaponType value) {
         this.dataManager.set(LARGE_WEAPON, (byte) value.ordinal());
-    }
-
-    public boolean isActing() {
-        return this.dataManager.get(ACTING);
-    }
-
-    public void setActing(boolean value) {
-        this.dataManager.set(ACTING, Boolean.valueOf(value));
     }
 
     public boolean canUseLeftClick() {

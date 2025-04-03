@@ -8,6 +8,7 @@ public class SaurophaganaxConfig extends RiftCreatureConfig {
     public SaurophaganaxConfig() {
         this.stats.baseHealth = 100;
         this.stats.baseDamage = 60;
+        this.stats.maxEnergy = 80;
         this.stats.healthMultiplier = 0.1;
         this.stats.damageMultiplier = 0.5;
         this.general.saddleItem = "minecraft:saddle";

@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class Dodo extends RiftCreature implements IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dodo"));
@@ -123,6 +124,11 @@ public class Dodo extends RiftCreature implements IHerder {
     @Override
     public List<CreatureMove> initialMoves() {
         return Collections.singletonList(CreatureMove.BOUNCE);
+    }
+
+    @Override
+    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        return Collections.emptyMap();
     }
     //move related stuff ends here
 

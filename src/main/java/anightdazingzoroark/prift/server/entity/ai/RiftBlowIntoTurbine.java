@@ -78,7 +78,6 @@ public class RiftBlowIntoTurbine extends EntityAIBase {
                     }
                     if (this.animTime == this.animLength) {
                         this.user.setUsingWorkAnim(false);
-                        this.creature.energyActionMod++;
                         this.creature.setXP(this.creature.getXP() + 5);
                     }
                     if (this.animTime > 120) {
