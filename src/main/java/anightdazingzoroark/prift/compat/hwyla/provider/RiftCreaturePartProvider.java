@@ -40,7 +40,7 @@ public class RiftCreaturePartProvider implements IWailaEntityProvider {
                 int currentHealth = (int)Math.ceil(part.getParent().getHealth());
                 int maxHealth = (int)part.getParent().getMaxHealth();
                 currenttip.add(I18n.format("hwyla.health", currentHealth, maxHealth));
-                if (part.getParent().isTamed()) currenttip.add(I18n.format("hwyla.energy", part.getParent().getEnergy(), part.getParent().getMaxEnergy()));
+                currenttip.add(I18n.format("hwyla.energy", part.getParent().getEnergy(), part.getParent().getMaxEnergy()));
             }
         }
         return currenttip;

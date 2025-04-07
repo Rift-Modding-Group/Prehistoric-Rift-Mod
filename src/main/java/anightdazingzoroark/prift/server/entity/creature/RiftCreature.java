@@ -363,6 +363,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public IEntityLivingData onInitialSpawn(@Nonnull DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
         super.onInitialSpawn(difficulty, livingdata);
         this.setAgeInDays(1);
+        this.setEnergy(this.getMaxEnergy());
         //manage level based on distance from 0, 0
         double distFromCenter = Math.sqrt(this.posX * this.posX + this.posZ * this.posZ);
         double level = Math.floor((distFromCenter / GeneralConfig.levelingRadius)) * GeneralConfig.levelingRadisIncrement + RiftUtil.randomInRange(1, 10) + this.levelAddFromDifficulty();
@@ -679,7 +680,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void lowEnergyEffects() {
-        if (this.getEnergy() > 0 && this.getEnergy() <= 6) this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 2));
+        if (this.getEnergy() > 0 && this.getEnergy() <= this.getWeaknessEnergy()) this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 2));
         else if (this.getEnergy() == 0) this.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 40, 255));
     }
 
@@ -2041,6 +2042,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public int getMaxEnergy() {
         return this.maxEnergy;
+    }
+
+    public int getWeaknessEnergy() {
+        return Math.min(20, (int) (0.3 * this.getMaxEnergy()));
     }
 
     public int getTameProgress() {

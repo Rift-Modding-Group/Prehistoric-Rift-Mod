@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
@@ -21,7 +22,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     private int moveAnimUseTime; //time until end of use anim
     private int animTime = 0;
     private boolean canBeExecutedMountedResult = false;
-    private boolean reduceFinalUseTimeFlag = true;
 
     private Entity target;
 
@@ -32,7 +32,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.creature.isBeingRidden() && (this.creature.usingMoveOne() || this.creature.usingMoveTwo() || this.creature.usingMoveThree());
+        return this.creature.isBeingRidden() && this.creature.getEnergy() > 0 && (this.creature.usingMoveOne() || this.creature.usingMoveTwo() || this.creature.usingMoveThree());
     }
 
     @Override
@@ -47,7 +47,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
             this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
-            if (this.canBeExecutedMountedResult) {
+            //execute the move when conditions while mounted are true and there's enough energy
+            if (this.canBeExecutedMountedResult && this.energySufficientForMove()) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(0));
 
                 this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
@@ -56,9 +57,15 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
             }
+            //insufficient energy returns false and a message saying not enough energy
+            else if (!this.energySufficientForMove()) {
+                ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.creature.getName()), false);
+                this.currentInvokedMove = null;
+                this.target = null;
+            }
             else {
                 if (this.currentInvokedMove.cannotExecuteMountedMessage() != null) {
-                    ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage()), false);
+                    ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage(), this.creature.getName()), false);
                 }
                 this.currentInvokedMove = null;
                 this.target = null;
@@ -69,7 +76,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
             this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
-            if (this.canBeExecutedMountedResult) {
+            //execute the move when conditions while mounted are true and there's enough energy
+            if (this.canBeExecutedMountedResult && this.energySufficientForMove()) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(1));
 
                 this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
@@ -78,9 +86,15 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
             }
+            //insufficient energy returns false and a message saying not enough energy
+            else if (!this.energySufficientForMove()) {
+                ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.creature.getName()), false);
+                this.currentInvokedMove = null;
+                this.target = null;
+            }
             else {
                 if (this.currentInvokedMove.cannotExecuteMountedMessage() != null) {
-                    ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage()), false);
+                    ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage(), this.creature.getName()), false);
                 }
                 this.currentInvokedMove = null;
                 this.target = null;
@@ -91,7 +105,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
             this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
-            if (this.canBeExecutedMountedResult) {
+            //execute the move when conditions while mounted are true and there's enough energy
+            if (this.canBeExecutedMountedResult && this.energySufficientForMove()) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(2));
 
                 this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
@@ -100,15 +115,21 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
             }
+            //insufficient energy returns false and a message saying not enough energy
+            else if (!this.energySufficientForMove()) {
+                ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.creature.getName()), false);
+                this.currentInvokedMove = null;
+                this.target = null;
+            }
             else {
                 if (this.currentInvokedMove.cannotExecuteMountedMessage() != null) {
-                    ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage()), false);
+                    ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage(), this.creature.getName()), false);
                 }
                 this.currentInvokedMove = null;
                 this.target = null;
             }
         }
-        if (this.currentInvokedMove != null && this.canBeExecutedMountedResult) {
+        if (this.currentInvokedMove != null && this.canBeExecutedMountedResult && this.energySufficientForMove()) {
             this.animTime = 0;
             this.creature.setPlayingInfiniteMoveAnim(false);
             this.finishFlag = false;
@@ -121,7 +142,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.currentInvokedMove.onStopExecuting(this.creature);
             this.currentInvokedMove = null;
         }
-        this.reduceFinalUseTimeFlag = true;
         this.creature.setMultistepMoveStep(0);
         this.canBeExecutedMountedResult = false;
         this.creature.setPlayingInfiniteMoveAnim(false);
@@ -134,7 +154,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
 
     @Override
     public void updateTask() {
-        if (this.currentInvokedMove == null || !this.canBeExecutedMountedResult) {
+        if (this.currentInvokedMove == null || !this.canBeExecutedMountedResult || !this.energySufficientForMove()) {
+            this.creature.setMoveOneUse(0);
+            this.creature.setMoveTwoUse(0);
+            this.creature.setMoveThreeUse(0);
             this.finishFlag = true;
             return;
         }
@@ -154,7 +177,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     //makes the anim prematurely stop
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
                 }
-                if (this.animTime == this.moveAnimChargeUpTime || (this.creature.currentCreatureMove().stopUponFullCharge && this.getUse() >= this.creature.currentCreatureMove().maxUse)) {
+                if (this.animTime == this.moveAnimChargeUpTime
+                        || (this.creature.currentCreatureMove().stopUponFullCharge && this.creature.getCurrentMoveUse() >= this.creature.currentCreatureMove().maxUse)
+                        || !this.energySufficientForChargedMove()) {
                     this.creature.setPlayingChargedMoveAnim(2);
                     this.setChargedMoveBeingUsed(false);
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
@@ -166,18 +191,21 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.creature.setPlayingChargedMoveAnim(3);
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
                     if (this.creature.currentCreatureMove().chargeUpAffectsUseTime) {
-                        this.currentInvokedMove.setUseValue(this.getUse());
-                        this.moveAnimUseTime += this.getUse();
-                        this.maxMoveAnimTime += this.getUse();
+                        this.currentInvokedMove.setUseValue(this.creature.getCurrentMoveUse());
+                        this.moveAnimUseTime += this.creature.getCurrentMoveUse();
+                        this.maxMoveAnimTime += this.creature.getCurrentMoveUse();
                     }
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
-                        || this.currentInvokedMove.forceStopFlag) {
+                        || this.currentInvokedMove.forceStopFlag
+                        || !this.energySufficientForChargedMove()) {
                     this.creature.setPlayingChargedMoveAnim(4);
-                    if (this.currentInvokedMove.forceStopFlag && this.creature.currentCreatureMove().chargeUpAffectsUseTime) {
+                    if ((this.currentInvokedMove.forceStopFlag && this.creature.currentCreatureMove().chargeUpAffectsUseTime)
+                            || !this.energySufficientForChargedMove()) {
+                        System.out.println("test");
                         this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
                         this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
                     }
@@ -189,7 +217,14 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
                     }
-                    this.creature.setMoveCooldown(this.getUse() * cooldownGradient);
+                    this.creature.setMoveCooldown(this.creature.getCurrentMoveUse() * cooldownGradient);
+                    int energyToDeduct = Math.round(RiftUtil.slopeResult(this.creature.getCurrentMoveUse(),
+                            true,
+                            0,
+                            this.currentInvokedMove.creatureMove.maxUse,
+                            this.currentInvokedMove.creatureMove.energyUse[0],
+                            this.currentInvokedMove.creatureMove.energyUse[1]));
+                    this.creature.setEnergy(Math.max(this.creature.getEnergy() - energyToDeduct, this.creature.getWeaknessEnergy()));
                     this.finishFlag = true;
                     this.animTime = 0;
                     this.creature.setMoveOneUse(0);
@@ -230,9 +265,9 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
-                    this.currentInvokedMove.setUseValue(this.getUse());
-                    this.moveAnimUseTime += this.getUse();
-                    this.maxMoveAnimTime += this.getUse();
+                    this.currentInvokedMove.setUseValue(this.creature.getCurrentMoveUse());
+                    this.moveAnimUseTime += this.creature.getCurrentMoveUse();
+                    this.maxMoveAnimTime += this.creature.getCurrentMoveUse();
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
@@ -240,13 +275,11 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime < this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag
                         || !this.getMoveIsUsing()
-                        || (this.getUse() >= this.creature.currentCreatureMove().maxUse)) {
+                        || (this.creature.getCurrentMoveUse() >= this.creature.currentCreatureMove().maxUse)
+                        || !this.energySufficientForChargedMove()) {
                     this.creature.setPlayingChargedMoveAnim(4);
-                    if (this.reduceFinalUseTimeFlag) {
-                        this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
-                        this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
-                        this.reduceFinalUseTimeFlag = false;
-                    }
+                    this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
+                    this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
                     this.creature.setPlayingInfiniteMoveAnim(false);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
@@ -256,7 +289,14 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;
                     }
-                    this.creature.setMoveCooldown(this.getUse() * cooldownGradient);
+                    this.creature.setMoveCooldown(this.creature.getCurrentMoveUse() * cooldownGradient);
+                    int energyToDeduct = Math.round(RiftUtil.slopeResult(this.creature.getCurrentMoveUse(),
+                            true,
+                            0,
+                            this.currentInvokedMove.creatureMove.maxUse,
+                            this.currentInvokedMove.creatureMove.energyUse[0],
+                            this.currentInvokedMove.creatureMove.energyUse[1]));
+                    this.creature.setEnergy(Math.max(this.creature.getEnergy() - energyToDeduct, this.creature.getWeaknessEnergy()));
                     this.finishFlag = true;
                     this.animTime = 0;
                     this.creature.setMoveOneUse(0);
@@ -265,7 +305,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (!this.finishFlag) {
                     this.animTime++;
-                    if (this.getMoveIsUsing() && this.getUse() < this.creature.currentCreatureMove().maxUse) {
+                    if (this.getMoveIsUsing() && this.creature.getCurrentMoveUse() < this.creature.currentCreatureMove().maxUse && this.energySufficientForChargedMove()) {
                         this.moveAnimUseTime++;
                         this.maxMoveAnimTime++;
                     }
@@ -316,6 +356,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                         this.creature.setCurrentMoveUse(0);
                     }
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setMultistepMoveStep(0);
+                    this.creature.setEnergy(this.creature.getEnergy() - this.creature.currentCreatureMove().energyUse[0]);
                     this.finishFlag = true;
                 }
                 if (!this.finishFlag) {
@@ -327,20 +368,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
             }
         }
-    }
-
-    private int getUse() {
-        if (this.creature.currentCreatureMove() == null) return 0;
-        int movePos = this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove());
-        switch (movePos) {
-            case 0:
-                return this.creature.getMoveOneUse();
-            case 1:
-                return this.creature.getMoveTwoUse();
-            case 2:
-                return this.creature.getMoveThreeUse();
-        }
-        return 0;
     }
 
     private void setChargedMoveBeingUsed(boolean value) {
@@ -378,6 +405,22 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             return this.creature.getClosestTargetInFront();
         }
         else return this.creature.getClosestTargetInFront(true);
+    }
+
+    private boolean energySufficientForMove() {
+        if (this.currentInvokedMove.creatureMove.chargeType.requiresCharge()) {
+            return this.creature.getEnergy() - this.currentInvokedMove.creatureMove.energyUse[0] >= this.creature.getWeaknessEnergy();
+        }
+        return this.creature.getEnergy() - this.currentInvokedMove.creatureMove.energyUse[0] >= 0;
+    }
+
+    private boolean energySufficientForChargedMove() {
+        return this.creature.getEnergy() - RiftUtil.slopeResult(this.creature.getCurrentMoveUse(),
+                true,
+                0,
+                this.currentInvokedMove.creatureMove.maxUse,
+                this.currentInvokedMove.creatureMove.energyUse[0],
+                this.currentInvokedMove.creatureMove.energyUse[1]) >= this.creature.getWeaknessEnergy();
     }
 
     private boolean setCanBeExecutedMountedResult() {

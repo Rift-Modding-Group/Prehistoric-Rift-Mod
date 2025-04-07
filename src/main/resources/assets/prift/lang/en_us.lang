@@ -239,7 +239,7 @@ radial.choice.set_wander_harvest=Enable Wander Harvesting
 radial.choice.clear_wander_harvest=Disable Wander Harvesting
 
 reminder.insufficient_pack_members=Not enough pack members to use!
-reminder.insufficient_energy=%s does not have enough energy to use this!
+reminder.insufficient_energy=%s does not have enough energy to use this move!
 reminder.low_energy=%s is low on energy!
 reminder.no_energy=%s is out of energy! It needs to rest in order to regenerate!
 reminder.not_egg_owner=You don't own this egg!
@@ -252,7 +252,7 @@ reminder.crank_blocked=%s's path is being blocked! Make sure there's sufficient 
 reminder.crank_path_outside_creature_box_bounds=%s's path is outside the boundaries of the creature box it's deployed from! Make sure there's enough distance!
 reminder.cannot_place_turbine=Cannot place turbine! Make sure that there's a 3 block tall and 3 block wide area for the turbine to be placed on!
 reminder.incapacitated=%s has been incapacitated! Revive it or else it will perish!
-reminder.insufficient_light_blast_charge=This creature does not have enough charge to do perform a light blast! Kill 10 monsters to activate!
+reminder.insufficient_light_blast_charge=%s does not have enough charge to do perform this move! Kill 10 monsters to activate!
 reminder.discovered_journal_entry=You have discovered the %s! Read about how to tame it by pressing %s!
 reminder.unlocked_journal_entry=You have unlocked the journal entry for the %s! Check it out by pressing %s!
 reminder.taming_finished_to_party=%s has been added to your party! Press J to check it out!
