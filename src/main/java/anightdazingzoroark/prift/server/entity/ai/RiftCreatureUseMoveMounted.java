@@ -142,6 +142,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             this.currentInvokedMove.onStopExecuting(this.creature);
             this.currentInvokedMove = null;
         }
+        this.creature.resetUseButtonsForMove();
         this.creature.setMultistepMoveStep(0);
         this.canBeExecutedMountedResult = false;
         this.creature.setPlayingInfiniteMoveAnim(false);
@@ -180,6 +181,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime == this.moveAnimChargeUpTime
                         || (this.creature.currentCreatureMove().stopUponFullCharge && this.creature.getCurrentMoveUse() >= this.creature.currentCreatureMove().maxUse)
                         || !this.energySufficientForChargedMove()) {
+                    this.creature.setCanUseButtonForMove(false);
                     this.creature.setPlayingChargedMoveAnim(2);
                     this.setChargedMoveBeingUsed(false);
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
@@ -205,7 +207,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.creature.setPlayingChargedMoveAnim(4);
                     if ((this.currentInvokedMove.forceStopFlag && this.creature.currentCreatureMove().chargeUpAffectsUseTime)
                             || !this.energySufficientForChargedMove()) {
-                        System.out.println("test");
                         this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
                         this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
                     }
@@ -213,6 +214,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.creature.setPlayingChargedMoveAnim(-1);
+                    this.creature.resetUseButtonsForMove();
                     int cooldownGradient = 1;
                     if (this.creature.currentCreatureMove().maxCooldown > 0 && this.creature.currentCreatureMove().maxUse > 0) {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/this.creature.currentCreatureMove().maxUse;

@@ -43,7 +43,6 @@ import java.util.Map;
 
 public class Saurophaganax extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/saurophaganax"));
-    private static final DataParameter<Integer> LIGHT_BLAST_CHARGE = EntityDataManager.createKey(Saurophaganax.class, DataSerializers.VARINT);
     private RiftCreaturePart neckPart;
     private RiftCreaturePart bodyFrontPart;
     private RiftCreaturePart tail0Part;
@@ -83,19 +82,6 @@ public class Saurophaganax extends RiftCreature {
     protected void entityInit() {
         super.entityInit();
         this.setCanPickUpLoot(true);
-        this.dataManager.register(LIGHT_BLAST_CHARGE, 0);
-    }
-
-    @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-        //manage weakening
-        if (!this.world.isRemote) {
-            if (this.world.isDaytime() && !this.isInCave()) this.setLightBlastCharge(0);
-            if (this.isTamed()) {
-                this.setRightClickUse(this.lightBlastCharge() * 10);
-            }
-        }
     }
 
     @Override
@@ -198,14 +184,6 @@ public class Saurophaganax extends RiftCreature {
     @Override
     public boolean isNocturnal() {
         return true;
-    }
-
-    public int lightBlastCharge() {
-        return this.dataManager.get(LIGHT_BLAST_CHARGE);
-    }
-
-    public void setLightBlastCharge(int value) {
-        this.dataManager.set(LIGHT_BLAST_CHARGE, value);
     }
 
     @Nullable

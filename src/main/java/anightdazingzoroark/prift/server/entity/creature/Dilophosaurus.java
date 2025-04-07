@@ -108,12 +108,6 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
     }
 
     @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-        this.manageCanForcedUseSpit();
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
 
@@ -125,10 +119,6 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
         if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
         if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
         if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
-    }
-
-    private void manageCanForcedUseSpit() {
-        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
     }
 
     @Override

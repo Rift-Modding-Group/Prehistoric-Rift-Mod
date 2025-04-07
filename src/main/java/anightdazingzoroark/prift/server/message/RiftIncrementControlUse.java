@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import io.netty.buffer.ByteBuf;
@@ -50,24 +49,7 @@ public class RiftIncrementControlUse implements IMessage {
             EntityLivingBase entity = (EntityLivingBase) playerEntity.world.getEntityByID(message.entityId);
 
             if (!playerEntity.world.isRemote) {
-                if (entity instanceof RiftCreature) {
-                    RiftCreature creature = (RiftCreature) entity;
-                    switch (message.control) {
-                        case 0:
-                            creature.setLeftClickUse(creature.getLeftClickUse() + 1);
-                            break;
-                        case 1:
-                            if (creature.getEnergy() > 6) creature.setRightClickUse(creature.getRightClickUse() + 1);
-                            break;
-                        case 2:
-                            if (creature.getEnergy() > 6) creature.setSpacebarUse(creature.getSpacebarUse() + 1);
-                            break;
-                        case 3:
-                            if (creature.getEnergy() > 6) creature.setMiddleClickUse(creature.getMiddleClickUse() + 1);
-                            break;
-                    }
-                }
-                else if (entity instanceof RiftCatapult) {
+                if (entity instanceof RiftCatapult) {
                     RiftCatapult catapult = (RiftCatapult) entity;
                     catapult.setLeftClickUse(catapult.getLeftClickUse() + 1);
                 }

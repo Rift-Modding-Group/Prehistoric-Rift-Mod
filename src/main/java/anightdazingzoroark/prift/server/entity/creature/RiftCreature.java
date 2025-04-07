@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
@@ -19,9 +18,6 @@ import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
-import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
-import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
-import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
 import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.enums.CreatureDiet;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
@@ -59,7 +55,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -94,20 +89,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Byte> LARGE_WEAPON = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CAN_USE_LEFT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_LEFT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> LEFT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> LEFT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CAN_USE_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_RIGHT_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> RIGHT_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> RIGHT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CAN_USE_MIDDLE_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_MIDDLE_CLICK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> MIDDLE_CLICK_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CAN_USE_SPACEBAR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_SPACEBAR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> SPACEBAR_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> SPACEBAR_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HAS_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> JUST_SPAWNED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -268,20 +254,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(LARGE_WEAPON, (byte) RiftLargeWeaponType.NONE.ordinal());
         this.dataManager.register(ENERGY, this.getMaxEnergy());
         this.dataManager.register(CAN_USE_LEFT_CLICK, true);
-        this.dataManager.register(USING_LEFT_CLICK, false);
-        this.dataManager.register(LEFT_CLICK_USE, 0);
-        this.dataManager.register(LEFT_CLICK_COOLDOWN, 0);
         this.dataManager.register(CAN_USE_RIGHT_CLICK, false);
-        this.dataManager.register(USING_RIGHT_CLICK, false);
-        this.dataManager.register(RIGHT_CLICK_USE, 0);
-        this.dataManager.register(RIGHT_CLICK_COOLDOWN, 0);
         this.dataManager.register(CAN_USE_MIDDLE_CLICK, true);
-        this.dataManager.register(USING_MIDDLE_CLICK, false);
-        this.dataManager.register(MIDDLE_CLICK_USE, 0);
         this.dataManager.register(CAN_USE_SPACEBAR, true);
         this.dataManager.register(USING_SPACEBAR, false);
         this.dataManager.register(SPACEBAR_USE, 0);
-        this.dataManager.register(SPACEBAR_COOLDOWN, 0);
         this.dataManager.register(HAS_TARGET, false);
         this.dataManager.register(AGE_TICKS, 0);
         this.dataManager.register(JUST_SPAWNED, true);
@@ -460,7 +437,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             //thru server events, the 2nd move, which is activated via right click, is disabled
             //this line here ensures that when right click is released, the 2nd move can be
             //used again
-            if (!this.canUseRightClick() && !settings.keyBindUseItem.isKeyDown()) RiftMessages.WRAPPER.sendToServer(new RiftCanUseRightClick(this, true));
+            if (!this.canUseRightClick()
+                    && !settings.keyBindUseItem.isKeyDown()
+                    && this.currentCreatureMove() == null) RiftMessages.WRAPPER.sendToServer(new RiftCanUseMoveTriggerButton(this, 1, true));
             
             //for using large weapons
             if (this.creatureType.canHoldLargeWeapon
@@ -470,9 +449,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             //for using moves and controlling movement
             else {
-                boolean leftClickOnly = settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown();
+                boolean leftClickOnly = settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown() && this.canUseLeftClick();
                 boolean rightClickOnly = !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown() && this.canUseRightClick();
-                boolean middleClickOnly = !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown();
+                boolean middleClickOnly = !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown() && this.canUseMiddleClick();
                 boolean jump = settings.keyBindJump.isKeyDown();
 
                 //for using moves
@@ -2195,36 +2174,34 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(LARGE_WEAPON, (byte) value.ordinal());
     }
 
+    public void setCanUseButtonForMove(boolean value) {
+        if (this.currentCreatureMove() == null) return;
+        int movePos = this.getLearnedMoves().indexOf(CreatureMove.values()[this.dataManager.get(CURRENT_MOVE)]);
+        switch (movePos) {
+            case 0:
+                this.setCanUseLeftClick(value);
+                break;
+            case 1:
+                this.setCanUseRightClick(value);
+                break;
+            case 2:
+                this.setCanUseMiddleClick(value);
+                break;
+        }
+    }
+
+    public void resetUseButtonsForMove() {
+        this.setCanUseLeftClick(true);
+        this.setCanUseRightClick(true);
+        this.setCanUseMiddleClick(true);
+    }
+
     public boolean canUseLeftClick() {
         return this.dataManager.get(CAN_USE_LEFT_CLICK);
     }
 
     public void setCanUseLeftClick(boolean value) {
         this.dataManager.set(CAN_USE_LEFT_CLICK, Boolean.valueOf(value));
-    }
-
-    public boolean isUsingLeftClick() {
-        return this.dataManager.get(USING_LEFT_CLICK);
-    }
-
-    public void setUsingLeftClick(boolean value) {
-        this.dataManager.set(USING_LEFT_CLICK, Boolean.valueOf(value));
-    }
-
-    public int getLeftClickUse() {
-        return this.dataManager.get(LEFT_CLICK_USE).intValue();
-    }
-
-    public void setLeftClickUse(int value) {
-        this.dataManager.set(LEFT_CLICK_USE, value);
-    }
-
-    public int getLeftClickCooldown() {
-        return Math.max(0, this.dataManager.get(LEFT_CLICK_COOLDOWN));
-    }
-
-    public void setLeftClickCooldown(int value) {
-        this.dataManager.set(LEFT_CLICK_COOLDOWN, Math.max(0, value));
     }
 
     public boolean canUseRightClick() {
@@ -2235,32 +2212,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(CAN_USE_RIGHT_CLICK, value);
     }
 
-    public boolean isUsingRightClick() {
-        return this.dataManager.get(USING_RIGHT_CLICK);
-    }
-
-    public void setUsingRightClick(boolean value) {
-        this.dataManager.set(USING_RIGHT_CLICK, value);
-    }
-
-    public int getRightClickUse() {
-        return this.dataManager.get(RIGHT_CLICK_USE).intValue();
-    }
-
-    public void setRightClickUse(int value) {
-        this.dataManager.set(RIGHT_CLICK_USE, value);
-    }
-
     public boolean alwaysShowRightClickUse() {
         return false;
-    }
-
-    public int getRightClickCooldown() {
-        return this.dataManager.get(RIGHT_CLICK_COOLDOWN);
-    }
-
-    public void setRightClickCooldown(int value) {
-        this.dataManager.set(RIGHT_CLICK_COOLDOWN, value);
     }
 
     public boolean canUseMiddleClick() {
@@ -2269,22 +2222,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setCanUseMiddleClick(boolean value) {
         this.dataManager.set(CAN_USE_MIDDLE_CLICK, value);
-    }
-
-    public boolean isUsingMiddleClick() {
-        return this.dataManager.get(USING_MIDDLE_CLICK);
-    }
-
-    public void setUsingMiddleClick(boolean value) {
-        this.dataManager.set(USING_MIDDLE_CLICK, value);
-    }
-
-    public int getMiddleClickUse() {
-        return this.dataManager.get(MIDDLE_CLICK_USE);
-    }
-
-    public void setMiddleClickUse(int value) {
-        this.dataManager.set(MIDDLE_CLICK_USE, value);
     }
 
     public boolean canUseSpacebar() {
@@ -2309,14 +2246,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setSpacebarUse(int value) {
         this.dataManager.set(SPACEBAR_USE, value);
-    }
-
-    public int getSpacebarCooldown() {
-        return this.dataManager.get(SPACEBAR_COOLDOWN);
-    }
-
-    public void setSpacebarCooldown(int value) {
-        this.dataManager.set(SPACEBAR_COOLDOWN, value);
     }
 
     public boolean hasTarget() {

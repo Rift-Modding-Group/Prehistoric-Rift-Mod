@@ -26,9 +26,6 @@ public class ParasaurolophusRenderer extends RiftCreatureRenderer {
         GeckoLibCache.getInstance().parser.setValue("parasaurolophus_move_use", this.moveAnimModifierBody(animatable));
         GeckoLibCache.getInstance().parser.setValue("parasaurolophus_move_use_shoulder", this.moveAnimModifierShoulder(animatable));
 
-        //variables
-        GeckoLibCache.getInstance().parser.setValue("use_blow", animatable.getRightClickUse());
-
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());
         model.getBone("headSaddle").get().setHidden(!animatable.isSaddled());

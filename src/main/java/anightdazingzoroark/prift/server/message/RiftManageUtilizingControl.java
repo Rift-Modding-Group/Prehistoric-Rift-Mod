@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.EntityLivingBase;
@@ -51,21 +50,7 @@ public class RiftManageUtilizingControl implements IMessage {
         private void handle(RiftManageUtilizingControl message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             EntityLivingBase entity = (EntityLivingBase) playerEntity.world.getEntityByID(message.entityId);
-            if (entity instanceof RiftCreature) {
-                RiftCreature creature = (RiftCreature) entity;
-                switch (message.control) {
-                    case 0:
-                        creature.setUsingLeftClick(message.isUsing);
-                        break;
-                    case 1:
-                        creature.setUsingRightClick(message.isUsing);
-                        break;
-                    case 2:
-                        creature.setUsingSpacebar(message.isUsing);
-                        break;
-                }
-            }
-            else if (entity instanceof RiftLargeWeapon) {
+            if (entity instanceof RiftLargeWeapon) {
                 RiftLargeWeapon weapon = (RiftLargeWeapon) entity;
                 weapon.setUsingLeftClick(message.isUsing);
             }

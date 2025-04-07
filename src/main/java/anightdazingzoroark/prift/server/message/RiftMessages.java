@@ -29,7 +29,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftJournalEditOne.Handler.class, RiftJournalEditOne.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftJournalEditOne.Handler.class, RiftJournalEditOne.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftLaunchLWeaponProjectile.Handler.class, RiftLaunchLWeaponProjectile.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftCanUseRightClick.Handler.class, RiftCanUseRightClick.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftCanUseMoveTriggerButton.Handler.class, RiftCanUseMoveTriggerButton.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftDeployPartyMem.Handler.class, RiftDeployPartyMem.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftDeployPartyMem.Handler.class, RiftDeployPartyMem.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftManageUtilizingControl.Handler.class, RiftManageUtilizingControl.class, id++, Side.SERVER);

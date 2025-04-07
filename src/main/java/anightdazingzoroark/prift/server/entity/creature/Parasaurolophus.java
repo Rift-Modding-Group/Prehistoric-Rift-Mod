@@ -145,12 +145,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-        this.manageCanBlow();
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
 
@@ -180,11 +174,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.readWorkstationDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
         this.readTurretModeDataFromNBT(compound);
-    }
-
-    private void manageCanBlow() {
-        if (this.getRightClickCooldown() > 0) this.setRightClickCooldown(this.getRightClickCooldown() - 1);
-        if (this.getRightClickCooldown() == 0) this.setCanBlow(true);
     }
 
     //blowing stuff starts here

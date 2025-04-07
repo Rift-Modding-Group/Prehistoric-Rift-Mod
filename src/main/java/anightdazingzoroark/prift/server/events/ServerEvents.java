@@ -17,7 +17,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.items.RiftItems;
-import anightdazingzoroark.prift.server.message.RiftCanUseRightClick;
+import anightdazingzoroark.prift.server.message.RiftCanUseMoveTriggerButton;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.google.common.base.Predicate;
@@ -281,7 +281,7 @@ public class ServerEvents {
             EntityPlayer player = (EntityPlayer)event.getEntityMounting();
             if (event.getEntityBeingMounted() instanceof RiftCreature) {
                 RiftCreature creature = (RiftCreature) event.getEntityBeingMounted();
-                RiftMessages.WRAPPER.sendToServer(new RiftCanUseRightClick(creature, false));
+                RiftMessages.WRAPPER.sendToServer(new RiftCanUseMoveTriggerButton(creature, 1, false));
                 NonPotionEffectsHelper.setRiding(player, true);
             }
         }
