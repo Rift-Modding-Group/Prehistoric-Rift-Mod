@@ -20,6 +20,9 @@ public class RiftLeapAttackMove extends RiftCreatureMove {
 
     @Override
     public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth()) {
+            return MovePriority.HIGH;
+        }
         return MovePriority.NONE;
     }
 

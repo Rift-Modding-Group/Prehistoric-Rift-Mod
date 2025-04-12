@@ -1344,6 +1344,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.getMoveCooldown(this.getLearnedMoves().indexOf(this.currentCreatureMove()));
     }
 
+    public int getMoveCooldown(CreatureMove move) {
+        if (!this.getLearnedMoves().contains(move)) return 0;
+        int index = this.getLearnedMoves().indexOf(move);
+        switch (index) {
+            case 0:
+                return this.getMoveOneCooldown();
+            case 1:
+                return this.getMoveTwoCooldown();
+            case 2:
+                return this.getMoveThreeCooldown();
+        }
+        return 0;
+    }
+
     public int getMoveCooldown(int index) {
         switch (index) {
             case 0:

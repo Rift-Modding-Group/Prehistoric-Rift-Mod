@@ -94,12 +94,16 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     public void updateTask() {
         //randomly select a move to use, after which it will use that move
         if (this.finishedMoveMarker) {
+            //cooldown of 1 second after using a move
             if (this.moveChoiceCooldown > 0) this.moveChoiceCooldown--;
             else {
                 this.creature.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
 
                 //manage pathing towards target
-                if (this.creature.getLearnedMoves().stream().anyMatch(m -> m.moveType == CreatureMove.MoveType.RANGED || (m.moveType == CreatureMove.MoveType.CHARGE && m.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE))) {
+                //non melee attacks are to be prioritized
+                if (this.creature.getLearnedMoves().stream().anyMatch(m -> (m.moveType == CreatureMove.MoveType.RANGED
+                        || (m.moveType == CreatureMove.MoveType.CHARGE && m.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE)
+                        || m.moveType == CreatureMove.MoveType.LEAP) && this.creature.getMoveCooldown(m) == 0)) {
                     if (this.creature.getDistance(this.target) > this.creature.rangedWidth()) {
                         this.creature.getNavigator().tryMoveToEntityLiving(this.target, 1.0D);
                     }
@@ -117,6 +121,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         this.creature.getNavigator().clearPath();
                     }
                 }
+                //mostly for melee attacks
                 else {
                     if (this.creature.getDistance(this.target) > this.creature.attackWidth()) {
                         this.creature.getNavigator().tryMoveToEntityLiving(this.target, 1.0D);
@@ -126,12 +131,16 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     }
                 }
 
-                //select move
+                //selecting and starting to use move
                 if (this.creature.getNavigator().noPath()) {
+                    //select a valid move
                     CreatureMove selectedMove = this.selectMoveForUse();
-                    if (selectedMove != null && this.moveCanHitTarget(selectedMove)) {
-                        this.creature.setCurrentCreatureMove(selectedMove);
-                        this.currentInvokedMove = this.creature.currentCreatureMove().invokeMove();
+
+                    if (selectedMove != null) {
+                        //invoke move
+                        this.currentInvokedMove = selectedMove.invokeMove();
+
+                        //generate charge time
                         if (selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
                             //if move involves charging into target, or is gradient while use,
                             //the max charge time is the whole value
@@ -139,33 +148,41 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             if (selectedMove.moveType == CreatureMove.MoveType.CHARGE)
                                 this.maxChargeTime = this.creature.currentCreatureMove().maxUse;
                             else this.maxChargeTime = RiftUtil.randomInRange(this.currentInvokedMove.unmountedChargeBounds()[0], this.currentInvokedMove.unmountedChargeBounds()[1]);
-
-                            //set move anim markers
-                            this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                            this.moveAnimChargeUpTime = this.moveAnimInitDelayTime + this.maxChargeTime;
-                            this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
-                            this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
-                            this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
                         }
                         else if (selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {
                             this.maxChargeTime = RiftUtil.randomInRange(this.currentInvokedMove.unmountedChargeBounds()[0], this.currentInvokedMove.unmountedChargeBounds()[1]);
+                        }
 
-                            this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                            this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                            this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
-                            this.moveAnimUseTime = this.moveAnimChargeToUseTime + this.maxChargeTime;
-                            this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+                        //when move is finally selected, set up everything for animatin the move
+                        if (this.moveCanHitTarget(selectedMove) && this.energySufficientForMove(selectedMove)) {
+                            this.creature.setCurrentCreatureMove(selectedMove);
+
+                            if (selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
+                                //set move anim markers
+                                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                                this.moveAnimChargeUpTime = this.moveAnimInitDelayTime + this.maxChargeTime;
+                                this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUseTime();
+                                this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationTime();
+                                this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+                            }
+                            else if (selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {
+                                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
+                                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
+                                this.moveAnimUseTime = this.moveAnimChargeToUseTime + this.maxChargeTime;
+                                this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUseTime();
+                            }
+                            else {
+                                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
+                                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
+                                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
+                                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
+                                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                            }
+                            this.finishedMoveMarker = false;
+                            this.animTime = 0;
+                            this.creature.setPlayingInfiniteMoveAnim(false);
                         }
-                        else {
-                            this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                            this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                            this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
-                            this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
-                            this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
-                        }
-                        this.finishedMoveMarker = false;
-                        this.animTime = 0;
-                        this.creature.setPlayingInfiniteMoveAnim(false);
                     }
                 }
             }
@@ -216,12 +233,21 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/(double)this.creature.currentCreatureMove().maxUse;
                     }
                     this.creature.setMoveCooldown((int) (this.creature.getCurrentMoveUse() * cooldownGradient));
+                    this.creature.setEnergy(Math.max(this.creature.getEnergy() - Math.round(RiftUtil.slopeResult(this.creature.getCurrentMoveUse(),
+                            true,
+                            0,
+                            this.currentInvokedMove.creatureMove.maxUse,
+                            this.currentInvokedMove.creatureMove.energyUse[0],
+                            this.currentInvokedMove.creatureMove.energyUse[1])), this.creature.getWeaknessEnergy()));
                     this.creature.setCurrentMoveUse(0);
                     this.moveChoiceCooldown = 20;
                     this.animTime = 0;
                     this.finishedAnimMarker = true;
                     this.finishedMoveMarker = true;
                 }
+
+                //updating move anim tick
+                if (!this.finishedMoveMarker) this.animTime++;
             }
             //gradient while use, aka holding click uses the move, reaching max use automatically stops the move
             else if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {
@@ -250,7 +276,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag) {
-                    System.out.println("play exit anim");
                     this.creature.setPlayingChargedMoveAnim(4);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(false);
                 }
@@ -263,12 +288,21 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/(double)this.creature.currentCreatureMove().maxUse;
                     }
                     this.creature.setMoveCooldown((int) (this.creature.getCurrentMoveUse() * cooldownGradient));
+                    this.creature.setEnergy(Math.max(this.creature.getEnergy() - Math.round(RiftUtil.slopeResult(this.creature.getCurrentMoveUse(),
+                            true,
+                            0,
+                            this.currentInvokedMove.creatureMove.maxUse,
+                            this.currentInvokedMove.creatureMove.energyUse[0],
+                            this.currentInvokedMove.creatureMove.energyUse[1])), this.creature.getWeaknessEnergy()));
                     this.creature.setCurrentMoveUse(0);
                     this.moveChoiceCooldown = 20;
                     this.animTime = 0;
                     this.finishedAnimMarker = true;
                     this.finishedMoveMarker = true;
                 }
+
+                //updating move anim tick
+                if (!this.finishedMoveMarker) this.animTime++;
             }
             //anything else thats just one click then use goes here
             else {
@@ -298,6 +332,8 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         this.creature.setMultistepMoveStep(2);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
+                    if (this.currentInvokedMove != null
+                            && this.currentInvokedMove.creatureMove == CreatureMove.LEAP_ATTACK) System.out.println("end move");
                     this.creature.setUsingUnchargedAnim(false);
                     this.currentInvokedMove.onStopExecuting(this.creature);
                     //the cloak move only has a cooldown when removing the cloaking
@@ -306,15 +342,22 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     }
                     //all other moves should have their cooldown applied as usual
                     else if (this.creature.currentCreatureMove() != CreatureMove.CLOAK) this.creature.setMoveCooldown(this.creature.currentCreatureMove().maxCooldown);
+                    this.creature.setEnergy(this.creature.getEnergy() - this.creature.currentCreatureMove().energyUse[0]);
                     this.moveChoiceCooldown = 20;
                     this.animTime = 0;
                     this.finishedAnimMarker = true;
                     this.finishedMoveMarker = true;
                 }
-            }
 
-            //updating move anim tick
-            if (!this.finishedMoveMarker) this.animTime++;
+                //updating move anim tick
+                if (!this.finishedMoveMarker) {
+                    this.animTime++;
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite && this.animTime >= this.moveAnimChargeToUseTime && !this.currentInvokedMove.forceStopFlag) {
+                        this.moveAnimUseTime++;
+                        this.maxMoveAnimTime++;
+                    }
+                }
+            }
         }
     }
 
@@ -335,7 +378,10 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     }
 
     private boolean moveCanHitTarget(CreatureMove move) {
-        if (move.moveType == CreatureMove.MoveType.RANGED || move.moveType == CreatureMove.MoveType.STATUS || move.moveType == CreatureMove.MoveType.CHARGE) return true;
+        if (move.moveType == CreatureMove.MoveType.RANGED
+                || move.moveType == CreatureMove.MoveType.STATUS
+                || move.moveType == CreatureMove.MoveType.CHARGE
+                || move.moveType == CreatureMove.MoveType.LEAP) return true;
         else return this.creature.getDistance(this.target) <= this.creature.attackWidth();
     }
 
@@ -354,5 +400,19 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         }
         if (movesForSelecting.isEmpty()) return null;
         else return movesForSelecting.getFirst();
+    }
+
+    private boolean energySufficientForMove(CreatureMove move) {
+        if (move.chargeType.requiresCharge()) {
+            return this.creature.getEnergy() - RiftUtil.slopeResult(
+                    this.maxChargeTime,
+                    true,
+                    0,
+                    move.maxUse,
+                    move.energyUse[0],
+                    move.energyUse[1]
+            ) >= this.creature.getWeaknessEnergy();
+        }
+        return this.creature.getEnergy() - move.energyUse[0] >= 0;
     }
 }
