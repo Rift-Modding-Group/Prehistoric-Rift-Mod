@@ -5,7 +5,6 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -44,18 +43,18 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     public void startExecuting() {
         if (this.creature.usingMoveOne()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(0).invokeMove();
-            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
+            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveAnimType);
             this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
             //execute the move when conditions while mounted are true and there's enough energy
             if (this.canBeExecutedMountedResult && this.energySufficientForMove()) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(0));
 
-                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
-                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
-                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getStartMoveDelayPoint();
+                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpPoint();
+                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUsePoint();
+                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationPoint();
+                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUsePoint();
             }
             //insufficient energy returns false and a message saying not enough energy
             else if (!this.energySufficientForMove()) {
@@ -73,18 +72,18 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         }
         else if (this.creature.usingMoveTwo()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(1).invokeMove();
-            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
+            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveAnimType);
             this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
             //execute the move when conditions while mounted are true and there's enough energy
             if (this.canBeExecutedMountedResult && this.energySufficientForMove()) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(1));
 
-                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
-                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
-                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getStartMoveDelayPoint();
+                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpPoint();
+                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUsePoint();
+                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationPoint();
+                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUsePoint();
             }
             //insufficient energy returns false and a message saying not enough energy
             else if (!this.energySufficientForMove()) {
@@ -102,18 +101,18 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         }
         else if (this.creature.usingMoveThree()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(2).invokeMove();
-            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveType);
+            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveAnimType);
             this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
             //execute the move when conditions while mounted are true and there's enough energy
             if (this.canBeExecutedMountedResult && this.energySufficientForMove()) {
                 this.creature.setCurrentCreatureMove(this.creature.getLearnedMoves().get(2));
 
-                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getStartMoveDelayPoint();
-                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpPoint();
-                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getChargeUpToUsePoint();
-                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getUseDurationPoint();
-                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveType).getRecoverFromUsePoint();
+                this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getStartMoveDelayPoint();
+                this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpPoint();
+                this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUsePoint();
+                this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationPoint();
+                this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUsePoint();
             }
             //insufficient energy returns false and a message saying not enough energy
             else if (!this.energySufficientForMove()) {
@@ -402,8 +401,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         return false;
     }
 
-    private Entity getAttackTarget(CreatureMove.MoveType creatureMoveType) {
-        if (creatureMoveType != CreatureMove.MoveType.RANGED && creatureMoveType != CreatureMove.MoveType.CHARGE) {
+    private Entity getAttackTarget(CreatureMove.MoveAnimType creatureMoveType) {
+        if (creatureMoveType != CreatureMove.MoveAnimType.RANGED && creatureMoveType != CreatureMove.MoveAnimType.CHARGE) {
             return this.creature.getClosestTargetInFront();
         }
         else return this.creature.getClosestTargetInFront(true);

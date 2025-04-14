@@ -3,10 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
-import anightdazingzoroark.prift.config.AnkylosaurusConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -16,11 +13,7 @@ import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
-import com.codetaylor.mc.pyrotech.modules.tech.basic.block.spi.BlockAnvilBase;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockHorizontal;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
@@ -31,23 +24,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -275,18 +259,18 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     @Override
-    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
-        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
-        moveMap.put(CreatureMove.MoveType.TAIL, new RiftCreatureMoveAnimator(this)
+    public Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveAnimType.TAIL, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(12.5D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.SPIN, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.SPIN, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineRecoverFromUseLength(5D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.DEFENSE, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.DEFENSE, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineRecoverFromUseLength(5D)
                 .finalizePoints());
@@ -308,7 +292,7 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     private boolean isHidingInShell() {
-        return this.currentCreatureMove() != null && (this.currentCreatureMove().moveType == CreatureMove.MoveType.DEFENSE || this.currentCreatureMove().moveType == CreatureMove.MoveType.SPIN);
+        return this.currentCreatureMove() != null && (this.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.DEFENSE || this.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.SPIN);
     }
 
     @Override

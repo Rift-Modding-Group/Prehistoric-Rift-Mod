@@ -1487,7 +1487,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(PLAY_INFINITE_MOVE_ANIM, value);
     }
 
-    public abstract Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType();
+    public abstract Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType();
     //move related stuff ends here
 
     public boolean getUsingLargeWeapon() {
@@ -1655,7 +1655,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setUsingUnchargedAnim(boolean value) {
         if (this.currentCreatureMove() == null) return;
         if (this.currentCreatureMove().chargeType.requiresCharge()) return;
-        switch (this.currentCreatureMove().moveType) {
+        switch (this.currentCreatureMove().moveAnimType) {
             case HEAD:
                 this.setUsingHeadTypeMove(value);
                 break;
@@ -1691,7 +1691,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setMultistepMoveStep(int step) {
         if (this.currentCreatureMove() == null) return;
-        switch (this.currentCreatureMove().moveType) {
+        switch (this.currentCreatureMove().moveAnimType) {
             case CHARGE:
                 if (step == 0) {
                     this.setUsingChargeTypeMoveMultistepOne(true);
@@ -1982,7 +1982,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //when the creature is cloaked and uses an attack move, the cloak gets undone
         //cloak also gets undone if creature is recently hit
         //and there will be a cooldown on cloaking until it will come back
-        if ((this.currentCreatureMove() != null && this.isCloaked() && this.currentCreatureMove().moveType != CreatureMove.MoveType.STATUS)
+        if ((this.currentCreatureMove() != null && this.isCloaked() && this.currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.STATUS)
         || (this.isCloaked() && this.isRecentlyHit())) {
             this.setCloaked(false);
 
@@ -2938,7 +2938,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             public PlayState test(AnimationEvent event) {
                 if (currentCreatureMove() != null && !currentCreatureMove().chargeType.requiresCharge()) {
                     String multiNameNum = "";
-                    if (animatorsForMoveType().get(currentCreatureMove().moveType).getNumberOfAnims() > 1
+                    if (animatorsForMoveType().get(currentCreatureMove().moveAnimType).getNumberOfAnims() > 1
                     && chosenAnimFromMultiple == -1) {
                         chosenAnimFromMultiple = RiftUtil.randomInRange(0, 1);
                         multiNameNum = "_"+chosenAnimFromMultiple;

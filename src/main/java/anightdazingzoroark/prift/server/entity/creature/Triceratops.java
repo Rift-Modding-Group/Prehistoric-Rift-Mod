@@ -12,7 +12,6 @@ import anightdazingzoroark.prift.server.entity.interfaces.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -180,19 +179,19 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     }
 
     @Override
-    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
-        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
-        moveMap.put(CreatureMove.MoveType.HEAD, new RiftCreatureMoveAnimator(this)
+    public Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveAnimType.HEAD, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.STOMP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(7.5D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.CHARGE, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.CHARGE, new RiftCreatureMoveAnimator(this)
                 .defineStartMoveDelayLength(5D)
                 .defineRecoverFromUseLength(5D)
                 .finalizePoints());

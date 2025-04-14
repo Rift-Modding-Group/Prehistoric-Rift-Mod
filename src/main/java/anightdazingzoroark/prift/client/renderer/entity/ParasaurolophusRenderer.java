@@ -1,16 +1,11 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.model.entity.RiftCreatureModel;
-import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 import software.bernie.geckolib3.resource.GeckoLibCache;
 
 public class ParasaurolophusRenderer extends RiftCreatureRenderer {
@@ -39,7 +34,7 @@ public class ParasaurolophusRenderer extends RiftCreatureRenderer {
 
     private double moveAnimModifierBody(RiftCreature animatable) {
         if (animatable.currentCreatureMove() == null) return 0;
-        if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.RANGED) {
+        if (animatable.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.RANGED) {
             return RiftUtil.slopeResult(animatable.getCurrentMoveUse(), true, 0, animatable.currentCreatureMove().maxUse, 0, 12.5D);
         }
         return 0;
@@ -47,7 +42,7 @@ public class ParasaurolophusRenderer extends RiftCreatureRenderer {
 
     private double moveAnimModifierShoulder(RiftCreature animatable) {
         if (animatable.currentCreatureMove() == null) return 0;
-        if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.RANGED) {
+        if (animatable.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.RANGED) {
             return RiftUtil.slopeResult(animatable.getCurrentMoveUse(), true, 0, animatable.currentCreatureMove().maxUse, 0, 30D);
         }
         return 0;

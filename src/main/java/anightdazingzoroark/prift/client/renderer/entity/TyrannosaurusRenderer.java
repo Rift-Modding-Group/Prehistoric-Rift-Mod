@@ -34,7 +34,7 @@ public class TyrannosaurusRenderer extends RiftCreatureRenderer {
 
     private double moveAnimModifier(RiftCreature animatable) {
         if (animatable.currentCreatureMove() == null) return 0;
-        if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.STATUS) {
+        if (animatable.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.STATUS) {
             return RiftUtil.slopeResult(animatable.getCurrentMoveUse(), true, 0, animatable.currentCreatureMove().maxUse, 0, 20D);
         }
         return 0;

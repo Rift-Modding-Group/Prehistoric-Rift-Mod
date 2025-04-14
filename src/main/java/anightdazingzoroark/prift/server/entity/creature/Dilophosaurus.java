@@ -3,20 +3,12 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
-import anightdazingzoroark.prift.config.DilophosaurusConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.interfaces.IRangedAttacker;
 import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
-import anightdazingzoroark.prift.server.entity.projectile.DilophosaurusSpit;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -24,13 +16,9 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.controller.AnimationController;
@@ -150,21 +138,21 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
     }
 
     @Override
-    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
-        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
-        moveMap.put(CreatureMove.MoveType.CLAW, new RiftCreatureMoveAnimator(this)
+    public Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveAnimType.CLAW, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
                 .setNumberOfAnims(2)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.RANGED, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.RANGED, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineChargeUpToUseLength(5D)
                 .defineUseDurationLength(25D)
                 .defineRecoverFromUseLength(10D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.STATUS, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.STATUS, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(7.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(10D)
@@ -227,7 +215,7 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
         data.addAnimationController(new AnimationController(this, "frillSetup", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
-                if (currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveType != CreatureMove.MoveType.RANGED)) {
+                if (currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) {
                     event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".frill_setup", true));
                     return PlayState.CONTINUE;
                 }
@@ -240,7 +228,7 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
         data.addAnimationController(new AnimationController(this, "sacSetup", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
-                if (currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveType != CreatureMove.MoveType.RANGED)) {
+                if (currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) {
                     event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sac_setup", true));
                     return PlayState.CONTINUE;
                 }

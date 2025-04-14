@@ -2,52 +2,31 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.SSRCompatUtils;
 import anightdazingzoroark.prift.client.RiftSounds;
-import anightdazingzoroark.prift.client.ui.RiftJournalScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
-import anightdazingzoroark.prift.config.ApatosaurusConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
-import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
-import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
-import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
 import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.items.RiftItems;
-import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
-import anightdazingzoroark.prift.server.message.*;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.*;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemFood;
-import net.minecraft.item.ItemMonsterPlacer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -338,19 +317,19 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     @Override
-    public Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> animatorsForMoveType() {
-        Map<CreatureMove.MoveType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
-        moveMap.put(CreatureMove.MoveType.STOMP, new RiftCreatureMoveAnimator(this)
+    public Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType() {
+        Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveAnimType.STOMP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(50D)
                 .defineChargeUpToUseLength(2D)
                 .defineRecoverFromUseLength(8D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.TAIL, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.TAIL, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineChargeUpToUseLength(1D)
                 .defineRecoverFromUseLength(4D)
                 .finalizePoints());
-        moveMap.put(CreatureMove.MoveType.DEFENSE, this.currentCreatureMove() == CreatureMove.BIDE ?
+        moveMap.put(CreatureMove.MoveAnimType.DEFENSE, this.currentCreatureMove() == CreatureMove.BIDE ?
                 new RiftCreatureMoveAnimator(this)
                         .defineStartMoveDelayLength(5D)
                         .defineChargeUpToUseLength(2.5D)

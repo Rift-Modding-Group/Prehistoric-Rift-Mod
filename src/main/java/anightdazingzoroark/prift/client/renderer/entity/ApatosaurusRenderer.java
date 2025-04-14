@@ -51,7 +51,7 @@ public class ApatosaurusRenderer extends RiftCreatureRenderer {
 
     private double moveAnimModifierBody(RiftCreature animatable) {
         if (animatable.currentCreatureMove() == null) return 0;
-        if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.DEFENSE && animatable.currentCreatureMove() == CreatureMove.BIDE) {
+        if (animatable.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.DEFENSE && animatable.currentCreatureMove() == CreatureMove.BIDE) {
             return RiftUtil.slopeResult(animatable.getCurrentMoveUse(), true, 0, animatable.currentCreatureMove().maxUse, 0, 2.5D);
         }
         return 0;
@@ -59,7 +59,7 @@ public class ApatosaurusRenderer extends RiftCreatureRenderer {
 
     private double moveAnimModifierTail(RiftCreature animatable) {
         if (animatable.currentCreatureMove() == null) return 0;
-        if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.DEFENSE && animatable.currentCreatureMove() == CreatureMove.BIDE) {
+        if (animatable.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.DEFENSE && animatable.currentCreatureMove() == CreatureMove.BIDE) {
             return RiftUtil.slopeResult(animatable.getCurrentMoveUse(), true, 0, animatable.currentCreatureMove().maxUse, 0, -15D);
         }
         return 0;
@@ -67,7 +67,7 @@ public class ApatosaurusRenderer extends RiftCreatureRenderer {
 
     private double moveAnimModifierLeg(RiftCreature animatable) {
         if (animatable.currentCreatureMove() == null) return 0;
-        if (animatable.currentCreatureMove().moveType == CreatureMove.MoveType.DEFENSE && animatable.currentCreatureMove() == CreatureMove.BIDE) {
+        if (animatable.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.DEFENSE && animatable.currentCreatureMove() == CreatureMove.BIDE) {
             return RiftUtil.slopeResult(animatable.getCurrentMoveUse(), true, 0, animatable.currentCreatureMove().maxUse, 0, -22.5D);
         }
         return 0;
