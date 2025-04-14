@@ -324,7 +324,7 @@ public class PlayerTamedCreaturesHelper {
                     if (creature.getEnergy() < creature.getMaxEnergy()) {
                         for (int j = 0; j < timeToSubtract; j++) {
                             //natural regen
-                            if (j % creature.getMaxEnergy() == 0) {
+                            if (j % creature.creatureType.energyRechargeSpeed() == 0) {
                                 newEnergyLevel += 1;
                                 if (creature.getEnergy() >= creature.getMaxEnergy()) break;
                             }
@@ -370,7 +370,7 @@ public class PlayerTamedCreaturesHelper {
                     //natural energy regen
                     if (creature.getEnergy() < creature.getMaxEnergy()) {
                         int newEnergyLevel = creature.getEnergy();
-                        int energyDivideTimes = timeToSubtract / creature.getMaxEnergy();
+                        int energyDivideTimes = timeToSubtract / creature.creatureType.energyRechargeSpeed();
                         for (int x = 0; x < energyDivideTimes; x++) {
                             newEnergyLevel += 1;
                         }
@@ -493,7 +493,7 @@ public class PlayerTamedCreaturesHelper {
 
                 if (creature.getEnergy() < creature.getMaxEnergy()) {
                     //natural energy regen
-                    if (time % creature.getMaxEnergy() == 0) newEnergyValue++;
+                    if (time % creature.creatureType.energyRechargeSpeed() == 0) newEnergyValue++;
 
                     //energy regen from food
                     if (GeneralConfig.creatureEatFromInventory && time % 60 == 0) {

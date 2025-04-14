@@ -652,7 +652,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             else this.energyRegenMod++;
 
             //regen energy every 1 second
-            if (this.energyRegenModDelay >= 20 && this.energyRegenMod >= 20) {
+            if (this.energyRegenModDelay >= 20 && this.energyRegenMod >= this.creatureType.energyRechargeSpeed()) {
                 this.setEnergy(Math.min(this.getEnergy() + 1, this.getMaxEnergy()));
                 this.energyRegenMod = 0;
             }
