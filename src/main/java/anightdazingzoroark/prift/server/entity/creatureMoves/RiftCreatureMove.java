@@ -14,7 +14,9 @@ public abstract class RiftCreatureMove {
 
     //if return false, its low priority
     //if return true, its high priority
-    public abstract MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target);
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return true;
+    }
 
     public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
         return true;
@@ -61,11 +63,5 @@ public abstract class RiftCreatureMove {
 
     public int[] unmountedChargeBounds() {
         return new int[]{(int)(this.creatureMove.maxUse * 0.3), this.creatureMove.maxUse};
-    }
-
-    public enum MovePriority {
-        HIGH, //move is put at top of list
-        LOW, //move is put at bottom of list
-        NONE; //move cannot be used at all
     }
 }

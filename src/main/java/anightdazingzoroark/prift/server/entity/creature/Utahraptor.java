@@ -149,12 +149,12 @@ public class Utahraptor extends RiftCreature implements IHerder {
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LEAP_ATTACK, CreatureMove.PACK_CALL);
+        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POUNCE, CreatureMove.PACK_CALL);
     }
 
     @Override
     public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LEAP_ATTACK, CreatureMove.PACK_CALL);
+        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POUNCE, CreatureMove.PACK_CALL);
     }
 
     @Override

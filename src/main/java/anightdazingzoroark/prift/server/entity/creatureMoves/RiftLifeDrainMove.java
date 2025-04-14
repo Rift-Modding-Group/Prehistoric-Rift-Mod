@@ -10,11 +10,8 @@ public class RiftLifeDrainMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.getHealth()/user.getMaxHealth() <= 0.5f) {
-            return MovePriority.HIGH;
-        }
-        return MovePriority.NONE;
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return user.getHealth()/user.getMaxHealth() <= 0.5f;
     }
 
     @Override

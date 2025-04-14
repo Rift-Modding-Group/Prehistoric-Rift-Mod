@@ -9,10 +9,12 @@ public class RiftCloakMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.canUtilizeCloaking() && !user.isCloaked() && user.getRevengeTarget() == null && user.getAttackTarget() == null
-                && user.getGrabVictim() == null) return MovePriority.HIGH;
-        return MovePriority.NONE;
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return user.canUtilizeCloaking()
+                && !user.isCloaked()
+                && user.getRevengeTarget() == null
+                && user.getAttackTarget() == null
+                && user.getGrabVictim() == null;
     }
 
     @Override

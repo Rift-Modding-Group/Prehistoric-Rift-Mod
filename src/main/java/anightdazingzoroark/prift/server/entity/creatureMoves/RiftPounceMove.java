@@ -11,19 +11,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class RiftLeapAttackMove extends RiftCreatureMove {
+public class RiftPounceMove extends RiftCreatureMove {
     private boolean notOnGroundFlag = false;
 
-    public RiftLeapAttackMove() {
-        super(CreatureMove.LEAP_ATTACK);
-    }
-
-    @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth()) {
-            return MovePriority.HIGH;
-        }
-        return MovePriority.NONE;
+    public RiftPounceMove() {
+        super(CreatureMove.POUNCE);
     }
 
     @Override

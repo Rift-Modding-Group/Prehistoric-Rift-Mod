@@ -28,11 +28,8 @@ public class RiftLungeMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth() && (user.onGround || user.isInWater())) {
-            return MovePriority.HIGH;
-        }
-        return MovePriority.NONE;
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return user.onGround || user.isInWater();
     }
 
     @Override

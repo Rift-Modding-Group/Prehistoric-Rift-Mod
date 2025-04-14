@@ -9,11 +9,6 @@ public class RiftTailSlapMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return MovePriority.LOW;
-    }
-
-    @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.removeSpeed();
     }

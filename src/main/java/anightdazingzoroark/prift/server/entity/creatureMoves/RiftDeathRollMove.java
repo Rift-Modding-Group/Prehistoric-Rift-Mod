@@ -9,14 +9,6 @@ public class RiftDeathRollMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth()) {
-            return MovePriority.NONE;
-        }
-        return MovePriority.HIGH;
-    }
-
-    @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setGrabVictim(null);
         user.removeSpeed();

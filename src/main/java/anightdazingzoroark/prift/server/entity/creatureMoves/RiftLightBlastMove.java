@@ -17,12 +17,6 @@ public class RiftLightBlastMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.getDistance(target) <= user.rangedWidth()) return MovePriority.HIGH;
-        return MovePriority.NONE;
-    }
-
-    @Override
     public String cannotExecuteMountedMessage() {
         return "reminder.insufficient_light_blast_charge";
     }

@@ -2,25 +2,18 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
-import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.AxisAlignedBB;
-
-import javax.annotation.Nullable;
-import java.util.List;
 
 public class RiftLeapMove extends RiftCreatureMove {
     private boolean notOnGroundFlag = false;
 
     public RiftLeapMove() {
-        super(CreatureMove.LEAP_ATTACK);
+        super(CreatureMove.POUNCE);
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return MovePriority.NONE;
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return false;
     }
 
     @Override

@@ -12,8 +12,8 @@ public class RiftPoisonTrapMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return MovePriority.NONE;
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return false;
     }
 
     @Override

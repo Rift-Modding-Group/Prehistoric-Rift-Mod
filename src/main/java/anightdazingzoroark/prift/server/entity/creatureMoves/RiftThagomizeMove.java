@@ -11,9 +11,8 @@ public class RiftThagomizeMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.world.rand.nextInt(4) == 0) return MovePriority.HIGH;
-        return MovePriority.NONE;
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return user.world.rand.nextInt(4) == 0;
     }
 
     @Override

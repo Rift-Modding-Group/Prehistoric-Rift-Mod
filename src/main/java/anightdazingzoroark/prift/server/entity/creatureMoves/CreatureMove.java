@@ -15,7 +15,7 @@ public enum CreatureMove {
     CHARGE(RiftChargeMove.class, MoveAnimType.CHARGE, ChargeType.GRADIENT_THEN_USE, 75, new int[]{10, 20}, 100, 200, true, true, false),
     BIDE(RiftBideMove.class, MoveAnimType.DEFENSE, ChargeType.GRADIENT_THEN_USE, 0, new int[]{20, 40}, 100, 200, false, false, true), //basically like the since removed move from pokemon, absorb all damage you take, then reflect it all back to the opponent
     SELF_DESTRUCT(null, MoveAnimType.RANGED, ChargeType.NONE, 300, new int[]{0}, 0, 0, false, false, false), //will be given only to anky for now
-    LEAP_ATTACK(RiftLeapAttackMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 50, new int[]{6}, 0, 100, false, true, false),
+    POUNCE(RiftPounceMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 50, new int[]{6}, 0, 100, false, true, false),
     PACK_CALL(RiftPackCallMove.class, MoveAnimType.ROAR, ChargeType.COOLDOWN_ONLY, 0, new int[]{6}, 0, 3600, false, false, false),
     TAIL_WHIP(RiftTailWhipMove.class, MoveAnimType.TAIL, ChargeType.NONE, 0, new int[]{4}, 0, 0, false, false, false),
     POWER_BLOW(RiftPowerBlowMove.class, MoveAnimType.RANGED, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false),

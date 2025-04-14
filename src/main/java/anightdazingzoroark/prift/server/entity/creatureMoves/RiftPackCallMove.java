@@ -18,15 +18,14 @@ public class RiftPackCallMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
         this.packMembers = user.world.getEntitiesWithinAABB(user.getClass(), user.getEntityBoundingBox().grow(12D), new Predicate<RiftCreature>() {
             @Override
             public boolean apply(@Nullable RiftCreature input) {
                 return input != null && !user.equals(input) && user.isTamed() == input.isTamed() && !input.isBaby();
             }
         });
-        if (!this.packMembers.isEmpty()) return MovePriority.HIGH;
-        return MovePriority.NONE;
+        return !this.packMembers.isEmpty();
     }
 
     @Override

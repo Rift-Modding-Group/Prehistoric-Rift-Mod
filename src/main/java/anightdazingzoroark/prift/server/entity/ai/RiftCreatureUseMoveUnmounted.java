@@ -3,14 +3,12 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     private final RiftCreature creature;
@@ -280,7 +278,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     if (this.currentInvokedMove != null
-                            && this.currentInvokedMove.creatureMove == CreatureMove.LEAP_ATTACK) System.out.println("end move");
+                            && this.currentInvokedMove.creatureMove == CreatureMove.POUNCE) System.out.println("end move");
                     this.creature.setUsingUnchargedAnim(false);
                     this.currentInvokedMove.onStopExecuting(this.creature);
                     //the cloak move only has a cooldown when removing the cloaking
@@ -467,7 +465,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         if (pos == -1) return false;
         else return this.creature.getMoveCooldown(pos) == 0
                 && this.creature.getEnergy() - move.energyUse[0] >= this.creature.getWeaknessEnergy()
-                && (invokedCreatureMove.canBeExecutedUnmounted(this.creature, this.target) == RiftCreatureMove.MovePriority.LOW || invokedCreatureMove.canBeExecutedUnmounted(this.creature, this.target) == RiftCreatureMove.MovePriority.HIGH);
+                && invokedCreatureMove.canBeExecutedUnmounted(this.creature, this.target);
     }
 
     private void setChargedMoveBeingUsed(boolean value) {
@@ -488,25 +486,8 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     private boolean moveCanHitTarget(CreatureMove move) {
         if (move.moveAnimType.moveType == CreatureMove.MoveType.RANGED
-                || move.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM) return true;
-        else if (move.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT) {
-            RiftCreatureMove invokedMove = move.invokeMove();
-            return invokedMove.canBeExecutedUnmounted(this.creature, this.target) != RiftCreatureMove.MovePriority.NONE;
-        }
+                || move.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM
+                || move.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT) return true;
         else return this.creature.getDistance(this.target) <= (this.creature.attackWidth() + this.creature.width);
-    }
-
-    private boolean energySufficientForMove(CreatureMove move) {
-        if (move.chargeType.requiresCharge()) {
-            return this.creature.getEnergy() - RiftUtil.slopeResult(
-                    this.maxChargeTime,
-                    true,
-                    0,
-                    move.maxUse,
-                    move.energyUse[0],
-                    move.energyUse[1]
-            ) >= this.creature.getWeaknessEnergy();
-        }
-        return this.creature.getEnergy() - move.energyUse[0] >= 0;
     }
 }

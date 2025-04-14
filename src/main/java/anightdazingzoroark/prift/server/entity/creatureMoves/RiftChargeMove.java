@@ -27,14 +27,6 @@ public class RiftChargeMove extends RiftCreatureMove {
     }
 
     @Override
-    public MovePriority canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.getDistance(target) > user.attackWidth() + 1 && user.getDistance(target) <= user.rangedWidth()) {
-            return MovePriority.HIGH;
-        }
-        return MovePriority.NONE;
-    }
-
-    @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.removeSpeed();
         user.disableCanRotateMounted();
