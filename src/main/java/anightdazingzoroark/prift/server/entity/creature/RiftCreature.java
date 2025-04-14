@@ -333,6 +333,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20D);
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16D);
+        if (this.canBeKnockedBack()) this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
     }
 
     @Override
@@ -1957,7 +1958,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             else RiftMessages.WRAPPER.sendToServer(new RiftGrabbedEntitySetPos(this, this.grabVictim));
         }
-        else this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(0);
+        else if (!this.canBeKnockedBack()) this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(0);
     }
 
     public Vec3d grabLocation() {
@@ -2226,10 +2227,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(CAN_USE_RIGHT_CLICK, value);
     }
 
-    public boolean alwaysShowRightClickUse() {
-        return false;
-    }
-
     public boolean canUseMiddleClick() {
         return this.dataManager.get(CAN_USE_MIDDLE_CLICK);
     }
@@ -2347,6 +2344,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(FORCED_AWAKE, value);
     }
     //nocturnal creature management ends here
+
+    public boolean canBeKnockedBack() {
+        return false;
+    }
 
     public boolean isIncapacitated() {
         return this.dataManager.get(INCAPACITATED);

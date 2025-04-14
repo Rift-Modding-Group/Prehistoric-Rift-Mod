@@ -112,12 +112,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         this.dataManager.register(WORKSTATION_Z_POS, 0);
     }
 
-    @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
-    }
-
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTurretModeTargeting(this, true));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
@@ -346,6 +340,10 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     @Override
     public AxisAlignedBB breakRange() {
         return new AxisAlignedBB(-1, 0, -1, 1, 0, 1);
+    }
+
+    public boolean canBeKnockedBack() {
+        return true;
     }
 
     @Override

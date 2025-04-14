@@ -110,12 +110,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
     }
 
-    @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
-    }
-
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
@@ -334,7 +328,9 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         if (!this.world.isRemote) this.clearLeadAttachPosMessage(destroyed, player);
     }
 
-
+    public boolean canBeKnockedBack() {
+        return true;
+    }
 
     @Override
     public List<String> blocksToHarvest() {

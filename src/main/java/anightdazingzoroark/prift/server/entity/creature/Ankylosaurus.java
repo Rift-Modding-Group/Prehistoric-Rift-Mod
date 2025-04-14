@@ -114,12 +114,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
     }
 
-    @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
-    }
-
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
@@ -281,6 +275,10 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     @Override
     public float attackWidth() {
         return 6f;
+    }
+
+    public boolean canBeKnockedBack() {
+        return true;
     }
 
     @Override

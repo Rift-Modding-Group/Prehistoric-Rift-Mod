@@ -169,12 +169,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.setCanPickUpLoot(true);
     }
 
-    @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
-    }
-
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftGetTargets(this, false, true));
@@ -361,6 +355,10 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     public BlockPos getWorkstationPos() {
         return new BlockPos(this.dataManager.get(WORKSTATION_X_POS), this.dataManager.get(WORKSTATION_Y_POS), this.dataManager.get(WORKSTATION_Z_POS));
+    }
+
+    public boolean canBeKnockedBack() {
+        return true;
     }
 
     public void setRoaring(boolean value) {
