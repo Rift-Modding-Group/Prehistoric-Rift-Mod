@@ -9,6 +9,7 @@ public class DodoConfig extends RiftCreatureConfig {
     public DodoConfig() {
         this.stats.baseHealth = 6;
         this.stats.healthMultiplier = 0.1;
+        this.stats.maxEnergy = 20;
         this.general.favoriteFood = Arrays.asList(
                 new Food("minecraft:wheat_seeds", 0.05),
                 new Food("minecraft:pumpkin_seeds", 0.05),

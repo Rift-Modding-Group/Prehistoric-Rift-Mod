@@ -250,7 +250,7 @@ public enum RiftCreatureType {
             true,
             false,
             CreatureCategory.DINOSAUR,
-            EnergyRechargeCategory.SLOW,
+            EnergyRechargeCategory.FAST,
             CreatureDiet.INSECTIVORE,
             BlockBreakTier.WOOD,
             LevelupRate.NORMAL,
@@ -288,7 +288,7 @@ public enum RiftCreatureType {
             true,
             false,
             CreatureCategory.MAMMAL,
-            EnergyRechargeCategory.SLOW,
+            EnergyRechargeCategory.FAST,
             CreatureDiet.HERBIVORE,
             BlockBreakTier.DIRT,
             LevelupRate.FAST,
@@ -372,6 +372,25 @@ public enum RiftCreatureType {
             1141548,
             180,
             0.5f,
+            EggTemperature.COLD
+    ),
+    GALLIMIMUS(
+            Gallimimus.class,
+            GallimimusConfig.class,
+            true,
+            true,
+            true,
+            true,
+            false,
+            CreatureCategory.DINOSAUR,
+            EnergyRechargeCategory.SLOW,
+            CreatureDiet.OMNIVORE,
+            BlockBreakTier.DIRT,
+            LevelupRate.NORMAL,
+            6045223,
+            9403247,
+            300,
+            1,
             EggTemperature.COLD
     );
 
