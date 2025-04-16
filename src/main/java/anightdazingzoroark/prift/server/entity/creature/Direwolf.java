@@ -39,7 +39,6 @@ public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
         this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.speed = 0.25D;
         this.isRideable = true;
-        this.maxRightClickCooldown = 1800f;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
 

@@ -1,0 +1,30 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.gallimimus.walk": {
+			"loop": true,
+			"animation_length": 2,
+			"bones": {
+				"leftLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [22.5, 0, 0],
+						"1.5": [-22.5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"rightLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [-22.5, 0, 0],
+						"1.5": [22.5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.gallimimus.new": {
+			"loop": true
+		}
+	}
+}

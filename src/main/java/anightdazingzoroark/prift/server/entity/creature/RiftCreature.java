@@ -186,7 +186,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public List<RiftCreatureConfig.Food> favoriteFood;
     public List<RiftCreatureConfig.Meal> tamingFood;
     public List<String> breedingFood;
-    public float maxRightClickCooldown;
     public String saddleItem;
     public RiftCreaturePart headPart;
     public RiftCreaturePart bodyPart;
@@ -231,7 +230,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.heal((float)maxCreatureHealth);
         this.herdCheckCountdown = 0;
         this.yFloatPos = 0D;
-        this.maxRightClickCooldown = 100f;
         this.oldScale = 0;
         this.healthRegen = 0;
         this.resetParts(0);
@@ -2346,6 +2344,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //nocturnal creature management ends here
 
     public boolean canBeKnockedBack() {
+        return false;
+    }
+
+    public boolean fleesFromDanger() {
         return false;
     }
 
