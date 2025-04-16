@@ -36,11 +36,11 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return ((this.creature.getAttackTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getAttackTarget()))
-                || (this.creature.getRevengeTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getRevengeTarget())))
+        System.out.println("attack target: "+this.creature.getAttackTarget());
+        return  (this.creature.isTamed() || !this.creature.fleesFromDanger())
+                && (this.creature.getAttackTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getAttackTarget()))
                 && !this.creature.isBeingRidden()
-                && (!(this.creature instanceof RiftWaterCreature) || !((RiftWaterCreature) this.creature).canFlop())
-                && (!this.creature.isTamed() || this.creature.fleesFromDanger());
+                && (!(this.creature instanceof RiftWaterCreature) || !((RiftWaterCreature) this.creature).canFlop());
     }
 
     @Override
@@ -103,35 +103,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             //cooldown of 1 second after using a move
             if (this.moveChoiceCooldown > 0) this.moveChoiceCooldown--;
             else this.moveSelection();
-                /*
-                this.creature.setCurrentCreatureMove(selectedMove);
-
-                if (selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
-                    //set move anim markers
-                    this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getStartMoveDelayPoint();
-                    this.moveAnimChargeUpTime = this.moveAnimInitDelayTime + this.maxChargeTime;
-                    this.moveAnimChargeToUseTime = this.moveAnimChargeUpTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseTime();
-                    this.moveAnimUseTime = this.moveAnimChargeToUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationTime();
-                    this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseTime();
-                }
-                else if (selectedMove.chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {
-                    this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getStartMoveDelayPoint();
-                    this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpPoint();
-                    this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUsePoint();
-                    this.moveAnimUseTime = this.moveAnimChargeToUseTime + this.maxChargeTime;
-                    this.maxMoveAnimTime = this.moveAnimUseTime + (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseTime();
-                }
-                else {
-                    this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getStartMoveDelayPoint();
-                    this.moveAnimChargeUpTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpPoint();
-                    this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUsePoint();
-                    this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationPoint();
-                    this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUsePoint();
-                }
-                this.finishedMoveMarker = false;
-                this.animTime = 0;
-                this.creature.setPlayingInfiniteMoveAnim(false);
-                */
         }
         //use the selected move
         else {

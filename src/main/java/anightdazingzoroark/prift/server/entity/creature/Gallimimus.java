@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -31,6 +32,7 @@ public class Gallimimus extends RiftCreature implements IHerder {
         this.speed = 0.35D;
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
+        this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, false);
 
         this.headPart = new RiftCreaturePart(this, 1.75f, 0, 1.75f, 0.625f, 0.5f, 1.5f);
         this.bodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.8f, 0.8f, 0.8f, 1f);
@@ -51,15 +53,16 @@ public class Gallimimus extends RiftCreature implements IHerder {
     }
 
     protected void initEntityAI() {
-        //this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
-        //this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
+        this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
+        this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(3, new RiftFleeFromEntities(this));
+        this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));

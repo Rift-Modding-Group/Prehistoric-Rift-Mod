@@ -17,6 +17,16 @@ public class GallimimusConfig extends RiftCreatureConfig {
                 new Meal("prift:basic_carnivore_meal", 0.1),
                 new Meal("prift:advanced_carnivore_meal", 0.33)
         );
+        this.general.targetWhitelist = Arrays.asList(
+                "minecraft:player",
+                "prift:tyrannosaurus",
+                "prift:utahraptor",
+                "prift:dimetrodon",
+                "prift:megapiranha",
+                "prift:direwolf",
+                "prift:baryonyx",
+                "prift:dilophosaurus"
+        );
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(10).setSpawnAmntRange(4, 6).setDensityLimit(12).setBiomes("tag:savanna")
         );

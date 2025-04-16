@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.player.EntityPlayer;
 
 public class RiftHurtByTarget extends EntityAIHurtByTarget {
     private final RiftCreature creature;
@@ -19,6 +20,15 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
         if (!this.creature.isTamed()) {
             if (this.creature.getRevengeTarget() instanceof RiftCreature) {
                 if (((RiftCreature)this.creature.getRevengeTarget()).creatureType == this.creature.creatureType && !((RiftCreature)this.creature.getRevengeTarget()).isTamed()) {
+                    this.creature.setRevengeTarget(null);
+                    return false;
+                }
+                else return super.shouldExecute();
+            }
+            else if (this.creature.getRevengeTarget() instanceof EntityPlayer) {
+                System.out.println("target not spectator? "+!((EntityPlayer)this.creature.getRevengeTarget()).isSpectator());
+                System.out.println("target not creative? "+!((EntityPlayer)this.creature.getRevengeTarget()).isCreative());
+                if (!((EntityPlayer)this.creature.getRevengeTarget()).isSpectator() && !((EntityPlayer)this.creature.getRevengeTarget()).isCreative()) {
                     this.creature.setRevengeTarget(null);
                     return false;
                 }
