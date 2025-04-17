@@ -36,7 +36,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        System.out.println("attack target: "+this.creature.getAttackTarget());
         return  (this.creature.isTamed() || !this.creature.fleesFromDanger())
                 && (this.creature.getAttackTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getAttackTarget()))
                 && !this.creature.isBeingRidden()

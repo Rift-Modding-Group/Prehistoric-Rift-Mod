@@ -156,6 +156,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_ROAR_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_RANGED_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_STATUS_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_BEAK_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_KICK_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Float> LEAP_X_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
@@ -319,6 +321,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_ROAR_TYPE_MOVE, false);
         this.dataManager.register(USING_RANGED_TYPE_MOVE, false);
         this.dataManager.register(USING_STATUS_TYPE_MOVE, false);
+        this.dataManager.register(USING_BEAK_TYPE_MOVE, false);
+        this.dataManager.register(USING_KICK_TYPE_MOVE, false);
 
         this.dataManager.register(LEAP_X_VELOCITY, 0.0f);
         this.dataManager.register(LEAP_Y_VELOCITY, 0.0f);
@@ -1032,6 +1036,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         List<String> itemList = new ArrayList<>();
         if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
         else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+        else if (diet == CreatureDiet.OMNIVORE) {
+            itemList = new ArrayList<>(Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods));
+            itemList.addAll(Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods));
+        }
 
         for (String foodItem : itemList) {
             int first = foodItem.indexOf(":");
@@ -1050,6 +1058,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         List<String> itemList = new ArrayList<>();
         if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
         else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+        else if (diet == CreatureDiet.OMNIVORE) {
+            itemList = new ArrayList<>(Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods));
+            itemList.addAll(Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods));
+        }
 
         for (String itemEntry : itemList) {
             int first = itemEntry.indexOf(":");
@@ -1685,6 +1697,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             case LEAP:
                 this.setUsingLeapTypeMove(value);
                 break;
+            case BEAK:
+                this.setUsingBeakTypeMove(value);
+                break;
+            case KICK:
+                this.setUsingKickTypeMove(value);
+                break;
         }
     }
 
@@ -1919,6 +1937,23 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setUsingStatusTypeMove(boolean value) {
         this.dataManager.set(USING_STATUS_TYPE_MOVE, value);
     }
+
+    public boolean isUsingBeakTypeMove() {
+        return this.dataManager.get(USING_BEAK_TYPE_MOVE);
+    }
+
+    public void setUsingBeakTypeMove(boolean value) {
+        this.dataManager.set(USING_BEAK_TYPE_MOVE, value);
+    }
+
+    public boolean isUsingKickTypeMove() {
+        return this.dataManager.get(USING_KICK_TYPE_MOVE);
+    }
+
+    public void setUsingKickTypeMove(boolean value) {
+        this.dataManager.set(USING_KICK_TYPE_MOVE, value);
+    }
+
     //move anims end here
 
     //mob grabbing management starts here
@@ -2977,6 +3012,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (isUsingRoarTypeMove()) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_roar_type_move"+multiNameNum, false));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (isUsingBeakTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_beak_type_move"+multiNameNum, false));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (isUsingKickTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_kick_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else if (isUsingChargeTypeMove()) {

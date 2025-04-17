@@ -481,3 +481,5 @@ creature_move.poison_spit.name=Poison Spit
 creature_move.shellter.name=Shellter
 creature_move.shell_spin.name=Shell Spin
 creature_move.poison_trap.name=Poison Trap
+creature_move.peck.name=Peck
+creature_move.kick.name=Kick

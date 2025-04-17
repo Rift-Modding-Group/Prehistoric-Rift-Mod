@@ -9,10 +9,7 @@ import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Gallimimus extends RiftCreature implements IHerder {
     private final RiftCreaturePart hipsPart;
@@ -117,7 +114,22 @@ public class Gallimimus extends RiftCreature implements IHerder {
 
     @Override
     public Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType() {
-        return Collections.emptyMap();
+        Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
+        moveMap.put(CreatureMove.MoveAnimType.BEAK, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.LEAP, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(6D)
+                .defineRecoverFromUseLength(1D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.KICK, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(12.5D)
+                .finalizePoints());
+        return moveMap;
     }
 
     @Override
