@@ -412,6 +412,28 @@
     "subtitle": "sounds.subtitle.dilophosaurus_spit"
   },
 
+  "prift.gallimimus.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/gallimimus/gallimimus_idle"
+    ],
+    "subtitle": "sounds.subtitle.gallimimus_idle"
+  },
+  "prift.gallimimus.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/gallimimus/gallimimus_hurt"
+    ],
+    "subtitle": "sounds.subtitle.gallimimus_hurt"
+  },
+  "prift.gallimimus.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/gallimimus/gallimimus_death"
+    ],
+    "subtitle": "sounds.subtitle.gallimimus_death"
+  },
+
   "prift.semi_manual_machine.reset": {
     "category": "block",
     "sounds": [

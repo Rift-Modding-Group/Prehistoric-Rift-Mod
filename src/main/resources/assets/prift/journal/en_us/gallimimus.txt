@@ -1,0 +1,6 @@
+Diet: Herbivore
+Behavior: Skittish
+
+Gallimimus run and scatter upon the sight of anything that they deem dangerous, whether its predators or other humans, and do so at high speeds. It is also their only form of self-defense. They only seem to herd as a way to alert others in danger instead of for actual defense.
+
+Their capability to achieve high speed, possibly as the fastest one of the Rift, makes them valuable for land travel, but how rapidly they get exhausted and how long they take to recharge make their reliability questionable.

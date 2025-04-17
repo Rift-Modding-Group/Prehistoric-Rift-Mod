@@ -45,6 +45,7 @@ entity.baryonyx.name=Baryonyx
 entity.palaeocastor.name=Palaeocastor
 entity.ankylosaurus.name=Ankylosaurus
 entity.dilophosaurus.name=Dilophosaurus
+entity.gallimimus.name=Gallimimus
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon
@@ -126,6 +127,7 @@ item.baryonyx_claw.name=Baryonyx Claw
 item.palaeocastor_tail.name=Palaeocastor Tail
 item.ankylosaurus_club.name=Ankylosaurus Club
 item.dilophosaurus_frill.name=Dilophosaurus Frill
+item.gallimimus_foot.name=Gallimimus Foot
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -143,6 +145,7 @@ item.saurophaganax_egg.name=Saurophaganax Egg
 item.baryonyx_egg.name=Baryonyx Egg
 item.ankylosaurus_egg.name=Ankylosaurus Egg
 item.dilophosaurus_egg.name=Dilophosaurus Egg
+item.gallimimus_egg.name=Gallimimus Egg
 
 item.apatosaurus_platform.name=Apatosaurus Platform
 item.cannon.name=Cannon

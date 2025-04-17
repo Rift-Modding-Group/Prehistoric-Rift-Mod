@@ -1,17 +1,25 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class Gallimimus extends RiftCreature implements IHerder {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/gallimimus"));
     private final RiftCreaturePart hipsPart;
     private final RiftCreaturePart neckPart;
     private final RiftCreaturePart tail0Part;
@@ -26,7 +34,7 @@ public class Gallimimus extends RiftCreature implements IHerder {
         this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
         this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.experienceValue = 10;
-        this.speed = 0.35D;
+        this.speed = 0.5D;
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, false);
@@ -57,14 +65,14 @@ public class Gallimimus extends RiftCreature implements IHerder {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftFleeFromEntities(this));
+        this.tasks.addTask(3, new RiftFleeFromEntities(this, 1f));
         this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
         this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));
         this.tasks.addTask(11, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(12, new RiftWander(this, 1.0D));
+        this.tasks.addTask(12, new RiftWander(this, 0.5D));
         this.tasks.addTask(13, new RiftLookAround(this));
     }
 
@@ -152,5 +160,23 @@ public class Gallimimus extends RiftCreature implements IHerder {
     @Override
     public boolean fleesFromDanger() {
         return true;
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.GALLIMIMUS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.GALLIMIMUS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.GALLIMIMUS_DEATH;
     }
 }

@@ -390,7 +390,7 @@ public enum RiftCreatureType {
             6045223,
             9403247,
             300,
-            1,
+            0.5f,
             EggTemperature.COLD
     );
 

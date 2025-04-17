@@ -175,6 +175,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.dilophosaurus.spit")
     public static final SoundEvent DILOPHOSAURUS_SPIT = createSoundEvent("prift.dilophosaurus.spit");
 
+    @GameRegistry.ObjectHolder("prift.gallimimus.idle")
+    public static final SoundEvent GALLIMIMUS_IDLE = createSoundEvent("prift.gallimimus.idle");
+
+    @GameRegistry.ObjectHolder("prift.gallimimus.hurt")
+    public static final SoundEvent GALLIMIMUS_HURT = createSoundEvent("prift.gallimimus.hurt");
+
+    @GameRegistry.ObjectHolder("prift.gallimimus.death")
+    public static final SoundEvent GALLIMIMUS_DEATH = createSoundEvent("prift.gallimimus.death");
+
     @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
     public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");
 

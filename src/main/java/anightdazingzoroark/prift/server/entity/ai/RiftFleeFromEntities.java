@@ -10,10 +10,12 @@ import net.minecraft.util.math.Vec3d;
 
 public class RiftFleeFromEntities extends EntityAIBase {
     private final RiftCreature creature;
+    private final float fleeSpeed;
     private Path path;
 
-    public RiftFleeFromEntities(RiftCreature creature) {
+    public RiftFleeFromEntities(RiftCreature creature, float fleeSpeed) {
         this.creature = creature;
+        this.fleeSpeed = fleeSpeed;
         this.setMutexBits(1);
     }
 
@@ -49,7 +51,7 @@ public class RiftFleeFromEntities extends EntityAIBase {
     }
 
     public void startExecuting() {
-        this.creature.getNavigator().setPath(this.path, 2);
+        this.creature.getNavigator().setPath(this.path, this.fleeSpeed);
         if (this.path.getFinalPathPoint() != null)
             this.creature.getLookHelper().setLookPosition(this.path.getFinalPathPoint().x, this.path.getFinalPathPoint().y, this.path.getFinalPathPoint().z, 30, 30);
     }
