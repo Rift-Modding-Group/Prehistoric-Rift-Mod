@@ -28,36 +28,36 @@ public class RiftWander extends EntityAIWander {
         if (this.creature.isSleeping()) return false;
         else if (this.creature.isTamed()) {
             if (this.creature instanceof RiftWaterCreature) {
-                if (this.creature.getEnergy() > 6
+                return super.shouldExecute()
+                        && this.creature.getEnergy() > this.creature.getWeaknessEnergy()
                         && this.creature.creatureBoxWithinReach()
                         && !this.creature.isSitting()
                         && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                         && !this.creature.busyAtWork()
                         && !this.creature.isBeingRidden()
-                        && !this.creature.isInWater()) return super.shouldExecute();
-                else return false;
+                        && !this.creature.isInWater();
             }
             else {
-                if (this.creature.getEnergy() > 6
+                return super.shouldExecute()
+                        && this.creature.getEnergy() > this.creature.getWeaknessEnergy()
                         && this.creature.creatureBoxWithinReach()
                         && !this.creature.isSitting()
                         && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                         && !this.creature.busyAtWork()
-                        && !this.creature.isBeingRidden()) return super.shouldExecute();
-                else return false;
+                        && !this.creature.isBeingRidden();
             }
         }
         else {
             boolean isHerdLeader = this.creature instanceof IHerder ? ((IHerder)this.creature).isHerdLeader() : false;
             boolean isStrayFromHerd = this.creature instanceof IHerder ? !((IHerder)this.creature).isHerdLeader() && !((IHerder)this.creature).hasHerdLeader() : true;
             if (this.creature instanceof RiftWaterCreature) {
-                if (isHerdLeader && !this.creature.isInWater()) return super.shouldExecute();
-                else if (isStrayFromHerd && !this.creature.isInWater()) return super.shouldExecute();
+                if (isHerdLeader && !this.creature.isInWater()) return super.shouldExecute() && this.creature.getEnergy() > this.creature.getWeaknessEnergy();
+                else if (isStrayFromHerd && !this.creature.isInWater()) return super.shouldExecute() && this.creature.getEnergy() > this.creature.getWeaknessEnergy();
                 else return false;
             }
             else {
-                if (isHerdLeader) return super.shouldExecute();
-                else if (isStrayFromHerd) return super.shouldExecute();
+                if (isHerdLeader) return super.shouldExecute() && this.creature.getEnergy() > this.creature.getWeaknessEnergy();
+                else if (isStrayFromHerd) return super.shouldExecute() && this.creature.getEnergy() > this.creature.getWeaknessEnergy();
                 else return false;
             }
         }
@@ -68,7 +68,7 @@ public class RiftWander extends EntityAIWander {
         boolean isNotInWater = this.creature instanceof RiftWaterCreature ? !this.creature.isInWater() : true;
         boolean hasNoHerdLeader = this.creature instanceof IHerder ? !((IHerder)this.creature).hasHerdLeader() : true;
 
-        return this.creature.getEnergy() > 6 && this.creature.creatureBoxWithinReach() && hasNoHerdLeader && isNotInWater && !this.creature.busyAtWork() && super.shouldContinueExecuting();
+        return this.creature.getEnergy() > this.creature.getWeaknessEnergy() && this.creature.creatureBoxWithinReach() && hasNoHerdLeader && isNotInWater && !this.creature.busyAtWork() && super.shouldContinueExecuting();
     }
 
     @Nullable

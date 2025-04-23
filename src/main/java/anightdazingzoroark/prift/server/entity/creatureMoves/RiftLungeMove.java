@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -52,14 +53,23 @@ public class RiftLungeMove extends RiftCreatureMove {
     public void whileExecuting(RiftCreature user) {
         //stop if it hits a mob
         AxisAlignedBB lungeHitbox = user.frontOfHeadAABB();
-        System.out.println("lunge hitbox center: "+lungeHitbox.getCenter());
-        System.out.println("lunge hitbox: "+lungeHitbox);
         List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, lungeHitbox, new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
                 if (entity instanceof RiftCreaturePart) {
                     RiftCreature parent = ((RiftCreaturePart)entity).getParent();
-                    return !parent.equals(user) && RiftUtil.checkForNoAssociations(user, parent);
+                    return !parent.equals(user)
+                            && RiftUtil.checkForNoAssociations(user, parent)
+                            && ((parent instanceof IHerder && user instanceof IHerder) ?
+                            ((IHerder)user).getHerdLeader() != null && ((IHerder)parent).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)parent).getHerdLeader())
+                            : true);
+                }
+                else if (entity instanceof RiftCreature) {
+                    return  !entity.equals(user)
+                            && RiftUtil.checkForNoAssociations(user, entity)
+                            && ((entity instanceof IHerder && user instanceof IHerder) ?
+                            ((IHerder)user).getHerdLeader() != null && ((IHerder)entity).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)entity).getHerdLeader())
+                            : true);
                 }
                 else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity) && !entity.equals(user);
                 else return false;
@@ -114,8 +124,8 @@ public class RiftLungeMove extends RiftCreatureMove {
             double unnormalizedDirectionX = this.targetPosForLunge.getX() - user.posX;
             double unnormalizedDirectionZ = this.targetPosForLunge.getZ() - user.posZ;
             double angleToTarget = Math.atan2(unnormalizedDirectionZ, unnormalizedDirectionX);
-            double chargeDistX = Math.min(user.rangedWidth() * Math.cos(angleToTarget), unnormalizedDirectionX);
-            double chargeDistZ = Math.min(user.rangedWidth() * Math.sin(angleToTarget), unnormalizedDirectionZ);
+            double chargeDistX = user.rangedWidth() * Math.cos(angleToTarget);
+            double chargeDistZ = user.rangedWidth() * Math.sin(angleToTarget);
 
             //get charge direction
             double unnormalizedMagnitude = Math.sqrt(Math.pow(unnormalizedDirectionX, 2) + Math.pow(unnormalizedDirectionZ, 2));

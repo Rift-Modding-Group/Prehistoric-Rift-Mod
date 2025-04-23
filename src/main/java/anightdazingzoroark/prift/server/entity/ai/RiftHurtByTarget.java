@@ -26,7 +26,7 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
                 else return super.shouldExecute();
             }
             else if (this.creature.getRevengeTarget() instanceof EntityPlayer) {
-                if (!((EntityPlayer)this.creature.getRevengeTarget()).isSpectator() && !((EntityPlayer)this.creature.getRevengeTarget()).isCreative()) {
+                if (((EntityPlayer)this.creature.getRevengeTarget()).isSpectator() || ((EntityPlayer)this.creature.getRevengeTarget()).isCreative()) {
                     this.creature.setRevengeTarget(null);
                     return false;
                 }

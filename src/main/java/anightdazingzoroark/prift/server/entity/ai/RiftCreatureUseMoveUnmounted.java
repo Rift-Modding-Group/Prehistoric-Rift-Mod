@@ -54,7 +54,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.selectingMove = true;
         this.selectedMoveBlacklist.clear();
         this.creature.setCurrentCreatureMove(null);
-        this.target = this.creature.getRevengeTarget() != null ? this.creature.getRevengeTarget() : this.creature.getAttackTarget();
+        this.target = this.creature.getAttackTarget();
         this.currentInvokedMove = null;
 
         this.maxMoveAnimTime = 0;
@@ -64,7 +64,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.moveAnimUseTime = 0;
         this.animTime = 0;
 
-        this.moveChoiceCooldown = 0;
         this.maxChargeTime = 0;
     }
 
@@ -88,7 +87,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.moveAnimUseTime = 0;
         this.animTime = 0;
 
-        this.moveChoiceCooldown = 0;
         this.maxChargeTime = 0;
 
         this.creature.setMultistepMoveStep(0);
@@ -115,7 +113,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimInitDelayTime) {
                     this.creature.setPlayingChargedMoveAnim(1);
-                    this.currentInvokedMove.onStartExecuting(this.creature);
+                    this.currentInvokedMove.onStartExecuting(this.creature, this.target);
                     this.setChargedMoveBeingUsed(true);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
                 }
@@ -156,14 +154,20 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             this.currentInvokedMove.creatureMove.energyUse[0],
                             this.currentInvokedMove.creatureMove.energyUse[1])), this.creature.getWeaknessEnergy()));
                     this.creature.setCurrentMoveUse(0);
-                    this.moveChoiceCooldown = 20;
+                    this.moveChoiceCooldown = 60;
                     this.animTime = 0;
                     this.finishedAnimMarker = true;
                     this.finishedMoveMarker = true;
                 }
 
                 //updating move anim tick
-                if (!this.finishedMoveMarker) this.animTime++;
+                if (!this.finishedMoveMarker) {
+                    this.animTime++;
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite && this.animTime > this.moveAnimChargeToUseTime && !this.currentInvokedMove.forceStopFlag) {
+                        this.moveAnimUseTime++;
+                        this.maxMoveAnimTime++;
+                    }
+                }
             }
             //gradient while use, aka holding click uses the move, reaching max use automatically stops the move
             else if (this.creature.currentCreatureMove().chargeType == CreatureMove.ChargeType.GRADIENT_WHILE_USE) {
@@ -172,7 +176,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimInitDelayTime) {
                     this.creature.setPlayingChargedMoveAnim(1);
-                    this.currentInvokedMove.onStartExecuting(this.creature);
+                    this.currentInvokedMove.onStartExecuting(this.creature, this.target);
                     this.setChargedMoveBeingUsed(true);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
                 }
@@ -211,7 +215,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             this.currentInvokedMove.creatureMove.energyUse[0],
                             this.currentInvokedMove.creatureMove.energyUse[1])), this.creature.getWeaknessEnergy()));
                     this.creature.setCurrentMoveUse(0);
-                    this.moveChoiceCooldown = 20;
+                    this.moveChoiceCooldown = 60;
                     this.animTime = 0;
                     this.finishedAnimMarker = true;
                     this.finishedMoveMarker = true;
@@ -223,7 +227,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             //anything else thats just one click then use goes here
             else {
                 if (this.animTime == 0) {
-                    this.currentInvokedMove.onStartExecuting(this.creature);
+                    this.currentInvokedMove.onStartExecuting(this.creature, this.target);
                     this.creature.setUsingUnchargedAnim(true);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) {
                         this.creature.setMultistepMoveStep(0);
@@ -433,9 +437,10 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         int pos = this.creature.getLearnedMoves().indexOf(move);
         //invoke the move to get its associated check for use
         RiftCreatureMove invokedCreatureMove = move.invokeMove();
+        boolean energyCheck = move.chargeType.requiresCharge() ? (this.creature.getEnergy() - move.energyUse[0] >= this.creature.getWeaknessEnergy()) : (this.creature.getEnergy() - move.energyUse[0] >= 0);
         if (pos == -1) return false;
         else return this.creature.getMoveCooldown(pos) == 0
-                && this.creature.getEnergy() - move.energyUse[0] >= this.creature.getWeaknessEnergy()
+                && energyCheck
                 && invokedCreatureMove.canBeExecutedUnmounted(this.creature, this.target);
     }
 

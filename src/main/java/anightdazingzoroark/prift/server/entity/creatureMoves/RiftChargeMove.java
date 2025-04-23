@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -30,18 +31,20 @@ public class RiftChargeMove extends RiftCreatureMove {
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.removeSpeed();
         user.disableCanRotateMounted();
+        //this is only relevant when unmounted
         if (target != null) this.targetPosForCharge = new BlockPos(target.posX, user.posY, target.posZ);
     }
 
     @Override
     public void onEndChargeUp(RiftCreature user, int useAmount) {
+        //this is only relevant when unmounted
         if (this.targetPosForCharge != null) {
             //get charge distance
             double unnormalizedDirectionX = this.targetPosForCharge.getX() - user.posX;
             double unnormalizedDirectionZ = this.targetPosForCharge.getZ() - user.posZ;
             double angleToTarget = Math.atan2(unnormalizedDirectionZ, unnormalizedDirectionX);
-            double chargeDistX = Math.min(user.rangedWidth() * Math.cos(angleToTarget), unnormalizedDirectionX);
-            double chargeDistZ = Math.min(user.rangedWidth() * Math.sin(angleToTarget), unnormalizedDirectionZ);
+            double chargeDistX = user.rangedWidth() * Math.cos(angleToTarget);
+            double chargeDistZ = user.rangedWidth() * Math.sin(angleToTarget);
 
             //get charge direction
             double unnormalizedMagnitude = Math.sqrt(Math.pow(unnormalizedDirectionX, 2) + Math.pow(unnormalizedDirectionZ, 2));
@@ -49,8 +52,11 @@ public class RiftChargeMove extends RiftCreatureMove {
             this.chargeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
 
             //get charge time
-            this.maxChargeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) * 1.5D / 8);
+            //the point at which it stops when unmounted is doubled, so the max charge time here
+            //is to be halved to make it consistent with when mounted
+            this.maxChargeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) * 1.5D / 16);
         }
+        //this is only relevant when mounted
         else {
             //get charge direction
             double unnormalizedMagnitude = Math.sqrt(Math.pow(user.getLookVec().x, 2) + Math.pow(user.getLookVec().z, 2));
@@ -67,14 +73,26 @@ public class RiftChargeMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
-        //stop if it hits a mob
         AxisAlignedBB chargerHitbox = user.getEntityBoundingBox().grow(1.5D);
+
+        //stop if it hits a mob
         List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, chargerHitbox, new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
                 if (entity instanceof RiftCreaturePart) {
                     RiftCreature parent = ((RiftCreaturePart)entity).getParent();
-                    return !parent.equals(user) && RiftUtil.checkForNoAssociations(user, parent);
+                    return !parent.equals(user)
+                            && RiftUtil.checkForNoAssociations(user, parent)
+                            && ((parent instanceof IHerder && user instanceof IHerder) ?
+                            ((IHerder)user).getHerdLeader() != null && ((IHerder)parent).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)parent).getHerdLeader())
+                            : true);
+                }
+                else if (entity instanceof RiftCreature) {
+                    return  !entity.equals(user)
+                            && RiftUtil.checkForNoAssociations(user, entity)
+                            && ((entity instanceof IHerder && user instanceof IHerder) ?
+                            ((IHerder)user).getHerdLeader() != null && ((IHerder)entity).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)entity).getHerdLeader())
+                            : true);
                 }
                 else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity) && !entity.equals(user);
                 else return false;
@@ -137,7 +155,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             user.motionZ = this.chargeDirectionToPosZ * 8;
             user.velocityChanged = true;
             this.chargeTime++;
-            if (this.useValue > 0) this.useValue--;
+            if (this.useValue > 0) this.useValue--; //this only matters when using while mounted
         }
     }
 

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -10,6 +11,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RiftPounceMove extends RiftCreatureMove {
     private boolean notOnGroundFlag = false;
@@ -44,12 +46,26 @@ public class RiftPounceMove extends RiftCreatureMove {
                     public boolean apply(@Nullable Entity entity) {
                         if (entity instanceof RiftCreaturePart) {
                             RiftCreature parent = ((RiftCreaturePart)entity).getParent();
-                            return !parent.equals(user) && RiftUtil.checkForNoAssociations(user, parent);
+                            return !parent.equals(user)
+                                    && RiftUtil.checkForNoAssociations(user, parent)
+                                    && ((parent instanceof IHerder && user instanceof IHerder) ?
+                                        ((IHerder)user).getHerdLeader() != null && ((IHerder)parent).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)parent).getHerdLeader())
+                                        : true);
+                        }
+                        else if (entity instanceof RiftCreature) {
+                            return  !entity.equals(user)
+                                    && RiftUtil.checkForNoAssociations(user, entity)
+                                    && ((entity instanceof IHerder && user instanceof IHerder) ?
+                                        ((IHerder)user).getHerdLeader() != null && ((IHerder)entity).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)entity).getHerdLeader())
+                                        : true);
                         }
                         else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity) && !entity.equals(user);
                         else return false;
                     }
                 });
+                //remove duplicates
+                leapedIntoMobs = leapedIntoMobs.stream().distinct().collect(Collectors.toList());
+
                 if (!leapedIntoMobs.isEmpty()) {
                     for (Entity entity : leapedIntoMobs) user.attackEntityAsMob(entity);
                     this.forceStopFlag = true;

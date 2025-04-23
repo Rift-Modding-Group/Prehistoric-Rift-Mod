@@ -206,6 +206,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private float recentlyHitDamage;
     private Entity grabVictim;
     private int chosenAnimFromMultiple = -1;
+    private int resetEnergyTick;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -422,10 +423,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     if (teleportPos != null) this.setPosition(teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
                 }
             }
+            else {
+                if (this.getEnergy() < this.getMaxEnergy()) this.instaRegenAfterNoTarget();
+            }
         }
-        if (this.world.isRemote) {
-            this.setControls();
-        }
+        else this.setControls();
+
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
@@ -713,20 +716,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     protected void manageSittingFromEnergy() {
-        if (this.getEnergy() <= 6
+        if (this.getEnergy() <= this.getWeaknessEnergy()
             && !this.isSitting()
             && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setSitting(true);
-        if (this.getEnergy() > 6
+        if (this.getEnergy() > this.getWeaknessEnergy()
             && this.isSitting()
             && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setSitting(false);
     }
 
     private void informRiderEnergy() {
-        if (!this.informLowEnergy && this.getEnergy() <= 6 && this.getEnergy() > 0) {
+        if (!this.informLowEnergy && this.getEnergy() <= this.getWeaknessEnergy() && this.getEnergy() > 0) {
             ((EntityPlayer)this.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.low_energy", this.getName()), false);
             this.informLowEnergy = true;
         }
-        if (this.informLowEnergy && this.getEnergy() > 6) {
+        if (this.informLowEnergy && this.getEnergy() > this.getWeaknessEnergy()) {
             this.informLowEnergy = false;
         }
         if (!this.informNoEnergy && this.getEnergy() == 0) {
@@ -734,6 +737,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.informNoEnergy = true;
         }
         if (this.informNoEnergy && this.getEnergy() > 0) this.informNoEnergy = false;
+    }
+
+    private void instaRegenAfterNoTarget() {
+        if (this.getAttackTarget() == null) {
+            this.resetEnergyTick++;
+            if (this.resetEnergyTick >= 300) {
+                this.setEnergy(this.getMaxEnergy());
+                this.resetEnergyTick = 0;
+            }
+        }
+        else this.resetEnergyTick = 0;
     }
 
     @Override
@@ -2714,7 +2728,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.stepHeight = 1.0F;
                 this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1F;
                 this.fallDistance = 0;
-                float moveSpeedMod = (this.getEnergy() > 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
+                float moveSpeedMod = (this.getEnergy() > this.getWeaknessEnergy() ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = (float)(Math.max(0, this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - riderSpeed)) * moveSpeedMod;
                 /*
@@ -2734,7 +2748,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
                  */
-                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : moveSpeed);
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.3f : 0) : moveSpeed);
 
                 //for getting out of bodies of water easily
                 if (forward > 0) {

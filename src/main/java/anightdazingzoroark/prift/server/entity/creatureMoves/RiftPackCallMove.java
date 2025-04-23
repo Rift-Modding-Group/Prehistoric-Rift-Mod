@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.MobEffects;
@@ -21,8 +22,12 @@ public class RiftPackCallMove extends RiftCreatureMove {
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
         this.packMembers = user.world.getEntitiesWithinAABB(user.getClass(), user.getEntityBoundingBox().grow(12D), new Predicate<RiftCreature>() {
             @Override
-            public boolean apply(@Nullable RiftCreature input) {
-                return input != null && !user.equals(input) && user.isTamed() == input.isTamed() && !input.isBaby();
+            public boolean apply(@Nullable RiftCreature entity) {
+                return entity != null
+                        && (!(entity instanceof IHerder) || ((IHerder) entity).isHerdLeader())
+                        && !user.equals(entity)
+                        && user.isTamed() == entity.isTamed()
+                        && !entity.isBaby();
             }
         });
         return !this.packMembers.isEmpty();
@@ -32,8 +37,8 @@ public class RiftPackCallMove extends RiftCreatureMove {
     public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
         this.packMembers = user.world.getEntitiesWithinAABB(user.getClass(), user.getEntityBoundingBox().grow(12D), new Predicate<RiftCreature>() {
             @Override
-            public boolean apply(@Nullable RiftCreature input) {
-                return input != null && !user.equals(input) && user.isTamed() == input.isTamed() && !input.isBaby();
+            public boolean apply(@Nullable RiftCreature entity) {
+                return entity != null && !user.equals(entity) && user.isTamed() == entity.isTamed() && !entity.isBaby();
             }
         });
         return !this.packMembers.isEmpty();
