@@ -45,14 +45,12 @@ public class RiftLungeMove extends RiftCreatureMove {
     }
 
     @Override
-    public void whileChargingUp(RiftCreature user) {
-
-    }
+    public void whileChargingUp(RiftCreature user) {}
 
     @Override
     public void whileExecuting(RiftCreature user) {
         //stop if it hits a mob
-        AxisAlignedBB lungeHitbox = user.frontOfHeadAABB();
+        AxisAlignedBB lungeHitbox = user.getEntityBoundingBox().grow(3D);
         List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, lungeHitbox, new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
@@ -110,9 +108,9 @@ public class RiftLungeMove extends RiftCreatureMove {
             this.forceStopFlag = true;
         }
         else {
-            user.velocityChanged = true;
             user.motionX = this.lungeDirectionToPosX * this.lungeVelocity;
             user.motionZ = this.lungeDirectionToPosZ * this.lungeVelocity;
+            user.velocityChanged = true;
             this.lungeTime++;
         }
     }
@@ -133,7 +131,7 @@ public class RiftLungeMove extends RiftCreatureMove {
             this.lungeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
 
             //get charge time
-            this.maxLungeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) * 1.5D / this.lungeVelocity);
+            this.maxLungeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) * 1.5D / (this.lungeVelocity * 2));
         }
         else {
             //get lunge direction

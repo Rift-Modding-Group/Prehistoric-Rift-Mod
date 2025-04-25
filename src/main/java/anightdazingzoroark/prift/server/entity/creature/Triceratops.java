@@ -193,10 +193,12 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     }
     //move related stuff ends here
 
+    @Override
     public float attackWidth() {
         return 5f;
     }
 
+    @Override
     public float rangedWidth() {
         return 32f;
     }

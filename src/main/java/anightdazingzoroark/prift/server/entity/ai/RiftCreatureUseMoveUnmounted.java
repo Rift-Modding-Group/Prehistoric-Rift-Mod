@@ -252,8 +252,6 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         this.creature.setMultistepMoveStep(2);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
-                    if (this.currentInvokedMove != null
-                            && this.currentInvokedMove.creatureMove == CreatureMove.POUNCE) System.out.println("end move");
                     this.creature.setUsingUnchargedAnim(false);
                     this.currentInvokedMove.onStopExecuting(this.creature);
                     //the cloak move only has a cooldown when removing the cloaking
@@ -272,7 +270,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 //updating move anim tick
                 if (!this.finishedMoveMarker) {
                     this.animTime++;
-                    if (this.creature.currentCreatureMove().useTimeIsInfinite && this.animTime >= this.moveAnimChargeToUseTime && !this.currentInvokedMove.forceStopFlag) {
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite && this.animTime > this.moveAnimChargeToUseTime && !this.currentInvokedMove.forceStopFlag) {
                         this.moveAnimUseTime++;
                         this.maxMoveAnimTime++;
                     }

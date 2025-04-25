@@ -148,11 +148,20 @@ public class Sarcosuchus extends RiftWaterCreature {
         return 3f;
     }
 
+    public float rangedWidth() {
+        return 32f;
+    }
+
     @Override
     public Vec3d riderPos() {
         float xOffset = (float)(this.posX - (0.3) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ - (0.3) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY - 1.375, zOffset);
+    }
+
+    @Override
+    public boolean canBeKnockedBack() {
+        return true;
     }
 
     @Override
