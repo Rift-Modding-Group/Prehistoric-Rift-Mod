@@ -404,10 +404,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageAttributes();
             this.manageDiscoveryByPlayer();
             this.manageMoveAndWeaponCooldown();
-            this.updateEnergyMove();
             if (this.canUtilizeCloaking()) this.manageCloaking();
             if (this.isNocturnal()) this.manageSleepSchedule();
             if (this.isTamed()) {
+                //here temporarily, idk
+                //will eventually make it so that energy for wild creatures can be
+                //reduced without it being exploitable in combat in the wild
+                this.updateEnergyMove();
+
                 this.lowEnergyEffects();
                 this.manageLoveCooldown();
                 if (GeneralConfig.creatureEatFromInventory) this.eatFromInventory();
@@ -826,7 +830,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (this.isEnergyRegenItem(itemstack) && this.getEnergy() < this.getMaxEnergy()) {
                         this.consumeItemFromStack(player, itemstack);
-                        this.setEnergy(this.getEnergy() + this.getEnergyRegenItemValue(itemstack));
+                        this.setEnergy(Math.min(this.getEnergy() + this.getEnergyRegenItemValue(itemstack), this.getMaxEnergy()));
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
@@ -1098,7 +1102,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void eatFoodForEnergyRegen(ItemStack itemStack) {
-        this.setEnergy(this.getEnergy() + this.getEnergyRegenItemValue(itemStack));
+        this.setEnergy(Math.min(this.getEnergy() + this.getEnergyRegenItemValue(itemStack), this.getMaxEnergy()));
         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
         this.spawnItemCrackParticles(itemStack.getItem());
         itemStack.setCount(itemStack.getCount() - 1);
@@ -2731,23 +2735,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 float moveSpeedMod = (this.getEnergy() > this.getWeaknessEnergy() ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = (float)(Math.max(0, this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - riderSpeed)) * moveSpeedMod;
-                /*
-                if (this instanceof ILeapingMob) {
-                    ILeapingMob leapingMob = (ILeapingMob) this;
-                    if (!leapingMob.isLeaping() && leapingMob.getLeapPower() > 0) {
-                        leapingMob.setLeaping(true);
-                        this.motionY = leapingMob.getLeapPower();
-                        if (forward > 0) {
-                            double dx = (48 * Math.sin(-Math.toRadians(this.rotationYaw)));
-                            double dz = (48 * Math.cos(Math.toRadians(this.rotationYaw)));
-                            double totalTime = leapingMob.getLeapPower() / RiftUtil.gravity;
-                            this.motionX += dx / totalTime;
-                            this.motionZ += dz / totalTime;
-                        }
-                        leapingMob.setLeapPower(0);
-                    }
-                }
-                 */
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.3f : 0) : moveSpeed);
 
                 //for getting out of bodies of water easily

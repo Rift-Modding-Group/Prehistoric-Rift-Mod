@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -198,14 +199,14 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 this.stepHeight = 1.0F;
                 this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1F;
                 this.fallDistance = 0;
-                float moveSpeedMod = (this.getEnergy() > 6 ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
+                float moveSpeedMod = (this.getEnergy() > this.getWeaknessEnergy() ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = ((float)(this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()) - riderSpeed) * moveSpeedMod;
 
                 if (this.getIsAscending()) this.motionY = 0.25D;
                 else if (this.getIsDescending()) this.motionY = -0.25D;
 
-                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > 6 ? moveSpeed * 0.3f : 0) : 2);
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.3f : 0) : 2);
 
                 this.moveRelative(strafe, this.isUsingSwimControls() ? vertical : 0, forward, 0.05F);
                 float f4 = 0.6F;
@@ -213,7 +214,12 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 if (d0 > 3.0F) d0 = 3.0F;
                 if (!this.onGround) d0 *= 0.5F;
                 if (d0 > 0.0F) f4 += (0.54600006F - f4) * d0 / 3.0F;
-                this.move(MoverType.SELF, this.motionX, this.isUsingSwimControls() ? this.motionY : 0, this.motionZ);
+                if (this.currentCreatureMove() != null) {
+                    System.out.println("motionX: "+this.motionX);
+                    System.out.println("motionY: "+this.motionY);
+                    System.out.println("motionZ: "+this.motionZ);
+                }
+                this.move(MoverType.SELF, this.motionX, (this.isUsingSwimControls() || this.currentCreatureMove() != null && this.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.CHARGE) ? this.motionY : 0, this.motionZ);
                 this.motionX *= f4;
                 this.motionX *= 0.900000011920929D;
                 this.motionY *= 0.900000011920929D;
