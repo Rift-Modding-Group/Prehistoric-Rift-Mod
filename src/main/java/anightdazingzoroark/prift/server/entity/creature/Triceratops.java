@@ -409,21 +409,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         return LOOT;
     }
 
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "stomp", 0, this::triceratopsStomp));
-    }
-
-    private <E extends IAnimatable> PlayState triceratopsStomp(AnimationEvent<E> event) {
-        if (this.isStomping()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.triceratops.stomp", false));
-            return PlayState.CONTINUE;
-        }
-        else event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
     protected SoundEvent getAmbientSound() {
         return RiftSounds.TRICERATOPS_IDLE;
     }

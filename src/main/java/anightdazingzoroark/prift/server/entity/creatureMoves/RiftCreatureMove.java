@@ -1,7 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import com.codetaylor.mc.pyrotech.modules.tech.basic.tile.TileChoppingBlock;
+import com.codetaylor.mc.pyrotech.modules.tech.basic.tile.spi.TileAnvilBase;
 import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 
 public abstract class RiftCreatureMove {
     public final CreatureMove creatureMove;
@@ -12,8 +17,7 @@ public abstract class RiftCreatureMove {
         this.creatureMove = creatureMove;
     }
 
-    //if return false, its low priority
-    //if return true, its high priority
+    //this section is for moves when used in battle
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
         return true;
     }
@@ -49,6 +53,25 @@ public abstract class RiftCreatureMove {
     public void lookAtTarget(RiftCreature user, Entity target) {
         if (target != null) user.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
     }
+
+    //this section is for moves when used on workstations
+    public boolean canUseWorkstation(RiftCreature user, BlockPos workstationPos) {
+        TileEntity tileEntity = user.world.getTileEntity(workstationPos);
+        //workstations from pyrotech go here
+        if (GeneralConfig.canUsePyrotech()) {
+            if (tileEntity instanceof TileAnvilBase) {
+
+            }
+            else if (tileEntity instanceof TileChoppingBlock) {}
+        }
+        return false;
+    }
+
+    public void onStartWorkstationUse() {}
+
+    public void onHitWorkstation() {}
+
+    public void onEndWorkstationUse() {}
 
     //this is for advanced anim time controls when managing animations for moves used while creature is mounted
     //the use value of the move is set here

@@ -27,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -37,6 +38,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
@@ -390,6 +392,12 @@ public class RiftUtil {
         int blockData = Integer.parseInt(string.substring(colData + 1));
         String blockName = string.substring(0, colData);
         return Block.getBlockFromName(blockName) == state.getBlock() && (blockData == - 1 || state.getBlock().getMetaFromState(state) == blockData);
+    }
+
+    public static String getStringIdFromBlock(Block block) {
+        ResourceLocation registryName = ForgeRegistries.BLOCKS.getKey(block);
+        if (registryName != null) return registryName.toString();
+        return "";
     }
 
     public static boolean checkForNoAssociations(RiftCreature user, Entity target) {

@@ -94,7 +94,8 @@ public enum CreatureMove {
         ROAR(MoveType.SUPPORT), //for moves that involve the user roaring or calling
         STATUS(MoveType.SUPPORT), //do not do damage, or damage isn't really important
         KICK(MoveType.MELEE), //involving kicking things
-        BEAK(MoveType.MELEE); //involving hitting using a beak
+        BEAK(MoveType.MELEE), //involving hitting using a beak
+        BLOW(MoveType.RANGED);
 
         public final MoveType moveType;
 
