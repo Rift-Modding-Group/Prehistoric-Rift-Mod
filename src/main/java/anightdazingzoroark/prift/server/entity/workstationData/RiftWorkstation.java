@@ -44,6 +44,21 @@ public enum RiftWorkstation {
             },
             RiftPyrotechBloomeryWorkstation.class,
             new CreatureMove.MoveAnimType[]{CreatureMove.MoveAnimType.BLOW, CreatureMove.MoveAnimType.ROAR}
+    ),
+    BLOW_POWERED_TURBINE_MM(new String[]{
+                "prift:blow_powered_turbine"
+            },
+            RiftMMBlowPoweredTurbineWorkstation.class,
+            new CreatureMove.MoveAnimType[]{CreatureMove.MoveAnimType.BLOW, CreatureMove.MoveAnimType.ROAR}
+    ),
+    SEMI_MANUAL_MACHINE_MM(new String[]{
+                "prift:semi_manual_extractor",
+                "prift:semi_manual_presser",
+                "prift:semi_manual_extruder",
+                "prift:semi_manual_hammerer"
+            },
+            RiftMMSemiManualMachineWorkstation.class,
+            new CreatureMove.MoveAnimType[]{CreatureMove.MoveAnimType.STOMP}
     );
 
     public final String[] workstationId;

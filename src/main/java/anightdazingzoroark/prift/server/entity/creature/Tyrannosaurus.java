@@ -176,8 +176,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 180f, 2.08f, 0.64f));
-        this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 1.04f, 0.64f));
+        this.tasks.addTask(0, new RiftCreatureOperateWorkstation(this));
         this.tasks.addTask(1, new RiftLandDwellerSwim(this));
         this.tasks.addTask(2, new RiftMate(this));
         this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
@@ -396,6 +395,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     protected ResourceLocation getLootTable() {
         return LOOT;
     }
+
     protected SoundEvent getAmbientSound() {
         return RiftSounds.TYRANNOSAURUS_IDLE;
     }

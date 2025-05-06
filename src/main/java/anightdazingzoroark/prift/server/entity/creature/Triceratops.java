@@ -116,7 +116,7 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
-        this.tasks.addTask(0, new RiftUseSemiManualMachine(this, 0.60f, 0.48f));
+        this.tasks.addTask(0, new RiftCreatureOperateWorkstation(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
 

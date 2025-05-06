@@ -196,23 +196,6 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
             case "prift:semi_manual_hammerer_top":
                 if (GeneralConfig.canUseMM()) moveAnimTypes.add(CreatureMove.MoveAnimType.STOMP);
                 break;
-            case "prift:blow_powered_turbine":
-                if (GeneralConfig.canUseMM()) {
-                    moveAnimTypes.add(CreatureMove.MoveAnimType.BLOW);
-                    moveAnimTypes.add(CreatureMove.MoveAnimType.ROAR);
-                }
-                break;
-            case "pyrotech:stone_kiln":
-            case "pyrotech:stone_oven":
-            case "pyrotech:stone_sawmill":
-            case "pyrotech:stone_crucible":
-            case "pyrotech:brick_kiln":
-            case "pyrotech:brick_oven":
-            case "pyrotech:brick_sawmill":
-            case "pyrotech:brick_crucible":
-            case "pyrotech:blow_powered_turbine":
-                if (GeneralConfig.canUseMM()) moveAnimTypes.add(CreatureMove.MoveAnimType.BLOW);
-                break;
         }
 
         //find move in moves that the creature has learned that has that moveAnimTypes
