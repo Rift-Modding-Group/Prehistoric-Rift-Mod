@@ -124,8 +124,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(0, new RiftParasaurStokeCombustor(this));
-        this.tasks.addTask(0, new RiftBlowIntoTurbine(this, 64f, 1.76f, 0.24f));
+        this.tasks.addTask(0, new RiftCreatureOperateWorkstation(this));
         this.tasks.addTask(0, new RiftUseLeadPoweredCrank(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
@@ -292,7 +291,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
                 .defineRecoverFromUseLength(3.75)
                 .finalizePoints()
         );
-        moveMap.put(CreatureMove.MoveAnimType.RANGED, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.BLOW, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5)
                 .defineChargeUpToUseLength(5)
                 .defineUseDurationLength(20)

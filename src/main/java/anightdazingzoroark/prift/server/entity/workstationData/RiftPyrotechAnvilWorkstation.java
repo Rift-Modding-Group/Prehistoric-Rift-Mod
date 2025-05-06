@@ -90,9 +90,7 @@ public class RiftPyrotechAnvilWorkstation extends RiftWorkstationData {
     }
 
     @Override
-    public void onEndWorkstationUse(RiftCreature user, BlockPos workstationPos) {
-
-    }
+    public void onEndWorkstationUse(RiftCreature user, BlockPos workstationPos) {}
 
     private TileAnvilBase tileAnvilBase(RiftCreature creature, BlockPos workstationPos) {
         TileEntity tileEntity = creature.world.getTileEntity(workstationPos);

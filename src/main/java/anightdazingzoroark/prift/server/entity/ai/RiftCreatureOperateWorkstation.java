@@ -28,6 +28,8 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
     private CreatureMove moveForOperation;
     private RiftCreatureMove invokedMoveForOperation;
 
+    private boolean canWorkWithWorkstation;
+
     private int maxMoveAnimTime; //entire time spent for animation
     private int moveAnimInitDelayTime; //time until end of delay point
     private int moveAnimChargeUpTime; //time until end of charge up point
@@ -100,6 +102,9 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
         this.moveAnimUseTime = 0;
         this.maxMoveAnimTime = 0;
         this.creature.setUsingUnchargedAnim(false);
+        this.setChargedMoveBeingUsed(false);
+        this.creature.setPlayingChargedMoveAnim(-1);
+        this.canWorkWithWorkstation = false;
 
         if (this.destroyedFlag) this.workstationUser.clearWorkstation(true);
         this.destroyedFlag = false;
@@ -110,33 +115,46 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
         if (this.workstationUser.workstationUseFromPos() != null) {
             this.creature.getLookHelper().setLookPosition(this.workstationUser.getWorkstationPos().getX(), this.workstationUser.getWorkstationPos().getY(), this.workstationUser.getWorkstationPos().getZ(), 30, 30);
             if (RiftUtil.entityAtLocation(this.creature, this.workstationUser.workstationUseFromPos(), 3)) {
-                if (this.workstationUser.isWorkstation(this.creature.world, this.workstationPos)
-                        && this.creature.getEnergy() > 0
-                        && this.invokedWorkstation.canUseWorkstation(this.creature, this.workstationPos)
-                ) {
+                if (this.canWorkWithWorkstation) {
                     if (this.animTime == 0) {
-                        System.out.println("move for operation: "+this.moveForOperation);
                         this.invokedWorkstation.onStartWorkstationUse(this.creature, this.workstationPos);
                         this.creature.setCurrentCreatureMove(this.moveForOperation);
-                        this.creature.setUsingUnchargedAnim(true);
-                        System.out.println("current move (at start): "+this.creature.currentCreatureMove());
+                        if (this.moveForOperation.chargeType.requiresCharge()) this.creature.setPlayingChargedMoveAnim(0);
+                        else this.creature.setUsingUnchargedAnim(true);
                     }
-                    if (this.animTime == this.moveAnimInitDelayTime) {}
-                    if (this.animTime == this.moveAnimChargeUpTime) {}
-                    if (this.animTime == this.moveAnimChargeToUseTime) {}
+                    if (this.animTime == this.moveAnimInitDelayTime) {
+                        if (this.moveForOperation.chargeType.requiresCharge()) {
+                            this.creature.setPlayingChargedMoveAnim(1);
+                            this.setChargedMoveBeingUsed(true);
+                        }
+                    }
+                    if (this.animTime == this.moveAnimChargeUpTime) {
+                        if (this.moveForOperation.chargeType.requiresCharge()) {
+                            this.creature.setPlayingChargedMoveAnim(2);
+                            this.setChargedMoveBeingUsed(false);
+                        }
+                    }
+                    if (this.animTime == this.moveAnimChargeToUseTime) {
+                        if (this.moveForOperation.chargeType.requiresCharge()) this.creature.setPlayingChargedMoveAnim(3);
+                    }
                     if (this.animTime == this.moveAnimUseTime) {
                         this.invokedWorkstation.onHitWorkstation(this.creature, this.workstationPos);
+                        if (this.moveForOperation.chargeType.requiresCharge()) this.creature.setPlayingChargedMoveAnim(4);
                     }
                     if (this.animTime >= this.maxMoveAnimTime) {
                         this.invokedWorkstation.onEndWorkstationUse(this.creature, this.workstationPos);
+                        this.creature.setPlayingChargedMoveAnim(1);
                         this.creature.setUsingUnchargedAnim(false);
                         this.creature.setCurrentCreatureMove(null);
                         this.creature.setXP(this.creature.getXP() + 5);
                         this.animTime = -60;
-                        System.out.println("current move (at end): "+this.creature.currentCreatureMove());
+                        this.canWorkWithWorkstation = false;
                     }
-                    this.animTime++;
+                    if (this.canWorkWithWorkstation) this.animTime++;
                 }
+                else this.canWorkWithWorkstation = this.workstationUser.isWorkstation(this.creature.world, this.workstationPos)
+                        && this.creature.getEnergy() > 0
+                        && this.invokedWorkstation.canUseWorkstation(this.creature, this.workstationPos);
             }
             else {
                 //move to front of workstation
@@ -144,6 +162,22 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
             }
         }
         if (!this.workstationUser.isWorkstation(this.creature.world, this.workstationPos)) this.destroyedFlag = true;
+    }
+
+    private void setChargedMoveBeingUsed(boolean value) {
+        if (this.creature.currentCreatureMove() == null) return;
+        int movePos = this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove());
+        switch (movePos) {
+            case 0:
+                this.creature.setUsingMoveOne(value);
+                break;
+            case 1:
+                this.creature.setUsingMoveTwo(value);
+                break;
+            case 2:
+                this.creature.setUsingMoveThree(value);
+                break;
+        }
     }
 
     private CreatureMove getMoveForWorkstation() {
@@ -178,12 +212,6 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
             case "pyrotech:brick_crucible":
             case "pyrotech:blow_powered_turbine":
                 if (GeneralConfig.canUseMM()) moveAnimTypes.add(CreatureMove.MoveAnimType.BLOW);
-                break;
-            case "pyrotech:anvil_granite":
-            case "pyrotech:anvil_iron_plated":
-            case "pyrotech:anvil_obsidian":
-            case "pyrotech:chopping_block":
-                if (GeneralConfig.canUsePyrotech()) moveAnimTypes.add(CreatureMove.MoveAnimType.TAIL);
                 break;
         }
 

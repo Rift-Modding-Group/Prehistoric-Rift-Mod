@@ -7,18 +7,44 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import java.util.Arrays;
 
 public enum RiftWorkstation {
     ANVIL_PYROTECH(
-            new String[]{"pyrotech:anvil_granite", "pyrotech:anvil_iron_plated", "pyrotech:anvil_obsidian"},
+            new String[]{
+                    "pyrotech:anvil_granite",
+                    "pyrotech:anvil_iron_plated",
+                    "pyrotech:anvil_obsidian"
+            },
             RiftPyrotechAnvilWorkstation.class,
-            new CreatureMove.MoveAnimType[]{CreatureMove.MoveAnimType.TAIL}),
-    CHOPPING_BLOCK_PYROTECH(new String[]{"pyrotech:chopping_block"},
-            null,
-            new CreatureMove.MoveAnimType[]{CreatureMove.MoveAnimType.TAIL});
+            new CreatureMove.MoveAnimType[]{CreatureMove.MoveAnimType.TAIL}
+    ),
+    CHOPPING_BLOCK_PYROTECH(new String[]{
+                "pyrotech:chopping_block"
+            },
+            RiftPyrotechChoppingBlockWorkstation.class,
+            new CreatureMove.MoveAnimType[]{CreatureMove.MoveAnimType.TAIL}
+    ),
+    COMBUSTION_WORKER_PYROTECH(new String[]{
+                "pyrotech:stone_kiln",
+                "pyrotech:stone_oven",
+                "pyrotech:stone_sawmill",
+                "pyrotech:stone_crucible",
+                "pyrotech:brick_kiln",
+                "pyrotech:brick_oven",
+                "pyrotech:brick_sawmill",
+                "pyrotech:brick_crucible"
+            },
+            RiftPyrotechCombustionWorkerWorkstation.class,
+            new CreatureMove.MoveAnimType[]{CreatureMove.MoveAnimType.BLOW, CreatureMove.MoveAnimType.ROAR}
+    ),
+    BLOOMERY_PYROTECH(new String[]{
+                "pyrotech:bloomery"
+            },
+            RiftPyrotechBloomeryWorkstation.class,
+            new CreatureMove.MoveAnimType[]{CreatureMove.MoveAnimType.BLOW, CreatureMove.MoveAnimType.ROAR}
+    );
 
     public final String[] workstationId;
     private final Class<? extends RiftWorkstationData> workstationData;

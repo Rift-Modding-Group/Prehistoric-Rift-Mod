@@ -158,6 +158,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_STATUS_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_BEAK_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_KICK_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USING_BLOW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Float> LEAP_X_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
@@ -324,6 +325,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_STATUS_TYPE_MOVE, false);
         this.dataManager.register(USING_BEAK_TYPE_MOVE, false);
         this.dataManager.register(USING_KICK_TYPE_MOVE, false);
+        this.dataManager.register(USING_BLOW_TYPE_MOVE, false);
 
         this.dataManager.register(LEAP_X_VELOCITY, 0.0f);
         this.dataManager.register(LEAP_Y_VELOCITY, 0.0f);
@@ -1721,6 +1723,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             case KICK:
                 this.setUsingKickTypeMove(value);
                 break;
+            case BLOW:
+                this.setUsingBlowTypeMove(value);
+                break;
         }
     }
 
@@ -1970,6 +1975,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setUsingKickTypeMove(boolean value) {
         this.dataManager.set(USING_KICK_TYPE_MOVE, value);
+    }
+
+    public boolean isUsingBlowTypeMove() {
+        return this.dataManager.get(USING_BLOW_TYPE_MOVE);
+    }
+
+    public void setUsingBlowTypeMove(boolean value) {
+        this.dataManager.set(USING_BLOW_TYPE_MOVE, value);
     }
 
     //move anims end here
@@ -3041,11 +3054,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
+                    else if (isUsingBlowTypeMove()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_blow_type_move"+multiNameNum, false));
+                        return PlayState.CONTINUE;
+                    }
                     else {
                         chosenAnimFromMultiple = -1;
                         event.getController().clearAnimationCache();
                         return PlayState.STOP;
                     }
+                }
+                else if (currentCreatureMove() == null) {
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
                 }
                 return PlayState.CONTINUE;
             }

@@ -470,7 +470,7 @@
 				}
 			}
 		},
-		"animation.parasaurolophus.use_ranged_type_move": {
+		"animation.parasaurolophus.use_blow_type_move": {
 			"animation_length": 1.75,
 			"bones": {
 				"body": {
@@ -541,7 +541,7 @@
 				}
 			}
 		},
-		"animation.parasaurolophus.use_charged_ranged_type_move_pt1": {
+		"animation.parasaurolophus.use_charged_blow_type_move_pt1": {
 			"animation_length": 5,
 			"bones": {
 				"body": {
@@ -558,7 +558,7 @@
 				}
 			}
 		},
-		"animation.parasaurolophus.use_charged_ranged_type_move_pt1_hold": {
+		"animation.parasaurolophus.use_charged_blow_type_move_pt1_hold": {
 			"loop": true,
 			"bones": {
 				"body": {
@@ -575,7 +575,7 @@
 				}
 			}
 		},
-		"animation.parasaurolophus.use_charged_ranged_type_move_pt2": {
+		"animation.parasaurolophus.use_charged_blow_type_move_pt2": {
 			"animation_length": 1.5,
 			"bones": {
 				"body": {
