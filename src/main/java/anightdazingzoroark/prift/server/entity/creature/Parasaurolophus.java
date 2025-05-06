@@ -46,8 +46,6 @@ import java.util.*;
 
 public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
-    private static final DataParameter<Boolean> BLOWING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> CAN_BLOW = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
@@ -102,8 +100,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(BLOWING, false);
-        this.dataManager.register(CAN_BLOW, true);
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
         this.dataManager.register(USING_WORKSTATION, false);
@@ -394,11 +390,11 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     public boolean isUsingWorkAnim() {
-        return this.isBlowing();
+        return false;
     }
 
     public void setUsingWorkAnim(boolean value) {
-        this.setBlowing(value);
+
     }
 
     public SoundEvent useAnimSound() {
@@ -518,41 +514,10 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         return 27;
     }
 
-    public boolean isBlowing() {
-        return this.dataManager.get(BLOWING);
-    }
-
-    public void setBlowing(boolean value) {
-        this.dataManager.set(BLOWING, value);
-    }
-
-    public boolean canBlow() {
-        return this.dataManager.get(CAN_BLOW);
-    }
-
-    public void setCanBlow(boolean value) {
-        this.dataManager.set(CAN_BLOW, value);
-    }
-
     @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationData data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "blow", 0, this::parasaurolophusBlow));
-    }
-
-    private <E extends IAnimatable> PlayState parasaurolophusBlow(AnimationEvent<E> event) {
-        if (this.isBlowing()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.parasaurolophus.blow", false));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
     }
 
     protected SoundEvent getAmbientSound() {
