@@ -6,6 +6,8 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
+import anightdazingzoroark.prift.server.entity.workstationData.RiftWorkstation;
+import anightdazingzoroark.prift.server.entity.workstationData.RiftWorkstationData;
 import net.minecraft.block.Block;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.tileentity.TileEntity;
@@ -18,6 +20,9 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
     private final RiftCreature creature;
     private final IWorkstationUser workstationUser;
     private BlockPos workstationPos;
+
+    private RiftWorkstation workstation;
+    private RiftWorkstationData invokedWorkstation;
 
     private boolean destroyedFlag;
     private CreatureMove moveForOperation;
@@ -38,12 +43,19 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
     @Override
     public boolean shouldExecute() {
         if (!(this.creature instanceof IWorkstationUser)) return false;
-        TileEntity workstation = this.creature.world.getTileEntity(this.workstationUser.getWorkstationPos());
-        Block workstationBlock = this.creature.world.getBlockState(this.workstationUser.getWorkstationPos()).getBlock();
-        this.moveForOperation = this.getMoveForWorkstation();
-        return workstation != null
-                && this.workstationUser.getWorkstations().containsKey(RiftUtil.getStringIdFromBlock(workstationBlock))
-                && this.moveForOperation != null;
+        this.workstationPos = this.workstationUser.getWorkstationPos();
+
+        TileEntity workstationTE = this.creature.world.getTileEntity(this.workstationUser.getWorkstationPos());
+
+        //get the workstationTE to use
+        this.workstation = RiftWorkstation.getWorkstation(this.creature, this.workstationPos);
+
+        if (this.workstation != null) {
+            this.moveForOperation = RiftWorkstation.getMoveForWorkstationUse(this.workstation, this.creature);
+            this.invokedWorkstation = this.workstation.invokedWorkstationData();
+            return workstationTE != null && this.moveForOperation != null && this.invokedWorkstation != null;
+        }
+        return false;
     }
 
     @Override
@@ -53,8 +65,7 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
 
     @Override
     public void startExecuting() {
-        this.animTime = -100;
-        this.workstationPos = this.workstationUser.getWorkstationPos();
+        this.animTime = -60;
 
         if (this.moveForOperation.chargeType == CreatureMove.ChargeType.GRADIENT_THEN_USE) {
             this.moveAnimInitDelayTime = (int)this.creature.animatorsForMoveType().get(this.moveForOperation.moveAnimType).getStartMoveDelayPoint();
@@ -82,12 +93,13 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
 
     @Override
     public void resetTask() {
-        this.animTime = -100;
+        this.animTime = -60;
         this.moveAnimInitDelayTime = 0;
         this.moveAnimChargeUpTime = 0;
         this.moveAnimChargeToUseTime = 0;
         this.moveAnimUseTime = 0;
         this.maxMoveAnimTime = 0;
+        this.creature.setUsingUnchargedAnim(false);
 
         if (this.destroyedFlag) this.workstationUser.clearWorkstation(true);
         this.destroyedFlag = false;
@@ -97,24 +109,38 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
     public void updateTask() {
         if (this.workstationUser.workstationUseFromPos() != null) {
             this.creature.getLookHelper().setLookPosition(this.workstationUser.getWorkstationPos().getX(), this.workstationUser.getWorkstationPos().getY(), this.workstationUser.getWorkstationPos().getZ(), 30, 30);
-            if (RiftUtil.entityAtLocation(this.creature, this.workstationUser.workstationUseFromPos(), 3)
-                && this.workstationUser.isWorkstation(this.creature.world, this.workstationPos)
-                && this.creature.getEnergy() > 0) {
-                if (this.animTime == 0) {
-                    this.creature.setCurrentCreatureMove(this.moveForOperation);
+            if (RiftUtil.entityAtLocation(this.creature, this.workstationUser.workstationUseFromPos(), 3)) {
+                if (this.workstationUser.isWorkstation(this.creature.world, this.workstationPos)
+                        && this.creature.getEnergy() > 0
+                        && this.invokedWorkstation.canUseWorkstation(this.creature, this.workstationPos)
+                ) {
+                    if (this.animTime == 0) {
+                        System.out.println("move for operation: "+this.moveForOperation);
+                        this.invokedWorkstation.onStartWorkstationUse(this.creature, this.workstationPos);
+                        this.creature.setCurrentCreatureMove(this.moveForOperation);
+                        this.creature.setUsingUnchargedAnim(true);
+                        System.out.println("current move (at start): "+this.creature.currentCreatureMove());
+                    }
+                    if (this.animTime == this.moveAnimInitDelayTime) {}
+                    if (this.animTime == this.moveAnimChargeUpTime) {}
+                    if (this.animTime == this.moveAnimChargeToUseTime) {}
+                    if (this.animTime == this.moveAnimUseTime) {
+                        this.invokedWorkstation.onHitWorkstation(this.creature, this.workstationPos);
+                    }
+                    if (this.animTime >= this.maxMoveAnimTime) {
+                        this.invokedWorkstation.onEndWorkstationUse(this.creature, this.workstationPos);
+                        this.creature.setUsingUnchargedAnim(false);
+                        this.creature.setCurrentCreatureMove(null);
+                        this.creature.setXP(this.creature.getXP() + 5);
+                        this.animTime = -60;
+                        System.out.println("current move (at end): "+this.creature.currentCreatureMove());
+                    }
+                    this.animTime++;
                 }
-                if (this.animTime == this.moveAnimInitDelayTime) {}
-                if (this.animTime == this.moveAnimChargeUpTime) {}
-                if (this.animTime == this.moveAnimChargeToUseTime) {}
-                if (this.animTime == this.moveAnimUseTime) {
-
-                }
-                if (this.animTime >= this.maxMoveAnimTime) {
-                    this.creature.setCurrentCreatureMove(null);
-                    this.creature.setXP(this.creature.getXP() + 5);
-                    this.animTime = -100;
-                }
-                this.animTime++;
+            }
+            else {
+                //move to front of workstation
+                this.creature.getMoveHelper().setMoveTo(this.workstationPos.getX(), this.workstationPos.getY(), this.workstationPos.getZ(), 1);
             }
         }
         if (!this.workstationUser.isWorkstation(this.creature.world, this.workstationPos)) this.destroyedFlag = true;
@@ -161,13 +187,14 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
                 break;
         }
 
-        //find move in moves that the creature has learned that has that moveAnimType
+        //find move in moves that the creature has learned that has that moveAnimTypes
         //to then use it
         for (CreatureMove.MoveAnimType moveAnimTypeChoice : moveAnimTypes) {
             if (this.creature.getLearnedMoves().stream().anyMatch(m -> m.moveAnimType == moveAnimTypeChoice)) {
                 return this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType == moveAnimTypeChoice).findFirst().get();
             }
         }
+
         return null;
     }
 }

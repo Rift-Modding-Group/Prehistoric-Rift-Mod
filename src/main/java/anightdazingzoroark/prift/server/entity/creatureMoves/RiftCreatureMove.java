@@ -54,25 +54,6 @@ public abstract class RiftCreatureMove {
         if (target != null) user.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
     }
 
-    //this section is for moves when used on workstations
-    public boolean canUseWorkstation(RiftCreature user, BlockPos workstationPos) {
-        TileEntity tileEntity = user.world.getTileEntity(workstationPos);
-        //workstations from pyrotech go here
-        if (GeneralConfig.canUsePyrotech()) {
-            if (tileEntity instanceof TileAnvilBase) {
-
-            }
-            else if (tileEntity instanceof TileChoppingBlock) {}
-        }
-        return false;
-    }
-
-    public void onStartWorkstationUse() {}
-
-    public void onHitWorkstation() {}
-
-    public void onEndWorkstationUse() {}
-
     //this is for advanced anim time controls when managing animations for moves used while creature is mounted
     //the use value of the move is set here
     public void setUseValue(int value) {
