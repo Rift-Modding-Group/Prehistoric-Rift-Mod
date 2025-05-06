@@ -250,16 +250,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     }
 
     @Override
-    public boolean isUsingWorkAnim() {
-        return this.isAttacking();
-    }
-
-    @Override
-    public void setUsingWorkAnim(boolean value) {
-        this.setAttacking(value);
-    }
-
-    @Override
     public SoundEvent useAnimSound() {
         return SoundEvents.BLOCK_WOOD_BREAK;
     }

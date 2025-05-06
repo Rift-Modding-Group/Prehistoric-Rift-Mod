@@ -389,14 +389,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         return null;
     }
 
-    public boolean isUsingWorkAnim() {
-        return false;
-    }
-
-    public void setUsingWorkAnim(boolean value) {
-
-    }
-
     public SoundEvent useAnimSound() {
         return RiftSounds.PARASAUROLOPHUS_BLOW;
     }

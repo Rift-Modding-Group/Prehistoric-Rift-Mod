@@ -315,17 +315,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         return null;
     }
 
-    public boolean isUsingWorkAnim() {
-        if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntityBlowPoweredTurbine) return this.isRoaring();
-        else if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntitySemiManualBase) return this.isStomping();
-        return false;
-    }
-
-    public void setUsingWorkAnim(boolean value) {
-        if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntityBlowPoweredTurbine) this.setRoaring(value);
-        else if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntitySemiManualBase) this.setStomping(value);
-    }
-
     public SoundEvent useAnimSound() {
         if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntityBlowPoweredTurbine) return RiftSounds.TYRANNOSAURUS_ROAR;
         else if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntitySemiManualBase) return RiftSounds.SEMI_MANUAL_MACHINE_RESET;

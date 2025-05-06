@@ -21,8 +21,6 @@ public interface IWorkstationUser {
         return false;
     }
     BlockPos workstationUseFromPos();
-    boolean isUsingWorkAnim();
-    void setUsingWorkAnim(boolean value);
     SoundEvent useAnimSound();
     default void writeWorkstationDataToNBT(NBTTagCompound compound) {
         compound.setBoolean("HasWorkstation", this.hasWorkstation());

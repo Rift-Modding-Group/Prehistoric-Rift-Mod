@@ -324,16 +324,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     }
 
     @Override
-    public boolean isUsingWorkAnim() {
-        return this.isAttacking();
-    }
-
-    @Override
-    public void setUsingWorkAnim(boolean value) {
-        this.setAttacking(value);
-    }
-
-    @Override
     public SoundEvent useAnimSound() {
         return SoundEvents.BLOCK_STONE_BREAK;
     }

@@ -221,14 +221,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         return null;
     }
 
-    public boolean isUsingWorkAnim() {
-        return this.isAttacking();
-    }
-
-    public void setUsingWorkAnim(boolean value) {
-        this.setAttacking(value);
-    }
-
     public SoundEvent useAnimSound() {
         return RiftSounds.SEMI_MANUAL_MACHINE_RESET;
     }

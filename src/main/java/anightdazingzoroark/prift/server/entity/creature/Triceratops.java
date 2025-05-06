@@ -254,16 +254,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     }
 
     @Override
-    public boolean isUsingWorkAnim() {
-        return this.isStomping();
-    }
-
-    @Override
-    public void setUsingWorkAnim(boolean value) {
-        this.setStomping(value);
-    }
-
-    @Override
     public SoundEvent useAnimSound() {
         return RiftSounds.SEMI_MANUAL_MACHINE_RESET;
     }
