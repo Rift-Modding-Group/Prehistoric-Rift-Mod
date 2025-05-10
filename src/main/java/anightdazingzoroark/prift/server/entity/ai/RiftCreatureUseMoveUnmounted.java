@@ -128,7 +128,13 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
-                    if (this.moveCanHitTarget(this.creature.currentCreatureMove())) this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    if (this.moveCanHitTarget(this.creature.currentCreatureMove())) {
+                        this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
+                            this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
+                                    1f,
+                                    1f);
+                    }
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
@@ -187,7 +193,13 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
-                    if (this.moveCanHitTarget(this.creature.currentCreatureMove())) this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    if (this.moveCanHitTarget(this.creature.currentCreatureMove())) {
+                        this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
+                            this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
+                                    1f,
+                                    1f);
+                    }
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
@@ -237,7 +249,13 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
-                    if (this.moveCanHitTarget(this.creature.currentCreatureMove())) this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    if (this.moveCanHitTarget(this.creature.currentCreatureMove())) {
+                        this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
+                            this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
+                                    2f,
+                                    1f);
+                    }
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);

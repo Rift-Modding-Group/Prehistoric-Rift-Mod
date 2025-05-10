@@ -11,6 +11,7 @@ import com.codetaylor.mc.pyrotech.modules.core.block.BlockRock;
 import com.codetaylor.mc.pyrotech.modules.tech.basic.ModuleTechBasicConfig;
 import com.codetaylor.mc.pyrotech.modules.tech.basic.recipe.ChoppingBlockRecipe;
 import com.codetaylor.mc.pyrotech.modules.tech.basic.tile.TileChoppingBlock;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -96,6 +97,8 @@ public class RiftPyrotechChoppingBlockWorkstation extends RiftWorkstationData {
             tileChoppingBlock.markDirty();
             BlockHelper.notifyBlockUpdate(user.world, tileChoppingBlock.getPos());
         }
+
+        user.playSound(SoundEvents.BLOCK_WOOD_BREAK, 2, 1);
     }
 
     @Override

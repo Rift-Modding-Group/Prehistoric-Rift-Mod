@@ -249,11 +249,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         return this.getWorkstationPos();
     }
 
-    @Override
-    public SoundEvent useAnimSound() {
-        return SoundEvents.BLOCK_WOOD_BREAK;
-    }
-
     public void setUseWorkstation(double x, double y, double z) {
         this.dataManager.set(USING_WORKSTATION, true);
         this.dataManager.set(WORKSTATION_X_POS, (int)x);

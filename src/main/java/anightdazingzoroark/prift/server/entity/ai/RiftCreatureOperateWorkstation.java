@@ -179,33 +179,4 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
                 break;
         }
     }
-
-    private CreatureMove getMoveForWorkstation() {
-        Block workstationBlock = this.creature.world.getBlockState(this.workstationUser.getWorkstationPos()).getBlock();
-
-        //get move anim type for the workstation
-        List<CreatureMove.MoveAnimType> moveAnimTypes = new ArrayList<>();
-        switch (RiftUtil.getStringIdFromBlock(workstationBlock)) {
-            case "prift:semi_manual_extractor":
-            case "prift:semi_manual_extractor_top":
-            case "prift:semi_manual_presser":
-            case "prift:semi_manual_presser_top":
-            case "prift:semi_manual_extruder":
-            case "prift:semi_manual_extruder_top":
-            case "prift:semi_manual_hammerer":
-            case "prift:semi_manual_hammerer_top":
-                if (GeneralConfig.canUseMM()) moveAnimTypes.add(CreatureMove.MoveAnimType.STOMP);
-                break;
-        }
-
-        //find move in moves that the creature has learned that has that moveAnimTypes
-        //to then use it
-        for (CreatureMove.MoveAnimType moveAnimTypeChoice : moveAnimTypes) {
-            if (this.creature.getLearnedMoves().stream().anyMatch(m -> m.moveAnimType == moveAnimTypeChoice)) {
-                return this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType == moveAnimTypeChoice).findFirst().get();
-            }
-        }
-
-        return null;
-    }
 }

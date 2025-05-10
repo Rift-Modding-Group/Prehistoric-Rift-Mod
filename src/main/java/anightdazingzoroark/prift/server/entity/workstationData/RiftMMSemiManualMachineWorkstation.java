@@ -1,9 +1,11 @@
 package anightdazingzoroark.prift.server.entity.workstationData;
 
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 
 public class RiftMMSemiManualMachineWorkstation extends RiftWorkstationData {
@@ -25,6 +27,7 @@ public class RiftMMSemiManualMachineWorkstation extends RiftWorkstationData {
         TileEntitySemiManualBase tileSemiManualBase = tileSemiManualBase(user, workstationPos);
         tileSemiManualBase.setPlayResetAnim(true);
         tileSemiManualBase.getTopTEntity().setMustBeReset(false);
+        user.world.playSound(null, workstationPos.getX(), workstationPos.getY(), workstationPos.getZ(), RiftSounds.SEMI_MANUAL_MACHINE_RESET, SoundCategory.BLOCKS, 0.75f, user.world.rand.nextFloat() * 0.15F + 0.6F);
     }
 
     @Override

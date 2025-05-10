@@ -42,7 +42,6 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         this.roar(user,  RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 1D, 2D));
-        user.playSound(RiftSounds.TYRANNOSAURUS_ROAR, 2, 1);
     }
 
     @Override

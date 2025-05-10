@@ -253,11 +253,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         return null;
     }
 
-    @Override
-    public SoundEvent useAnimSound() {
-        return RiftSounds.SEMI_MANUAL_MACHINE_RESET;
-    }
-
     public void setUseWorkstation(double x, double y, double z) {
         this.dataManager.set(USING_WORKSTATION, true);
         this.dataManager.set(WORKSTATION_X_POS, (int)x);

@@ -323,11 +323,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         return this.getWorkstationPos();
     }
 
-    @Override
-    public SoundEvent useAnimSound() {
-        return SoundEvents.BLOCK_STONE_BREAK;
-    }
-
     public void setUseWorkstation(double x, double y, double z) {
         this.dataManager.set(USING_WORKSTATION, true);
         this.dataManager.set(WORKSTATION_X_POS, (int)x);

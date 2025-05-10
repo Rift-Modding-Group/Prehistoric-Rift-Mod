@@ -191,6 +191,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
+                                1f,
+                                1f);
                     if (this.creature.currentCreatureMove().chargeUpAffectsUseTime) {
                         this.currentInvokedMove.setUseValue(this.creature.getCurrentMoveUse());
                         this.moveAnimUseTime += this.creature.getCurrentMoveUse();
@@ -266,6 +270,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
+                                1f,
+                                1f);
                     this.currentInvokedMove.setUseValue(this.creature.getCurrentMoveUse());
                     this.moveAnimUseTime += this.creature.getCurrentMoveUse();
                     this.maxMoveAnimTime += this.creature.getCurrentMoveUse();
@@ -329,6 +337,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);

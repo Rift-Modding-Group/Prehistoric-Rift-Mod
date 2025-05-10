@@ -9,6 +9,7 @@ import com.codetaylor.mc.pyrotech.modules.tech.basic.ModuleTechBasic;
 import com.codetaylor.mc.pyrotech.modules.tech.basic.network.SCPacketParticleAnvilHit;
 import com.codetaylor.mc.pyrotech.modules.tech.basic.recipe.AnvilRecipe;
 import com.codetaylor.mc.pyrotech.modules.tech.basic.tile.spi.TileAnvilBase;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -85,7 +86,7 @@ public class RiftPyrotechAnvilWorkstation extends RiftWorkstationData {
         tileAnvilBase.markDirty();
         BlockHelper.notifyBlockUpdate(user.world, tileAnvilBase.getPos());
 
-        //user.playSound(user.useAnimSound(), 2, 1);
+        user.playSound(SoundEvents.BLOCK_STONE_BREAK, 2, 1);
         ModuleTechBasic.PACKET_SERVICE.sendToAllAround(new SCPacketParticleAnvilHit(workstationPos, 0.5f, 0.4375f, 0.5f), tileAnvilBase);
     }
 

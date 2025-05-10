@@ -249,6 +249,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
                 .defineChargeUpToUseLength(5D)
                 .defineUseDurationLength(22.5)
                 .defineRecoverFromUseLength(7.5)
+                .setChargeUpToUseSound(RiftSounds.TYRANNOSAURUS_ROAR)
                 .finalizePoints());
         return moveMap;
     }
@@ -312,12 +313,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
                     return this.getWorkstationPos().add(-4 * dirF, downF, 0);
             }
         }
-        return null;
-    }
-
-    public SoundEvent useAnimSound() {
-        if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntityBlowPoweredTurbine) return RiftSounds.TYRANNOSAURUS_ROAR;
-        else if (this.world.getTileEntity(this.getWorkstationPos()) instanceof TileEntitySemiManualBase) return RiftSounds.SEMI_MANUAL_MACHINE_RESET;
         return null;
     }
 
