@@ -179,15 +179,19 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
                 .defineChargeUpLength(10D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(7.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.STOMP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(7.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_STOMP_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.CHARGE, new RiftCreatureMoveAnimator(this)
                 .defineStartMoveDelayLength(5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpSound(RiftSounds.TRICERATOPS_CHARGE_UP, true)
+                .setChargeUpToUseSound(RiftSounds.TRICERATOPS_CHARGE)
                 .finalizePoints());
         return moveMap;
     }

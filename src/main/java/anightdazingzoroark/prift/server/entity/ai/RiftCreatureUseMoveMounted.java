@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSoundLooper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
@@ -21,6 +22,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     private int moveAnimUseTime; //time until end of use anim
     private int animTime = 0;
     private boolean canBeExecutedMountedResult = false;
+
+    private RiftSoundLooper chargeUpSoundLooper;
 
     private Entity target;
 
@@ -55,6 +58,14 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUsePoint();
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUsePoint();
+
+                if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                    && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                    this.chargeUpSoundLooper = new RiftSoundLooper(this.creature,
+                            this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                            20,
+                            1f,
+                            1f);
             }
             //insufficient energy returns false and a message saying not enough energy
             else if (!this.energySufficientForMove()) {
@@ -84,6 +95,14 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUsePoint();
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUsePoint();
+
+                if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                        && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                    this.chargeUpSoundLooper = new RiftSoundLooper(this.creature,
+                            this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                            20,
+                            1f,
+                            1f);
             }
             //insufficient energy returns false and a message saying not enough energy
             else if (!this.energySufficientForMove()) {
@@ -113,6 +132,14 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 this.moveAnimChargeToUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUsePoint();
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUsePoint();
+
+                if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                        && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                    this.chargeUpSoundLooper = new RiftSoundLooper(this.creature,
+                            this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                            20,
+                            1f,
+                            1f);
             }
             //insufficient energy returns false and a message saying not enough energy
             else if (!this.energySufficientForMove()) {
@@ -187,6 +214,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimInitDelayTime && this.animTime <= this.moveAnimChargeUpTime) {
                     this.currentInvokedMove.whileChargingUp(this.creature);
+                    if (this.chargeUpSoundLooper != null) this.chargeUpSoundLooper.playSound();
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);

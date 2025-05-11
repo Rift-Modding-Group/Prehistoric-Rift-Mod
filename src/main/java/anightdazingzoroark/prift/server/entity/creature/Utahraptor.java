@@ -163,15 +163,18 @@ public class Utahraptor extends RiftCreature implements IHerder {
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(1.5D)
                 .defineRecoverFromUseLength(1D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_SCRATCH_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.ROAR, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(30D)
+                .setChargeUpToUseSound(RiftSounds.UTAHRAPTOR_CALL)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.LEAP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(6D)
                 .defineRecoverFromUseLength(1D)
+                .setChargeUpToUseSound(RiftSounds.UTAHRAPTOR_LEAP)
                 .finalizePoints());
         return moveMap;
     }

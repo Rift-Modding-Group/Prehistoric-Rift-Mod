@@ -20,6 +20,7 @@ public class RiftCreatureMoveAnimator {
     //for sounds to make at certain points
     private SoundEvent startMoveDelaySound;
     private SoundEvent chargeUpSound;
+    private boolean chargeUpSoundCanLoop;
     private SoundEvent chargeUpToUseSound;
     private SoundEvent useDurationSound;
     private SoundEvent recoverFromUseSound;
@@ -116,12 +117,21 @@ public class RiftCreatureMoveAnimator {
     }
 
     public RiftCreatureMoveAnimator setChargeUpSound(SoundEvent value) {
+        return this.setChargeUpSound(value, false);
+    }
+
+    public RiftCreatureMoveAnimator setChargeUpSound(SoundEvent value, boolean canLoop) {
         this.chargeUpSound = value;
+        this.chargeUpSoundCanLoop = canLoop;
         return this;
     }
 
     public SoundEvent getChargeUpSound() {
         return this.chargeUpSound;
+    }
+
+    public boolean chargeUpSoundCanLoop() {
+        return this.chargeUpSoundCanLoop;
     }
 
     public RiftCreatureMoveAnimator setChargeUpToUseSound(SoundEvent value) {

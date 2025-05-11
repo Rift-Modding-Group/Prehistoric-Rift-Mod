@@ -100,6 +100,23 @@
     ],
     "subtitle": "sounds.subtitle.triceratops_death"
   },
+  "prift.triceratops.charge_up": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/triceratops/triceratops_charge_up_1",
+      "prift:entities/triceratops/triceratops_charge_up_2",
+      "prift:entities/triceratops/triceratops_charge_up_3",
+      "prift:entities/triceratops/triceratops_charge_up_4"
+    ],
+    "subtitle": "sounds.subtitle.triceratops_charge_up"
+  },
+  "prift.triceratops.charge": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/triceratops/triceratops_charge"
+    ],
+    "subtitle": "sounds.subtitle.triceratops_charge"
+  },
 
   "prift.utahraptor.idle": {
     "category": "neutral",
@@ -128,6 +145,13 @@
       "prift:entities/utahraptor/utahraptor_call"
     ],
     "subtitle": "sounds.subtitle.utahraptor_call"
+  },
+  "prift.utahraptor.leap": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/utahraptor/utahraptor_leap"
+    ],
+    "subtitle": "sounds.subtitle.utahraptor_leap"
   },
 
   "prift.apatosaurus.idle": {
@@ -461,6 +485,20 @@
       "prift:entities/generic_move/generic_tail_move"
     ],
     "subtitle": "sounds.subtitle.generic_tail_move"
+  },
+  "prift.generic_move.head": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_head_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_head_move"
+  },
+  "prift.generic_move.scratch": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_scratch_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_scratch_move"
   },
 
   "prift.semi_manual_machine.reset": {
