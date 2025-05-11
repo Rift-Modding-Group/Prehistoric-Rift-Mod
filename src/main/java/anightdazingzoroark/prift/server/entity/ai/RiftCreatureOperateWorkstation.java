@@ -136,6 +136,10 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
                     }
                     if (this.animTime == this.moveAnimChargeToUseTime) {
                         if (this.moveForOperation.chargeType.requiresCharge()) this.creature.setPlayingChargedMoveAnim(3);
+                        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
+                            this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
+                                    1f,
+                                    1f);
                     }
                     if (this.animTime == this.moveAnimUseTime) {
                         this.invokedWorkstation.onHitWorkstation(this.creature, this.workstationPos);

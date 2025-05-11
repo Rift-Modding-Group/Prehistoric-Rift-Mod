@@ -28,6 +28,9 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.stegosaurus.death")
     public static final SoundEvent STEGOSAURUS_DEATH = createSoundEvent("prift.stegosaurus.death");
 
+    @GameRegistry.ObjectHolder("prift.stegosaurus.ranged_move")
+    public static final SoundEvent STEGOSAURUS_RANGED_MOVE = createSoundEvent("prift.stegosaurus.ranged_move");
+
     @GameRegistry.ObjectHolder("prift.dodo.idle")
     public static final SoundEvent DODO_IDLE = createSoundEvent("prift.dodo.idle");
 
@@ -183,6 +186,15 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.gallimimus.death")
     public static final SoundEvent GALLIMIMUS_DEATH = createSoundEvent("prift.gallimimus.death");
+
+    @GameRegistry.ObjectHolder("prift.generic_move.bite")
+    public static final SoundEvent GENERIC_BITE_MOVE = createSoundEvent("prift.generic_move.bite");
+
+    @GameRegistry.ObjectHolder("prift.generic_move.stomp")
+    public static final SoundEvent GENERIC_STOMP_MOVE = createSoundEvent("prift.generic_move.stomp");
+
+    @GameRegistry.ObjectHolder("prift.generic_move.tail")
+    public static final SoundEvent GENERIC_TAIL_MOVE = createSoundEvent("prift.generic_move.tail");
 
     @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
     public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");

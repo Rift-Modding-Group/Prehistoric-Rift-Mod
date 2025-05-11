@@ -193,11 +193,13 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
                 .defineChargeUpLength(10D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(17.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_TAIL_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.RANGED, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(10D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(7.5D)
+                .setChargeUpToUseSound(RiftSounds.STEGOSAURUS_RANGED_MOVE)
                 .finalizePoints());
         return moveMap;
     }

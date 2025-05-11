@@ -49,6 +49,13 @@
     ],
     "subtitle": "sounds.subtitle.stegosaurus_death"
   },
+  "prift.stegosaurus.ranged_move": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/stegosaurus/stegosaurus_ranged_move"
+    ],
+    "subtitle": "sounds.subtitle.stegosaurus_ranged_move"
+  },
 
   "prift.dodo.idle": {
     "category": "neutral",
@@ -432,6 +439,28 @@
       "prift:entities/gallimimus/gallimimus_death"
     ],
     "subtitle": "sounds.subtitle.gallimimus_death"
+  },
+
+  "prift.generic_move.bite": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_bite_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_bite_move"
+  },
+  "prift.generic_move.stomp": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_stomp_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_stomp_move"
+  },
+  "prift.generic_move.tail": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_tail_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_tail_move"
   },
 
   "prift.semi_manual_machine.reset": {
