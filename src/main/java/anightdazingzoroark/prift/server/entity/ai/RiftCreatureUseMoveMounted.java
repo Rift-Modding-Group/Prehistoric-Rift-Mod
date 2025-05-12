@@ -24,6 +24,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     private boolean canBeExecutedMountedResult = false;
 
     private RiftSoundLooper chargeUpSoundLooper;
+    private RiftSoundLooper useSoundLooper;
 
     private Entity target;
 
@@ -66,6 +67,12 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                             20,
                             1f,
                             1f);
+                if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound() != null)
+                    this.useSoundLooper = new RiftSoundLooper(this.creature,
+                            this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound(),
+                            5,
+                            1f,
+                            1f);
             }
             //insufficient energy returns false and a message saying not enough energy
             else if (!this.energySufficientForMove()) {
@@ -103,6 +110,12 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                             20,
                             1f,
                             1f);
+                if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound() != null)
+                    this.useSoundLooper = new RiftSoundLooper(this.creature,
+                            this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound(),
+                            5,
+                            1f,
+                            1f);
             }
             //insufficient energy returns false and a message saying not enough energy
             else if (!this.energySufficientForMove()) {
@@ -138,6 +151,12 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.chargeUpSoundLooper = new RiftSoundLooper(this.creature,
                             this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
                             20,
+                            1f,
+                            1f);
+                if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound() != null)
+                    this.useSoundLooper = new RiftSoundLooper(this.creature,
+                            this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound(),
+                            5,
                             1f,
                             1f);
             }
@@ -231,6 +250,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
+                    if (this.useSoundLooper != null) this.useSoundLooper.playSound();
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag
@@ -308,6 +328,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
+                    if (this.useSoundLooper != null) this.useSoundLooper.playSound();
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime < this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag
@@ -372,6 +393,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
+                    if (this.useSoundLooper != null) this.useSoundLooper.playSound();
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) {
                         this.creature.setMultistepMoveStep(1);
                     }

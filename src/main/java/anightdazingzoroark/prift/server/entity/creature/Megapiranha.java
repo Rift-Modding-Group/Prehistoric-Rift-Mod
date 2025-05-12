@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -107,6 +108,7 @@ public class Megapiranha extends RiftWaterCreature implements IHerder {
                 .defineChargeUpLength(1D)
                 .defineChargeUpToUseLength(1.5D)
                 .defineRecoverFromUseLength(2.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
                 .finalizePoints()
         );
         return moveMap;

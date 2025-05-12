@@ -169,104 +169,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.readTurretModeDataFromNBT(compound);
     }
 
-    //blowing stuff starts here
-    public void useBlow(float strength) {
-        this.useBlow(null, strength);
-    }
-
-    public void useBlow(Entity target, float strength) {
-        RiftCreature thisCreature = this;
-        if (target == null) {
-            double dist = this.getEntityBoundingBox().maxX - this.getEntityBoundingBox().minX + 8D;
-            Vec3d vec3d = this.getPositionEyes(1.0F);
-            Vec3d vec3d1 = this.getLook(1.0F);
-            Vec3d vec3d2 = vec3d.add(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist);
-            double d1 = dist;
-            Entity rider = this.getControllingPassenger();
-            List<EntityLivingBase> list = this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().expand(vec3d1.x * dist, vec3d1.y * dist, vec3d1.z * dist).grow(5.0D, 5.0D, 5.0D), null);
-            double d2 = d1;
-            for (EntityLivingBase entity : list) {
-                AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().grow((double) entity.getCollisionBorderSize() + 2F);
-                RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
-
-                if (entity != this && entity != rider) {
-                    if (entity instanceof Parasaurolophus) {
-                        if ((((Parasaurolophus)entity).isTamed() && !this.isTamed()) || (!((Parasaurolophus)entity).isTamed() && this.isTamed())) {
-                            if (axisalignedbb.contains(vec3d)) {
-                                if (d2 >= 0.0D) {
-                                    this.parasaurKnockback(entity, strength);
-                                    d2 = 0.0D;
-                                }
-                            }
-                            else if (raytraceresult != null) {
-                                double d3 = vec3d.distanceTo(raytraceresult.hitVec);
-
-                                if (d3 < d2 || d2 == 0.0D) {
-                                    this.parasaurKnockback(entity, strength);
-                                    d2 = d3;
-                                }
-                            }
-                        }
-                    }
-                    else {
-                        if (axisalignedbb.contains(vec3d)) {
-                            if (d2 >= 0.0D) {
-                                this.parasaurKnockback(entity, strength);
-                                d2 = 0.0D;
-                            }
-                        }
-                        else if (raytraceresult != null) {
-                            double d3 = vec3d.distanceTo(raytraceresult.hitVec);
-
-                            if (d3 < d2 || d2 == 0.0D) {
-                                this.parasaurKnockback(entity, strength);
-                                d2 = d3;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else if (target instanceof EntityLivingBase) {
-            AxisAlignedBB aabb = target.getEntityBoundingBox().grow(5);
-            List<EntityLivingBase> entityList = this.world.getEntitiesWithinAABB(EntityLivingBase.class, aabb, new Predicate<EntityLivingBase>() {
-                @Override
-                public boolean apply(@Nullable EntityLivingBase input) {
-                    return RiftUtil.checkForNoAssociations(thisCreature, input);
-                }
-            });
-            for (EntityLivingBase entityLivingBase : entityList) this.parasaurKnockback(entityLivingBase, strength);
-        }
-    }
-
-    public void parasaurKnockback(EntityLivingBase entity, float strength) {
-        double d0 = this.posX - entity.posX;
-        double d1 = this.posZ - entity.posZ;
-        double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
-        entity.knockBack(this, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
-        entity.attackEntityFrom(DamageSource.causeMobDamage(this), 1);
-    }
-
-    public void parsaurManualStokeHeater(float strength) {
-        BlockPos pos = new BlockPos(this.posX, this.posY, this.posZ);
-        int radius = 5;
-        for (int x = -radius; x <= radius; x++) {
-            for (int z = -radius; z <= radius; z++) {
-                BlockPos tempPos = pos.add(x, 0, z);
-                TileEntity tileEntity = this.world.getTileEntity(tempPos);
-                if (tileEntity != null) {
-                    if (tileEntity instanceof TileCombustionWorkerStoneBase) {
-                        TileCombustionWorkerStoneBase stoked = (TileCombustionWorkerStoneBase) tileEntity;
-                        if (stoked.hasFuel() && stoked.workerIsActive() && stoked.hasInput()) {
-                            stoked.consumeAirflow(RiftUtil.clamp(0.04f * strength + 12f, 12, 16), false);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    //blowing stuff ends here
-
     //move related stuff starts here
     @Override
     public List<CreatureMove> learnableMoves() {
@@ -285,6 +187,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
                 .defineChargeUpLength(5)
                 .defineChargeUpToUseLength(1.25)
                 .defineRecoverFromUseLength(3.75)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
                 .finalizePoints()
         );
         moveMap.put(CreatureMove.MoveAnimType.BLOW, new RiftCreatureMoveAnimator(this)
@@ -292,6 +195,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
                 .defineChargeUpToUseLength(5)
                 .defineUseDurationLength(20)
                 .defineRecoverFromUseLength(5)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BLOW_MOVE)
                 .finalizePoints()
         );
         moveMap.put(CreatureMove.MoveAnimType.STATUS, new RiftCreatureMoveAnimator(this)
@@ -300,6 +204,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
                 .defineChargeUpToUseLength(2.5)
                 .defineUseDurationLength(17.5)
                 .defineRecoverFromUseLength(5)
+                .setChargeUpToUseSound(RiftSounds.PARASAUROLOPHUS_SOUND_BLAST)
                 .finalizePoints()
         );
         return moveMap;
@@ -388,12 +293,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         }
         return null;
     }
-
-    /*
-    public SoundEvent useAnimSound() {
-        return RiftSounds.PARASAUROLOPHUS_BLOW;
-    }
-    */
 
     public void setUseWorkstation(double x, double y, double z) {
         this.dataManager.set(USING_WORKSTATION, true);

@@ -175,6 +175,13 @@
     ],
     "subtitle": "sounds.subtitle.apatosaurus_death"
   },
+  "prift.apatosaurus.bide_release": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/apatosaurus/apatosaurus_bide_release"
+    ],
+    "subtitle": "sounds.subtitle.apatosaurus_bide_release"
+  },
 
   "prift.parasaurolophus.idle": {
     "category": "neutral",
@@ -197,12 +204,12 @@
     ],
     "subtitle": "sounds.subtitle.parasaurolophus_death"
   },
-  "prift.parasaurolophus.blow": {
+  "prift.parasaurolophus.sound_blast": {
     "category": "neutral",
     "sounds": [
-      "prift:entities/parasaurolophus/parasaurolophus_blow"
+      "prift:entities/parasaurolophus/parasaurolophus_sound_blast"
     ],
-    "subtitle": "sounds.subtitle.parasaurolophus_blow"
+    "subtitle": "sounds.subtitle.parasaurolophus_sound_blast"
   },
 
   "prift.dimetrodon.idle": {
@@ -247,6 +254,20 @@
       "prift:entities/sarcosuchus/sarcosuchus_death"
     ],
     "subtitle": "sounds.subtitle.sarcosuchus_death"
+  },
+  "prift.sarcosuchus.death_roll": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/sarcosuchus/sarcosuchus_death_roll"
+    ],
+    "subtitle": "sounds.subtitle.sarcosuchus_death_roll"
+  },
+  "prift.sarcosuchus.charge": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/sarcosuchus/sarcosuchus_charge"
+    ],
+    "subtitle": "sounds.subtitle.sarcosuchus_charge"
   },
 
   "prift.anomalocaris.hurt": {
@@ -499,6 +520,13 @@
       "prift:entities/generic_move/generic_scratch_move"
     ],
     "subtitle": "sounds.subtitle.generic_scratch_move"
+  },
+  "prift.generic_move.blow": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_blow_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_move_blow"
   },
 
   "prift.semi_manual_machine.reset": {

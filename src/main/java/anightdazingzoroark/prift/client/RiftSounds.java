@@ -79,6 +79,9 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.apatosaurus.death")
     public static final SoundEvent APATOSAURUS_DEATH = createSoundEvent("prift.apatosaurus.death");
 
+    @GameRegistry.ObjectHolder("prift.apatosaurus.bide_release")
+    public static final SoundEvent APATOSAURUS_BIDE_RELEASE = createSoundEvent("prift.apatosaurus.bide_release");
+
     @GameRegistry.ObjectHolder("prift.parasaurolophus.idle")
     public static final SoundEvent PARASAUROLOPHUS_IDLE = createSoundEvent("prift.parasaurolophus.idle");
 
@@ -88,8 +91,8 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.parasaurolophus.death")
     public static final SoundEvent PARASAUROLOPHUS_DEATH = createSoundEvent("prift.parasaurolophus.death");
 
-    @GameRegistry.ObjectHolder("prift.parasaurolophus.blow")
-    public static final SoundEvent PARASAUROLOPHUS_BLOW = createSoundEvent("prift.parasaurolophus.blow");
+    @GameRegistry.ObjectHolder("prift.parasaurolophus.sound_blast")
+    public static final SoundEvent PARASAUROLOPHUS_SOUND_BLAST = createSoundEvent("prift.parasaurolophus.sound_blast");
 
     @GameRegistry.ObjectHolder("prift.dimetrodon.idle")
     public static final SoundEvent DIMETRODON_IDLE = createSoundEvent("prift.dimetrodon.idle");
@@ -108,6 +111,12 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.sarcosuchus.death")
     public static final SoundEvent SARCOSUCHUS_DEATH = createSoundEvent("prift.sarcosuchus.death");
+
+    @GameRegistry.ObjectHolder("prift.sarcosuchus.death_roll")
+    public static final SoundEvent SARCOSUCHUS_DEATH_ROLL = createSoundEvent("prift.sarcosuchus.death_roll");
+
+    @GameRegistry.ObjectHolder("prift.sarcosuchus.charge")
+    public static final SoundEvent SARCOSUCHUS_CHARGE = createSoundEvent("prift.sarcosuchus.charge");
 
     @GameRegistry.ObjectHolder("prift.anomalocaris.hurt")
     public static final SoundEvent ANOMALOCARIS_HURT = createSoundEvent("prift.anomalocaris.hurt");
@@ -210,6 +219,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.generic_move.scratch")
     public static final SoundEvent GENERIC_SCRATCH_MOVE = createSoundEvent("prift.generic_move.scratch");
+
+    @GameRegistry.ObjectHolder("prift.generic_move.blow")
+    public static final SoundEvent GENERIC_BLOW_MOVE = createSoundEvent("prift.generic_move.blow");
 
     @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
     public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");

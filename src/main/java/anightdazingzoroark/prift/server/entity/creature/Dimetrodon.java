@@ -428,6 +428,7 @@ public class Dimetrodon extends RiftCreature {
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
                 .finalizePoints()
         );
         return moveMap;

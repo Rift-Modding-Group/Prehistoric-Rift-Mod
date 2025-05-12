@@ -309,17 +309,20 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
                 .defineChargeUpLength(50D)
                 .defineChargeUpToUseLength(2D)
                 .defineRecoverFromUseLength(8D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_STOMP_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.TAIL, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineChargeUpToUseLength(1D)
                 .defineRecoverFromUseLength(4D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_TAIL_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.DEFENSE, this.currentCreatureMove() == CreatureMove.BIDE ?
                 new RiftCreatureMoveAnimator(this)
                         .defineStartMoveDelayLength(5D)
                         .defineChargeUpToUseLength(2.5D)
                         .defineRecoverFromUseLength(7.5D)
+                        .setChargeUpToUseSound(RiftSounds.APATOSAURUS_BIDE_RELEASE)
                         .finalizePoints()
         : null);
         return moveMap;

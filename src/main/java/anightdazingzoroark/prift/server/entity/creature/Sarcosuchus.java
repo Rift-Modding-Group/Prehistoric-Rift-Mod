@@ -126,14 +126,18 @@ public class Sarcosuchus extends RiftWaterCreature {
                 .defineChargeUpLength(4D)
                 .defineChargeUpToUseLength(1D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.CHARGE, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.SARCOSUCHUS_CHARGE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.SPIN, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineUseDurationLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
+                .setUseDurationSound(RiftSounds.SARCOSUCHUS_DEATH_ROLL)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.GRAB, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(2.5D)
