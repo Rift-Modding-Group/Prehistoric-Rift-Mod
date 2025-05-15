@@ -83,14 +83,17 @@ public class Anomalocaris extends RiftWaterCreature {
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_SCRATCH_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.GRAB, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.STATUS, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpToUseLength(9D)
                 .defineRecoverFromUseLength(8D)
+                .setChargeUpSound(RiftSounds.ANOMALOCARIS_CLOAKING)
                 .finalizePoints());
         return moveMap;
     }
@@ -130,6 +133,10 @@ public class Anomalocaris extends RiftWaterCreature {
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.ANOMALOCARIS_IDLE;
     }
 
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {

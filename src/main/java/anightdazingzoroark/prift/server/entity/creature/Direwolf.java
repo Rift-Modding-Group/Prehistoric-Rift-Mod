@@ -182,16 +182,19 @@ public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.ROAR, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpToUseLength(5D)
                 .defineUseDurationLength(30D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.DIREWOLF_HOWL)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.STATUS, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpToUseLength(5D)
                 .defineUseDurationLength(20D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.DIREWOLF_SNIFF)
                 .finalizePoints());
         return moveMap;
     }

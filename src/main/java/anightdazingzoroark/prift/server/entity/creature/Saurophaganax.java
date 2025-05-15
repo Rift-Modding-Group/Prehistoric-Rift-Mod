@@ -128,17 +128,20 @@ public class Saurophaganax extends RiftCreature {
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.HEAD, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.ROAR, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineChargeUpToUseLength(5D)
                 .defineUseDurationLength(22.5)
                 .defineRecoverFromUseLength(7.5)
+                .setChargeUpToUseSound(RiftSounds.SAUROPHAGANAX_LIGHT_BLAST)
                 .finalizePoints());
         return moveMap;
     }

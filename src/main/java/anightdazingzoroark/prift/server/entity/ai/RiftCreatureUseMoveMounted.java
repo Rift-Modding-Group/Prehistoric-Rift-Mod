@@ -219,6 +219,12 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.currentInvokedMove.onStartExecuting(this.creature);
                     this.setChargedMoveBeingUsed(true);
 
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                            && !this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                                1f,
+                                1f);
+
                     //this is here because putting this in this.animTime == this.moveAnimChargeToUseTime
                     //makes the anim prematurely stop
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
@@ -233,7 +239,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimInitDelayTime && this.animTime <= this.moveAnimChargeUpTime) {
                     this.currentInvokedMove.whileChargingUp(this.creature);
-                    if (this.chargeUpSoundLooper != null) this.chargeUpSoundLooper.playSound();
+                    if (this.chargeUpSoundLooper != null
+                            && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                            && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                        this.chargeUpSoundLooper.playSound();
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
@@ -303,6 +312,12 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.creature.setPlayingChargedMoveAnim(1);
                     this.currentInvokedMove.onStartExecuting(this.creature);
                     this.setChargedMoveBeingUsed(true);
+
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                            && !this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                                1f,
+                                1f);
 
                     //gradient while use moves should always have infinite move use anim time
                     //(by infinite its until they release the mouse button associated with the move)
@@ -374,9 +389,14 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime == 0) {
                     this.currentInvokedMove.onStartExecuting(this.creature);
                     this.creature.setUsingUnchargedAnim(true);
-                    if (this.creature.currentCreatureMove().useTimeIsInfinite) {
-                        this.creature.setMultistepMoveStep(0);
-                    }
+
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                            && !this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                                1f,
+                                1f);
+
+                    if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setMultistepMoveStep(0);
                 }
                 if (this.animTime == this.moveAnimChargeUpTime) {
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());

@@ -270,6 +270,13 @@
     "subtitle": "sounds.subtitle.sarcosuchus_charge"
   },
 
+  "prift.anomalocaris.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/anomalocaris/anomalocaris_idle"
+    ],
+    "subtitle": "sounds.subtitle.anomalocaris_idle"
+  },
   "prift.anomalocaris.hurt": {
     "category": "neutral",
     "sounds": [
@@ -283,6 +290,13 @@
       "prift:entities/anomalocaris/anomalocaris_death"
     ],
     "subtitle": "sounds.subtitle.anomalocaris_death"
+  },
+  "prift.anomalocaris.cloaking": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/anomalocaris/anomalocaris_cloaking"
+    ],
+    "subtitle": "sounds.subtitle.anomalocaris_cloaking"
   },
 
   "prift.saurophaganax.idle": {
@@ -306,12 +320,12 @@
     ],
     "subtitle": "sounds.subtitle.saurophaganax_death"
   },
-  "prift.saurophaganax.light_blast_boom": {
+  "prift.saurophaganax.light_blast": {
     "category": "neutral",
     "sounds": [
-      "prift:entities/saurophaganax/saurophaganax_light_blast_boom"
+      "prift:entities/saurophaganax/saurophaganax_light_blast"
     ],
-    "subtitle": "sounds.subtitle.saurophaganax_light_blast_boom"
+    "subtitle": "sounds.subtitle.saurophaganax_light_blast"
   },
 
   "prift.direwolf.idle": {
@@ -345,6 +359,13 @@
       "prift:entities/direwolf/direwolf_howl"
     ],
     "subtitle": "sounds.subtitle.direwolf_howl"
+  },
+  "prift.direwolf.sniff": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/direwolf/direwolf_sniff"
+    ],
+    "subtitle": "sounds.subtitle.direwolf_sniff"
   },
 
   "prift.megaloceros.idle": {

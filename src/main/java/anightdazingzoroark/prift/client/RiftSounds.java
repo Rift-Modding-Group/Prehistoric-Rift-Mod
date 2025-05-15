@@ -118,11 +118,17 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.sarcosuchus.charge")
     public static final SoundEvent SARCOSUCHUS_CHARGE = createSoundEvent("prift.sarcosuchus.charge");
 
+    @GameRegistry.ObjectHolder("prift.anomalocaris.idle")
+    public static final SoundEvent ANOMALOCARIS_IDLE = createSoundEvent("prift.anomalocaris.idle");
+
     @GameRegistry.ObjectHolder("prift.anomalocaris.hurt")
     public static final SoundEvent ANOMALOCARIS_HURT = createSoundEvent("prift.anomalocaris.hurt");
 
     @GameRegistry.ObjectHolder("prift.anomalocaris.death")
     public static final SoundEvent ANOMALOCARIS_DEATH = createSoundEvent("prift.anomalocaris.death");
+
+    @GameRegistry.ObjectHolder("prift.anomalocaris.cloaking")
+    public static final SoundEvent ANOMALOCARIS_CLOAKING = createSoundEvent("prift.anomalocaris.cloaking");
 
     @GameRegistry.ObjectHolder("prift.saurophaganax.idle")
     public static final SoundEvent SAUROPHAGANAX_IDLE = createSoundEvent("prift.saurophaganax.idle");
@@ -133,8 +139,8 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.saurophaganax.death")
     public static final SoundEvent SAUROPHAGANAX_DEATH = createSoundEvent("prift.saurophaganax.death");
 
-    @GameRegistry.ObjectHolder("prift.saurophaganax.light_blast_boom")
-    public static final SoundEvent SAUROPHAGANAX_LIGHT_BLAST_BOOM = createSoundEvent("prift.saurophaganax.light_blast_boom");
+    @GameRegistry.ObjectHolder("prift.saurophaganax.light_blast")
+    public static final SoundEvent SAUROPHAGANAX_LIGHT_BLAST = createSoundEvent("prift.saurophaganax.light_blast");
 
     @GameRegistry.ObjectHolder("prift.direwolf.idle")
     public static final SoundEvent DIREWOLF_IDLE = createSoundEvent("prift.direwolf.idle");
@@ -147,6 +153,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.direwolf.howl")
     public static final SoundEvent DIREWOLF_HOWL = createSoundEvent("prift.direwolf.howl");
+
+    @GameRegistry.ObjectHolder("prift.direwolf.howl")
+    public static final SoundEvent DIREWOLF_SNIFF = createSoundEvent("prift.direwolf.sniff");
 
     @GameRegistry.ObjectHolder("prift.megaloceros.idle")
     public static final SoundEvent MEGALOCEROS_IDLE = createSoundEvent("prift.megaloceros.idle");
