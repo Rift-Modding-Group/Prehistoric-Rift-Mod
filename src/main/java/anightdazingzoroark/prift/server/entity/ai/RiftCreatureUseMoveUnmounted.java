@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSoundLooper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -24,10 +25,15 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     private boolean finishedAnimMarker;
     private int moveChoiceCooldown;
     private int maxChargeTime;
+
     //for move selection
     private boolean selectingMove = true;
     private CreatureMove moveToTest = null;
     private List<CreatureMove> selectedMoveBlacklist = new ArrayList<>();
+
+    //for sound looping
+    private RiftSoundLooper chargeUpSoundLooper;
+    private RiftSoundLooper useSoundLooper;
 
     public RiftCreatureUseMoveUnmounted(RiftCreature creature) {
         this.creature = creature;
@@ -116,6 +122,12 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     this.currentInvokedMove.onStartExecuting(this.creature, this.target);
                     this.setChargedMoveBeingUsed(true);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
+
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                            && !this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime == this.moveAnimChargeUpTime) {
                     this.creature.setPlayingChargedMoveAnim(2);
@@ -125,6 +137,10 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 if (this.animTime >= this.moveAnimInitDelayTime && this.animTime < this.moveAnimChargeUpTime && this.creature.getCurrentMoveUse() < this.maxChargeTime) {
                     this.currentInvokedMove.whileChargingUp(this.creature);
                     this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
+                    if (this.chargeUpSoundLooper != null
+                            && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                            && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                        this.chargeUpSoundLooper.playSound();
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
@@ -138,11 +154,16 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
+                    if (this.useSoundLooper != null) this.useSoundLooper.playSound();
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag) {
                     this.creature.setPlayingChargedMoveAnim(4);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(false);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound() != null)
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.creature.setPlayingChargedMoveAnim(-1);
@@ -185,6 +206,12 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     this.currentInvokedMove.onStartExecuting(this.creature, this.target);
                     this.setChargedMoveBeingUsed(true);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(true);
+
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                            && !this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime == this.moveAnimChargeUpTime) {
                     this.creature.setPlayingChargedMoveAnim(2);
@@ -203,6 +230,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
+                    if (this.useSoundLooper != null) this.useSoundLooper.playSound();
                     if (this.creature.getCurrentMoveUse() < this.maxChargeTime)
                         this.creature.setCurrentMoveUse(this.creature.getCurrentMoveUse() + 1);
                 }
@@ -210,6 +238,10 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         || this.currentInvokedMove.forceStopFlag) {
                     this.creature.setPlayingChargedMoveAnim(4);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(false);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound() != null)
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.creature.setPlayingChargedMoveAnim(-1);
@@ -244,6 +276,11 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) {
                         this.creature.setMultistepMoveStep(0);
                     }
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                            && !this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime == this.moveAnimChargeUpTime) {
                     this.currentInvokedMove.onEndChargeUp(this.creature, this.creature.getCurrentMoveUse());
@@ -259,15 +296,20 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);
+                    if (this.useSoundLooper != null) this.useSoundLooper.playSound();
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) {
                         this.creature.setMultistepMoveStep(1);
                     }
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag) {
-                    //also dont know what to put here
                     if (this.creature.currentCreatureMove().useTimeIsInfinite)
                         this.creature.setMultistepMoveStep(2);
+
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound() != null)
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.creature.setUsingUnchargedAnim(false);
@@ -441,6 +483,21 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationPoint();
                 this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUsePoint();
             }
+
+            if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                    && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                this.chargeUpSoundLooper = new RiftSoundLooper(this.creature,
+                        this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                        20,
+                        1f,
+                        1f);
+            if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound() != null)
+                this.useSoundLooper = new RiftSoundLooper(this.creature,
+                        this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound(),
+                        5,
+                        1f,
+                        1f);
+
             this.finishedMoveMarker = false;
             this.animTime = 0;
             this.creature.setPlayingInfiniteMoveAnim(false);

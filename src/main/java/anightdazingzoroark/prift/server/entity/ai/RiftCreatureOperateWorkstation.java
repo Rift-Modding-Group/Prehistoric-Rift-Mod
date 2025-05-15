@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.RiftSoundLooper;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -36,6 +37,10 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
     private int moveAnimChargeToUseTime; //time until end of charge up to use point
     private int moveAnimUseTime; //time until end of use anim
     private int animTime = -100; //-100 instead of 0 because there will be a cooldown of 5 seconds after every time a move is used
+
+    //for sound looping
+    private RiftSoundLooper chargeUpSoundLooper;
+    private RiftSoundLooper useSoundLooper;
 
     public RiftCreatureOperateWorkstation(RiftCreature creature) {
         this.creature = creature;
@@ -90,6 +95,21 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
             this.moveAnimUseTime = (int)this.creature.animatorsForMoveType().get(this.moveForOperation.moveAnimType).getUseDurationPoint();
             this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.moveForOperation.moveAnimType).getRecoverFromUsePoint();
         }
+
+        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+            this.chargeUpSoundLooper = new RiftSoundLooper(this.creature,
+                    this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                    20,
+                    1f,
+                    1f);
+        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound() != null)
+            this.useSoundLooper = new RiftSoundLooper(this.creature,
+                    this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound(),
+                    5,
+                    1f,
+                    1f);
+
         this.invokedMoveForOperation = this.moveForOperation.invokeMove();
     }
 
@@ -127,6 +147,18 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
                             this.creature.setPlayingChargedMoveAnim(1);
                             this.setChargedMoveBeingUsed(true);
                         }
+
+                        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                                && !this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                            this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                                    1f,
+                                    1f);
+                    }
+                    if (this.animTime >= this.moveAnimInitDelayTime && this.animTime <= this.moveAnimChargeUpTime) {
+                        if (this.chargeUpSoundLooper != null
+                                && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
+                                && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+                            this.chargeUpSoundLooper.playSound();
                     }
                     if (this.animTime == this.moveAnimChargeUpTime) {
                         if (this.moveForOperation.chargeType.requiresCharge()) {
@@ -141,9 +173,16 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
                                     1f,
                                     1f);
                     }
+                    if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
+                        if (this.useSoundLooper != null) this.useSoundLooper.playSound();
+                    }
                     if (this.animTime == this.moveAnimUseTime) {
                         this.invokedWorkstation.onHitWorkstation(this.creature, this.workstationPos);
                         if (this.moveForOperation.chargeType.requiresCharge()) this.creature.setPlayingChargedMoveAnim(4);
+                        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound() != null)
+                            this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound(),
+                                    1f,
+                                    1f);
                     }
                     if (this.animTime >= this.maxMoveAnimTime) {
                         this.invokedWorkstation.onEndWorkstationUse(this.creature, this.workstationPos);

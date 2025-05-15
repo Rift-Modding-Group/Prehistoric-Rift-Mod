@@ -23,6 +23,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     private int animTime = 0;
     private boolean canBeExecutedMountedResult = false;
 
+    //for sound looping
     private RiftSoundLooper chargeUpSoundLooper;
     private RiftSoundLooper useSoundLooper;
 
