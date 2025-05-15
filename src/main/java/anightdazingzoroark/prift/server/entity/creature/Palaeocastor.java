@@ -127,6 +127,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
                 .defineChargeUpLength(1.25D)
                 .defineChargeUpToUseLength(1.25D)
                 .defineRecoverFromUseLength(2.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
                 .finalizePoints());
         return moveMap;
     }

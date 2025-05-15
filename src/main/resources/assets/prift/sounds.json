@@ -389,6 +389,29 @@
     ],
     "subtitle": "sounds.subtitle.megaloceros_death"
   },
+  "prift.megaloceros.leap": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/megaloceros/megaloceros_leap"
+    ],
+    "subtitle": "sounds.subtitle.megaloceros_leap"
+  },
+  "prift.megaloceros.charge_up": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/megaloceros/megaloceros_charge_up_1",
+      "prift:entities/megaloceros/megaloceros_charge_up_2",
+      "prift:entities/megaloceros/megaloceros_charge_up_3"
+    ],
+    "subtitle": "sounds.subtitle.megaloceros_charge_up"
+  },
+  "prift.megaloceros.charge": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/megaloceros/megaloceros_charge"
+    ],
+    "subtitle": "sounds.subtitle.megaloceros_charge"
+  },
 
   "prift.baryonyx.idle": {
     "category": "neutral",

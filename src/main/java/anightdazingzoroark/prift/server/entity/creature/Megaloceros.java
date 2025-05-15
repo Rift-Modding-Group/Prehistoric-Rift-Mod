@@ -195,14 +195,18 @@ public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestW
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.LEAP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpToUseLength(5D)
                 .defineRecoverFromUseLength(1D)
+                .setChargeUpToUseSound(RiftSounds.MEGALOCEROS_LEAP)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.CHARGE, new RiftCreatureMoveAnimator(this)
                 .defineStartMoveDelayLength(5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpSound(RiftSounds.MEGALOCEROS_CHARGE_UP, true)
+                .setChargeUpToUseSound(RiftSounds.MEGALOCEROS_CHARGE)
                 .finalizePoints());
         return moveMap;
     }
