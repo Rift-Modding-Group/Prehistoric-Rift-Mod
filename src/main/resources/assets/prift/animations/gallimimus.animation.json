@@ -23,7 +23,7 @@
 				}
 			}
 		},
-		"animation.gallimimus.use_beak_type_move": {
+		"animation.gallimimus.use_head_type_move": {
 			"animation_length": 0.5,
 			"bones": {
 				"hips": {

@@ -112,30 +112,33 @@ public class Gallimimus extends RiftCreature implements IHerder {
 
     @Override
     public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.PECK, CreatureMove.LEAP, CreatureMove.KICK);
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.LEAP, CreatureMove.KICK);
     }
 
     @Override
     public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.PECK, CreatureMove.LEAP, CreatureMove.KICK);
+        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.LEAP, CreatureMove.KICK);
     }
 
     @Override
     public Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType() {
         Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> moveMap = new HashMap<>();
-        moveMap.put(CreatureMove.MoveAnimType.BEAK, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.HEAD, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(2.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.LEAP, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(6D)
                 .defineRecoverFromUseLength(1D)
+                .setChargeUpToUseSound(RiftSounds.GALLIMIMUS_LEAP)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.KICK, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(12.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_KICK_MOVE)
                 .finalizePoints());
         return moveMap;
     }

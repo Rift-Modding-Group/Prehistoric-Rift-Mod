@@ -264,10 +264,13 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
         moveMap.put(CreatureMove.MoveAnimType.SPIN, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineRecoverFromUseLength(5D)
+                .setUseDurationSound(RiftSounds.ANKYLOSAURUS_SHELL_SPIN)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.DEFENSE, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.ANKYLOSAURUS_SHELLTER_IN)
+                .setRecoverFromUseSound(RiftSounds.ANKYLOSAURUS_SHELLTER_OUT)
                 .finalizePoints());
         return moveMap;
     }

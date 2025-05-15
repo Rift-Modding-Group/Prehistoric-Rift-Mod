@@ -145,17 +145,20 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(5D)
                 .setNumberOfAnims(2)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_SCRATCH_MOVE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.RANGED, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineChargeUpToUseLength(5D)
                 .defineUseDurationLength(25D)
                 .defineRecoverFromUseLength(10D)
+                .setChargeUpToUseSound(RiftSounds.DILOPHOSAURUS_SPIT)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.STATUS, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(7.5D)
                 .defineChargeUpToUseLength(2.5D)
                 .defineRecoverFromUseLength(10D)
+                .setChargeUpToUseSound(RiftSounds.DILOPHOSAURUS_SPIT)
                 .finalizePoints());
         return moveMap;
     }

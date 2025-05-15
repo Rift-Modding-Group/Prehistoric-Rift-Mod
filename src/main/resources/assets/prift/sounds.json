@@ -478,6 +478,30 @@
     ],
     "subtitle": "sounds.subtitle.ankylosaurus_death"
   },
+  "prift.ankylosaurus.shell_spin": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/ankylosaurus/ankylosaurus_shell_spin_1",
+      "prift:entities/ankylosaurus/ankylosaurus_shell_spin_2",
+      "prift:entities/ankylosaurus/ankylosaurus_shell_spin_3",
+      "prift:entities/ankylosaurus/ankylosaurus_shell_spin_4"
+    ],
+    "subtitle": "sounds.subtitle.ankylosaurus_shell_spin"
+  },
+  "prift.ankylosaurus.shellter_in": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/ankylosaurus/ankylosaurus_shellter_in"
+    ],
+    "subtitle": "sounds.subtitle.ankylosaurus_shellter_in"
+  },
+  "prift.ankylosaurus.shellter_out": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/ankylosaurus/ankylosaurus_shellter_out"
+    ],
+    "subtitle": "sounds.subtitle.ankylosaurus_shellter_out"
+  },
 
   "prift.dilophosaurus.idle": {
     "category": "neutral",
@@ -529,6 +553,13 @@
     ],
     "subtitle": "sounds.subtitle.gallimimus_death"
   },
+  "prift.gallimimus.leap": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/gallimimus/gallimimus_leap"
+    ],
+    "subtitle": "sounds.subtitle.gallimimus_leap"
+  },
 
   "prift.generic_move.bite": {
     "category": "neutral",
@@ -570,7 +601,14 @@
     "sounds": [
       "prift:entities/generic_move/generic_blow_move"
     ],
-    "subtitle": "sounds.subtitle.generic_move_blow"
+    "subtitle": "sounds.subtitle.generic_blow_move"
+  },
+  "prift.generic_move.kick": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_kick_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_kick_move"
   },
 
   "prift.semi_manual_machine.reset": {

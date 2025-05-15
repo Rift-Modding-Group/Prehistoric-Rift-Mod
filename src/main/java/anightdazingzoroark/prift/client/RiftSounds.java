@@ -202,6 +202,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.ankylosaurus.death")
     public static final SoundEvent ANKYLOSAURUS_DEATH = createSoundEvent("prift.ankylosaurus.death");
 
+    @GameRegistry.ObjectHolder("prift.ankylosaurus.shell_spin")
+    public static final SoundEvent ANKYLOSAURUS_SHELL_SPIN = createSoundEvent("prift.ankylosaurus.shell_spin");
+
+    @GameRegistry.ObjectHolder("prift.ankylosaurus.shellter_in")
+    public static final SoundEvent ANKYLOSAURUS_SHELLTER_IN = createSoundEvent("prift.ankylosaurus.shellter_in");
+
+    @GameRegistry.ObjectHolder("prift.ankylosaurus.shellter_out")
+    public static final SoundEvent ANKYLOSAURUS_SHELLTER_OUT = createSoundEvent("prift.ankylosaurus.shellter_out");
+
     @GameRegistry.ObjectHolder("prift.dilophosaurus.idle")
     public static final SoundEvent DILOPHOSAURUS_IDLE = createSoundEvent("prift.dilophosaurus.idle");
 
@@ -219,6 +228,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.gallimimus.hurt")
     public static final SoundEvent GALLIMIMUS_HURT = createSoundEvent("prift.gallimimus.hurt");
+
+    @GameRegistry.ObjectHolder("prift.gallimimus.leap")
+    public static final SoundEvent GALLIMIMUS_LEAP = createSoundEvent("prift.gallimimus.leap");
 
     @GameRegistry.ObjectHolder("prift.gallimimus.death")
     public static final SoundEvent GALLIMIMUS_DEATH = createSoundEvent("prift.gallimimus.death");
@@ -240,6 +252,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.generic_move.blow")
     public static final SoundEvent GENERIC_BLOW_MOVE = createSoundEvent("prift.generic_move.blow");
+
+    @GameRegistry.ObjectHolder("prift.generic_move.kick")
+    public static final SoundEvent GENERIC_KICK_MOVE = createSoundEvent("prift.generic_move.kick");
 
     @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
     public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");

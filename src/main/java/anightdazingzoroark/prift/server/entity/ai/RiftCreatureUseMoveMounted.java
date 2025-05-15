@@ -271,6 +271,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                         this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
                     }
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) this.creature.setPlayingInfiniteMoveAnim(false);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound() != null)
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.creature.setPlayingChargedMoveAnim(-1);
@@ -354,6 +358,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.moveAnimUseTime -= this.currentInvokedMove.getUseValue();
                     this.maxMoveAnimTime -= this.currentInvokedMove.getUseValue();
                     this.creature.setPlayingInfiniteMoveAnim(false);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound() != null)
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.creature.setPlayingChargedMoveAnim(-1);
@@ -423,6 +431,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) {
                         this.creature.setMultistepMoveStep(2);
                     }
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound() != null)
+                        this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound(),
+                                1f,
+                                1f);
                 }
                 if (this.animTime >= this.maxMoveAnimTime) {
                     this.animTime = 0;
