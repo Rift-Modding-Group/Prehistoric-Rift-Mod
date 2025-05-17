@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.particle.*;
 import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
@@ -102,6 +103,9 @@ public class ClientProxy extends ServerProxy {
                 break;
             case "pregnancy":
                 particle = new RiftPregnancyParticle(world, x, y, z, motX, motY, motZ);
+                break;
+            case "blow":
+                particle = new RiftBlowMoveParticle(world, x, y, z, motX, motY, motZ);
                 break;
         }
         if (particle != null) this.particleSpawner.spawnParticle(particle, false, false, false, x, y, z);

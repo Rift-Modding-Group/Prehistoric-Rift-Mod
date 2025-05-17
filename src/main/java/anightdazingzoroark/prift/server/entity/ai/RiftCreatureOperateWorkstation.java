@@ -96,16 +96,16 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
             this.maxMoveAnimTime = (int)this.creature.animatorsForMoveType().get(this.moveForOperation.moveAnimType).getRecoverFromUsePoint();
         }
 
-        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
-                && this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
+        if (this.creature.animatorsForMoveType().get(this.moveForOperation.moveAnimType).getChargeUpSound() != null
+                && this.creature.animatorsForMoveType().get(this.moveForOperation.moveAnimType).chargeUpSoundCanLoop())
             this.chargeUpSoundLooper = new RiftSoundLooper(this.creature,
-                    this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound(),
+                    this.creature.animatorsForMoveType().get(this.moveForOperation.moveAnimType).getChargeUpSound(),
                     20,
                     1f,
                     1f);
-        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound() != null)
+        if (this.creature.animatorsForMoveType().get(this.moveForOperation.moveAnimType).getUseDurationSound() != null)
             this.useSoundLooper = new RiftSoundLooper(this.creature,
-                    this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getUseDurationSound(),
+                    this.creature.animatorsForMoveType().get(this.moveForOperation.moveAnimType).getUseDurationSound(),
                     5,
                     1f,
                     1f);
@@ -168,16 +168,18 @@ public class RiftCreatureOperateWorkstation extends EntityAIBase {
                     }
                     if (this.animTime == this.moveAnimChargeToUseTime) {
                         if (this.moveForOperation.chargeType.requiresCharge()) this.creature.setPlayingChargedMoveAnim(3);
+                        this.invokedWorkstation.onHitWorkstation(this.creature, this.workstationPos);
                         if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
                             this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
                                     1f,
                                     1f);
+                        if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles() != null)
+                            this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles().createParticle();
                     }
                     if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                         if (this.useSoundLooper != null) this.useSoundLooper.playSound();
                     }
                     if (this.animTime == this.moveAnimUseTime) {
-                        this.invokedWorkstation.onHitWorkstation(this.creature, this.workstationPos);
                         if (this.moveForOperation.chargeType.requiresCharge()) this.creature.setPlayingChargedMoveAnim(4);
                         if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound() != null)
                             this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound(),

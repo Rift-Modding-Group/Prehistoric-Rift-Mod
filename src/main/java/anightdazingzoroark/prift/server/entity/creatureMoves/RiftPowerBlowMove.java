@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.server.entity.creature.Parasaurolophus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

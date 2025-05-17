@@ -252,6 +252,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                         this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
                                 1f,
                                 1f);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles() != null)
+                        this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles().createParticle();
                     if (this.creature.currentCreatureMove().chargeUpAffectsUseTime) {
                         this.currentInvokedMove.setUseValue(this.creature.getCurrentMoveUse());
                         this.moveAnimUseTime += this.creature.getCurrentMoveUse();
@@ -342,6 +344,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                         this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
                                 1f,
                                 1f);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles() != null)
+                        this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles().createParticle();
                     this.currentInvokedMove.setUseValue(this.creature.getCurrentMoveUse());
                     this.moveAnimUseTime += this.creature.getCurrentMoveUse();
                     this.maxMoveAnimTime += this.creature.getCurrentMoveUse();
@@ -419,6 +423,8 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                         this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
                                 1f,
                                 1f);
+                    if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles() != null)
+                        this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles().createParticle();
                 }
                 if (this.animTime >= this.moveAnimChargeToUseTime && this.animTime <= this.moveAnimUseTime) {
                     this.currentInvokedMove.whileExecuting(this.creature);

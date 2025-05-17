@@ -1,6 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftShowParticlesOnClient;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.Vec3d;
+
+import java.util.Random;
 
 //this class serves to define the speed of all the parts of an animation of a creature using a move
 public class RiftCreatureMoveAnimator {
@@ -24,6 +30,8 @@ public class RiftCreatureMoveAnimator {
     private SoundEvent chargeUpToUseSound;
     private SoundEvent useDurationSound;
     private SoundEvent recoverFromUseSound;
+    //for data involving particles
+    private ParticleData chargeUpToUseParticles;
     //other stuff
     private int numberOfAnims = 1; //this is for how many animations of same keyframes can be played
 
@@ -161,6 +169,15 @@ public class RiftCreatureMoveAnimator {
         return this.recoverFromUseSound;
     }
 
+    public RiftCreatureMoveAnimator setChargeUpToUseParticles(String particleName, int particleCount, double posX, double posY, double posZ, double motionX, double motionY, double motionZ) {
+        this.chargeUpToUseParticles = new ParticleData(particleName, particleCount, posX, posY, posZ, motionX, motionY, motionZ);
+        return this;
+    }
+
+    public ParticleData getChargeUpToUseParticles() {
+        return this.chargeUpToUseParticles;
+    }
+
     //other things
     public RiftCreatureMoveAnimator setNumberOfAnims(int value) {
         this.numberOfAnims = value;
@@ -169,5 +186,29 @@ public class RiftCreatureMoveAnimator {
 
     public int getNumberOfAnims() {
         return this.numberOfAnims;
+    }
+
+    public class ParticleData {
+        public final String particleName;
+        public final int particleCount;
+        public final double posX, posY, posZ;
+        public final double motionX, motionY, motionZ;
+
+        public ParticleData(String particleName, int particleCount, double posX, double posY, double posZ, double motionX, double motionY, double motionZ) {
+            this.particleName = particleName;
+            this.particleCount = particleCount;
+            this.posX = posX;
+            this.posY = posY;
+            this.posZ = posZ;
+            this.motionX = motionX;
+            this.motionY = motionY;
+            this.motionZ = motionZ;
+        }
+
+        public void createParticle() {
+            for (int x = 0; x < this.particleCount; x++) {
+                RiftMessages.WRAPPER.sendToAll(new RiftShowParticlesOnClient(this.particleName, this.posX, this.posY, this.posZ, this.motionX, this.motionY, this.motionZ));
+            }
+        }
     }
 }

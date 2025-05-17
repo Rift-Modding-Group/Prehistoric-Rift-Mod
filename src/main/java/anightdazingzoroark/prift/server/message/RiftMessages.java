@@ -112,5 +112,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftManualUseLargeWeapon.Handler.class, RiftManualUseLargeWeapon.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetSprinting.Handler.class, RiftSetSprinting.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetSprinting.Handler.class, RiftSetSprinting.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftShowParticlesOnClient.Handler.class, RiftShowParticlesOnClient.class, id++, Side.CLIENT);
     }
 }
