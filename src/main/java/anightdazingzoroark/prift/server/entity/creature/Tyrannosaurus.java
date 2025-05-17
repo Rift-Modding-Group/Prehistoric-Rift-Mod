@@ -252,6 +252,8 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
                 .defineUseDurationLength(22.5)
                 .defineRecoverFromUseLength(7.5)
                 .setChargeUpToUseSound(RiftSounds.TYRANNOSAURUS_ROAR)
+                .setChargeUpToUseParticles("roar", 64, this.posX, this.posY, this.posZ)
+                .setChargeUpToUseParticleYBounds(0, (int) this.height)
                 .finalizePoints());
         return moveMap;
     }

@@ -107,6 +107,9 @@ public class ClientProxy extends ServerProxy {
             case "blow":
                 particle = new RiftBlowMoveParticle(world, x, y, z, motX, motY, motZ);
                 break;
+            case "roar":
+                particle = new RiftRoarParticle(world, x, y, z, motX, motY, motZ);
+                break;
         }
         if (particle != null) this.particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
     }

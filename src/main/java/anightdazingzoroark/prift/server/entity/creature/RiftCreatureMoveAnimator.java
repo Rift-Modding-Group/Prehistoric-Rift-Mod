@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftShowParticlesOnClient;
 import net.minecraft.util.SoundEvent;
@@ -169,8 +170,28 @@ public class RiftCreatureMoveAnimator {
         return this.recoverFromUseSound;
     }
 
+    public RiftCreatureMoveAnimator setChargeUpToUseParticles(String particleName, int particleCount, double posX, double posY, double posZ) {
+        this.chargeUpToUseParticles = new ParticleData(particleName, particleCount, posX, posY, posZ);
+        return this;
+    }
+
     public RiftCreatureMoveAnimator setChargeUpToUseParticles(String particleName, int particleCount, double posX, double posY, double posZ, double motionX, double motionY, double motionZ) {
         this.chargeUpToUseParticles = new ParticleData(particleName, particleCount, posX, posY, posZ, motionX, motionY, motionZ);
+        return this;
+    }
+
+    public RiftCreatureMoveAnimator setChargeUpToUseParticleXBounds(int xBoundLow, int xBoundHigh) {
+        if (this.chargeUpToUseParticles != null) this.chargeUpToUseParticles.setXBounds(xBoundLow, xBoundHigh);
+        return this;
+    }
+
+    public RiftCreatureMoveAnimator setChargeUpToUseParticleYBounds(int yBoundLow, int yBoundHigh) {
+        if (this.chargeUpToUseParticles != null) this.chargeUpToUseParticles.setYBounds(yBoundLow, yBoundHigh);
+        return this;
+    }
+
+    public RiftCreatureMoveAnimator setChargeUpToUseParticleZBounds(int zBoundLow, int zBoundHigh) {
+        if (this.chargeUpToUseParticles != null) this.chargeUpToUseParticles.setZBounds(zBoundLow, zBoundHigh);
         return this;
     }
 
@@ -189,10 +210,14 @@ public class RiftCreatureMoveAnimator {
     }
 
     public class ParticleData {
-        public final String particleName;
-        public final int particleCount;
-        public final double posX, posY, posZ;
-        public final double motionX, motionY, motionZ;
+        private final String particleName;
+        private final int particleCount;
+        private final double posX, posY, posZ;
+        private double motionX, motionY, motionZ;
+        private boolean motionExceptYRandom;
+        private int xBoundLow, xBoundHigh;
+        private int yBoundLow, yBoundHigh;
+        private int zBoundLow, zBoundHigh;
 
         public ParticleData(String particleName, int particleCount, double posX, double posY, double posZ, double motionX, double motionY, double motionZ) {
             this.particleName = particleName;
@@ -205,9 +230,55 @@ public class RiftCreatureMoveAnimator {
             this.motionZ = motionZ;
         }
 
+        public ParticleData(String particleName, int particleCount, double posX, double posY, double posZ) {
+            this.particleName = particleName;
+            this.particleCount = particleCount;
+            this.posX = posX;
+            this.posY = posY;
+            this.posZ = posZ;
+            this.motionExceptYRandom = true;
+        }
+
+        public void setXBounds(int xBoundLow, int xBoundHigh) {
+            this.xBoundLow = xBoundLow;
+            this.xBoundHigh = xBoundHigh;
+        }
+
+        public void setYBounds(int yBoundLow, int yBoundHigh) {
+            this.yBoundLow = yBoundLow;
+            this.yBoundHigh = yBoundHigh;
+        }
+
+        public void setZBounds(int zBoundLow, int zBoundHigh) {
+            this.zBoundLow = zBoundLow;
+            this.zBoundHigh = zBoundHigh;
+        }
+
         public void createParticle() {
+            Random random = new Random();
             for (int x = 0; x < this.particleCount; x++) {
-                RiftMessages.WRAPPER.sendToAll(new RiftShowParticlesOnClient(this.particleName, this.posX, this.posY, this.posZ, this.motionX, this.motionY, this.motionZ));
+                int xBounds = ((this.xBoundLow <= 0 && this.xBoundHigh <= 0) ? 0 : (
+                        (this.xBoundLow > 0 && this.xBoundHigh <= 0) ? this.xBoundLow : (
+                                (this.xBoundLow <= 0 && this.xBoundHigh > 0) ? RiftUtil.randomInRange(0, this.xBoundHigh) : RiftUtil.randomInRange(this.xBoundLow, this.xBoundHigh)
+                        )
+                ));
+                int yBounds = ((this.yBoundLow <= 0 && this.yBoundHigh <= 0) ? 0 : (
+                        (this.yBoundLow > 0 && this.yBoundHigh <= 0) ? this.yBoundLow : (
+                                (this.yBoundLow <= 0 && this.yBoundHigh > 0) ? RiftUtil.randomInRange(0, this.yBoundHigh) : RiftUtil.randomInRange(this.yBoundLow, this.yBoundHigh)
+                        )
+                ));
+                int zBounds = ((this.zBoundLow <= 0 && this.zBoundHigh <= 0) ? 0 : (
+                        (this.zBoundLow > 0 && this.zBoundHigh <= 0) ? this.zBoundLow : (
+                                (this.zBoundLow <= 0 && this.zBoundHigh > 0) ? RiftUtil.randomInRange(0, this.zBoundHigh) : RiftUtil.randomInRange(this.zBoundLow, this.zBoundHigh)
+                        )
+                ));
+                double finalXMotion = this.motionExceptYRandom ? RiftUtil.randomInRange(0.2D, 0.8D) * (random.nextBoolean() ? 1 : -1) : this.motionX;
+                double finalZMotion = this.motionExceptYRandom ? RiftUtil.randomInRange(0.2D, 0.8D) * (random.nextBoolean() ? 1 : -1) : this.motionZ;
+                RiftMessages.WRAPPER.sendToAll(new RiftShowParticlesOnClient(this.particleName,
+                        this.posX + xBounds * (random.nextBoolean() ? 1 : -1),
+                        this.posY + yBounds * (random.nextBoolean() ? 1 : -1),
+                        this.posZ + zBounds * (random.nextBoolean() ? 1 : -1),
+                        finalXMotion, this.motionY, finalZMotion));
             }
         }
     }
