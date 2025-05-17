@@ -409,9 +409,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.canUtilizeCloaking()) this.manageCloaking();
             if (this.isNocturnal()) this.manageSleepSchedule();
             if (this.isTamed()) {
-                //here temporarily, idk
-                //will eventually make it so that energy for wild creatures can be
-                //reduced without it being exploitable in combat in the wild
                 this.updateEnergyMove();
 
                 this.lowEnergyEffects();
@@ -433,7 +430,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 if (this.getEnergy() < this.getMaxEnergy()) this.instaRegenAfterNoTarget();
             }
         }
-        else this.setControls();
+        else {
+            this.setControls();
+
+            //set sprinting based on if rider is sprinting
+            RiftMessages.WRAPPER.sendToServer(new RiftSetSprinting(this, this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting()));
+        }
 
         if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
@@ -641,15 +643,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     private void updateEnergyMove() {
-        //when moving and not using a move, energy reduces every 5 seconds, or 2.5 seconds when sprinting
-        if (this.isMoving(false) && this.currentCreatureMove() == null) {
+        //when sprinting and not using a move, energy reduces every 1 second when sprinting
+        if (this.isMoving(false)
+                && this.currentCreatureMove() == null
+                && this.isSprinting()) {
             this.energyMod++;
             this.energyRegenMod = 0;
             this.energyRegenModDelay = 0;
 
-            int movementMaxMod = (this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting()) ? 50 : 100;
-
-            if (this.energyMod >= movementMaxMod) {
+            if (this.energyMod >= 20) {
                 this.setEnergy(Math.max(this.getEnergy() - 1, 0));
                 this.energyMod = 0;
             }
@@ -2748,7 +2750,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 float moveSpeedMod = (this.getEnergy() > this.getWeaknessEnergy() ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = (float)(Math.max(0, this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - riderSpeed)) * moveSpeedMod;
-                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.3f : 0) : moveSpeed);
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (this.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.75f : 0) : moveSpeed);
 
                 //for getting out of bodies of water easily
                 if (forward > 0) {

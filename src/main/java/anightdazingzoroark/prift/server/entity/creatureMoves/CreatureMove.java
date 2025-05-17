@@ -2,39 +2,39 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 public enum CreatureMove {
     BOUNCE(RiftBounceMove.class, MoveAnimType.STATUS, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false),
-    TACKLE(RiftTackleMove.class, MoveAnimType.CHARGE, ChargeType.NONE, 25, new int[]{1}, 0, 0, false, false, false),
-    HEADBUTT(RiftHeadbuttMove.class, MoveAnimType.HEAD, ChargeType.NONE, 25, new int[]{1}, 0, 0, false, false, false),
-    STOMP(RiftStompMove.class, MoveAnimType.STOMP, ChargeType.NONE, 25, new int[]{4}, 0, 0, false, false, false),
-    SCRATCH(RiftScratchMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{1}, 0, 0, false, false, false),
-    BITE(RiftBiteMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{1}, 0, 0, false, false, false),
-    SNARL(RiftSnarlMove.class, MoveAnimType.STATUS, ChargeType.NONE, 0, new int[]{1}, 0, 60, false, false, false),
+    TACKLE(RiftTackleMove.class, MoveAnimType.CHARGE, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
+    HEADBUTT(RiftHeadbuttMove.class, MoveAnimType.HEAD, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
+    STOMP(RiftStompMove.class, MoveAnimType.STOMP, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
+    SCRATCH(RiftScratchMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
+    BITE(RiftBiteMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
+    SNARL(RiftSnarlMove.class, MoveAnimType.STATUS, ChargeType.NONE, 0, new int[]{0}, 0, 60, false, false, false),
     POWER_ROAR(RiftPowerRoarMove.class, MoveAnimType.ROAR, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false),
-    TAIL_SLAP(RiftTailSlapMove.class, MoveAnimType.TAIL, ChargeType.NONE, 25, new int[]{2}, 0, 0, false, false, false),
+    TAIL_SLAP(RiftTailSlapMove.class, MoveAnimType.TAIL, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
     THAGOMIZE(RiftThagomizeMove.class, MoveAnimType.TAIL, ChargeType.GRADIENT_THEN_USE, 80, new int[]{10, 20}, 100, 200, false, false, false),
     PLATE_FLING(RiftPlateFlingMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 25, new int[]{2}, 0, 100, false, false, false),
     CHARGE(RiftChargeMove.class, MoveAnimType.CHARGE, ChargeType.GRADIENT_THEN_USE, 75, new int[]{10, 20}, 100, 200, true, true, false),
     BIDE(RiftBideMove.class, MoveAnimType.DEFENSE, ChargeType.GRADIENT_THEN_USE, 0, new int[]{20, 40}, 100, 200, false, false, true), //basically like the since removed move from pokemon, absorb all damage you take, then reflect it all back to the opponent
     SELF_DESTRUCT(null, MoveAnimType.RANGED, ChargeType.NONE, 300, new int[]{0}, 0, 0, false, false, false), //will be given only to anky for now
     POUNCE(RiftPounceMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 50, new int[]{6}, 0, 100, false, true, false),
-    PACK_CALL(RiftPackCallMove.class, MoveAnimType.ROAR, ChargeType.COOLDOWN_ONLY, 0, new int[]{6}, 0, 3600, false, false, false),
-    TAIL_WHIP(RiftTailWhipMove.class, MoveAnimType.TAIL, ChargeType.NONE, 0, new int[]{4}, 0, 0, false, false, false),
+    PACK_CALL(RiftPackCallMove.class, MoveAnimType.ROAR, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 3600, false, false, false),
+    TAIL_WHIP(RiftTailWhipMove.class, MoveAnimType.TAIL, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false),
     POWER_BLOW(RiftPowerBlowMove.class, MoveAnimType.BLOW, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false),
     SHOCK_BLAST(RiftShockBlastMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{20}, 0, 3600, false, false, false),
     DEATH_ROLL(RiftDeathRollMove.class, MoveAnimType.SPIN, ChargeType.GRADIENT_WHILE_USE, 60, new int[]{10, 20}, 100, 200, false, true, true),
     LUNGE(RiftLungeMove.class, MoveAnimType.CHARGE, ChargeType.COOLDOWN_ONLY, 25, new int[]{8}, 0, 100, false, true, false),
-    GRAB(RiftGrabMove.class, MoveAnimType.GRAB, ChargeType.NONE, 0, new int[]{1}, 0, 0, false, false, false),
+    GRAB(RiftGrabMove.class, MoveAnimType.GRAB, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false),
     LIFE_DRAIN(RiftLifeDrainMove.class, MoveAnimType.GRAB, ChargeType.GRADIENT_WHILE_USE, 60, new int[]{4, 12}, 50, 100, false, true, true),
     CLOAK(RiftCloakMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 200, false, false, false),
     LIGHT_BLAST(RiftLightBlastMove.class, MoveAnimType.ROAR, ChargeType.BUILDUP, 60, new int[]{20}, 10, 0, false, false, false),
     SNIFF(RiftSniffMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 100, false, false, false),
     LEAP(RiftLeapMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 0, new int[]{6}, 0, 100, false, true, false),
-    POISON_CLAW(RiftPoisonClawMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{1}, 0, 0, false, false, false),
+    POISON_CLAW(RiftPoisonClawMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
     POISON_SPIT(RiftPoisonSpitMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 25, new int[]{2}, 0, 0, false, false, false),
     SHELLTER(RiftShellterMove.class, MoveAnimType.DEFENSE, ChargeType.GRADIENT_WHILE_USE, 0, new int[]{0, 0}, 100, 100, false, true, true),
     SHELL_SPIN(RiftShellSpinMove.class, MoveAnimType.SPIN, ChargeType.GRADIENT_WHILE_USE, 45, new int[]{20, 40}, 100, 300, false, true, true),
     POISON_TRAP(RiftPoisonTrapMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{10}, 0, 200, false, false, false),
     KICK(RiftKickMove.class, MoveAnimType.KICK, ChargeType.COOLDOWN_ONLY, 25, new int[]{6}, 0, 100, false, false, false),
-    PECK(RiftPeckMove.class, MoveAnimType.BEAK, ChargeType.NONE, 25, new int[]{1}, 0, 0, false, false, false);
+    PECK(RiftPeckMove.class, MoveAnimType.BEAK, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false);
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveAnimType moveAnimType;

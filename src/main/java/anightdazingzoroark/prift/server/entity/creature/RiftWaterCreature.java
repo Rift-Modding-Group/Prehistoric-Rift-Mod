@@ -206,7 +206,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 if (this.getIsAscending()) this.motionY = 0.25D;
                 else if (this.getIsDescending()) this.motionY = -0.25D;
 
-                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.3f : 0) : 2);
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.75f : 0) : 2);
 
                 this.moveRelative(strafe, this.isUsingSwimControls() ? vertical : 0, forward, 0.05F);
                 float f4 = 0.6F;
@@ -214,11 +214,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 if (d0 > 3.0F) d0 = 3.0F;
                 if (!this.onGround) d0 *= 0.5F;
                 if (d0 > 0.0F) f4 += (0.54600006F - f4) * d0 / 3.0F;
-                if (this.currentCreatureMove() != null) {
-                    System.out.println("motionX: "+this.motionX);
-                    System.out.println("motionY: "+this.motionY);
-                    System.out.println("motionZ: "+this.motionZ);
-                }
                 this.move(MoverType.SELF, this.motionX, (this.isUsingSwimControls() || this.currentCreatureMove() != null && this.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.CHARGE) ? this.motionY : 0, this.motionZ);
                 this.motionX *= f4;
                 this.motionX *= 0.900000011920929D;

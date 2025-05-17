@@ -174,7 +174,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/(double)this.creature.currentCreatureMove().maxUse;
                     }
                     this.creature.setMoveCooldown((int) (this.creature.getCurrentMoveUse() * cooldownGradient));
-                    if (this.creature.isTamed()) this.creature.setEnergy(Math.max(this.creature.getEnergy() - Math.round(RiftUtil.slopeResult(this.creature.getCurrentMoveUse(),
+                    this.creature.setEnergy(Math.max(this.creature.getEnergy() - Math.round(RiftUtil.slopeResult(this.creature.getCurrentMoveUse(),
                             true,
                             0,
                             this.currentInvokedMove.creatureMove.maxUse,
@@ -252,7 +252,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                         cooldownGradient = this.creature.currentCreatureMove().maxCooldown/(double)this.creature.currentCreatureMove().maxUse;
                     }
                     this.creature.setMoveCooldown((int) (this.creature.getCurrentMoveUse() * cooldownGradient));
-                    if (this.creature.isTamed()) this.creature.setEnergy(Math.max(this.creature.getEnergy() - Math.round(RiftUtil.slopeResult(this.creature.getCurrentMoveUse(),
+                    this.creature.setEnergy(Math.max(this.creature.getEnergy() - Math.round(RiftUtil.slopeResult(this.creature.getCurrentMoveUse(),
                             true,
                             0,
                             this.currentInvokedMove.creatureMove.maxUse,
@@ -320,7 +320,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     }
                     //all other moves should have their cooldown applied as usual
                     else if (this.creature.currentCreatureMove() != CreatureMove.CLOAK) this.creature.setMoveCooldown(this.creature.currentCreatureMove().maxCooldown);
-                    if (this.creature.isTamed()) this.creature.setEnergy(this.creature.getEnergy() - this.creature.currentCreatureMove().energyUse[0]);
+                    this.creature.setEnergy(this.creature.getEnergy() - this.creature.currentCreatureMove().energyUse[0]);
                     this.moveChoiceCooldown = 20;
                     this.animTime = 0;
                     this.finishedAnimMarker = true;
