@@ -85,6 +85,12 @@ public class ClientProxy extends ServerProxy {
     @SideOnly(Side.CLIENT)
     @Override
     public void spawnParticle(String name, double x, double y, double z, double motX, double motY, double motZ) {
+        this.spawnParticle(name, -1, x, y, z, motX, motY, motZ);
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void spawnParticle(String name, int color, double x, double y, double z, double motX, double motY, double motZ) {
         World world = Minecraft.getMinecraft().world;
         Particle particle = null;
         if (world == null) return;
@@ -109,6 +115,9 @@ public class ClientProxy extends ServerProxy {
                 break;
             case "roar":
                 particle = new RiftRoarParticle(world, x, y, z, motX, motY, motZ);
+                break;
+            case "light_blast":
+                particle = new RiftLightBlastParticle(world, color, x, y, z, motX, motY, motZ);
                 break;
         }
         if (particle != null) this.particleSpawner.spawnParticle(particle, false, false, false, x, y, z);

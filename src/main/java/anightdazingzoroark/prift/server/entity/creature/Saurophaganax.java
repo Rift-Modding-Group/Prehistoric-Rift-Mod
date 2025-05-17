@@ -142,6 +142,8 @@ public class Saurophaganax extends RiftCreature {
                 .defineUseDurationLength(22.5)
                 .defineRecoverFromUseLength(7.5)
                 .setChargeUpToUseSound(RiftSounds.SAUROPHAGANAX_LIGHT_BLAST)
+                .setChargeUpToUseParticles("light_blast", 256, this.posX, this.posY, this.posZ)
+                .setChargeUpToUseParticleColor(this.getVariantColor())
                 .finalizePoints());
         return moveMap;
     }
@@ -153,6 +155,21 @@ public class Saurophaganax extends RiftCreature {
 
     public boolean canBeKnockedBack() {
         return true;
+    }
+
+    public int getVariantColor() {
+        switch (this.getVariant()) {
+            case 0:
+                return 0xff6300;
+            case 1:
+                return 0x166fbc;
+            case 2:
+                return 0x9ba6b1;
+            case 3:
+                return 0x37de00;
+            default:
+                return 0xff6300;
+        }
     }
 
     @Override

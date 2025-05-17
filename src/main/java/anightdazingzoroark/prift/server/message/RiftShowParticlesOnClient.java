@@ -1,10 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -14,13 +11,15 @@ import net.minecraftforge.fml.relauncher.Side;
 
 public class RiftShowParticlesOnClient implements IMessage {
     private String particleName;
+    private int color;
     private double posX, posY, posZ;
     private double motionX, motionY, motionZ;
 
     public RiftShowParticlesOnClient() {}
 
-    public RiftShowParticlesOnClient(String particleName, double posX, double posY, double posZ, double motionX, double motionY, double motionZ) {
+    public RiftShowParticlesOnClient(String particleName, int color, double posX, double posY, double posZ, double motionX, double motionY, double motionZ) {
         this.particleName = particleName;
+        this.color = color;
         this.posX = posX;
         this.posY = posY;
         this.posZ = posZ;
@@ -32,6 +31,7 @@ public class RiftShowParticlesOnClient implements IMessage {
     @Override
     public void fromBytes(ByteBuf buf) {
         this.particleName = ByteBufUtils.readUTF8String(buf);
+        this.color = buf.readInt();
         this.posX = buf.readDouble();
         this.posY = buf.readDouble();
         this.posZ = buf.readDouble();
@@ -43,6 +43,7 @@ public class RiftShowParticlesOnClient implements IMessage {
     @Override
     public void toBytes(ByteBuf buf) {
         ByteBufUtils.writeUTF8String(buf, this.particleName);
+        buf.writeInt(this.color);
         buf.writeDouble(this.posX);
         buf.writeDouble(this.posY);
         buf.writeDouble(this.posZ);
@@ -60,7 +61,7 @@ public class RiftShowParticlesOnClient implements IMessage {
 
         private void handle(RiftShowParticlesOnClient message, MessageContext ctx) {
             if (ctx.side == Side.CLIENT) {
-                RiftInitialize.PROXY.spawnParticle(message.particleName, message.posX, message.posY, message.posZ, message.motionX, message.motionY, message.motionZ);
+                RiftInitialize.PROXY.spawnParticle(message.particleName, message.color, message.posX, message.posY, message.posZ, message.motionX, message.motionY, message.motionZ);
             }
         }
     }

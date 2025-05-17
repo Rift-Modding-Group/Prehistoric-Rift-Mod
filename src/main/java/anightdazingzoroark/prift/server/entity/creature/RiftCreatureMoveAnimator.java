@@ -195,6 +195,11 @@ public class RiftCreatureMoveAnimator {
         return this;
     }
 
+    public RiftCreatureMoveAnimator setChargeUpToUseParticleColor(int color) {
+        if (this.chargeUpToUseParticles != null) this.chargeUpToUseParticles.setParticleColor(color);
+        return this;
+    }
+
     public ParticleData getChargeUpToUseParticles() {
         return this.chargeUpToUseParticles;
     }
@@ -218,6 +223,7 @@ public class RiftCreatureMoveAnimator {
         private int xBoundLow, xBoundHigh;
         private int yBoundLow, yBoundHigh;
         private int zBoundLow, zBoundHigh;
+        private int particleColor = -1;
 
         public ParticleData(String particleName, int particleCount, double posX, double posY, double posZ, double motionX, double motionY, double motionZ) {
             this.particleName = particleName;
@@ -254,6 +260,10 @@ public class RiftCreatureMoveAnimator {
             this.zBoundHigh = zBoundHigh;
         }
 
+        public void setParticleColor(int particleColor) {
+            this.particleColor = particleColor;
+        }
+
         public void createParticle() {
             Random random = new Random();
             for (int x = 0; x < this.particleCount; x++) {
@@ -275,6 +285,7 @@ public class RiftCreatureMoveAnimator {
                 double finalXMotion = this.motionExceptYRandom ? RiftUtil.randomInRange(0.2D, 0.8D) * (random.nextBoolean() ? 1 : -1) : this.motionX;
                 double finalZMotion = this.motionExceptYRandom ? RiftUtil.randomInRange(0.2D, 0.8D) * (random.nextBoolean() ? 1 : -1) : this.motionZ;
                 RiftMessages.WRAPPER.sendToAll(new RiftShowParticlesOnClient(this.particleName,
+                        this.particleColor,
                         this.posX + xBounds * (random.nextBoolean() ? 1 : -1),
                         this.posY + yBounds * (random.nextBoolean() ? 1 : -1),
                         this.posZ + zBounds * (random.nextBoolean() ? 1 : -1),

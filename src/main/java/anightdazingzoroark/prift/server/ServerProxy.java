@@ -88,6 +88,8 @@ public class ServerProxy {
 
     public void spawnParticle(String name, double x, double y, double z, double motX, double motY, double motZ) {}
 
+    public void spawnParticle(String name, int color, double x, double y, double z, double motX, double motY, double motZ) {}
+
     public void spawnTrapParticle(int color, double x, double y, double z, double motX, double motY, double motZ) {}
 
     @Optional.Method(modid = RiftInitialize.SIMPLE_DIFFICULTY_MOD_ID)
