@@ -208,7 +208,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 if (this.getIsAscending()) this.motionY = 0.25D;
                 else if (this.getIsDescending()) this.motionY = -0.25D;
 
-                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.75f : 0) : 2);
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.25f : 0) : 2);
 
                 this.moveRelative(strafe, this.isUsingSwimControls() ? vertical : 0, forward, 0.05F);
                 float f4 = 0.6F;

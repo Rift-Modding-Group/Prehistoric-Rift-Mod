@@ -2748,7 +2748,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 float moveSpeedMod = (this.getEnergy() > this.getWeaknessEnergy() ? 1f : this.getEnergy() > 0 ? 0.5f : 0f);
                 float riderSpeed = (float) (controller.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 float moveSpeed = (float)(Math.max(0, this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() - riderSpeed)) * moveSpeedMod;
-                this.setAIMoveSpeed(this.onGround ? moveSpeed + (this.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.75f : 0) : moveSpeed);
+                this.setAIMoveSpeed(this.onGround ? moveSpeed + (this.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.25f : 0) : moveSpeed);
 
                 //for getting out of bodies of water easily
                 if (forward > 0) {
