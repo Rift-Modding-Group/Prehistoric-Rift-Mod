@@ -51,7 +51,7 @@ public class RiftPackCallMove extends RiftCreatureMove {
 
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
-        user.removeSpeed();
+        user.setCanMove(false);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class RiftPackCallMove extends RiftCreatureMove {
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         for (RiftCreature entity : this.packMembers) {
-            entity.removeSpeed();
+            entity.setCanMove(false);
             entity.addPotionEffect(new PotionEffect(MobEffects.SPEED, 90 * 20, 2));
             entity.addPotionEffect(new PotionEffect(MobEffects.STRENGTH, 90 * 20, 2));
         }
@@ -75,7 +75,7 @@ public class RiftPackCallMove extends RiftCreatureMove {
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-        user.resetSpeed();
-        for (RiftCreature entity : this.packMembers) entity.resetSpeed();
+        user.setCanMove(true);
+        for (RiftCreature entity : this.packMembers) entity.setCanMove(true);
     }
 }

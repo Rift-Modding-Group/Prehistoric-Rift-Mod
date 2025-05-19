@@ -42,7 +42,7 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
         this.canFireWeapon = false;
         this.pauseTime = 0;
         this.creature.setLargeWeaponUse(0);
-        this.creature.resetSpeed();
+        this.creature.setCanMove(true);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
                 if (this.canFireWeapon) this.manageCannonFiring();
                 else if (this.creature.getUsingLargeWeapon()) {
                     if (this.creature.canFireLargeWeapon()) {
-                        this.creature.removeSpeed();
+                        this.creature.setCanMove(false);
                         this.canFireWeapon = true;
                     }
                     else {
@@ -67,7 +67,7 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
                 if (this.canFireWeapon) this.manageMortarFiring();
                 else {
                     if (this.creature.canFireLargeWeapon() && !this.creature.getUsingLargeWeapon() && this.creature.getLargeWeaponUse() > 0) {
-                        this.creature.removeSpeed();
+                        this.creature.setCanMove(false);
                         this.canFireWeapon = true;
                     }
                     else if (!this.creature.canFireLargeWeapon() && this.creature.getUsingLargeWeapon()) {
@@ -82,7 +82,7 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
                 if (this.canFireWeapon) this.manageCatapultFiring();
                 else {
                     if (this.creature.canFireLargeWeapon() && !this.creature.getUsingLargeWeapon() && this.creature.getLargeWeaponUse() > 0) {
-                        this.creature.removeSpeed();
+                        this.creature.setCanMove(false);
                         this.canFireWeapon = true;
                     }
                     else if (!this.creature.canFireLargeWeapon() && this.creature.getUsingLargeWeapon()) {

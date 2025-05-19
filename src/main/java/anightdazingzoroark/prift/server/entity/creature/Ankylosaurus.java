@@ -188,7 +188,6 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        this.resetSpeed();
         this.writeHarvestWanderDataToNBT(compound);
         this.writeWorkstationDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);

@@ -106,6 +106,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROTATE_MOUNTED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CLOAKED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CAN_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
@@ -273,6 +274,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(INCAPACITATED, false);
         this.dataManager.register(CAN_ROTATE_MOUNTED, true);
         this.dataManager.register(CLOAKED, false);
+        this.dataManager.register(CAN_MOVE, true);
 
         this.dataManager.register(CURRENT_MOVE, -1);
 
@@ -2137,18 +2139,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.waterSpeed;
     }
 
-    public void resetSpeed() {
-        this.setSpeed(this.speed);
-        this.setWaterSpeed(this.waterSpeed);
-    }
-
-    public void removeSpeed() {
-        this.setSpeed(0D);
-        this.setWaterSpeed(0D);
+    public void setCanMove(boolean value) {
+        this.dataManager.set(CAN_MOVE, value);
     }
 
     public boolean canMove() {
-        return this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getBaseValue() > 0D;
+        return this.dataManager.get(CAN_MOVE);
     }
 
     public TameBehaviorType getTameBehavior() {
@@ -2381,14 +2377,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.changeAttackByMultiplier(0.1);
             }
             else {
-                this.resetSpeed();
+                this.setCanMove(true);
                 this.changeAttackByMultiplier(1);
             }
         }
         else if (this.isSleeping() || this.isForcedAwake()) {
             this.setSleeping(false);
             this.setForcedAwake(false);
-            this.resetSpeed();
+            this.setCanMove(true);
             this.changeAttackByMultiplier(1);
         }
     }
@@ -2723,6 +2719,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
+        if (!this.canMove()) return;
+
         if (this.getLeapDirection().length() > 0f && this.onGround()) {
             this.motionX = this.getLeapDirection().x;
             this.motionY = this.getLeapDirection().y;

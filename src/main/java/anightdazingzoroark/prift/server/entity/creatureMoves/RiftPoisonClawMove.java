@@ -13,7 +13,7 @@ public class RiftPoisonClawMove extends RiftCreatureMove {
 
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
-        user.removeSpeed();
+        user.setCanMove(false);
     }
 
     @Override
@@ -34,6 +34,6 @@ public class RiftPoisonClawMove extends RiftCreatureMove {
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-        user.resetSpeed();
+        user.setCanMove(true);
     }
 }

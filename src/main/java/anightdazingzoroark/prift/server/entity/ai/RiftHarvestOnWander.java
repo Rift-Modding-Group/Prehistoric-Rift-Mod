@@ -54,7 +54,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
         this.creature.getNavigator().clearPath();
         this.targetBlockPos = null;
         this.path = null;
-        this.creature.resetSpeed();
+        this.creature.setCanMove(true);
         this.creatureHarvester.setHarvesting(false);
     }
 
@@ -66,7 +66,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
             if (this.path.isFinished() || RiftUtil.entityAtLocation(this.creature, this.targetBlockPos, this.creatureHarvester.harvestRange())) {
                 if (this.animTime == 0) {
                     this.creatureHarvester.setHarvesting(true);
-                    this.creature.removeSpeed();
+                    this.creature.setCanMove(false);
                 }
                 if (this.animTime == this.harvestAnimTime) {
                     this.creatureHarvester.harvestBlock(this.creature, this.targetBlockPos);
@@ -77,7 +77,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
                 }
                 if (this.animTime > 30) {
                     this.animTime = -1;
-                    this.creature.resetSpeed();
+                    this.creature.setCanMove(true);
                     this.creatureHarvester.setHarvesting(false);
                     this.creature.getNavigator().clearPath();
                     this.targetBlockPos = null;

@@ -11,7 +11,7 @@ public class RiftDeathRollMove extends RiftCreatureMove {
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setGrabVictim(null);
-        user.removeSpeed();
+        user.setCanMove(false);
     }
 
     @Override
@@ -33,6 +33,6 @@ public class RiftDeathRollMove extends RiftCreatureMove {
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.setGrabVictim(null);
-        user.resetSpeed();
+        user.setCanMove(true);
     }
 }

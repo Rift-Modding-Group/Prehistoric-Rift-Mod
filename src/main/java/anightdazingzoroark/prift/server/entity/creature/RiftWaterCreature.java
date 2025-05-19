@@ -191,6 +191,8 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
+        if (!this.canMove()) return;
+
         if (this.isSaddled() && this.isBeingRidden()) {
             EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();
             if (controller != null && this.isInWater()) {

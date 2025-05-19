@@ -13,7 +13,7 @@ public class RiftPoisonSpitMove extends RiftCreatureMove {
 
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
-        user.removeSpeed();
+        user.setCanMove(false);
         user.disableCanRotateMounted();
     }
 
@@ -35,7 +35,7 @@ public class RiftPoisonSpitMove extends RiftCreatureMove {
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-        user.resetSpeed();
+        user.setCanMove(true);
         user.enableCanRotateMounted();
     }
 

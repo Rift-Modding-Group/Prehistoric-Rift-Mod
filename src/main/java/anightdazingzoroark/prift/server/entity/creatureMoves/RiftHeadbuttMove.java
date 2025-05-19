@@ -10,16 +10,14 @@ public class RiftHeadbuttMove extends RiftCreatureMove {
 
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
-        user.removeSpeed();
+        user.setCanMove(false);
     }
 
     @Override
     public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
@@ -28,6 +26,6 @@ public class RiftHeadbuttMove extends RiftCreatureMove {
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-        user.resetSpeed();
+        user.setCanMove(true);
     }
 }

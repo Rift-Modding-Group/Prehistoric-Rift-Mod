@@ -55,8 +55,7 @@ public class RiftSetTurretMode implements IMessage {
             turretModeUser.setTurretMode(message.value);
 
             //remove or reset speed
-            if (message.value) creature.removeSpeed();
-            else creature.resetSpeed();
+            creature.setCanMove(!message.value);
         }
     }
 }
