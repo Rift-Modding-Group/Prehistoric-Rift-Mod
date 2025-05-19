@@ -382,12 +382,9 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         for (int x = 0; x < nbtItemList.tagCount(); x++) {
             NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
             int j = nbttagcompound.getByte("Slot") & 255;
-            if ((creatureType.canBeSaddled && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)) || !creatureType.canBeSaddled) {
-                nbtItemList.removeTag(x);
-            }
-            else if ((creatureType.canHoldLargeWeapon && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) || !creatureType.canHoldLargeWeapon) {
-                nbtItemList.removeTag(x);
-            }
+            boolean unremovableSlot = (creatureType.canBeSaddled && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE))
+                    || (creatureType.canHoldLargeWeapon && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON));
+            if (!unremovableSlot) nbtItemList.removeTag(x);
         }
     }
 
@@ -402,12 +399,9 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 for (int x = 0; x < nbtItemList.tagCount(); x++) {
                     NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
                     int j = nbttagcompound.getByte("Slot") & 255;
-                    if ((creatureType.canBeSaddled && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)) || !creatureType.canBeSaddled) {
-                        nbtItemList.removeTag(x);
-                    }
-                    else if ((creatureType.canHoldLargeWeapon && j != creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) || !creatureType.canHoldLargeWeapon) {
-                        nbtItemList.removeTag(x);
-                    }
+                    boolean unremovableSlot = (creatureType.canBeSaddled && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE))
+                            || (creatureType.canHoldLargeWeapon && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON));
+                    if (!unremovableSlot) nbtItemList.removeTag(x);
                 }
             }
         }

@@ -62,7 +62,11 @@ public class RiftDropPartyMemberInventory implements IMessage {
 
                 NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
                 int j = nbttagcompound.getByte("Slot") & 255;
-                if ((canBeSaddled && j != 0) || !canBeSaddled) {
+                RiftCreatureType creatureType = RiftCreatureType.values()[partyMemNBT.getByte("CreatureType")];
+
+                boolean unremovableSlot = (creatureType.canBeSaddled && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE))
+                        || (creatureType.canHoldLargeWeapon && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON));
+                if (!unremovableSlot) {
                     EntityItem entityItem = new EntityItem(playerEntity.world, itemPosX, itemPosY, itemPosZ);
                     entityItem.setItem(new ItemStack(nbttagcompound));
                     playerEntity.world.spawnEntity(entityItem);
