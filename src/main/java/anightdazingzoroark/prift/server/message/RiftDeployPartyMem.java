@@ -22,14 +22,20 @@ import java.util.UUID;
 public class RiftDeployPartyMem implements IMessage {
     private int playerId;
     private int position;
-    public boolean deploy;
+    private boolean deploy;
+    private boolean interMessage;
 
     public RiftDeployPartyMem() {}
 
     public RiftDeployPartyMem(EntityPlayer player, int position, boolean deploy) {
+        this(player, position, deploy, false);
+    }
+
+    public RiftDeployPartyMem(EntityPlayer player, int position, boolean deploy, boolean interMessage) {
         this.playerId = player.getEntityId();
         this.position = position;
         this.deploy = deploy;
+        this.interMessage = interMessage;
     }
 
     @Override
@@ -37,6 +43,7 @@ public class RiftDeployPartyMem implements IMessage {
         this.playerId = buf.readInt();
         this.position = buf.readInt();
         this.deploy = buf.readBoolean();
+        this.interMessage = buf.readBoolean();
     }
 
     @Override
@@ -44,6 +51,7 @@ public class RiftDeployPartyMem implements IMessage {
         buf.writeInt(this.playerId);
         buf.writeInt(this.position);
         buf.writeBoolean(this.deploy);
+        buf.writeBoolean(this.interMessage);
     }
 
     public static class Handler implements IMessageHandler<RiftDeployPartyMem, IMessage> {
@@ -81,11 +89,16 @@ public class RiftDeployPartyMem implements IMessage {
                     compound.setByte("DeploymentType", (byte) PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE.ordinal());
                     playerTamedCreatures.modifyCreature(uuid, compound);
 
-                    //update remove creature
+                    //update creature
                     RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, uuid);
-                    partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                    PlayerTamedCreaturesHelper.updatePartyMem(partyMember);
+                    if (partyMember != null) {
+                        partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                        PlayerTamedCreaturesHelper.updatePartyMem(partyMember);
+                    }
                 }
+
+                //repeat on the client side
+                if (!message.interMessage) RiftMessages.WRAPPER.sendToAll(new RiftDeployPartyMem(player, message.position, message.deploy, true));
             }
             if (ctx.side == Side.CLIENT) {
                 EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
@@ -105,11 +118,16 @@ public class RiftDeployPartyMem implements IMessage {
                     compound.setByte("DeploymentType", (byte) PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE.ordinal());
                     playerTamedCreatures.modifyCreature(uuid, compound);
 
-                    //update remove creature
+                    //update creature
                     RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, uuid);
-                    partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                    PlayerTamedCreaturesHelper.updatePartyMem(partyMember);
+                    if (partyMember != null) {
+                        partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                        PlayerTamedCreaturesHelper.updatePartyMem(partyMember);
+                    }
                 }
+
+                //repeat on the server side
+                if (!message.interMessage) RiftMessages.WRAPPER.sendToServer(new RiftDeployPartyMem(player, message.position, message.deploy, true));
             }
         }
     }

@@ -166,7 +166,6 @@ public class RiftLungeMove extends RiftCreatureMove {
             this.lungeDirectionToPosX = user.getLookVec().normalize().x;
             if (user.isInWater()) this.lungeDirectionToPosY = user.getLookVec().normalize().y;
             this.lungeDirectionToPosZ = user.getLookVec().normalize().z;
-            System.out.println("lunge direction: "+user.getLookVec());
 
             //get lunge time
             this.maxLungeTime = (int) Math.ceil(user.rangedWidth() * 1.5D / this.lungeVelocity);

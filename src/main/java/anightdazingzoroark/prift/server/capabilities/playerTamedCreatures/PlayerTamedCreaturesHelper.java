@@ -704,6 +704,7 @@ public class PlayerTamedCreaturesHelper {
 
     public static NBTTagCompound createNBTFromCreature(RiftCreature creature) {
         NBTTagCompound compound = new NBTTagCompound();
+        //get data that doesnt get saved into nbt properly for some reason
         compound.setUniqueId("UniqueID", creature.getUniqueID());
         compound.setString("CustomName", creature.getCustomNameTag());
         creature.writeEntityToNBT(compound);
@@ -711,10 +712,7 @@ public class PlayerTamedCreaturesHelper {
     }
 
     public static void deployCreatureFromParty(EntityPlayer player, int position, boolean deploy) {
-        if (player.world.isRemote) {
-            RiftMessages.WRAPPER.sendToServer(new RiftDeployPartyMem(player, position, deploy));
-            RiftMessages.WRAPPER.sendToAll(new RiftDeployPartyMem(player, position, deploy));
-        }
+        RiftMessages.WRAPPER.sendToAll(new RiftDeployPartyMem(player, position, deploy));
     }
 
     public static boolean canBeDeployed(EntityPlayer player, int position) {

@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalPartyButton;
 import anightdazingzoroark.prift.compat.jei.RiftJEI;
@@ -88,6 +89,7 @@ public class RiftJournalScreen extends GuiScreen {
 
         //for set last open time
         PlayerTamedCreaturesHelper.setPartyLastOpenedTime(this.mc.player, (int) this.mc.world.getTotalWorldTime());
+        PlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
         //start with the creature types
         this.sidebarType = null;
@@ -107,7 +109,7 @@ public class RiftJournalScreen extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        if (mc != null && mc.world != null) this.drawDefaultBackground();
+        if (this.mc != null && this.mc.world != null) this.drawDefaultBackground();
         else return;
 
         //update creatures as long as this page is open

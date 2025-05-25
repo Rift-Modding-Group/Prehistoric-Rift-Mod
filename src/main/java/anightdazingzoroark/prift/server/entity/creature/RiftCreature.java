@@ -3264,6 +3264,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             return true;
         }
+
+        //this is just here for testing purposes
+        @Override
+        public String toString() {
+            String toReturn = "[";
+            for (int x = 0; x < slotCount(); x++) {
+                if (!this.getStackInSlot(x).isEmpty()) {
+                    toReturn += "{Slot:"+x+",Item:"+this.getStackInSlot(x).getItem().getTranslationKey()+",Count:"+this.getStackInSlot(x).getCount()+"}";
+                    if (x < slotCount() - 1) toReturn += ",";
+                }
+            }
+            toReturn += "]";
+            return toReturn;
+        }
     }
 
     class RiftCreatureInvListener implements IInventoryChangedListener {

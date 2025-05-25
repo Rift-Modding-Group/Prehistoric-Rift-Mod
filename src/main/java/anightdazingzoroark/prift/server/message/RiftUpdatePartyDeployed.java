@@ -60,12 +60,11 @@ public class RiftUpdatePartyDeployed implements IMessage {
     public static class Handler implements IMessageHandler<RiftUpdatePartyDeployed, IMessage> {
         @Override
         public IMessage onMessage(RiftUpdatePartyDeployed message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handleServer(message, ctx));
-            if (ctx.side == Side.CLIENT) FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handleClient(message, ctx));
+            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handleServer(RiftUpdatePartyDeployed message, MessageContext ctx) {
+        private void handle(RiftUpdatePartyDeployed message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
@@ -77,20 +76,17 @@ public class RiftUpdatePartyDeployed implements IMessage {
 
                     if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                         NBTTagCompound newCompound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
-                        playerTamedCreatures.replaceCreature(message.uuid, newCompound);
+                        playerTamedCreatures.modifyCreature(message.uuid, newCompound);
                         RiftMessages.WRAPPER.sendToAll(new RiftUpdatePartyDeployed(player, creature, newCompound));
                     }
                     else if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                         NBTTagCompound newCompound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
-                        playerTamedCreatures.replaceCreature(message.uuid, newCompound);
+                        playerTamedCreatures.modifyCreature(message.uuid, newCompound);
                         RiftMessages.WRAPPER.sendToAll(new RiftUpdatePartyDeployed(player, creature, newCompound));
-
-                        //for removing creature and hitboxes
-                        RiftUtil.removeCreature(creature);
                     }
                 }
                 else {
-                    playerTamedCreatures.replaceCreature(message.uuid, message.tagCompound);
+                    playerTamedCreatures.modifyCreature(message.uuid, message.tagCompound);
                     if (creature != null
                             && PlayerTamedCreatures.DeploymentType.values()[message.tagCompound.getByte("DeploymentType")] == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
                             && creature.isEntityAlive()) {
@@ -99,9 +95,6 @@ public class RiftUpdatePartyDeployed implements IMessage {
                     }
                 }
             }
-        }
-
-        private void handleClient(RiftUpdatePartyDeployed message, MessageContext ctx) {
             if (ctx.side == Side.CLIENT) {
                 EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
@@ -113,20 +106,17 @@ public class RiftUpdatePartyDeployed implements IMessage {
 
                     if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                         NBTTagCompound newCompound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
-                        playerTamedCreatures.replaceCreature(message.uuid, newCompound);
+                        playerTamedCreatures.modifyCreature(message.uuid, newCompound);
                         RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyDeployed(player, creature, newCompound));
                     }
                     else if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                         NBTTagCompound newCompound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
-                        playerTamedCreatures.replaceCreature(message.uuid, newCompound);
-                        RiftMessages.WRAPPER.sendToAll(new RiftUpdatePartyDeployed(player, creature, newCompound));
-
-                        //for removing creature and hitboxes
-                        RiftUtil.removeCreature(creature);
+                        playerTamedCreatures.modifyCreature(message.uuid, newCompound);
+                        RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyDeployed(player, creature, newCompound));
                     }
                 }
                 else {
-                    playerTamedCreatures.replaceCreature(message.uuid, message.tagCompound);
+                    playerTamedCreatures.modifyCreature(message.uuid, message.tagCompound);
                     if (creature != null
                             && PlayerTamedCreatures.DeploymentType.values()[message.tagCompound.getByte("DeploymentType")] == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
                             && creature.isEntityAlive()) {

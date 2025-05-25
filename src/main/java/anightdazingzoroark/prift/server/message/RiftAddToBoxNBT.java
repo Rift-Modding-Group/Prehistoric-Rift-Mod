@@ -52,7 +52,6 @@ public class RiftAddToBoxNBT implements IMessage {
                 playerTamedCreatures.addToBoxNBT(message.tagCompound);
             }
             if (ctx.side == Side.CLIENT) {
-                System.out.println("test");
                 EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);

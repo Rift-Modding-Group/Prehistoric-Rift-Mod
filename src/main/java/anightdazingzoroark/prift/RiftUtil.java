@@ -488,10 +488,11 @@ public class RiftUtil {
         if (creature == null) return;
         if (creature.getParts() == null) return;
         RiftCreature subCreature = creature;
+        World world = creature.world;
 
-        if (creature.world.isRemote) {
+        if (world.isRemote) {
             //remove creature
-            creature.world.removeEntity(creature);
+            world.removeEntityDangerously(creature);
             RiftMessages.WRAPPER.sendToServer(new RiftRemoveCreature(creature, true));
 
             //remove hitboxes
@@ -499,14 +500,14 @@ public class RiftUtil {
                 RiftCreaturePart creaturePart = (RiftCreaturePart) part;
 
                 if (creaturePart != null) {
-                    creature.world.removeEntityDangerously(creaturePart);
+                    world.removeEntityDangerously(creaturePart);
                     RiftMessages.WRAPPER.sendToServer(new RiftRemoveCreature(creaturePart, false));
                 }
             }
         }
         else {
             //remove creature
-            creature.world.removeEntity(creature);
+            world.removeEntityDangerously(creature);
             RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreature(creature, true));
 
             //remove hitboxes
@@ -514,8 +515,8 @@ public class RiftUtil {
                 RiftCreaturePart creaturePart = (RiftCreaturePart) part;
 
                 if (creaturePart != null) {
-                    creature.world.removeEntityDangerously(creaturePart);
                     RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreature(creaturePart, false));
+                    world.removeEntityDangerously(creaturePart);
                 }
             }
         }
