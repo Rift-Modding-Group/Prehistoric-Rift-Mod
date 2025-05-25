@@ -456,7 +456,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (!this.canUseRightClick()
                     && !settings.keyBindUseItem.isKeyDown()
                     && this.currentCreatureMove() == null) RiftMessages.WRAPPER.sendToServer(new RiftCanUseMoveTriggerButton(this, 1, true));
-            
+
             //for using large weapons
             if (this.creatureType.canHoldLargeWeapon
                     && this.getLargeWeapon() != RiftLargeWeaponType.NONE
@@ -470,6 +470,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 boolean middleClickOnly = !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown() && this.canUseMiddleClick();
                 boolean jump = settings.keyBindJump.isKeyDown();
 
+                //for using jump in navigating
+                if (this instanceof RiftWaterCreature)
+                    RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, jump));
+
+                //holding certain items will prevent mouse related moves from being used
+                if (RiftUtil.itemCanOverrideMoveControls(((EntityPlayer)this.getControllingPassenger()).getHeldItemMainhand().getItem()))
+                    return;
+
                 //for using moves
                 if (leftClickOnly && this.getMoveOneCooldown() == 0)
                     this.playerUseMove(0);
@@ -479,10 +487,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.playerUseMove(2);
                 else
                     this.playerUseMove(-1);
-
-                //for using jump in navigating
-                if (this instanceof RiftWaterCreature)
-                    RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, jump));
             }
         }
     }

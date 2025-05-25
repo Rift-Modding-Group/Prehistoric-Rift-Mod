@@ -23,6 +23,8 @@ import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemFood;
+import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -194,11 +196,16 @@ public class RiftUtil {
         return Math.max(min, Math.min(max, value));
     }
 
+    public static boolean itemCanOverrideMoveControls(Item item) {
+        return checkInMountItemWhitelist(item)
+                || (GeneralConfig.mountConsumablesCanOverride && ((item instanceof ItemFood) || (item instanceof ItemPotion)));
+    }
+
     public static boolean checkInMountItemWhitelist(Item item) {
         List<String> oreDicList = new ArrayList<>();
         List<String> itemList = new ArrayList<>();
         boolean flag = false;
-        for (String entry : GeneralConfig.mountOverrideWhitelistItems) {
+        for (String entry : GeneralConfig.mountOverrideItems) {
             if (entry.contains("oreDic:")) {
                 oreDicList.add(entry.replace("oreDic:", ""));
             }
