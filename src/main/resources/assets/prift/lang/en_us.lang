@@ -320,6 +320,7 @@ sounds.subtitle.tyrannosaurus_roar=Tyrannosaurus roars
 sounds.subtitle.stegosaurus_idle=Stegosaurus grunts
 sounds.subtitle.stegosaurus_hurt=Stegosaurus hurts
 sounds.subtitle.stegosaurus_death=Stegosaurus dies
+sounds.subtitle.stegosaurus_ranged_move=Stegosaurus launches plate
 
 sounds.subtitle.dodo_idle=Dodo cackles
 sounds.subtitle.dodo_hurt=Dodo hurts
@@ -328,20 +329,24 @@ sounds.subtitle.dodo_death=Dodo dies
 sounds.subtitle.triceratops_idle=Triceratops grunts
 sounds.subtitle.triceratops_hurt=Triceratops hurts
 sounds.subtitle.triceratops_death=Triceratops dies
+sounds.subtitle.triceratops_charge_up=Triceratops charges up
+sounds.subtitle.triceratops_charge=Triceratops charges
 
 sounds.subtitle.utahraptor_idle=Utahraptor grunts
 sounds.subtitle.utahraptor_hurt=Utahraptor hurts
 sounds.subtitle.utahraptor_death=Utahraptor dies
 sounds.subtitle.utahraptor_call=Utahraptor calls
+sounds.subtitle.utahraptor_leap=Utahraptor leaps
 
 sounds.subtitle.apatosaurus_idle=Apatosaurus grunts
 sounds.subtitle.apatosaurus_hurt=Apatosaurus hurts
 sounds.subtitle.apatosaurus_death=Apatosaurus dies
+prift.apatosaurus.bide_release=Apatosaurus bide release
 
 sounds.subtitle.parasaurolophus_idle=Parasaurolophus grunts
 sounds.subtitle.parasaurolophus_hurt=Parasaurolophus hurts
 sounds.subtitle.parasaurolophus_death=Parasaurolophus dies
-sounds.subtitle.parasaurolophus_blow=Parasaurolophus blows
+prift.parasaurolophus.sound_blast=Parasaurolophus sound blasts
 
 sounds.subtitle.dimetrodon_idle=Dimetrodon grunts
 sounds.subtitle.dimetrodon_hurt=Dimetrodon hurts
@@ -350,9 +355,13 @@ sounds.subtitle.dimetrodon_death=Dimetrodon dies
 sounds.subtitle.sarcosuchus_idle=Sarcosuchus grunts
 sounds.subtitle.sarcosuchus_hurt=Sarcosuchus hurts
 sounds.subtitle.sarcosuchus_death=Sarcosuchus dies
+sounds.subtitle.sarcosuchus_death_roll=Sarcosuchus spins
+sounds.subtitle.sarcosuchus_charge=Sarcosuchus lunges
 
+sounds.subtitle.anomalocaris_idle=Anomalocaris idle
 sounds.subtitle.anomalocaris_hurt=Anomalocaris hurts
 sounds.subtitle.anomalocaris_death=Anomalocaris dies
+sounds.subtitle.anomalocaris_cloaking=Anomalocaris cloaking
 
 sounds.subtitle.saurophaganax_idle=Saurophaganax grunts
 sounds.subtitle.saurophaganax_hurt=Saurophaganax hurts
@@ -363,10 +372,14 @@ sounds.subtitle.direwolf_idle=Direwolf grunts
 sounds.subtitle.direwolf_hurt=Direwolf hurts
 sounds.subtitle.direwolf_death=Direwolf dies
 sounds.subtitle.direwolf_howl=Direwolf howls
+sounds.subtitle.direwolf_sniff=Direwolf sniffs
 
 sounds.subtitle.megaloceros_idle=Megaloceros grunts
 sounds.subtitle.megaloceros_hurt=Megaloceros hurts
 sounds.subtitle.megaloceros_death=Megaloceros dies
+sounds.subtitle.megaloceros_leap=Megaloceros leaps
+sounds.subtitle.megaloceros_charge_up=Megaloceros charges up
+sounds.subtitle.megaloceros_charge=Megaloceros charges
 
 sounds.subtitle.baryonyx_idle=Baryonyx grunts
 sounds.subtitle.baryonyx_hurt=Baryonyx hurts
@@ -379,10 +392,25 @@ sounds.subtitle.palaeocastor_death=Palaeocastor dies
 sounds.subtitle.ankylosaurus_idle=Ankylosaurus grunts
 sounds.subtitle.ankylosaurus_hurt=Ankylosaurus hurts
 sounds.subtitle.ankylosaurus_death=Ankylosaurus dies
+sounds.subtitle.ankylosaurus_shell_spin=Ankylosaurus spins
+sounds.subtitle.ankylosaurus_shellter_in=Ankylosaurus enters shell
+sounds.subtitle.ankylosaurus_shellter_out=Ankylosaurus exits shell
 
 sounds.subtitle.dilophosaurus_idle=Dilophosaurus grunts
 sounds.subtitle.dilophosaurus_hurt=Dilophosaurus hurts
 sounds.subtitle.dilophosaurus_death=Dilophosaurus dies
+sounds.subtitle.dilophosaurus_spit=Dilophosaurus spits
+
+sounds.subtitle.gallimimus_idle=Gallimimus grunts
+sounds.subtitle.gallimimus_hurt=Gallimimus hurts
+sounds.subtitle.gallimimus_death=Gallimimus dies
+sounds.subtitle.gallimimus_leap=Gallimimus leaps
+
+sounds.subtitle.generic_tail_move=Tail move used
+sounds.subtitle.generic_head_move=Head move used
+sounds.subtitle.generic_scratch_move=Scratch move used
+sounds.subtitle.generic_blow_move=Blow move used
+sounds.subtitle.generic_kick_move=Kick move used
 
 tamebehavior.assist=%s is currently assisting
 tamebehavior.neutral=%s is currently neutral
@@ -460,7 +488,7 @@ creature_move.scratch.name=Scratch
 creature_move.bite.name=Bite
 creature_move.snarl.name=Snarl
 creature_move.power_roar.name=Power Roar
-creature_move.tail_whip.name=Tail Whip
+creature_move.tail_slap.name=Tail Slap
 creature_move.thagomize.name=Thagomize
 creature_move.plate_fling.name=Plate Fling
 creature_move.charge.name=Charge
