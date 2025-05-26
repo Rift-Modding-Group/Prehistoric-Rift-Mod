@@ -117,13 +117,6 @@ public class RiftDeployPartyMem implements IMessage {
                     NBTTagCompound compound = new NBTTagCompound();
                     compound.setByte("DeploymentType", (byte) PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE.ordinal());
                     playerTamedCreatures.modifyCreature(uuid, compound);
-
-                    //update creature
-                    RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, uuid);
-                    if (partyMember != null) {
-                        partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                        PlayerTamedCreaturesHelper.updatePartyMem(partyMember);
-                    }
                 }
 
                 //repeat on the server side

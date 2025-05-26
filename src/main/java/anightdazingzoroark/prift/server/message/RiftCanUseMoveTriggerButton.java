@@ -49,6 +49,7 @@ public class RiftCanUseMoveTriggerButton implements IMessage {
             RiftCreature interacted = (RiftCreature) world.getEntityByID(message.creatureId);
 
             if (!world.isRemote) {
+                if (interacted == null) return;
                 switch (message.control) {
                     case 0:
                         interacted.setCanUseLeftClick(message.value);
