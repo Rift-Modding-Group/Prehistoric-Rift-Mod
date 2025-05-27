@@ -2381,14 +2381,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 this.changeAttackByMultiplier(0.1);
             }
             else {
-                this.setCanMove(true);
+                this.changeSpeedByMultiplier(1);
                 this.changeAttackByMultiplier(1);
             }
         }
         else if (this.isSleeping() || this.isForcedAwake()) {
             this.setSleeping(false);
             this.setForcedAwake(false);
-            this.setCanMove(true);
+            this.changeSpeedByMultiplier(1);
             this.changeAttackByMultiplier(1);
         }
     }
