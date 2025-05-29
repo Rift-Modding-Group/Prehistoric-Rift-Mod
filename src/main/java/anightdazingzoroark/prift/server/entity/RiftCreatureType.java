@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity;
 
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.*;
 import anightdazingzoroark.prift.server.entity.creature.*;

@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.structures;
 
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import net.minecraft.block.state.IBlockState;

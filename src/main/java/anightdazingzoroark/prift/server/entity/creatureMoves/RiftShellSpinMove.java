@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;

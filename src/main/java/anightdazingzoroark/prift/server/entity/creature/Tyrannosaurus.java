@@ -3,10 +3,11 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -222,13 +223,14 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     //move related stuff starts here
     @Override
-    public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR);
-    }
-
-    @Override
-    public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR);
+    public WeightedList<List<CreatureMove>> possibleMoves() {
+        WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
+        possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR));
+        possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT, CreatureMove.POWER_ROAR));
+        possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.TACKLE, CreatureMove.POWER_ROAR));
+        possibleMoves.add(2, Arrays.asList(CreatureMove.BITE, CreatureMove.GNASH, CreatureMove.POWER_ROAR));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.SHOCK_BLAST, CreatureMove.POWER_ROAR));
+        return possibleMoves;
     }
 
     @Override

@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -13,7 +14,6 @@ import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
@@ -172,13 +172,11 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
 
     //move related stuff starts here
     @Override
-    public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.PLATE_FLING, CreatureMove.THAGOMIZE);
-    }
-
-    @Override
-    public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.PLATE_FLING, CreatureMove.THAGOMIZE);
+    public WeightedList<List<CreatureMove>> possibleMoves() {
+        WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
+        possibleMoves.add(3, Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.PLATE_FLING, CreatureMove.THAGOMIZE));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.PLATE_FLING, CreatureMove.PLATE_SCATTER));
+        return possibleMoves;
     }
     //move related stuff ends here
 

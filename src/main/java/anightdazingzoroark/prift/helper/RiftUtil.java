@@ -1,5 +1,6 @@
-package anightdazingzoroark.prift;
+package anightdazingzoroark.prift.helper;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;

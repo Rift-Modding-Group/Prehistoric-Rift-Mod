@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;

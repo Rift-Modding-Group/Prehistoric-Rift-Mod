@@ -1,9 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -26,10 +27,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dilophosaurus"));
@@ -128,13 +126,13 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
 
     //move related stuff starts here
     @Override
-    public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POISON_SPIT, CreatureMove.POISON_TRAP);
-    }
-
-    @Override
-    public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POISON_SPIT, CreatureMove.POISON_TRAP);
+    public WeightedList<List<CreatureMove>> possibleMoves() {
+        WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
+        possibleMoves.add(3, Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POISON_SPIT, CreatureMove.POISON_TRAP));
+        possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.POISON_SPIT, CreatureMove.POISON_TRAP));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POISON_SPIT, CreatureMove.VENOM_BOMB));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.POISON_SPIT, CreatureMove.VENOM_BOMB));
+        return possibleMoves;
     }
 
     @Override

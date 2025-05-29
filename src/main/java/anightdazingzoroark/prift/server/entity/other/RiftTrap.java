@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.other;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;

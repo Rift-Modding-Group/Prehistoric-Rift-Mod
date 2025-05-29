@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.client.particle;
 
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.client.particle.ParticleCloud;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;

@@ -1,15 +1,11 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
-import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.model.entity.RiftCreatureModel;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.Sarcosuchus;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
 public class SarcosuchusRenderer extends RiftCreatureRenderer {
     public SarcosuchusRenderer(RenderManager renderManager) {

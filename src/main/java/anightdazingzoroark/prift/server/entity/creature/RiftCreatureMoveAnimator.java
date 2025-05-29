@@ -1,11 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
-import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftShowParticlesOnClient;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.Random;
 

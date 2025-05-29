@@ -1,11 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -17,9 +18,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -34,10 +33,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenWandering, IWorkstationUser, ILeadWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/ankylosaurus"));
@@ -242,13 +238,12 @@ public class Ankylosaurus extends RiftCreature implements IHerder, IHarvestWhenW
 
     //move related stuff starts here
     @Override
-    public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.SHELLTER, CreatureMove.SHELL_SPIN, CreatureMove.SELF_DESTRUCT);
-    }
-
-    @Override
-    public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.SHELLTER, CreatureMove.SHELL_SPIN);
+    public WeightedList<List<CreatureMove>> possibleMoves() {
+        WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
+        possibleMoves.add(3, Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.SHELL_SPIN, CreatureMove.SHELLTER));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.STOMP, CreatureMove.SHELLTER));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.SELF_DESTRUCT, CreatureMove.SHELLTER));
+        return possibleMoves;
     }
 
     @Override

@@ -4,20 +4,17 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPowere
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
-import com.codetaylor.mc.pyrotech.modules.tech.machine.tile.spi.TileCombustionWorkerStoneBase;
-import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -28,18 +25,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -171,13 +160,10 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     //move related stuff starts here
     @Override
-    public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.POWER_BLOW, CreatureMove.SHOCK_BLAST);
-    }
-
-    @Override
-    public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.POWER_BLOW, CreatureMove.SHOCK_BLAST);
+    public WeightedList<List<CreatureMove>> possibleMoves() {
+        WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
+        possibleMoves.add(1, Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.POWER_BLOW, CreatureMove.SHOCK_BLAST));
+        return possibleMoves;
     }
 
     @Override

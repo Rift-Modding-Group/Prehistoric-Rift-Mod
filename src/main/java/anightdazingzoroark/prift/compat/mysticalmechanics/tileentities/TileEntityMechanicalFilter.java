@@ -1,17 +1,15 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockMechanicalFilter;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.MechanicalFilterRecipe;
-import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.MillstoneRecipe;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.ItemStackHelper;
@@ -36,7 +34,6 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public class TileEntityMechanicalFilter extends TileEntity implements ITickable, IAnimatable, ISidedInventory {

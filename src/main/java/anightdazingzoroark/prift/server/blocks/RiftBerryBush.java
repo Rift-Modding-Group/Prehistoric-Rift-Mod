@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.blocks;
 
-import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.SoundType;

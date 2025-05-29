@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.client.renderer.block;
 
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.model.block.RiftSemiManualHammererModel;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualHammerer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualHammererTop;

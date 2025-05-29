@@ -1,9 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
@@ -147,13 +148,11 @@ public class Utahraptor extends RiftCreature implements IHerder {
 
     //move related stuff starts here
     @Override
-    public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POUNCE, CreatureMove.PACK_CALL);
-    }
-
-    @Override
-    public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POUNCE, CreatureMove.PACK_CALL);
+    public WeightedList<List<CreatureMove>> possibleMoves() {
+        WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
+        possibleMoves.add(1, Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POUNCE, CreatureMove.PACK_CALL));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.SCRATCH, CreatureMove.POUNCE, CreatureMove.KICK));
+        return possibleMoves;
     }
 
     @Override

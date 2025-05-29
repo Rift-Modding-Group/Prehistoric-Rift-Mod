@@ -1,9 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -67,13 +68,11 @@ public class Anomalocaris extends RiftWaterCreature {
 
     //move related stuff starts here
     @Override
-    public List<CreatureMove> learnableMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LIFE_DRAIN, CreatureMove.CLOAK);
-    }
-
-    @Override
-    public List<CreatureMove> initialMoves() {
-        return Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LIFE_DRAIN, CreatureMove.CLOAK);
+    public WeightedList<List<CreatureMove>> possibleMoves() {
+        WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
+        possibleMoves.add(3, Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LIFE_DRAIN, CreatureMove.CLOAK));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.LEECH, CreatureMove.LIFE_DRAIN, CreatureMove.CLOAK));
+        return possibleMoves;
     }
 
     @Override

@@ -1,11 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
@@ -412,13 +413,10 @@ public class Dimetrodon extends RiftCreature {
 
     //move related stuff starts here
     @Override
-    public List<CreatureMove> learnableMoves() {
-        return Collections.singletonList(CreatureMove.BITE);
-    }
-
-    @Override
-    public List<CreatureMove> initialMoves() {
-        return Collections.singletonList(CreatureMove.BITE);
+    public WeightedList<List<CreatureMove>> possibleMoves() {
+        WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
+        possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.CLIMATE_BLAST));
+        return possibleMoves;
     }
 
     @Override

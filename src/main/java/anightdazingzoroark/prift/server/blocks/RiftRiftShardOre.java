@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.blocks;
 
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;

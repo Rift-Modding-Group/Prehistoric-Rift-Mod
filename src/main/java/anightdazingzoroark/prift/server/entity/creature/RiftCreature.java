@@ -1,11 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
+import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
@@ -976,7 +977,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(leveledDamageValue * this.damageMultiplier);
 
         if (this.justSpawned()) {
-            this.setLearnedMoves(this.initialMoves());
+            this.setLearnedMoves(this.possibleMoves().next());
             this.heal((float) (this.maxCreatureHealth + (0.1D) * (this.getLevel() - 1) * this.maxCreatureHealth));
             this.setSpeed(this.speed);
             this.setWaterSpeed(this.waterSpeed);
@@ -1273,7 +1274,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //move related stuff starts here
-    public abstract List<CreatureMove> learnableMoves();
+    public abstract WeightedList<List<CreatureMove>> possibleMoves();
+
+    public List<CreatureMove> learnableMoves() {
+        List<List<CreatureMove>> possibleMoves = this.possibleMoves().possibleOutcomes();
+        List<CreatureMove> toOutput = new ArrayList<>();
+        for (List<CreatureMove> creatureMoves : possibleMoves) {
+            toOutput = RiftUtil.uniteTwoLists(toOutput, creatureMoves);
+        }
+        return toOutput;
+    }
 
     public List<CreatureMove> getLearnedMoves() {
         return this.dataManager.get(MOVE_LIST);
@@ -1288,8 +1298,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setLearnedMoves(List<CreatureMove> values) {
         this.dataManager.set(MOVE_LIST, values);
     }
-
-    public abstract List<CreatureMove> initialMoves();
 
     public CreatureMove currentCreatureMove() {
         if (this.dataManager.get(CURRENT_MOVE) >= 0) return CreatureMove.values()[this.dataManager.get(CURRENT_MOVE)];

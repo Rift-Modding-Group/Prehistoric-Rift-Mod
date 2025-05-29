@@ -1,8 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.RiftUtil;
-import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalButton;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiJournalPartyButton;
 import anightdazingzoroark.prift.compat.jei.RiftJEI;

@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.world;
 
-import anightdazingzoroark.prift.RiftUtil;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.structures.RiftedStoneMound;
 import anightdazingzoroark.prift.server.structures.RiftedStoneVein;
