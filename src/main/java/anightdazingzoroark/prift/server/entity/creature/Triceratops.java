@@ -157,7 +157,7 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
 
     //move related stuff starts here
     @Override
-    public WeightedList<List<CreatureMove>> possibleMoves() {
+    public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
         possibleMoves.add(3, Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.STOMP, CreatureMove.CHARGE));
         possibleMoves.add(3, Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.TACKLE, CreatureMove.CHARGE));

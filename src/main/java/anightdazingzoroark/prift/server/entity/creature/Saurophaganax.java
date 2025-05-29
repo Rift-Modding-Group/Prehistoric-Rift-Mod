@@ -112,7 +112,7 @@ public class Saurophaganax extends RiftCreature {
 
     //move related stuff starts here
     @Override
-    public WeightedList<List<CreatureMove>> possibleMoves() {
+    public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
         possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT, CreatureMove.LIGHT_BLAST));
         possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.SCRATCH, CreatureMove.LIGHT_BLAST));

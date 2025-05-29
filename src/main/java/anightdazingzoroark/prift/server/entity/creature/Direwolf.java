@@ -167,7 +167,7 @@ public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
 
     //move related stuff starts here
     @Override
-    public WeightedList<List<CreatureMove>> possibleMoves() {
+    public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
         possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.PACK_CALL, CreatureMove.SNIFF));
         possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.SNARL, CreatureMove.SNIFF));

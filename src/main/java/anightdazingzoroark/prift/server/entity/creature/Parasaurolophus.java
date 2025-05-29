@@ -160,7 +160,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
 
     //move related stuff starts here
     @Override
-    public WeightedList<List<CreatureMove>> possibleMoves() {
+    public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
         possibleMoves.add(1, Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.POWER_BLOW, CreatureMove.SHOCK_BLAST));
         return possibleMoves;

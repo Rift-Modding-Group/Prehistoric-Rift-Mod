@@ -109,7 +109,7 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
 
     //move related stuff starts here
     @Override
-    public WeightedList<List<CreatureMove>> possibleMoves() {
+    public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
         possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.SCRATCH, CreatureMove.BURROW));
         return possibleMoves;

@@ -68,7 +68,7 @@ public class Anomalocaris extends RiftWaterCreature {
 
     //move related stuff starts here
     @Override
-    public WeightedList<List<CreatureMove>> possibleMoves() {
+    public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
         possibleMoves.add(3, Arrays.asList(CreatureMove.SCRATCH, CreatureMove.LIFE_DRAIN, CreatureMove.CLOAK));
         possibleMoves.add(1, Arrays.asList(CreatureMove.LEECH, CreatureMove.LIFE_DRAIN, CreatureMove.CLOAK));

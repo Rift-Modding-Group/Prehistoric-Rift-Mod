@@ -180,7 +180,7 @@ public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestW
 
     //move related stuff starts here
     @Override
-    public WeightedList<List<CreatureMove>> possibleMoves() {
+    public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
         possibleMoves.add(1, Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.LEAP, CreatureMove.CHARGE));
         possibleMoves.add(1, Arrays.asList(CreatureMove.HEADBUTT, CreatureMove.TACKLE, CreatureMove.CHARGE));

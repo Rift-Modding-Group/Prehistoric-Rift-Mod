@@ -223,7 +223,7 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     //move related stuff starts here
     @Override
-    public WeightedList<List<CreatureMove>> possibleMoves() {
+    public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
         possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.STOMP, CreatureMove.POWER_ROAR));
         possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT, CreatureMove.POWER_ROAR));

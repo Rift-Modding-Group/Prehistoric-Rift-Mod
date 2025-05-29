@@ -172,7 +172,7 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
 
     //move related stuff starts here
     @Override
-    public WeightedList<List<CreatureMove>> possibleMoves() {
+    public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
         possibleMoves.add(3, Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.PLATE_FLING, CreatureMove.THAGOMIZE));
         possibleMoves.add(1, Arrays.asList(CreatureMove.TAIL_SLAP, CreatureMove.PLATE_FLING, CreatureMove.PLATE_SCATTER));

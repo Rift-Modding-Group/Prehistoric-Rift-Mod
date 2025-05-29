@@ -977,7 +977,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(leveledDamageValue * this.damageMultiplier);
 
         if (this.justSpawned()) {
-            this.setLearnedMoves(this.possibleMoves().next());
+            this.setLearnedMoves(this.possibleStartingMoves().next());
             this.heal((float) (this.maxCreatureHealth + (0.1D) * (this.getLevel() - 1) * this.maxCreatureHealth));
             this.setSpeed(this.speed);
             this.setWaterSpeed(this.waterSpeed);
@@ -1274,12 +1274,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //move related stuff starts here
-    public abstract WeightedList<List<CreatureMove>> possibleMoves();
+    public abstract WeightedList<List<CreatureMove>> possibleStartingMoves();
 
     public List<CreatureMove> learnableMoves() {
-        List<List<CreatureMove>> possibleMoves = this.possibleMoves().possibleOutcomes();
+        List<List<CreatureMove>> possibleStartingMoves = this.possibleStartingMoves().possibleOutcomes();
         List<CreatureMove> toOutput = new ArrayList<>();
-        for (List<CreatureMove> creatureMoves : possibleMoves) {
+        for (List<CreatureMove> creatureMoves : possibleStartingMoves) {
             toOutput = RiftUtil.uniteTwoLists(toOutput, creatureMoves);
         }
         return toOutput;
