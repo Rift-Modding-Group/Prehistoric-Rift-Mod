@@ -557,4 +557,57 @@ public enum RiftCreatureType {
         FAST,
         SLOW;
     }
+
+    public enum CreatureCategory {
+        ALL,
+        DINOSAUR,
+        MAMMAL,
+        REPTILE,
+        BIRD,
+        FISH,
+        INVERTEBRATE;
+
+        public String getTranslatedName(boolean plural) {
+            String pluralAdd = (plural && !this.equals(ALL)) ? "_plural" : "";
+            return I18n.format("type.creature."+this.name().toLowerCase()+pluralAdd);
+        }
+
+        public static CreatureCategory safeValOf(String string) {
+            for (CreatureCategory category : CreatureCategory.values()) {
+                if (category.name().equalsIgnoreCase(string)) {
+                    return category;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum CreatureDiet {
+        HERBIVORE,
+        FUNGIVORE,
+        CARNIVORE,
+        PISCIVORE,
+        INSECTIVORE,
+        OMNIVORE,
+        SAXUMAVORE;
+    }
+
+    public enum LevelupRate {
+        VERY_SLOW(1.6D),
+        SLOW(1.4D),
+        NORMAL(1.2D),
+        FAST(1D),
+        VERY_FAST(0.8D);
+
+        private final double rate;
+
+        LevelupRate(double rate) {
+            this.rate = rate;
+        }
+
+        public double getRate() {
+            return this.rate;
+        }
+    }
+
 }

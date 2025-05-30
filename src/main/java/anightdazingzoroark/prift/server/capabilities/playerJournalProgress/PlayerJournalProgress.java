@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerJournalProgress;
 
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.enums.CreatureCategory;
 
 import java.util.*;
 
@@ -45,10 +44,10 @@ public class PlayerJournalProgress implements IPlayerJournalProgress {
     }
 
     @Override
-    public List<CreatureCategory> getUnlockedCategories() {
-        List<CreatureCategory> categoryList = new ArrayList<>();
-        for (CreatureCategory category : CreatureCategory.values()) {
-            if (!category.equals(CreatureCategory.ALL)) {
+    public List<RiftCreatureType.CreatureCategory> getUnlockedCategories() {
+        List<RiftCreatureType.CreatureCategory> categoryList = new ArrayList<>();
+        for (RiftCreatureType.CreatureCategory category : RiftCreatureType.CreatureCategory.values()) {
+            if (!category.equals(RiftCreatureType.CreatureCategory.ALL)) {
                 for (RiftCreatureType creatureType : this.encounteredCreatures.keySet()) {
                     if (creatureType.getCreatureCategory().equals(category) && !categoryList.contains(creatureType.getCreatureCategory())) {
                         categoryList.add(creatureType.getCreatureCategory());

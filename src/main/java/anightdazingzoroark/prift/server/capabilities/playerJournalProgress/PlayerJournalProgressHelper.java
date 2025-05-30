@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerJournalProgress;
 
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.message.RiftJournalEditAll;
 import anightdazingzoroark.prift.server.message.RiftJournalEditOne;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -20,7 +19,7 @@ public class PlayerJournalProgressHelper {
         return getPlayerJournalProgress(player).getEncounteredCreatures();
     }
 
-    public static List<CreatureCategory> getUnlockedCategories(EntityPlayer player) {
+    public static List<RiftCreatureType.CreatureCategory> getUnlockedCategories(EntityPlayer player) {
         return getPlayerJournalProgress(player).getUnlockedCategories();
     }
 

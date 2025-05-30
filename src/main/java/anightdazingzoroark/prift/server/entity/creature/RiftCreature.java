@@ -19,8 +19,6 @@ import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
-import anightdazingzoroark.prift.server.enums.CreatureCategory;
-import anightdazingzoroark.prift.server.enums.CreatureDiet;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.items.RiftItems;
@@ -1043,11 +1041,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isEnergyRegenItem(ItemStack stack) {
-        CreatureDiet diet = this.creatureType.getCreatureDiet();
+        RiftCreatureType.CreatureDiet diet = this.creatureType.getCreatureDiet();
         List<String> itemList = new ArrayList<>();
-        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
-        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
-        else if (diet == CreatureDiet.OMNIVORE) {
+        if (diet == RiftCreatureType.CreatureDiet.HERBIVORE || diet == RiftCreatureType.CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (diet == RiftCreatureType.CreatureDiet.CARNIVORE || diet == RiftCreatureType.CreatureDiet.PISCIVORE || diet == RiftCreatureType.CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+        else if (diet == RiftCreatureType.CreatureDiet.OMNIVORE) {
             itemList = new ArrayList<>(Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods));
             itemList.addAll(Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods));
         }
@@ -1065,11 +1063,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public int getEnergyRegenItemValue(ItemStack stack) {
-        CreatureDiet diet = this.creatureType.getCreatureDiet();
+        RiftCreatureType.CreatureDiet diet = this.creatureType.getCreatureDiet();
         List<String> itemList = new ArrayList<>();
-        if (diet == CreatureDiet.HERBIVORE || diet == CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
-        else if (diet == CreatureDiet.CARNIVORE || diet == CreatureDiet.PISCIVORE || diet == CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
-        else if (diet == CreatureDiet.OMNIVORE) {
+        if (diet == RiftCreatureType.CreatureDiet.HERBIVORE || diet == RiftCreatureType.CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (diet == RiftCreatureType.CreatureDiet.CARNIVORE || diet == RiftCreatureType.CreatureDiet.PISCIVORE || diet == RiftCreatureType.CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+        else if (diet == RiftCreatureType.CreatureDiet.OMNIVORE) {
             itemList = new ArrayList<>(Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods));
             itemList.addAll(Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods));
         }
@@ -2629,8 +2627,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Nullable
     @Override
     public EntityAgeable createChild(EntityAgeable ageable) {
-        CreatureCategory category = this.creatureType.getCreatureCategory();
-        if (category.equals(CreatureCategory.DINOSAUR) || category.equals(CreatureCategory.REPTILE) || category.equals(CreatureCategory.BIRD) || this.creatureType.equals(RiftCreatureType.DIMETRODON)) {
+        RiftCreatureType.CreatureCategory category = this.creatureType.getCreatureCategory();
+        if (category.equals(RiftCreatureType.CreatureCategory.DINOSAUR) || category.equals(RiftCreatureType.CreatureCategory.REPTILE) || category.equals(RiftCreatureType.CreatureCategory.BIRD) || this.creatureType.equals(RiftCreatureType.DIMETRODON)) {
             RiftEgg egg = new RiftEgg(this.world);
             egg.setCreatureType(this.creatureType);
             egg.setOwnerId(this.getOwnerId());
@@ -2639,7 +2637,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             egg.setHatchTime(this.creatureType.getHatchTime() * 20);
             return egg;
         }
-        else if (category.equals(CreatureCategory.INVERTEBRATE)) {
+        else if (category.equals(RiftCreatureType.CreatureCategory.INVERTEBRATE)) {
             RiftSac sac = new RiftSac(this.world);
             sac.setCreatureType(this.creatureType);
             sac.setOwnerId(this.getOwnerId());

@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerJournalProgress;
 
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.enums.CreatureCategory;
 
 import java.util.List;
 import java.util.Map;
@@ -14,5 +13,5 @@ public interface IPlayerJournalProgress {
     void clearCreature(RiftCreatureType creatureType);
     void unlockAllEntries();
     void resetEntries();
-    List<CreatureCategory> getUnlockedCategories();
+    List<RiftCreatureType.CreatureCategory> getUnlockedCategories();
 }

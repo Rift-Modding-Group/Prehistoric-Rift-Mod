@@ -15,7 +15,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
-import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
 import com.google.common.collect.Lists;
@@ -56,7 +55,7 @@ public class RiftJournalScreen extends GuiScreen {
     private Map<String, List<Integer>> shownTamingFoodsList = new HashMap<>();
     private Map<String, List<Integer>> shownFavoriteFoodsList = new HashMap<>();
     private Map<String, List<Integer>> shownWorkstationsList = new HashMap<>();
-    private CreatureCategory sidebarType;
+    private RiftCreatureType.CreatureCategory sidebarType;
     private RiftCreatureType entryType;
     private int selectedPartyPos = -1;
     private int partyPosToMove = -1;
@@ -172,13 +171,13 @@ public class RiftJournalScreen extends GuiScreen {
         }
     }
 
-    protected void setSidebarButtonList(CreatureCategory category) {
+    protected void setSidebarButtonList(RiftCreatureType.CreatureCategory category) {
         this.buttonList.clear();
         this.sidebarHeight = 25;
 
         List<RiftCreatureType> creatureTypeList = this.playerJournalProgress().getEncounteredCreatures().keySet().stream().sorted(Comparator.comparing(Enum::name)).collect(Collectors.toList());
         //additional filter by category
-        if (!category.equals(CreatureCategory.ALL)) {
+        if (!category.equals(RiftCreatureType.CreatureCategory.ALL)) {
             creatureTypeList = creatureTypeList.stream()
                     .filter(cat -> cat.getCreatureCategory() == category)
                     .collect(Collectors.toList());
@@ -197,7 +196,7 @@ public class RiftJournalScreen extends GuiScreen {
         if (button instanceof RiftGuiJournalButton) {
             RiftGuiJournalButton jButton = (RiftGuiJournalButton)button;
             if (this.sidebarType == null) {
-                this.sidebarType = CreatureCategory.safeValOf(jButton.getTriggerString());
+                this.sidebarType = RiftCreatureType.CreatureCategory.safeValOf(jButton.getTriggerString());
                 this.scrollSidebarOffset = 0;
             }
             else {

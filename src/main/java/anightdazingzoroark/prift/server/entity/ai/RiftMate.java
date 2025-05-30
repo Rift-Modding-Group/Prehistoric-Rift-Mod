@@ -1,19 +1,16 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
-import anightdazingzoroark.prift.server.enums.CreatureCategory;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import java.util.Random;
@@ -57,10 +54,10 @@ public class RiftMate extends EntityAIBase {
         ++this.spawnBabyDelay;
 
         if (this.spawnBabyDelay >= 20 && this.creature.getDistanceSq(this.targetMate) <= 24.0D) {
-            CreatureCategory category = this.creature.creatureType.getCreatureCategory();
-            if (category.equals(CreatureCategory.DINOSAUR) || category.equals(CreatureCategory.REPTILE) || category.equals(CreatureCategory.BIRD) || this.creature.creatureType.equals(RiftCreatureType.DIMETRODON)) this.spawnEgg();
-            else if (category.equals(CreatureCategory.INVERTEBRATE)) this.spawnSac();
-            else if (category.equals(CreatureCategory.MAMMAL)) this.setPregnant();
+            RiftCreatureType.CreatureCategory category = this.creature.creatureType.getCreatureCategory();
+            if (category.equals(RiftCreatureType.CreatureCategory.DINOSAUR) || category.equals(RiftCreatureType.CreatureCategory.REPTILE) || category.equals(RiftCreatureType.CreatureCategory.BIRD) || this.creature.creatureType.equals(RiftCreatureType.DIMETRODON)) this.spawnEgg();
+            else if (category.equals(RiftCreatureType.CreatureCategory.INVERTEBRATE)) this.spawnSac();
+            else if (category.equals(RiftCreatureType.CreatureCategory.MAMMAL)) this.setPregnant();
 
             this.creature.setLoveCooldown(12000);
             this.targetMate.setLoveCooldown(12000);
