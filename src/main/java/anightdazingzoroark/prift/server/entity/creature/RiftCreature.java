@@ -137,6 +137,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<Boolean> FIRING_CATAPULT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
+    private static final DataParameter<Integer> USED_MOVE_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> USED_MULTISTEP_MOVE_STEP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -150,17 +152,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_HEAD_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_TAIL_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_STOMP_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_CLAW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_JAW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_ROAR_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_RANGED_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_STATUS_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_BEAK_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_KICK_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_BLOW_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Float> LEAP_X_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
@@ -305,6 +296,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         this.dataManager.register(FIRING_CATAPULT, false);
 
+        this.dataManager.register(USED_MOVE_TYPE, -1);
+        this.dataManager.register(USED_MULTISTEP_MOVE_STEP, 0);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE, false);
         this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO, false);
@@ -318,17 +311,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_ONE, false);
         this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_TWO, false);
         this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_THREE, false);
-        this.dataManager.register(USING_HEAD_TYPE_MOVE, false);
-        this.dataManager.register(USING_TAIL_TYPE_MOVE, false);
-        this.dataManager.register(USING_STOMP_TYPE_MOVE, false);
-        this.dataManager.register(USING_CLAW_TYPE_MOVE, false);
-        this.dataManager.register(USING_JAW_TYPE_MOVE, false);
-        this.dataManager.register(USING_ROAR_TYPE_MOVE, false);
-        this.dataManager.register(USING_RANGED_TYPE_MOVE, false);
-        this.dataManager.register(USING_STATUS_TYPE_MOVE, false);
-        this.dataManager.register(USING_BEAK_TYPE_MOVE, false);
-        this.dataManager.register(USING_KICK_TYPE_MOVE, false);
-        this.dataManager.register(USING_BLOW_TYPE_MOVE, false);
 
         this.dataManager.register(LEAP_X_VELOCITY, 0.0f);
         this.dataManager.register(LEAP_Y_VELOCITY, 0.0f);
@@ -1699,308 +1681,32 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //move anims start here
+    //for setting anim type of move
     public void setUsingUnchargedAnim(boolean value) {
-        if (this.currentCreatureMove() == null) return;
-        if (this.currentCreatureMove().chargeType.requiresCharge()) return;
-        switch (this.currentCreatureMove().moveAnimType) {
-            case HEAD:
-                this.setUsingHeadTypeMove(value);
-                break;
-            case TAIL:
-                this.setUsingTailTypeMove(value);
-                break;
-            case STOMP:
-                this.setUsingStompTypeMove(value);
-                break;
-            case CLAW:
-                this.setUsingClawTypeMove(value);
-                break;
-            case JAW:
-                this.setUsingJawTypeMove(value);
-                break;
-            case ROAR:
-                this.setUsingRoarTypeMove(value);
-                break;
-            case RANGED:
-                this.setUsingRangedTypeMove(value);
-                break;
-            case STATUS:
-                this.setUsingStatusTypeMove(value);
-                break;
-            case CHARGE:
-                this.setUsingChargeTypeMove(value);
-                break;
-            case LEAP:
-                this.setUsingLeapTypeMove(value);
-                break;
-            case BEAK:
-                this.setUsingBeakTypeMove(value);
-                break;
-            case KICK:
-                this.setUsingKickTypeMove(value);
-                break;
-            case BLOW:
-                this.setUsingBlowTypeMove(value);
-                break;
+        if (this.currentCreatureMove() == null || this.currentCreatureMove().chargeType.requiresCharge()) {
+            this.dataManager.set(USED_MOVE_TYPE, -1); //-1 means theres no move
         }
+
+        if (value) this.dataManager.set(USED_MOVE_TYPE, this.currentCreatureMove().moveAnimType.ordinal());
     }
 
-    public void setMultistepMoveStep(int step) {
-        if (this.currentCreatureMove() == null) return;
-        switch (this.currentCreatureMove().moveAnimType) {
-            case CHARGE:
-                if (step == 0) {
-                    this.setUsingChargeTypeMoveMultistepOne(true);
-                    this.setUsingChargeTypeMoveMultistepTwo(false);
-                    this.setUsingChargeTypeMoveMultistepThree(false);
-                }
-                else if (step == 1) {
-                    this.setUsingChargeTypeMoveMultistepOne(false);
-                    this.setUsingChargeTypeMoveMultistepTwo(true);
-                    this.setUsingChargeTypeMoveMultistepThree(false);
-                }
-                else if (step == 2) {
-                    this.setUsingChargeTypeMoveMultistepOne(false);
-                    this.setUsingChargeTypeMoveMultistepTwo(false);
-                    this.setUsingChargeTypeMoveMultistepThree(true);
-                }
-                else {
-                    this.setUsingChargeTypeMoveMultistepOne(false);
-                    this.setUsingChargeTypeMoveMultistepTwo(false);
-                    this.setUsingChargeTypeMoveMultistepThree(false);
-                }
-                break;
-            case LEAP:
-                if (step == 0) {
-                    this.setUsingLeapTypeMoveMultistepOne(true);
-                    this.setUsingLeapTypeMoveMultistepTwo(false);
-                    this.setUsingLeapTypeMoveMultistepThree(false);
-                }
-                else if (step == 1) {
-                    this.setUsingLeapTypeMoveMultistepOne(false);
-                    this.setUsingLeapTypeMoveMultistepTwo(true);
-                    this.setUsingLeapTypeMoveMultistepThree(false);
-                }
-                else if (step == 2) {
-                    this.setUsingLeapTypeMoveMultistepOne(false);
-                    this.setUsingLeapTypeMoveMultistepTwo(false);
-                    this.setUsingLeapTypeMoveMultistepThree(true);
-                }
-                else {
-                    this.setUsingLeapTypeMoveMultistepOne(false);
-                    this.setUsingLeapTypeMoveMultistepTwo(false);
-                    this.setUsingLeapTypeMoveMultistepThree(false);
-                }
-                break;
-            case SPIN:
-                if (step == 0) {
-                    this.setUsingSpinTypeMoveMultistepOne(true);
-                    this.setUsingSpinTypeMoveMultistepTwo(false);
-                    this.setUsingSpinTypeMoveMultistepThree(false);
-                }
-                else if (step == 1) {
-                    this.setUsingSpinTypeMoveMultistepOne(false);
-                    this.setUsingSpinTypeMoveMultistepTwo(true);
-                    this.setUsingSpinTypeMoveMultistepThree(false);
-                }
-                else if (step == 2) {
-                    this.setUsingSpinTypeMoveMultistepOne(false);
-                    this.setUsingSpinTypeMoveMultistepTwo(false);
-                    this.setUsingSpinTypeMoveMultistepThree(true);
-                }
-                else {
-                    this.setUsingSpinTypeMoveMultistepOne(false);
-                    this.setUsingSpinTypeMoveMultistepTwo(false);
-                    this.setUsingSpinTypeMoveMultistepThree(false);
-                }
-                break;
-        }
+    //for getting anim type of move
+    public CreatureMove.MoveAnimType getUnchargedAnimType() {
+        if (this.dataManager.get(USED_MOVE_TYPE) < 0) return null;
+        else return CreatureMove.MoveAnimType.values()[this.dataManager.get(USED_MOVE_TYPE)];
     }
 
-    public boolean isUsingChargeTypeMove() {
-        return this.dataManager.get(USING_CHARGE_TYPE_MOVE);
+    //multistep moves are uncharged one time use moves
+    //whose anims are in multiple steps
+    public void setUnchargedMultistepMoveStep(int step) {
+        //0 is for no anim progress
+        //multistep moves have 3 steps
+        this.dataManager.set(USED_MULTISTEP_MOVE_STEP, step);
     }
 
-    public void setUsingChargeTypeMove(boolean value) {
-        this.dataManager.set(USING_CHARGE_TYPE_MOVE, value);
+    public int getUnchargedMultistepMoveStep() {
+        return this.dataManager.get(USED_MULTISTEP_MOVE_STEP);
     }
-
-    public boolean usingChargeTypeMoveMultistepOne() {
-        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE);
-    }
-
-    public void setUsingChargeTypeMoveMultistepOne(boolean value) {
-        this.dataManager.set(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE, value);
-    }
-
-    public boolean usingChargeTypeMoveMultistepTwo() {
-        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO);
-    }
-
-    public void setUsingChargeTypeMoveMultistepTwo(boolean value) {
-        this.dataManager.set(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO, value);
-    }
-
-    public boolean usingChargeTypeMoveMultistepThree() {
-        return this.dataManager.get(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE);
-    }
-
-    public void setUsingChargeTypeMoveMultistepThree(boolean value) {
-        this.dataManager.set(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE, value);
-    }
-
-    public boolean isUsingLeapTypeMove() {
-        return this.dataManager.get(USING_LEAP_TYPE_MOVE);
-    }
-
-    public void setUsingLeapTypeMove(boolean value) {
-        this.dataManager.set(USING_LEAP_TYPE_MOVE, value);
-    }
-
-    public boolean usingLeapTypeMoveMultistepOne() {
-        return this.dataManager.get(USING_LEAP_TYPE_MOVE_MULTISTEP_ONE);
-    }
-
-    public void setUsingLeapTypeMoveMultistepOne(boolean value) {
-        this.dataManager.set(USING_LEAP_TYPE_MOVE_MULTISTEP_ONE, value);
-    }
-
-    public boolean usingLeapTypeMoveMultistepTwo() {
-        return this.dataManager.get(USING_LEAP_TYPE_MOVE_MULTISTEP_TWO);
-    }
-
-    public void setUsingLeapTypeMoveMultistepTwo(boolean value) {
-        this.dataManager.set(USING_LEAP_TYPE_MOVE_MULTISTEP_TWO, value);
-    }
-
-    public boolean usingLeapTypeMoveMultistepThree() {
-        return this.dataManager.get(USING_LEAP_TYPE_MOVE_MULTISTEP_THREE);
-    }
-
-    public void setUsingLeapTypeMoveMultistepThree(boolean value) {
-        this.dataManager.set(USING_LEAP_TYPE_MOVE_MULTISTEP_THREE, value);
-    }
-
-    public boolean isUsingSpinTypeMove() {
-        return this.dataManager.get(USING_SPIN_TYPE_MOVE);
-    }
-
-    public void setUsingSpinTypeMove(boolean value) {
-        this.dataManager.set(USING_SPIN_TYPE_MOVE, value);
-    }
-
-    public boolean usingSpinTypeMoveMultistepOne() {
-        return this.dataManager.get(USING_SPIN_TYPE_MOVE_MULTISTEP_ONE);
-    }
-
-    public void setUsingSpinTypeMoveMultistepOne(boolean value) {
-        this.dataManager.set(USING_SPIN_TYPE_MOVE_MULTISTEP_ONE, value);
-    }
-
-    public boolean usingSpinTypeMoveMultistepTwo() {
-        return this.dataManager.get(USING_SPIN_TYPE_MOVE_MULTISTEP_TWO);
-    }
-
-    public void setUsingSpinTypeMoveMultistepTwo(boolean value) {
-        this.dataManager.set(USING_SPIN_TYPE_MOVE_MULTISTEP_TWO, value);
-    }
-
-    public boolean usingSpinTypeMoveMultistepThree() {
-        return this.dataManager.get(USING_SPIN_TYPE_MOVE_MULTISTEP_THREE);
-    }
-
-    public void setUsingSpinTypeMoveMultistepThree(boolean value) {
-        this.dataManager.set(USING_SPIN_TYPE_MOVE_MULTISTEP_THREE, value);
-    }
-
-    public boolean isUsingHeadTypeMove() {
-        return this.dataManager.get(USING_HEAD_TYPE_MOVE);
-    }
-
-    public void setUsingHeadTypeMove(boolean value) {
-        this.dataManager.set(USING_HEAD_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingTailTypeMove() {
-        return this.dataManager.get(USING_TAIL_TYPE_MOVE);
-    }
-
-    public void setUsingTailTypeMove(boolean value) {
-        this.dataManager.set(USING_TAIL_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingStompTypeMove() {
-        return this.dataManager.get(USING_STOMP_TYPE_MOVE);
-    }
-
-    public void setUsingStompTypeMove(boolean value) {
-        this.dataManager.set(USING_STOMP_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingClawTypeMove() {
-        return this.dataManager.get(USING_CLAW_TYPE_MOVE);
-    }
-
-    public void setUsingClawTypeMove(boolean value) {
-        this.dataManager.set(USING_CLAW_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingJawTypeMove() {
-        return this.dataManager.get(USING_JAW_TYPE_MOVE);
-    }
-
-    public void setUsingJawTypeMove(boolean value) {
-        this.dataManager.set(USING_JAW_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingRoarTypeMove() {
-        return this.dataManager.get(USING_ROAR_TYPE_MOVE);
-    }
-
-    public void setUsingRoarTypeMove(boolean value) {
-        this.dataManager.set(USING_ROAR_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingRangedTypeMove() {
-        return this.dataManager.get(USING_RANGED_TYPE_MOVE);
-    }
-
-    public void setUsingRangedTypeMove(boolean value) {
-        this.dataManager.set(USING_RANGED_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingStatusTypeMove() {
-        return this.dataManager.get(USING_STATUS_TYPE_MOVE);
-    }
-
-    public void setUsingStatusTypeMove(boolean value) {
-        this.dataManager.set(USING_STATUS_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingBeakTypeMove() {
-        return this.dataManager.get(USING_BEAK_TYPE_MOVE);
-    }
-
-    public void setUsingBeakTypeMove(boolean value) {
-        this.dataManager.set(USING_BEAK_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingKickTypeMove() {
-        return this.dataManager.get(USING_KICK_TYPE_MOVE);
-    }
-
-    public void setUsingKickTypeMove(boolean value) {
-        this.dataManager.set(USING_KICK_TYPE_MOVE, value);
-    }
-
-    public boolean isUsingBlowTypeMove() {
-        return this.dataManager.get(USING_BLOW_TYPE_MOVE);
-    }
-
-    public void setUsingBlowTypeMove(boolean value) {
-        this.dataManager.set(USING_BLOW_TYPE_MOVE, value);
-    }
-
     //move anims end here
 
     //mob grabbing management starts here
@@ -3008,66 +2714,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         multiNameNum = "_"+chosenAnimFromMultiple;
                     }
 
-                    if (isUsingJawTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_jaw_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingStompTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_stomp_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingTailTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_tail_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingRangedTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_ranged_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingHeadTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_head_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingClawTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_claw_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingStatusTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_status_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingRoarTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_roar_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingBeakTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_beak_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingKickTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_kick_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingChargeTypeMove()) {
+                    if (getUnchargedAnimType() != null) {
                         if (currentCreatureMove().useTimeIsInfinite) {
-                            if (usingChargeTypeMoveMultistepOne()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move_pt1", false));
-                            else if (usingChargeTypeMoveMultistepTwo()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move_pt2", true));
-                            else if (usingChargeTypeMoveMultistepThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move_pt3", false));
+                            if (getUnchargedMultistepMoveStep() > 0) {
+                                boolean animCanLoop = getUnchargedMultistepMoveStep() == 2;
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_"+getUnchargedAnimType().toString().toLowerCase()+"_type_move_pt"+getUnchargedMultistepMoveStep(), animCanLoop));
+                            }
                         }
-                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_charge_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingLeapTypeMove()) {
-                        if (currentCreatureMove().useTimeIsInfinite) {
-                            if (usingLeapTypeMoveMultistepOne()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move_pt1", false));
-                            else if (usingLeapTypeMoveMultistepTwo()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move_pt2", true));
-                            else if (usingLeapTypeMoveMultistepThree()) event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move_pt3", false));
-                        }
-                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_leap_type_move"+multiNameNum, false));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (isUsingBlowTypeMove()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation." + creatureType.toString().toLowerCase() + ".use_blow_type_move"+multiNameNum, false));
+                        else event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".use_"+getUnchargedAnimType().toString().toLowerCase()+"_type_move"+multiNameNum, false));
                         return PlayState.CONTINUE;
                     }
                     else {

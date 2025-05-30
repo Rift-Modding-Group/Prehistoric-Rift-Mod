@@ -95,7 +95,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
         this.maxChargeTime = 0;
 
-        this.creature.setMultistepMoveStep(0);
+        this.creature.setUnchargedMultistepMoveStep(0);
         this.creature.setPlayingChargedMoveAnim(-1);
     }
 
@@ -274,7 +274,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     this.currentInvokedMove.onStartExecuting(this.creature, this.target);
                     this.creature.setUsingUnchargedAnim(true);
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) {
-                        this.creature.setMultistepMoveStep(0);
+                        this.creature.setUnchargedMultistepMoveStep(1);
                     }
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
                             && !this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).chargeUpSoundCanLoop())
@@ -298,13 +298,13 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     this.currentInvokedMove.whileExecuting(this.creature);
                     if (this.useSoundLooper != null) this.useSoundLooper.playSound();
                     if (this.creature.currentCreatureMove().useTimeIsInfinite) {
-                        this.creature.setMultistepMoveStep(1);
+                        this.creature.setUnchargedMultistepMoveStep(2);
                     }
                 }
                 if ((this.animTime >= this.moveAnimUseTime && this.animTime <= this.maxMoveAnimTime)
                         || this.currentInvokedMove.forceStopFlag) {
                     if (this.creature.currentCreatureMove().useTimeIsInfinite)
-                        this.creature.setMultistepMoveStep(2);
+                        this.creature.setUnchargedMultistepMoveStep(3);
 
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound() != null)
                         this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getRecoverFromUseSound(),
