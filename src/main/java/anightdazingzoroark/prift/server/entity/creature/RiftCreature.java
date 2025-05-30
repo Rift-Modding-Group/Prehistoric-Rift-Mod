@@ -129,6 +129,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
 
+    private static final DataParameter<Boolean> BREAK_BLOCK_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CAN_SET_BLOCK_BREAK_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+
     private static final DataParameter<Boolean> USING_LARGE_WEAPON = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> LARGE_WEAPON_USE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LARGE_WEAPON_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -137,19 +140,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<Integer> USED_MOVE_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> USED_MULTISTEP_MOVE_STEP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_LEAP_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_LEAP_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_LEAP_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_LEAP_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_DELAY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_TWO = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> USING_SPIN_TYPE_MOVE_MULTISTEP_THREE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Float> LEAP_X_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
@@ -287,6 +277,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(PLAY_INFINITE_MOVE_ANIM, false);
 
         this.dataManager.register(MOVE_LIST, new ArrayList<>());
+        this.dataManager.register(BREAK_BLOCK_MODE, false);
+        this.dataManager.register(CAN_SET_BLOCK_BREAK_MODE, true);
 
         this.dataManager.register(USING_LARGE_WEAPON, false);
         this.dataManager.register(LARGE_WEAPON_USE, 0);
@@ -296,19 +288,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         this.dataManager.register(USED_MOVE_TYPE, -1);
         this.dataManager.register(USED_MULTISTEP_MOVE_STEP, 0);
-        this.dataManager.register(USING_CHARGE_TYPE_MOVE, false);
-        this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_ONE, false);
-        this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_TWO, false);
-        this.dataManager.register(USING_CHARGE_TYPE_MOVE_MULTISTEP_THREE, false);
-        this.dataManager.register(USING_LEAP_TYPE_MOVE, false);
-        this.dataManager.register(USING_LEAP_TYPE_MOVE_MULTISTEP_ONE, false);
-        this.dataManager.register(USING_LEAP_TYPE_MOVE_MULTISTEP_TWO, false);
-        this.dataManager.register(USING_LEAP_TYPE_MOVE_MULTISTEP_THREE, false);
-        this.dataManager.register(USING_SPIN_TYPE_MOVE, false);
-        this.dataManager.register(USING_SPIN_TYPE_MOVE_DELAY, false);
-        this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_ONE, false);
-        this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_TWO, false);
-        this.dataManager.register(USING_SPIN_TYPE_MOVE_MULTISTEP_THREE, false);
 
         this.dataManager.register(LEAP_X_VELOCITY, 0.0f);
         this.dataManager.register(LEAP_Y_VELOCITY, 0.0f);
@@ -450,10 +429,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 boolean rightClickOnly = !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown() && this.canUseRightClick();
                 boolean middleClickOnly = !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown() && this.canUseMiddleClick();
                 boolean jump = settings.keyBindJump.isKeyDown();
+                boolean toggleBetweenAttackOrBreak = RiftControls.toggleAttackOrBlockBreak.isKeyDown();
 
                 //for using jump in navigating
                 if (this instanceof RiftWaterCreature)
                     RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, jump));
+
+                //for switching between attack or block break
+                RiftMessages.WRAPPER.sendToServer(new RiftAttackOrBlockBreakControl(this, toggleBetweenAttackOrBreak));
 
                 //holding certain items will prevent mouse related moves from being used
                 if (RiftUtil.itemCanOverrideMoveControls(((EntityPlayer)this.getControllingPassenger()).getHeldItemMainhand().getItem()))
@@ -1517,6 +1500,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public abstract Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType();
     //move related stuff ends here
 
+    public boolean inBlockBreakMode() {
+        return this.dataManager.get(BREAK_BLOCK_MODE);
+    }
+
+    public void setBlockBreakMode(boolean value) {
+        this.dataManager.set(BREAK_BLOCK_MODE, value);
+    }
+
+    public boolean canSetBlockBreakMode() {
+        return this.dataManager.get(CAN_SET_BLOCK_BREAK_MODE);
+    }
+
+    public void setCanSetBlockBreakMode(boolean value) {
+        this.dataManager.set(CAN_SET_BLOCK_BREAK_MODE, value);
+    }
+
     public boolean getUsingLargeWeapon() {
         return this.dataManager.get(USING_LARGE_WEAPON);
     }
@@ -2277,6 +2276,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public abstract Vec3d riderPos();
 
+    public boolean checkIfCanBreakBlock(IBlockState blockState) {
+        for (String blockBreakLevels : RiftConfigHandler.getConfig(this.creatureType).general.blockBreakLevels) {
+            Block block = blockState.getBlock();
+            String tool = blockBreakLevels.substring(0, blockBreakLevels.indexOf(":"));
+            int level = Integer.parseInt(blockBreakLevels.substring(blockBreakLevels.indexOf(":")));
+            if (block.isToolEffective(tool, blockState) && block.getHarvestLevel(blockState) >= level) return true;
+        }
+        return false;
+    }
+
     public boolean checkBasedOnStrength(IBlockState blockState) {
         Block block = blockState.getBlock();
         switch (this.creatureType.getBlockBreakTier()) {
@@ -2407,8 +2416,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         return closestTargetInFront;
     }
-
-    public void controlRangedAttack(double strength) {}
 
     @Override
     public boolean canBeSteered() {

@@ -81,29 +81,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
             else return false;
         }
     };
-    private static final Predicate<EntityLivingBase> ROAR_BLACKLIST = new Predicate<EntityLivingBase>() {
-        @Override
-        public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = RiftConfigHandler.getConfig(RiftCreatureType.TYRANNOSAURUS).general.affectedByRoarBlacklist;
-            if (!blacklist.isEmpty()) {
-                if (entity instanceof EntityPlayer) return entity.isEntityAlive() && !blacklist.contains("minecraft:player");
-                else return entity.isEntityAlive() && !blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
-            }
-            else return entity.isEntityAlive() && !(entity instanceof RiftEgg);
-        }
-    };
-    private static final Predicate<EntityLivingBase> ROAR_WHITELIST = new Predicate<EntityLivingBase>() {
-        @Override
-        public boolean apply(@Nullable EntityLivingBase entity) {
-            List<String> blacklist = RiftConfigHandler.getConfig(RiftCreatureType.TYRANNOSAURUS).general.affectedByRoarBlacklist;
-
-            if (!blacklist.isEmpty()) {
-                if (entity instanceof EntityPlayer) return entity.isEntityAlive() && blacklist.contains("minecraft:player");
-                else return entity.isEntityAlive() && blacklist.contains(EntityList.getKey(entity).toString()) && !(entity instanceof RiftEgg);
-            }
-            else return false;
-        }
-    };
     private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> STOMPING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);

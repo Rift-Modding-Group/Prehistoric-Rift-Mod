@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -28,6 +29,7 @@ public class RiftCreatureControls {
     private static final ResourceLocation rightMouseIcon = new ResourceLocation(RiftInitialize.MODID, "textures/ui/right_mouse_icon.png");
     private static final ResourceLocation middleMouseIcon = new ResourceLocation(RiftInitialize.MODID, "textures/ui/middle_mouse_icon.png");
     private static final ResourceLocation spacebarIcon = new ResourceLocation(RiftInitialize.MODID, "textures/ui/spacebar_icon.png");
+    private static final ResourceLocation genericButtonIcon = new ResourceLocation(RiftInitialize.MODID, "textures/ui/generic_button_icon.png");
     private final float iconScale = 0.75f;
     private final float textScale = 0.5f;
 
@@ -57,6 +59,9 @@ public class RiftCreatureControls {
                 if (creature instanceof RiftWaterCreature && creature.isInWater()) {
                     this.showSpacebarControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 20);
                 }
+
+                //for toggling between attack and block break
+                this.showToggleAttackOrBreakControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), 40);
             }
         }
     }
@@ -239,6 +244,42 @@ public class RiftCreatureControls {
         //show text
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
         String controlName = I18n.format("creature_control.spacebar."+(creature instanceof RiftWaterCreature ? "water" : "air"));
+        int textPosX = (int) ((width / 2D) / this.textScale - 440 * this.textScale) - 4 - fontRenderer.getStringWidth(controlName);
+        int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
+
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(0.5f, 0.5f, 0.5f);
+        fontRenderer.drawString(controlName, textPosX, textPosY, 0xffffff);
+        GlStateManager.popMatrix();
+    }
+
+    private void showToggleAttackOrBreakControls(RiftCreature creature, int width, int height, int yOffset) {
+        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+
+        //show generic control key button texture
+        int iconXPos = (int) (((width - 16 * this.iconScale) / 2D - 135 * this.iconScale) / this.iconScale);
+        int iconYPos = (int) (((height - 16 * this.iconScale) / 2D + 80 * this.iconScale + yOffset) / this.iconScale);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(genericButtonIcon);
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(this.iconScale, this.iconScale, this.iconScale);
+        GlStateManager.enableBlend();
+        GlStateManager.color(1.0f, 1.0f, 1.0f);
+        Gui.drawModalRectWithCustomSizedTexture(iconXPos, iconYPos, 0, 0, 16, 16, 16, 16);
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+
+        //show control key
+        String controlKey = RiftControls.toggleAttackOrBlockBreak.getDisplayName();
+        int controlPosX = (int) ((width / 2D) / this.textScale - 400 * this.textScale) - fontRenderer.getStringWidth(controlKey);
+        int controlPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 121 * this.textScale + yOffset) / this.textScale);
+
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(0.5f, 0.5f, 0.5f);
+        fontRenderer.drawString(controlKey, controlPosX, controlPosY, 0x000000);
+        GlStateManager.popMatrix();
+
+        //show text
+        String controlName = I18n.format("creature_control.toggle_"+(creature.inBlockBreakMode() ? "attack" : "block_break"));
         int textPosX = (int) ((width / 2D) / this.textScale - 440 * this.textScale) - 4 - fontRenderer.getStringWidth(controlName);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
 

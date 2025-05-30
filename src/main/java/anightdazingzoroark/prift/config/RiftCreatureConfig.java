@@ -51,6 +51,9 @@ public abstract class RiftCreatureConfig {
         @SerializedName("targetBlacklist")
         public List<String> targetBlacklist;
 
+        @SerializedName("blockBreakLevels")
+        public List<String> blockBreakLevels;
+
         @SerializedName("harvestableBlocks")
         public List<String> harvestableBlocks;
 
