@@ -17,9 +17,7 @@ public class RiftBiteMove extends RiftCreatureMove {
     public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {

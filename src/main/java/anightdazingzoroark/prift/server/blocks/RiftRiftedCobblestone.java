@@ -3,20 +3,12 @@ package anightdazingzoroark.prift.server.blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.Item;
 
-import java.util.Random;
-
-public class RiftRiftedStone extends Block {
-    public RiftRiftedStone() {
+public class RiftRiftedCobblestone extends Block {
+    public RiftRiftedCobblestone() {
         super(Material.ROCK, MapColor.PURPLE);
         this.setHardness(7.5F);
         this.setResistance(10.0F);
         this.setHarvestLevel("pickaxe", 1);
-    }
-
-    public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-        return Item.getItemFromBlock(RiftBlocks.RIFTED_COBBLESTONE);
     }
 }

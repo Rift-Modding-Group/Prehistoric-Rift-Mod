@@ -53,6 +53,7 @@ public class SaurophaganaxConfig extends RiftCreatureConfig {
                 "minecraft:zombie",
                 "minecraft:zombie_villager"
         );
+        this.general.blockBreakLevels = Arrays.asList("pickaxe:2", "axe:2", "shovel:2");
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setTimeRange(12000, 24000).setMustSeeSky().setYLevelRange(56, 256).setWeight(15).setSpawnAmntRange(1, 1).setDensityLimit(1).setBiomes("all"),
                 new SpawnRule().setCategory("CAVE").setSpawnOnLand().setYLevelRange(0, 56).setWeight(15).setSpawnAmntRange(1, 1).setDensityLimit(1).setBiomes("all")

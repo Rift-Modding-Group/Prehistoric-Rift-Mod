@@ -279,7 +279,7 @@ public class RiftCreatureControls {
         GlStateManager.popMatrix();
 
         //show text
-        String controlName = I18n.format("creature_control.toggle_"+(creature.inBlockBreakMode() ? "attack" : "block_break"));
+        String controlName = I18n.format("creature_control.block_break_mode."+(creature.inBlockBreakMode() ? "disable" : "enable"));
         int textPosX = (int) ((width / 2D) / this.textScale - 440 * this.textScale) - 4 - fontRenderer.getStringWidth(controlName);
         int textPosY = (int) (((height - fontRenderer.FONT_HEIGHT * this.textScale) / 2D + 120 * this.textScale + yOffset) / this.textScale);
 

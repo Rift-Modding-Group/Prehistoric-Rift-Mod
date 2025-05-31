@@ -44,9 +44,9 @@ public class RiftBlocks {
         CRYOBERRY_BUSH = registerBlock(new RiftCryoberryBush(), "cryoberry_bush", false);
 
         RIFTED_STONE = registerBlock(new RiftRiftedStone(), "rifted_stone", true);
-        RIFTED_COBBLESTONE = registerBlock(new Block(Material.ROCK, MapColor.PURPLE).setHardness(7.5F).setResistance(10.0F), "rifted_cobblestone", true);
+        RIFTED_COBBLESTONE = registerBlock(new RiftRiftedCobblestone(), "rifted_cobblestone", true);
         RIFT_SHARD_ORE = registerBlock(new RiftRiftShardOre(), "rift_shard_ore", true);
-        RIFT_SHARD_BLOCK = registerBlock(new Block(Material.ROCK), "rift_shard_block", true);
+        RIFT_SHARD_BLOCK = registerBlock(new RiftRiftShardBlock(), "rift_shard_block", true);
 
         //fluid shenanigans
         PYROBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.PYROBERRY_JUICE, Material.WATER), "pyroberry_juice", true, true, false);

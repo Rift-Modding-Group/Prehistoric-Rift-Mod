@@ -101,7 +101,7 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
                                     IBlockState iblockstate = roarUser.world.getBlockState(blockpos);
 
                                     if (iblockstate.getMaterial() != Material.AIR) {
-                                        if (roarUser.checkBasedOnStrength(iblockstate)) f -= 0.24F;
+                                        if (roarUser.checkIfCanBreakBlock(iblockstate)) f -= 0.24F;
                                         else f -= (1200F + 0.3F) * 0.3F;
 
                                         if (f > 0.0F) set.add(blockpos);

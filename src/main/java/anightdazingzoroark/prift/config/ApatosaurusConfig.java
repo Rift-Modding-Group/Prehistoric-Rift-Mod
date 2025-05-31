@@ -21,6 +21,7 @@ public class ApatosaurusConfig extends RiftCreatureConfig {
                 new Meal("prift:advanced_herbivore_meal", 0)
         );
         this.general.maximumPassengerSize = "MEDIUM";
+        this.general.blockBreakLevels = Arrays.asList("pickaxe:2", "axe:2", "shovel:2");
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(7).setSpawnAmntRange(1, 3).setDensityLimit(4).setBiomes("tag:plains", "-tag:savanna")
         );

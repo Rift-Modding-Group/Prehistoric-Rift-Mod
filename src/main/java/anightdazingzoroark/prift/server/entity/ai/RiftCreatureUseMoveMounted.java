@@ -250,11 +250,18 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
+                    //do the move's general functions on use point
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    //when user is in block break mode and if the move is a melee move, allow for block break
+                    if (this.creature.inBlockBreakMode() && this.creature.currentCreatureMove().moveAnimType.moveType == CreatureMove.MoveType.MELEE) {
+                        this.currentInvokedMove.breakBlocks(this.creature);
+                    }
+                    //play sound associated with move
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
                         this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
                                 1f,
                                 1f);
+                    //show particles associated with move
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles() != null)
                         this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles().createParticle();
                     if (this.creature.currentCreatureMove().chargeUpAffectsUseTime) {
@@ -342,11 +349,18 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
+                    //do the move's general functions on use point
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    //when user is in block break mode and if the move is a melee move, allow for block break
+                    if (this.creature.inBlockBreakMode() && this.creature.currentCreatureMove().moveAnimType.moveType == CreatureMove.MoveType.MELEE) {
+                        this.currentInvokedMove.breakBlocks(this.creature);
+                    }
+                    //play sound associated with move
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
                         this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
                                 1f,
                                 1f);
+                    //show particles associated with move
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles() != null)
                         this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles().createParticle();
                     this.currentInvokedMove.setUseValue(this.creature.getCurrentMoveUse());
@@ -421,11 +435,18 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.currentInvokedMove.whileChargingUp(this.creature);
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
+                    //do the move's general functions on use point
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    //when user is in block break mode and if the move is a melee move, allow for block break
+                    if (this.creature.inBlockBreakMode() && this.creature.currentCreatureMove().moveAnimType.moveType == CreatureMove.MoveType.MELEE) {
+                        this.currentInvokedMove.breakBlocks(this.creature);
+                    }
+                    //play sound associated with move
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
                         this.creature.playSound(this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound(),
                                 1f,
                                 1f);
+                    //show particles associated with move
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles() != null)
                         this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseParticles().createParticle();
                 }

@@ -8,13 +8,13 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftAttackOrBlockBreakControl implements IMessage {
+public class RiftManageBlockBreakControl implements IMessage {
     private int creatureId;
     private boolean value;
 
-    public RiftAttackOrBlockBreakControl() {}
+    public RiftManageBlockBreakControl() {}
 
-    public RiftAttackOrBlockBreakControl(RiftCreature creature, boolean value) {
+    public RiftManageBlockBreakControl(RiftCreature creature, boolean value) {
         this.creatureId = creature.getEntityId();
         this.value = value;
     }
@@ -31,14 +31,14 @@ public class RiftAttackOrBlockBreakControl implements IMessage {
         buf.writeBoolean(this.value);
     }
 
-    public static class Handler implements IMessageHandler<RiftAttackOrBlockBreakControl, IMessage> {
+    public static class Handler implements IMessageHandler<RiftManageBlockBreakControl, IMessage> {
         @Override
-        public IMessage onMessage(RiftAttackOrBlockBreakControl message, MessageContext ctx) {
+        public IMessage onMessage(RiftManageBlockBreakControl message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handle(RiftAttackOrBlockBreakControl message, MessageContext ctx) {
+        private void handle(RiftManageBlockBreakControl message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             RiftCreature creature = (RiftCreature) playerEntity.world.getEntityByID(message.creatureId);
 

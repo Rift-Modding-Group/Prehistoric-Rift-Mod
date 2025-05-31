@@ -21,6 +21,7 @@ public class TriceratopsConfig extends RiftCreatureConfig {
                 "minecraft:leaves:-1",
                 "minecraft:leaves2:-1"
         );
+        this.general.blockBreakLevels = Arrays.asList("pickaxe:1", "axe:1", "shovel:1");
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(15).setSpawnAmntRange(4, 6).setDensityLimit(10).setBiomes("tag:plains", "-tag:savanna")
         );

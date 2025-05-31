@@ -272,9 +272,8 @@ public class ServerEvents {
     }
 
     //make it so that upon mounting a creature then dismounting it
-    //you dont take damage
-    //as well as making it so that on the instant they start riding
-    //they dont activate a right click ability
+    //you dont take damage and block break mode for the creature
+    //is disabled
     @SubscribeEvent
     public void onStartRiding(EntityMountEvent event) {
         if (event.isDismounting() && event.getEntityMounting() instanceof EntityPlayer) {
@@ -282,6 +281,7 @@ public class ServerEvents {
             if (event.getEntityBeingMounted() instanceof RiftCreature) {
                 RiftCreature creature = (RiftCreature) event.getEntityBeingMounted();
                 RiftMessages.WRAPPER.sendToServer(new RiftCanUseMoveTriggerButton(creature, 1, false));
+                creature.setBlockBreakMode(false);
                 NonPotionEffectsHelper.setRiding(player, true);
             }
         }

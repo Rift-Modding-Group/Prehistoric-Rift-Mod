@@ -473,6 +473,8 @@ hwyla.power_created=Power Created: %s
 
 creature_control.spacebar.water=Swim Up/Down
 creature_control.spacebar.air=Fly Up/Down
+creature_control.block_break_mode.enable=Enable Block Break
+creature_control.block_break_mode.disable=Disable Block Break
 
 large_weapon_control.cannon=Fire Cannon
 large_weapon_control.mortar=Charge Mortar

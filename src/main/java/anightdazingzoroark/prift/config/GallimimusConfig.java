@@ -27,6 +27,7 @@ public class GallimimusConfig extends RiftCreatureConfig {
                 "prift:baryonyx",
                 "prift:dilophosaurus"
         );
+        this.general.blockBreakLevels = Arrays.asList("shovel:0");
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(10).setSpawnAmntRange(4, 6).setDensityLimit(12).setBiomes("tag:savanna")
         );

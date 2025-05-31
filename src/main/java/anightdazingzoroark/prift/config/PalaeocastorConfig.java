@@ -36,6 +36,7 @@ public class PalaeocastorConfig extends RiftCreatureConfig {
                 "minecraft:emerald_ore:0",
                 "minecraft:cobblestone:0"
         );
+        this.general.blockBreakLevels = Arrays.asList("pickaxe:2", "shovel:0");
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("CAVE").setSpawnOnLand().setYLevelRange(0, 56).setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("all")
         );

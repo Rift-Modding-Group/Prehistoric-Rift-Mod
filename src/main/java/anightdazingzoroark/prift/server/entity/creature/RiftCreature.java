@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.RiftGui;
+import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -436,7 +437,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, jump));
 
                 //for switching between attack or block break
-                RiftMessages.WRAPPER.sendToServer(new RiftAttackOrBlockBreakControl(this, toggleBetweenAttackOrBreak));
+                RiftMessages.WRAPPER.sendToServer(new RiftManageBlockBreakControl(this, toggleBetweenAttackOrBreak));
 
                 //holding certain items will prevent mouse related moves from being used
                 if (RiftUtil.itemCanOverrideMoveControls(((EntityPlayer)this.getControllingPassenger()).getHeldItemMainhand().getItem()))
@@ -2277,24 +2278,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public abstract Vec3d riderPos();
 
     public boolean checkIfCanBreakBlock(IBlockState blockState) {
-        for (String blockBreakLevels : RiftConfigHandler.getConfig(this.creatureType).general.blockBreakLevels) {
-            Block block = blockState.getBlock();
-            String tool = blockBreakLevels.substring(0, blockBreakLevels.indexOf(":"));
-            int level = Integer.parseInt(blockBreakLevels.substring(blockBreakLevels.indexOf(":")));
-            if (block.isToolEffective(tool, blockState) && block.getHarvestLevel(blockState) >= level) return true;
-        }
-        return false;
-    }
-
-    public boolean checkBasedOnStrength(IBlockState blockState) {
         Block block = blockState.getBlock();
-        switch (this.creatureType.getBlockBreakTier()) {
-            case DIRT:
-                return RiftUtil.blockWeakerThanDirt(block, blockState);
-            case WOOD:
-                return RiftUtil.blockWeakerThanWood(block, blockState);
-            case STONE:
-                return RiftUtil.blockWeakerThanStone(block, blockState);
+
+        //some blocks cannot be broken by creatures
+        boolean excemptedBlocks = block instanceof RiftCreatureBox;
+        if (excemptedBlocks) return false;
+
+        //the ones that have a mining level of -1 can be broken easily w/out
+        //additional checks
+        if (block.getHarvestLevel(blockState) < 0) return true;
+
+        //check if block requires specific tool to be broken
+        for (String blockBreakLevels : RiftConfigHandler.getConfig(this.creatureType).general.blockBreakLevels) {
+            String tool = blockBreakLevels.substring(0, blockBreakLevels.indexOf(":"));
+            int level = Integer.parseInt(blockBreakLevels.substring(blockBreakLevels.indexOf(":")+1));
+            if (block.isToolEffective(tool, blockState)
+                    && level >= block.getHarvestLevel(blockState)) return true;
         }
         return false;
     }

@@ -139,7 +139,7 @@ public class RiftChargeMove extends RiftCreatureMove {
                             IBlockState iblockstate = user.world.getBlockState(blockpos);
 
                             if (iblockstate.getMaterial() != Material.AIR && y >= user.posY) {
-                                if (user.checkBasedOnStrength(iblockstate)) toBreak.add(blockpos);
+                                if (user.checkIfCanBreakBlock(iblockstate)) toBreak.add(blockpos);
                             }
                         }
                     }

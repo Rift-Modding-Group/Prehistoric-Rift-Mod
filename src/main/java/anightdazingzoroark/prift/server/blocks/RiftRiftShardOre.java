@@ -17,6 +17,7 @@ public class RiftRiftShardOre extends Block {
         super(Material.ROCK, MapColor.PURPLE);
         this.setHardness(7.5F);
         this.setResistance(10.0F);
+        this.setHarvestLevel("pickaxe", 1);
     }
 
     public Item getItemDropped(IBlockState state, Random rand, int fortune) {

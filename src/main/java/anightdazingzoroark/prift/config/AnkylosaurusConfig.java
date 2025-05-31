@@ -34,6 +34,7 @@ public class AnkylosaurusConfig extends RiftCreatureConfig {
                 "minecraft:emerald_ore:0",
                 "minecraft:cobblestone:0"
         );
+        this.general.blockBreakLevels = Arrays.asList("pickaxe:2", "axe:1", "shovel:1");
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(15).setSpawnAmntRange(4, 6).setDensityLimit(12).setBiomes("tag:sandy")
         );
