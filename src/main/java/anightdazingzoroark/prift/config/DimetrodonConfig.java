@@ -38,7 +38,7 @@ public class DimetrodonConfig extends RiftCreatureConfig {
         this.simpleDifficulty.coldTemperatureValue = -5.0f;
         this.simpleDifficulty.warmTemperatureValue = 5.0f;
         this.simpleDifficulty.veryWarmTemperatureValue = 10.0f;
-        this.general.blockBreakLevels = Arrays.asList("pickaxe:1", "axe:1", "shovel:1");
+        this.general.blockBreakLevels = Arrays.asList("pickaxe:0", "axe:0", "shovel:0");
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("tag:sandy", "tag:savanna")
         );

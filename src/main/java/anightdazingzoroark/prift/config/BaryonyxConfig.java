@@ -19,7 +19,7 @@ public class BaryonyxConfig extends RiftCreatureConfig {
         );
         this.general.targetWhitelist = Arrays.asList("minecraft:squid");
         this.general.targetBlacklist = Arrays.asList();
-        this.general.blockBreakLevels = Arrays.asList("pickaxe:1", "axe:1", "shovel:1");
+        this.general.blockBreakLevels = Arrays.asList("pickaxe:0", "axe:0", "shovel:0");
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setSpawnInWater().setMustSeeSky().setYLevelRange(56, 256).setTimeRange(0, 12000).setWeight(15).setSpawnAmntRange(1, 1).setDensityLimit(2).setBiomes("tag:swamp")
         );

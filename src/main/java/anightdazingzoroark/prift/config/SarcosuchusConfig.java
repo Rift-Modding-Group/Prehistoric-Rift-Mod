@@ -21,7 +21,7 @@ public class SarcosuchusConfig extends RiftCreatureConfig {
         );
         this.general.targetBlacklist = Arrays.asList();
         this.general.maximumSpinAttackTargetSize = "MEDIUM";
-        this.general.blockBreakLevels = Arrays.asList("axe:1", "shovel:1");
+        this.general.blockBreakLevels = Arrays.asList("axe:0", "shovel:0");
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("WATER").setSpawnInWater().setMustSeeSky().setYLevelRange(56, 64).setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(2).setBiomes("biome:minecraft:river"),
                 new SpawnRule().setCategory("WATER").setSpawnInWater().setMustSeeSky().setYLevelRange(56, 64).setWeight(15).setSpawnAmntRange(1, 1).setDensityLimit(2).setBiomes("tag:swamp")
