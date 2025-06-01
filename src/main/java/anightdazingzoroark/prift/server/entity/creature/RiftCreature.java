@@ -2445,6 +2445,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void travel(float strafe, float vertical, float forward) {
         if (!this.canMove()) return;
 
+        //for leaping
         if (this.getLeapDirection().length() > 0f && this.onGround()) {
             this.motionX = this.getLeapDirection().x;
             this.motionY = this.getLeapDirection().y;

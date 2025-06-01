@@ -37,6 +37,7 @@ public class RiftChargeMove extends RiftCreatureMove {
 
     @Override
     public void onEndChargeUp(RiftCreature user, int useAmount) {
+        user.setCanMove(true);
         //this is only relevant when unmounted
         if (this.targetPosForCharge != null) {
             //get charge distance
