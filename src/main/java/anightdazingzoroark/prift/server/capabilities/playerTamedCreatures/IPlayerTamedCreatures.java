@@ -30,6 +30,7 @@ public interface IPlayerTamedCreatures {
     int getPartyLastOpenedTime();
     void setBoxLastOpenedTime(int value);
     int getBoxLastOpenedTime();
+    NBTTagCompound getPartyMemberTag(UUID uuid);
 
     //for indirect values
     void addToPartyCreatures(RiftCreature creature);

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -43,6 +44,11 @@ public class RiftChangeDeploymentType implements IMessage {
         private void handle(RiftChangeDeploymentType message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
+                RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
+                if (creature != null) creature.setDeploymentType(message.deploymentType);
+            }
+            if (ctx.side == Side.CLIENT) {
+                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
                 RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
                 if (creature != null) creature.setDeploymentType(message.deploymentType);
             }

@@ -229,12 +229,10 @@ public class RiftJournalScreen extends GuiScreen {
             if (button.id == 0) {
                 if (this.getSelectedCreature().getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                     PlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedPartyPos, false);
-                    this.getSelectedCreature().setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
                 }
                 else if (this.getSelectedCreature().getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                     if (PlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedPartyPos)) {
                         PlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedPartyPos, true);
-                        this.getSelectedCreature().setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                     }
                 }
             }
@@ -777,6 +775,8 @@ public class RiftJournalScreen extends GuiScreen {
 
     private RiftCreature getSelectedCreature() {
         if (this.selectedPartyPos < 0 || this.selectedPartyPos >= PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).size()) return null;
+        System.out.println("player nbt selected deployment type: "+PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).get(this.selectedPartyPos).getDeploymentType());
+        System.out.println("nbt: "+PlayerTamedCreaturesHelper.getPartyMemberTag(this.mc.player, PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).get(this.selectedPartyPos).getUniqueID()));
         return PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).get(this.selectedPartyPos);
     }
 

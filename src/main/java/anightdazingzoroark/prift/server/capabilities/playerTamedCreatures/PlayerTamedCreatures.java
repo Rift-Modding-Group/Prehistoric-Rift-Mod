@@ -86,6 +86,17 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
+    public NBTTagCompound getPartyMemberTag(UUID uuid) {
+        //find in party first
+        for (NBTTagCompound partyMemCompound : this.partyCreatures) {
+            if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
+                return partyMemCompound;
+            }
+        }
+        return new NBTTagCompound();
+    }
+
+    @Override
     public void addToPartyCreatures(RiftCreature creature) {
         if (this.partyCreatures.size() < this.getMaxPartySize()) {
             boolean canAdd = false;

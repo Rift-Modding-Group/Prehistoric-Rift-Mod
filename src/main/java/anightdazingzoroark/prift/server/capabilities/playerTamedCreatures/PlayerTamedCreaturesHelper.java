@@ -29,6 +29,10 @@ public class PlayerTamedCreaturesHelper {
         return getPlayerTamedCreatures(player).getPartyCreatures(player.world);
     }
 
+    public static NBTTagCompound getPartyMemberTag(EntityPlayer player, UUID uuid) {
+        return getPlayerTamedCreatures(player).getPartyMemberTag(uuid);
+    }
+
     public static void addToPlayerParty(EntityPlayer player, RiftCreature creature) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).addToPartyCreatures(creature);
@@ -130,10 +134,12 @@ public class PlayerTamedCreaturesHelper {
     //update creatures
     public static void updateAllPartyMems(EntityPlayer player) {
         if (player.world.isRemote) {
-            for (RiftCreature creature : getPlayerParty(player)) updatePartyMem(creature);
+            for (RiftCreature creature : getPlayerParty(player))
+                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) updatePartyMem(creature);
         }
         else {
-            for (RiftCreature creature : getPlayerParty(player)) updatePartyMem(creature);
+            for (RiftCreature creature : getPlayerParty(player))
+                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) updatePartyMem(creature);
         }
     }
 

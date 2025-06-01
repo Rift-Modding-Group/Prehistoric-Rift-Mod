@@ -73,15 +73,18 @@ public class RiftUpdatePartyDeployed implements IMessage {
                 RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.uuid);
                 if (message.tagCompound.isEmpty()) {
                     if (creature == null) return;
+                    //System.out.println("update nbt server");
 
                     if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                         NBTTagCompound newCompound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
                         playerTamedCreatures.modifyCreature(message.uuid, newCompound);
+                        //System.out.println("(party) server nbt: "+playerTamedCreatures.getPartyMemberTag(message.uuid));
                         RiftMessages.WRAPPER.sendToAll(new RiftUpdatePartyDeployed(player, creature, newCompound));
                     }
                     else if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                         NBTTagCompound newCompound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
                         playerTamedCreatures.modifyCreature(message.uuid, newCompound);
+                        //System.out.println("(party inactive) server nbt: "+playerTamedCreatures.getPartyMemberTag(message.uuid));
                         RiftMessages.WRAPPER.sendToAll(new RiftUpdatePartyDeployed(player, creature, newCompound));
                     }
                 }
@@ -116,7 +119,9 @@ public class RiftUpdatePartyDeployed implements IMessage {
                     }
                 }
                 else {
+                    //System.out.println("update nbt client");
                     playerTamedCreatures.modifyCreature(message.uuid, message.tagCompound);
+                    //System.out.println("client nbt: "+playerTamedCreatures.getPartyMemberTag(message.uuid));
                     if (creature != null
                             && PlayerTamedCreatures.DeploymentType.values()[message.tagCompound.getByte("DeploymentType")] == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
                             && creature.isEntityAlive()) {
