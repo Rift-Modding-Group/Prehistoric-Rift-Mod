@@ -505,14 +505,19 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     }
 
     private boolean moveIsSelectable(CreatureMove move) {
-        if (move == null) return false;
+        if (move == null || move.creatureMove == null) return false;
+
         //get pos associated with move
         int pos = this.creature.getLearnedMoves().indexOf(move);
+        if (pos == -1) return false;
+
+        //check if theres animators available for move
+        if (this.creature.animatorsForMoveType().get(move.moveAnimType) == null) return false;
+
         //invoke the move to get its associated check for use
         RiftCreatureMove invokedCreatureMove = move.invokeMove();
         boolean energyCheck = move.chargeType.requiresCharge() ? (this.creature.getEnergy() - move.energyUse[0] >= this.creature.getWeaknessEnergy()) : (this.creature.getEnergy() - move.energyUse[0] >= 0);
-        if (pos == -1) return false;
-        else return this.creature.getMoveCooldown(pos) == 0
+        return this.creature.getMoveCooldown(pos) == 0
                 && energyCheck
                 && invokedCreatureMove.canBeExecutedUnmounted(this.creature, this.target);
     }

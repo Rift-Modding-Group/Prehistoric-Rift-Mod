@@ -116,5 +116,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftChangeDeploymentType.Handler.class, RiftChangeDeploymentType.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeDeploymentType.Handler.class, RiftChangeDeploymentType.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftManageBlockBreakControl.Handler.class, RiftManageBlockBreakControl.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftSetEntityMotion.Handler.class, RiftSetEntityMotion.class, id++, Side.CLIENT);
     }
 }

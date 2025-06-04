@@ -78,8 +78,6 @@ public abstract class RiftCreatureMove {
     //for use in when break block mode is active
     public void breakBlocks(RiftCreature user) {
         //get all blocks in front of user based on width, melee reach, and height
-        //currently this only gets a straight line, will figure out soon how to
-        //make this
         List<BlockPos> blockBreakList = new ArrayList<>();
 
         Vec3d look = user.getLookVec().normalize();
@@ -98,7 +96,7 @@ public abstract class RiftCreatureMove {
                 user.posZ + (user.attackWidth() + user.width) * look.z + perpZ * offset
         );
 
-        //for loops wouldn't work in this situation, so its
+        //for loops wouldn't work in this situation, so it's
         //time to do nested while loops
         int x = firstPos.getX();
         int y = firstPos.getY();
@@ -145,8 +143,8 @@ public abstract class RiftCreatureMove {
             //break block and put the items in the creatures inventory
             if (user.checkIfCanBreakBlock(blockState)) {
                 List<ItemStack> drops = blockState.getBlock().getDrops(user.world, posToBreak, blockState, 0);
-                for (ItemStack stack : drops) user.creatureInventory.addItem(stack);
-                user.world.destroyBlock(posToBreak, false);
+                if (user.isTamed()) for (ItemStack stack : drops) user.creatureInventory.addItem(stack);
+                user.world.destroyBlock(posToBreak, !user.isTamed());
             }
         }
     }

@@ -610,4 +610,12 @@ public enum RiftCreatureType {
         }
     }
 
+    //these influence wild only behaviors
+    public enum Behavior {
+        HERDER, //will use herding or pack hunting
+        OBLIVIOUS, //will never respond to being attacked or approached
+        DOCILE, //will be peaceful unless attacked
+        SKITTISH, //will run from certain creatures
+        AGGRESSIVE //will attack certain creatures
+    }
 }

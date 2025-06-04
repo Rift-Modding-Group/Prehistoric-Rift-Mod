@@ -63,6 +63,7 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.util.vector.Vector;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -73,6 +74,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.vecmath.Vector2d;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -2302,13 +2304,38 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //create an AABB in front of the creature based on the head hitbox's position
     //and the head's width
-    public AxisAlignedBB frontOfHeadAABB() {
-        double xPoint = this.posX + (this.headPart.width + this.headPart.radius) * Math.cos(Math.atan2(this.getLookVec().z, this.getLookVec().x));
-        double minYPoint = this.posY;
-        double maxYPoint = Math.max(this.headPart.posY + this.headPart.height, this.posY + this.height);
-        double zPoint = this.posZ + (this.headPart.width + this.headPart.radius) * Math.sin(Math.atan2(this.getLookVec().z, this.getLookVec().x));
-        return new AxisAlignedBB(xPoint - (this.headPart.width / 2), minYPoint, zPoint - (this.headPart.width / 2),
-                xPoint + (this.headPart.width / 2), maxYPoint, zPoint + (this.headPart.width / 2));
+    public AxisAlignedBB frontOfCreatureAABB(double zGrowth) {
+        Vec3d look = this.getLookVec().normalize();
+        double perpX = -look.z;
+        double perpZ = look.x;
+        double offset = Math.ceil(this.width / 2.0) + 0.5;
+
+        /*
+        boolean facingNorth = (this.rotationYaw >= 135 && this.rotationYaw <= 180) || (this.rotationYaw <= -135 && this.rotationYaw >= -180);
+        boolean facingEast = this.rotationYaw > -135 && this.rotationYaw < -45;
+        boolean facingSouth = this.rotationYaw >= -45 && this.rotationYaw <= 45;
+        boolean facingWest = this.rotationYaw > 45 && this.rotationYaw < 135;
+        */
+
+        return new AxisAlignedBB(
+                this.posX + look.x - perpX * offset,
+                this.posY,
+                this.posZ + look.z - perpZ * offset,
+                this.posX + (this.attackWidth() + this.width + zGrowth) * look.x + perpX * offset,
+                this.posY + this.height,
+                this.posZ + (this.attackWidth() + this.width + zGrowth) * look.z + perpZ * offset
+        );
+    }
+
+    public AxisAlignedBB frontOfCreatureAABB() {
+        return new AxisAlignedBB(
+                this.headPart.width >= 1 ? this.headPart.getEntityBoundingBox().minX : this.headPart.posX - 0.5D,
+                this.posY,
+                this.headPart.width >= 1 ? this.headPart.getEntityBoundingBox().minZ : this.headPart.posZ - 0.5D,
+                this.headPart.width >= 1 ? this.headPart.getEntityBoundingBox().maxX : this.headPart.posX + 0.5D,
+                Math.max(this.posY + this.height, this.headPart.getEntityBoundingBox().maxY),
+                this.headPart.width >= 1 ? this.headPart.getEntityBoundingBox().maxZ : this.headPart.posZ + 0.5D
+        );
     }
 
     public List<Entity> getAllTargetsInFront() {
@@ -2443,7 +2470,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
-        if (!this.canMove()) return;
+        if (!this.canMove()) {
+            super.travel(0, vertical, 0);
+            return;
+        }
 
         //for leaping
         if (this.getLeapDirection().length() > 0f && this.onGround()) {

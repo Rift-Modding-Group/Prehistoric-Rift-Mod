@@ -775,8 +775,8 @@ public class RiftJournalScreen extends GuiScreen {
 
     private RiftCreature getSelectedCreature() {
         if (this.selectedPartyPos < 0 || this.selectedPartyPos >= PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).size()) return null;
-        System.out.println("player nbt selected deployment type: "+PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).get(this.selectedPartyPos).getDeploymentType());
-        System.out.println("nbt: "+PlayerTamedCreaturesHelper.getPartyMemberTag(this.mc.player, PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).get(this.selectedPartyPos).getUniqueID()));
+        //System.out.println("player nbt selected deployment type: "+PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).get(this.selectedPartyPos).getDeploymentType());
+        //System.out.println("nbt: "+PlayerTamedCreaturesHelper.getPartyMemberTag(this.mc.player, PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).get(this.selectedPartyPos).getUniqueID()));
         return PlayerTamedCreaturesHelper.getPlayerParty(this.mc.player).get(this.selectedPartyPos);
     }
 

@@ -4,6 +4,8 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftSetEntityMotion;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -31,6 +33,7 @@ public class RiftChargeMove extends RiftCreatureMove {
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setCanMove(false);
         user.disableCanRotateMounted();
+
         //this is only relevant when unmounted
         if (target != null) this.targetPosForCharge = new BlockPos(target.posX, user.posY, target.posZ);
     }
@@ -38,6 +41,7 @@ public class RiftChargeMove extends RiftCreatureMove {
     @Override
     public void onEndChargeUp(RiftCreature user, int useAmount) {
         user.setCanMove(true);
+
         //this is only relevant when unmounted
         if (this.targetPosForCharge != null) {
             //get charge distance
@@ -55,7 +59,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             //get charge time
             //the point at which it stops when unmounted is doubled, so the max charge time here
             //is to be halved to make it consistent with when mounted
-            this.maxChargeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) * 1.5D / 16);
+            this.maxChargeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) / 16);
         }
         //this is only relevant when mounted
         else {
@@ -65,7 +69,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             this.chargeDirectionToPosZ = user.getLookVec().z / unnormalizedMagnitude;
 
             //get charge time
-            this.maxChargeTime = (int) Math.ceil(RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth()) * 1.5D / 8);
+            this.maxChargeTime = (int) Math.ceil(RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth()) / 8);
         }
     }
 
@@ -74,10 +78,10 @@ public class RiftChargeMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
-        AxisAlignedBB chargerHitbox = user.getEntityBoundingBox().grow(1.5D);
+        AxisAlignedBB chargerDetectHitbox = user.getEntityBoundingBox().grow(2D);
 
         //stop if it hits a mob
-        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, chargerHitbox, new Predicate<Entity>() {
+        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, chargerDetectHitbox, new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
                 if (entity instanceof RiftCreaturePart) {
@@ -102,8 +106,8 @@ public class RiftChargeMove extends RiftCreatureMove {
 
         //stop if it hits a block
         boolean breakBlocksFlag = false;
-        breakBlocksLoop: for (int x = MathHelper.floor(chargerHitbox.minX); x < MathHelper.ceil(chargerHitbox.maxX); x++) {
-            for (int z = MathHelper.floor(chargerHitbox.minZ); z < MathHelper.ceil(chargerHitbox.maxZ); z++) {
+        breakBlocksLoop: for (int x = MathHelper.floor(chargerDetectHitbox.minX); x < MathHelper.ceil(chargerDetectHitbox.maxX); x++) {
+            for (int z = MathHelper.floor(chargerDetectHitbox.minZ); z < MathHelper.ceil(chargerDetectHitbox.maxZ); z++) {
                 IBlockState state = user.world.getBlockState(new BlockPos(x, user.posY, z));
                 IBlockState stateUp = user.world.getBlockState(new BlockPos(x, user.posY + 1, z));
 
@@ -115,7 +119,6 @@ public class RiftChargeMove extends RiftCreatureMove {
         }
 
         if (breakBlocksFlag || !chargedIntoEntities.isEmpty() || this.chargeTime >= this.maxChargeTime) {
-            //stop charging
             user.motionX = 0;
             user.motionZ = 0;
             user.velocityChanged = true;
@@ -130,31 +133,23 @@ public class RiftChargeMove extends RiftCreatureMove {
             }
 
             //destroy all breakable blocks it has hit
-            boolean canBreak = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(user.world, user);
-            if (breakBlocksFlag && canBreak) {
-                List<BlockPos> toBreak = new ArrayList<>();
-                for (int x = MathHelper.floor(chargerHitbox.minX); x < MathHelper.ceil(chargerHitbox.maxX); x++) {
-                    for (int y = MathHelper.floor(chargerHitbox.minY); y < MathHelper.ceil(chargerHitbox.maxY); y++) {
-                        for (int z = MathHelper.floor(chargerHitbox.minZ); z < MathHelper.ceil(chargerHitbox.maxZ); z++) {
-                            BlockPos blockpos = new BlockPos(x, y, z);
-                            IBlockState iblockstate = user.world.getBlockState(blockpos);
-
-                            if (iblockstate.getMaterial() != Material.AIR && y >= user.posY) {
-                                if (user.checkIfCanBreakBlock(iblockstate)) toBreak.add(blockpos);
-                            }
-                        }
-                    }
-                }
-                for (BlockPos blockPos : toBreak) user.world.destroyBlock(blockPos, false);
-            }
+            if (breakBlocksFlag) this.breakBlocks(user);
 
             //forcibly stop the move
             this.forceStopFlag = true;
         }
         else {
-            user.motionX = this.chargeDirectionToPosX * 8;
-            user.motionZ = this.chargeDirectionToPosZ * 8;
-            user.velocityChanged = true;
+            //for some reason when being ridden and tryin to make a creature
+            //charge/lunge into a wall theres a good chance they'll stop prematurely
+            //so there's this shit instead
+            if (user.isBeingRidden() && user.getControllingPassenger() != null)
+                RiftMessages.WRAPPER.sendToAll(new RiftSetEntityMotion(user, this.chargeDirectionToPosX * 8, this.chargeDirectionToPosZ * 8));
+            else {
+                user.motionX = this.chargeDirectionToPosX * 8;
+                user.motionZ = this.chargeDirectionToPosZ * 8;
+                user.velocityChanged = true;
+            }
+
             this.chargeTime++;
             if (this.useValue > 0) this.useValue--; //this only matters when using while mounted
         }

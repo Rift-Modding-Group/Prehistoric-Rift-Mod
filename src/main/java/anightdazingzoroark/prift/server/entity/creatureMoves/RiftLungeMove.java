@@ -4,6 +4,8 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftSetEntityMotion;
 import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -111,10 +113,20 @@ public class RiftLungeMove extends RiftCreatureMove {
             this.forceStopFlag = true;
         }
         else {
-            user.motionX = this.lungeDirectionToPosX * this.lungeVelocity;
-            user.motionY = this.lungeDirectionToPosY * this.lungeVelocity;
-            user.motionZ = this.lungeDirectionToPosZ * this.lungeVelocity;
-            user.velocityChanged = true;
+            if (user.isBeingRidden() && user.getControllingPassenger() != null)
+                RiftMessages.WRAPPER.sendToAll(new RiftSetEntityMotion(
+                        user,
+                        this.lungeDirectionToPosX * this.lungeVelocity,
+                        this.lungeDirectionToPosY * this.lungeVelocity,
+                        this.lungeDirectionToPosZ * this.lungeVelocity
+                )
+            );
+            else {
+                user.motionX = this.lungeDirectionToPosX * this.lungeVelocity;
+                user.motionY = this.lungeDirectionToPosY * this.lungeVelocity;
+                user.motionZ = this.lungeDirectionToPosZ * this.lungeVelocity;
+                user.velocityChanged = true;
+            }
             this.lungeTime++;
         }
     }
