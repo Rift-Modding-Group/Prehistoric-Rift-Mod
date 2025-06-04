@@ -254,7 +254,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
                     //when user is in block break mode and if the move is a melee move, allow for block break
                     if (this.creature.inBlockBreakMode() && this.creature.currentCreatureMove().moveAnimType.moveType == CreatureMove.MoveType.MELEE) {
-                        this.currentInvokedMove.breakBlocks(this.creature);
+                        this.currentInvokedMove.breakBlocksInFront(this.creature);
                     }
                     //play sound associated with move
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
@@ -353,7 +353,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
                     //when user is in block break mode and if the move is a melee move, allow for block break
                     if (this.creature.inBlockBreakMode() && this.creature.currentCreatureMove().moveAnimType.moveType == CreatureMove.MoveType.MELEE) {
-                        this.currentInvokedMove.breakBlocks(this.creature);
+                        this.currentInvokedMove.breakBlocksInFront(this.creature);
                     }
                     //play sound associated with move
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)
@@ -439,7 +439,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                     this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
                     //when user is in block break mode and if the move is a melee move, allow for block break
                     if (this.creature.inBlockBreakMode() && this.creature.currentCreatureMove().moveAnimType.moveType == CreatureMove.MoveType.MELEE) {
-                        this.currentInvokedMove.breakBlocks(this.creature);
+                        this.currentInvokedMove.breakBlocksInFront(this.creature);
                     }
                     //play sound associated with move
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)

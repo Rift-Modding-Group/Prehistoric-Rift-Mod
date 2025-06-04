@@ -55,28 +55,7 @@ public class RiftLungeMove extends RiftCreatureMove {
     public void whileExecuting(RiftCreature user) {
         //stop if it hits a mob
         AxisAlignedBB lungeHitbox = user.getEntityBoundingBox().grow(3D);
-        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, lungeHitbox, new Predicate<Entity>() {
-            @Override
-            public boolean apply(@Nullable Entity entity) {
-                if (entity instanceof RiftCreaturePart) {
-                    RiftCreature parent = ((RiftCreaturePart)entity).getParent();
-                    return !parent.equals(user)
-                            && RiftUtil.checkForNoAssociations(user, parent)
-                            && ((parent instanceof IHerder && user instanceof IHerder) ?
-                            ((IHerder)user).getHerdLeader() != null && ((IHerder)parent).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)parent).getHerdLeader())
-                            : true);
-                }
-                else if (entity instanceof RiftCreature) {
-                    return  !entity.equals(user)
-                            && RiftUtil.checkForNoAssociations(user, entity)
-                            && ((entity instanceof IHerder && user instanceof IHerder) ?
-                            ((IHerder)user).getHerdLeader() != null && ((IHerder)entity).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)entity).getHerdLeader())
-                            : true);
-                }
-                else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity) && !entity.equals(user);
-                else return false;
-            }
-        });
+        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, lungeHitbox, this.generalEntityPredicate(user));
 
         //stop if it hits a block
         boolean hitBlocksFlag = false;

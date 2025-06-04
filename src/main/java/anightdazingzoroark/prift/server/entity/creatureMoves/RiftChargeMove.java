@@ -3,17 +3,15 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSetEntityMotion;
-import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MoverType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.*;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +22,7 @@ public class RiftChargeMove extends RiftCreatureMove {
     private int maxChargeTime;
     private double chargeDirectionToPosX;
     private double chargeDirectionToPosZ;
+    private final int chargeSpeed = 4;
 
     public RiftChargeMove() {
         super(CreatureMove.CHARGE);
@@ -35,7 +34,7 @@ public class RiftChargeMove extends RiftCreatureMove {
         user.disableCanRotateMounted();
 
         //this is only relevant when unmounted
-        if (target != null) this.targetPosForCharge = new BlockPos(target.posX, user.posY, target.posZ);
+        if (target != null) this.targetPosForCharge = new BlockPos(target);
     }
 
     @Override
@@ -59,7 +58,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             //get charge time
             //the point at which it stops when unmounted is doubled, so the max charge time here
             //is to be halved to make it consistent with when mounted
-            this.maxChargeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) / 16);
+            this.maxChargeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) / (this.chargeSpeed * 2));
         }
         //this is only relevant when mounted
         else {
@@ -69,7 +68,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             this.chargeDirectionToPosZ = user.getLookVec().z / unnormalizedMagnitude;
 
             //get charge time
-            this.maxChargeTime = (int) Math.ceil(RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth()) / 8);
+            this.maxChargeTime = (int) Math.ceil(RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth()) / this.chargeSpeed);
         }
     }
 
@@ -78,62 +77,72 @@ public class RiftChargeMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
-        AxisAlignedBB chargerDetectHitbox = user.getEntityBoundingBox().grow(2D);
+        AxisAlignedBB chargerDetectHitbox = user.getEntityBoundingBox();
+        AxisAlignedBB chargerEffectHitbox = chargerDetectHitbox.grow(2D);
 
         //stop if it hits a mob
-        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, chargerDetectHitbox, new Predicate<Entity>() {
-            @Override
-            public boolean apply(@Nullable Entity entity) {
-                if (entity instanceof RiftCreaturePart) {
-                    RiftCreature parent = ((RiftCreaturePart)entity).getParent();
-                    return !parent.equals(user)
-                            && RiftUtil.checkForNoAssociations(user, parent)
-                            && ((parent instanceof IHerder && user instanceof IHerder) ?
-                            ((IHerder)user).getHerdLeader() != null && ((IHerder)parent).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)parent).getHerdLeader())
-                            : true);
-                }
-                else if (entity instanceof RiftCreature) {
-                    return  !entity.equals(user)
-                            && RiftUtil.checkForNoAssociations(user, entity)
-                            && ((entity instanceof IHerder && user instanceof IHerder) ?
-                            ((IHerder)user).getHerdLeader() != null && ((IHerder)entity).getHerdLeader() != null && !((IHerder)user).getHerdLeader().equals(((IHerder)entity).getHerdLeader())
-                            : true);
-                }
-                else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity) && !entity.equals(user);
-                else return false;
-            }
-        });
+        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, chargerDetectHitbox.grow(1D), this.generalEntityPredicate(user));
 
         //stop if it hits a block
-        boolean breakBlocksFlag = false;
+        boolean hitBlocksFlag = false;
         breakBlocksLoop: for (int x = MathHelper.floor(chargerDetectHitbox.minX); x < MathHelper.ceil(chargerDetectHitbox.maxX); x++) {
             for (int z = MathHelper.floor(chargerDetectHitbox.minZ); z < MathHelper.ceil(chargerDetectHitbox.maxZ); z++) {
                 IBlockState state = user.world.getBlockState(new BlockPos(x, user.posY, z));
                 IBlockState stateUp = user.world.getBlockState(new BlockPos(x, user.posY + 1, z));
 
                 if (state.getMaterial() != Material.AIR && stateUp.getMaterial() != Material.AIR) {
-                    breakBlocksFlag = true;
+                    hitBlocksFlag = true;
                     break breakBlocksLoop;
                 }
             }
         }
 
-        if (breakBlocksFlag || !chargedIntoEntities.isEmpty() || this.chargeTime >= this.maxChargeTime) {
+        if (hitBlocksFlag || !chargedIntoEntities.isEmpty() || this.chargeTime >= this.maxChargeTime) {
             user.motionX = 0;
             user.motionZ = 0;
             user.velocityChanged = true;
 
             //damage all entities it charged into
-            if (!chargedIntoEntities.isEmpty()) for (Entity entity : chargedIntoEntities) {
-                if (entity instanceof RiftCreaturePart) {
-                    RiftCreature parent = ((RiftCreaturePart)entity).getParent();
-                    user.attackEntityAsMob(parent);
+            if (!chargedIntoEntities.isEmpty()) {
+                List<Entity> entitiesToDamage = user.world.getEntitiesWithinAABB(Entity.class, chargerEffectHitbox, this.generalEntityPredicate(user));
+                for (Entity entity : entitiesToDamage) {
+                    if (entity instanceof RiftCreaturePart) {
+                        RiftCreature parent = ((RiftCreaturePart) entity).getParent();
+                        user.attackEntityAsMob(parent);
+                    }
+                    user.attackEntityAsMob(entity);
                 }
-                user.attackEntityAsMob(entity);
             }
 
             //destroy all breakable blocks it has hit
-            if (breakBlocksFlag) this.breakBlocks(user);
+            //this can skip the breakBlocksFlagw
+            //first get blocks in the detection list
+            List<BlockPos> blockBreakList = new ArrayList<>();
+            for (int x = MathHelper.floor(chargerEffectHitbox.minX); x < MathHelper.ceil(chargerEffectHitbox.maxX); x++) {
+                for (int y = MathHelper.floor(chargerEffectHitbox.minY); y < MathHelper.ceil(chargerEffectHitbox.maxY); y++) {
+                    for (int z = MathHelper.floor(chargerEffectHitbox.minZ); z < MathHelper.ceil(chargerEffectHitbox.maxZ); z++) {
+                        BlockPos blockpos = new BlockPos(x, y, z);
+                        IBlockState iblockstate = user.world.getBlockState(blockpos);
+                        if (iblockstate.getMaterial() != Material.AIR && y >= user.posY) {
+                            if (user.checkIfCanBreakBlock(iblockstate)) blockBreakList.add(blockpos);
+                        }
+                    }
+                }
+            }
+
+            //now break the blocks
+            for (BlockPos posToBreak : blockBreakList) {
+                IBlockState blockState = user.world.getBlockState(posToBreak);
+
+                //break block and put the items in the creatures inventory
+                if (user.checkIfCanBreakBlock(blockState)) {
+                    List<ItemStack> drops = blockState.getBlock().getDrops(user.world, posToBreak, blockState, 0);
+                    if (user.isTamed()) for (ItemStack stack : drops) user.creatureInventory.addItem(stack);
+                    user.world.destroyBlock(posToBreak, !user.isTamed());
+                }
+            }
+
+            this.breakBlocksInFront(user);
 
             //forcibly stop the move
             this.forceStopFlag = true;
@@ -143,12 +152,9 @@ public class RiftChargeMove extends RiftCreatureMove {
             //charge/lunge into a wall theres a good chance they'll stop prematurely
             //so there's this shit instead
             if (user.isBeingRidden() && user.getControllingPassenger() != null)
-                RiftMessages.WRAPPER.sendToAll(new RiftSetEntityMotion(user, this.chargeDirectionToPosX * 8, this.chargeDirectionToPosZ * 8));
-            else {
-                user.motionX = this.chargeDirectionToPosX * 8;
-                user.motionZ = this.chargeDirectionToPosZ * 8;
-                user.velocityChanged = true;
-            }
+                RiftMessages.WRAPPER.sendToAll(new RiftSetEntityMotion(user, this.chargeDirectionToPosX * this.chargeSpeed, this.chargeDirectionToPosZ * this.chargeSpeed));
+            else
+                user.move(MoverType.SELF, this.chargeDirectionToPosX * this.chargeSpeed, user.motionY, this.chargeDirectionToPosZ * this.chargeSpeed);
 
             this.chargeTime++;
             if (this.useValue > 0) this.useValue--; //this only matters when using while mounted
@@ -168,7 +174,7 @@ public class RiftChargeMove extends RiftCreatureMove {
 
     @Override
     public void lookAtTarget(RiftCreature user, Entity target) {
-        if (this.lookAtPosition != null) user.getLookHelper().setLookPosition(this.lookAtPosition.getX(), this.lookAtPosition.getY(), this.lookAtPosition.getZ(), 30.0F, 30.0F);
-        else this.lookAtPosition = target.getPosition();
+        if (this.lookAtPosition != null) user.getLookHelper().setLookPosition(this.lookAtPosition.getX(), this.lookAtPosition.getY(), this.lookAtPosition.getZ(), 180.0F, 30.0F);
+        else this.lookAtPosition = new BlockPos(target);
     }
 }

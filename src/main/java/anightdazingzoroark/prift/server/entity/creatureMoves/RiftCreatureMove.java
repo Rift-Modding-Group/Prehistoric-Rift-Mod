@@ -1,16 +1,18 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
-import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import com.codetaylor.mc.pyrotech.modules.tech.basic.tile.TileChoppingBlock;
-import com.codetaylor.mc.pyrotech.modules.tech.basic.tile.spi.TileAnvilBase;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
+import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
+import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +59,7 @@ public abstract class RiftCreatureMove {
     public abstract void onStopExecuting(RiftCreature user);
 
     public void lookAtTarget(RiftCreature user, Entity target) {
-        if (target != null) user.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
+        if (target != null) user.getLookHelper().setLookPositionWithEntity(target, 180F, 180F);
     }
 
     //this is for advanced anim time controls when managing animations for moves used while creature is mounted
@@ -76,7 +78,7 @@ public abstract class RiftCreatureMove {
     }
 
     //for use in when break block mode is active
-    public void breakBlocks(RiftCreature user) {
+    public void breakBlocksInFront(RiftCreature user) {
         //get all blocks in front of user based on width, melee reach, and height
         List<BlockPos> blockBreakList = new ArrayList<>();
 
@@ -147,5 +149,26 @@ public abstract class RiftCreatureMove {
                 user.world.destroyBlock(posToBreak, !user.isTamed());
             }
         }
+    }
+
+    protected Predicate<Entity> generalEntityPredicate(RiftCreature user) {
+        return new Predicate<Entity>() {
+            @Override
+            public boolean apply(@Nullable Entity entity) {
+                if (entity instanceof RiftCreaturePart) {
+                    RiftCreature parent = ((RiftCreaturePart)entity).getParent();
+                    return !parent.equals(user)
+                            && RiftUtil.checkForNoAssociations(user, parent)
+                            && RiftUtil.checkForNoHerdAssociations(user, parent);
+                }
+                else if (entity instanceof RiftCreature) {
+                    return  !entity.equals(user)
+                            && RiftUtil.checkForNoAssociations(user, entity)
+                            && RiftUtil.checkForNoHerdAssociations(user, (RiftCreature) entity);
+                }
+                else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity) && !entity.equals(user);
+                else return false;
+            }
+        };
     }
 }
