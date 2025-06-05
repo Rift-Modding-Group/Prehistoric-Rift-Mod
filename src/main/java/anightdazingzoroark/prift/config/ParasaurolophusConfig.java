@@ -29,6 +29,7 @@ public class ParasaurolophusConfig extends RiftCreatureConfig {
                 "prift:cryoberry_bush:3"
         );
         this.general.blockBreakLevels = Arrays.asList("shovel:0");
+        this.general.breakBlocksInPursuit = true;
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setTimeRange(0, 12000).setWeight(20).setSpawnAmntRange(4, 6).setDensityLimit(12).setBiomes("tag:plains", "-tag:savanna")
         );

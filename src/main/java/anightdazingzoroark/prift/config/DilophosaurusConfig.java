@@ -23,6 +23,7 @@ public class DilophosaurusConfig extends RiftCreatureConfig {
                 "prift:triceratops"
         );
         this.general.blockBreakLevels = Arrays.asList("shovel:0");
+        this.general.breakBlocksInPursuit = true;
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("LAND").setSpawnOnLand().setMustSeeSky().setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(16).setBiomes("tag:forest", "tag:jungle", "-tag:cold")
         );

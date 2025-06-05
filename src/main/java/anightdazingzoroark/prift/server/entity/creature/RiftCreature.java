@@ -18,6 +18,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
@@ -2280,6 +2281,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public abstract Vec3d riderPos();
+
+    public boolean checkIfCanBreakBlock(BlockPos blockPos) {
+        return this.checkIfCanBreakBlock(this.world.getBlockState(blockPos));
+    }
 
     public boolean checkIfCanBreakBlock(IBlockState blockState) {
         Block block = blockState.getBlock();

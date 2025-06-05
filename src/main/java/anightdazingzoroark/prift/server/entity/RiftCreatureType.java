@@ -9,6 +9,8 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 public enum RiftCreatureType {
@@ -23,8 +25,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.CARNIVORE,
-            BlockBreakTier.WOOD,
             LevelupRate.SLOW,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.BLOCK_BREAKER},
             3670016,
             2428687,
             450,
@@ -42,8 +44,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.HERBIVORE,
-            BlockBreakTier.DIRT,
             LevelupRate.NORMAL,
+            new Behavior[]{Behavior.DOCILE, Behavior.HERDER, Behavior.BLOCK_BREAKER},
             1731840,
             16743424,
             300,
@@ -62,7 +64,7 @@ public enum RiftCreatureType {
             EnergyRechargeCategory.SLOW,
             CreatureDiet.HERBIVORE,
             null,
-            null,
+            new Behavior[]{},
             7828853,
             6184028,
             90,
@@ -80,8 +82,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.HERBIVORE,
-            BlockBreakTier.WOOD,
             LevelupRate.NORMAL,
+            new Behavior[]{Behavior.DOCILE, Behavior.HERDER, Behavior.BLOCK_BREAKER},
             935177,
             3631923,
             300,
@@ -99,8 +101,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.FAST,
             CreatureDiet.CARNIVORE,
-            BlockBreakTier.DIRT,
             LevelupRate.FAST,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.HERDER, Behavior.BLOCK_BREAKER},
             5855577,
             10439936,
             180,
@@ -118,8 +120,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.HERBIVORE,
-            BlockBreakTier.STONE,
             LevelupRate.VERY_SLOW,
+            new Behavior[]{Behavior.DOCILE, Behavior.HERDER, Behavior.BLOCK_BREAKER},
             3160621,
             16748800,
             450,
@@ -137,8 +139,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.FAST,
             CreatureDiet.HERBIVORE,
-            BlockBreakTier.DIRT,
             LevelupRate.FAST,
+            new Behavior[]{Behavior.DOCILE, Behavior.HERDER, Behavior.BLOCK_BREAKER},
             10055190,
             8920579,
             300,
@@ -156,8 +158,8 @@ public enum RiftCreatureType {
             CreatureCategory.MAMMAL,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.CARNIVORE,
-            null,
             LevelupRate.NORMAL,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.BLOCK_BREAKER},
             10968581,
             13198105,
             90,
@@ -176,7 +178,7 @@ public enum RiftCreatureType {
             EnergyRechargeCategory.FAST,
             CreatureDiet.INSECTIVORE,
             null,
-            null,
+            new Behavior[]{Behavior.HERDER},
             1329530,
             1857680,
             0,
@@ -195,7 +197,7 @@ public enum RiftCreatureType {
             EnergyRechargeCategory.FAST,
             CreatureDiet.CARNIVORE,
             null,
-            null,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.HERDER},
             8421504,
             10226700,
             0,
@@ -213,8 +215,8 @@ public enum RiftCreatureType {
             CreatureCategory.REPTILE,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.CARNIVORE,
-            BlockBreakTier.WOOD,
             LevelupRate.NORMAL,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.BLOCK_BREAKER},
             2302246,
             2627379,
             300,
@@ -232,8 +234,8 @@ public enum RiftCreatureType {
             CreatureCategory.INVERTEBRATE,
             EnergyRechargeCategory.FAST,
             CreatureDiet.CARNIVORE,
-            BlockBreakTier.DIRT,
             LevelupRate.NORMAL,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.BLOCK_BREAKER},
             10892050,
             12270358,
             300,
@@ -251,8 +253,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.FAST,
             CreatureDiet.INSECTIVORE,
-            BlockBreakTier.WOOD,
             LevelupRate.NORMAL,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.BLOCK_BREAKER, Behavior.NOCTURNAL},
             986895,
             16737280,
             450,
@@ -270,8 +272,8 @@ public enum RiftCreatureType {
             CreatureCategory.MAMMAL,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.CARNIVORE,
-            BlockBreakTier.DIRT,
             LevelupRate.FAST,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.BLOCK_BREAKER, Behavior.HERDER},
             8421504,
             10066329,
             0,
@@ -289,8 +291,8 @@ public enum RiftCreatureType {
             CreatureCategory.MAMMAL,
             EnergyRechargeCategory.FAST,
             CreatureDiet.HERBIVORE,
-            BlockBreakTier.DIRT,
             LevelupRate.FAST,
+            new Behavior[]{Behavior.DOCILE, Behavior.HERDER, Behavior.BLOCK_BREAKER},
             6048296,
             4666924,
             0,
@@ -308,8 +310,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.PISCIVORE,
-            BlockBreakTier.WOOD,
             LevelupRate.NORMAL,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.BLOCK_BREAKER},
             1277213,
             4674683,
             300,
@@ -327,8 +329,8 @@ public enum RiftCreatureType {
             CreatureCategory.MAMMAL,
             EnergyRechargeCategory.FAST,
             CreatureDiet.SAXUMAVORE,
-            BlockBreakTier.STONE,
             LevelupRate.FAST,
+            new Behavior[]{Behavior.DOCILE, Behavior.BLOCK_BREAKER},
             3881787,
             855309,
             0,
@@ -346,8 +348,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.HERBIVORE,
-            BlockBreakTier.STONE,
             LevelupRate.SLOW,
+            new Behavior[]{Behavior.DOCILE, Behavior.HERDER, Behavior.BLOCK_BREAKER},
             4338984,
             4343887,
             300,
@@ -365,8 +367,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.CARNIVORE,
-            BlockBreakTier.DIRT,
             LevelupRate.FAST,
+            new Behavior[]{Behavior.DOCILE, Behavior.AGGRESSIVE, Behavior.BLOCK_BREAKER},
             16239896,
             1141548,
             180,
@@ -384,8 +386,8 @@ public enum RiftCreatureType {
             CreatureCategory.DINOSAUR,
             EnergyRechargeCategory.SLOW,
             CreatureDiet.OMNIVORE,
-            BlockBreakTier.DIRT,
             LevelupRate.NORMAL,
+            new Behavior[]{Behavior.DOCILE, Behavior.HERDER, Behavior.SKITTISH},
             6045223,
             9403247,
             300,
@@ -403,8 +405,8 @@ public enum RiftCreatureType {
     private final CreatureCategory creatureCategory;
     private final EnergyRechargeCategory energyRechargeCategory;
     private final CreatureDiet creatureDiet;
-    private final BlockBreakTier blockBreakTier;
     private final LevelupRate levelupRate;
+    private final Behavior[] behaviors;
     private final int eggPrimary;
     private final int eggSecondary;
     private final int hatchTime; //in seconds
@@ -414,7 +416,7 @@ public enum RiftCreatureType {
     public Item sacItem;
     public final String friendlyName;
 
-    RiftCreatureType(Class<? extends RiftCreature> creature, Class<? extends RiftCreatureConfig> config, boolean isTameable, boolean isTameableByFeeding, boolean isBreedable, boolean canBeSaddled, boolean canHoldLargeWeapon, CreatureCategory creatureCategory, EnergyRechargeCategory energyRechargeCategory, CreatureDiet creatureDiet, BlockBreakTier blockBreakTier, LevelupRate levelupRate, int eggPrimary, int eggSecondary, int hatchTime, float eggScale, EggTemperature eggTemperature) {
+    RiftCreatureType(Class<? extends RiftCreature> creature, Class<? extends RiftCreatureConfig> config, boolean isTameable, boolean isTameableByFeeding, boolean isBreedable, boolean canBeSaddled, boolean canHoldLargeWeapon, CreatureCategory creatureCategory, EnergyRechargeCategory energyRechargeCategory, CreatureDiet creatureDiet, LevelupRate levelupRate, Behavior[] behaviors, int eggPrimary, int eggSecondary, int hatchTime, float eggScale, EggTemperature eggTemperature) {
         this.creature = creature;
         this.config = config;
         this.isTameable = isTameable;
@@ -425,8 +427,8 @@ public enum RiftCreatureType {
         this.creatureCategory = creatureCategory;
         this.energyRechargeCategory = energyRechargeCategory;
         this.creatureDiet = creatureDiet;
-        this.blockBreakTier = blockBreakTier;
         this.levelupRate = levelupRate;
+        this.behaviors = behaviors;
         this.friendlyName = this.name().toUpperCase(Locale.ENGLISH).substring(0, 1) + this.name().toLowerCase().substring(1);
         this.eggPrimary = eggPrimary;
         this.eggSecondary = eggSecondary;
@@ -468,12 +470,12 @@ public enum RiftCreatureType {
         return this.creatureDiet;
     }
 
-    public BlockBreakTier getBlockBreakTier() {
-        return this.blockBreakTier;
-    }
-
     public LevelupRate getLevelupRate() {
         return this.levelupRate;
+    }
+
+    public List<Behavior> getBehaviors() {
+        return Arrays.asList(this.behaviors);
     }
 
     public int getEggPrimary() {
@@ -612,10 +614,11 @@ public enum RiftCreatureType {
 
     //these influence wild only behaviors
     public enum Behavior {
-        HERDER, //will use herding or pack hunting
-        OBLIVIOUS, //will never respond to being attacked or approached
-        DOCILE, //will be peaceful unless attacked
-        SKITTISH, //will run from certain creatures
-        AGGRESSIVE //will attack certain creatures
+        HERDER, //will use herding or pack hunting behaviors
+        DOCILE, //will retaliate when attacked
+        SKITTISH, //will run from targets
+        AGGRESSIVE, //will attack targets
+        BLOCK_BREAKER, //will break blocks in front when pursuing a target
+        NOCTURNAL //will be active at night and sleep at day
     }
 }

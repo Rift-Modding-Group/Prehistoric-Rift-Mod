@@ -25,6 +25,7 @@ public class AnomalocarisConfig extends RiftCreatureConfig {
         this.general.targetBlacklist = Arrays.asList();
         this.general.maximumGrabTargetSize = "MEDIUM";
         this.general.blockBreakLevels = Arrays.asList("pickaxe:0", "shovel:0");
+        this.general.breakBlocksInPursuit = true;
         this.spawnRules = Arrays.asList(
                 new SpawnRule().setCategory("WATER").setSpawnInWater().setMustSeeSky().setYLevelRange(0, 64).setWeight(5).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("biome:minecraft:deep_ocean")
         );

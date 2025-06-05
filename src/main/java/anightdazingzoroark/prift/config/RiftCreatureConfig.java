@@ -57,6 +57,9 @@ public abstract class RiftCreatureConfig {
         @SerializedName("harvestableBlocks")
         public List<String> harvestableBlocks;
 
+        @SerializedName("breakBlocksInPursuit")
+        public boolean breakBlocksInPursuit;
+
         //anomalocaris only
         @SerializedName("maximumGrabTargetSize")
         public String maximumGrabTargetSize;
