@@ -33,7 +33,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder {
+public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
@@ -53,8 +53,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     private RiftCreaturePart tail1Part;
     private RiftCreaturePart tail2Part;
     private RiftCreaturePart tail3Part;
-    protected int herdSize = 1;
-    protected RiftCreature herdLeader;
 
     public Parasaurolophus(World worldIn) {
         super(worldIn, RiftCreatureType.PARASAUROLOPHUS);
@@ -362,31 +360,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public boolean canDoHerding() {
-        return !this.isTamed();
-    }
-
-    public RiftCreature getHerder() {
-        return this;
-    }
-
-    public RiftCreature getHerdLeader() {
-        return this.herdLeader;
-    }
-
-    public void setHerdLeader(RiftCreature creature) {
-        this.herdLeader = creature;
-    }
-
-    public int getHerdSize() {
-        return this.herdSize;
-    }
-
-    public void setHerdSize(int value) {
-        this.herdSize = value;
-    }
-
-    public double followRange() {
+    public double herdFollowRange() {
         return 4D;
     }
 

@@ -7,7 +7,6 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -22,15 +21,12 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class Dodo extends RiftCreature implements IHerder {
+public class Dodo extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dodo"));
-    protected int herdSize = 1;
-    protected RiftCreature herdLeader;
 
     public Dodo(World worldIn) {
         super(worldIn, RiftCreatureType.DODO);
@@ -69,31 +65,7 @@ public class Dodo extends RiftCreature implements IHerder {
     public void fall(float distance, float damageMultiplier) {}
 
     @Override
-    public boolean canDoHerding() {
-        return true;
-    }
-
-    public RiftCreature getHerder() {
-        return this;
-    }
-
-    public RiftCreature getHerdLeader() {
-        return this.herdLeader;
-    }
-
-    public void setHerdLeader(RiftCreature creature) {
-        this.herdLeader = creature;
-    }
-
-    public int getHerdSize() {
-        return this.herdSize;
-    }
-
-    public void setHerdSize(int value) {
-        this.herdSize = value;
-    }
-
-    public double followRange() {
+    public double herdFollowRange() {
         return 3D;
     }
 

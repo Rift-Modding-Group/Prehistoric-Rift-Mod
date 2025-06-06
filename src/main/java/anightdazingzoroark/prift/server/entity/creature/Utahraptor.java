@@ -9,7 +9,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftClimber;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -24,7 +23,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Utahraptor extends RiftCreature implements IHerder {
+public class Utahraptor extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/utahraptor"));
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> PACK_BUFFING = EntityDataManager.createKey(Utahraptor.class, DataSerializers.BOOLEAN);
@@ -33,8 +32,6 @@ public class Utahraptor extends RiftCreature implements IHerder {
     private RiftCreaturePart tail0Part;
     private RiftCreaturePart tail1Part;
     private RiftCreaturePart tail2Part;
-    protected int herdSize = 1;
-    protected RiftCreature herdLeader;
 
     public Utahraptor(World worldIn) {
         super(worldIn, RiftCreatureType.UTAHRAPTOR);
@@ -114,31 +111,7 @@ public class Utahraptor extends RiftCreature implements IHerder {
     }
 
     @Override
-    public boolean canDoHerding() {
-        return !this.isTamed();
-    }
-
-    public RiftCreature getHerder() {
-        return this;
-    }
-
-    public RiftCreature getHerdLeader() {
-        return this.herdLeader;
-    }
-
-    public void setHerdLeader(RiftCreature creature) {
-        this.herdLeader = creature;
-    }
-
-    public int getHerdSize() {
-        return this.herdSize;
-    }
-
-    public void setHerdSize(int value) {
-        this.herdSize = value;
-    }
-
-    public double followRange() {
+    public double herdFollowRange() {
         return 4D;
     }
 

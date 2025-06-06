@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.MobEffects;
@@ -24,7 +24,7 @@ public class RiftPackCallMove extends RiftCreatureMove {
             @Override
             public boolean apply(@Nullable RiftCreature entity) {
                 return entity != null
-                        && (!(entity instanceof IHerder) || ((IHerder) entity).isHerdLeader())
+                        && !RiftUtil.checkForNoHerdAssociations(user, entity)
                         && !user.equals(entity)
                         && user.isTamed() == entity.isTamed()
                         && !entity.isBaby();

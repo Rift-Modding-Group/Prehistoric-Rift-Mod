@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Triceratops extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, IHerder {
+public class Triceratops extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering {
     private static final DataParameter<Boolean> STOMPING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
@@ -54,8 +54,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     private RiftCreaturePart tail0Part;
     private RiftCreaturePart tail1Part;
     private RiftCreaturePart tail2Part;
-    protected int herdSize = 1;
-    protected RiftCreature herdLeader;
 
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
@@ -353,31 +351,7 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     }
 
     @Override
-    public boolean canDoHerding() {
-        return !this.isTamed();
-    }
-
-    public RiftCreature getHerder() {
-        return this;
-    }
-
-    public RiftCreature getHerdLeader() {
-        return this.herdLeader;
-    }
-
-    public void setHerdLeader(RiftCreature creature) {
-        this.herdLeader = creature;
-    }
-
-    public int getHerdSize() {
-        return this.herdSize;
-    }
-
-    public void setHerdSize(int value) {
-        this.herdSize = value;
-    }
-
-    public double followRange() {
+    public double herdFollowRange() {
         return 4D;
     }
 

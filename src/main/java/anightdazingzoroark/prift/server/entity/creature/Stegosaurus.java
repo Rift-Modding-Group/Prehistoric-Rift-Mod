@@ -34,7 +34,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IHerder, IWorkstationUser {
+public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
@@ -57,8 +57,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     private RiftCreaturePart tail1Part;
     private RiftCreaturePart tail2Part;
     private RiftCreaturePart tail3Part;
-    protected int herdSize = 1;
-    protected RiftCreature herdLeader;
 
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
@@ -350,31 +348,7 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     }
 
     @Override
-    public boolean canDoHerding() {
-        return !this.isTamed();
-    }
-
-    public RiftCreature getHerder() {
-        return this;
-    }
-
-    public RiftCreature getHerdLeader() {
-        return this.herdLeader;
-    }
-
-    public void setHerdLeader(RiftCreature creature) {
-        this.herdLeader = creature;
-    }
-
-    public int getHerdSize() {
-        return this.herdSize;
-    }
-
-    public void setHerdSize(int value) {
-        this.herdSize = value;
-    }
-
-    public double followRange() {
+    public double herdFollowRange() {
         return 4D;
     }
 

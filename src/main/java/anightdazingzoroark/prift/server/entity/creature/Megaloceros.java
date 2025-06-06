@@ -31,13 +31,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Megaloceros extends RiftCreature implements IHarvestWhenWandering, IHerder {
+public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megaloceros"));
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart frontBodyPart;
-    protected int herdSize = 1;
-    protected RiftCreature herdLeader;
 
     public Megaloceros(World worldIn) {
         super(worldIn, RiftCreatureType.MEGALOCEROS);
@@ -126,31 +124,7 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering, 
     }
 
     @Override
-    public boolean canDoHerding() {
-        return !this.isTamed();
-    }
-
-    public RiftCreature getHerder() {
-        return this;
-    }
-
-    public RiftCreature getHerdLeader() {
-        return this.herdLeader;
-    }
-
-    public void setHerdLeader(RiftCreature creature) {
-        this.herdLeader = creature;
-    }
-
-    public int getHerdSize() {
-        return this.herdSize;
-    }
-
-    public void setHerdSize(int value) {
-        this.herdSize = value;
-    }
-
-    public double followRange() {
+    public double herdFollowRange() {
         return 4D;
     }
 

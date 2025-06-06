@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
@@ -86,17 +85,14 @@ public class RiftGetTargets extends EntityAITarget {
 
     public void startExecuting() {
         this.creature.setAttackTarget(this.targetEntity);
-        if (this.creature instanceof IHerder) {
-            IHerder herder = (IHerder)this.creature;
-            if (this.alertOthers && herder.canDoHerding() && herder.isHerdLeader()) {
-                List<RiftCreature> allyList = creature.world.getEntitiesWithinAABB(this.creature.getClass(), herder.herdBoundingBox(), new Predicate<RiftCreature>() {
-                    @Override
-                    public boolean apply(@Nullable RiftCreature input) {
-                        return !input.isTamed();
-                    }
-                });
-                for (RiftCreature ally : allyList) ally.setAttackTarget(this.targetEntity);
-            }
+        if (this.alertOthers && this.creature.isHerdLeader()) {
+            List<RiftCreature> allyList = creature.world.getEntitiesWithinAABB(this.creature.getClass(), this.creature.herdBoundingBox(), new Predicate<RiftCreature>() {
+                @Override
+                public boolean apply(@Nullable RiftCreature input) {
+                    return !input.isTamed();
+                }
+            });
+            for (RiftCreature ally : allyList) ally.setAttackTarget(this.targetEntity);
         }
         super.startExecuting();
     }

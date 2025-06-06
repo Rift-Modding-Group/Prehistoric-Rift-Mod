@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.pathfinding.Path;
@@ -21,8 +20,8 @@ public class RiftFleeFromEntities extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        boolean isHerdLeader = this.creature instanceof IHerder ? ((IHerder)this.creature).isHerdLeader() : false;
-        boolean isStrayFromHerd = this.creature instanceof IHerder ? !((IHerder)this.creature).isHerdLeader() && !((IHerder)this.creature).hasHerdLeader() : true;
+        boolean isHerdLeader = this.creature.isHerdLeader();
+        boolean isStrayFromHerd = !this.creature.canDoHerding() || !this.creature.isHerdLeader() && !this.creature.hasHerdLeader();
         if (this.creature.isTamed() || !this.creature.fleesFromDanger() || !(isHerdLeader || isStrayFromHerd) || this.creature.getAttackTarget() == null) return false;
 
         if (this.creature.getRevengeTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getRevengeTarget())) {

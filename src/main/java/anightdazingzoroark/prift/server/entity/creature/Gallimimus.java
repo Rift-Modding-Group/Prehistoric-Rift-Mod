@@ -8,7 +8,6 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -19,16 +18,13 @@ import net.minecraft.world.storage.loot.LootTableList;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Gallimimus extends RiftCreature implements IHerder {
+public class Gallimimus extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/gallimimus"));
     private final RiftCreaturePart hipsPart;
     private final RiftCreaturePart neckPart;
     private final RiftCreaturePart tail0Part;
     private final RiftCreaturePart tail1Part;
     private final RiftCreaturePart tail2Part;
-    protected int herdSize = 1;
-    protected RiftCreature herdLeader;
-
     public Gallimimus(World worldIn) {
         super(worldIn, RiftCreatureType.GALLIMIMUS);
         this.setSize(1.25f, 1.5f);
@@ -78,31 +74,7 @@ public class Gallimimus extends RiftCreature implements IHerder {
     }
 
     @Override
-    public boolean canDoHerding() {
-        return !this.isTamed();
-    }
-
-    public RiftCreature getHerder() {
-        return this;
-    }
-
-    public RiftCreature getHerdLeader() {
-        return this.herdLeader;
-    }
-
-    public void setHerdLeader(RiftCreature creature) {
-        this.herdLeader = creature;
-    }
-
-    public int getHerdSize() {
-        return this.herdSize;
-    }
-
-    public void setHerdSize(int value) {
-        this.herdSize = value;
-    }
-
-    public double followRange() {
+    public double herdFollowRange() {
         return 4D;
     }
 

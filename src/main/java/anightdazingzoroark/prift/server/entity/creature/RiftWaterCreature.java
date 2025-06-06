@@ -180,6 +180,12 @@ public abstract class RiftWaterCreature extends RiftCreature {
         this.dataManager.set(DESCENDING, value);
     }
 
+    //herding stuff starts here
+    public boolean canDoHerding() {
+        return super.canDoHerding() && this.isInWater();
+    }
+    //herding stuff ends here
+
     @Override
     public void travel(float strafe, float vertical, float forward) {
         if (!this.canMove()) return;

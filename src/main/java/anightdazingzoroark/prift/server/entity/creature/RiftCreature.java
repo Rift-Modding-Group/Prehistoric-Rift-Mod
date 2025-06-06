@@ -78,6 +78,7 @@ import javax.annotation.Nullable;
 import javax.vecmath.Vector2d;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable, IRiftMultipart {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -151,6 +152,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LEAP_Z_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
 
+    private int herdSize = 1;
+    private RiftCreature herdLeader;
     private int boxReviveTime;
     private int energyMod;
     private int energyRegenMod;
@@ -322,9 +325,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         double level = Math.floor((distFromCenter / GeneralConfig.levelingRadius)) * GeneralConfig.levelingRadisIncrement + RiftUtil.randomInRange(1, 10) + this.levelAddFromDifficulty();
         this.setLevel(RiftUtil.clamp((int) level, 0, 100));
         //manage herding
-        if (this instanceof IHerder &&  ((IHerder)this).canDoHerding()) {
-            if (!(livingdata instanceof IHerder.HerdData)) return new IHerder.HerdData(this);
-            ((IHerder)this).addToHerdLeader(((IHerder.HerdData)livingdata).herdLeader);
+        if (this.canDoHerding()) {
+            if (!(livingdata instanceof HerdData)) return new HerdData(this);
+            this.addToHerdLeader(((HerdData)livingdata).herdLeader);
         }
         //if creature can use cloaking, instantly cloak it
         if (this.canUtilizeCloaking()) {
@@ -398,6 +401,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
             else {
+                if (this.canDoHerding()) this.manageHerding();
                 if (this.getEnergy() < this.getMaxEnergy()) this.instaRegenAfterNoTarget();
             }
         }
@@ -407,8 +411,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             //set sprinting based on if rider is sprinting
             RiftMessages.WRAPPER.sendToServer(new RiftSetSprinting(this, this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting()));
         }
-
-        if (this instanceof IHerder && ((IHerder)this).canDoHerding()) ((IHerder)this).manageHerding();
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
         this.manageGrabVictim();
@@ -1735,6 +1737,90 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return new int[]{minutes, seconds};
     }
     //pregnancy related stuff ends here
+
+    //herding related stuff starts here
+    public boolean canDoHerding() {
+        return this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.HERDER) && !this.isTamed();
+    }
+
+    public RiftCreature getHerdLeader() {
+        return this.herdLeader;
+    }
+
+    public void setHerdLeader(RiftCreature creature) {
+        this.herdLeader = creature;
+    }
+
+    public int getHerdSize() {
+        return this.herdSize;
+    }
+
+    public void setHerdSize(int value) {
+        this.herdSize = value;
+    }
+
+    public boolean hasHerdLeader() {
+        return this.herdLeader != null && this.herdLeader.isEntityAlive() && this.canDoHerding();
+    }
+    public void addToHerdLeader(RiftCreature creature) {
+        this.setHerdLeader(creature);
+        this.herdLeader.setHerdSize(this.herdLeader.getHerdSize() + 1);
+    }
+
+    public void separateFromHerdLeader() {
+        this.herdLeader.setHerdSize(this.herdLeader.getHerdSize() - 1);
+        this.setHerdLeader(null);
+    }
+
+    public void manageHerding() {
+        if (this.isHerdLeader() && this.world.rand.nextInt(200) == 1) {
+            if (this.world.getEntitiesWithinAABB(this.getClass(), this.herdBoundingBox()).size() <= 1) {
+                this.setHerdSize(1);
+            }
+        }
+    }
+
+    public AxisAlignedBB herdBoundingBox() {
+        return this.getEntityBoundingBox().grow(12D);
+    }
+
+    public boolean isHerdLeader() {
+        return this.getHerdSize() > 1 && this.canDoHerding();
+    }
+
+    public boolean canAddToHerd() {
+        return this.isHerdLeader() && this.getHerdSize() < this.maxHerdSize() && this.canDoHerding();
+    }
+
+    public boolean isNearHerdLeader() {
+        return this.getDistanceSq(this.getHerdLeader()) <= 144;
+    }
+
+    public void addCreatureToHerd(@Nonnull Stream<RiftCreature> stream) {
+        try {
+            stream.limit(this.maxHerdSize() - this.getHerdSize())
+                    .filter(creature -> creature != this && creature.canDoHerding())
+                    .forEach(creature -> creature.addToHerdLeader(this));
+        }
+        catch (Exception e) {}
+    }
+
+    public double herdFollowRange() {
+        return 0.5D;
+    }
+
+    public void herderFollowLeader() {
+        if (this.hasHerdLeader()) {
+            if (!this.getEntityBoundingBox().intersects(this.getHerdLeader().getEntityBoundingBox().grow(this.herdFollowRange()))) {
+                this.getNavigator().tryMoveToEntityLiving(this.getHerdLeader(), 1D);
+            }
+        }
+    }
+
+    public int maxHerdSize() {
+        return 5;
+    }
+    //herding related stuff ends here
 
     public int getLevel() {
         return this.dataManager.get(LEVEL);
@@ -3087,6 +3173,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         @Override
         public void onInventoryChanged(IInventory invBasic) {
             this.creature.refreshInventory();
+        }
+    }
+
+
+    class HerdData implements IEntityLivingData {
+        public final RiftCreature herdLeader;
+
+        public HerdData(@Nonnull RiftCreature creature) {
+            this.herdLeader = creature;
         }
     }
 }

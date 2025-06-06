@@ -5,19 +5,17 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class Coelacanth extends RiftWaterCreature implements IHerder {
+public class Coelacanth extends RiftWaterCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/coelacanth"));
     private RiftCreaturePart bodyFront0;
     private RiftCreaturePart bodyFront1;
@@ -25,8 +23,6 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
     private RiftCreaturePart bodyBack0;
     private RiftCreaturePart bodyBack1;
     private RiftCreaturePart bodyBack2;
-    protected int herdSize = 1;
-    protected RiftCreature herdLeader;
 
     public Coelacanth(World worldIn) {
         super(worldIn, RiftCreatureType.COELACANTH);
@@ -63,31 +59,7 @@ public class Coelacanth extends RiftWaterCreature implements IHerder {
     }
 
     @Override
-    public boolean canDoHerding() {
-        return this.isInWater();
-    }
-
-    public RiftCreature getHerder() {
-        return this;
-    }
-
-    public RiftCreature getHerdLeader() {
-        return this.herdLeader;
-    }
-
-    public void setHerdLeader(RiftCreature creature) {
-        this.herdLeader = creature;
-    }
-
-    public int getHerdSize() {
-        return this.herdSize;
-    }
-
-    public void setHerdSize(int value) {
-        this.herdSize = value;
-    }
-
-    public double followRange() {
+    public double herdFollowRange() {
         return 2D;
     }
 

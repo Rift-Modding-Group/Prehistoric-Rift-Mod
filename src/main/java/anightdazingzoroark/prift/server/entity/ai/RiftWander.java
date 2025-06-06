@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.RandomPositionGenerator;
@@ -48,8 +47,8 @@ public class RiftWander extends EntityAIWander {
             }
         }
         else {
-            boolean isHerdLeader = this.creature instanceof IHerder ? ((IHerder)this.creature).isHerdLeader() : false;
-            boolean isStrayFromHerd = this.creature instanceof IHerder ? !((IHerder)this.creature).isHerdLeader() && !((IHerder)this.creature).hasHerdLeader() : true;
+            boolean isHerdLeader = this.creature.isHerdLeader();
+            boolean isStrayFromHerd = !this.creature.canDoHerding() || !this.creature.isHerdLeader() && !this.creature.hasHerdLeader();
             if (this.creature instanceof RiftWaterCreature) {
                 if (isHerdLeader && !this.creature.isInWater()) return super.shouldExecute() && this.creature.getEnergy() > this.creature.getWeaknessEnergy();
                 else if (isStrayFromHerd && !this.creature.isInWater()) return super.shouldExecute() && this.creature.getEnergy() > this.creature.getWeaknessEnergy();
@@ -65,8 +64,8 @@ public class RiftWander extends EntityAIWander {
 
     @Override
     public boolean shouldContinueExecuting() {
-        boolean isNotInWater = this.creature instanceof RiftWaterCreature ? !this.creature.isInWater() : true;
-        boolean hasNoHerdLeader = this.creature instanceof IHerder ? !((IHerder)this.creature).hasHerdLeader() : true;
+        boolean isNotInWater = !(this.creature instanceof RiftWaterCreature) || !this.creature.isInWater();
+        boolean hasNoHerdLeader = !this.creature.hasHerdLeader();
 
         return this.creature.getEnergy() > this.creature.getWeaknessEnergy() && this.creature.creatureBoxWithinReach() && hasNoHerdLeader && isNotInWater && !this.creature.busyAtWork() && super.shouldContinueExecuting();
     }

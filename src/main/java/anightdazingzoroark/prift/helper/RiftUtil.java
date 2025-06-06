@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -358,16 +357,13 @@ public class RiftUtil {
 
     public static boolean checkForNoHerdAssociations(RiftCreature user, RiftCreature target) {
         //if one of the creatures isn't a herder, return true
-        if (!(user instanceof IHerder) || !(target instanceof IHerder)) return true;
-
-        IHerder userHerder = (IHerder) user;
-        IHerder targetHerder = (IHerder) target;
+        if (!user.canDoHerding() || !target.canDoHerding()) return true;
 
         //if both herders have no leaders, return true
-        if (userHerder.getHerdLeader() == null || targetHerder.getHerdLeader() == null) return true;
+        if (user.getHerdLeader() == null || target.getHerdLeader() == null) return true;
 
         //if herders have same leader, return false, else true
-        if (userHerder.getHerdLeader().equals(targetHerder.getHerdLeader())) return false;
+        if (user.getHerdLeader().equals(target.getHerdLeader())) return false;
         return true;
     }
 

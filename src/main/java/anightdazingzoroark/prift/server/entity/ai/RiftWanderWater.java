@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIWander;
@@ -30,8 +29,8 @@ public class RiftWanderWater extends EntityAIWander {
             else return false;
         }
         else {
-            boolean isHerdLeader = this.waterCreature instanceof IHerder ? ((IHerder)this.waterCreature).isHerdLeader() : false;
-            boolean isStrayFromHerd = this.waterCreature instanceof IHerder ? !((IHerder)this.waterCreature).isHerdLeader() && !((IHerder)this.waterCreature).hasHerdLeader() : true;
+            boolean isHerdLeader = this.waterCreature.isHerdLeader();
+            boolean isStrayFromHerd = !this.waterCreature.canDoHerding() || !this.waterCreature.isHerdLeader() && !this.waterCreature.hasHerdLeader();
 
             if (isHerdLeader && this.waterCreature.isInWater()) return super.shouldExecute();
             else if (isStrayFromHerd && this.waterCreature.isInWater()) return super.shouldExecute();
@@ -41,7 +40,7 @@ public class RiftWanderWater extends EntityAIWander {
 
     @Override
     public boolean shouldContinueExecuting() {
-        boolean hasNoHerdLeader = this.waterCreature instanceof IHerder ? !((IHerder)this.waterCreature).hasHerdLeader() : true;
+        boolean hasNoHerdLeader = !this.waterCreature.hasHerdLeader();
         return this.waterCreature.getEnergy() > 6 && this.waterCreature.creatureBoxWithinReach() && hasNoHerdLeader && this.waterCreature.isInWater() && super.shouldContinueExecuting();
     }
 
