@@ -49,6 +49,7 @@ public class RiftBreakBlockWhilePursuingTarget extends EntityAIBase {
                 || !this.target.isEntityAlive()
                 || !this.creature.getNavigator().noPath()
                 || this.target.canEntityBeSeen(this.creature)
+                || (this.creature.canEnterTurretMode() && this.creature.isTurretMode())
         ) return false;
 
         this.blockPosToDig = (this.blockPosToDig != null && this.creature.getDistanceSq(this.blockPosToDig) <= Math.pow(this.creature.attackWidth() + this.creature.width, 2) && this.creature.checkIfCanBreakBlock(this.blockPosToDig))
