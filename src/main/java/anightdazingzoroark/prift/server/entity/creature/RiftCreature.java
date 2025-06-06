@@ -52,6 +52,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -1554,7 +1555,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(FIRING_CATAPULT, value);
     }
 
-
+    public EnumFacing creatureHorizontalDirection() {
+        if ((this.rotationYaw >= 135 && this.rotationYaw <= 180) || (this.rotationYaw <= -135 && this.rotationYaw >= -180))
+            return EnumFacing.NORTH;
+        else if (this.rotationYaw >= -45 && this.rotationYaw <= 45)
+            return EnumFacing.SOUTH;
+        else if (this.rotationYaw > 45 && this.rotationYaw < 135)
+            return EnumFacing.WEST;
+        else if (this.rotationYaw > -135 && this.rotationYaw < -45)
+            return EnumFacing.EAST;
+        return null;
+    }
 
     private void initInventory() {
         RiftCreatureInventory tempInventory = this.creatureInventory;
@@ -2296,7 +2307,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //the ones that have a mining level of -1 can be broken easily w/out
         //additional checks
         if (block.getHarvestLevel(blockState) < 0) return true;
-
+        System.out.println("block pickaxe level: "+block.getHarvestLevel(blockState));
         //check if block requires specific tool to be broken
         for (String blockBreakLevels : RiftConfigHandler.getConfig(this.creatureType).general.blockBreakLevels) {
             String tool = blockBreakLevels.substring(0, blockBreakLevels.indexOf(":"));

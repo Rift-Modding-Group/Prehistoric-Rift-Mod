@@ -70,7 +70,6 @@ public class RiftBreakBlockWhilePursuingTarget extends EntityAIBase {
 
     @Override
     public void startExecuting() {
-        System.out.println("can start digging");
         this.finishedAnimMarker = true;
         this.finishedMoveMarker = false;
 
@@ -112,8 +111,8 @@ public class RiftBreakBlockWhilePursuingTarget extends EntityAIBase {
 
     @Override
     public void updateTask() {
-        System.out.println("diggy diggy hole...");
         this.creature.getLookHelper().setLookPosition(this.target.posX, this.target.posY + (double)this.target.getEyeHeight(), this.target.posZ, (float)this.creature.getHorizontalFaceSpeed(), (float)this.creature.getVerticalFaceSpeed());
+        //this.creature.getNavigator().tryMoveToEntityLiving(this.target, 1.0D);
         //this.creature.getMoveHelper().setMoveTo(this.target.posX, this.target.posY, this.target.posZ, 1.0);
 
         if (this.finishedAnimMarker) this.selectMeleeMoveForBlockBreak();
@@ -130,8 +129,6 @@ public class RiftBreakBlockWhilePursuingTarget extends EntityAIBase {
                             1f);
             }
             if (this.animTime == this.moveAnimChargeToUseTime) {
-                //block break happens here
-                //for now only frontwards, will make it so that it can break blocks downwards and upwards too
                 this.currentInvokedMove.breakBlocksInFront(this.creature);
 
                 if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpToUseSound() != null)

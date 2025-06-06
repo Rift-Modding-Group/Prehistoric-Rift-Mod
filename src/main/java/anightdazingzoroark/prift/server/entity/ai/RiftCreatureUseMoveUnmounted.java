@@ -46,6 +46,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                 && (this.creature.getAttackTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getAttackTarget()))
                 && !this.creature.isBeingRidden()
                 && (!(this.creature instanceof RiftWaterCreature) || !((RiftWaterCreature) this.creature).canFlop());
+                //&& this.creature.getAttackTarget().canEntityBeSeen(this.creature);
     }
 
     @Override

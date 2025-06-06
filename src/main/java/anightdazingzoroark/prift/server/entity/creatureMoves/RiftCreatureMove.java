@@ -9,6 +9,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -83,19 +84,58 @@ public abstract class RiftCreatureMove {
         List<BlockPos> blockBreakList = new ArrayList<>();
 
         Vec3d look = user.getLookVec().normalize();
-        double perpX = -look.z;
-        double perpZ = look.x;
         double offset = Math.ceil(user.width / 2.0) + 0.5;
+        double creatureHeight = user.height + ((user.isBeingRidden() && user.getControllingPassenger() != null) ? user.getControllingPassenger().height : 0);
+        double firstX, firstY, firstZ, lastX, lastY, lastZ;
+
+        //for looking up
+        if (user.rotationPitch <= -22.5f) {
+            firstX = user.posX - ((user.creatureHorizontalDirection() == EnumFacing.NORTH || user.creatureHorizontalDirection() == EnumFacing.SOUTH) ?
+                    offset : creatureHeight/2D);
+            firstY = user.posY + user.height;
+            firstZ = user.posZ - ((user.creatureHorizontalDirection() == EnumFacing.NORTH || user.creatureHorizontalDirection() == EnumFacing.SOUTH) ?
+                    creatureHeight/2D : offset);
+
+            lastX = user.posX + ((user.creatureHorizontalDirection() == EnumFacing.NORTH || user.creatureHorizontalDirection() == EnumFacing.SOUTH) ?
+                    offset : creatureHeight/2D);
+            lastY = user.posY + user.height + user.attackWidth() + user.width;
+            lastZ = user.posZ + ((user.creatureHorizontalDirection() == EnumFacing.NORTH || user.creatureHorizontalDirection() == EnumFacing.SOUTH) ?
+                    creatureHeight/2D : offset);
+        }
+        //for looking down
+        else if (user.rotationPitch >= 22.5f) {
+            firstX = user.posX - ((user.creatureHorizontalDirection() == EnumFacing.NORTH || user.creatureHorizontalDirection() == EnumFacing.SOUTH) ?
+                    offset : creatureHeight/2D);
+            firstY = user.posY - 1;
+            firstZ = user.posZ - ((user.creatureHorizontalDirection() == EnumFacing.NORTH || user.creatureHorizontalDirection() == EnumFacing.SOUTH) ?
+                    creatureHeight/2D : offset);
+
+            lastX = user.posX + ((user.creatureHorizontalDirection() == EnumFacing.NORTH || user.creatureHorizontalDirection() == EnumFacing.SOUTH) ?
+                    offset : creatureHeight/2D);
+            lastY = user.posY - 2; //to make sure that digging downwards doesn't result in a hole they cannot get out of
+            lastZ = user.posZ + ((user.creatureHorizontalDirection() == EnumFacing.NORTH || user.creatureHorizontalDirection() == EnumFacing.SOUTH) ?
+                    creatureHeight/2D : offset);
+        }
+        //for looking forward
+        else {
+            firstX = user.posX + look.x - (-look.z) * offset;
+            firstY = user.posY;
+            firstZ = user.posZ + look.z - look.x * offset;
+
+            lastX = user.posX + (user.attackWidth() + user.width) * look.x + (-look.z) * offset;
+            lastY = user.posY + user.height + ((user.isBeingRidden() && user.getControllingPassenger() != null) ? user.getControllingPassenger().height : 0);
+            lastZ = user.posZ + (user.attackWidth() + user.width) * look.z + look.x * offset;
+        }
 
         BlockPos firstPos = new BlockPos(
-                user.posX + look.x - perpX * offset,
-                user.posY,
-                user.posZ + look.z - perpZ * offset
+                firstX,
+                firstY,
+                firstZ
         );
         BlockPos lastPos = new BlockPos(
-                user.posX + (user.attackWidth() + user.width) * look.x + perpX * offset,
-                user.posY + user.height + ((user.isBeingRidden() && user.getControllingPassenger() != null) ? user.getControllingPassenger().height : 0),
-                user.posZ + (user.attackWidth() + user.width) * look.z + perpZ * offset
+                lastX,
+                lastY,
+                lastZ
         );
 
         //for loops wouldn't work in this situation, so it's
