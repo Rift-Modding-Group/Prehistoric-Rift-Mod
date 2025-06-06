@@ -33,7 +33,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser {
+public class Parasaurolophus extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/parasaurolophus"));
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
@@ -45,8 +45,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     private static final DataParameter<Integer> LEAD_WORK_X_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Y_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.BYTE);
     private RiftCreaturePart hipsPart;
     private RiftCreaturePart neckPart;
     private RiftCreaturePart tail0Part;
@@ -97,8 +95,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.dataManager.register(LEAD_WORK_X_POS, 0);
         this.dataManager.register(LEAD_WORK_Y_POS, 0);
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
-        this.dataManager.register(TURRET_MODE, false);
-        this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
     }
 
     protected void initEntityAI() {
@@ -145,7 +141,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.writeHarvestWanderDataToNBT(compound);
         this.writeWorkstationDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);
-        this.writeTurretModeDataToNBT(compound);
     }
 
     @Override
@@ -154,7 +149,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.readHarvestWanderDataFromNBT(compound);
         this.readWorkstationDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
-        this.readTurretModeDataFromNBT(compound);
     }
 
     //move related stuff starts here
@@ -340,23 +334,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.dataManager.set(LEAD_WORK_Z_POS, 0);
         EntityPlayer player = (EntityPlayer)this.getOwner();
         if (!this.world.isRemote) this.clearLeadAttachPosMessage(destroyed, player);
-    }
-
-    @Override
-    public boolean isTurretMode() {
-        return this.dataManager.get(TURRET_MODE);
-    }
-
-    @Override
-    public void setTurretMode(boolean value) {
-        this.dataManager.set(TURRET_MODE, value);
-    }
-
-    public TurretModeTargeting getTurretTargeting() {
-        return TurretModeTargeting.values()[this.dataManager.get(TURRET_TARGET).byteValue()];
-    }
-    public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
-        this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
     }
 
     @Override

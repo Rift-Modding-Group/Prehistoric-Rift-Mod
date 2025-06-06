@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
-import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.client.Minecraft;
@@ -134,13 +133,13 @@ public class RiftDialMenu extends GuiScreen {
             if (this.selectedItem == i) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 255, 255, 255, 128);
             }
-            else if (this.radialChoiceMenu == 3 && (!(this.creature instanceof ITurretModeUser) || (this.creature instanceof ITurretModeUser && !((ITurretModeUser)this.creature).isTurretMode())) && this.creature.getTameBehavior().name().equals(this.choices.get(i).name())) {
+            else if (this.radialChoiceMenu == 3 && (!this.creature.canEnterTurretMode() || !this.creature.isTurretMode()) && this.creature.getTameBehavior().name().equals(this.choices.get(i).name())) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 128, 0, 128, 128);
             }
-            else if (this.radialChoiceMenu == 3 && this.creature instanceof ITurretModeUser && ((ITurretModeUser)this.creature).isTurretMode() && ((ITurretModeUser)this.creature).getTurretTargeting().name().equals(this.choices.get(i).name())) {
+            else if (this.radialChoiceMenu == 3 && this.creature.canEnterTurretMode() && this.creature.isTurretMode() && this.creature.getTurretTargeting().name().equals(this.choices.get(i).name())) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 128, 0, 128, 128);
             }
-            else if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (this.creature instanceof ITurretModeUser && ((ITurretModeUser) this.creature).isTurretMode()) || this.creature.busyAtWork() || this.creature.isSleeping()) && this.choices.get(i) == RiftTameRadialChoice.RIDE) {
+            else if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (this.creature.canEnterTurretMode() && this.creature.isTurretMode()) || this.creature.busyAtWork() || this.creature.isSleeping()) && this.choices.get(i) == RiftTameRadialChoice.RIDE) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
             else if (this.radialChoiceMenu == 0 && onlySelected && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) && this.creature.canBePregnant()) {
@@ -192,7 +191,7 @@ public class RiftDialMenu extends GuiScreen {
         for (int i = 0; i < numItems; i++) {
             String radialString;
             if (this.radialChoiceMenu == 0 && this.choices.get(i) == RiftTameRadialChoice.BEHAVIOR) {
-                if (this.creature instanceof ITurretModeUser && ((ITurretModeUser) this.creature).isTurretMode()) radialString = I18n.format("radial.choice.turret_targeting");
+                if (this.creature.canEnterTurretMode() && this.creature.isTurretMode()) radialString = I18n.format("radial.choice.turret_targeting");
                 else radialString = I18n.format("radial.choice.behavior");
             }
             else if (this.radialChoiceMenu == 2 && this.choices.get(i) == RiftTameRadialChoice.SET_WORKSTATION) {
@@ -205,7 +204,7 @@ public class RiftDialMenu extends GuiScreen {
                 else radialString = I18n.format("radial.choice.clear_wander_harvest");
             }
             else if (this.radialChoiceMenu == 2 && this.choices.get(i) == RiftTameRadialChoice.SET_TURRET_MODE) {
-                boolean isInTurretMode = this.creature instanceof ITurretModeUser && ((ITurretModeUser) this.creature).isTurretMode();
+                boolean isInTurretMode = this.creature.canEnterTurretMode() && this.creature.isTurretMode();
                 if (!isInTurretMode) radialString = I18n.format("radial.choice.set_turret_mode");
                 else radialString = I18n.format("radial.choice.clear_turret_mode");
             }
@@ -213,7 +212,7 @@ public class RiftDialMenu extends GuiScreen {
 
             //additional disablin text
             //radialString.charAt(0) != '['
-            if (this.radialChoiceMenu == 0 && this.creature.isRideable && this.choices.get(i) == RiftTameRadialChoice.RIDE && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled()) || (this.creature instanceof ITurretModeUser && ((ITurretModeUser) this.creature).isTurretMode()) || this.creature.busyAtWork() || this.creature.isSleeping())) radialString = "["+radialString+"]";
+            if (this.radialChoiceMenu == 0 && this.creature.isRideable && this.choices.get(i) == RiftTameRadialChoice.RIDE && (this.creature.isBaby() || (!this.creature.isBaby() && !this.creature.isSaddled()) || (this.creature.canEnterTurretMode() && this.creature.isTurretMode()) || this.creature.busyAtWork() || this.creature.isSleeping())) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 0 && this.choices.get(i) == RiftTameRadialChoice.BEHAVIOR && this.creature.isBaby()) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 2 && (this.choices.get(i) == RiftTameRadialChoice.SET_WORKSTATION || this.choices.get(i) == RiftTameRadialChoice.SET_WANDER_HARVEST) && this.creature.isBaby()) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 2 && this.choices.get(i) == RiftTameRadialChoice.SET_TURRET_MODE && this.creature.busyAtWork()) radialString = "["+radialString+"]";
@@ -248,7 +247,7 @@ public class RiftDialMenu extends GuiScreen {
             if (this.radialChoiceMenu == 0 && this.creature.isBaby() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
                 this.drawHoveringText(I18n.format("radial.note.too_young_saddle"), mouseX, mouseY);
             }
-            if (this.radialChoiceMenu == 0 && (this.creature.busyAtWork() || (this.creature instanceof ITurretModeUser && ((ITurretModeUser) this.creature).isTurretMode())) && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
+            if (this.radialChoiceMenu == 0 && (this.creature.busyAtWork() || (this.creature.canEnterTurretMode() && this.creature.isTurretMode())) && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
                 this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
             if (this.radialChoiceMenu == 0 && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) && this.creature.canBePregnant()) {
@@ -343,7 +342,7 @@ public class RiftDialMenu extends GuiScreen {
                     }
                     else if (this.creature.mainRadialChoices().get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
                         boolean isNotPregnant = !this.creature.isPregnant();
-                        boolean isInTurretMode = this.creature instanceof ITurretModeUser && ((ITurretModeUser)this.creature).isTurretMode();
+                        boolean isInTurretMode = this.creature.canEnterTurretMode() && this.creature.isTurretMode();
                         if (isNotPregnant && !this.creature.isSleeping() && !this.creature.isBaby() && !this.creature.busyAtWork() && !isInTurretMode && this.creature.isSaddled()) {
                             this.mc.player.closeScreen();
                             RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this.creature));
@@ -358,7 +357,7 @@ public class RiftDialMenu extends GuiScreen {
                     }
                     else if (this.creature.mainRadialChoices().get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) {
                         boolean isNotPregnant = !this.creature.isPregnant();
-                        boolean isInTurretMode = this.creature instanceof ITurretModeUser && ((ITurretModeUser)this.creature).isTurretMode();
+                        boolean isInTurretMode = this.creature.canEnterTurretMode() && this.creature.isTurretMode();
                         if (!this.creature.isBaby() && isNotPregnant && !this.creature.busyAtWork()) {
                             this.choices = isInTurretMode ? this.creature.turretRadialChoices() : this.creature.behaviorRadialChoices();
                             this.radialChoiceMenu = 3;
@@ -385,13 +384,13 @@ public class RiftDialMenu extends GuiScreen {
                         }
                     }
                     else if (this.creature.optionsRadialChoices().get(this.selectedItem) == RiftTameRadialChoice.SET_TURRET_MODE && !this.creature.busyAtWork()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftSetTurretMode(this.creature, !((ITurretModeUser) this.creature).isTurretMode()));
+                        RiftMessages.WRAPPER.sendToServer(new RiftSetTurretMode(this.creature, !this.creature.isTurretMode()));
                         this.mc.player.closeScreen();
                     }
                 }
                 break;
             case 3:
-                boolean isInTurretMode = this.creature instanceof ITurretModeUser && ((ITurretModeUser)this.creature).isTurretMode();
+                boolean isInTurretMode = this.creature.canEnterTurretMode() && this.creature.isTurretMode();
                 if (isInTurretMode) {
                     if (this.selectedItem > -1 && this.selectedItem < this.creature.turretRadialChoices().size()) {
                         if (this.creature.turretRadialChoices().get(this.selectedItem) == RiftTameRadialChoice.BACK) {

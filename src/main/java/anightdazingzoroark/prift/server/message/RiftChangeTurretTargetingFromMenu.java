@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -48,9 +47,10 @@ public class RiftChangeTurretTargetingFromMenu implements IMessage {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
 
             RiftCreature interacted = (RiftCreature) playerEntity.world.getEntityByID(message.creatureId);
-            ITurretModeUser turretModeUser = (ITurretModeUser) interacted;
-            if (!turretModeUser.getTurretTargeting().equals(message.turretModeTargeting)) this.sendTurretTargetingMessage(message.turretModeTargeting, interacted);
-            turretModeUser.setTurretModeTargeting(message.turretModeTargeting);
+            if (interacted != null) {
+                if (interacted.getTurretTargeting() != message.turretModeTargeting) this.sendTurretTargetingMessage(message.turretModeTargeting, interacted);
+                interacted.setTurretModeTargeting(message.turretModeTargeting);
+            }
         }
 
         private void sendTurretTargetingMessage(TurretModeTargeting turretModeTargeting, RiftCreature creature) {

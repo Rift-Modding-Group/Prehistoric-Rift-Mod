@@ -34,7 +34,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, IHarvestWhenWandering, ITurretModeUser, IWorkstationUser {
+public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, IHarvestWhenWandering, IWorkstationUser {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/stegosaurus"));
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
@@ -42,8 +42,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     private static final DataParameter<Integer> LEAD_WORK_X_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Y_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
@@ -102,8 +100,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         this.dataManager.register(LEAD_WORK_X_POS, 0);
         this.dataManager.register(LEAD_WORK_Y_POS, 0);
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
-        this.dataManager.register(TURRET_MODE, false);
-        this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
         this.dataManager.register(USING_WORKSTATION, false);
         this.dataManager.register(WORKSTATION_X_POS, 0);
         this.dataManager.register(WORKSTATION_Y_POS, 0);
@@ -156,7 +152,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         super.writeEntityToNBT(compound);
         this.writeHarvestWanderDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);
-        this.writeTurretModeDataToNBT(compound);
         this.writeWorkstationDataToNBT(compound);
     }
 
@@ -165,7 +160,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         super.readEntityFromNBT(compound);
         this.readHarvestWanderDataFromNBT(compound);
         this.readLeadWorkDataFromNBT(compound);
-        this.readTurretModeDataFromNBT(compound);
         this.readWorkstationDataFromNBT(compound);
     }
 
@@ -328,23 +322,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
 
     public boolean canBeKnockedBack() {
         return true;
-    }
-
-    @Override
-    public boolean isTurretMode() {
-        return this.dataManager.get(TURRET_MODE);
-    }
-
-    @Override
-    public void setTurretMode(boolean value) {
-        this.dataManager.set(TURRET_MODE, value);
-    }
-
-    public TurretModeTargeting getTurretTargeting() {
-        return TurretModeTargeting.values()[this.dataManager.get(TURRET_TARGET).byteValue()];
-    }
-    public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
-        this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
     }
 
     @Override

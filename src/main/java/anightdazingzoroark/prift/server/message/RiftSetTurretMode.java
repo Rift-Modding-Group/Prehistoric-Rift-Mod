@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -45,17 +44,13 @@ public class RiftSetTurretMode implements IMessage {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
 
             RiftCreature creature = (RiftCreature)playerEntity.world.getEntityByID(message.creatureId);
-            ITurretModeUser turretModeUser = (ITurretModeUser) creature;
 
             //send message
             String messageToSend = message.value ? "action.creature_start_turret_mode" : "action.creature_stop_turret_mode";
             ((EntityPlayer) creature.getOwner()).sendStatusMessage(new TextComponentTranslation(messageToSend), false);
 
             //set turret mode
-            turretModeUser.setTurretMode(message.value);
-
-            //remove or reset speed
-            creature.setCanMove(!message.value);
+            creature.setTurretMode(message.value);
         }
     }
 }

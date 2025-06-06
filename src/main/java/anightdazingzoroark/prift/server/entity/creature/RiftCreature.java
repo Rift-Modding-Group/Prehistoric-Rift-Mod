@@ -22,6 +22,7 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -109,6 +110,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROTATE_MOUNTED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CLOAKED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -262,6 +265,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) PlayerTamedCreatures.DeploymentType.NONE.ordinal());
         this.dataManager.register(PREGNANT, false);
         this.dataManager.register(PREGNANCY_TIMER, 0);
+        this.dataManager.register(TURRET_MODE, false);
+        this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
         this.dataManager.register(INCAPACITATED, false);
         this.dataManager.register(CAN_ROTATE_MOUNTED, true);
         this.dataManager.register(CLOAKED, false);
@@ -840,7 +845,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                         else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
-                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
+                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
                         if (this.canBePregnant()) {
                             if (!this.isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                             else player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId() ,0, 0);
@@ -1203,6 +1208,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             compound.setInteger("PregnancyTime", this.getPregnancyTimer());
             compound.setBoolean("IsPregnancy", this.isPregnant());
         }
+        //for turret mode
+        compound.setBoolean("TurretMode", this.isTurretMode());
+        compound.setByte("TurretTargeting", (byte) this.getTurretTargeting().ordinal());
     }
 
     @Override
@@ -1254,6 +1262,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setLearnedMoves(moveList);
         //for pregnancy
         if (this.canBePregnant()) this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
+        //for turret mode
+        this.setTurretMode(compound.getBoolean("TurretMode"));
+        this.setTurretModeTargeting(TurretModeTargeting.values()[compound.getByte("TurretTargeting")]);
     }
 
     //move related stuff starts here
@@ -1821,6 +1832,28 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return 5;
     }
     //herding related stuff ends here
+
+    //turret mode stuff starts here
+    public boolean canEnterTurretMode() {
+        return this.getLearnedMoves().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED);
+    }
+
+    public boolean isTurretMode() {
+        return this.dataManager.get(TURRET_MODE);
+    }
+
+    public void setTurretMode(boolean value) {
+        this.dataManager.set(TURRET_MODE, value);
+    }
+
+    public TurretModeTargeting getTurretTargeting() {
+        return TurretModeTargeting.values()[this.dataManager.get(TURRET_TARGET)];
+    }
+
+    public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
+        this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
+    }
+    //turret mode stuff ends here
 
     public int getLevel() {
         return this.dataManager.get(LEVEL);
@@ -2390,7 +2423,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean busyAtTurretMode() {
-        return this instanceof ITurretModeUser && ((ITurretModeUser)this).isTurretMode();
+        return this.canEnterTurretMode() && this.isTurretMode();
     }
 
     public boolean busyAtWanderOnHarvest() {
@@ -2650,7 +2683,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
-        if (!this.canMove()) {
+        if (!this.canMove() || this.isTurretMode()) {
             super.travel(0, vertical, 0);
             return;
         }
@@ -2753,7 +2786,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this instanceof IWorkstationUser) {
             leashOperatingFlag = !((IWorkstationUser)this).hasWorkstation();
         }
-        return !this.getLeashed() && this.isTamed() && !this.isSitting() && (!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode()) && leashOperatingFlag;
+        return !this.getLeashed() && this.isTamed() && !this.isSitting() && (!this.canEnterTurretMode() || !this.isTurretMode()) && leashOperatingFlag;
     }
 
     public void onDeath(DamageSource cause) {
@@ -2814,7 +2847,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         list.add(RiftTameRadialChoice.BACK);
         if (this instanceof IWorkstationUser && !((IWorkstationUser)this).getWorkstations().isEmpty()) list.add(RiftTameRadialChoice.SET_WORKSTATION);
         if (this instanceof IHarvestWhenWandering) list.add(RiftTameRadialChoice.SET_WANDER_HARVEST);
-        if (this instanceof ITurretModeUser) list.add(RiftTameRadialChoice.SET_TURRET_MODE);
+        if (this.canEnterTurretMode()) list.add(RiftTameRadialChoice.SET_TURRET_MODE);
         return list;
     }
 

@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import com.google.common.base.Predicate;
@@ -20,7 +20,6 @@ import java.util.*;
 
 public class RiftTurretModeTargeting extends EntityAITarget {
     private final RiftCreature creature;
-    private ITurretModeUser turretModeUser;
     protected final RiftTurretModeTargeting.Sorter sorter;
     protected EntityLivingBase targetEntity;
 
@@ -33,8 +32,7 @@ public class RiftTurretModeTargeting extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature instanceof ITurretModeUser && ((ITurretModeUser) this.creature).isTurretMode()) {
-            this.turretModeUser = (ITurretModeUser) this.creature;
+        if (this.creature.canEnterTurretMode() && this.creature.isTurretMode()) {
             List<EntityLivingBase> list = new ArrayList<>();
             for (EntityLivingBase entity : this.taskOwner.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), new Predicate<EntityLivingBase>() {
                 @Override
@@ -42,31 +40,19 @@ public class RiftTurretModeTargeting extends EntityAITarget {
                     return !(input instanceof RiftEgg) && !(input instanceof RiftLargeWeapon);
                 }
             })) {
-                if (this.turretModeUser.getTurretTargeting().equals(TurretModeTargeting.PLAYERS)) {
+                if (this.creature.getTurretTargeting().equals(TurretModeTargeting.PLAYERS)) {
                     if (entity instanceof EntityPlayer) {
                         if (!entity.getUniqueID().equals(this.creature.getOwnerId())) {
                             list.add(entity);
                         }
                     }
                 }
-                else if (this.turretModeUser.getTurretTargeting().equals(TurretModeTargeting.PLAYERS_AND_OTHER_TAMES)) {
-                    if (entity instanceof EntityPlayer) {
-                        if (!entity.getUniqueID().equals(this.creature.getOwnerId())) {
-                            list.add(entity);
-                        }
-                    }
-                    else if (entity instanceof EntityTameable) {
-                        if ((((EntityTameable) entity).isTamed())) {
-                            if (this.creature.getOwner() != null) {
-                                if (!((EntityTameable) entity).getOwner().equals(this.creature.getOwner())) {
-                                    list.add(entity);
-                                }
-                            }
-                        }
-                        else list.add(entity);
+                else if (this.creature.getTurretTargeting().equals(TurretModeTargeting.PLAYERS_AND_OTHER_TAMES)) {
+                    if ((entity instanceof EntityPlayer || entity instanceof EntityTameable) && RiftUtil.checkForNoAssociations(this.creature, entity)) {
+                        list.add(entity);
                     }
                 }
-                else if (this.turretModeUser.getTurretTargeting().equals(TurretModeTargeting.HOSTILES)) {
+                else if (this.creature.getTurretTargeting().equals(TurretModeTargeting.HOSTILES)) {
                     List<String> targets = Arrays.asList(GeneralConfig.turretModeHostileTargets);
                     if (entity instanceof EntityPlayer) {
                         if (targets.contains("minecraft:player")) {
@@ -90,7 +76,7 @@ public class RiftTurretModeTargeting extends EntityAITarget {
                         }
                     }
                 }
-                else if (this.turretModeUser.getTurretTargeting().equals(TurretModeTargeting.ALL)) {
+                else if (this.creature.getTurretTargeting().equals(TurretModeTargeting.ALL)) {
                     if (entity instanceof EntityPlayer) {
                         if (!entity.getUniqueID().equals(this.creature.getOwnerId())) {
                             list.add(entity);

@@ -8,12 +8,6 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
-import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -29,10 +23,8 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
+public class Dilophosaurus extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dilophosaurus"));
-    private static final DataParameter<Boolean> TURRET_MODE = EntityDataManager.createKey(Dilophosaurus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Byte> TURRET_TARGET = EntityDataManager.createKey(Dilophosaurus.class, DataSerializers.BYTE);
     private RiftCreaturePart neckPart;
     private RiftCreaturePart hipPart;
     private RiftCreaturePart tail0Part;
@@ -72,8 +64,6 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(TURRET_MODE, false);
-        this.dataManager.register(TURRET_TARGET, (byte) TurretModeTargeting.HOSTILES.ordinal());
         this.setCanPickUpLoot(true);
     }
 
@@ -106,18 +96,6 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
         if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
         if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
         if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
-    }
-
-    @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        this.writeTurretModeDataToNBT(compound);
-    }
-
-    @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        this.readTurretModeDataFromNBT(compound);
     }
 
     @Override
@@ -171,26 +149,6 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
     @Override
     public float rangedWidth() {
         return 12f;
-    }
-
-    @Override
-    public boolean isTurretMode() {
-        return this.dataManager.get(TURRET_MODE);
-    }
-
-    @Override
-    public void setTurretMode(boolean value) {
-        this.dataManager.set(TURRET_MODE, value);
-    }
-
-    @Override
-    public TurretModeTargeting getTurretTargeting() {
-        return TurretModeTargeting.values()[this.dataManager.get(TURRET_TARGET)];
-    }
-
-    @Override
-    public void setTurretModeTargeting(TurretModeTargeting turretModeTargeting) {
-        this.dataManager.set(TURRET_TARGET, (byte) turretModeTargeting.ordinal());
     }
 
     @Override
