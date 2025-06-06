@@ -80,7 +80,8 @@ public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestW
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
 
         this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
+        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(6, new RiftHarvestOnWander(this, 0.52F, 0.36F));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
         this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));

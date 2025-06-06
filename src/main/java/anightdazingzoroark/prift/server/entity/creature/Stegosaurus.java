@@ -124,15 +124,16 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         this.tasks.addTask(3, new RiftLandDwellerSwim(this));
 
         this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(5, new RiftBreakBlockWhilePursuingTarget(this));
+        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
 
-        this.tasks.addTask(6, new RiftHarvestOnWander(this, 0.96F, 0.36F));
-        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
-        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(9, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(10, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(11, new RiftWander(this, 1.0D));
-        this.tasks.addTask(12, new RiftLookAround(this));
+        this.tasks.addTask(7, new RiftHarvestOnWander(this, 0.96F, 0.36F));
+        this.tasks.addTask(8, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
+        this.tasks.addTask(9, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(10, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(11, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(12, new RiftWander(this, 1.0D));
+        this.tasks.addTask(13, new RiftLookAround(this));
     }
 
     @Override

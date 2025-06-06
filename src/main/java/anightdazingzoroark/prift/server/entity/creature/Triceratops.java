@@ -115,15 +115,16 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
 
         this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
+        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
 
-        this.tasks.addTask(5, new RiftHarvestOnWander(this, 0.72F, 0.48F));
-        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
-        this.tasks.addTask(7, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(8, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(10, new RiftWander(this, 1.0D));
-        this.tasks.addTask(11, new RiftLookAround(this));
+        this.tasks.addTask(6, new RiftHarvestOnWander(this, 0.72F, 0.48F));
+        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
+        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(9, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(10, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(11, new RiftWander(this, 1.0D));
+        this.tasks.addTask(12, new RiftLookAround(this));
     }
 
     @Override

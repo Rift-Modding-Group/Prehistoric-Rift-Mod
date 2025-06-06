@@ -87,7 +87,8 @@ public class Dilophosaurus extends RiftCreature implements ITurretModeUser {
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
+        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(7, new RiftWander(this, 1.0D));
         this.tasks.addTask(8, new RiftLookAround(this));
