@@ -6,13 +6,11 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.inventory.CreatureContainer;
 import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
 import anightdazingzoroark.prift.server.inventory.WeaponContainer;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
-import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -103,7 +101,7 @@ public class RiftGui implements IGuiHandler {
         if (id == GUI_EGG) {
             if (entity instanceof RiftEgg) return new RiftEggMenu((RiftEgg)entity);
             else if (entity instanceof RiftSac) return new RiftEggMenu((RiftSac)entity);
-            else if (entity instanceof IImpregnable) return new RiftEggMenu((IImpregnable)entity);
+            else if (entity instanceof RiftCreature && ((RiftCreature)entity).canBePregnant()) return new RiftEggMenu((RiftCreature)entity);
         }
         else if (id == GUI_DIAL) return new RiftDialMenu((RiftCreature) entity);
         else if (id == GUI_CREATURE_INVENTORY) {

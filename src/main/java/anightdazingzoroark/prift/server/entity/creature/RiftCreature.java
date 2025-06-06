@@ -18,7 +18,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
-import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
@@ -107,6 +106,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> FORCED_AWAKE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CLIMBING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
+    public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROTATE_MOUNTED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CLOAKED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -256,6 +257,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(FORCED_AWAKE, false);
         this.dataManager.register(CLIMBING, false);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) PlayerTamedCreatures.DeploymentType.NONE.ordinal());
+        this.dataManager.register(PREGNANT, false);
+        this.dataManager.register(PREGNANCY_TIMER, 0);
         this.dataManager.register(INCAPACITATED, false);
         this.dataManager.register(CAN_ROTATE_MOUNTED, true);
         this.dataManager.register(CLOAKED, false);
@@ -375,6 +378,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageMoveAndWeaponCooldown();
             if (this.canUtilizeCloaking()) this.manageCloaking();
             if (this.isNocturnal()) this.manageSleepSchedule();
+            if (this.canBePregnant()) this.createBabyWhenPregnant();
             if (this.isTamed()) {
                 this.updateEnergyMove();
 
@@ -828,15 +832,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.BUCKET))) player.dropItem(new ItemStack(Items.BUCKET), false);
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
-                        if (this instanceof IImpregnable) {
-                            if (((IImpregnable)this).isPregnant() && player.isSneaking()) player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId() ,0, 0);
+                        if (this.canBePregnant()) {
+                            if (this.isPregnant() && player.isSneaking()) player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId() ,0, 0);
                             else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId(), 0, 0);
                         }
                         else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!(this instanceof ITurretModeUser) || !((ITurretModeUser) this).isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
-                        if (this instanceof IImpregnable) {
-                            if (!((IImpregnable)this).isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
+                        if (this.canBePregnant()) {
+                            if (!this.isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                             else player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId() ,0, 0);
                         }
                         else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {
@@ -1192,6 +1196,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             nbttaglist.appendTag(nbttagcompound);
         }
         compound.setTag("LearnedMoves", nbttaglist);
+        //for pregnancy
+        if (this.canBePregnant()) {
+            compound.setInteger("PregnancyTime", this.getPregnancyTimer());
+            compound.setBoolean("IsPregnancy", this.isPregnant());
+        }
     }
 
     @Override
@@ -1241,6 +1250,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (!this.getLearnedMoves().contains(moveToAdd)) moveList.add(moveToAdd);
         }
         this.setLearnedMoves(moveList);
+        //for pregnancy
+        if (this.canBePregnant()) this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
     }
 
     //move related stuff starts here
@@ -1656,6 +1667,74 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             else this.setLargeWeapon(RiftLargeWeaponType.NONE);
         }
     }
+
+    //pregnancy related stuff starts here
+    public boolean canBePregnant() {
+        return this.creatureType.getCreatureCategory() == RiftCreatureType.CreatureCategory.MAMMAL && this.creatureType != RiftCreatureType.DIMETRODON;
+    }
+
+    public void setPregnant(boolean value, int timer) {
+        this.dataManager.set(PREGNANT, value);
+        this.dataManager.set(PREGNANCY_TIMER, timer);
+    }
+
+    public boolean isPregnant() {
+        return this.dataManager.get(PREGNANT);
+    }
+
+    public void setPregnancyTimer(int value) {
+        this.dataManager.set(PREGNANCY_TIMER, value);
+    }
+
+    public int getPregnancyTimer() {
+        return this.dataManager.get(PREGNANCY_TIMER);
+    }
+
+    public void createBabyWhenPregnant() {
+        if (this.getPregnancyTimer() > 0) {
+            this.setPregnancyTimer(this.getPregnancyTimer() - 1);
+            if (this.getPregnancyTimer() == 0) {
+                RiftCreature baby = this.creatureType.invokeClass(this.world);
+                baby.setHealth((float) (this.minCreatureHealth + (0.1) * (this.getLevel()) * (this.minCreatureHealth)));
+                baby.setAgeInDays(0);
+                baby.setTamed(true);
+                baby.setOwnerId(this.getOwnerId());
+                baby.setTameBehavior(TameBehaviorType.PASSIVE);
+                baby.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
+                this.setPregnant(false, 0);
+                this.setSitting(false);
+
+                EntityPlayer owner = (EntityPlayer) this.getOwner();
+
+                //update journal
+                if (PlayerJournalProgressHelper.getUnlockedCreatures(owner).containsKey(baby.creatureType) && !PlayerJournalProgressHelper.getUnlockedCreatures(owner).get(baby.creatureType)) {
+                    PlayerJournalProgressHelper.unlockCreature(owner, baby.creatureType);
+                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", baby.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                }
+
+                //update player tamed creatures
+                if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
+                    baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                    this.world.spawnEntity(baby);
+                    PlayerTamedCreaturesHelper.addToPlayerParty(owner, baby);
+                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed_to_party", this.getName()), false);
+                }
+                else if (PlayerTamedCreaturesHelper.getPlayerBox(owner).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(owner)) {
+                    baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                    PlayerTamedCreaturesHelper.addToPlayerBoxViaNBT(owner, baby);
+                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed_to_box", this.getName()), false);
+                }
+            }
+        }
+    }
+
+    public int[] getBirthTimeMinutes() {
+        int minutes = (int)((float)this.getPregnancyTimer() / 1200F);
+        int seconds = (int)((float)this.getPregnancyTimer() / 20F);
+        seconds = seconds - (minutes * 60);
+        return new int[]{minutes, seconds};
+    }
+    //pregnancy related stuff ends here
 
     public int getLevel() {
         return this.dataManager.get(LEVEL);
@@ -2307,7 +2386,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //the ones that have a mining level of -1 can be broken easily w/out
         //additional checks
         if (block.getHarvestLevel(blockState) < 0) return true;
-        System.out.println("block pickaxe level: "+block.getHarvestLevel(blockState));
         //check if block requires specific tool to be broken
         for (String blockBreakLevels : RiftConfigHandler.getConfig(this.creatureType).general.blockBreakLevels) {
             String tool = blockBreakLevels.substring(0, blockBreakLevels.indexOf(":"));

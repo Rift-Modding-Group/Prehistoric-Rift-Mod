@@ -10,7 +10,6 @@ import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionE
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
@@ -443,8 +442,8 @@ public class ServerEvents {
             }
 
             //manage pregnancy particles
-            if (entity instanceof IImpregnable) {
-                if (((IImpregnable)entity).isPregnant()) {
+            if (entity instanceof RiftCreature) {
+                if (((RiftCreature)entity).isPregnant()) {
                     double motionY = RiftUtil.randomInRange(-0.25D, -0.125D);
                     double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
                     double f1 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) + entity.getEntityBoundingBox().minY;

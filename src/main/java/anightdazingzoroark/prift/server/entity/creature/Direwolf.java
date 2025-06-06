@@ -9,8 +9,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHerder;
-import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -24,10 +22,8 @@ import net.minecraft.world.storage.loot.LootTableList;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
+public class Direwolf extends RiftCreature implements IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/direwolf"));
-    public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Direwolf.class, DataSerializers.BOOLEAN);
-    public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Direwolf.class, DataSerializers.VARINT);
     private RiftCreaturePart hipsPart;
     protected int herdSize = 1;
     protected RiftCreature herdLeader;
@@ -56,8 +52,6 @@ public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(PREGNANT, false);
-        this.dataManager.register(PREGNANCY_TIMER, 0);
         this.setCanPickUpLoot(true);
     }
 
@@ -83,31 +77,12 @@ public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
     }
 
     @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-        //manage birthin related stuff
-        if (!this.world.isRemote) this.createBaby(this);
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
 
         if (this.isSitting() && !this.isBeingRidden() && this.hipsPart != null) {
             this.hipsPart.setPositionAndUpdate(this.hipsPart.posX, this.hipsPart.posY - 0.3f, this.hipsPart.posZ);
         }
-    }
-
-    @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        this.writePregnancyDataToNBT(compound);
-    }
-
-    @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        this.readPregnancyDataFromNBT(compound);
     }
 
     @Override
@@ -142,23 +117,6 @@ public class Direwolf extends RiftCreature implements IImpregnable, IHerder {
     @Override
     public int slotCount() {
         return 18;
-    }
-
-    public void setPregnant(boolean value, int timer) {
-        this.dataManager.set(PREGNANT, value);
-        this.dataManager.set(PREGNANCY_TIMER, timer);
-    }
-
-    public boolean isPregnant() {
-        return this.dataManager.get(PREGNANT);
-    }
-
-    public void setPregnancyTimer(int value) {
-        this.dataManager.set(PREGNANCY_TIMER, value);
-    }
-
-    public int getPregnancyTimer() {
-        return this.dataManager.get(PREGNANCY_TIMER);
     }
 
     @Override

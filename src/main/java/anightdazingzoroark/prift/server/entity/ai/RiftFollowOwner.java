@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IChargingMob;
 import net.minecraft.entity.ai.EntityAIFollowOwner;
 import net.minecraft.world.World;
 
@@ -21,7 +20,6 @@ public class RiftFollowOwner extends EntityAIFollowOwner {
         else if (this.tameable.isSitting()) return false;
         else if (this.tameable.getDeploymentType() != PlayerTamedCreatures.DeploymentType.PARTY) return false;
         else if (this.tameable.busyAtWork()) return false;
-        else if (this.tameable instanceof IChargingMob && !((IChargingMob) this.tameable).isNotUtilizingCharging()) return false;
         return super.shouldExecute() && this.tameable.getEnergy() > 0;
     }
 
@@ -29,7 +27,6 @@ public class RiftFollowOwner extends EntityAIFollowOwner {
         return !this.tameable.isSleeping()
                 && !this.tameable.isSitting()
                 && this.tameable.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY
-                && (!(this.tameable instanceof IChargingMob) || ((IChargingMob) this.tameable).isNotUtilizingCharging())
                 && !this.tameable.busyAtWork()
                 && this.tameable.getEnergy() > 0
                 && super.shouldContinueExecuting();

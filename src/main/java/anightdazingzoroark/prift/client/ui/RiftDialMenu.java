@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
-import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.prift.server.entity.interfaces.ITurretModeUser;
 import anightdazingzoroark.prift.server.enums.*;
@@ -144,9 +143,8 @@ public class RiftDialMenu extends GuiScreen {
             else if (this.radialChoiceMenu == 0 && (this.creature.isBaby() || (this.creature instanceof ITurretModeUser && ((ITurretModeUser) this.creature).isTurretMode()) || this.creature.busyAtWork() || this.creature.isSleeping()) && this.choices.get(i) == RiftTameRadialChoice.RIDE) {
                 drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
             }
-            else if (this.radialChoiceMenu == 0 && onlySelected && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) && this.creature instanceof IImpregnable) {
-                IImpregnable impregnable = (IImpregnable)this.creature;
-                if (impregnable.isPregnant()) drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
+            else if (this.radialChoiceMenu == 0 && onlySelected && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) && this.creature.canBePregnant()) {
+                if (this.creature.isPregnant()) drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 64);
                 else drawPieArc(buffer, x, y, zLevel, radiusIn, radiusOut, s, e, 0, 0, 0, 128);
             }
             else if (this.radialChoiceMenu == 0 && this.creature.isBaby() && onlySelected && this.choices.get(i) == RiftTameRadialChoice.BEHAVIOR) {
@@ -227,11 +225,8 @@ public class RiftDialMenu extends GuiScreen {
                     }
                 }
             }
-            if (this.radialChoiceMenu == 0 && (this.choices.get(i) == RiftTameRadialChoice.RIDE || this.choices.get(i) == RiftTameRadialChoice.STATE || this.choices.get(i) == RiftTameRadialChoice.BEHAVIOR)) {
-                if (this.creature instanceof IImpregnable) {
-                    IImpregnable impregnable = (IImpregnable)this.creature;
-                    if (impregnable.isPregnant()) radialString = "["+radialString+"]";
-                }
+            if (this.radialChoiceMenu == 0 && (this.choices.get(i) == RiftTameRadialChoice.RIDE || this.choices.get(i) == RiftTameRadialChoice.STATE || this.choices.get(i) == RiftTameRadialChoice.BEHAVIOR) && this.creature.canBePregnant() && this.creature.isPregnant()) {
+                radialString = "["+radialString+"]";
             }
             if (this.radialChoiceMenu == 0 && this.creature.busyAtWork() && (this.choices.get(i) == RiftTameRadialChoice.STATE || this.choices.get(i) == RiftTameRadialChoice.BEHAVIOR)) radialString = "["+radialString+"]";
             if (this.radialChoiceMenu == 2 && this.creature.busyAtWork() && (this.choices.get(i) != RiftTameRadialChoice.BACK && this.choices.get(i) != RiftTameRadialChoice.SET_WORKSTATION)) radialString = "["+radialString+"]";
@@ -256,9 +251,8 @@ public class RiftDialMenu extends GuiScreen {
             if (this.radialChoiceMenu == 0 && (this.creature.busyAtWork() || (this.creature instanceof ITurretModeUser && ((ITurretModeUser) this.creature).isTurretMode())) && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
                 this.drawHoveringText(I18n.format("radial.note.too_busy"), mouseX, mouseY);
             }
-            if (this.radialChoiceMenu == 0 && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) && this.creature instanceof IImpregnable) {
-                IImpregnable impregnable = (IImpregnable) this.creature;
-                if (impregnable.isPregnant()) this.drawHoveringText(I18n.format("radial.note.is_pregnant"), mouseX, mouseY);
+            if (this.radialChoiceMenu == 0 && (this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.STATE || this.choices.get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) && this.creature.canBePregnant()) {
+                if (this.creature.isPregnant()) this.drawHoveringText(I18n.format("radial.note.is_pregnant"), mouseX, mouseY);
             }
             if (this.radialChoiceMenu == 0 && this.creature.isSleeping() && this.choices.get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
                 this.drawHoveringText(I18n.format("radial.note.is_asleep"), mouseX, mouseY);
@@ -348,7 +342,7 @@ public class RiftDialMenu extends GuiScreen {
                         this.mc.player.closeScreen();
                     }
                     else if (this.creature.mainRadialChoices().get(this.selectedItem) == RiftTameRadialChoice.RIDE) {
-                        boolean isNotPregnant = !(this.creature instanceof IImpregnable) || !((IImpregnable) this.creature).isPregnant();
+                        boolean isNotPregnant = !this.creature.isPregnant();
                         boolean isInTurretMode = this.creature instanceof ITurretModeUser && ((ITurretModeUser)this.creature).isTurretMode();
                         if (isNotPregnant && !this.creature.isSleeping() && !this.creature.isBaby() && !this.creature.busyAtWork() && !isInTurretMode && this.creature.isSaddled()) {
                             this.mc.player.closeScreen();
@@ -363,7 +357,7 @@ public class RiftDialMenu extends GuiScreen {
                         }
                     }
                     else if (this.creature.mainRadialChoices().get(this.selectedItem) == RiftTameRadialChoice.BEHAVIOR) {
-                        boolean isNotPregnant = !(this.creature instanceof IImpregnable) || !((IImpregnable) this.creature).isPregnant();
+                        boolean isNotPregnant = !this.creature.isPregnant();
                         boolean isInTurretMode = this.creature instanceof ITurretModeUser && ((ITurretModeUser)this.creature).isTurretMode();
                         if (!this.creature.isBaby() && isNotPregnant && !this.creature.busyAtWork()) {
                             this.choices = isInTurretMode ? this.creature.turretRadialChoices() : this.creature.behaviorRadialChoices();

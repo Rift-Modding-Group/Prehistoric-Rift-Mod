@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -84,7 +83,7 @@ public class RiftMate extends EntityAIBase {
         if (player != null) player.addStat(StatList.ANIMALS_BRED);
         this.creature.resetInLove();
         this.targetMate.resetInLove();
-        ((IImpregnable)this.creature).setPregnant(true, 1800);
+        this.creature.setPregnant(true, 1800);
         this.creature.setSitting(true);
         this.creature.setTameBehavior(TameBehaviorType.PASSIVE);
         Random random = this.creature.getRNG();

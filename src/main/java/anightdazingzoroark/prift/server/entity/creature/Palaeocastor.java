@@ -7,7 +7,6 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -23,10 +22,8 @@ import net.minecraft.world.storage.loot.LootTableList;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvestWhenWandering {
+public class Palaeocastor extends RiftCreature implements IHarvestWhenWandering {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/palaeocastor"));
-    public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
-    public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.VARINT);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
     public RiftCreaturePart neckPart;
@@ -56,8 +53,6 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(PREGNANT, false);
-        this.dataManager.register(PREGNANCY_TIMER, 0);
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
     }
@@ -79,12 +74,6 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     }
 
     @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-        if (!this.world.isRemote) this.createBaby(this);
-    }
-
-    @Override
     public void updateParts() {
         super.updateParts();
     }
@@ -92,14 +81,12 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        this.writePregnancyDataToNBT(compound);
         this.writeHarvestWanderDataToNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        this.readPregnancyDataFromNBT(compound);
         this.readHarvestWanderDataFromNBT(compound);
     }
 
@@ -159,23 +146,6 @@ public class Palaeocastor extends RiftCreature implements IImpregnable, IHarvest
 
     public boolean canHarvest() {
         return this.dataManager.get(CAN_HARVEST);
-    }
-
-    public void setPregnant(boolean value, int timer) {
-        this.dataManager.set(PREGNANT, value);
-        this.dataManager.set(PREGNANCY_TIMER, timer);
-    }
-
-    public boolean isPregnant() {
-        return this.dataManager.get(PREGNANT);
-    }
-
-    public void setPregnancyTimer(int value) {
-        this.dataManager.set(PREGNANCY_TIMER, value);
-    }
-
-    public int getPregnancyTimer() {
-        return this.dataManager.get(PREGNANCY_TIMER);
     }
 
     @Override

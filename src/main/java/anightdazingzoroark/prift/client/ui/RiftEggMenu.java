@@ -1,11 +1,9 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IImpregnable;
 import anightdazingzoroark.prift.server.entity.other.RiftEmbryo;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
@@ -39,7 +37,7 @@ public class RiftEggMenu extends GuiScreen {
         this.hatchable = sac;
     }
 
-    public RiftEggMenu(IImpregnable impregnable) {
+    public RiftEggMenu(RiftCreature impregnable) {
         this.hatchable = impregnable;
         this.embryoRotation = 0;
     }
@@ -76,8 +74,8 @@ public class RiftEggMenu extends GuiScreen {
             }
             this.renderText = "";
         }
-        else if (this.hatchable instanceof IImpregnable) {
-            IImpregnable impregnable = (IImpregnable) this.hatchable;
+        else if (this.hatchable instanceof RiftCreature && ((RiftCreature)this.hatchable).canBePregnant()) {
+            RiftCreature impregnable = (RiftCreature) this.hatchable;
             if (impregnable.getPregnancyTimer() <= 0) {
                 this.mc.player.closeScreen();
             }
@@ -161,16 +159,16 @@ public class RiftEggMenu extends GuiScreen {
                 printStringXY(s1, (-this.fontRenderer.getStringWidth(s1) + this.xGui)/ 2, 140, 0, 0, 0);
             }
         }
-        else if (this.hatchable instanceof IImpregnable) {
-            IImpregnable impregnable = (IImpregnable) this.hatchable;
+        else if (this.hatchable instanceof RiftCreature && ((RiftCreature)this.hatchable).canBePregnant()) {
+            RiftCreature pregnant = (RiftCreature) this.hatchable;
             GlStateManager.pushMatrix();
-            String s = I18n.format("prift.pregnancy.name", ((RiftCreature)impregnable).getName(false));
+            String s = I18n.format("prift.pregnancy.name", ((RiftCreature) pregnant).getName(false));
             printStringXY(s, (-this.fontRenderer.getStringWidth(s) + this.xGui)/ 2, 20, 0, 0, 0);
             GlStateManager.popMatrix();
             {
                 String s1;
-                int minutes = impregnable.getBirthTimeMinutes()[0];
-                int seconds = impregnable.getBirthTimeMinutes()[1];
+                int minutes = pregnant.getBirthTimeMinutes()[0];
+                int seconds = pregnant.getBirthTimeMinutes()[1];
                 String minutesString = minutes > 0 ? minutes + " " + I18n.format("prift.egg.minutes") : "";
                 s1 = I18n.format("prift.egg.time") + ": " + minutesString + " " + seconds + " " + I18n.format("prift.egg.seconds");
                 printStringXY(s1, (-this.fontRenderer.getStringWidth(s1) + this.xGui)/ 2, 140, 0, 0, 0);
@@ -244,7 +242,7 @@ public class RiftEggMenu extends GuiScreen {
             sac.rotationPitch = f4;
             GlStateManager.disableDepth();
         }
-        else if (this.hatchable instanceof IImpregnable) {
+        else if (this.hatchable instanceof RiftCreature && ((RiftCreature)this.hatchable).canBePregnant()) {
             RiftEmbryo embryo = new RiftEmbryo(((RiftCreature)this.hatchable).world);
             GlStateManager.enableColorMaterial();
             GlStateManager.pushMatrix();

@@ -31,10 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestWhenWandering, IHerder {
+public class Megaloceros extends RiftCreature implements IHarvestWhenWandering, IHerder {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megaloceros"));
-    public static final DataParameter<Boolean> PREGNANT = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
-    public static final DataParameter<Integer> PREGNANCY_TIMER = EntityDataManager.createKey(Megaloceros.class, DataSerializers.VARINT);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     private RiftCreaturePart frontBodyPart;
@@ -64,8 +62,6 @@ public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestW
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(PREGNANT, false);
-        this.dataManager.register(PREGNANCY_TIMER, 0);
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
     }
@@ -89,15 +85,6 @@ public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestW
         this.tasks.addTask(11, new RiftHerdMemberFollow(this));
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
-    }
-
-    @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-        if (!this.world.isRemote) {
-            //manage birthin related stuff
-            this.createBaby(this);
-        }
     }
 
     @Override
@@ -129,14 +116,12 @@ public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestW
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        this.writePregnancyDataToNBT(compound);
         this.writeHarvestWanderDataToNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        this.readPregnancyDataFromNBT(compound);
         this.readHarvestWanderDataFromNBT(compound);
     }
 
@@ -225,23 +210,6 @@ public class Megaloceros extends RiftCreature implements IImpregnable, IHarvestW
         float xOffset = (float)(this.posX + (-0.125f) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
         float zOffset = (float)(this.posZ + (-0.125f) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
         return new Vec3d(xOffset, this.posY - 0.75, zOffset);
-    }
-
-    public void setPregnant(boolean value, int timer) {
-        this.dataManager.set(PREGNANT, value);
-        this.dataManager.set(PREGNANCY_TIMER, timer);
-    }
-
-    public boolean isPregnant() {
-        return this.dataManager.get(PREGNANT);
-    }
-
-    public void setPregnancyTimer(int value) {
-        this.dataManager.set(PREGNANCY_TIMER, value);
-    }
-
-    public int getPregnancyTimer() {
-        return this.dataManager.get(PREGNANCY_TIMER);
     }
 
     @Override
