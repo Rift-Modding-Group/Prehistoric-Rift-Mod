@@ -163,6 +163,18 @@ public class Baryonyx extends RiftWaterCreature {
                 .setNumberOfAnims(2)
                 .setChargeUpToUseSound(RiftSounds.GENERIC_SCRATCH_MOVE)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.KICK, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(10D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_KICK_MOVE)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.HEAD, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
+                .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.TAIL, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineChargeUpToUseLength(2.5D)

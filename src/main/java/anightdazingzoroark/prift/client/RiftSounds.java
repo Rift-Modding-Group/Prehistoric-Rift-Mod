@@ -256,6 +256,9 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.generic_move.kick")
     public static final SoundEvent GENERIC_KICK_MOVE = createSoundEvent("prift.generic_move.kick");
 
+    @GameRegistry.ObjectHolder("prift.generic_move.self_destruction")
+    public static final SoundEvent GENERIC_SELF_DESTRUCTION_MOVE = createSoundEvent("prift.generic_move.self_destruction");
+
     @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
     public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");
 

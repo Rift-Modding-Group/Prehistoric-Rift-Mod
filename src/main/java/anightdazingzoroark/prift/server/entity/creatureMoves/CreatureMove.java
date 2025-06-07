@@ -14,7 +14,7 @@ public enum CreatureMove {
     PLATE_FLING(RiftPlateFlingMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 25, new int[]{2}, 0, 100, false, false, false),
     CHARGE(RiftChargeMove.class, MoveAnimType.CHARGE, ChargeType.GRADIENT_THEN_USE, 75, new int[]{10, 20}, 100, 200, true, true, false),
     BIDE(RiftBideMove.class, MoveAnimType.DEFENSE, ChargeType.GRADIENT_THEN_USE, 0, new int[]{20, 40}, 100, 200, false, false, true), //basically like the since removed move from pokemon, absorb all damage you take, then reflect it all back to the opponent
-    SELF_DESTRUCT(null, MoveAnimType.RANGED, ChargeType.NONE, 300, new int[]{0}, 0, 0, false, false, false), //will be given only to anky for now
+    SELF_DESTRUCT(RiftSelfDestructMove.class, MoveAnimType.SELF_DESTRUCTION, ChargeType.NONE, 300, new int[]{0}, 0, 0, false, false, false), //will be given only to anky for now
     POUNCE(RiftPounceMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 50, new int[]{6}, 0, 100, false, true, false),
     PACK_CALL(RiftPackCallMove.class, MoveAnimType.ROAR, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 3600, false, false, false),
     TAIL_WHIP(RiftTailWhipMove.class, MoveAnimType.TAIL, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false),
@@ -35,7 +35,7 @@ public enum CreatureMove {
     POISON_TRAP(RiftPoisonTrapMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{10}, 0, 200, false, false, false),
     KICK(RiftKickMove.class, MoveAnimType.KICK, ChargeType.COOLDOWN_ONLY, 25, new int[]{6}, 0, 100, false, false, false),
     PECK(RiftPeckMove.class, MoveAnimType.BEAK, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false), //peck wih a beak
-    LEECH(null, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false), //bite to deal little damage but drain some health
+    LEECH(RiftLeechMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false), //bite to deal little damage but drain some health
     VENOM_BOMB(null, MoveAnimType.RANGED, ChargeType.GRADIENT_THEN_USE, 25, new int[]{5, 15}, 0, 100, false, false, false), //spit a bomb that explodes and deals lots of damage + poisons mobs in range
     CLIMATE_BLAST(null, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 25, new int[]{20}, 0, 100, false, false, false), //blast fire or frost depending on temperature
     BURROW(null, MoveAnimType.BURROW, ChargeType.GRADIENT_WHILE_USE, 40, new int[]{4, 8}, 100, 200, false, true, true), //burrow into the ground
@@ -104,7 +104,8 @@ public enum CreatureMove {
         BLOW(MoveType.RANGED), //involves blowing
         BURROW(MoveType.RANGED_SELDOM), //involves burrowing
         SCATTER(MoveType.RANGED), //involves scattering projectiles
-        GNASH(MoveType.MELEE); //involves
+        GNASH(MoveType.MELEE), //involves
+        SELF_DESTRUCTION(MoveType.MELEE); //involves suicide in order to do something
 
         public final MoveType moveType;
 

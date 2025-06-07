@@ -610,6 +610,13 @@
     ],
     "subtitle": "sounds.subtitle.generic_kick_move"
   },
+  "prift.generic_move.self_destruction": {
+    "category": "neutral",
+    "sounds": [
+      "random/fuse"
+    ],
+    "subtitle": "sounds.subtitle.generic_self_destruction_move"
+  },
 
   "prift.semi_manual_machine.reset": {
     "category": "block",

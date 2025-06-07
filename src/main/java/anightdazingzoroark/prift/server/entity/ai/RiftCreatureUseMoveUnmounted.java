@@ -560,7 +560,8 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     private boolean moveCanHitTarget(CreatureMove move) {
         if (move.moveAnimType.moveType == CreatureMove.MoveType.RANGED
                 || move.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM
-                || move.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT) return true;
+                || move.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT
+                || move.moveAnimType == CreatureMove.MoveAnimType.SELF_DESTRUCTION) return true;
         else return this.creature.getDistance(this.target) <= (this.creature.attackWidth() + this.creature.width);
     }
 }

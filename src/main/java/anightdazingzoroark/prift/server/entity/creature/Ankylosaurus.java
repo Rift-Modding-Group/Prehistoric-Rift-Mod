@@ -229,6 +229,19 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
                 .defineRecoverFromUseLength(12.5D)
                 .setChargeUpToUseSound(RiftSounds.GENERIC_TAIL_MOVE)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.STOMP, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(10D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_STOMP_MOVE)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.SELF_DESTRUCTION, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(40D)
+                .defineRecoverFromUseLength(5D)
+                .setChargeUpSound(RiftSounds.GENERIC_SELF_DESTRUCTION_MOVE)
+                .finalizePoints()
+        );
         moveMap.put(CreatureMove.MoveAnimType.SPIN, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineRecoverFromUseLength(5D)
