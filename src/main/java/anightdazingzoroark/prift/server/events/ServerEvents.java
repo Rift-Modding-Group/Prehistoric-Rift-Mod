@@ -15,6 +15,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
+import anightdazingzoroark.prift.server.entity.projectile.VenomBomb;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftCanUseMoveTriggerButton;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -458,7 +459,7 @@ public class ServerEvents {
         if (NonPotionEffectsHelper.isGrabbed(entity)) entity.fallDistance = 0;
     }
 
-    //manage cannon impacting stuff
+    //manage explosions from projectiles
     @SubscribeEvent
     public void manageProjectileExplosion(ExplosionEvent.Detonate event) {
         //manage cannon explosion stuff
@@ -542,6 +543,18 @@ public class ServerEvents {
                 if (!RiftUtil.checkForNoAssociations(creature, entity)) entitiesToRemove.add(entity);
             }
             event.getAffectedEntities().removeAll(entitiesToRemove);
+        }
+        //poison mobs hit by explosion from venom bomb
+        if (event.getExplosion().exploder instanceof VenomBomb) {
+            VenomBomb venomBomb = (VenomBomb) event.getExplosion().exploder;
+            for (Entity entity : event.getAffectedEntities()) {
+                if (entity instanceof EntityLivingBase
+                        && RiftUtil.checkForNoAssociations(venomBomb.getShooter(), entity)
+                        && RiftUtil.checkForNoHerdAssociations(venomBomb.getShooter(), entity)
+                ) {
+                    ((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.POISON, 100, 4));
+                }
+            }
         }
     }
 }

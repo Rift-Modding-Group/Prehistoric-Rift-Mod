@@ -337,6 +337,8 @@ public class RiftUtil {
     }
 
     public static boolean checkForNoAssociations(RiftCreature user, Entity target) {
+        if (user == null) return true;
+
         if (target instanceof EntityLivingBase) {
             EntityLivingBase entityLivingBase = (EntityLivingBase)target;
             if (entityLivingBase instanceof EntityPlayer) return !user.isOwner(entityLivingBase);
@@ -348,6 +350,7 @@ public class RiftUtil {
                 else return true;
             }
         }
+        //if target is a hitbox, get parent and call function recursively but this time w the parent
         else if (target instanceof MultiPartEntityPart) {
             Entity parentOfPart = (Entity) ((MultiPartEntityPart)target).parent;
             return checkForNoAssociations(user, parentOfPart);
@@ -355,15 +358,24 @@ public class RiftUtil {
         return true;
     }
 
-    public static boolean checkForNoHerdAssociations(RiftCreature user, RiftCreature target) {
-        //if one of the creatures isn't a herder, return true
-        if (!user.canDoHerding() || !target.canDoHerding()) return true;
+    public static boolean checkForNoHerdAssociations(RiftCreature user, Entity target) {
+        //if the user herder isn't a herder or doesn't exist, return true
+        if (user == null || !user.canDoHerding()) return true;
+
+        //if the target isn't a RiftCreature of RiftCreaturePart, return true
+        if (!(target instanceof RiftCreature) && !(target instanceof RiftCreaturePart)) return true;
+
+        RiftCreature targetCreature = null;
+        if (target instanceof RiftCreaturePart) targetCreature = ((RiftCreaturePart)target).getParent();
+        else if (target instanceof RiftCreature) targetCreature = (RiftCreature) target;
+
+        if (targetCreature == null) return true;
 
         //if both herders have no leaders, return true
-        if (user.getHerdLeader() == null || target.getHerdLeader() == null) return true;
+        if (user.getHerdLeader() == null || targetCreature.getHerdLeader() == null) return true;
 
         //if herders have same leader, return false, else true
-        if (user.getHerdLeader().equals(target.getHerdLeader())) return false;
+        if (user.getHerdLeader().equals(targetCreature.getHerdLeader())) return false;
         return true;
     }
 

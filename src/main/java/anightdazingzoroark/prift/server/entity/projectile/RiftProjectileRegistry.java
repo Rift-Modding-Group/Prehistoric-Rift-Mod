@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.projectile;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.item.Item;
 
-public class RiftProjectiles {
+public class RiftProjectileRegistry {
     public static Item THROWN_STEGOSAURUS_PLATE_ONE;
     public static Item THROWN_STEGOSAURUS_PLATE_TWO;
     public static Item THROWN_STEGOSAURUS_PLATE_THREE;

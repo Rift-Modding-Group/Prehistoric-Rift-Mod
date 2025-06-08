@@ -124,6 +124,12 @@ public class Dilophosaurus extends RiftCreature {
                 .setNumberOfAnims(2)
                 .setChargeUpToUseSound(RiftSounds.GENERIC_SCRATCH_MOVE)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.JAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
+                .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.RANGED, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(5D)
                 .defineChargeUpToUseLength(5D)

@@ -6,7 +6,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
-import anightdazingzoroark.prift.server.entity.projectile.RiftProjectiles;
+import anightdazingzoroark.prift.server.entity.projectile.RiftProjectileRegistry;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
@@ -190,7 +190,7 @@ public class RiftItems {
         if (GeneralConfig.canUseMM()) RiftMMItems.registerMMItems();
 
         //dont ask why this is here
-        RiftProjectiles.registerProjectiles();
+        RiftProjectileRegistry.registerProjectiles();
 
         //to not be seen
         DETECT_ALERT = riftUnusableGenericItem("detect_alert");

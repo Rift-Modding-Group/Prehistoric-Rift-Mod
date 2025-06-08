@@ -517,3 +517,4 @@ creature_move.poison_trap.name=Poison Trap
 creature_move.peck.name=Peck
 creature_move.kick.name=Kick
 creature_move.leech.name=Leech
+creature_move.venom_bomb.name=Venom Bomb

@@ -66,6 +66,6 @@ public class RiftMortarShell extends EntityArrow implements IRiftProjectile {
 
     @Override
     public ItemStack getItemToRender() {
-        return new ItemStack(RiftProjectiles.MORTAR_SHELL);
+        return new ItemStack(RiftProjectileRegistry.MORTAR_SHELL);
     }
 }

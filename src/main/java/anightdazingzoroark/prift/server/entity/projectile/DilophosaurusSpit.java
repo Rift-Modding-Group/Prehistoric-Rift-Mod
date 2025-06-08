@@ -43,7 +43,7 @@ public class DilophosaurusSpit extends EntityArrow implements IRiftProjectile, I
 
     @Override
     public ItemStack getItemToRender() {
-        return new ItemStack(RiftProjectiles.DILOPHOSAURUS_SPIT);
+        return new ItemStack(RiftProjectileRegistry.DILOPHOSAURUS_SPIT);
     }
 
     protected void onHit(RayTraceResult raytraceResultIn) {

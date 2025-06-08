@@ -61,6 +61,6 @@ public class RiftCannonball extends EntityArrow implements IRiftProjectile {
 
     @Override
     public ItemStack getItemToRender() {
-        return new ItemStack(RiftProjectiles.CANNONBALL);
+        return new ItemStack(RiftProjectileRegistry.CANNONBALL);
     }
 }

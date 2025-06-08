@@ -32,6 +32,7 @@ public class RiftEntities {
         registerEntity("catapult_boulder_projectile", RiftCatapultBoulder.class, miscId++, RiftInitialize.instance);
         registerEntity("thrown_bola", ThrownBola.class, miscId++, RiftInitialize.instance);
         registerEntity("dilophosaurus_spit", DilophosaurusSpit.class, miscId++, RiftInitialize.instance);
+        registerEntity("venom_bomb", VenomBomb.class, miscId++, RiftInitialize.instance);
         registerEntity("trap", RiftTrap.class, miscId++, RiftInitialize.instance);
     }
 
