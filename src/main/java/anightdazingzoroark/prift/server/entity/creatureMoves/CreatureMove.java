@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 public enum CreatureMove {
     BOUNCE(RiftBounceMove.class, MoveAnimType.STATUS, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false),
-    TACKLE(RiftTackleMove.class, MoveAnimType.CHARGE, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
+    TACKLE(RiftTackleMove.class, MoveAnimType.CHARGE, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, true, false),
     HEADBUTT(RiftHeadbuttMove.class, MoveAnimType.HEAD, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
     STOMP(RiftStompMove.class, MoveAnimType.STOMP, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
     SCRATCH(RiftScratchMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
