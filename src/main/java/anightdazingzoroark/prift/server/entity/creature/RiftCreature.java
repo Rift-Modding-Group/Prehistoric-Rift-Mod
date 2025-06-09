@@ -744,24 +744,35 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         else this.resetEnergyTick = 0;
     }
 
+    public void attackEntityAsMobEffects(Entity entityIn) {}
+
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
-        if (flag) this.applyEnchantments(this, entityIn);
+        if (flag) {
+            this.applyEnchantments(this, entityIn);
+            this.attackEntityAsMobEffects(entityIn);
+        }
         this.setLastAttackedEntity(entityIn);
         return flag;
     }
 
     public boolean attackEntityAsMobWithAdditionalDamage(Entity entityIn, float damageAdditional) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()) + damageAdditional);
-        if (flag) this.applyEnchantments(this, entityIn);
+        if (flag) {
+            this.applyEnchantments(this, entityIn);
+            this.attackEntityAsMobEffects(entityIn);
+        }
         this.setLastAttackedEntity(entityIn);
         return flag;
     }
 
     public boolean attackEntityAsMobWithMultiplier(Entity entityIn, float multiplier) {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()) * multiplier);
-        if (flag) this.applyEnchantments(this, entityIn);
+        if (flag) {
+            this.applyEnchantments(this, entityIn);
+            this.attackEntityAsMobEffects(entityIn);
+        }
         this.setLastAttackedEntity(entityIn);
         return flag;
     }

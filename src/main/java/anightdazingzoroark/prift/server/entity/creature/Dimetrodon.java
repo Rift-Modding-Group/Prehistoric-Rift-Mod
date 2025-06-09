@@ -386,25 +386,19 @@ public class Dimetrodon extends RiftCreature {
     }
 
     @Override
-    public boolean attackEntityAsMob(Entity entityIn) {
-        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float)((int)this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue()));
-        if (flag) {
-            this.applyEnchantments(this, entityIn);
-            if (this.getTemperature().equals(EggTemperature.VERY_WARM)) entityIn.setFire(15);
-            else if (this.getTemperature().equals(EggTemperature.WARM)) entityIn.setFire(5);
-            else if (this.getTemperature().equals(EggTemperature.COLD)) {
-                EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
-                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 0));
-                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 100, 0));
-            }
-            else if (this.getTemperature().equals(EggTemperature.VERY_COLD)) {
-                EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
-                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 300, 0));
-                entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 300, 0));
-            }
+    public void attackEntityAsMobEffects(Entity entityIn) {
+        if (this.getTemperature().equals(EggTemperature.VERY_WARM)) entityIn.setFire(15);
+        else if (this.getTemperature().equals(EggTemperature.WARM)) entityIn.setFire(5);
+        else if (this.getTemperature().equals(EggTemperature.COLD)) {
+            EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
+            entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 0));
+            entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 100, 0));
         }
-        this.setLastAttackedEntity(entityIn);
-        return flag;
+        else if (this.getTemperature().equals(EggTemperature.VERY_COLD)) {
+            EntityLivingBase entityLivingBase = (EntityLivingBase)entityIn;
+            entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 300, 0));
+            entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 300, 0));
+        }
     }
 
     @Override
@@ -430,6 +424,28 @@ public class Dimetrodon extends RiftCreature {
                 .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
                 .finalizePoints()
         );
+        moveMap.put(CreatureMove.MoveAnimType.STOMP, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(10D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(7.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_STOMP_MOVE)
+                .finalizePoints()
+        );
+        //special stuff for status type moves
+        RiftCreatureMoveAnimator statusMoveAnimator = new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(1.25D)
+                .defineRecoverFromUseLength(3.75D)
+                .finalizePoints();
+
+        if (this.currentCreatureMove() == CreatureMove.CLIMATE_BLAST) {
+            if (this.getTemperature() == EggTemperature.WARM || this.getTemperature() == EggTemperature.VERY_WARM)
+                statusMoveAnimator.setChargeUpToUseParticles("climate_blast_warm", 96, this.posX, this.posY, this.posZ);
+            else if (this.getTemperature() == EggTemperature.COLD || this.getTemperature() == EggTemperature.VERY_COLD)
+                statusMoveAnimator.setChargeUpToUseParticles("climate_blast_cold", 96, this.posX, this.posY, this.posZ);
+        }
+
+        moveMap.put(CreatureMove.MoveAnimType.STATUS, statusMoveAnimator);
         return moveMap;
     }
     //move related stuff ends here

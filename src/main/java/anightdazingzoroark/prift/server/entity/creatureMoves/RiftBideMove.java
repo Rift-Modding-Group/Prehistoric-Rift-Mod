@@ -34,12 +34,7 @@ public class RiftBideMove extends RiftCreatureMove {
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         float damageToRelease = this.accumulatedDamage * 2f;
         AxisAlignedBB area = user.getEntityBoundingBox().grow(4D, 4D, 4D);
-        List<Entity> hitEntitiesList = user.world.getEntitiesWithinAABB(Entity.class, area, new Predicate<Entity>() {
-            @Override
-            public boolean apply(@Nullable Entity entity) {
-                return RiftUtil.checkForNoAssociations(user, entity) && !user.equals(entity);
-            }
-        });
+        List<Entity> hitEntitiesList = user.world.getEntitiesWithinAABB(Entity.class, area, this.generalEntityPredicate(user));
 
         for (Entity entity : hitEntitiesList) {
             entity.attackEntityFrom(DamageSource.causeMobDamage(user), damageToRelease);

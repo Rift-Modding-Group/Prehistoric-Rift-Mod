@@ -76,11 +76,11 @@
 				},
 				"leftFrontLeg": {
 					"rotation": [-90, 0, 0],
-					"position": [0, -3, 0]
+					"position": [0, 0, 0]
 				},
 				"rightFrontLeg": {
 					"rotation": [-90, 0, 0],
-					"position": [0, -3, 0]
+					"position": [0, 0, 0]
 				},
 				"leftBackFoot": {
 					"position": [0, 1, 0]
@@ -148,6 +148,74 @@
 				},
 				"lowerJaw": {
 					"rotation": [22.5, 0, 0]
+				}
+			}
+		},
+		"animation.dimetrodon.use_stomp_type_move": {
+			"animation_length": 1,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [-12.5, 0, 0],
+						"0.625": [0, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [12.5, 0, 0],
+						"0.625": [0, 0, 0]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [12.5, 0, 0],
+						"0.625": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [12.5, 0, 0],
+						"0.625": [12.5, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.dimetrodon.use_status_type_move": {
+			"animation_length": 0.5,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-12.5, 0, 0],
+						"0.375": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [12.5, 0, 0],
+						"0.375": [12.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.375": [0, 0, 0]
+					}
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.375": [27.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
 				}
 			}
 		}

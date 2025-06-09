@@ -203,7 +203,7 @@ public abstract class RiftCreatureMove {
                 else if (entity instanceof RiftCreature) {
                     return  !entity.equals(user)
                             && RiftUtil.checkForNoAssociations(user, entity)
-                            && RiftUtil.checkForNoHerdAssociations(user, (RiftCreature) entity);
+                            && RiftUtil.checkForNoHerdAssociations(user, entity);
                 }
                 else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity) && !entity.equals(user);
                 else return false;

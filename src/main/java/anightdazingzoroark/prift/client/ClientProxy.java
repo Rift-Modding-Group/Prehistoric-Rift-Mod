@@ -104,6 +104,12 @@ public class ClientProxy extends ServerProxy {
             case "light_blast":
                 particle = new RiftLightBlastParticle(world, color, x, y, z, motX, motY, motZ);
                 break;
+            case "climate_blast_warm":
+                particle = new RiftClimateBlastWarm(world, x, y, z, motX, motY, motZ);
+                break;
+            case "climate_blast_cold":
+                particle = new RiftClimateBlastCold(world, x, y, z, motX, motY, motZ);
+                break;
         }
         if (particle != null) this.particleSpawner.spawnParticle(particle, false, false, false, x, y, z);
     }
