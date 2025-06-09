@@ -367,6 +367,13 @@
     ],
     "subtitle": "sounds.subtitle.direwolf_sniff"
   },
+  "prift.direwolf.growl": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/direwolf/direwolf_growl"
+    ],
+    "subtitle": "sounds.subtitle.direwolf_growl"
+  },
 
   "prift.megaloceros.idle": {
     "category": "neutral",

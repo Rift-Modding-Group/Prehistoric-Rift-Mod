@@ -17,24 +17,20 @@ public class RiftPowerBlowMove extends RiftCreatureMove {
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setCanMove(false);
+        user.disableCanRotateMounted();
     }
 
     @Override
-    public void whileChargingUp(RiftCreature user) {
-
-    }
+    public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         List<Entity> targets = user.getAllTargetsInFront(true);
         float blowStrength = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 2f, 8f);
         for (Entity entity : targets) {
-
             if (entity instanceof MultiPartEntityPart
                     && ((MultiPartEntityPart)entity).parent instanceof EntityLivingBase)
                 this.knockback(user, (EntityLivingBase)((MultiPartEntityPart)entity).parent, blowStrength);
@@ -55,6 +51,7 @@ public class RiftPowerBlowMove extends RiftCreatureMove {
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.setCanMove(true);
+        user.enableCanRotateMounted();
     }
 
     @Override

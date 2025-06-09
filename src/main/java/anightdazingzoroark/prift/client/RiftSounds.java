@@ -157,6 +157,9 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.direwolf.howl")
     public static final SoundEvent DIREWOLF_SNIFF = createSoundEvent("prift.direwolf.sniff");
 
+    @GameRegistry.ObjectHolder("prift.direwolf.growl")
+    public static final SoundEvent DIREWOLF_GROWL = createSoundEvent("prift.direwolf.growl");
+
     @GameRegistry.ObjectHolder("prift.megaloceros.idle")
     public static final SoundEvent MEGALOCEROS_IDLE = createSoundEvent("prift.megaloceros.idle");
 

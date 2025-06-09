@@ -125,6 +125,22 @@ public class Direwolf extends RiftCreature {
                 .defineRecoverFromUseLength(5D)
                 .setChargeUpToUseSound(RiftSounds.DIREWOLF_SNIFF)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.GROWL, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpToUseLength(5D)
+                .defineUseDurationLength(2.5D)
+                .defineRecoverFromUseLength(2.5D)
+                .setChargeUpToUseSound(RiftSounds.DIREWOLF_GROWL)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.BLOW, new RiftCreatureMoveAnimator(this)
+                .defineStartMoveDelayLength(5D)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(5D)
+                .defineUseDurationLength(17.5D)
+                .defineRecoverFromUseLength(2.5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BLOW_MOVE)
+                .setChargeUpToUseParticles("blow", 32, this.headPart.posX, this.headPart.posY, this.headPart.posZ, this.getLookVec().x, this.getLookVec().y, this.getLookVec().z)
+                .finalizePoints()
+        );
         return moveMap;
     }
     //move related stuff ends here

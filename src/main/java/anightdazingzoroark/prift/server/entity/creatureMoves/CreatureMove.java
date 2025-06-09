@@ -7,7 +7,7 @@ public enum CreatureMove {
     STOMP(RiftStompMove.class, MoveAnimType.STOMP, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
     SCRATCH(RiftScratchMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
     BITE(RiftBiteMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
-    SNARL(RiftSnarlMove.class, MoveAnimType.STATUS, ChargeType.NONE, 0, new int[]{0}, 0, 60, false, false, false),
+    SNARL(RiftSnarlMove.class, MoveAnimType.GROWL, ChargeType.NONE, 0, new int[]{0}, 0, 60, false, false, false),
     POWER_ROAR(RiftPowerRoarMove.class, MoveAnimType.ROAR, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false),
     TAIL_SLAP(RiftTailSlapMove.class, MoveAnimType.TAIL, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false),
     THAGOMIZE(RiftThagomizeMove.class, MoveAnimType.TAIL, ChargeType.GRADIENT_THEN_USE, 80, new int[]{10, 20}, 100, 200, false, false, false),
@@ -105,7 +105,8 @@ public enum CreatureMove {
         BURROW(MoveType.RANGED_SELDOM), //involves burrowing
         SCATTER(MoveType.RANGED), //involves scattering projectiles
         GNASH(MoveType.MELEE), //involves
-        SELF_DESTRUCTION(MoveType.MELEE); //involves suicide in order to do something
+        SELF_DESTRUCTION(MoveType.MELEE), //involves suicide in order to do something
+        GROWL(MoveType.SUPPORT); //involves growling as a form of support
 
         public final MoveType moveType;
 

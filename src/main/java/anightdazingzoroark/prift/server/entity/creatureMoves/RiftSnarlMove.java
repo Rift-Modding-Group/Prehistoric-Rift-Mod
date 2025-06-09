@@ -18,17 +18,13 @@ public class RiftSnarlMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onStartExecuting(RiftCreature user, Entity target) {
-
-    }
+    public void onStartExecuting(RiftCreature user, Entity target) {}
 
     @Override
     public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {

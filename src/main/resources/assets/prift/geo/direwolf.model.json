@@ -27,9 +27,6 @@
 					"name": "frontBody",
 					"parent": "direwolf",
 					"pivot": [0, 17.5, 4.7],
-					"cubes": [
-						{"origin": [-6, 7, -6], "size": [12, 12, 12], "uv": [0, 25]}
-					],
 					"locators": {
 						"werewolfindicator": [0, 22, 0],
 						"particlelocator": [0, 24, 3]
@@ -92,8 +89,16 @@
 					]
 				},
 				{
-					"name": "saddle",
+					"name": "frontBodyCube",
 					"parent": "frontBody",
+					"pivot": [0, 13, 0],
+					"cubes": [
+						{"origin": [-6, 7, -6], "size": [12, 12, 12], "uv": [0, 25]}
+					]
+				},
+				{
+					"name": "saddle",
+					"parent": "frontBodyCube",
 					"pivot": [0, 0, 0],
 					"cubes": [
 						{"origin": [-6, 7, -5.5], "size": [12, 12, 11], "inflate": 0.25, "uv": [66, 0]}
