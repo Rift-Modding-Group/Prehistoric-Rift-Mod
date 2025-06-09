@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.projectile;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.item.Item;
 
-public class RiftProjectileRegistry {
+public class RiftProjectileAnimatorRegistry {
     public static Item THROWN_STEGOSAURUS_PLATE_ONE;
     public static Item THROWN_STEGOSAURUS_PLATE_TWO;
     public static Item THROWN_STEGOSAURUS_PLATE_THREE;
@@ -13,6 +13,7 @@ public class RiftProjectileRegistry {
     public static Item CATAPULT_BOULDER;
     public static Item THROWN_BOLA;
     public static Item DILOPHOSAURUS_SPIT;
+    public static Item VENOM_BOMB;
 
     public static void registerProjectiles() {
         THROWN_STEGOSAURUS_PLATE_ONE = new ThrownStegoPlateAnimator().setRegistryName("thrown_stegosaurus_plate_animator_one").setTranslationKey("thrown_stegosaurus_plate_animator_one");
@@ -27,6 +28,7 @@ public class RiftProjectileRegistry {
         THROWN_BOLA = new ThrownBolaAnimator().setRegistryName("thrown_bola_animator").setTranslationKey("thrown_bola_animator");
 
         DILOPHOSAURUS_SPIT = new DilophosaurusSpitAnimator().setRegistryName("dilophosaurus_spit_animator").setTranslationKey("dilophosaurus_spit_animator");
+        VENOM_BOMB = new VenomBombAnimator().setRegistryName("venom_bomb_animator").setTranslationKey("venom_bomb_animator");
 
         RiftItems.ITEMS.add(THROWN_STEGOSAURUS_PLATE_ONE);
         RiftItems.ITEMS.add(THROWN_STEGOSAURUS_PLATE_TWO);
@@ -40,5 +42,6 @@ public class RiftProjectileRegistry {
         RiftItems.ITEMS.add(THROWN_BOLA);
 
         RiftItems.ITEMS.add(DILOPHOSAURUS_SPIT);
+        RiftItems.ITEMS.add(VENOM_BOMB);
     }
 }

@@ -8,7 +8,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
-import anightdazingzoroark.prift.server.entity.projectile.RiftProjectileRegistry;
+import anightdazingzoroark.prift.server.entity.projectile.RiftProjectileAnimatorRegistry;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import com.codetaylor.mc.pyrotech.ModPyrotechConfig;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.ModuleTechBloomery;
@@ -117,15 +117,15 @@ public class RiftJEI implements IModPlugin {
     public void register(IModRegistry registry) {
         //hide the projectile animators from jei
         IIngredientBlacklist blacklist = registry.getJeiHelpers().getIngredientBlacklist();
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileRegistry.CANNONBALL));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileRegistry.MORTAR_SHELL));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileRegistry.CATAPULT_BOULDER));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_ONE));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_TWO));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_THREE));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_FOUR));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileRegistry.THROWN_BOLA));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileRegistry.DILOPHOSAURUS_SPIT));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.CANNONBALL));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.MORTAR_SHELL));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.CATAPULT_BOULDER));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_ONE));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_TWO));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_THREE));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_FOUR));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_BOLA));
+        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.DILOPHOSAURUS_SPIT));
 
         //hide le hidden items
         blacklist.addIngredientToBlacklist(new ItemStack(RiftItems.DETECT_ALERT));

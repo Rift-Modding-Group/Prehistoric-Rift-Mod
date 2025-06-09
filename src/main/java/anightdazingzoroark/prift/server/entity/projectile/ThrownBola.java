@@ -63,7 +63,7 @@ public class ThrownBola extends EntityArrow implements IRiftProjectile, IProject
 
     @Override
     public ItemStack getItemToRender() {
-        return new ItemStack(RiftProjectileRegistry.THROWN_BOLA);
+        return new ItemStack(RiftProjectileAnimatorRegistry.THROWN_BOLA);
     }
 
     @Override

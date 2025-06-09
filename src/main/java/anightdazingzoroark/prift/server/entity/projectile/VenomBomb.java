@@ -160,7 +160,7 @@ public class VenomBomb extends EntityArrow implements IRiftProjectile, IProjecti
 
     @Override
     public ItemStack getItemToRender() {
-        return null;
+        return new ItemStack(RiftProjectileAnimatorRegistry.VENOM_BOMB);
     }
 
     @Override

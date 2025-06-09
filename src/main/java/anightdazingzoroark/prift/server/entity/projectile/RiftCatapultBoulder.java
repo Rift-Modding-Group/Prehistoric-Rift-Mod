@@ -66,6 +66,6 @@ public class RiftCatapultBoulder extends EntityArrow implements IRiftProjectile 
 
     @Override
     public ItemStack getItemToRender() {
-        return new ItemStack(RiftProjectileRegistry.CATAPULT_BOULDER);
+        return new ItemStack(RiftProjectileAnimatorRegistry.CATAPULT_BOULDER);
     }
 }

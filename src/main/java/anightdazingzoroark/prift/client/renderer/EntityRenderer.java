@@ -57,10 +57,10 @@ public class EntityRenderer {
                 return new ProjectileRenderer<ThrownStegoPlate>(manager, Minecraft.getMinecraft().getRenderItem(), null);
             }
         });
-        RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_ONE.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(0));
-        RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_TWO.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(1));
-        RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_THREE.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(2));
-        RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_FOUR.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(3));
+        RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_ONE.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(0));
+        RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_TWO.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(1));
+        RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_THREE.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(2));
+        RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_FOUR.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(3));
 
         RenderingRegistry.registerEntityRenderingHandler(RiftCannonball.class, new IRenderFactory<RiftCannonball>() {
             @Override
@@ -68,7 +68,7 @@ public class EntityRenderer {
                 return new ProjectileRenderer<RiftCannonball>(manager, Minecraft.getMinecraft().getRenderItem(), null);
             }
         });
-        RiftProjectileRegistry.CANNONBALL.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CANNON));
+        RiftProjectileAnimatorRegistry.CANNONBALL.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CANNON));
 
         RenderingRegistry.registerEntityRenderingHandler(RiftMortarShell.class, new IRenderFactory<RiftMortarShell>() {
             @Override
@@ -76,7 +76,7 @@ public class EntityRenderer {
                 return new ProjectileRenderer<RiftMortarShell>(manager, Minecraft.getMinecraft().getRenderItem(), null);
             }
         });
-        RiftProjectileRegistry.MORTAR_SHELL.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.MORTAR));
+        RiftProjectileAnimatorRegistry.MORTAR_SHELL.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.MORTAR));
 
         RenderingRegistry.registerEntityRenderingHandler(RiftCatapultBoulder.class, new IRenderFactory<RiftCatapultBoulder>() {
             @Override
@@ -84,7 +84,7 @@ public class EntityRenderer {
                 return new ProjectileRenderer<RiftCatapultBoulder>(manager, Minecraft.getMinecraft().getRenderItem(), null);
             }
         });
-        RiftProjectileRegistry.CATAPULT_BOULDER.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CATAPULT));
+        RiftProjectileAnimatorRegistry.CATAPULT_BOULDER.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CATAPULT));
 
         RenderingRegistry.registerEntityRenderingHandler(ThrownBola.class, new IRenderFactory<ThrownBola>() {
             @Override
@@ -92,7 +92,7 @@ public class EntityRenderer {
                 return new ProjectileRenderer<ThrownBola>(manager, Minecraft.getMinecraft().getRenderItem(), null);
             }
         });
-        RiftProjectileRegistry.THROWN_BOLA.setTileEntityItemStackRenderer(new ThrownBolaAnimatorRenderer());
+        RiftProjectileAnimatorRegistry.THROWN_BOLA.setTileEntityItemStackRenderer(new ThrownBolaAnimatorRenderer());
 
         RenderingRegistry.registerEntityRenderingHandler(DilophosaurusSpit.class, new IRenderFactory<DilophosaurusSpit>() {
             @Override
@@ -100,7 +100,15 @@ public class EntityRenderer {
                 return new ProjectileRenderer<DilophosaurusSpit>(manager, Minecraft.getMinecraft().getRenderItem(), null);
             }
         });
-        RiftProjectileRegistry.DILOPHOSAURUS_SPIT.setTileEntityItemStackRenderer(new DilophosaurusSpitRenderer());
+        RiftProjectileAnimatorRegistry.DILOPHOSAURUS_SPIT.setTileEntityItemStackRenderer(new DilophosaurusSpitRenderer());
+
+        RenderingRegistry.registerEntityRenderingHandler(VenomBomb.class, new IRenderFactory<VenomBomb>() {
+            @Override
+            public Render<? super VenomBomb> createRenderFor(RenderManager manager) {
+                return new ProjectileRenderer<VenomBomb>(manager, Minecraft.getMinecraft().getRenderItem(), null);
+            }
+        });
+        RiftProjectileAnimatorRegistry.VENOM_BOMB.setTileEntityItemStackRenderer(new VenomBombRenderer());
 
 
         RenderingRegistry.registerEntityRenderingHandler(RiftTrap.class, new IRenderFactory<RiftTrap>() {

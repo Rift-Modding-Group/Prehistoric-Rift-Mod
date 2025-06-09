@@ -65,16 +65,16 @@ public class ThrownStegoPlate extends EntityArrow implements IRiftProjectile {
         ItemStack itemForm;
         switch (this.getVariant()) {
             default:
-                itemForm = new ItemStack(RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_ONE);
+                itemForm = new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_ONE);
                 break;
             case 1:
-                itemForm = new ItemStack(RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_TWO);
+                itemForm = new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_TWO);
                 break;
             case 2:
-                itemForm = new ItemStack(RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_THREE);
+                itemForm = new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_THREE);
                 break;
             case 3:
-                itemForm = new ItemStack(RiftProjectileRegistry.THROWN_STEGOSAURUS_PLATE_FOUR);
+                itemForm = new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_FOUR);
                 break;
         }
         return itemForm;
