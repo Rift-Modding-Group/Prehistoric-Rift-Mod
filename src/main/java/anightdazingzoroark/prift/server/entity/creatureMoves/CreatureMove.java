@@ -38,9 +38,10 @@ public enum CreatureMove {
     LEECH(RiftLeechMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false), //bite to deal little damage but drain some health
     VENOM_BOMB(RiftVenomBombMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 25, new int[]{5, 15}, 0, 100, false, false, false), //spit a bomb that explodes and deals lots of damage + poisons mobs in range
     CLIMATE_BLAST(RiftClimateBlastMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 25, new int[]{8}, 0, 100, false, false, false), //blast fire or frost depending on temperature
-    BURROW(null, MoveAnimType.BURROW, ChargeType.GRADIENT_WHILE_USE, 40, new int[]{4, 8}, 100, 200, false, true, true), //burrow into the ground
+    BURROW(RiftBurrowMove.class, MoveAnimType.BURROW, ChargeType.GRADIENT_WHILE_USE, 40, new int[]{4, 8}, 100, 200, false, true, true), //burrow into the ground
     PLATE_SCATTER(null, MoveAnimType.SCATTER, ChargeType.COOLDOWN_ONLY, 50, new int[]{20}, 0, 150, false, false, false), //scatter plates
-    GNASH(null, MoveAnimType.GNASH, ChargeType.COOLDOWN_ONLY, 60, new int[]{20}, 0, 600, false, false, false); //user picks up and damages a target, then spits them out
+    GNASH(null, MoveAnimType.GNASH, ChargeType.COOLDOWN_ONLY, 60, new int[]{20}, 0, 600, false, false, false), //user picks up and damages a target by thrashing them around, then throws them
+    MUDBALL(null, MoveAnimType.THROW, ChargeType.COOLDOWN_ONLY, 30, new int[]{0}, 0, 100, false, false, false); //user throws mud to blind target
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveAnimType moveAnimType;
@@ -93,7 +94,7 @@ public enum CreatureMove {
         STOMP(MoveType.MELEE), //stomp based
         CLAW(MoveType.MELEE), //claw based
         JAW(MoveType.MELEE), //jaw/mouth based attacks
-        RANGED(MoveType.RANGED), //attacks that are ranged or elemental attacks
+        RANGED(MoveType.RANGED), //involves spitting/breathing a projectile
         DEFENSE(MoveType.SUPPORT), //for things that involve defending like hiding in shell or using a shield
         SPIN(MoveType.MELEE), //attacks that involve spinning
         GRAB(MoveType.MELEE), //for moves that involve grabbing a creature
@@ -106,7 +107,8 @@ public enum CreatureMove {
         SCATTER(MoveType.RANGED), //involves scattering projectiles
         GNASH(MoveType.MELEE), //involves
         SELF_DESTRUCTION(MoveType.MELEE), //involves suicide in order to do something
-        GROWL(MoveType.SUPPORT); //involves growling as a form of support
+        GROWL(MoveType.SUPPORT), //involves growling as a form of support
+        THROW(MoveType.RANGED); //involves throwing a projectile
 
         public final MoveType moveType;
 

@@ -99,7 +99,12 @@ public class Palaeocastor extends RiftCreature implements IHarvestWhenWandering 
     @Override
     public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
-        possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.SCRATCH, CreatureMove.BURROW));
+        possibleMoves.add(2, Arrays.asList(CreatureMove.BITE, CreatureMove.SCRATCH, CreatureMove.BURROW));
+        possibleMoves.add(2, Arrays.asList(CreatureMove.BITE, CreatureMove.TACKLE, CreatureMove.BURROW));
+        possibleMoves.add(2, Arrays.asList(CreatureMove.SCRATCH, CreatureMove.TACKLE, CreatureMove.BURROW));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.SCRATCH, CreatureMove.MUDBALL));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.TACKLE, CreatureMove.MUDBALL));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.SCRATCH, CreatureMove.TACKLE, CreatureMove.MUDBALL));
         return possibleMoves;
     }
 
@@ -111,6 +116,17 @@ public class Palaeocastor extends RiftCreature implements IHarvestWhenWandering 
                 .defineChargeUpToUseLength(1.25D)
                 .defineRecoverFromUseLength(2.5D)
                 .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.CLAW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(2D)
+                .defineRecoverFromUseLength(3D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_SCRATCH_MOVE)
+                .setNumberOfAnims(2)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.BURROW, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(7.5D)
+                .defineUseDurationLength(5D)
                 .finalizePoints());
         return moveMap;
     }

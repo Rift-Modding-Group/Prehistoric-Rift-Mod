@@ -14,6 +14,8 @@ public class PalaeocastorRenderer extends RiftCreatureRenderer {
 
     @Override
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
+        if (animatable.isBurrowing()) return;
+
         Palaeocastor palaeocastor = (Palaeocastor) animatable;
         float scale = RiftUtil.setModelScale(palaeocastor, 0.25f, 1f);
 

@@ -65,7 +65,6 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.util.vector.Vector;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -76,7 +75,6 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.vecmath.Vector2d;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -115,6 +113,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> INCAPACITATED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_ROTATE_MOUNTED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CLOAKED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> BURROWING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -270,6 +269,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(INCAPACITATED, false);
         this.dataManager.register(CAN_ROTATE_MOUNTED, true);
         this.dataManager.register(CLOAKED, false);
+        this.dataManager.register(BURROWING, false);
         this.dataManager.register(CAN_MOVE, true);
 
         this.dataManager.register(CURRENT_MOVE, -1);
@@ -411,6 +411,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else {
+            if (this.isBurrowing()) this.createBurrowingParticles();
             this.setControls();
 
             //set sprinting based on if rider is sprinting
@@ -2087,6 +2088,31 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean canMove() {
         return this.dataManager.get(CAN_MOVE);
     }
+
+    //burrowing stuff starts here
+    public boolean isBurrowing() {
+        return this.dataManager.get(BURROWING);
+    }
+
+    public void setBurrowing(boolean value) {
+        this.dataManager.set(BURROWING, value);
+    }
+
+    private void createBurrowingParticles() {
+        IBlockState stateBelow = this.world.getBlockState(this.getPosition().down());
+        for (int x = 0; x < 16; x++) {
+            if (stateBelow.getMaterial() != Material.AIR)
+                this.world.spawnParticle(EnumParticleTypes.BLOCK_CRACK,
+                    this.posX,
+                    this.posY,
+                    this.posZ,
+                    4.0D * ((double)this.rand.nextFloat() - 0.5D),
+                    0.5D,
+                    4.0D * ((double)this.rand.nextFloat() - 0.5D),
+                    Block.getStateId(stateBelow));
+        }
+    }
+    //burrowing stuff ends here
 
     public TameBehaviorType getTameBehavior() {
         return TameBehaviorType.values()[this.dataManager.get(BEHAVIOR).byteValue()];

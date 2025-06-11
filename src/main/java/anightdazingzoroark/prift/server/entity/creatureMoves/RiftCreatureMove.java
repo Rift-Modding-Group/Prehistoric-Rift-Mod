@@ -56,6 +56,8 @@ public abstract class RiftCreatureMove {
 
     public abstract void onReachUsePoint(RiftCreature user, Entity target, int useAmount);
 
+    public void onBeforeStopExecuting(RiftCreature user) {}
+
     public abstract void onStopExecuting(RiftCreature user);
 
     public void lookAtTarget(RiftCreature user, Entity target) {

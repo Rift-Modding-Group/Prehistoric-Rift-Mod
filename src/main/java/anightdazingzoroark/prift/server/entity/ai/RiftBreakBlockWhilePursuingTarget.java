@@ -44,6 +44,9 @@ public class RiftBreakBlockWhilePursuingTarget extends EntityAIBase {
     public boolean shouldExecute() {
         if (!RiftConfigHandler.getConfig(this.creature.creatureType).general.breakBlocksInPursuit) return false;
 
+        //some moves make it so the creature can't dig up blocks in front
+        if (this.creature.currentCreatureMove() == CreatureMove.BURROW) return false;
+
         this.target = this.creature.getAttackTarget();
         if (this.target == null
                 || !this.target.isEntityAlive()
