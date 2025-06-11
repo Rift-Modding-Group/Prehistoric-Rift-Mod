@@ -41,7 +41,7 @@ public enum CreatureMove {
     BURROW(RiftBurrowMove.class, MoveAnimType.BURROW, ChargeType.GRADIENT_WHILE_USE, 40, new int[]{4, 8}, 100, 200, false, true, true), //burrow into the ground
     PLATE_SCATTER(null, MoveAnimType.SCATTER, ChargeType.COOLDOWN_ONLY, 50, new int[]{20}, 0, 150, false, false, false), //scatter plates
     GNASH(null, MoveAnimType.GNASH, ChargeType.COOLDOWN_ONLY, 60, new int[]{20}, 0, 600, false, false, false), //user picks up and damages a target by thrashing them around, then throws them
-    MUDBALL(null, MoveAnimType.THROW, ChargeType.COOLDOWN_ONLY, 30, new int[]{0}, 0, 100, false, false, false); //user throws mud to blind target
+    MUDBALL(RiftMudballMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 30, new int[]{0}, 0, 100, false, false, false); //user throws mud to blind target
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveAnimType moveAnimType;

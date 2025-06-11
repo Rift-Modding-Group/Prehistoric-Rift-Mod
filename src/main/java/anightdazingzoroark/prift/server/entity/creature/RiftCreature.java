@@ -411,12 +411,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else {
-            if (this.isBurrowing()) this.createBurrowingParticles();
             this.setControls();
 
             //set sprinting based on if rider is sprinting
             RiftMessages.WRAPPER.sendToServer(new RiftSetSprinting(this, this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting()));
         }
+        if (this.isBurrowing()) this.manageBurrowingEffects();
         this.updateParts();
         this.resetParts(this.getRenderSizeModifier());
         this.manageGrabVictim();
@@ -2098,18 +2098,23 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(BURROWING, value);
     }
 
-    private void createBurrowingParticles() {
+    private void manageBurrowingEffects() {
         IBlockState stateBelow = this.world.getBlockState(this.getPosition().down());
         for (int x = 0; x < 16; x++) {
-            if (stateBelow.getMaterial() != Material.AIR)
-                this.world.spawnParticle(EnumParticleTypes.BLOCK_CRACK,
-                    this.posX,
-                    this.posY,
-                    this.posZ,
-                    4.0D * ((double)this.rand.nextFloat() - 0.5D),
-                    0.5D,
-                    4.0D * ((double)this.rand.nextFloat() - 0.5D),
-                    Block.getStateId(stateBelow));
+            if (stateBelow.getMaterial() != Material.AIR) {
+                //play sounds
+                this.playSound(stateBelow.getBlock().getSoundType().getHitSound(), 1f, 1f);
+
+                //show particles
+                if (this.world.isRemote) this.world.spawnParticle(EnumParticleTypes.BLOCK_CRACK,
+                        this.posX,
+                        this.posY,
+                        this.posZ,
+                        4.0D * ((double) this.rand.nextFloat() - 0.5D),
+                        0.5D,
+                        4.0D * ((double) this.rand.nextFloat() - 0.5D),
+                        Block.getStateId(stateBelow));
+            }
         }
     }
     //burrowing stuff ends here

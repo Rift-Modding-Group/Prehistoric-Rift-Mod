@@ -196,6 +196,12 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.palaeocastor.death")
     public static final SoundEvent PALAEOCASTOR_DEATH = createSoundEvent("prift.palaeocastor.death");
 
+    @GameRegistry.ObjectHolder("prift.palaeocastor.mudball")
+    public static final SoundEvent PALAEOCASTOR_MUDBALL = createSoundEvent("prift.palaeocastor.mudball");
+
+    @GameRegistry.ObjectHolder("prift.palaeocastor.charge")
+    public static final SoundEvent PALAEOCASTOR_CHARGE = createSoundEvent("prift.palaeocastor.charge");
+
     @GameRegistry.ObjectHolder("prift.ankylosaurus.idle")
     public static final SoundEvent ANKYLOSAURUS_IDLE = createSoundEvent("prift.ankylosaurus.idle");
 

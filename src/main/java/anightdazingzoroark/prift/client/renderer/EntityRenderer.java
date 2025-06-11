@@ -110,6 +110,14 @@ public class EntityRenderer {
         });
         RiftProjectileAnimatorRegistry.VENOM_BOMB.setTileEntityItemStackRenderer(new VenomBombRenderer());
 
+        RenderingRegistry.registerEntityRenderingHandler(Mudball.class, new IRenderFactory<Mudball>() {
+            @Override
+            public Render<? super Mudball> createRenderFor(RenderManager manager) {
+                return new ProjectileRenderer<Mudball>(manager, Minecraft.getMinecraft().getRenderItem(), null);
+            }
+        });
+        RiftProjectileAnimatorRegistry.MUDBALL.setTileEntityItemStackRenderer(new MudballRenderer());
+
 
         RenderingRegistry.registerEntityRenderingHandler(RiftTrap.class, new IRenderFactory<RiftTrap>() {
             @Override

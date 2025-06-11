@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
-import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MultiPartEntityPart;
@@ -34,7 +33,7 @@ public class RiftBurrowMove extends RiftCreatureMove {
     @Override
     public void whileExecuting(RiftCreature user) {
         user.setBurrowing(true);
-        AxisAlignedBB burrowerDetectHitbox = user.getEntityBoundingBox().grow(2D);
+        AxisAlignedBB burrowerDetectHitbox = user.getEntityBoundingBox().grow(0.5D);
         boolean burrowTargetHit = false;
 
         //as long as the creature is on a block that they can break, or in front of a 1 block tall wall which they can break,
@@ -48,7 +47,7 @@ public class RiftBurrowMove extends RiftCreatureMove {
 
         //always dig towards the target
         if (this.burrowTarget != null && this.burrowTarget.isEntityAlive()) {
-            user.getMoveHelper().setMoveTo(this.burrowTarget.posX, this.burrowTarget.posY, this.burrowTarget.posZ, 1D);
+            user.getMoveHelper().setMoveTo(this.burrowTarget.posX, this.burrowTarget.posY, this.burrowTarget.posZ, 1.5D);
 
             //jumping logic
             if (user.checkIfCanBreakBlock(inFrontPos)

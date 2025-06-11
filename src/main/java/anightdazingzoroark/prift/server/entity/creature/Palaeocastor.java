@@ -124,9 +124,20 @@ public class Palaeocastor extends RiftCreature implements IHarvestWhenWandering 
                 .setChargeUpToUseSound(RiftSounds.GENERIC_SCRATCH_MOVE)
                 .setNumberOfAnims(2)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.CHARGE, new RiftCreatureMoveAnimator(this)
+                .defineStartMoveDelayLength(5D)
+                .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.PALAEOCASTOR_CHARGE)
+                .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.BURROW, new RiftCreatureMoveAnimator(this)
                 .defineChargeUpLength(7.5D)
                 .defineUseDurationLength(5D)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.RANGED, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.PALAEOCASTOR_MUDBALL)
                 .finalizePoints());
         return moveMap;
     }

@@ -18,7 +18,7 @@
 				{
 					"name": "body",
 					"parent": "base",
-					"pivot": [0, 0, 0],
+					"pivot": [0, 3.125, 4],
 					"cubes": [
 						{"origin": [-4, 2, -6], "size": [8, 8, 12], "uv": [0, 0]}
 					],
@@ -89,7 +89,7 @@
 				},
 				{
 					"name": "leftBackLeg",
-					"parent": "body",
+					"parent": "base",
 					"pivot": [-5.125, 3.125, 4],
 					"cubes": [
 						{"origin": [-6.625, -0.375, 2.5], "size": [3, 5, 3], "inflate": -0.375, "uv": [20, 32]}
@@ -97,7 +97,7 @@
 				},
 				{
 					"name": "rightBackLeg",
-					"parent": "body",
+					"parent": "base",
 					"pivot": [5.125, 3.125, 4],
 					"cubes": [
 						{"origin": [3.625, -0.375, 2.5], "size": [3, 5, 3], "inflate": -0.375, "uv": [0, 0]}

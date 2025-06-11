@@ -463,6 +463,24 @@
     ],
     "subtitle": "sounds.subtitle.palaeocastor_death"
   },
+  "prift.palaeocastor.mudball": {
+    "category": "neutral",
+    "sounds": [
+      "mob/slime/small1",
+      "mob/slime/small2",
+      "mob/slime/small3",
+      "mob/slime/small4",
+      "mob/slime/small5"
+    ],
+    "subtitle": "sounds.subtitle.palaeocastor_mudball"
+  },
+  "prift.palaeocastor.charge": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/palaeocastor/palaeocastor_charge"
+    ],
+    "subtitle": "sounds.subtitle.palaeocastor_charge"
+  },
 
   "prift.ankylosaurus.idle": {
     "category": "neutral",
