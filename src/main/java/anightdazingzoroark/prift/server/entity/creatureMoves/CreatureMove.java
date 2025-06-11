@@ -39,7 +39,7 @@ public enum CreatureMove {
     VENOM_BOMB(RiftVenomBombMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 25, new int[]{5, 15}, 0, 100, false, false, false), //spit a bomb that explodes and deals lots of damage + poisons mobs in range
     CLIMATE_BLAST(RiftClimateBlastMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 25, new int[]{8}, 0, 100, false, false, false), //blast fire or frost depending on temperature
     BURROW(RiftBurrowMove.class, MoveAnimType.BURROW, ChargeType.GRADIENT_WHILE_USE, 40, new int[]{4, 8}, 100, 200, false, true, true), //burrow into the ground
-    PLATE_SCATTER(null, MoveAnimType.SCATTER, ChargeType.COOLDOWN_ONLY, 50, new int[]{20}, 0, 150, false, false, false), //scatter plates
+    PLATE_SCATTER(RiftPlateScatterMove.class, MoveAnimType.SCATTER, ChargeType.COOLDOWN_ONLY, 50, new int[]{20}, 0, 150, false, false, false), //scatter plates
     GNASH(null, MoveAnimType.GNASH, ChargeType.COOLDOWN_ONLY, 60, new int[]{20}, 0, 600, false, false, false), //user picks up and damages a target by thrashing them around, then throws them
     MUDBALL(RiftMudballMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 30, new int[]{0}, 0, 100, false, false, false); //user throws mud to blind target
 

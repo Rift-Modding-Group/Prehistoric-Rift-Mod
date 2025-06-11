@@ -192,20 +192,12 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
                 .defineRecoverFromUseLength(7.5D)
                 .setChargeUpToUseSound(RiftSounds.STEGOSAURUS_RANGED_MOVE)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.SCATTER, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpToUseLength(5D)
+                .defineRecoverFromUseLength(1D)
+                .setChargeUpToUseSound(RiftSounds.STEGOSAURUS_RANGED_MOVE)
+                .finalizePoints());
         return moveMap;
-    }
-
-    public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
-        ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(this.world, this);
-        double d0 = target.posX - this.posX;
-        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - thrownStegoPlate.posY;
-        double d2 = target.posZ - this.posZ;
-        double d3 = (double) MathHelper.sqrt(d0 * d0 + d2 * d2);
-        thrownStegoPlate.setVariant(this.getVariant());
-        thrownStegoPlate.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 5F);
-        thrownStegoPlate.setDamage(4D + (double)(this.getLevel())/10D);
-        this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-        this.world.spawnEntity(thrownStegoPlate);
     }
 
     public Vec3d riderPos() {

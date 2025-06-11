@@ -17,6 +17,16 @@ public class RiftLightBlastMove extends RiftCreatureMove {
     }
 
     @Override
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return user.getMoveUse(this.creatureMove) >= this.creatureMove.maxUse;
+    }
+
+    @Override
+    public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
+        return user.getMoveUse(this.creatureMove) >= this.creatureMove.maxUse;
+    }
+
+    @Override
     public String cannotExecuteMountedMessage() {
         return "reminder.insufficient_light_blast_charge";
     }
@@ -27,14 +37,10 @@ public class RiftLightBlastMove extends RiftCreatureMove {
     }
 
     @Override
-    public void whileChargingUp(RiftCreature user) {
-
-    }
+    public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {

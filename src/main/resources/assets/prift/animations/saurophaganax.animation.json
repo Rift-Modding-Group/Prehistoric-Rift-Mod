@@ -453,6 +453,32 @@
 					}
 				}
 			}
+		},
+		"animation.saurophaganax.use_claw_type_move_0": {
+			"animation_length": 0.5,
+			"bones": {
+				"leftArm": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [-50.29011, 57.15935, 80.75168],
+						"0.25": [-93.67368, -17.69473, 39.07591],
+						"0.5": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.saurophaganax.use_claw_type_move_1": {
+			"animation_length": 0.5,
+			"bones": {
+				"rightArm": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.125": [-50.2901, -57.1594, -80.7517],
+						"0.25": [-93.6737, 17.6947, -39.0759],
+						"0.5": [0, 0, 0]
+					}
+				}
+			}
 		}
 	}
 }

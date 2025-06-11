@@ -1327,6 +1327,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return 0;
     }
 
+    public int getMoveUse(CreatureMove value) {
+        int index = this.getLearnedMoves().indexOf(value);
+        if (index == -1) return 0;
+        return this.getMoveUse(index);
+    }
+
     public int getCurrentMoveUse() {
         if (this.dataManager.get(CURRENT_MOVE) < 0) return 0;
         int movePos = this.getLearnedMoves().indexOf(CreatureMove.values()[this.dataManager.get(CURRENT_MOVE)]);
@@ -3023,6 +3029,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                 }
                 else if (currentCreatureMove() == null) {
+                    chosenAnimFromMultiple = -1;
                     event.getController().clearAnimationCache();
                     return PlayState.STOP;
                 }

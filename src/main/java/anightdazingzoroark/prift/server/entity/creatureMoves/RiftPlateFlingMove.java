@@ -22,9 +22,7 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
     public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
@@ -40,12 +38,12 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
 
     private void shootEntityUnmounted(RiftCreature creature, Entity target) {
         ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(creature.world, creature);
-        double d0 = target.posX - creature.posX;
-        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - thrownStegoPlate.posY;
-        double d2 = target.posZ - creature.posZ;
-        double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
+        double velX = target.posX - creature.posX;
+        double velY = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - thrownStegoPlate.posY;
+        double velZ = target.posZ - creature.posZ;
+        double magnitude = MathHelper.sqrt(velX * velX + velZ * velZ);
         thrownStegoPlate.setVariant(creature.getVariant());
-        thrownStegoPlate.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 5F);
+        thrownStegoPlate.shoot(velX, velY + magnitude * 0.20000000298023224D, velZ, 1.6F, 5F);
         thrownStegoPlate.setDamage(4D + (double)(creature.getLevel())/10D);
         creature.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (creature.getRNG().nextFloat() * 0.4F + 0.8F));
         creature.world.spawnEntity(thrownStegoPlate);
