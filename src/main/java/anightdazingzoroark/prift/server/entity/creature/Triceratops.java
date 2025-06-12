@@ -190,6 +190,7 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
                         .defineStartMoveDelayLength(5D)
                         .defineChargeUpToUseLength(2.5D)
                         .defineRecoverFromUseLength(7.5D)
+                        .setChargeUpToUseSound(RiftSounds.TRICERATOPS_BIDE_RELEASE)
                         .finalizePoints()
                 : null);
         return moveMap;

@@ -244,12 +244,13 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         moveMap.put(CreatureMove.MoveAnimType.CHARGE, new RiftCreatureMoveAnimator(this)
                 .defineStartMoveDelayLength(5D)
                 .defineRecoverFromUseLength(5D)
-                //.setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
+                .setChargeUpToUseSound(RiftSounds.TYRANNOSAURUS_CHARGE)
                 .finalizePoints());
         moveMap.put(CreatureMove.MoveAnimType.GNASH, new RiftCreatureMoveAnimator(this)
                 .defineStartMoveDelayLength(5D)
                 .defineRecoverFromUseLength(5D)
-                //.setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_BITE_MOVE)
+                .setUseDurationSound(RiftSounds.GENERIC_GNASH_MOVE_GNASHING)
                 .finalizePoints());
         return moveMap;
     }

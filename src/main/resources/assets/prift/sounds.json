@@ -27,6 +27,13 @@
     ],
     "subtitle": "sounds.subtitle.tyrannosaurus_roar"
   },
+  "prift.tyrannosaurus.charge": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/tyrannosaurus/tyrannosaurus_charge"
+    ],
+    "subtitle": "sounds.subtitle.tyrannosaurus_charge"
+  },
 
   "prift.stegosaurus.idle": {
     "category": "neutral",
@@ -116,6 +123,13 @@
       "prift:entities/triceratops/triceratops_charge"
     ],
     "subtitle": "sounds.subtitle.triceratops_charge"
+  },
+  "prift.triceratops.bide_release": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/triceratops/triceratops_bide_release"
+    ],
+    "subtitle": "sounds.subtitle.triceratops_bide_release"
   },
 
   "prift.utahraptor.idle": {
@@ -641,6 +655,13 @@
       "random/fuse"
     ],
     "subtitle": "sounds.subtitle.generic_self_destruction_move"
+  },
+  "prift.generic_move.gnash_gnashing": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_gnash_move_gnashing"
+    ],
+    "subtitle": "sounds.subtitle.generic_gnash_move_gnashing"
   },
 
   "prift.semi_manual_machine.reset": {

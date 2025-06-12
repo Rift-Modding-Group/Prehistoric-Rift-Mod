@@ -19,6 +19,9 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.tyrannosaurus.roar")
     public static final SoundEvent TYRANNOSAURUS_ROAR = createSoundEvent("prift.tyrannosaurus.roar");
 
+    @GameRegistry.ObjectHolder("prift.tyrannosaurus.charge")
+    public static final SoundEvent TYRANNOSAURUS_CHARGE = createSoundEvent("prift.tyrannosaurus.charge");
+
     @GameRegistry.ObjectHolder("prift.stegosaurus.idle")
     public static final SoundEvent STEGOSAURUS_IDLE = createSoundEvent("prift.stegosaurus.idle");
 
@@ -54,6 +57,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.triceratops.charge")
     public static final SoundEvent TRICERATOPS_CHARGE = createSoundEvent("prift.triceratops.charge");
+
+    @GameRegistry.ObjectHolder("prift.triceratops.bide_release")
+    public static final SoundEvent TRICERATOPS_BIDE_RELEASE = createSoundEvent("prift.triceratops.bide_release");
 
     @GameRegistry.ObjectHolder("prift.utahraptor.idle")
     public static final SoundEvent UTAHRAPTOR_IDLE = createSoundEvent("prift.utahraptor.idle");
@@ -267,6 +273,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.generic_move.self_destruction")
     public static final SoundEvent GENERIC_SELF_DESTRUCTION_MOVE = createSoundEvent("prift.generic_move.self_destruction");
+
+    @GameRegistry.ObjectHolder("prift.generic_move.gnash_gnashing")
+    public static final SoundEvent GENERIC_GNASH_MOVE_GNASHING = createSoundEvent("prift.generic_move.gnash_gnashing");
 
     @GameRegistry.ObjectHolder("prift.semi_manual_machine.reset")
     public static final SoundEvent SEMI_MANUAL_MACHINE_RESET = createSoundEvent("prift.semi_manual_machine.reset");
