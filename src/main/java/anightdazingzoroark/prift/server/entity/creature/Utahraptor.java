@@ -149,6 +149,12 @@ public class Utahraptor extends RiftCreature {
                 .defineRecoverFromUseLength(1D)
                 .setChargeUpToUseSound(RiftSounds.UTAHRAPTOR_LEAP)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.KICK, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(2.5D)
+                .setChargeUpToUseSound(RiftSounds.UTAHRAPTOR_LEAP)
+                .finalizePoints());
         return moveMap;
     }
     //move related stuff ends here
@@ -185,9 +191,5 @@ public class Utahraptor extends RiftCreature {
 
     protected SoundEvent getDeathSound() {
         return RiftSounds.UTAHRAPTOR_DEATH;
-    }
-
-    public SoundEvent getCallSound() {
-        return RiftSounds.UTAHRAPTOR_CALL;
     }
 }

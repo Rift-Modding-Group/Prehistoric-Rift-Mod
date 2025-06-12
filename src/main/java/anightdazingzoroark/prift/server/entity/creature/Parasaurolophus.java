@@ -178,7 +178,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
                 .setChargeUpToUseParticles("blow", 32, this.headPart.posX, this.headPart.posY, this.headPart.posZ, this.getLookVec().x, this.getLookVec().y, this.getLookVec().z)
                 .finalizePoints()
         );
-        moveMap.put(CreatureMove.MoveAnimType.STATUS, new RiftCreatureMoveAnimator(this)
+        moveMap.put(CreatureMove.MoveAnimType.ROAR, new RiftCreatureMoveAnimator(this)
                 .defineStartMoveDelayLength(5)
                 .defineChargeUpLength(10)
                 .defineChargeUpToUseLength(2.5)

@@ -235,6 +235,22 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
                 .setChargeUpToUseParticles("roar", 64, this.posX, this.posY, this.posZ)
                 .setChargeUpToUseParticleYBounds(0, (int) this.height)
                 .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.HEAD, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(2.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(5D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.CHARGE, new RiftCreatureMoveAnimator(this)
+                .defineStartMoveDelayLength(5D)
+                .defineRecoverFromUseLength(5D)
+                //.setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.GNASH, new RiftCreatureMoveAnimator(this)
+                .defineStartMoveDelayLength(5D)
+                .defineRecoverFromUseLength(5D)
+                //.setChargeUpToUseSound(RiftSounds.GENERIC_HEAD_MOVE)
+                .finalizePoints());
         return moveMap;
     }
     //move related stuff ends here

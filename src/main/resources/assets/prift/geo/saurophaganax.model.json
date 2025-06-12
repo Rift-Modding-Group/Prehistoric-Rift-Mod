@@ -144,7 +144,7 @@
 				{
 					"name": "leftShoulder",
 					"parent": "leftArm",
-					"pivot": [0, 0, 0],
+					"pivot": [-5.75, 10, -12.8],
 					"cubes": [
 						{"origin": [-6.75, 4.75, -13.8], "size": [2, 6, 3], "inflate": -0.25, "uv": [0, 26]}
 					]

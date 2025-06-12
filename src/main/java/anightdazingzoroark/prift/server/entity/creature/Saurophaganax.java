@@ -115,8 +115,9 @@ public class Saurophaganax extends RiftCreature {
     @Override
     public WeightedList<List<CreatureMove>> possibleStartingMoves() {
         WeightedList<List<CreatureMove>> possibleMoves = new WeightedList<>();
-        possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT, CreatureMove.LIGHT_BLAST));
-        possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.SCRATCH, CreatureMove.LIGHT_BLAST));
+        possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.HEADBUTT, CreatureMove.LIGHT_BLAST));
+        possibleMoves.add(3, Arrays.asList(CreatureMove.BITE, CreatureMove.SCRATCH, CreatureMove.LIGHT_BLAST));
+        possibleMoves.add(1, Arrays.asList(CreatureMove.BITE, CreatureMove.GNASH, CreatureMove.LIGHT_BLAST));
         return possibleMoves;
     }
 
@@ -150,6 +151,10 @@ public class Saurophaganax extends RiftCreature {
                 .setChargeUpToUseSound(RiftSounds.SAUROPHAGANAX_LIGHT_BLAST)
                 .setChargeUpToUseParticles("light_blast", 256, this.posX, this.posY, this.posZ)
                 .setChargeUpToUseParticleColor(this.getVariantColor())
+                .finalizePoints());
+        moveMap.put(CreatureMove.MoveAnimType.GNASH, new RiftCreatureMoveAnimator(this)
+                .defineStartMoveDelayLength(5D)
+                .defineRecoverFromUseLength(5D)
                 .finalizePoints());
         return moveMap;
     }

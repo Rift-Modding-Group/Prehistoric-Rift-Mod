@@ -19,7 +19,7 @@ public enum CreatureMove {
     PACK_CALL(RiftPackCallMove.class, MoveAnimType.ROAR, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 3600, false, false, false),
     TAIL_WHIP(RiftTailWhipMove.class, MoveAnimType.TAIL, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false),
     POWER_BLOW(RiftPowerBlowMove.class, MoveAnimType.BLOW, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false),
-    SHOCK_BLAST(RiftShockBlastMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{20}, 0, 3600, false, false, false),
+    SHOCK_BLAST(RiftShockBlastMove.class, MoveAnimType.ROAR, ChargeType.COOLDOWN_ONLY, 0, new int[]{20}, 0, 3600, false, false, false),
     DEATH_ROLL(RiftDeathRollMove.class, MoveAnimType.SPIN, ChargeType.GRADIENT_WHILE_USE, 60, new int[]{10, 20}, 100, 200, false, true, true),
     LUNGE(RiftLungeMove.class, MoveAnimType.CHARGE, ChargeType.COOLDOWN_ONLY, 25, new int[]{8}, 0, 100, false, true, false),
     GRAB(RiftGrabMove.class, MoveAnimType.GRAB, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false),
@@ -40,7 +40,7 @@ public enum CreatureMove {
     CLIMATE_BLAST(RiftClimateBlastMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 25, new int[]{8}, 0, 100, false, false, false), //blast fire or frost depending on temperature
     BURROW(RiftBurrowMove.class, MoveAnimType.BURROW, ChargeType.GRADIENT_WHILE_USE, 40, new int[]{4, 8}, 100, 200, false, true, true), //burrow into the ground
     PLATE_SCATTER(RiftPlateScatterMove.class, MoveAnimType.SCATTER, ChargeType.COOLDOWN_ONLY, 50, new int[]{20}, 0, 150, false, false, false), //scatter plates
-    GNASH(null, MoveAnimType.GNASH, ChargeType.COOLDOWN_ONLY, 60, new int[]{20}, 0, 600, false, false, false), //user picks up and damages a target by thrashing them around, then throws them
+    GNASH(RiftGnashMove.class, MoveAnimType.GNASH, ChargeType.GRADIENT_WHILE_USE, 60, new int[]{20, 40}, 100, 300, false, true, true), //user picks up and damages a target by thrashing them around, then throws them
     MUDBALL(RiftMudballMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 30, new int[]{0}, 0, 100, false, false, false); //user throws mud to blind target
 
     public final Class<? extends RiftCreatureMove> creatureMove;
@@ -105,7 +105,7 @@ public enum CreatureMove {
         BLOW(MoveType.RANGED), //involves blowing
         BURROW(MoveType.RANGED_SELDOM), //involves burrowing
         SCATTER(MoveType.RANGED), //involves scattering projectiles
-        GNASH(MoveType.MELEE), //involves
+        GNASH(MoveType.MELEE), //involves grabbing a creature to damage them
         SELF_DESTRUCTION(MoveType.MELEE), //involves suicide in order to do something
         GROWL(MoveType.SUPPORT), //involves growling as a form of support
         THROW(MoveType.RANGED); //involves throwing a projectile
