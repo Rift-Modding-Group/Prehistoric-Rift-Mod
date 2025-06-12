@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
+import software.bernie.geckolib3.resource.GeckoLibCache;
 
 public class TriceratopsRenderer extends RiftCreatureRenderer {
     public TriceratopsRenderer(RenderManager renderManager) {
@@ -15,6 +16,8 @@ public class TriceratopsRenderer extends RiftCreatureRenderer {
     @Override
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
         float scale = RiftUtil.setModelScale(animatable, 0.3f, 1.75f);
+
+        GeckoLibCache.getInstance().parser.setValue("triceratops_move_use", Math.min(animatable.getCurrentMoveUse(), 100));
 
         //hide saddle stuff
         model.getBone("saddle").get().setHidden(!animatable.isSaddled());
