@@ -561,7 +561,7 @@
 					"rotation": [7.5, 0, 0]
 				},
 				"neck": {
-					"rotation": ["direwolf_move_use * (-0.225) + 17.5", 0, 0]
+					"rotation": ["creature_move_use * (-0.225) + 17.5", 0, 0]
 				},
 				"leftFrontLeg": {
 					"rotation": [-7.5, 0, 12.5]
@@ -570,10 +570,10 @@
 					"rotation": [-7.5, 0, -12.5]
 				},
 				"head": {
-					"rotation": ["direwolf_move_use * 0.05", 0, 0]
+					"rotation": ["creature_move_use * 0.05", 0, 0]
 				},
 				"frontBodyCube": {
-					"scale": "direwolf_move_use * (0.05 / 100) + 1"
+					"scale": "creature_move_use * (0.05 / 100) + 1"
 				}
 			}
 		},
@@ -615,7 +615,7 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": ["direwolf_move_use * (-0.225) + 17.5", 0, 0],
+						"0.0": ["creature_move_use * (-0.225) + 17.5", 0, 0],
 						"0.25": [7.5, 0, 0],
 						"0.375": [7.43656, 0.9762, -7.43656],
 						"0.5": [7.44086, -0.97341, 7.43298],
@@ -643,7 +643,7 @@
 				},
 				"head": {
 					"rotation": {
-						"0.0": ["direwolf_move_use * 0.05", 0, 0],
+						"0.0": ["creature_move_use * 0.05", 0, 0],
 						"0.25": [-15, 0, 0],
 						"1.125": [-15, 0, 0],
 						"1.25": [0, 0, 0]
@@ -659,7 +659,7 @@
 				},
 				"frontBodyCube": {
 					"scale": {
-						"0.0": ["direwolf_move_use * (0.05 / 100) + 1", "direwolf_move_use * (0.05 / 100) + 1", "direwolf_move_use * (0.05 / 100) + 1"],
+						"0.0": ["creature_move_use * (0.05 / 100) + 1", "creature_move_use * (0.05 / 100) + 1", "creature_move_use * (0.05 / 100) + 1"],
 						"0.25": [1, 1, 1]
 					}
 				}

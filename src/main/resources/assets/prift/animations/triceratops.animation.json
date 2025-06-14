@@ -530,7 +530,7 @@
 					"rotation": [-4.83045, -1.29256, -14.94548]
 				},
 				"head": {
-					"rotation": ["triceratops_move_use * 0.25", 0, 0]
+					"rotation": ["creature_move_use * 0.25", 0, 0]
 				}
 			}
 		},
@@ -587,7 +587,7 @@
 				},
 				"head": {
 					"rotation": {
-						"0.0": ["triceratops_move_use * 0.25", 0, 0],
+						"0.0": ["creature_move_use * 0.25", 0, 0],
 						"0.125": [-15, 0, 0],
 						"0.5": [0, 0, 0]
 					}

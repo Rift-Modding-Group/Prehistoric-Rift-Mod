@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.renderer;
 
 import anightdazingzoroark.prift.client.renderer.entity.*;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
@@ -20,26 +21,12 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 public class EntityRenderer {
     public static void registerRenderers() {
         //creatures
-        RenderingRegistry.registerEntityRenderingHandler(Tyrannosaurus.class, TyrannosaurusRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Stegosaurus.class, StegosaurusRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Dodo.class, DodoRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Triceratops.class, TriceratopsRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Utahraptor.class, UtahraptorRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Apatosaurus.class, ApatosaurusRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Parasaurolophus.class, ParasaurolophusRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Dimetrodon.class, DimetrodonRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Coelacanth.class, CoelacanthRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Megapiranha.class, MegapiranhaRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Sarcosuchus.class, SarcosuchusRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Anomalocaris.class, AnomalocarisRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Saurophaganax.class, SaurophaganaxRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Direwolf.class, DirewolfRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Megaloceros.class, MegalocerosRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Baryonyx.class, BaryonyxRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Palaeocastor.class, PalaeocastorRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Ankylosaurus.class, AnkylosaurusRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Dilophosaurus.class, DilophosaurusRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Gallimimus.class, GallimimusRenderer::new);
+        for (RiftCreatureType creatureType : RiftCreatureType.values()) {
+            if (creatureType == RiftCreatureType.SAUROPHAGANAX)
+                RenderingRegistry.registerEntityRenderingHandler(creatureType.getCreature(), RiftCreatureGlowingRenderer::new);
+            else
+                RenderingRegistry.registerEntityRenderingHandler(creatureType.getCreature(), RiftCreatureRenderer::new);
+        }
 
         //everythin else
         RenderingRegistry.registerEntityRenderingHandler(RiftEgg.class, RiftEggRenderer::new);

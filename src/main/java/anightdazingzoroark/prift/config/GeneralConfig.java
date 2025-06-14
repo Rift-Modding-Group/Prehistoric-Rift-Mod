@@ -409,7 +409,7 @@ public class GeneralConfig {
         }, "Mobs that are to be considered monsters");
 
         //debug
-        quickEggHatch = config.getBoolean("All eggs hatch quickly", "Debug", false, "Turning this on makes all eggs hatch within 5 seconds. Mainly here for testing purposes, idk i could have made this a gamerule or smth");
+        quickEggHatch = config.getBoolean("All eggs hatch quickly", "Debug", false, "Turning this on makes all eggs hatch within 5 seconds regardless of temperature");
         spawnCreatureNotify = config.getBoolean("Show what creature was spawned in the log", "Debug", false, "Turning this on will reveal the creatures that are being spawned in and their locations in the log");
     }
 

@@ -466,7 +466,7 @@
 			"animation_length": 5,
 			"bones": {
 				"body": {
-					"rotation": ["apatosaurus_bide_move_body_use", 0, 0]
+					"rotation": ["creature_move_use * (2.5 / 100)", 0, 0]
 				},
 				"neck0": {
 					"rotation": [5, 0, 0]
@@ -482,19 +482,19 @@
 					"position": [0, 1, 0]
 				},
 				"tail0": {
-					"rotation": [0, "apatosaurus_bide_move_tail_use", 0]
+					"rotation": [0, "creature_move_use * -0.15", 0]
 				},
 				"tail1": {
-					"rotation": [0, "apatosaurus_bide_move_tail_use", 0]
+					"rotation": [0, "creature_move_use * -0.15", 0]
 				},
 				"tail2": {
-					"rotation": [0, "apatosaurus_bide_move_tail_use", 0]
+					"rotation": [0, "creature_move_use * -0.15", 0]
 				},
 				"leftFrontLeg": {
-					"rotation": ["apatosaurus_bide_move_leg_use", 0, 0]
+					"rotation": ["creature_move_use * -0.225", 0, 0]
 				},
 				"rightFrontLeg": {
-					"rotation": ["apatosaurus_bide_move_leg_use", 0, 0]
+					"rotation": ["creature_move_use * -0.225", 0, 0]
 				}
 			}
 		},
@@ -539,8 +539,8 @@
 			"bones": {
 				"body": {
 					"rotation": {
-						"0.0": ["apatosaurus_bide_move_body_use", 0, 0],
-						"0.125": ["apatosaurus_bide_move_body_use", 0, 0],
+						"0.0": ["creature_move_use * (2.5 / 100)", 0, 0],
+						"0.125": ["creature_move_use * (2.5 / 100)", 0, 0],
 						"0.5": [0, 0, 0]
 					}
 				},
@@ -579,36 +579,36 @@
 				},
 				"tail0": {
 					"rotation": {
-						"0.0": [0, "apatosaurus_bide_move_tail_use", 0],
+						"0.0": [0, "creature_move_use * -0.15", 0],
 						"0.125": [0, 30, 0],
 						"0.5": [0, 0, 0]
 					}
 				},
 				"tail1": {
 					"rotation": {
-						"0.0": [0, "apatosaurus_bide_move_tail_use", 0],
+						"0.0": [0, "creature_move_use * -0.15", 0],
 						"0.125": [0, 30, 0],
 						"0.5": [0, 0, 0]
 					}
 				},
 				"tail2": {
 					"rotation": {
-						"0.0": [0, "apatosaurus_bide_move_tail_use", 0],
+						"0.0": [0, "creature_move_use * -0.15", 0],
 						"0.125": [0, 30, 0],
 						"0.5": [0, 0, 0]
 					}
 				},
 				"leftFrontLeg": {
 					"rotation": {
-						"0.0": ["apatosaurus_bide_move_leg_use", 0, 0],
-						"0.125": ["apatosaurus_bide_move_leg_use", 0, 0],
+						"0.0": ["creature_move_use * -0.225", 0, 0],
+						"0.125": ["creature_move_use * -0.225", 0, 0],
 						"0.5": [0, 0, 0]
 					}
 				},
 				"rightFrontLeg": {
 					"rotation": {
-						"0.0": ["apatosaurus_bide_move_leg_use", 0, 0],
-						"0.125": ["apatosaurus_bide_move_leg_use", 0, 0],
+						"0.0": ["creature_move_use * -0.225", 0, 0],
+						"0.125": ["creature_move_use * -0.225", 0, 0],
 						"0.5": [0, 0, 0]
 					}
 				}
