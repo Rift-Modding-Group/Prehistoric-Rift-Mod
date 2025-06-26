@@ -2,9 +2,9 @@ package anightdazingzoroark.prift.server.entity.aprilFools;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
+import anightdazingzoroark.riftlib.core.IAnimatable;
+import anightdazingzoroark.riftlib.core.manager.AnimationData;
+import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 public abstract class RiftAprilFoolsBoss extends EntityLiving implements IAnimatable {
     private final AnimationFactory factory = new AnimationFactory(this);

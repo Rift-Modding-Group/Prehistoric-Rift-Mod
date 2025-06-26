@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client.model.entity;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.util.ResourceLocation;
-import software.bernie.geckolib3.model.AnimatedGeoModel;
+import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
 
 public class RiftCreatureModel extends AnimatedGeoModel<RiftCreature> {
     @Override

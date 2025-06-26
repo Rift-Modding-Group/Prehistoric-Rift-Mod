@@ -4,9 +4,9 @@ import anightdazingzoroark.prift.client.model.block.RiftHandCrankModel;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityHandCrank;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
-import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoBlockRenderer;
-import software.bernie.geckolib3.resource.GeckoLibCache;
+import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
+import anightdazingzoroark.riftlib.resource.RiftLibCache;
 
 public class HandCrankRenderer extends GeoBlockRenderer<TileEntityHandCrank> {
     public HandCrankRenderer() {
@@ -15,7 +15,7 @@ public class HandCrankRenderer extends GeoBlockRenderer<TileEntityHandCrank> {
 
     @Override
     public void render(GeoModel model, TileEntityHandCrank animatable, float partialTicks, float red, float green, float blue, float alpha) {
-        GeckoLibCache.getInstance().parser.setValue("rotation", animatable.getRotation());
+        RiftLibCache.getInstance().parser.setValue("rotation", animatable.getRotation());
         super.render(model, animatable, partialTicks, red, green, blue, alpha);
     }
 

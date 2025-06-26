@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import net.minecraft.item.Item;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
+import anightdazingzoroark.riftlib.core.IAnimatable;
+import anightdazingzoroark.riftlib.core.manager.AnimationData;
+import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 //geckolib for 1.12.2 is weird like bruv
 public class ThrownStegoPlateAnimator extends Item implements IAnimatable {

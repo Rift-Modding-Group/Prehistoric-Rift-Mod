@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.config;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.minecraftforge.fml.common.Optional;
 

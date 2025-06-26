@@ -5,7 +5,7 @@ import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.projectile.WeaponProjectileAnimator;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import software.bernie.geckolib3.model.AnimatedGeoModel;
+import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
 
 public class WeaponProjectileModel extends AnimatedGeoModel<WeaponProjectileAnimator> {
     private RiftLargeWeaponType weaponType;

@@ -65,13 +65,13 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
+import anightdazingzoroark.riftlib.core.IAnimatable;
+import anightdazingzoroark.riftlib.core.PlayState;
+import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
+import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
+import anightdazingzoroark.riftlib.core.manager.AnimationData;
+import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -805,6 +805,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
+        super.processInteract(player, hand);
         if (this.isTamed()) {
             if (this.getOwner() != null) {
                 if (this.isOwner(player)) {
@@ -2145,15 +2146,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //for multi hitbox stuff
     public World getWorld() {
         return this.world;
-    }
-
-    public boolean attackEntityFromPart(MultiPartEntityPart part, DamageSource source, float damage) {
-        RiftCreaturePart riftPart = (RiftCreaturePart) part;
-        if (damage > 0.0f && !riftPart.isDisabled() && riftPart.testForMeleeImmunity(source) && riftPart.testForProjectileImmunity(source)) {
-            float newDamage = riftPart.getDamageMultiplier() * damage;
-            return this.attackEntityFrom(source, newDamage);
-        }
-        return false;
     }
 
     public RiftCreature getPartParent() {

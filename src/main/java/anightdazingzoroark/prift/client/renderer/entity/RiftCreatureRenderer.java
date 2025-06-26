@@ -10,9 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
-import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
-import software.bernie.geckolib3.resource.GeckoLibCache;
+import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.renderers.geo.GeoEntityRenderer;
+import anightdazingzoroark.riftlib.resource.RiftLibCache;
 
 public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
     public RiftCreatureRenderer(RenderManager renderManager) {
@@ -31,7 +31,7 @@ public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
         if (animatable.isBurrowing()) return;
 
         //variables
-        GeckoLibCache.getInstance().parser.setValue("creature_move_use", Math.min(animatable.getCurrentMoveUse(), 100));
+        RiftLibCache.getInstance().parser.setValue("creature_move_use", Math.min(animatable.getCurrentMoveUse(), 100));
 
         //translucensy for cloaking
         float translucency = animatable.isCloaked() ? 0.2f : alpha;

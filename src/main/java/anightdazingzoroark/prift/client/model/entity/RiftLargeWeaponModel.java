@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import net.minecraft.util.ResourceLocation;
-import software.bernie.geckolib3.model.AnimatedGeoModel;
+import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
 
 public class RiftLargeWeaponModel extends AnimatedGeoModel<RiftLargeWeapon> {
     @Override

@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client.model.block;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtruder;
 import net.minecraft.util.ResourceLocation;
-import software.bernie.geckolib3.model.AnimatedGeoModel;
+import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
 
 public class RiftSemiManualExtruderModel extends AnimatedGeoModel<TileEntitySemiManualExtruder> {
     @Override

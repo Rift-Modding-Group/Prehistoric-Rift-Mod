@@ -5,10 +5,10 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.ResourceLocation;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.util.Color;
-import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
-import software.bernie.geckolib3.renderers.geo.GeoLayerRenderer;
+import anightdazingzoroark.riftlib.core.IAnimatable;
+import anightdazingzoroark.riftlib.core.util.Color;
+import anightdazingzoroark.riftlib.renderers.geo.GeoEntityRenderer;
+import anightdazingzoroark.riftlib.renderers.geo.GeoLayerRenderer;
 
 import java.util.function.Function;
 

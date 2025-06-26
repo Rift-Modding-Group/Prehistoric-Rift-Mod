@@ -9,9 +9,9 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoBlockRenderer;
-import software.bernie.geckolib3.resource.GeckoLibCache;
+import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
+import anightdazingzoroark.riftlib.resource.RiftLibCache;
 
 public class LeadPoweredCrankRenderer extends GeoBlockRenderer<TileEntityLeadPoweredCrank> {
     public LeadPoweredCrankRenderer() {
@@ -22,7 +22,7 @@ public class LeadPoweredCrankRenderer extends GeoBlockRenderer<TileEntityLeadPow
     public void render(GeoModel model, TileEntityLeadPoweredCrank animatable, float partialTicks, float red, float green, float blue, float alpha) {
         model.getBone("lead").get().setHidden(!animatable.getHasLead());
 
-        GeckoLibCache.getInstance().parser.setValue("rotation", animatable.getRotation());
+        RiftLibCache.getInstance().parser.setValue("rotation", animatable.getRotation());
 
         if (animatable.getHasLead()) this.renderLeash(animatable.getWorker(), -0.5, 0, -0.5, 0, 0, 0, partialTicks, animatable.getPos());
 

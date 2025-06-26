@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.projectile.DilophosaurusSpitAnimator;
 import anightdazingzoroark.prift.server.entity.projectile.MudballAnimator;
 import net.minecraft.util.ResourceLocation;
-import software.bernie.geckolib3.model.AnimatedGeoModel;
+import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
 
 public class MudballModel extends AnimatedGeoModel<MudballAnimator> {
     @Override

@@ -93,10 +93,6 @@ repositories {
         }
     }
     maven {
-        name = 'GeckoLib'
-        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-    }
-    maven {
         url "https://mmdmaven.blamejared.com/"
     }
     maven {
@@ -137,7 +133,6 @@ dependencies {
         }
     }
     runtimeOnly 'com.cleanroommc:strip-latest-forge-requirements:1.0'
-    implementation 'software.bernie.geckolib:geckolib-forge-1.12.2:3.0.31'
     compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
     compileOnly "curse.maven:pyrotech-306676:4956838"
     compileOnly "curse.maven:athenaeum-284350:4633750"
@@ -147,6 +142,7 @@ dependencies {
     compileOnly "curse.maven:crafttweaker-239197:5354089"
     compileOnly "curse.maven:pams-harvestcraft-221857:2904825"
     compileOnly files("libs/Hwyla-1.8.26-B41_1.12.2-api.jar")
+    compileOnly files("libs/riftlib-1.0.0-dev.jar")
     compileOnly "curse.maven:serene-seasons-291874:2799213"
     compileOnly "net.darkhax.gamestages:GameStages-1.12.2:2.0.123"
     implementation "mezz.jei:jei_${mc_version}:${jei_version}"

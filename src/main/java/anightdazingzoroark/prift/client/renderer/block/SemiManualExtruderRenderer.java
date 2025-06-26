@@ -2,8 +2,8 @@ package anightdazingzoroark.prift.client.renderer.block;
 
 import anightdazingzoroark.prift.client.model.block.RiftSemiManualExtruderModel;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualExtruder;
-import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoBlockRenderer;
+import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
 
 public class SemiManualExtruderRenderer extends GeoBlockRenderer<TileEntitySemiManualExtruder> {
     public SemiManualExtruderRenderer() {

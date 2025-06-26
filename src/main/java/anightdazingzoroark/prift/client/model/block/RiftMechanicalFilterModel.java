@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client.model.block;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityMechanicalFilter;
 import net.minecraft.util.ResourceLocation;
-import software.bernie.geckolib3.model.AnimatedGeoModel;
+import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
 
 public class RiftMechanicalFilterModel extends AnimatedGeoModel<TileEntityMechanicalFilter> {
     @Override

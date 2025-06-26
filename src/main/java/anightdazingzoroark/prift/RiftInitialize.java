@@ -8,9 +8,8 @@ import anightdazingzoroark.prift.server.commands.RiftCreatureHighlightCommand;
 import anightdazingzoroark.prift.server.commands.RiftJournalCommand;
 import anightdazingzoroark.prift.server.commands.RiftResetWildCreaturesCommand;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import net.minecraft.network.datasync.DataSerializer;
+import anightdazingzoroark.riftlib.RiftLib;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -18,15 +17,13 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Logger;
-import software.bernie.geckolib3.GeckoLib;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-@Mod(modid = RiftInitialize.MODID, name = RiftInitialize.MODNAME, version = RiftInitialize.MODVERSION, dependencies = "required-after:forge@[11.16.0.1865,);required-after:geckolib3@[3.0.19,);required-after:mixinbooter@[10.2,);after:harvestcraft@[1.12.2zb,);after:pyrotech@[1.12.2-1.6.11,);")
+@Mod(modid = RiftInitialize.MODID, name = RiftInitialize.MODNAME, version = RiftInitialize.MODVERSION, dependencies = "required-after:forge@[11.16.0.1865,);required-after:riftlib@[1.0.0,);required-after:mixinbooter@[10.2,);after:harvestcraft@[1.12.2zb,);after:pyrotech@[1.12.2-1.6.11,);")
 public class RiftInitialize {
     public static final String MODID = "prift";
     public static final String SSR_MOD_ID = "shouldersurfing";
@@ -53,6 +50,7 @@ public class RiftInitialize {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
+        RiftLib.initializePre();
         PROXY.preInit(event);
 
         //for general config
@@ -70,8 +68,8 @@ public class RiftInitialize {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
+        RiftLib.initializeMiddle();
         PROXY.init(event);
-        GeckoLib.initialize();
 
         logger.info("MOMMY AYUNDA PLEASE BREASTFEED MEEEEEEEEEEEEEEE");
     }

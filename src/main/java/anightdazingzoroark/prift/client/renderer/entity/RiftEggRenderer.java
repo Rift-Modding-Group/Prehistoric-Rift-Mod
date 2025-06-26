@@ -4,8 +4,8 @@ import anightdazingzoroark.prift.client.model.entity.RiftEggModel;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
-import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
+import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.renderers.geo.GeoEntityRenderer;
 
 public class RiftEggRenderer extends GeoEntityRenderer<RiftEgg> {
     public RiftEggRenderer(RenderManager renderManager) {

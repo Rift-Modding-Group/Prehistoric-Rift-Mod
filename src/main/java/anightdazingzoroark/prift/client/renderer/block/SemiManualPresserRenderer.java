@@ -12,8 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import org.lwjgl.opengl.GL11;
-import software.bernie.geckolib3.geo.render.built.GeoModel;
-import software.bernie.geckolib3.renderers.geo.GeoBlockRenderer;
+import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
 
 public class SemiManualPresserRenderer extends GeoBlockRenderer<TileEntitySemiManualPresser> {
     public SemiManualPresserRenderer() {
@@ -21,8 +21,8 @@ public class SemiManualPresserRenderer extends GeoBlockRenderer<TileEntitySemiMa
     }
 
     @Override
-    public void func_192841_a(TileEntitySemiManualPresser animatable, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-        super.func_192841_a(animatable, x, y, z, partialTicks, destroyStage, alpha);
+    public void render(TileEntitySemiManualPresser animatable, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+        super.render(animatable, x, y, z, partialTicks, destroyStage, alpha);
         //render items
         TileEntitySemiManualPresserTop topTE = (TileEntitySemiManualPresserTop)animatable.getTopTEntity();
         float recipeTRatio = topTE != null ? (float)topTE.getTimeHeld()/(float)topTE.getMaxRecipeTime() : -1;
