@@ -1,0 +1,172 @@
+{
+	"hitboxes": [
+		{
+			"locator": "hitbox_body",
+			"width": 1,
+			"height": 0.9,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_body_0",
+			"width": 1,
+			"height": 0.9,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_neck_0",
+			"width": 0.55,
+			"height": 0.6,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_neck_1",
+			"width": 0.55,
+			"height": 0.6,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_neck_2",
+			"width": 0.45,
+			"height": 0.6,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_neck_3",
+			"width": 0.45,
+			"height": 0.55,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_neck_4",
+			"width": 0.4,
+			"height": 0.55,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_neck_5",
+			"width": 0.4,
+			"height": 0.55,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_neck_6",
+			"width": 0.4,
+			"height": 0.55,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_head",
+			"width": 0.5,
+			"height": 0.45,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_jaw",
+			"width": 0.4,
+			"height": 0.4,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_0",
+			"width": 0.5,
+			"height": 0.55,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_1",
+			"width": 0.5,
+			"height": 0.55,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_2",
+			"width": 0.45,
+			"height": 0.5,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_3",
+			"width": 0.45,
+			"height": 0.5,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_4",
+			"width": 0.4,
+			"height": 0.4,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_5",
+			"width": 0.4,
+			"height": 0.4,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_6",
+			"width": 0.4,
+			"height": 0.4,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_left_front_leg",
+			"width": 0.3,
+			"height": 0.9,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_right_front_leg",
+			"width": 0.3,
+			"height": 0.9,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_right_back_leg",
+			"width": 0.45,
+			"height": 0.7,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_leftt_back_leg",
+			"width": 0.45,
+			"height": 0.7,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_right_back_shin",
+			"width": 0.3,
+			"height": 0.65,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_left_back_shin",
+			"width": 0.3,
+			"height": 0.65,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		}
+	]
+}

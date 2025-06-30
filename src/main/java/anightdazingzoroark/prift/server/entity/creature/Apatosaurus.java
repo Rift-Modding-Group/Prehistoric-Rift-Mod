@@ -49,20 +49,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> WORKSTATION_Z_POS = EntityDataManager.createKey(Apatosaurus.class, DataSerializers.VARINT);
-    private int launchTick;
     public boolean dismount = false;
-    private RiftCreaturePart neck0Part;
-    private RiftCreaturePart neck1Part;
-    private RiftCreaturePart neck2Part;
-    private RiftCreaturePart neck3Part;
-    private RiftCreaturePart neck4Part;
-    private RiftCreaturePart neck5Part;
-    private RiftCreaturePart leftBackLegPart;
-    private RiftCreaturePart rightBackLegPart;
-    private RiftCreaturePart tail0Part;
-    private RiftCreaturePart tail1Part;
-    private RiftCreaturePart tail2Part;
-    private RiftCreaturePart tail3Part;
 
     public Apatosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.APATOSAURUS);
@@ -72,39 +59,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         this.experienceValue = 50;
         this.speed = 0.15D;
         this.isRideable = true;
-        this.launchTick = 0;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
-
-        this.headPart = new RiftCreaturePart(this, 6.625f, 0, 4.5125f, 0.625f, 0.5f, 2f);
-        this.bodyPart = new RiftCreaturePart(this, -0.75f, 0, 1.35f, 1.65f, 1f, 1f);
-        this.neck0Part = new RiftCreaturePart(this, 5.75f, 0, 4.25f, 0.5f, 0.5f, 1.5f);
-        this.neck1Part = new RiftCreaturePart(this, 5f, 0, 3.75f, 0.5f, 0.5f, 1.5f);
-        this.neck2Part = new RiftCreaturePart(this, 4.25f, 0, 3.25f, 0.5f, 0.5f, 1.5f);
-        this.neck3Part = new RiftCreaturePart(this, 3.5f, 0, 2.75f, 0.5f, 0.625f, 1.5f);
-        this.neck4Part = new RiftCreaturePart(this, 2.75f, 0, 2.5f, 0.5f, 0.625f, 1.5f);
-        this.neck5Part = new RiftCreaturePart(this, 1.75f, 0, 2.25f, 0.625f, 0.625f, 1.5f);
-        this.leftBackLegPart = new RiftCreaturePart(this, 2.375f, -150, 0, 0.625f, 1.25f, 0.5f);
-        this.rightBackLegPart = new RiftCreaturePart(this, 2.375f, 150, 0, 0.625f, 1.25f, 0.5f);
-        this.tail0Part = new RiftCreaturePart(this, -3.25f, 0, 1.9f, 0.675f, 0.625f, 0.5f);
-        this.tail1Part = new RiftCreaturePart(this, -4.75f, 0, 1.8f, 0.625f, 0.6f, 0.5f);
-        this.tail2Part = new RiftCreaturePart(this, -6f, 0, 1.7f, 0.625f, 0.6f, 0.5f);
-        this.tail3Part = new RiftCreaturePart(this, -7.25f, 0, 1.7f, 0.625f, 0.45f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.neck0Part,
-            this.neck1Part,
-            this.neck2Part,
-            this.neck3Part,
-            this.neck4Part,
-            this.neck5Part,
-            this.leftBackLegPart,
-            this.rightBackLegPart,
-            this.tail0Part,
-            this.tail1Part,
-            this.tail2Part,
-            this.tail3Part
-        };
     }
 
     @Override
@@ -147,25 +102,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         //passenger stuff
         if (this.getPassengers().size() == 1) this.dismount = false;
         else if (this.getPassengers().size() > 1) this.dismount = true;
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -1.125f : 0;
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-        if (this.neck0Part != null) this.neck0Part.setPositionAndUpdate(this.neck0Part.posX, this.neck0Part.posY + sitOffset, this.neck0Part.posZ);
-        if (this.neck1Part != null) this.neck1Part.setPositionAndUpdate(this.neck1Part.posX, this.neck1Part.posY + sitOffset, this.neck1Part.posZ);
-        if (this.neck2Part != null) this.neck2Part.setPositionAndUpdate(this.neck2Part.posX, this.neck2Part.posY + sitOffset, this.neck2Part.posZ);
-        if (this.neck3Part != null) this.neck3Part.setPositionAndUpdate(this.neck3Part.posX, this.neck3Part.posY + sitOffset, this.neck3Part.posZ);
-        if (this.neck4Part != null) this.neck4Part.setPositionAndUpdate(this.neck4Part.posX, this.neck4Part.posY + sitOffset, this.neck4Part.posZ);
-        if (this.neck5Part != null) this.neck5Part.setPositionAndUpdate(this.neck5Part.posX, this.neck5Part.posY + sitOffset, this.neck5Part.posZ);
-        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
-        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
-        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
-        if (this.tail3Part != null) this.tail3Part.setPositionAndUpdate(this.tail3Part.posX, this.tail3Part.posY + sitOffset, this.tail3Part.posZ);
     }
 
     @Override
@@ -256,43 +192,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         return 54;
     }
 
-    public void updatePassenger(Entity passenger) {
-        if (this.isPassenger(passenger)) {
-            if (passenger.equals(this.getControllingPassenger()) && passenger.equals(this.getOwner())) super.updatePassenger(passenger);
-            else {
-                if (this.getPassengerTwo() == null) this.setPassengerTwo((EntityLivingBase) passenger);
-                else if (this.getPassengerOne() == null) this.setPassengerOne((EntityLivingBase) passenger);
-                if (this.getPassengerOne() != null) {
-                    if (this.getPassengerOne().equals(passenger)) {
-                        passenger.setPosition(passengerPosOne().x, passengerPosOne().y + passenger.height, passengerPosOne().z);
-                        ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
-                    }
-                }
-                if (this.getPassengerTwo() != null) {
-                    if (this.getPassengerTwo().equals(passenger)) {
-                        passenger.setPosition(passengerPosTwo().x, passengerPosTwo().y + passenger.height, passengerPosTwo().z);
-                        ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
-                    }
-                }
-            }
-            if (this.isDead) passenger.dismountRidingEntity();
-            if (passenger.isDead) {
-                if (this.getPassengerOne() != null) {
-                    if (this.getPassengerOne().equals(passenger)) {
-                        passenger.dismountRidingEntity();
-                        this.setPassengerOne(null);
-                    }
-                }
-                if (this.getPassengerTwo() != null) {
-                    if (this.getPassengerTwo().equals(passenger)) {
-                        passenger.dismountRidingEntity();
-                        this.setPassengerTwo(null);
-                    }
-                }
-            }
-        }
-    }
-
     //move related stuff starts here
     @Override
     public WeightedList<List<CreatureMove>> possibleStartingMoves() {
@@ -330,18 +229,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
 
     public float attackWidth() {
         return 6f;
-    }
-
-    public Vec3d passengerPosOne() {
-        float seatOneX = (float)(this.posX + (-0.25) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
-        float seatOneZ = (float)(this.posZ + (-0.25) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
-        return new Vec3d(seatOneX, this.posY + 2.25, seatOneZ);
-    }
-
-    public Vec3d passengerPosTwo() {
-        float seatTwoX = (float)(this.posX + (-2) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
-        float seatTwoZ = (float)(this.posZ + (-2) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
-        return new Vec3d(seatTwoX, this.posY + 2.25, seatTwoZ);
     }
 
     public void addPassengersManual() {
