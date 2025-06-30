@@ -20,10 +20,12 @@ public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
         this.shadowSize = 1f;
     }
 
+    /*
     @Override
     public boolean shouldRender(RiftCreature livingEntity, ICamera camera, double camX, double camY, double camZ) {
         return super.shouldRender(livingEntity, camera, camX, camY, camZ) || livingEntity.shouldRender(camera) || Minecraft.getMinecraft().player.isRidingOrBeingRiddenBy(livingEntity);
     }
+     */
 
     @Override
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
@@ -77,11 +79,7 @@ public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
         //other parts to hide
         if (model.getBone("antlers").isPresent()) model.getBone("antlers").get().setHidden(animatable.isBaby());
 
-        //change size
-        float scale = animatable.getRenderSizeModifier();
-
         GlStateManager.pushMatrix();
-        GlStateManager.scale(scale, scale, scale);
         GlStateManager.enableBlend();
         GlStateManager.color(1.0f, 1.0f, 1.0f, translucency);
         super.render(model, animatable, partialTicks, red, green, blue, translucency);

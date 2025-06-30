@@ -27,6 +27,8 @@ import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
+import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
+import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -79,7 +81,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class RiftCreature extends EntityTameable implements IAnimatable, IRiftMultipart {
+public abstract class RiftCreature extends EntityTameable implements IAnimatable, IMultiHitboxUser {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LOVE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -184,7 +186,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public String saddleItem;
     public RiftCreaturePart headPart;
     public RiftCreaturePart bodyPart;
-    public RiftCreaturePart[] hitboxArray = {};
+    public Entity[] hitboxArray = {};
     public float oldScale;
     private int healthRegen;
     protected double attackDamage;
@@ -228,9 +230,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.yFloatPos = 0D;
         this.oldScale = 0;
         this.healthRegen = 0;
-        this.resetParts(0);
         this.isFloatingOnWater = false;
         this.initInventory();
+        this.initializeHitboxes(this);
     }
 
     @Override
@@ -418,7 +420,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         if (this.isBurrowing()) this.manageBurrowingEffects();
         this.updateParts();
-        this.resetParts(this.getRenderSizeModifier());
         this.manageGrabVictim();
     }
 
@@ -592,23 +593,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.setXP(tempXp);
             this.setLevel(this.getLevel() + 1);
             ((EntityPlayer)(this.getOwner())).sendStatusMessage(new TextComponentTranslation("reminder.level_up", this.getName(false), this.getLevel()), false);
-        }
-    }
-
-    public void updateParts() {
-        for (RiftCreaturePart creaturePart : this.hitboxArray) {
-            if (creaturePart != null) {
-                creaturePart.onUpdate();
-            }
-        }
-    }
-
-    public void resetParts(float scale) {
-        if (scale > this.oldScale) {
-            this.oldScale = scale;
-            for (RiftCreaturePart creaturePart : this.hitboxArray) {
-                if (creaturePart != null) creaturePart.resize(scale);
-            }
         }
     }
 
@@ -808,7 +792,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.processInteract(player, hand);
         if (this.isTamed()) {
             if (this.getOwner() != null) {
-                if (this.isOwner(player)) {
+                if (this.isOwner(player) && !this.isPassenger(player)) {
                     if (this.isFavoriteFood(itemstack) && !itemstack.isEmpty() && this.isBaby() && this.getHealth() == this.getMaxHealth()) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setAgeInTicks(this.getAgeInTicks() + this.getFavoriteFoodGrowth(itemstack));
@@ -874,7 +858,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
                     }
                 }
-                else player.sendStatusMessage(new TextComponentTranslation("reminder.not_creature_owner", this.getOwner().getName()), false);
+                else if (!this.isOwner(player)) {
+                    player.sendStatusMessage(new TextComponentTranslation("reminder.not_creature_owner", this.getOwner().getName()), false);
+                }
             }
             return true;
         }
@@ -1629,17 +1615,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.targetList;
     }
 
-    public float getRenderSizeModifier() {
+    @Override
+    public float scale() {
         return RiftUtil.setModelScale(this, this.ageScaleParams()[0], this.ageScaleParams()[1]);
     }
 
     public abstract float[] ageScaleParams();
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldRender(ICamera camera) {
-        for (RiftCreaturePart creaturePart : this.hitboxArray) return this.inFrustrum(camera, creaturePart);
-        return false;
-    }
 
     public boolean inFrustrum(ICamera camera, Entity entity) {
         return camera != null && entity != null && camera.isBoundingBoxInFrustum(entity.getEntityBoundingBox());
@@ -2144,16 +2125,24 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //for multi hitbox stuff
-    public World getWorld() {
-        return this.world;
-    }
-
-    public RiftCreature getPartParent() {
+    @Override
+    public Entity getMultiHitboxUser() {
         return this;
     }
 
+    @Override
     public Entity[] getParts() {
         return this.hitboxArray;
+    }
+
+    @Override
+    public void setParts(Entity[] hitboxes) {
+        this.hitboxArray = hitboxes;
+    }
+
+    @Override
+    public World getWorld() {
+        return this.world;
     }
     //end of multi hitbox stuff
 
@@ -2171,18 +2160,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
         if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
             Entity attacker = source.getImmediateSource();
-            RiftCreaturePart closestPart = null;
+            EntityHitbox closestPart = null;
             float closestDist = RiftUtil.funnyNumber;
-            for (RiftCreaturePart testPart : this.hitboxArray) {
-                if (attacker.getDistance(testPart) <= closestDist && !testPart.isDisabled()) {
-                    closestPart = testPart;
-                    closestDist = attacker.getDistance(testPart);
+            for (Entity testEntity : this.hitboxArray) {
+                EntityHitbox testHitbox = (EntityHitbox) testEntity;
+                if (attacker.getDistance(testHitbox) <= closestDist && !testHitbox.isDisabled()) {
+                    closestPart = testHitbox;
+                    closestDist = attacker.getDistance(testHitbox);
                 }
             }
             if (closestPart != null) {
-                if (closestPart.testForMeleeImmunity(source)
-                        && closestPart.testForProjectileImmunity(source)) return super.attackEntityFrom(source, amount * closestPart.getDamageMultiplier());
-                else return false;
+                this.attackEntityFromPart(closestPart, source, amount);
             }
         }
         return super.attackEntityFrom(source, amount);

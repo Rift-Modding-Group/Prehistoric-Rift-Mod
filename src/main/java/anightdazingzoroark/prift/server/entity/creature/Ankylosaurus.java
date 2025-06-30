@@ -130,17 +130,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
 
     public void updateParts() {
         super.updateParts();
-
-        //disable parts when hiding
-        for (RiftCreaturePart part : this.hitboxArray) {
-            if (this.isSitting() && !this.isHidingInShell()) {
-                part.setDisabled(!part.partName.equals("body") && !part.partName.equals("head"));
-            }
-            else if (this.isHidingInShell()) {
-                part.setDisabled(!part.partName.equals("body"));
-            }
-        }
-
         //change positions when sitting or hiding
         float sitOffset = ((this.isSitting() && !this.isBeingRidden()) || this.isHidingInShell()) ? -0.75f : 0;
         if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
@@ -158,6 +147,7 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         return super.attackEntityFromPart(part, source, damage);
     }
 
+    /*
     public boolean attackEntityFrom(DamageSource source, float amount) {
         if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
             //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
@@ -178,6 +168,7 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         }
         return super.attackEntityFrom(source, amount);
     }
+     */
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {

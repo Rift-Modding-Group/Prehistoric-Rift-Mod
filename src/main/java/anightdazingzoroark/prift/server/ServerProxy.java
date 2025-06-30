@@ -18,7 +18,9 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesStorage;
 import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawning;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
+import anightdazingzoroark.prift.server.entity.RiftCreatureHitboxLinker;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.events.RiftCreatureBoxBorder;
 import anightdazingzoroark.prift.server.events.ServerEvents;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
@@ -29,6 +31,7 @@ import anightdazingzoroark.prift.server.tileentities.RiftTileEntities;
 import anightdazingzoroark.prift.server.world.RiftPlantGenerator;
 import anightdazingzoroark.prift.server.world.RiftStructureGenerator;
 import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
+import anightdazingzoroark.riftlib.RiftLibLinkerRegistry;
 import com.charles445.simpledifficulty.api.temperature.TemperatureRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;

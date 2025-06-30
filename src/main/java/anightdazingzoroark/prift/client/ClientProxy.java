@@ -10,6 +10,11 @@ import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
+import anightdazingzoroark.prift.server.entity.RiftCreatureHitboxLinker;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.Tyrannosaurus;
+import anightdazingzoroark.riftlib.RiftLibLinkerRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.util.math.BlockPos;
@@ -43,6 +48,9 @@ public class ClientProxy extends ServerProxy {
     @Override
     public void preInit(FMLPreInitializationEvent e) {
         super.preInit(e);
+        for (RiftCreatureType creatureType : RiftCreatureType.values()) {
+            RiftLibLinkerRegistry.registerEntityHitboxLinker(creatureType.getCreature(), new RiftCreatureHitboxLinker());
+        }
         EntityRenderer.registerRenderers();
         BlockRenderer.registerRenderers();
         MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());

@@ -110,29 +110,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
-
-        this.headPart = new RiftCreaturePart(this, 3f, 0, 3f, 0.75f, 0.5f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 2f, 0.75f, 0.75f, 1f);
-        this.neckPart = new RiftCreaturePart(this, 1.75f, 0, 2.75f, 0.5f, 0.5f, 1.5f);
-        this.hipPart = new RiftCreaturePart(this, -2f, 0, 2f, 0.75f, 0.75f, 1);
-        this.leftLegPart = new RiftCreaturePart(this, 2.875f, -156, 0, 0.4f, 1.135f, 0.5f);
-        this.rightLegPart = new RiftCreaturePart(this, 2.875f, 156, 0, 0.4f, 1.135f, 0.5f);
-        this.tail0Part = new RiftCreaturePart(this, -4.25f, 0, 2.25f, 0.5f, 0.6f, 0.5f);
-        this.tail1Part = new RiftCreaturePart(this, -5.625f, 0, 2.25f, 0.5f, 0.5f, 0.5f);
-        this.tail2Part = new RiftCreaturePart(this, -7f, 0, 2.25f, 0.5f, 0.45f, 0.5f);
-        this.tail3Part = new RiftCreaturePart(this, -8.375f, 0, 2.25f, 0.5f, 0.4f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.neckPart,
-            this.hipPart,
-            this.leftLegPart,
-            this.rightLegPart,
-            this.tail0Part,
-            this.tail1Part,
-            this.tail2Part,
-            this.tail3Part,
-        };
     }
 
     @Override
