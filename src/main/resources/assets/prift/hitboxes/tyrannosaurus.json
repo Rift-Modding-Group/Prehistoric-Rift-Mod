@@ -4,7 +4,7 @@
 			"locator": "hitbox_hips",
 			"width": 0.6,
 			"height": 0.7,
-			"damageMultiplier": 0,
+			"damageMultiplier": 1,
 			"affectedByAnim": true
 		},
 		{

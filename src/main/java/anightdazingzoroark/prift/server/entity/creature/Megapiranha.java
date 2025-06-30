@@ -88,11 +88,6 @@ public class Megapiranha extends RiftWaterCreature {
     }
 
     @Override
-    public Vec3d riderPos() {
-        return null;
-    }
-
-    @Override
     public boolean isAmphibious() {
         return false;
     }

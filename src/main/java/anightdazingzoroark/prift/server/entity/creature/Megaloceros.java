@@ -180,13 +180,6 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
     }
 
     @Override
-    public Vec3d riderPos() {
-        float xOffset = (float)(this.posX + (-0.125f) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
-        float zOffset = (float)(this.posZ + (-0.125f) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
-        return new Vec3d(xOffset, this.posY - 0.75, zOffset);
-    }
-
-    @Override
     public List<String> blocksToHarvest() {
         return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }

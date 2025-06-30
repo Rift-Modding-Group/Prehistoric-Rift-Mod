@@ -89,14 +89,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     private static final DataParameter<Integer> WORKSTATION_Z_POS = EntityDataManager.createKey(Tyrannosaurus.class, DataSerializers.VARINT);
     public int roarCooldownTicks;
     public int roarCharge;
-    private RiftCreaturePart neckPart;
-    private RiftCreaturePart hipPart;
-    private RiftCreaturePart leftLegPart;
-    private RiftCreaturePart rightLegPart;
-    private RiftCreaturePart tail0Part;
-    private RiftCreaturePart tail1Part;
-    private RiftCreaturePart tail2Part;
-    private RiftCreaturePart tail3Part;
 
     public Tyrannosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TYRANNOSAURUS);
@@ -147,21 +139,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     public void onLivingUpdate() {
         super.onLivingUpdate();
         if (!this.isBaby()) this.manageApplyApexEffect();
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -1f : 0.25f;
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
-        if (this.hipPart != null) this.hipPart.setPositionAndUpdate(this.hipPart.posX, this.hipPart.posY + sitOffset, this.hipPart.posZ);
-        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
-        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
-        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
-        if (this.tail3Part != null) this.tail3Part.setPositionAndUpdate(this.tail3Part.posX, this.tail3Part.posY + sitOffset, this.tail3Part.posZ);
     }
 
     @Override
@@ -345,11 +322,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     public float attackWidth() {
         return 4f;
-    }
-
-    @Override
-    public Vec3d riderPos() {
-        return new Vec3d(this.posX, this.posY + 2.125, this.posZ);
     }
 
     @Override

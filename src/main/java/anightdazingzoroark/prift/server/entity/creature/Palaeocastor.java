@@ -148,13 +148,6 @@ public class Palaeocastor extends RiftCreature implements IHarvestWhenWandering 
     }
 
     @Override
-    public Vec3d riderPos() {
-        return null;
-    }
-
-
-
-    @Override
     public List<String> blocksToHarvest() {
         return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }

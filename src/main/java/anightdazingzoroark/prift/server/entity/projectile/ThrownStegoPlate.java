@@ -38,7 +38,7 @@ public class ThrownStegoPlate extends EntityArrow implements IRiftProjectile {
     }
 
     public ThrownStegoPlate(World world, RiftCreature shooter, EntityPlayer rider) {
-        super(world, shooter.riderPos().x, shooter.riderPos().y + rider.getEyeHeight() + rider.height, shooter.riderPos().z);
+        super(world, shooter.ridePositions().get(0).x, shooter.ridePositions().get(0).y + rider.getEyeHeight() + rider.height, shooter.ridePositions().get(0).z);
         this.shootingEntity = shooter;
         this.rider = rider;
     }

@@ -115,11 +115,6 @@ public class Anomalocaris extends RiftWaterCreature {
     }
 
     @Override
-    public Vec3d riderPos() {
-        return new Vec3d(this.posX, this.posY - 1.75, this.posZ);
-    }
-
-    @Override
     public EnumCreatureAttribute getCreatureAttribute()
     {
         return EnumCreatureAttribute.ARTHROPOD;

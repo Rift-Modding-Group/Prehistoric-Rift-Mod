@@ -190,11 +190,6 @@ public class Baryonyx extends RiftWaterCreature {
     }
 
     @Override
-    public Vec3d riderPos() {
-        return new Vec3d(this.posX, this.posY + 0.125f, this.posZ);
-    }
-
-    @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;

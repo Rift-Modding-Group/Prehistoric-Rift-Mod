@@ -196,11 +196,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public Vec3d riderPos() {
-        return new Vec3d(this.posX, this.posY - 0.35, this.posZ);
-    }
-
-    @Override
     public List<String> blocksToHarvest() {
         return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;
     }

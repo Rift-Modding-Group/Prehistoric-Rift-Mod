@@ -257,14 +257,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         return true;
     }
 
-    @Override
-    public Vec3d riderPos() {
-        float offset = this.isHidingInShell() ? -0.875f : -0.25f;
-        float xOffset = (float)(this.posX + (-0.125) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
-        float zOffset = (float)(this.posZ + (-0.125) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
-        return new Vec3d(xOffset, this.posY + offset, zOffset);
-    }
-
     private boolean isHidingInShell() {
         return this.currentCreatureMove() != null && (this.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.DEFENSE || this.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.SPIN);
     }

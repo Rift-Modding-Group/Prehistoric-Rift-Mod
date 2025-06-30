@@ -47,14 +47,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> WORKSTATION_Z_POS = EntityDataManager.createKey(Stegosaurus.class, DataSerializers.VARINT);
     public int strongAttackCharge;
-    private RiftCreaturePart neckPart;
-    private RiftCreaturePart hipPart;
-    private RiftCreaturePart leftBackLegPart;
-    private RiftCreaturePart rightBackLegPart;
-    private RiftCreaturePart tail0Part;
-    private RiftCreaturePart tail1Part;
-    private RiftCreaturePart tail2Part;
-    private RiftCreaturePart tail3Part;
 
     public Stegosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.STEGOSAURUS);
@@ -66,29 +58,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         this.isRideable = true;
         this.strongAttackCharge = 0;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
-
-        this.headPart = new RiftCreaturePart(this, 3.125f, 0, 1.1f, 0.6f, 0.5f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0.55f, 0, 0.8f, 0.875f, 0.75f, 1f);
-        this.neckPart = new RiftCreaturePart(this, 2.1f, 0, 1f, 0.4f, 0.5f, 1.5f);
-        this.hipPart = new RiftCreaturePart(this, -1.2f, 0, 0.8f, 0.875f, 0.9f, 1f);
-        this.leftBackLegPart = new RiftCreaturePart(this, 1.5f, -150, 0f, 0.5f, 1f, 0.5f);
-        this.rightBackLegPart = new RiftCreaturePart(this, 1.5f, 150, 0f, 0.5f, 1f, 0.5f);
-        this.tail0Part = new RiftCreaturePart(this, -2.5f, 0, 1f, 0.6f, 0.6f, 0.5f);
-        this.tail1Part = new RiftCreaturePart(this, -3.5f, 0, 1f, 0.4f, 0.5f, 0.5f);
-        this.tail2Part = new RiftCreaturePart(this, -4.25f, 0, 1f, 0.4f, 0.5f, 0.5f);
-        this.tail3Part = new RiftCreaturePart(this, -5.25f, 0, 1f, 0.6f, 0.5f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.neckPart,
-            this.hipPart,
-            this.leftBackLegPart,
-            this.rightBackLegPart,
-            this.tail0Part,
-            this.tail1Part,
-            this.tail2Part,
-            this.tail3Part
-        };
     }
 
     @Override
@@ -128,23 +97,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         this.tasks.addTask(11, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.5f : 0.25f;
-        float tail1SitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.6f : 0.5f;
-        float tail2SitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.8f : 0.5f;
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
-        if (this.hipPart != null) this.hipPart.setPositionAndUpdate(this.hipPart.posX, this.hipPart.posY + sitOffset, this.hipPart.posZ);
-        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
-        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + tail1SitOffset, this.tail1Part.posZ);
-        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + tail2SitOffset, this.tail2Part.posZ);
-        if (this.tail3Part != null) this.tail3Part.setPositionAndUpdate(this.tail3Part.posX, this.tail3Part.posY + tail2SitOffset, this.tail3Part.posZ);
     }
 
     @Override

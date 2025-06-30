@@ -455,11 +455,6 @@ public class Dimetrodon extends RiftCreature {
     }
 
     @Override
-    public Vec3d riderPos() {
-        return null;
-    }
-
-    @Override
     public int slotCount() {
         return 9;
     }

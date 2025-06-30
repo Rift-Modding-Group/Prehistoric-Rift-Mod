@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
 import anightdazingzoroark.prift.server.entity.RiftCreatureHitboxLinker;
+import anightdazingzoroark.prift.server.entity.RiftCreatureRidePosLinker;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.Tyrannosaurus;
@@ -50,6 +51,7 @@ public class ClientProxy extends ServerProxy {
         super.preInit(e);
         for (RiftCreatureType creatureType : RiftCreatureType.values()) {
             RiftLibLinkerRegistry.registerEntityHitboxLinker(creatureType.getCreature(), new RiftCreatureHitboxLinker());
+            RiftLibLinkerRegistry.registerDynamicRidePosLinker(creatureType.getCreature(), new RiftCreatureRidePosLinker());
         }
         EntityRenderer.registerRenderers();
         BlockRenderer.registerRenderers();

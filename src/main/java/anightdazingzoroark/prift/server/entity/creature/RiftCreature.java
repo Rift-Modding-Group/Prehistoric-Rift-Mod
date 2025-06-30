@@ -29,6 +29,7 @@ import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
+import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -81,7 +82,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class RiftCreature extends EntityTameable implements IAnimatable, IMultiHitboxUser {
+public abstract class RiftCreature extends EntityTameable implements IAnimatable, IMultiHitboxUser, IDynamicRideUser {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LOVE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -187,6 +188,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public RiftCreaturePart headPart;
     public RiftCreaturePart bodyPart;
     public Entity[] hitboxArray = {};
+    private List<Vec3d> ridePositions;
     public float oldScale;
     private int healthRegen;
     protected double attackDamage;
@@ -233,6 +235,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.isFloatingOnWater = false;
         this.initInventory();
         this.initializeHitboxes(this);
+        this.initializeRiderPositions(this);
     }
 
     @Override
@@ -2170,7 +2173,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
             }
             if (closestPart != null) {
-                this.attackEntityFromPart(closestPart, source, amount);
+                if (closestPart.damageSourceWithinDamageDefinitions(source)) {
+                    amount *= closestPart.getDamageMultiplierForSource(source);
+                }
+                else {
+                    amount *= closestPart.getDamageMultiplier();
+                }
+                super.attackEntityFrom(source, amount);
             }
         }
         return super.attackEntityFrom(source, amount);
@@ -2496,28 +2505,33 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return 0;
     }
 
-    public void updatePassenger(Entity passenger) {
-        if (this.canBeSteered() && this.canRotateMounted()) {
-            this.rotationYaw = passenger.rotationYaw;
-            this.prevRotationYaw = this.rotationYaw;
-            this.rotationPitch = passenger.rotationPitch * 0.5f;
-            this.setRotation(this.rotationYaw, this.rotationPitch);
-            this.renderYawOffset = this.rotationYaw;
-        }
-
-        passenger.setPosition(riderPos().x, riderPos().y + passenger.height, riderPos().z);
-
-        ((EntityLivingBase)passenger).renderYawOffset = this.renderYawOffset;
-        if (this.isDead) passenger.dismountRidingEntity();
+    //ride pos management starts here
+    public EntityLiving getDynamicRideUser() {
+        return this;
     }
+
+    public void createRidePositions(List<Vec3d> value) {
+        this.ridePositions = value;
+    }
+
+    public List<Vec3d> ridePositions() {
+        return this.ridePositions;
+    }
+
+    public void setRidePosition(int index, Vec3d value) {
+        this.ridePositions.set(index, value);
+    }
+
+    public void updatePassenger(Entity passenger) {
+        IDynamicRideUser.super.updatePassenger(passenger);
+    }
+    //ride pos management ends here
 
     public abstract float attackWidth();
 
     public float rangedWidth() {
         return 16f;
     }
-
-    public abstract Vec3d riderPos();
 
     public boolean checkIfCanBreakBlock(BlockPos blockPos) {
         return this.checkIfCanBreakBlock(this.world.getBlockState(blockPos));

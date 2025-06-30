@@ -186,13 +186,6 @@ public class Saurophaganax extends RiftCreature {
     }
 
     @Override
-    public Vec3d riderPos() {
-        float xOffset = (float)(this.posX + (0.5) * Math.cos((this.rotationYaw + 90) * Math.PI / 180));
-        float zOffset = (float)(this.posZ + (0.5) * Math.sin((this.rotationYaw + 90) * Math.PI / 180));
-        return new Vec3d(xOffset, this.posY + 0.35, zOffset);
-    }
-
-    @Override
     public boolean isNocturnal() {
         return true;
     }

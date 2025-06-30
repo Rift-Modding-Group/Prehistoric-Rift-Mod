@@ -74,11 +74,6 @@ public class Dodo extends RiftCreature {
     }
 
     @Override
-    public Vec3d riderPos() {
-        return null;
-    }
-
-    @Override
     public boolean canNaturalRegen() {
         return false;
     }
