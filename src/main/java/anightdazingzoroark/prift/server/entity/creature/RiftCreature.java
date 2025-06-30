@@ -2147,6 +2147,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public World getWorld() {
         return this.world;
     }
+
+    public EntityHitbox getHeadHitbox() {
+        for (Entity entity : this.hitboxArray) {
+            EntityHitbox hitboxToTest = (EntityHitbox) entity;
+            if (hitboxToTest.partName.equals("head")) return hitboxToTest;
+        }
+        return null;
+    }
     //end of multi hitbox stuff
 
     protected void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source) {

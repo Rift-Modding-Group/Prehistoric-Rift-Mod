@@ -45,12 +45,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     private static final DataParameter<Integer> LEAD_WORK_X_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Y_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Parasaurolophus.class, DataSerializers.VARINT);
-    private RiftCreaturePart hipsPart;
-    private RiftCreaturePart neckPart;
-    private RiftCreaturePart tail0Part;
-    private RiftCreaturePart tail1Part;
-    private RiftCreaturePart tail2Part;
-    private RiftCreaturePart tail3Part;
 
     public Parasaurolophus(World worldIn) {
         super(worldIn, RiftCreatureType.PARASAUROLOPHUS);
@@ -61,25 +55,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.speed = 0.25D;
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
-
-        this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.48f, 0.625f, 0.5f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 1.375f, 0, 0.8f, 0.75f, 0.8f, 1f);
-        this.hipsPart = new RiftCreaturePart(this, 0f, 0, 0.8f, 0.9f, 0.8f, 1f);
-        this.neckPart = new RiftCreaturePart(this, 2.125f, 0, 1.125f, 0.5f, 0.7f, 1.5f);
-        this.tail0Part = new RiftCreaturePart(this, -1.125f, 0, 1f, 0.4f, 0.6f, 0.5f);
-        this.tail1Part = new RiftCreaturePart(this, -1.625f, 0, 1.1f, 0.4f, 0.45f, 0.5f);
-        this.tail2Part = new RiftCreaturePart(this, -2.125f, 0, 1.05f, 0.4f, 0.45f, 0.5f);
-        this.tail3Part = new RiftCreaturePart(this, -2.875f, 0, 1.1f, 0.5f, 0.35f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.hipsPart,
-            this.neckPart,
-            this.tail0Part,
-            this.tail1Part,
-            this.tail2Part,
-            this.tail3Part
-        };
     }
 
     @Override
@@ -122,20 +97,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.6f : 0;
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
-        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
-        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
-        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
-        if (this.tail3Part != null) this.tail3Part.setPositionAndUpdate(this.tail3Part.posX, this.tail3Part.posY + sitOffset, this.tail3Part.posZ);
-    }
-
-    @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         this.writeHarvestWanderDataToNBT(compound);
@@ -175,7 +136,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
                 .defineUseDurationLength(20)
                 .defineRecoverFromUseLength(5)
                 .setChargeUpToUseSound(RiftSounds.GENERIC_BLOW_MOVE)
-                .setChargeUpToUseParticles("blow", 32, this.headPart.posX, this.headPart.posY, this.headPart.posZ, this.getLookVec().x, this.getLookVec().y, this.getLookVec().z)
+                .setChargeUpToUseParticles("blow", 32, this.getHeadHitbox().posX, this.getHeadHitbox().posY, this.getHeadHitbox().posZ, this.getLookVec().x, this.getLookVec().y, this.getLookVec().z)
                 .finalizePoints()
         );
         moveMap.put(CreatureMove.MoveAnimType.ROAR, new RiftCreatureMoveAnimator(this)
