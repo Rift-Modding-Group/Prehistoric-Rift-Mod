@@ -48,12 +48,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     private static final DataParameter<Integer> LEAD_WORK_Y_POS = EntityDataManager.createKey(Triceratops.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Triceratops.class, DataSerializers.VARINT);
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/triceratops"));
-    private RiftCreaturePart hipPart;
-    private RiftCreaturePart leftBackLegPart;
-    private RiftCreaturePart rightBackLegPart;
-    private RiftCreaturePart tail0Part;
-    private RiftCreaturePart tail1Part;
-    private RiftCreaturePart tail2Part;
 
     public Triceratops(World worldIn) {
         super(worldIn, RiftCreatureType.TRICERATOPS);
@@ -64,25 +58,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         this.speed = 0.15D;
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
-
-        this.headPart = new RiftCreaturePart(this, 2.875f, 0, 1.2f, 1f, 1.25f, 1f).setInvulnerable();
-        this.bodyPart = new RiftCreaturePart(this, 1.125f, 0, 0.8f, 1f, 0.875f, 1f);
-        this.hipPart = new RiftCreaturePart(this, -0.25f, 0, 0.7f, 1f, 1f, 1f);
-        this.leftBackLegPart = new RiftCreaturePart(this, 0.9f, -115, 0, 0.6f, 1.125f, 0.5f);
-        this.rightBackLegPart = new RiftCreaturePart(this, 0.9f, 115, 0, 0.6f, 1.125f, 0.5f);
-        this.tail0Part = new RiftCreaturePart(this, -1.5f, 0, 0.8f, 0.8f, 0.75f, 0.5f);
-        this.tail1Part = new RiftCreaturePart(this, -2.5f, 0, 1f, 0.6f, 0.6f, 0.5f);
-        this.tail2Part = new RiftCreaturePart(this, -3.375f, 0, 0.9f, 0.6f, 0.5f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.hipPart,
-            this.leftBackLegPart,
-            this.rightBackLegPart,
-            this.tail0Part,
-            this.tail1Part,
-            this.tail2Part
-        };
     }
 
     @Override
@@ -123,19 +98,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
         this.tasks.addTask(10, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(11, new RiftWander(this, 1.0D));
         this.tasks.addTask(12, new RiftLookAround(this));
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.65f : 0;
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-        if (this.hipPart != null) this.hipPart.setPositionAndUpdate(this.hipPart.posX, this.hipPart.posY + sitOffset, this.hipPart.posZ);
-        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
-        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
-        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
     }
 
     @Override

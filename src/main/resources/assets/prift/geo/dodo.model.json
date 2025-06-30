@@ -23,7 +23,10 @@
 					"cubes": [
 						{"origin": [-3, 4, -4.5], "size": [6, 7, 8], "uv": [0, 0], "mirror": false},
 						{"origin": [-1.5, 8.75, 2.5], "size": [3, 3, 3], "uv": [12, 26], "mirror": false}
-					]
+					],
+					"locators": {
+						"hitbox_body": [0, 7.5, -0.5]
+					}
 				},
 				{
 					"name": "leftLeg",
@@ -67,7 +70,10 @@
 					"pivot": [0, 8.5, -4],
 					"cubes": [
 						{"origin": [-1.5, 6.5, -6.5], "size": [3, 6, 3], "uv": [25, 12]}
-					]
+					],
+					"locators": {
+						"hitbox_neck": [0, 9.5, -5]
+					}
 				},
 				{
 					"name": "head",
@@ -77,7 +83,10 @@
 						{"origin": [-1.5, 12, -7.5], "size": [3, 4, 4], "inflate": 0.25, "uv": [20, 0]},
 						{"origin": [-1.5, 12, -10.7], "size": [3, 3, 3], "uv": [8, 15]},
 						{"origin": [-1.5, 11, -12.7], "size": [3, 4, 2], "uv": [22, 31]}
-					]
+					],
+					"locators": {
+						"hitbox_head": [0, 14, -5.5]
+					}
 				}
 			]
 		}

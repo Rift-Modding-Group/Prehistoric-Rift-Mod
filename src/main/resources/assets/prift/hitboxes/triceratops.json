@@ -1,0 +1,123 @@
+{
+	"hitboxes": [
+		{
+			"locator": "hitbox_body",
+			"width": 0.7,
+			"height": 0.85,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_neck",
+			"width": 0.6,
+			"height": 0.6,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_head",
+			"width": 0.6,
+			"height": 0.6,
+			"damageMultiplier": 0,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_frill_0",
+			"width": 0.6,
+			"height": 1,
+			"damageMultiplier": 0,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_frill_1",
+			"width": 0.6,
+			"height": 1,
+			"damageMultiplier": 0,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_hips",
+			"width": 0.9,
+			"height": 0.9,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_0",
+			"width": 0.6,
+			"height": 0.75,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_1",
+			"width": 0.45,
+			"height": 0.6,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_2",
+			"width": 0.45,
+			"height": 0.55,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_3",
+			"width": 0.35,
+			"height": 0.5,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_4",
+			"width": 0.35,
+			"height": 0.5,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_left_front_leg",
+			"width": 0.3,
+			"height": 0.8,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_right_front_leg",
+			"width": 0.3,
+			"height": 0.8,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_left_back_leg",
+			"width": 0.45,
+			"height": 0.7,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_right_back_leg",
+			"width": 0.45,
+			"height": 0.7,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_left_back_shin",
+			"width": 0.3,
+			"height": 0.55,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_right_back_shin",
+			"width": 0.3,
+			"height": 0.55,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		}
+	]
+}

@@ -36,13 +36,6 @@ public class Dodo extends RiftCreature {
         this.experienceValue = 3;
         this.speed = 0.25D;
         this.isRideable = false;
-
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.25f, 1f,  0.55f, 1f);
-        this.headPart = new RiftCreaturePart(this, 0.35f, 0, 0.5f, 0.5f,  0.5f, 1f);
-        this.hitboxArray = new RiftCreaturePart[]{
-                this.headPart,
-                this.bodyPart,
-        };
     }
 
     protected void initEntityAI() {

@@ -1,0 +1,25 @@
+{
+	"hitboxes": [
+		{
+			"locator": "hitbox_body",
+			"width": 0.5,
+			"height": 0.45,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_head",
+			"width": 0.3,
+			"height": 0.3,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_neck",
+			"width": 0.2,
+			"height": 0.4,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		}
+	]
+}
