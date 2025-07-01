@@ -26,7 +26,9 @@
 						{"origin": [0, 8, -4], "size": [0, 3, 7], "uv": [0, 17]}
 					],
 					"locators": {
-						"bleedlocator": [0, 3, -0.5]
+						"hitbox_body": [0, 4, 0],
+						"hitbox_body_0": [0, 4, 2],
+						"hitbox_body_1": [0, 4, -2]
 					}
 				},
 				{
@@ -35,7 +37,11 @@
 					"pivot": [0, 4, -4],
 					"cubes": [
 						{"origin": [-1.5, 2, -8], "size": [3, 6, 4], "uv": [14, 16]}
-					]
+					],
+					"locators": {
+						"hitbox_head": [0, 4, -4],
+						"hitbox_head_0": [0, 4, -6.5]
+					}
 				},
 				{
 					"name": "lowerJaw",

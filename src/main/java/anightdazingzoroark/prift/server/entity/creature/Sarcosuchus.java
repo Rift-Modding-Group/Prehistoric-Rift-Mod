@@ -24,13 +24,6 @@ import java.util.*;
 public class Sarcosuchus extends RiftWaterCreature {
     private static final DataParameter<Boolean> SPINNING = EntityDataManager.<Boolean>createKey(Sarcosuchus.class, DataSerializers.BOOLEAN);
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/sarcosuchus"));
-    private RiftCreaturePart snoutPart;
-    private RiftCreaturePart frontBodyPart;
-    private RiftCreaturePart tail0;
-    private RiftCreaturePart tail1;
-    private RiftCreaturePart tail2;
-    private RiftCreaturePart tail3;
-    private RiftCreaturePart tail4;
 
     public Sarcosuchus(World worldIn) {
         super(worldIn, RiftCreatureType.SARCOSUCHUS);
@@ -43,27 +36,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.speed = 0.2D;
         this.waterSpeed = 10D;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
-
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.125f, 0.75f, 0.675f, 1f);
-        this.headPart = new RiftCreaturePart(this, 1.625f, 0, 0.125f, 0.625f, 0.625f, 1.5f);
-        this.snoutPart = new RiftCreaturePart(this, 2.5f, 0, 0.2f, 0.55f, 0.5f, 1.5f);
-        this.frontBodyPart = new RiftCreaturePart(this, 0.75f, 0, 0.125f, 0.75f, 0.65f, 1f);
-        this.tail0 = new RiftCreaturePart(this, -0.75f, 0, 0.125f, 0.75f, 0.65f, 0.5f);
-        this.tail1 = new RiftCreaturePart(this, -1.625f, 0, 0.2f, 0.575f, 0.525f, 0.5f);
-        this.tail2 = new RiftCreaturePart(this, -2.375f, 0, 0.225f, 0.525f, 0.475f, 0.5f);
-        this.tail3 = new RiftCreaturePart(this, -3.125f, 0, 0.225f, 0.525f, 0.475f, 0.5f);
-        this.tail4 = new RiftCreaturePart(this, -3.75f, 0, 0.25f, 0.475f, 0.425f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.bodyPart,
-            this.headPart,
-            this.snoutPart,
-            this.frontBodyPart,
-            this.tail0,
-            this.tail1,
-            this.tail2,
-            this.tail3,
-            this.tail4
-        };
     }
 
     @Override
@@ -88,23 +60,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.tasks.addTask(7, new RiftWanderWater(this, 1.0D));
         this.tasks.addTask(8, new RiftWander(this, 1.0D));
     }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.175f : 0;
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.snoutPart != null) this.snoutPart.setPositionAndUpdate(this.snoutPart.posX, this.snoutPart.posY + sitOffset, this.snoutPart.posZ);
-        if (this.frontBodyPart != null) this.frontBodyPart.setPositionAndUpdate(this.frontBodyPart.posX, this.frontBodyPart.posY + sitOffset, this.frontBodyPart.posZ);
-        if (this.tail0 != null) this.tail0.setPositionAndUpdate(this.tail0.posX, this.tail0.posY + sitOffset, this.tail0.posZ);
-        if (this.tail1 != null) this.tail1.setPositionAndUpdate(this.tail1.posX, this.tail1.posY + sitOffset, this.tail1.posZ);
-        if (this.tail2 != null) this.tail2.setPositionAndUpdate(this.tail2.posX, this.tail2.posY + sitOffset, this.tail2.posZ);
-        if (this.tail3 != null) this.tail3.setPositionAndUpdate(this.tail3.posX, this.tail3.posY + sitOffset, this.tail3.posZ);
-        if (this.tail4 != null) this.tail4.setPositionAndUpdate(this.tail4.posX, this.tail4.posY + sitOffset, this.tail4.posZ);
-    }
-
     @Override
     public float[] ageScaleParams() {
         return new float[]{0.3f, 1.5f};

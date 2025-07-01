@@ -28,11 +28,6 @@ public class Megapiranha extends RiftWaterCreature {
         this.speed = 0.35D;
         this.waterSpeed = 4D;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
-
-        this.headPart = new RiftCreaturePart(this, 0, 0, 0, 0.25f,  0.375f, 1f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart
-        };
     }
 
     @Override

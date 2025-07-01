@@ -17,35 +17,12 @@ import java.util.Map;
 
 public class Coelacanth extends RiftWaterCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/coelacanth"));
-    private RiftCreaturePart bodyFront0;
-    private RiftCreaturePart bodyFront1;
-    private RiftCreaturePart bodyFront2;
-    private RiftCreaturePart bodyBack0;
-    private RiftCreaturePart bodyBack1;
-    private RiftCreaturePart bodyBack2;
 
     public Coelacanth(World worldIn) {
         super(worldIn, RiftCreatureType.COELACANTH);
         this.setSize(0.5f, 0.5f);
         this.experienceValue = 3;
         this.speed = 0.5D;
-
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0f, 0.5f, 1f, 1f);
-        this.bodyFront0 = new RiftCreaturePart(this, 1.1f, 0, 0.15f, 0.375f, 0.8f, 1f);
-        this.bodyFront1 = new RiftCreaturePart(this, 0.72f, 0, 0.15f, 0.375f, 0.8f, 1f);
-        this.bodyFront2 = new RiftCreaturePart(this, 0.36f, 0, 0.15f, 0.375f, 0.8f, 1f);
-        this.bodyBack0 = new RiftCreaturePart(this, -1.1f, 0, 0.15f, 0.375f, 0.8f, 1f);
-        this.bodyBack1 = new RiftCreaturePart(this, -0.72f, 0, 0.15f, 0.375f, 0.8f, 1f);
-        this.bodyBack2 = new RiftCreaturePart(this, -0.36f, 0, 0.15f, 0.375f, 0.8f, 1f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.bodyPart,
-            this.bodyFront0,
-            this.bodyFront1,
-            this.bodyFront2,
-            this.bodyBack0,
-            this.bodyBack1,
-            this.bodyBack2
-        };
     }
 
     protected void initEntityAI() {
