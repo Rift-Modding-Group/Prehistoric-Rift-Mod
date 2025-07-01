@@ -50,12 +50,6 @@ public class Dimetrodon extends RiftCreature {
     private static final DataParameter<Boolean> FORCED_TEMPERATURE = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> FORCED_TEMPERATURE_TIME = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> CARING_EGG = EntityDataManager.createKey(Dimetrodon.class, DataSerializers.BOOLEAN);
-
-    private RiftCreaturePart neckPart;
-    private RiftCreaturePart tail0Part;
-    private RiftCreaturePart tail1Part;
-    private RiftCreaturePart tail2Part;
-
     public RiftEgg eggTarget;
 
     public Dimetrodon(World worldIn) {
@@ -67,21 +61,6 @@ public class Dimetrodon extends RiftCreature {
         this.speed = 0.20D;
         this.isRideable = false;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
-
-        this.headPart = new RiftCreaturePart(this, 1.25f, 0, 0.45f, 0.5f, 0.425f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.3f, 1f, 0.5f, 1f);
-        this.neckPart = new RiftCreaturePart(this, 0.75f, 0, 0.45f, 0.375f, 0.375f, 1.5f);
-        this.tail0Part = new RiftCreaturePart(this, -0.8f, 0, 0.4f, 0.375f, 0.375f, 0.5f);
-        this.tail1Part = new RiftCreaturePart(this, -1.2f, 0, 0.35f, 0.375f, 0.375f, 0.5f);
-        this.tail2Part = new RiftCreaturePart(this, -1.6f, 0, 0.3f, 0.375f, 0.375f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.neckPart,
-            this.tail0Part,
-            this.tail1Part,
-            this.tail2Part
-        };
     }
 
     @Override
@@ -291,26 +270,13 @@ public class Dimetrodon extends RiftCreature {
 
         if (this.posY <= cutoff || cutoff == 64) return 0.0f;
 
-        return temperature * (float)((float)this.posY - cutoff) / (64.0f - cutoff);
+        return temperature * ((float)this.posY - cutoff) / (64.0f - cutoff);
     }
 
     protected float getTempForBiome(Biome biome) {
         return MathHelper.clamp(biome.getDefaultTemperature(), 0.0f, 1.35f)/1.35f;
     }
     //simple difficulty compat ends here
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.25f : 0;
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
-        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
-        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
-        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
-    }
 
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
