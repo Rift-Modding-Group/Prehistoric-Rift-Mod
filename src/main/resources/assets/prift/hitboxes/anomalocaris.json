@@ -1,0 +1,46 @@
+{
+	"hitboxes": [
+		{
+			"locator": "hitbox_body",
+			"width": 0.7,
+			"height": 0.2,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_body_0",
+			"width": 0.5,
+			"height": 0.15,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_head",
+			"width": 0.4,
+			"height": 0.15,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_0",
+			"width": 0.2,
+			"height": 0.075,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_1",
+			"width": 0.2,
+			"height": 0.075,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		},
+		{
+			"locator": "hitbox_tail_2",
+			"width": 0.2,
+			"height": 0.075,
+			"damageMultiplier": 1,
+			"affectedByAnim": true
+		}
+	]
+}

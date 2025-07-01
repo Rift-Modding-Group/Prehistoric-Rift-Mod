@@ -24,7 +24,6 @@ import java.util.Map;
 
 public class Anomalocaris extends RiftWaterCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/anomalocaris"));
-    public RiftCreaturePart tailPart;
 
     public Anomalocaris(World worldIn) {
         super(worldIn, RiftCreatureType.ANOMALOCARIS);
@@ -37,15 +36,6 @@ public class Anomalocaris extends RiftWaterCreature {
         this.speed = 0.2D;
         this.waterSpeed = 5D;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
-
-        this.headPart = new RiftCreaturePart(this, 1.25f, 0, 0f, 0.5f, 0.5f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0f, 1f, 0.375f, 1f);
-        this.tailPart = new RiftCreaturePart(this, -1.75f, 0, 0f, 0.75f, 0.5f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-                this.headPart,
-                this.bodyPart,
-                this.tailPart
-        };
     }
 
     protected void initEntityAI() {
