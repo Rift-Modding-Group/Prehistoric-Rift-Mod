@@ -35,7 +35,6 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/megaloceros"));
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Megaloceros.class, DataSerializers.BOOLEAN);
-    private RiftCreaturePart frontBodyPart;
 
     public Megaloceros(World worldIn) {
         super(worldIn, RiftCreatureType.MEGALOCEROS);
@@ -46,15 +45,6 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
         this.speed = 0.35D;
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
-
-        this.headPart = new RiftCreaturePart(this, 1.4f, 0, 1.3f, 0.7f, 0.6f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.75f, 1f, 0.75f, 1f);
-        this.frontBodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.75f, 0.75f, 0.75f, 1f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.frontBodyPart
-        };
     }
 
     @Override
@@ -83,16 +73,6 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
         this.tasks.addTask(11, new RiftHerdMemberFollow(this));
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.55f : 0;
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-        if (this.frontBodyPart != null) this.frontBodyPart.setPositionAndUpdate(this.frontBodyPart.posX, this.frontBodyPart.posY + sitOffset, this.frontBodyPart.posZ);
     }
 
     @Override

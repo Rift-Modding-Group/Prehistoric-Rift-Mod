@@ -25,7 +25,9 @@
 						{"origin": [-2, 9, 0], "size": [4, 2, 4], "uv": [0, 49]}
 					],
 					"locators": {
-						"bleedlocator": [0, 12, -2]
+						"bleedlocator": [0, 12, -2],
+						"hitbox_hips": [0, 16, 6],
+						"rider_pos_0": [0, 23, -2]
 					}
 				},
 				{
@@ -34,7 +36,10 @@
 					"pivot": [-7, 14.5, 6],
 					"cubes": [
 						{"origin": [-9, 7.5, 2.5], "size": [4, 10, 7], "uv": [66, 29]}
-					]
+					],
+					"locators": {
+						"hitbox_left_back_leg": [-5.4, 12.5, 6]
+					}
 				},
 				{
 					"name": "leftBackShin",
@@ -42,7 +47,10 @@
 					"pivot": [-7, 9.5, 9.75],
 					"cubes": [
 						{"origin": [-8.5, 0, 8.25], "size": [3, 11, 3], "uv": [24, 72]}
-					]
+					],
+					"locators": {
+						"hitbox_left_back_shin": [-7, 5.6, 9.75]
+					}
 				},
 				{
 					"name": "rightBackLeg",
@@ -50,7 +58,10 @@
 					"pivot": [7, 14.5, 6],
 					"cubes": [
 						{"origin": [5, 7.5, 2.5], "size": [4, 10, 7], "uv": [63, 10]}
-					]
+					],
+					"locators": {
+						"hitbox_right_back_leg": [5.4, 12.5, 6]
+					}
 				},
 				{
 					"name": "rightBackShin",
@@ -58,7 +69,10 @@
 					"pivot": [7, 9.5, 9.75],
 					"cubes": [
 						{"origin": [5.5, 0, 8.25], "size": [3, 11, 3], "uv": [0, 0]}
-					]
+					],
+					"locators": {
+						"hitbox_right_back_shin": [7, 5.6, 9.75]
+					}
 				},
 				{
 					"name": "saddle",
@@ -83,7 +97,11 @@
 					"pivot": [0, 22, 0.5],
 					"cubes": [
 						{"origin": [-5, 10.5, -13], "size": [10, 12, 14], "uv": [0, 0]}
-					]
+					],
+					"locators": {
+						"hitbox_body": [0, 16.5, -4],
+						"hitbox_body_0": [0, 16.5, -8]
+					}
 				},
 				{
 					"name": "leftFrontLeg",
@@ -91,7 +109,10 @@
 					"pivot": [-6.5, 13.5, -7.25],
 					"cubes": [
 						{"origin": [-8, 0, -8.75], "size": [3, 15, 3], "uv": [12, 72]}
-					]
+					],
+					"locators": {
+						"hitbox_left_front_leg": [-6.5, 7.6, -7.25]
+					}
 				},
 				{
 					"name": "rightFrontLeg",
@@ -99,7 +120,10 @@
 					"pivot": [6.5, 13.5, -7.25],
 					"cubes": [
 						{"origin": [5, 0, -8.75], "size": [3, 15, 3], "uv": [0, 72]}
-					]
+					],
+					"locators": {
+						"hitbox_right_front_leg": [6.5, 7.6, -7.25]
+					}
 				},
 				{
 					"name": "neck",
@@ -107,7 +131,10 @@
 					"pivot": [0, 18.5, -10],
 					"cubes": [
 						{"origin": [-3, 12.5, -21], "size": [6, 9, 13], "pivot": [0, 15, -11.5], "rotation": [-40, 0, 0], "uv": [35, 14]}
-					]
+					],
+					"locators": {
+						"hitbox_neck": [0, 19, -13]
+					}
 				},
 				{
 					"name": "head",
@@ -118,7 +145,12 @@
 						{"origin": [-7, 26, -18], "size": [4, 2, 1], "pivot": [-3, 25.5, -17.5], "rotation": [0, 0, 45], "uv": [34, 0]},
 						{"origin": [3, 26, -18], "size": [4, 2, 1], "pivot": [3, 25.5, -17.5], "rotation": [0, 0, -45], "uv": [0, 31]},
 						{"origin": [-3, 21.5, -31.5], "size": [6, 5, 8], "uv": [67, 52]}
-					]
+					],
+					"locators": {
+						"hitbox_head": [0, 23.5, -19],
+						"hitbox_jaws": [0, 23, -25],
+						"hitbox_jaws_0": [0, 23, -28.5]
+					}
 				},
 				{
 					"name": "lowerJaw",

@@ -2155,6 +2155,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         return null;
     }
+
+    public EntityHitbox getBodyHitbox() {
+        for (Entity entity : this.hitboxArray) {
+            EntityHitbox hitboxToTest = (EntityHitbox) entity;
+            if (hitboxToTest.partName.equals("body")) return hitboxToTest;
+        }
+        return null;
+    }
     //end of multi hitbox stuff
 
     protected void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source) {
@@ -2770,8 +2778,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
                 //for getting out of bodies of water easily
                 if (forward > 0) {
-                    if (this.bodyPart != null) {
-                        if (this.bodyPart.isInWater()) {
+                    if (this.getBodyHitbox() != null) {
+                        if (this.getBodyHitbox().isInWater()) {
                             if (this.posY >= RiftUtil.highestWaterPos(this) - 2 && this.posY <= RiftUtil.highestWaterPos(this) + 2) {
                                 double xMove = this.width * Math.sin(-Math.toRadians(this.rotationYaw));
                                 double zMove = this.width * Math.cos(Math.toRadians(this.rotationYaw));
@@ -2808,8 +2816,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
             //get out of 2 block or more deep water pits
             if (forward > 0) {
-                if (this.bodyPart != null) {
-                    if (this.bodyPart.isInWater()) {
+                if (this.getBodyHitbox() != null) {
+                    if (this.getBodyHitbox().isInWater()) {
                         if (this.posY >= RiftUtil.highestWaterPos(this) - 2 && this.posY <= RiftUtil.highestWaterPos(this) + 2) {
                             double xMove = (this.width)*Math.sin(-Math.toRadians(this.rotationYaw));
                             double zMove = (this.width)*Math.cos(Math.toRadians(this.rotationYaw));
