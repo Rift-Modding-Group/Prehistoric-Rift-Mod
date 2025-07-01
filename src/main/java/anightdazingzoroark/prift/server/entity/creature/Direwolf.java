@@ -20,7 +20,6 @@ import java.util.*;
 
 public class Direwolf extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/direwolf"));
-    private RiftCreaturePart hipsPart;
 
     public Direwolf(World worldIn) {
         super(worldIn, RiftCreatureType.DIREWOLF);
@@ -32,15 +31,6 @@ public class Direwolf extends RiftCreature {
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
-
-        this.headPart = new RiftCreaturePart(this, 1f, 0, 0.8f, 0.7f, 0.7f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.6f, 1f, 0.7f, 1f);
-        this.hipsPart = new RiftCreaturePart(this, -0.9f, 0, 0.6f, 0.9f, 0.7f, 1f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.hipsPart
-        };
     }
 
     @Override
@@ -68,15 +58,6 @@ public class Direwolf extends RiftCreature {
         this.tasks.addTask(10, new RiftHerdMemberFollow(this));
         this.tasks.addTask(11, new RiftWander(this, 1.0D));
         this.tasks.addTask(12, new RiftLookAround(this));
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        if (this.isSitting() && !this.isBeingRidden() && this.hipsPart != null) {
-            this.hipsPart.setPositionAndUpdate(this.hipsPart.posX, this.hipsPart.posY - 0.3f, this.hipsPart.posZ);
-        }
     }
 
     @Override
@@ -138,7 +119,7 @@ public class Direwolf extends RiftCreature {
                 .defineUseDurationLength(17.5D)
                 .defineRecoverFromUseLength(2.5D)
                 .setChargeUpToUseSound(RiftSounds.GENERIC_BLOW_MOVE)
-                .setChargeUpToUseParticles("blow", 32, this.headPart.posX, this.headPart.posY, this.headPart.posZ, this.getLookVec().x, this.getLookVec().y, this.getLookVec().z)
+                .setChargeUpToUseParticles("blow", 32, this.getHeadHitbox().posX, this.getHeadHitbox().posY, this.getHeadHitbox().posZ, this.getLookVec().x, this.getLookVec().y, this.getLookVec().z)
                 .finalizePoints()
         );
         return moveMap;

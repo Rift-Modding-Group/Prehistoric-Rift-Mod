@@ -18,18 +18,14 @@
 				{
 					"name": "direwolf",
 					"parent": "base",
-					"pivot": [0, 0, 0],
-					"locators": {
-						"bleedlocator": [0, 12, 3]
-					}
+					"pivot": [0, 0, 0]
 				},
 				{
 					"name": "frontBody",
 					"parent": "direwolf",
 					"pivot": [0, 17.5, 4.7],
 					"locators": {
-						"werewolfindicator": [0, 22, 0],
-						"particlelocator": [0, 24, 3]
+						"hitbox_body": [0, 13, 0]
 					}
 				},
 				{
@@ -38,7 +34,10 @@
 					"pivot": [0, 16.5, -5.5],
 					"cubes": [
 						{"origin": [-4, 9.75, -12.5], "size": [8, 8, 8], "pivot": [0, 16.5, -5.5], "rotation": [-7.5, 0, 0], "uv": [42, 17]}
-					]
+					],
+					"locators": {
+						"hitbox_neck": [0, 14, -7]
+					}
 				},
 				{
 					"name": "head",
@@ -49,7 +48,12 @@
 						{"origin": [-2, 12.2, -24], "size": [4, 4, 6], "uv": [52, 0]},
 						{"origin": [-4.925, 18.75, -11.875], "size": [2, 4, 1], "pivot": [-4.125, 20, -11.375], "rotation": [0, 0, -30], "uv": [36, 0]},
 						{"origin": [2.925, 18.75, -11.875], "size": [2, 4, 1], "pivot": [4.125, 20, -11.375], "rotation": [0, 0, 30], "uv": [36, 5], "mirror": true}
-					]
+					],
+					"locators": {
+						"hitbox_head": [0, 15.25, -14],
+						"hitbox_jaws": [0, 13.625, -19.5],
+						"hitbox_jaws_0": [0, 13.625, -22]
+					}
 				},
 				{
 					"name": "lowerJaw",
@@ -78,15 +82,21 @@
 					"pivot": [-7.5, 8.5, -2.25],
 					"cubes": [
 						{"origin": [-9, 0, -3.75], "size": [3, 10, 3], "uv": [0, 0]}
-					]
+					],
+					"locators": {
+						"hitbox_left_front_leg": [-7.4, 5.2, -2.25]
+					}
 				},
 				{
 					"name": "rightFrontLeg",
 					"parent": "frontBody",
 					"pivot": [7.5, 8.5, -2.25],
 					"cubes": [
-						{"origin": [6, 0, -3.75], "size": [3, 10, 3], "uv": [36, 58], "mirror": true}
-					]
+						{"origin": [5.9, 0, -3.75], "size": [3, 10, 3], "uv": [36, 58], "mirror": true}
+					],
+					"locators": {
+						"hitbox_right_front_leg": [7.4, 5.2, -2.25]
+					}
 				},
 				{
 					"name": "frontBodyCube",
@@ -94,7 +104,10 @@
 					"pivot": [0, 13, 0],
 					"cubes": [
 						{"origin": [-6, 7, -6], "size": [12, 12, 12], "uv": [0, 25]}
-					]
+					],
+					"locators": {
+						"rider_pos_0": [0, 19.25, 0]
+					}
 				},
 				{
 					"name": "saddle",
@@ -110,7 +123,10 @@
 					"pivot": [0, 17, 5.7],
 					"cubes": [
 						{"origin": [-5.5, 7.5, 5], "size": [11, 11, 14], "inflate": -0.125, "uv": [0, 0]}
-					]
+					],
+					"locators": {
+						"hitbox_body_0": [0, 13, 12.5]
+					}
 				},
 				{
 					"name": "leftBackLeg",
@@ -118,7 +134,10 @@
 					"pivot": [-6.8, 12, 13],
 					"cubes": [
 						{"origin": [-8.3, 6, 10], "size": [3, 8, 6], "uv": [0, 58]}
-					]
+					],
+					"locators": {
+						"hitbox_left_back_leg": [-5.25, 10, 13]
+					}
 				},
 				{
 					"name": "leftBackShin",
@@ -126,7 +145,10 @@
 					"pivot": [-5, -6, 5],
 					"cubes": [
 						{"origin": [-8.3, -0.125, 15], "size": [3, 8, 3], "inflate": -0.125, "uv": [0, 25]}
-					]
+					],
+					"locators": {
+						"hitbox_right_back_shin": [-6.75, 4, 16.5]
+					}
 				},
 				{
 					"name": "rightBackLeg",
@@ -134,7 +156,10 @@
 					"pivot": [6.8, 12, 13],
 					"cubes": [
 						{"origin": [5.3, 6, 10], "size": [3, 8, 6], "uv": [18, 52]}
-					]
+					],
+					"locators": {
+						"hitbox_right_back_leg": [5.25, 10, 13]
+					}
 				},
 				{
 					"name": "rightBackShin",
@@ -142,7 +167,10 @@
 					"pivot": [-5, -6, 5],
 					"cubes": [
 						{"origin": [5.3, -0.125, 15], "size": [3, 8, 3], "inflate": -0.125, "uv": [0, 25], "mirror": true}
-					]
+					],
+					"locators": {
+						"hitbox_left_back_shin": [6.75, 4, 16.5]
+					}
 				},
 				{
 					"name": "tail",
