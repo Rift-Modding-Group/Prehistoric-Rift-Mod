@@ -23,11 +23,6 @@ import java.util.Map;
 
 public class Saurophaganax extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/saurophaganax"));
-    private RiftCreaturePart neckPart;
-    private RiftCreaturePart bodyFrontPart;
-    private RiftCreaturePart tail0Part;
-    private RiftCreaturePart tail1Part;
-    private RiftCreaturePart tail2Part;
 
     public Saurophaganax(World worldIn) {
         super(worldIn, RiftCreatureType.SAUROPHAGANAX);
@@ -39,23 +34,6 @@ public class Saurophaganax extends RiftCreature {
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.25D;
         this.targetList = RiftUtil.creatureTargets((RiftConfigHandler.getConfig(this.creatureType)).general.targetWhitelist);
-
-        this.headPart = new RiftCreaturePart(this, 3.5f, 0, 2f, 0.6f, 0.6f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0f, 0, 1.125f, 1f, 0.8f, 1f);
-        this.neckPart = new RiftCreaturePart(this, 2.5f, 0, 1.7f, 0.5f, 0.65f, 1.5f);
-        this.bodyFrontPart = new RiftCreaturePart(this, 1.5f, 0, 1.125f, 0.8f, 0.8f, 1f);
-        this.tail0Part = new RiftCreaturePart(this, -1.5f, 0, 1.4f, 0.6f, 0.6f, 0.5f);
-        this.tail1Part = new RiftCreaturePart(this, -2.5f, 0, 1.4f, 0.5f, 0.5f, 0.5f);
-        this.tail2Part = new RiftCreaturePart(this, -3.5f, 0, 1.4f, 0.5f, 0.5f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.neckPart,
-            this.bodyFrontPart,
-            this.tail0Part,
-            this.tail1Part,
-            this.tail2Part
-        };
     }
 
     @Override
@@ -80,25 +58,6 @@ public class Saurophaganax extends RiftCreature {
         this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(9, new RiftWander(this, 1.0D));
         this.tasks.addTask(10, new RiftLookAround(this));
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sleepOffsetBody = this.isSleeping() ? -1.2f : 0;
-        float sleepOffsetNeck = this.isSleeping() ? -1.7f : 0;
-        float sleepOffsetHead = this.isSleeping() ? -2f : 0;
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden() && !this.isSleeping()) ? -0.6f : 0;
-
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sleepOffsetBody + sitOffset, this.bodyPart.posZ);
-        if (this.bodyFrontPart != null) this.bodyFrontPart.setPositionAndUpdate(this.bodyFrontPart.posX, this.bodyFrontPart.posY + sleepOffsetBody + sitOffset, this.bodyFrontPart.posZ);
-        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sleepOffsetBody + sitOffset, this.tail0Part.posZ);
-        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sleepOffsetBody + sitOffset, this.tail1Part.posZ);
-        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sleepOffsetBody + sitOffset, this.tail2Part.posZ);
-        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sleepOffsetNeck + sitOffset, this.neckPart.posZ);
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sleepOffsetHead + sitOffset, this.headPart.posZ);
     }
 
     @Override

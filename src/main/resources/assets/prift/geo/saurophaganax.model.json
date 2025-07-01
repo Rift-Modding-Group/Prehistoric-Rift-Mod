@@ -18,10 +18,7 @@
 				{
 					"name": "saurophaganax",
 					"parent": "base",
-					"pivot": [0, 0, 0],
-					"locators": {
-						"bleedlocator": [0, 12, -6]
-					}
+					"pivot": [0, 0, 0]
 				},
 				{
 					"name": "body",
@@ -31,7 +28,10 @@
 						{"origin": [-4.5, 9, -4.5], "size": [9, 12, 10], "uv": [0, 26]}
 					],
 					"locators": {
-						"particlelocator": [0, 28, 0]
+						"rider_pos_0": [0, 21.5, -8],
+						"hitbox_body": [0, 15.5, -9],
+						"hitbox_body_0": [0, 15.5, -15],
+						"hitbox_hips": [0, 15, 0.5]
 					}
 				},
 				{
@@ -40,7 +40,10 @@
 					"pivot": [0, 17.5, -17],
 					"cubes": [
 						{"origin": [-3, 11.81699, -25.48205], "size": [6, 8, 11], "pivot": [0, 17.5, -17], "rotation": [-30, 0, 0], "uv": [0, 48]}
-					]
+					],
+					"locators": {
+						"hitbox_neck": [0, 18, -21.5]
+					}
 				},
 				{
 					"name": "head",
@@ -51,7 +54,12 @@
 						{"origin": [2, 23.7, -28], "size": [3, 1, 2], "pivot": [3, 23.45, -27], "rotation": [0, 0, -45], "uv": [50, 44]},
 						{"origin": [-5, 23.7, -28], "size": [3, 1, 2], "pivot": [-3, 23.45, -27], "rotation": [0, 0, 45], "uv": [0, 48]},
 						{"origin": [-3, 19.25, -38], "size": [6, 5, 7], "uv": [56, 61]}
-					]
+					],
+					"locators": {
+						"hitbox_head": [0, 20.75, -27],
+						"hitbox_jaws": [0, 20.75, -32],
+						"hitbox_jaws_0": [0, 20.75, -35]
+					}
 				},
 				{
 					"name": "lowerJaw",
@@ -89,7 +97,11 @@
 					"rotation": [-2.5, 0, 0],
 					"cubes": [
 						{"origin": [-3.5, 12.5019, 2.58724], "size": [7, 8, 12], "uv": [36, 14]}
-					]
+					],
+					"locators": {
+						"hitbox_tail_0": [0, 16.5, 7],
+						"hitbox_tail_1": [0, 16.5, 10.75]
+					}
 				},
 				{
 					"name": "tail1",
@@ -98,7 +110,11 @@
 					"rotation": [-2.5, 0, 0],
 					"cubes": [
 						{"origin": [-3, 13.00761, 12.67431], "size": [6, 7, 12], "uv": [26, 36]}
-					]
+					],
+					"locators": {
+						"hitbox_tail_2": [0, 16.75, 17],
+						"hitbox_tail_3": [0, 16.5, 21.25]
+					}
 				},
 				{
 					"name": "tail2",
@@ -107,7 +123,11 @@
 					"rotation": [-2.5, 0, 0],
 					"cubes": [
 						{"origin": [-2.5, 13.51711, 22.76105], "size": [5, 6, 12], "uv": [50, 43]}
-					]
+					],
+					"locators": {
+						"hitbox_tail_4": [0, 16.6, 26.5],
+						"hitbox_tail_5": [0, 16.6, 31.5]
+					}
 				},
 				{
 					"name": "tail2BackSpine",
@@ -139,7 +159,10 @@
 					"pivot": [-5.75, 12.7, -15],
 					"cubes": [
 						{"origin": [-7.25, 8, -16.5], "size": [3, 6, 3], "inflate": -0.25, "pivot": [-5.75, 12.7, -15], "rotation": [45, 0, 0], "uv": [55, 0]}
-					]
+					],
+					"locators": {
+						"hitbox_left_arm": [-4.5, 9.4, -13.75]
+					}
 				},
 				{
 					"name": "leftShoulder",
@@ -155,7 +178,10 @@
 					"pivot": [5.75, 12.7, -15],
 					"cubes": [
 						{"origin": [4.25, 8, -16.5], "size": [3, 6, 3], "inflate": -0.25, "pivot": [5.75, 12.7, -15], "rotation": [45, 0, 0], "uv": [50, 35]}
-					]
+					],
+					"locators": {
+						"hitbox_right_arm": [4.5, 9.4, -13.75]
+					}
 				},
 				{
 					"name": "rightShoulder",
@@ -221,7 +247,10 @@
 					"pivot": [-6.5, 13.75, 0.5],
 					"cubes": [
 						{"origin": [-8.5, 7.25, -2.5], "size": [4, 9, 6], "uv": [0, 67]}
-					]
+					],
+					"locators": {
+						"hitbox_left_leg": [-5.5, 11.75, 0.5]
+					}
 				},
 				{
 					"name": "leftShin",
@@ -229,7 +258,10 @@
 					"pivot": [0, 0, 0],
 					"cubes": [
 						{"origin": [-8, 1.3, 2], "size": [3, 9, 4], "uv": [70, 30]}
-					]
+					],
+					"locators": {
+						"hitbox_left_shin": [-6.25, 5.2, 4]
+					}
 				},
 				{
 					"name": "leftFoot",
@@ -244,8 +276,11 @@
 					"parent": "saurophaganax",
 					"pivot": [6.5, 13.75, 0.5],
 					"cubes": [
-						{"origin": [4.5, 7.25, -2.5], "size": [4, 9, 6], "uv": [62, 6]}
-					]
+						{"origin": [3.5, 7.25, -2.5], "size": [4, 9, 6], "uv": [62, 6]}
+					],
+					"locators": {
+						"hitbox_right_leg": [5.5, 11.75, 0.5]
+					}
 				},
 				{
 					"name": "rightShin",
@@ -253,7 +288,10 @@
 					"pivot": [0, 0, 0],
 					"cubes": [
 						{"origin": [5, 1.3, 2], "size": [3, 9, 4], "uv": [0, 0]}
-					]
+					],
+					"locators": {
+						"hitbox_right_shin": [6.25, 5.2, 4]
+					}
 				},
 				{
 					"name": "rightFoot",
