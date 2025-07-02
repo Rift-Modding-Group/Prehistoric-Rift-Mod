@@ -23,8 +23,7 @@
 						{"origin": [-5, 12, -5], "size": [10, 14, 11], "uv": [41, 17]}
 					],
 					"locators": {
-						"particlelocator": [0, 40, -7],
-						"bleedlocator": [0, 16, -8]
+						"hitbox_hips": [0, 19, 0.9]
 					}
 				},
 				{
@@ -33,7 +32,12 @@
 					"pivot": [0, 0, 0],
 					"cubes": [
 						{"origin": [-5, 14, -21], "size": [10, 12, 16], "uv": [0, 0]}
-					]
+					],
+					"locators": {
+						"hitbox_body": [0, 20, -9.5],
+						"hitbox_body_0": [0, 20, -16],
+						"rider_pos_0": [0, 26.5, -6.5]
+					}
 				},
 				{
 					"name": "leftArm",
@@ -41,7 +45,10 @@
 					"pivot": [-5.5, 19, -18.5],
 					"cubes": [
 						{"origin": [-8, 12, -19], "size": [3, 8, 3], "pivot": [-6.5, 19, -17.5], "rotation": [45, 0, 0], "uv": [0, 56]}
-					]
+					],
+					"locators": {
+						"hitbox_left_arm": [-4.25, 13.875, -15.25]
+					}
 				},
 				{
 					"name": "leftElbow",
@@ -57,7 +64,10 @@
 					"pivot": [5.5, 19, -18.5],
 					"cubes": [
 						{"origin": [5, 12, -19], "size": [3, 8, 3], "pivot": [6.5, 19, -17.5], "rotation": [45, 0, 0], "uv": [36, 0]}
-					]
+					],
+					"locators": {
+						"hitbox_right_arm": [4.25, 13.875, -15.25]
+					}
 				},
 				{
 					"name": "rightElbow",
@@ -73,7 +83,12 @@
 					"pivot": [0, 20.25, -17.5],
 					"cubes": [
 						{"origin": [-3, 14.75, -33.5], "size": [6, 9, 19], "pivot": [0, 20.25, -17.5], "rotation": [-55, 0, 0], "uv": [0, 28]}
-					]
+					],
+					"locators": {
+						"hitbox_neck": [0, 22, -20.25],
+						"hitbox_neck_0": [0, 24.75, -22.5],
+						"hitbox_neck_1": [0, 28.75, -24.5]
+					}
 				},
 				{
 					"name": "head",
@@ -84,7 +99,12 @@
 						{"origin": [-2.5, 35.5, -37.5], "size": [0, 5, 13], "pivot": [-2.5, 36, -31], "rotation": [0, 0, -15], "uv": [20, 70]},
 						{"origin": [2.5, 35.5, -37.5], "size": [0, 5, 13], "pivot": [2.5, 36, -31], "rotation": [0, 0, 15], "uv": [66, 35]},
 						{"origin": [-3, 30, -41.5], "size": [6, 6, 9], "uv": [74, 33]}
-					]
+					],
+					"locators": {
+						"hitbox_head": [0, 32, -28],
+						"hitbox_jaws": [0, 32, -34],
+						"hitbox_jaws_0": [0, 32, -38.5]
+					}
 				},
 				{
 					"name": "lowerJaw",
@@ -141,7 +161,7 @@
 						{"origin": [-3.5, 29, -33.5], "size": [7, 1, 1], "uv": [60, 116]},
 						{"origin": [3.5, 29, -33.5], "size": [1, 1, 1], "uv": [60, 118], "mirror": true},
 						{"origin": [4, 23.5, -33.5], "size": [0, 12, 19], "pivot": [4.5, 29.5, -33], "rotation": [-17.5, 7.5, 0], "uv": [79, 34], "mirror": true},
-						{"origin": [-4, 23.5, -33.5], "size": [0, 12, 19], "pivot": [-4.5, 29.5, -33], "rotation": [-17.5, -7.5, 0], "uv": [79, 34]}
+						{"origin": [-4, 23.5, -32.5], "size": [0, 12, 19], "pivot": [-4.5, 29.5, -32], "rotation": [-17.5, -7.5, 0], "uv": [79, 34]}
 					]
 				},
 				{
@@ -164,7 +184,11 @@
 					"rotation": [-2.5, 0, 0],
 					"cubes": [
 						{"origin": [-4, 16.5, 3], "size": [8, 9, 13], "uv": [37, 43]}
-					]
+					],
+					"locators": {
+						"hitbox_tail_0": [0, 21, 7.5],
+						"hitbox_tail_1": [0, 21, 12]
+					}
 				},
 				{
 					"name": "tail1",
@@ -173,7 +197,11 @@
 					"rotation": [-2.5, 0, 0],
 					"cubes": [
 						{"origin": [-3, 18, 14], "size": [6, 7, 13], "uv": [0, 56]}
-					]
+					],
+					"locators": {
+						"hitbox_tail_2": [0, 21.75, 19],
+						"hitbox_tail_3": [0, 21.5, 24]
+					}
 				},
 				{
 					"name": "tail2",
@@ -182,7 +210,12 @@
 					"rotation": [-2.5, 0, 0],
 					"cubes": [
 						{"origin": [-2, 19.5, 25], "size": [4, 5, 13], "uv": [25, 65]}
-					]
+					],
+					"locators": {
+						"hitbox_tail_4": [0, 22, 29],
+						"hitbox_tail_5": [0, 22, 32],
+						"hitbox_tail_6": [0, 22, 36]
+					}
 				},
 				{
 					"name": "leftLeg",
@@ -190,7 +223,10 @@
 					"pivot": [-6.5, 19, 0.5],
 					"cubes": [
 						{"origin": [-8, 10, -3.5], "size": [3, 12, 8], "uv": [60, 83]}
-					]
+					],
+					"locators": {
+						"hitbox_left_leg": [-4.25, 16, 0.5]
+					}
 				},
 				{
 					"name": "leftShin",
@@ -198,7 +234,10 @@
 					"pivot": [0, 0, 0],
 					"cubes": [
 						{"origin": [-8, 1.5, 2], "size": [3, 12, 5], "inflate": -0.25, "uv": [82, 83]}
-					]
+					],
+					"locators": {
+						"hitbox_left_shin": [-5.75, 6.6, 4.5]
+					}
 				},
 				{
 					"name": "leftFoot",
@@ -214,7 +253,10 @@
 					"pivot": [6.5, 19, 0.5],
 					"cubes": [
 						{"origin": [5, 10, -3.5], "size": [3, 12, 8], "uv": [38, 83]}
-					]
+					],
+					"locators": {
+						"hitbox_right_leg": [4.25, 16, 0.5]
+					}
 				},
 				{
 					"name": "rightShin",
@@ -222,7 +264,10 @@
 					"pivot": [0, 0, 0],
 					"cubes": [
 						{"origin": [5, 1.5, 2], "size": [3, 12, 5], "inflate": -0.25, "uv": [0, 28]}
-					]
+					],
+					"locators": {
+						"hitbox_right_shin": [5.75, 6.6, 4.5]
+					}
 				},
 				{
 					"name": "rightFoot",

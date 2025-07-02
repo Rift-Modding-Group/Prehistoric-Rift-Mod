@@ -25,11 +25,6 @@ import java.util.*;
 
 public class Dilophosaurus extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/dilophosaurus"));
-    private RiftCreaturePart neckPart;
-    private RiftCreaturePart hipPart;
-    private RiftCreaturePart tail0Part;
-    private RiftCreaturePart tail1Part;
-    private RiftCreaturePart tail2Part;
 
     public Dilophosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.DILOPHOSAURUS);
@@ -41,24 +36,6 @@ public class Dilophosaurus extends RiftCreature {
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.2D;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
-
-        this.headPart = new RiftCreaturePart(this, 2f, 0, 1.7f, 1f, 0.6f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.9f, 1f, 0.8f, 1f);
-        this.neckPart = new RiftCreaturePart(this, 1.5f, 0, 1.2f, 0.7f, 0.7f, 1.5f);
-        this.hipPart = new RiftCreaturePart(this, 0, 0, 0.7f, 1f, 1f, 1f);
-        this.tail0Part = new RiftCreaturePart(this, -0.9f, 0, 1f, 0.7f, 0.6f, 0.5f);
-        this.tail1Part = new RiftCreaturePart(this, -1.5f, 0, 0.95f, 0.6f, 0.6f, 0.5f);
-        this.tail2Part = new RiftCreaturePart(this, -2.1f, 0, 0.9f, 0.6f, 0.6f, 0.5f);
-
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.headPart,
-            this.bodyPart,
-            this.neckPart,
-            this.hipPart,
-            this.tail0Part,
-            this.tail1Part,
-            this.tail2Part
-        };
     }
 
     @Override
@@ -82,20 +59,6 @@ public class Dilophosaurus extends RiftCreature {
         this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(7, new RiftWander(this, 1.0D));
         this.tasks.addTask(8, new RiftLookAround(this));
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-
-        float sitOffset = (this.isSitting() && !this.isBeingRidden()) ? -0.45f : 0;
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-        if (this.neckPart != null) this.neckPart.setPositionAndUpdate(this.neckPart.posX, this.neckPart.posY + sitOffset, this.neckPart.posZ);
-        if (this.hipPart != null) this.hipPart.setPositionAndUpdate(this.hipPart.posX, this.hipPart.posY + sitOffset, this.hipPart.posZ);
-        if (this.tail0Part != null) this.tail0Part.setPositionAndUpdate(this.tail0Part.posX, this.tail0Part.posY + sitOffset, this.tail0Part.posZ);
-        if (this.tail1Part != null) this.tail1Part.setPositionAndUpdate(this.tail1Part.posX, this.tail1Part.posY + sitOffset, this.tail1Part.posZ);
-        if (this.tail2Part != null) this.tail2Part.setPositionAndUpdate(this.tail2Part.posX, this.tail2Part.posY + sitOffset, this.tail2Part.posZ);
     }
 
     @Override
