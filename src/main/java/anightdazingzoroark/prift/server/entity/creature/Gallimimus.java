@@ -20,11 +20,7 @@ import java.util.*;
 
 public class Gallimimus extends RiftCreature {
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/gallimimus"));
-    private final RiftCreaturePart hipsPart;
-    private final RiftCreaturePart neckPart;
-    private final RiftCreaturePart tail0Part;
-    private final RiftCreaturePart tail1Part;
-    private final RiftCreaturePart tail2Part;
+
     public Gallimimus(World worldIn) {
         super(worldIn, RiftCreatureType.GALLIMIMUS);
         this.setSize(1.25f, 1.5f);
@@ -35,23 +31,6 @@ public class Gallimimus extends RiftCreature {
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, false);
-
-        this.headPart = new RiftCreaturePart(this, 1.75f, 0, 1.75f, 0.625f, 0.5f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, 0.8f, 0, 0.8f, 0.8f, 0.8f, 1f);
-        this.hipsPart = new RiftCreaturePart(this, 0, 0, 0.6f, 0.8f, 1f, 1f);
-        this.neckPart = new RiftCreaturePart(this, 1.375f, 0, 1f, 0.4f, 1.25f, 2f);
-        this.tail0Part = new RiftCreaturePart(this, -0.75f, 0, 1f, 0.8f, 0.5f, 0.5f);
-        this.tail1Part = new RiftCreaturePart(this, -1.375f, 0, 0.95f, 0.7f, 0.5f, 0.5f);
-        this.tail2Part = new RiftCreaturePart(this, -2f, 0, 0.9f, 0.6f, 0.5f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-                this.headPart,
-                this.bodyPart,
-                this.hipsPart,
-                this.neckPart,
-                this.tail0Part,
-                this.tail1Part,
-                this.tail2Part
-        };
     }
 
     protected void initEntityAI() {
