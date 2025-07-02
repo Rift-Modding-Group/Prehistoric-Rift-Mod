@@ -337,7 +337,11 @@ public class RiftUtil {
     }
 
     public static boolean checkForNoAssociations(RiftCreature user, Entity target) {
-        if (user == null) return true;
+        if (user == null || target == null) return true;
+
+        //if user and target are somehow the same, return false, as by logic they're associated
+        //with each other
+        if (user.equals(target)) return false;
 
         if (target instanceof EntityLivingBase) {
             EntityLivingBase entityLivingBase = (EntityLivingBase)target;
@@ -355,28 +359,34 @@ public class RiftUtil {
             Entity parentOfPart = (Entity) ((MultiPartEntityPart)target).parent;
             return checkForNoAssociations(user, parentOfPart);
         }
+        //target being anything else returns true, as by logic they're not associated with user
         return true;
     }
 
     public static boolean checkForNoHerdAssociations(RiftCreature user, Entity target) {
-        //if the user herder isn't a herder or doesn't exist, return true
-        if (user == null || !user.canDoHerding()) return true;
+        //if the user herder isn't a herder or doesn't exist, or if target doesnt exist, return true
+        if (user == null || !user.canDoHerding() || target == null) return true;
 
-        //if the target isn't a RiftCreature of EntityHitbox, return true
-        if (!(target instanceof RiftCreature) && !(target instanceof EntityHitbox)) return true;
+        //if user and target are somehow the same, return false, as by logic they're associated
+        //with each other
+        if (user.equals(target)) return false;
 
-        RiftCreature targetCreature = null;
-        if (target instanceof EntityHitbox) targetCreature = (RiftCreature) ((EntityHitbox)target).getParentAsEntityLiving();
-        else if (target instanceof RiftCreature) targetCreature = (RiftCreature) target;
+        if (target instanceof RiftCreature) {
+            RiftCreature targetCreature = (RiftCreature) target;
 
-        if (targetCreature == null) return true;
+            //if both herders have no leaders, return true
+            if (user.getHerdLeader() == null || targetCreature.getHerdLeader() == null) return true;
 
-        //if both herders have no leaders, return true
-        if (user.getHerdLeader() == null || targetCreature.getHerdLeader() == null) return true;
-
-        //if herders have same leader, return false, else true
-        if (user.getHerdLeader().equals(targetCreature.getHerdLeader())) return false;
-        return true;
+            //if herders have same leader, return false, else true
+            return !user.getHerdLeader().equals(targetCreature.getHerdLeader());
+        }
+        //if target is a hitbox, get parent and call function recursively but this time w the parent
+        else if (target instanceof MultiPartEntityPart) {
+            Entity parentOfPart = (Entity) ((MultiPartEntityPart)target).parent;
+            return checkForNoHerdAssociations(user, parentOfPart);
+        }
+        //target being anything else returns true, as by logic they're not associated with user
+        else return true;
     }
 
     public static <T> List<T> uniteTwoLists(List<T> listOne, List<T> listTwo) {

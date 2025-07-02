@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSetEntityMotion;
 import net.minecraft.block.material.Material;
@@ -106,10 +105,6 @@ public class RiftChargeMove extends RiftCreatureMove {
             if (!chargedIntoEntities.isEmpty()) {
                 List<Entity> entitiesToDamage = user.world.getEntitiesWithinAABB(Entity.class, chargerEffectHitbox, this.generalEntityPredicate(user));
                 for (Entity entity : entitiesToDamage) {
-                    if (entity instanceof RiftCreaturePart) {
-                        RiftCreature parent = ((RiftCreaturePart) entity).getParent();
-                        user.attackEntityAsMob(parent);
-                    }
                     user.attackEntityAsMob(entity);
                 }
             }

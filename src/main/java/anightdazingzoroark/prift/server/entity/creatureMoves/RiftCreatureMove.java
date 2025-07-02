@@ -2,11 +2,11 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -196,18 +196,9 @@ public abstract class RiftCreatureMove {
         return new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
-                if (entity instanceof RiftCreaturePart) {
-                    RiftCreature parent = ((RiftCreaturePart)entity).getParent();
-                    return !parent.equals(user)
-                            && RiftUtil.checkForNoAssociations(user, parent)
-                            && RiftUtil.checkForNoHerdAssociations(user, parent);
-                }
-                else if (entity instanceof RiftCreature) {
-                    return  !entity.equals(user)
-                            && RiftUtil.checkForNoAssociations(user, entity)
-                            && RiftUtil.checkForNoHerdAssociations(user, entity);
-                }
-                else if (entity instanceof EntityLivingBase) return RiftUtil.checkForNoAssociations(user, entity) && !entity.equals(user);
+                if (entity instanceof EntityLivingBase || entity instanceof MultiPartEntityPart)
+                    return RiftUtil.checkForNoAssociations(user, entity)
+                        && RiftUtil.checkForNoHerdAssociations(user, entity);
                 else return false;
             }
         };

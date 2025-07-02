@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSetEntityMotion;
 import net.minecraft.block.material.Material;
@@ -11,7 +10,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class RiftLungeMove extends RiftCreatureMove {
@@ -77,10 +75,6 @@ public class RiftLungeMove extends RiftCreatureMove {
 
             //damage all entities it charged into
             if (!chargedIntoEntities.isEmpty()) for (Entity entity : chargedIntoEntities) {
-                if (entity instanceof RiftCreaturePart) {
-                    RiftCreature parent = ((RiftCreaturePart)entity).getParent();
-                    user.attackEntityAsMob(parent);
-                }
                 user.attackEntityAsMob(entity);
             }
 

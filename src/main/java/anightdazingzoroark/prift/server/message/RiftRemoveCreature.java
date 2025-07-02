@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;

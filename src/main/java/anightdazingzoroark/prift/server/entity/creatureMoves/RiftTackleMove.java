@@ -1,20 +1,16 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
-import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSetEntityMotion;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RiftTackleMove extends RiftCreatureMove {
@@ -101,10 +97,6 @@ public class RiftTackleMove extends RiftCreatureMove {
             if (!tackledEntities.isEmpty()) {
                 List<Entity> entitiesToDamage = user.world.getEntitiesWithinAABB(Entity.class, tackleEffectHitbox, this.generalEntityPredicate(user));
                 for (Entity entity : entitiesToDamage) {
-                    if (entity instanceof RiftCreaturePart) {
-                        RiftCreature parent = ((RiftCreaturePart) entity).getParent();
-                        user.attackEntityAsMob(parent);
-                    }
                     user.attackEntityAsMob(entity);
                 }
             }
