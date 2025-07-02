@@ -45,15 +45,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
     private static final DataParameter<Integer> LEAD_WORK_X_POS = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Y_POS = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEAD_WORK_Z_POS = EntityDataManager.createKey(Ankylosaurus.class, DataSerializers.VARINT);
-    private RiftCreaturePart leftFrontLegPart;
-    private RiftCreaturePart rightFrontLegPart;
-    private RiftCreaturePart leftBackLegPart;
-    private RiftCreaturePart rightBackLegPart;
-    private RiftCreaturePart tail0;
-    private RiftCreaturePart tail1;
-    private RiftCreaturePart tail2;
-    private RiftCreaturePart tail3;
-    private RiftCreaturePart tailClub;
 
     public Ankylosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.ANKYLOSAURUS);
@@ -64,33 +55,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         this.speed = 0.15D;
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
-
-        this.headPart = new RiftCreaturePart(this, "head",2f, 0, 0.7f, 0.5f, 0.5f, 1.5f);
-        this.bodyPart = new RiftCreaturePart(this, "body", 0, 0, 0.5f, 1.25f, 0.9f, 0.25f)
-                .setImmuneToMelee()
-                .setImmuneToProjectile();
-        this.leftFrontLegPart = new RiftCreaturePart(this, 1.5f, 30f, 0, 0.35f, 0.7f, 0.5f);
-        this.rightFrontLegPart = new RiftCreaturePart(this, 1.5f, -30f, 0, 0.35f, 0.7f, 0.5f);
-        this.leftBackLegPart = new RiftCreaturePart(this, 1.5f, 150f, 0, 0.35f, 0.7f, 0.5f);
-        this.rightBackLegPart = new RiftCreaturePart(this, 1.5f, -150f, 0, 0.35f, 0.7f, 0.5f);
-        this.tail0 = new RiftCreaturePart(this, "tail", -1.75f, 0, 0.7f, 0.5f, 0.5f, 0.5f);
-        this.tail1 = new RiftCreaturePart(this,"tail",  -2.625f, 0, 0.75f, 0.4f, 0.4f, 0.5f);
-        this.tail2 = new RiftCreaturePart(this,"tail",  -3.375f, 0, 0.8f, 0.35f, 0.35f, 0.5f);
-        this.tail3 = new RiftCreaturePart(this,"tail",  -4f, 0, 0.75f, 0.3f, 0.3f, 0.5f);
-        this.tailClub = new RiftCreaturePart(this,"tail",  -4.375f, 0, 0.7f, 0.35f, 0.35f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-                this.headPart,
-                this.bodyPart,
-                this.leftFrontLegPart,
-                this.rightFrontLegPart,
-                this.leftBackLegPart,
-                this.rightBackLegPart,
-                this.tail0,
-                this.tail1,
-                this.tail2,
-                this.tail3,
-                this.tailClub
-        };
     }
 
     @Override
@@ -126,25 +90,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         this.tasks.addTask(11, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
-    }
-
-    public void updateParts() {
-        super.updateParts();
-        //change positions when sitting or hiding
-        float sitOffset = ((this.isSitting() && !this.isBeingRidden()) || this.isHidingInShell()) ? -0.75f : 0;
-        if (this.headPart != null) this.headPart.setPositionAndUpdate(this.headPart.posX, this.headPart.posY + sitOffset, this.headPart.posZ);
-        if (this.bodyPart != null) this.bodyPart.setPositionAndUpdate(this.bodyPart.posX, this.bodyPart.posY + sitOffset, this.bodyPart.posZ);
-    }
-
-    public boolean attackEntityFromPart(MultiPartEntityPart part, DamageSource source, float damage) {
-        RiftCreaturePart riftPart = (RiftCreaturePart) part;
-        if (riftPart.partName.equals("body") && this.isHidingInShell()) {
-            Entity attackedEntity = source.getImmediateSource();
-            if (attackedEntity != null && !source.isExplosion() && !source.isProjectile()) {
-                attackedEntity.attackEntityFrom(DamageSource.causeMobDamage(this), 2f);
-            }
-        }
-        return super.attackEntityFromPart(part, source, damage);
     }
 
     /*
