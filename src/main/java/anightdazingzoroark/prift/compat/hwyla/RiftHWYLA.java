@@ -5,7 +5,7 @@ import anightdazingzoroark.prift.compat.hwyla.provider.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
+import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import mcp.mobius.waila.api.IWailaPlugin;
 import mcp.mobius.waila.api.IWailaRegistrar;
 import mcp.mobius.waila.api.WailaPlugin;
@@ -18,9 +18,9 @@ public class RiftHWYLA implements IWailaPlugin {
         registrar.registerBodyProvider(creatureProvider, RiftCreature.class);
 
         RiftCreaturePartProvider creaturePartProvider = new RiftCreaturePartProvider();
-        registrar.registerHeadProvider(creaturePartProvider, RiftCreaturePart.class);
-        registrar.registerBodyProvider(creaturePartProvider, RiftCreaturePart.class);
-        registrar.registerTailProvider(creaturePartProvider, RiftCreaturePart.class);
+        registrar.registerHeadProvider(creaturePartProvider, EntityHitbox.class);
+        registrar.registerBodyProvider(creaturePartProvider, EntityHitbox.class);
+        registrar.registerTailProvider(creaturePartProvider, EntityHitbox.class);
 
         if (GeneralConfig.canUseMM()) {
             RiftBlowPoweredTurbineProvider turbineProvider = new RiftBlowPoweredTurbineProvider();

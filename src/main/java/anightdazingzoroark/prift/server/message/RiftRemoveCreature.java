@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
+import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -51,7 +52,7 @@ public class RiftRemoveCreature implements IMessage {
                     if (creature != null) messagePlayer.world.removeEntityDangerously(creature);
                 }
                 else {
-                    RiftCreaturePart creaturePart = (RiftCreaturePart) messagePlayer.world.getEntityByID(message.entityId);
+                    EntityHitbox creaturePart = (EntityHitbox) messagePlayer.world.getEntityByID(message.entityId);
                     if (creaturePart != null) messagePlayer.world.removeEntityDangerously(creaturePart);
                 }
             }
@@ -63,7 +64,7 @@ public class RiftRemoveCreature implements IMessage {
                     if (creature != null) messagePlayer.world.removeEntityDangerously(creature);
                 }
                 else {
-                    RiftCreaturePart creaturePart = (RiftCreaturePart) messagePlayer.world.getEntityByID(message.entityId);
+                    EntityHitbox creaturePart = (EntityHitbox) messagePlayer.world.getEntityByID(message.entityId);
                     if (creaturePart != null) messagePlayer.world.removeEntityDangerously(creaturePart);
                 }
             }

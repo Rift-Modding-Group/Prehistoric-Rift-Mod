@@ -3,11 +3,11 @@ package anightdazingzoroark.prift.helper;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftRemoveCreature;
+import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -362,11 +362,11 @@ public class RiftUtil {
         //if the user herder isn't a herder or doesn't exist, return true
         if (user == null || !user.canDoHerding()) return true;
 
-        //if the target isn't a RiftCreature of RiftCreaturePart, return true
-        if (!(target instanceof RiftCreature) && !(target instanceof RiftCreaturePart)) return true;
+        //if the target isn't a RiftCreature of EntityHitbox, return true
+        if (!(target instanceof RiftCreature) && !(target instanceof EntityHitbox)) return true;
 
         RiftCreature targetCreature = null;
-        if (target instanceof RiftCreaturePart) targetCreature = ((RiftCreaturePart)target).getParent();
+        if (target instanceof EntityHitbox) targetCreature = (RiftCreature) ((EntityHitbox)target).getParentAsEntityLiving();
         else if (target instanceof RiftCreature) targetCreature = (RiftCreature) target;
 
         if (targetCreature == null) return true;
@@ -457,7 +457,7 @@ public class RiftUtil {
 
             //remove hitboxes
             for (Entity part : subCreature.getParts()) {
-                RiftCreaturePart creaturePart = (RiftCreaturePart) part;
+                EntityHitbox creaturePart = (EntityHitbox) part;
 
                 if (creaturePart != null) {
                     world.removeEntityDangerously(creaturePart);
@@ -472,7 +472,7 @@ public class RiftUtil {
 
             //remove hitboxes
             for (Entity part : subCreature.getParts()) {
-                RiftCreaturePart creaturePart = (RiftCreaturePart) part;
+                EntityHitbox creaturePart = (EntityHitbox) part;
 
                 if (creaturePart != null) {
                     RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreature(creaturePart, false));

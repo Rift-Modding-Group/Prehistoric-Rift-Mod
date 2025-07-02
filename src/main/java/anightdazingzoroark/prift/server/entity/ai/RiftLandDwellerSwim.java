@@ -22,7 +22,7 @@ public class RiftLandDwellerSwim extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature.bodyPart != null) return this.creature.bodyPart.isInWater() || this.creature.bodyPart.isInLava();
+        if (this.creature.getBodyHitbox() != null) return this.creature.getBodyHitbox().isInWater() || this.creature.getBodyHitbox().isInLava();
         else return false;
     }
 

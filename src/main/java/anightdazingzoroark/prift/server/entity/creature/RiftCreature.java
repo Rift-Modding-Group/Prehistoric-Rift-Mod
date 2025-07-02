@@ -185,8 +185,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public List<RiftCreatureConfig.Meal> tamingFood;
     public List<String> breedingFood;
     public String saddleItem;
-    public RiftCreaturePart headPart;
-    public RiftCreaturePart bodyPart;
     public Entity[] hitboxArray = {};
     private List<Vec3d> ridePositions;
     public float oldScale;
@@ -1667,8 +1665,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean canBreatheUnderwater() {
-        if (this.headPart != null) return !this.headPart.isUnderwater();
-        return false;
+        return !this.headIsUnderwater();
     }
 
     public void refreshInventory() {
@@ -1963,7 +1960,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public Vec3d grabLocation() {
-        return new Vec3d(this.headPart.posX, this.headPart.posY, this.headPart.posZ);
+        return new Vec3d(this.getBodyHitbox().posX, this.getBodyHitbox().posY, this.getBodyHitbox().posZ);
     }
     //mob grabbing management ends here
 
@@ -2156,12 +2153,24 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return null;
     }
 
+    public boolean headIsUnderwater() {
+        if (this.getHeadHitbox() == null) return false;
+
+        BlockPos thisPos = new BlockPos(this.getHeadHitbox().posX, this.getHeadHitbox().posY, this.getHeadHitbox().posZ);
+        BlockPos abovePos = thisPos.up();
+        return this.world.getBlockState(thisPos).getMaterial().isLiquid() && this.world.getBlockState(abovePos).getMaterial().isLiquid();
+    }
+
     public EntityHitbox getBodyHitbox() {
         for (Entity entity : this.hitboxArray) {
             EntityHitbox hitboxToTest = (EntityHitbox) entity;
             if (hitboxToTest.partName.equals("body")) return hitboxToTest;
         }
         return null;
+    }
+
+    public boolean hitboxUseHWYLA() {
+        return false;
     }
     //end of multi hitbox stuff
 
@@ -2600,12 +2609,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public AxisAlignedBB frontOfCreatureAABB() {
         return new AxisAlignedBB(
-                this.headPart.width >= 1 ? this.headPart.getEntityBoundingBox().minX : this.headPart.posX - 0.5D,
+                this.getHeadHitbox().width >= 1 ? this.getHeadHitbox().getEntityBoundingBox().minX : this.getHeadHitbox().posX - 0.5D,
                 this.posY,
-                this.headPart.width >= 1 ? this.headPart.getEntityBoundingBox().minZ : this.headPart.posZ - 0.5D,
-                this.headPart.width >= 1 ? this.headPart.getEntityBoundingBox().maxX : this.headPart.posX + 0.5D,
-                Math.max(this.posY + this.height, this.headPart.getEntityBoundingBox().maxY),
-                this.headPart.width >= 1 ? this.headPart.getEntityBoundingBox().maxZ : this.headPart.posZ + 0.5D
+                this.getHeadHitbox().width >= 1 ? this.getHeadHitbox().getEntityBoundingBox().minZ : this.getHeadHitbox().posZ - 0.5D,
+                this.getHeadHitbox().width >= 1 ? this.getHeadHitbox().getEntityBoundingBox().maxX : this.getHeadHitbox().posX + 0.5D,
+                Math.max(this.posY + this.height, this.getHeadHitbox().getEntityBoundingBox().maxY),
+                this.getHeadHitbox().width >= 1 ? this.getHeadHitbox().getEntityBoundingBox().maxZ : this.getHeadHitbox().posZ + 0.5D
         );
     }
 

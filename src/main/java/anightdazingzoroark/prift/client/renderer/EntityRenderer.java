@@ -35,7 +35,6 @@ public class EntityRenderer {
         RenderingRegistry.registerEntityRenderingHandler(RiftMortar.class, RiftLargeWeaponRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftCatapult.class, RiftCatapultRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftEmbryo.class, RiftEmbryoRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(RiftCreaturePart.class, new CreaturePartRenderer.Factory());
 
         //projectiles
         RenderingRegistry.registerEntityRenderingHandler(ThrownStegoPlate.class, new IRenderFactory<ThrownStegoPlate>() {
