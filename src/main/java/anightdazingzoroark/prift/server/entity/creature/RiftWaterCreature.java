@@ -31,7 +31,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
     private final PathNavigateSwimmer waterNavigate;
     private final PathNavigateGround landNavigate;
     private boolean amphibiousInWater;
-    public RiftCreaturePart bodyPart;
 
     public RiftWaterCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn, creatureType);
@@ -125,8 +124,8 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
     @Override
     public boolean isInWater() {
-        if (this.bodyPart != null) {
-            return this.world.getBlockState(this.bodyPart.getPosition()).getMaterial() == Material.WATER;
+        if (this.getBodyHitbox() != null) {
+            return this.world.getBlockState(this.getBodyHitbox().getPosition()).getMaterial() == Material.WATER;
         }
         return this.world.getBlockState(this.getPosition()).getMaterial() == Material.WATER;
     }
@@ -222,7 +221,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 this.motionZ *= f4;
 
                 if (this.isAmphibious() && forward > 0) {
-                    if (this.bodyPart != null && this.bodyPart.isInWater()) {
+                    if (this.getBodyHitbox() != null && this.getBodyHitbox().isInWater()) {
                         if (this.posY >= RiftUtil.highestWaterPos(this) - 2 && this.posY <= RiftUtil.highestWaterPos(this) + 2) {
                             double xMove = this.width * Math.sin(-Math.toRadians(this.rotationYaw));
                             double zMove = this.width * Math.cos(Math.toRadians(this.rotationYaw));

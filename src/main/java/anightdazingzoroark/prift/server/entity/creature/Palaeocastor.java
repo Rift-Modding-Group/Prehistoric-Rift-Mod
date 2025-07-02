@@ -26,8 +26,6 @@ public class Palaeocastor extends RiftCreature implements IHarvestWhenWandering 
     public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/palaeocastor"));
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Palaeocastor.class, DataSerializers.BOOLEAN);
-    public RiftCreaturePart neckPart;
-    public RiftCreaturePart tailPart;
 
     public Palaeocastor(World worldIn) {
         super(worldIn, RiftCreatureType.PALAEOCASTOR);
@@ -37,17 +35,6 @@ public class Palaeocastor extends RiftCreature implements IHarvestWhenWandering 
         this.speed = 0.25D;
         this.attackDamage = RiftConfigHandler.getConfig(this.creatureType).stats.baseDamage;
         this.experienceValue = 3;
-
-        this.bodyPart = new RiftCreaturePart(this, 0, 0, 0.125f, 0.625f, 0.625f, 1f);
-        this.headPart = new RiftCreaturePart(this, 0.75f, 0, 0.25f, 0.5f, 0.5f, 1.5f);
-        this.neckPart = new RiftCreaturePart(this, 0.5f, 0, 0.25f, 0.4f, 0.4f, 1.5f);
-        this.tailPart = new RiftCreaturePart(this, -0.6f, 0, 0.25f, 0.5f, 0.5f, 0.5f);
-        this.hitboxArray = new RiftCreaturePart[]{
-            this.bodyPart,
-            this.headPart,
-            this.neckPart,
-            this.tailPart
-        };
     }
 
     @Override
