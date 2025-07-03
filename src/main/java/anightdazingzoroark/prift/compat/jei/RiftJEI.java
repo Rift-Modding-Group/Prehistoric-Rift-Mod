@@ -117,9 +117,6 @@ public class RiftJEI implements IModPlugin {
     public void register(IModRegistry registry) {
         //hide the projectile animators from jei
         IIngredientBlacklist blacklist = registry.getJeiHelpers().getIngredientBlacklist();
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.CANNONBALL));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.MORTAR_SHELL));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.CATAPULT_BOULDER));
         blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.VENOM_BOMB));
 
         //hide le hidden items

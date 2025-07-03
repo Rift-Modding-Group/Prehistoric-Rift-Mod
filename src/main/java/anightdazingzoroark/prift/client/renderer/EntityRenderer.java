@@ -37,33 +37,10 @@ public class EntityRenderer {
 
         //projectiles
         RenderingRegistry.registerEntityRenderingHandler(ThrownStegoPlate.class, ThrownStegoPlateRenderer::new);
-
-        RenderingRegistry.registerEntityRenderingHandler(RiftCannonball.class, new IRenderFactory<RiftCannonball>() {
-            @Override
-            public Render<? super RiftCannonball> createRenderFor(RenderManager manager) {
-                return new ProjectileRenderer<RiftCannonball>(manager, Minecraft.getMinecraft().getRenderItem(), null);
-            }
-        });
-        RiftProjectileAnimatorRegistry.CANNONBALL.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CANNON));
-
-        RenderingRegistry.registerEntityRenderingHandler(RiftMortarShell.class, new IRenderFactory<RiftMortarShell>() {
-            @Override
-            public Render<? super RiftMortarShell> createRenderFor(RenderManager manager) {
-                return new ProjectileRenderer<RiftMortarShell>(manager, Minecraft.getMinecraft().getRenderItem(), null);
-            }
-        });
-        RiftProjectileAnimatorRegistry.MORTAR_SHELL.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.MORTAR));
-
-        RenderingRegistry.registerEntityRenderingHandler(RiftCatapultBoulder.class, new IRenderFactory<RiftCatapultBoulder>() {
-            @Override
-            public Render<? super RiftCatapultBoulder> createRenderFor(RenderManager manager) {
-                return new ProjectileRenderer<RiftCatapultBoulder>(manager, Minecraft.getMinecraft().getRenderItem(), null);
-            }
-        });
-        RiftProjectileAnimatorRegistry.CATAPULT_BOULDER.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CATAPULT));
-
+        RenderingRegistry.registerEntityRenderingHandler(RiftCannonball.class, RiftCannonballRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftMortarShell.class, RiftMortarShellRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftCatapultBoulder.class, RiftCatapultBoulderRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ThrownBola.class, ThrownBolaRenderer::new);
-
         RenderingRegistry.registerEntityRenderingHandler(DilophosaurusSpit.class, DilophosaurusSpitRenderer::new);
 
         RenderingRegistry.registerEntityRenderingHandler(VenomBomb.class, new IRenderFactory<VenomBomb>() {
