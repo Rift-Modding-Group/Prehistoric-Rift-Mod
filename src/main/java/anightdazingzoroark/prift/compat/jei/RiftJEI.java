@@ -120,12 +120,6 @@ public class RiftJEI implements IModPlugin {
         blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.CANNONBALL));
         blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.MORTAR_SHELL));
         blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.CATAPULT_BOULDER));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_ONE));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_TWO));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_THREE));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_FOUR));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.THROWN_BOLA));
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.DILOPHOSAURUS_SPIT));
         blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.VENOM_BOMB));
 
         //hide le hidden items

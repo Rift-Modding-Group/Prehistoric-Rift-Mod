@@ -6,6 +6,12 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
 import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
 import anightdazingzoroark.prift.server.enums.MobSize;
+import anightdazingzoroark.riftlib.core.PlayState;
+import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
+import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
+import anightdazingzoroark.riftlib.core.manager.AnimationData;
+import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
@@ -13,11 +19,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class ThrownBola extends EntityArrow implements IRiftProjectile, IProjectile {
+public class ThrownBola extends RiftLibProjectile {
     public ThrownBola(World worldIn) {
         super(worldIn);
     }
@@ -39,35 +46,36 @@ public class ThrownBola extends EntityArrow implements IRiftProjectile, IProject
         if (!shooter.onGround) this.motionY += shooter.motionY;
     }
 
-    protected void onHit(RayTraceResult raytraceResultIn) {
-        if (!this.world.isRemote) {
-            Entity entity = raytraceResultIn.entityHit;
-            if (entity instanceof EntityLivingBase) {
-                EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
-                entityLivingBase.attackEntityFrom(DamageSource.causeThrownDamage(this, this.shootingEntity), 0f);
-                if (RiftUtil.isAppropriateSize(entityLivingBase, MobSize.MEDIUM)) {
-                    NonPotionEffectsHelper.setBolaCaptured(entityLivingBase, 300);
-                }
-            }
-            else if (entity instanceof RiftCreaturePart) {
-                RiftCreature parent = ((RiftCreaturePart)entity).getParent();
-                parent.attackEntityFrom(DamageSource.causeThrownDamage(this, this.shootingEntity), 0f);
-                if (RiftUtil.isAppropriateSize(parent, MobSize.MEDIUM)) {
-                    NonPotionEffectsHelper.setBolaCaptured(parent, 300);
-                }
-            }
-            this.setDead();
+    @Override
+    public void projectileEntityEffects(EntityLivingBase entityLivingBase) {
+        if (entityLivingBase != null && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.MEDIUM)) {
+            NonPotionEffectsHelper.setBolaCaptured(entityLivingBase, 300);
         }
-        else super.onHit(raytraceResultIn);
     }
 
     @Override
-    public ItemStack getItemToRender() {
-        return new ItemStack(RiftProjectileAnimatorRegistry.THROWN_BOLA);
+    public double getDamage() {
+        return 0;
     }
 
     @Override
-    protected ItemStack getArrowStack() {
+    public SoundEvent getOnProjectileHitSound() {
         return null;
+    }
+
+    @Override
+    public boolean canRotateVertically() {
+        return false;
+    }
+
+    @Override
+    public void registerControllers(AnimationData data) {
+        data.addAnimationController(new AnimationController(this, "rotation", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent event) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bola.spinning", true));
+                return PlayState.CONTINUE;
+            }
+        }));
     }
 }

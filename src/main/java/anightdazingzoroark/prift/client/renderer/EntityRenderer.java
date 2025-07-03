@@ -5,7 +5,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
-import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
@@ -37,16 +36,7 @@ public class EntityRenderer {
         RenderingRegistry.registerEntityRenderingHandler(RiftEmbryo.class, RiftEmbryoRenderer::new);
 
         //projectiles
-        RenderingRegistry.registerEntityRenderingHandler(ThrownStegoPlate.class, new IRenderFactory<ThrownStegoPlate>() {
-            @Override
-            public Render<? super ThrownStegoPlate> createRenderFor(RenderManager manager) {
-                return new ProjectileRenderer<ThrownStegoPlate>(manager, Minecraft.getMinecraft().getRenderItem(), null);
-            }
-        });
-        RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_ONE.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(0));
-        RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_TWO.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(1));
-        RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_THREE.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(2));
-        RiftProjectileAnimatorRegistry.THROWN_STEGOSAURUS_PLATE_FOUR.setTileEntityItemStackRenderer(new ThrownStegoPlateAnimatorRenderer(3));
+        RenderingRegistry.registerEntityRenderingHandler(ThrownStegoPlate.class, ThrownStegoPlateRenderer::new);
 
         RenderingRegistry.registerEntityRenderingHandler(RiftCannonball.class, new IRenderFactory<RiftCannonball>() {
             @Override
@@ -72,21 +62,9 @@ public class EntityRenderer {
         });
         RiftProjectileAnimatorRegistry.CATAPULT_BOULDER.setTileEntityItemStackRenderer(new WeaponProjectileAnimatorRenderer(RiftLargeWeaponType.CATAPULT));
 
-        RenderingRegistry.registerEntityRenderingHandler(ThrownBola.class, new IRenderFactory<ThrownBola>() {
-            @Override
-            public Render<? super ThrownBola> createRenderFor(RenderManager manager) {
-                return new ProjectileRenderer<ThrownBola>(manager, Minecraft.getMinecraft().getRenderItem(), null);
-            }
-        });
-        RiftProjectileAnimatorRegistry.THROWN_BOLA.setTileEntityItemStackRenderer(new ThrownBolaAnimatorRenderer());
+        RenderingRegistry.registerEntityRenderingHandler(ThrownBola.class, ThrownBolaRenderer::new);
 
-        RenderingRegistry.registerEntityRenderingHandler(DilophosaurusSpit.class, new IRenderFactory<DilophosaurusSpit>() {
-            @Override
-            public Render<? super DilophosaurusSpit> createRenderFor(RenderManager manager) {
-                return new ProjectileRenderer<DilophosaurusSpit>(manager, Minecraft.getMinecraft().getRenderItem(), null);
-            }
-        });
-        RiftProjectileAnimatorRegistry.DILOPHOSAURUS_SPIT.setTileEntityItemStackRenderer(new DilophosaurusSpitRenderer());
+        RenderingRegistry.registerEntityRenderingHandler(DilophosaurusSpit.class, DilophosaurusSpitRenderer::new);
 
         RenderingRegistry.registerEntityRenderingHandler(VenomBomb.class, new IRenderFactory<VenomBomb>() {
             @Override
@@ -96,14 +74,7 @@ public class EntityRenderer {
         });
         RiftProjectileAnimatorRegistry.VENOM_BOMB.setTileEntityItemStackRenderer(new VenomBombRenderer());
 
-        RenderingRegistry.registerEntityRenderingHandler(Mudball.class, new IRenderFactory<Mudball>() {
-            @Override
-            public Render<? super Mudball> createRenderFor(RenderManager manager) {
-                return new ProjectileRenderer<Mudball>(manager, Minecraft.getMinecraft().getRenderItem(), null);
-            }
-        });
-        RiftProjectileAnimatorRegistry.MUDBALL.setTileEntityItemStackRenderer(new MudballRenderer());
-
+        RenderingRegistry.registerEntityRenderingHandler(Mudball.class, MudballRenderer::new);
 
         RenderingRegistry.registerEntityRenderingHandler(RiftTrap.class, new IRenderFactory<RiftTrap>() {
             @Override

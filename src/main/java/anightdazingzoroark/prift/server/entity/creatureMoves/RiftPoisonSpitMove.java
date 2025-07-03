@@ -46,13 +46,11 @@ public class RiftPoisonSpitMove extends RiftCreatureMove {
         double d2 = target.posZ - user.posZ;
         double d3 = (double) MathHelper.sqrt(d0 * d0 + d2 * d2);
         dilophosaurusSpit.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.5F, 1.0F);
-        dilophosaurusSpit.setDamage(2D + (double)(user.getLevel())/10D);
         user.world.spawnEntity(dilophosaurusSpit);
     }
 
     public void shootEntityMounted(RiftCreature user) {
-        DilophosaurusSpit dilophosaurusSpit = new DilophosaurusSpit(user.world, user, (EntityPlayer)user.getControllingPassenger());
-        dilophosaurusSpit.setDamage(2D + (double)(user.getLevel())/10D);
+        DilophosaurusSpit dilophosaurusSpit = new DilophosaurusSpit(user.world, user, (EntityPlayer) user.getControllingPassenger());
         dilophosaurusSpit.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
         user.world.spawnEntity(dilophosaurusSpit);
     }
