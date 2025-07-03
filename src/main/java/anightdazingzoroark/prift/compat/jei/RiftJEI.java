@@ -8,7 +8,6 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
-import anightdazingzoroark.prift.server.entity.projectile.RiftProjectileAnimatorRegistry;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import com.codetaylor.mc.pyrotech.ModPyrotechConfig;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.ModuleTechBloomery;
@@ -117,7 +116,6 @@ public class RiftJEI implements IModPlugin {
     public void register(IModRegistry registry) {
         //hide the projectile animators from jei
         IIngredientBlacklist blacklist = registry.getJeiHelpers().getIngredientBlacklist();
-        blacklist.addIngredientToBlacklist(new ItemStack(RiftProjectileAnimatorRegistry.VENOM_BOMB));
 
         //hide le hidden items
         blacklist.addIngredientToBlacklist(new ItemStack(RiftItems.DETECT_ALERT));

@@ -1,29 +1,24 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
-import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreaturePart;
-import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import anightdazingzoroark.riftlib.core.PlayState;
+import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
+import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
+import anightdazingzoroark.riftlib.core.manager.AnimationData;
+import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class VenomBomb extends EntityArrow implements IRiftProjectile, IProjectile {
+public class VenomBomb extends RiftLibProjectile {
     private static final DataParameter<Boolean> COUNTING_DOWN = EntityDataManager.createKey(VenomBomb.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> COUNTDOWN = EntityDataManager.createKey(VenomBomb.class, DataSerializers.VARINT);
     private EntityPlayer rider;
@@ -35,7 +30,6 @@ public class VenomBomb extends EntityArrow implements IRiftProjectile, IProjecti
 
     public VenomBomb(World world, double x, double y, double z) {
         this(world);
-        this.setDamage(2D);
         this.setPosition(x, y, z);
     }
 
@@ -73,58 +67,24 @@ public class VenomBomb extends EntityArrow implements IRiftProjectile, IProjecti
         }
     }
 
-    protected void onHit(RayTraceResult raytraceResultIn) {
-        Entity entity = raytraceResultIn.entityHit;
-        BlockPos blockPos = raytraceResultIn.getBlockPos();
+    @Override
+    public void projectileEntityEffects(EntityLivingBase entityLivingBase) {
+        this.setIsCountingDown(true);
+    }
 
-        if (!this.world.isRemote) {
-            //check if entity was hit first
-            if (entity != null && entity != this.rider
-                    && RiftUtil.checkForNoAssociations(this.shooter, entity)
-                    && RiftUtil.checkForNoHerdAssociations(this.shooter, entity)
-            ) {
-                float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-                int i = MathHelper.ceil((double) f * this.getDamage());
+    @Override
+    public double getDamage() {
+        return 0;
+    }
 
-                if (this.getIsCritical()) i += this.rand.nextInt(i / 2 + 2);
+    @Override
+    public boolean canRotateVertically() {
+        return false;
+    }
 
-                DamageSource damagesource;
-
-                if (this.shooter == null) damagesource = DamageSource.causeArrowDamage(this, this);
-                else damagesource = DamageSource.causeArrowDamage(this, this.shooter);
-
-                if (!entity.attackEntityFrom(damagesource, (float) i)) {
-                    this.motionX *= -0.10000000149011612D;
-                    this.motionY *= -0.10000000149011612D;
-                    this.motionZ *= -0.10000000149011612D;
-                    this.rotationYaw += 180.0F;
-                    this.prevRotationYaw += 180.0F;
-                }
-                this.setIsCountingDown(true);
-                this.playSound(SoundEvents.BLOCK_SLIME_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
-            }
-            else if (blockPos != null) {
-                this.xTile = blockPos.getX();
-                this.yTile = blockPos.getY();
-                this.zTile = blockPos.getZ();
-                IBlockState iblockstate = this.world.getBlockState(blockPos);
-                this.inTile = iblockstate.getBlock();
-                this.inData = this.inTile.getMetaFromState(iblockstate);
-                this.motionX = raytraceResultIn.hitVec.x - this.posX;
-                this.motionY = raytraceResultIn.hitVec.y - this.posY;
-                this.motionZ = raytraceResultIn.hitVec.z - this.posZ;
-                float f2 = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-                this.posX -= this.motionX / (double)f2 * 0.05000000074505806D;
-                this.posY -= this.motionY / (double)f2 * 0.05000000074505806D;
-                this.posZ -= this.motionZ / (double)f2 * 0.05000000074505806D;
-                this.playSound(SoundEvents.BLOCK_SLIME_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
-                this.inGround = true;
-                this.setIsCritical(false);
-
-                if (iblockstate.getMaterial() != Material.AIR) this.inTile.onEntityCollision(this.world, blockPos, iblockstate, this);
-                this.setIsCountingDown(true);
-            }
-        }
+    @Override
+    public boolean canSelfDestroyUponHit() {
+        return false;
     }
 
     public void shoot(Entity shooter, float rotationPitchIn, float rotationYawIn, float pitchOffset, float velocity, float inaccuracy) {
@@ -159,12 +119,18 @@ public class VenomBomb extends EntityArrow implements IRiftProjectile, IProjecti
     }
 
     @Override
-    public ItemStack getItemToRender() {
-        return new ItemStack(RiftProjectileAnimatorRegistry.VENOM_BOMB);
+    public SoundEvent getOnProjectileHitSound() {
+        return SoundEvents.BLOCK_SLIME_HIT;
     }
 
     @Override
-    protected ItemStack getArrowStack() {
-        return null;
+    public void registerControllers(AnimationData data) {
+        data.addAnimationController(new AnimationController(this, "default", 0, new AnimationController.IAnimationPredicate() {
+            @Override
+            public PlayState test(AnimationEvent event) {
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.venom_bomb.default", true));
+                return PlayState.CONTINUE;
+            }
+        }));
     }
 }

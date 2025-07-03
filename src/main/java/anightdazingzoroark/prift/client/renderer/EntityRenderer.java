@@ -42,15 +42,7 @@ public class EntityRenderer {
         RenderingRegistry.registerEntityRenderingHandler(RiftCatapultBoulder.class, RiftCatapultBoulderRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ThrownBola.class, ThrownBolaRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(DilophosaurusSpit.class, DilophosaurusSpitRenderer::new);
-
-        RenderingRegistry.registerEntityRenderingHandler(VenomBomb.class, new IRenderFactory<VenomBomb>() {
-            @Override
-            public Render<? super VenomBomb> createRenderFor(RenderManager manager) {
-                return new ProjectileRenderer<VenomBomb>(manager, Minecraft.getMinecraft().getRenderItem(), null);
-            }
-        });
-        RiftProjectileAnimatorRegistry.VENOM_BOMB.setTileEntityItemStackRenderer(new VenomBombRenderer());
-
+        RenderingRegistry.registerEntityRenderingHandler(VenomBomb.class, VenomBombRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(Mudball.class, MudballRenderer::new);
 
         RenderingRegistry.registerEntityRenderingHandler(RiftTrap.class, new IRenderFactory<RiftTrap>() {
