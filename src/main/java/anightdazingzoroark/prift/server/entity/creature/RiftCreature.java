@@ -1203,6 +1203,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             nbttaglist.appendTag(nbttagcompound);
         }
         compound.setTag("LearnedMoves", nbttaglist);
+        compound.setInteger("CooldownMoveOne", this.getMoveOneCooldown());
+        compound.setInteger("CooldownMoveTwo", this.getMoveTwoCooldown());
+        compound.setInteger("CooldownMoveThree", this.getMoveThreeCooldown());
         //for pregnancy
         if (this.canBePregnant()) {
             compound.setInteger("PregnancyTime", this.getPregnancyTimer());
@@ -1260,6 +1263,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (!this.getLearnedMoves().contains(moveToAdd)) moveList.add(moveToAdd);
         }
         this.setLearnedMoves(moveList);
+        this.setMoveOneCooldown(compound.getInteger("CooldownMoveOne"));
+        this.setMoveTwoCooldown(compound.getInteger("CooldownMoveTwo"));
+        this.setMoveThreeCooldown(compound.getInteger("CooldownMoveThree"));
         //for pregnancy
         if (this.canBePregnant()) this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
         //for turret mode

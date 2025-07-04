@@ -2,6 +2,10 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MultiPartEntityPart;
+
+import java.util.List;
 
 public class RiftStompMove extends RiftCreatureMove {
     public RiftStompMove() {
@@ -17,13 +21,17 @@ public class RiftStompMove extends RiftCreatureMove {
     public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        if (target != null) user.attackEntityAsMob(target);
+        List<Entity> targets = user.getAllTargetsInFront(false);
+        for (Entity entity : targets) {
+            if (entity instanceof MultiPartEntityPart
+                    && ((MultiPartEntityPart)entity).parent instanceof EntityLivingBase)
+                user.attackEntityAsMob((EntityLivingBase) ((MultiPartEntityPart)entity).parent);
+            else if (entity instanceof EntityLivingBase) user.attackEntityAsMob(entity);
+        }
     }
 
     @Override
