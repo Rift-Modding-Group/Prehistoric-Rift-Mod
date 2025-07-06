@@ -27,16 +27,14 @@ public class RiftWaterCreatureMoveHelper extends EntityMoveHelper {
                 double creatureSpeed = (float) (this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
                 Vec3d finalVectors = mvNormalized.scale(creatureSpeed);
 
+                //set look angle
+                float f = (float) (MathHelper.atan2(finalVectors.z, finalVectors.x) * 180 / Math.PI - 90);
+                this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, f, 90);
+                this.creature.setRenderYawOffset(this.creature.rotationYaw);
+
                 //set speed
                 this.creature.setAIMoveSpeed((float) Math.sqrt(finalVectors.x * finalVectors.x + finalVectors.z * finalVectors.z));
                 this.creature.setMoveVertical((float) finalVectors.y);
-
-                //set look angle
-                if (Math.abs(finalVectors.x) + Math.abs(finalVectors.z) > 0) {
-                    float f = (float) (MathHelper.atan2(finalVectors.z, finalVectors.x) * 180 / Math.PI - 90);
-                    this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, f, 90);
-                    this.creature.setRenderYawOffset(this.creature.rotationYaw);
-                }
             }
         }
         else {
