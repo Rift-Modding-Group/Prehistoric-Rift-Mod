@@ -82,14 +82,15 @@ public class Dimetrodon extends RiftCreature {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(5, new RiftFollowOwner(this, 1.0D, 8.0F, 2.0F));
-        this.tasks.addTask(6, new RiftDimetrodonEggCaring(this));
-        this.tasks.addTask(7, new RiftDimetrodonMoveToEgg(this, 1.0D));
-        this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(9, new RiftWander(this, 1.0D));
-        this.tasks.addTask(10, new RiftLookAround(this));
+        this.tasks.addTask(3, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
+        this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
+        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 2.0F));
+        this.tasks.addTask(7, new RiftDimetrodonEggCaring(this));
+        this.tasks.addTask(8, new RiftDimetrodonMoveToEgg(this, 1.0D));
+        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(10, new RiftWander(this, 1.0D));
+        this.tasks.addTask(11, new RiftLookAround(this));
     }
 
     @Override
@@ -473,5 +474,9 @@ public class Dimetrodon extends RiftCreature {
 
     protected SoundEvent getDeathSound() {
         return RiftSounds.DIMETRODON_DEATH;
+    }
+
+    public SoundEvent getWarnSound() {
+        return RiftSounds.DIMETRODON_WARN;
     }
 }

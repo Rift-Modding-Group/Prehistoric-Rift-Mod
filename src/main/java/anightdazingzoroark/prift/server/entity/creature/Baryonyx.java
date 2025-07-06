@@ -59,12 +59,13 @@ public class Baryonyx extends RiftWaterCreature {
         this.targetTasks.addTask(3, new RiftAttackForOwner(this));
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(3, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(4, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(5, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
-        this.tasks.addTask(6, new RiftGoToWater(this, 16, 1.0D));
-        this.tasks.addTask(7, new RiftWanderWater(this, 1.0D));
-        this.tasks.addTask(8, new RiftWander(this, 1.0D));
+        this.tasks.addTask(3, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
+        this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
+        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(6, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
+        this.tasks.addTask(7, new RiftGoToWater(this, 16, 1.0D));
+        this.tasks.addTask(8, new RiftWanderWater(this, 1.0D));
+        this.tasks.addTask(9, new RiftWander(this, 1.0D));
     }
 
     @Override
@@ -153,5 +154,9 @@ public class Baryonyx extends RiftWaterCreature {
 
     protected SoundEvent getDeathSound() {
         return RiftSounds.BARYONYX_DEATH;
+    }
+
+    public SoundEvent getWarnSound() {
+        return RiftSounds.BARYONYX_WARN;
     }
 }

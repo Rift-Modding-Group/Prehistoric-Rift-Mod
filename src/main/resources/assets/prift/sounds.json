@@ -167,6 +167,13 @@
     ],
     "subtitle": "sounds.subtitle.utahraptor_leap"
   },
+  "prift.utahraptor.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/utahraptor/utahraptor_warn"
+    ],
+    "subtitle": "sounds.subtitle.utahraptor_warn"
+  },
 
   "prift.apatosaurus.idle": {
     "category": "neutral",
@@ -195,6 +202,13 @@
       "prift:entities/apatosaurus/apatosaurus_bide_release"
     ],
     "subtitle": "sounds.subtitle.apatosaurus_bide_release"
+  },
+  "prift.apatosaurus.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/apatosaurus/apatosaurus_warn"
+    ],
+    "subtitle": "sounds.subtitle.apatosaurus_warn"
   },
 
   "prift.parasaurolophus.idle": {
@@ -246,6 +260,13 @@
       "prift:entities/dimetrodon/dimetrodon_death"
     ],
     "subtitle": "sounds.subtitle.dimetrodon_death"
+  },
+  "prift.dimetrodon.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dimetrodon/dimetrodon_warn"
+    ],
+    "subtitle": "sounds.subtitle.dimetrodon_warn"
   },
 
   "prift.sarcosuchus.idle": {
@@ -311,6 +332,13 @@
       "prift:entities/anomalocaris/anomalocaris_cloaking"
     ],
     "subtitle": "sounds.subtitle.anomalocaris_cloaking"
+  },
+  "prift.anomalocaris.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/anomalocaris/anomalocaris_warn"
+    ],
+    "subtitle": "sounds.subtitle.anomalocaris_warn"
   },
 
   "prift.saurophaganax.idle": {
@@ -455,6 +483,13 @@
     ],
     "subtitle": "sounds.subtitle.baryonyx_death"
   },
+  "prift.baryonyx.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/baryonyx/baryonyx_warn"
+    ],
+    "subtitle": "sounds.subtitle.baryonyx_warn"
+  },
 
   "prift.palaeocastor.idle": {
     "category": "neutral",
@@ -541,6 +576,13 @@
     ],
     "subtitle": "sounds.subtitle.ankylosaurus_shellter_out"
   },
+  "prift.ankylosaurus.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/ankylosaurus/ankylosaurus_warn"
+    ],
+    "subtitle": "sounds.subtitle.ankylosaurus_warn"
+  },
 
   "prift.dilophosaurus.idle": {
     "category": "neutral",
@@ -569,6 +611,13 @@
       "prift:entities/dilophosaurus/dilophosaurus_spit"
     ],
     "subtitle": "sounds.subtitle.dilophosaurus_spit"
+  },
+  "prift.dilophosaurus.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dilophosaurus/dilophosaurus_warn"
+    ],
+    "subtitle": "sounds.subtitle.dilophosaurus_warn"
   },
 
   "prift.gallimimus.idle": {

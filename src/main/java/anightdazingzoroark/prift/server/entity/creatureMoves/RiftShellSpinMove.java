@@ -28,15 +28,7 @@ public class RiftShellSpinMove extends RiftCreatureMove {
     @Override
     public void whileExecuting(RiftCreature user) {
         AxisAlignedBB area = user.getEntityBoundingBox().grow(4D, 0, 4D);
-        List<Entity> hitEntitiesList = user.world.getEntitiesWithinAABB(Entity.class, area, new Predicate<Entity>() {
-            @Override
-            public boolean apply(@Nullable Entity entity) {
-                if (entity instanceof EntityLivingBase) {
-                    return RiftUtil.checkForNoAssociations(user, entity) && !user.equals(entity);
-                }
-                return true;
-            }
-        });
+        List<Entity> hitEntitiesList = user.world.getEntitiesWithinAABB(Entity.class, area, this.generalEntityPredicate(user));
 
         for (Entity entity : hitEntitiesList) {
             user.attackEntityAsMobWithMultiplier(entity, 0.125f);

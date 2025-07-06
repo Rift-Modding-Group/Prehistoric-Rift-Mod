@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import net.minecraft.init.MobEffects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -44,6 +45,13 @@ public class Dilophosaurus extends RiftCreature {
         this.setCanPickUpLoot(true);
     }
 
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+        //remove poison
+        if (this.getActivePotionEffect(MobEffects.POISON) != null) this.removePotionEffect(MobEffects.POISON);
+    }
+
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTurretModeTargeting(this, true));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
@@ -54,11 +62,12 @@ public class Dilophosaurus extends RiftCreature {
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(6, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
-        this.tasks.addTask(7, new RiftWander(this, 1.0D));
-        this.tasks.addTask(8, new RiftLookAround(this));
+        this.tasks.addTask(4, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
+        this.tasks.addTask(5, new RiftBreakBlockWhilePursuingTarget(this));
+        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
+        this.tasks.addTask(8, new RiftWander(this, 1.0D));
+        this.tasks.addTask(9, new RiftLookAround(this));
     }
 
     @Override
@@ -137,7 +146,7 @@ public class Dilophosaurus extends RiftCreature {
         data.addAnimationController(new AnimationController(this, "frillSetup", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
-                if (currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) {
+                if ((currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) && !isWarning()) {
                     event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".frill_setup", true));
                     return PlayState.CONTINUE;
                 }
@@ -150,7 +159,7 @@ public class Dilophosaurus extends RiftCreature {
         data.addAnimationController(new AnimationController(this, "sacSetup", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
-                if (currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) {
+                if ((currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) && !isWarning()) {
                     event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sac_setup", true));
                     return PlayState.CONTINUE;
                 }
@@ -174,7 +183,7 @@ public class Dilophosaurus extends RiftCreature {
         return RiftSounds.DILOPHOSAURUS_DEATH;
     }
 
-    public SoundEvent rangedAttackSound() {
-        return RiftSounds.DILOPHOSAURUS_SPIT;
+    public SoundEvent getWarnSound() {
+        return RiftSounds.DILOPHOSAURUS_WARN;
     }
 }

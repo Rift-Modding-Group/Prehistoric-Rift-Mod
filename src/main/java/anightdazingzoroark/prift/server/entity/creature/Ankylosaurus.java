@@ -81,39 +81,17 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(6, new RiftHarvestOnWander(this, 1.2f, 0.6f));
-        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
-        this.tasks.addTask(8, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(9, new RiftHerdMemberFollow(this));
+        this.tasks.addTask(4, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
+        this.tasks.addTask(5, new RiftBreakBlockWhilePursuingTarget(this));
+        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(7, new RiftHarvestOnWander(this, 1.2f, 0.6f));
+        this.tasks.addTask(8, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
+        this.tasks.addTask(9, new RiftHerdDistanceFromOtherMembers(this, 3D));
+        this.tasks.addTask(10, new RiftHerdMemberFollow(this));
         this.tasks.addTask(11, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
     }
-
-    /*
-    public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
-            //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
-            Entity attacker = source.getImmediateSource();
-            RiftCreaturePart closestPart = null;
-            float closestDist = RiftUtil.funnyNumber;
-            for (RiftCreaturePart testPart : this.hitboxArray) {
-                if (attacker.getDistance(testPart) <= closestDist && !testPart.isDisabled()) {
-                    closestPart = testPart;
-                    closestDist = attacker.getDistance(testPart);
-                }
-            }
-            if (closestPart != null) {
-                if (closestPart.partName.equals("body") && this.isHidingInShell() && !source.isExplosion() && !source.isProjectile()) {
-                    //attacker.attackEntityFrom(DamageSource.causeThornsDamage(this), 2f);
-                }
-            }
-        }
-        return super.attackEntityFrom(source, amount);
-    }
-     */
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
@@ -330,5 +308,10 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
 
     protected SoundEvent getDeathSound() {
         return RiftSounds.ANKYLOSAURUS_DEATH;
+    }
+
+    @Override
+    public SoundEvent getWarnSound() {
+        return RiftSounds.ANKYLOSAURUS_WARN;
     }
 }

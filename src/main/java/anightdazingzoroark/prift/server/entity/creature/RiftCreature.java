@@ -54,10 +54,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionUtils;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -118,6 +115,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> CLOAKED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> BURROWING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> WARNING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> CAN_WARN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
@@ -274,6 +273,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(CLOAKED, false);
         this.dataManager.register(BURROWING, false);
         this.dataManager.register(CAN_MOVE, true);
+        this.dataManager.register(WARNING, false);
+        this.dataManager.register(CAN_WARN, true);
 
         this.dataManager.register(CURRENT_MOVE, -1);
 
@@ -387,6 +388,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageAttributes();
             this.manageDiscoveryByPlayer();
             this.manageMoveAndWeaponCooldown();
+            this.hasNoTargetManagement();
             if (this.canUtilizeCloaking()) this.manageCloaking();
             if (this.isNocturnal()) this.manageSleepSchedule();
             if (this.canBePregnant()) this.createBabyWhenPregnant();
@@ -410,7 +412,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
             else {
                 if (this.canDoHerding()) this.manageHerding();
-                if (this.getEnergy() < this.getMaxEnergy()) this.instaRegenAfterNoTarget();
             }
         }
         else {
@@ -725,6 +726,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.resetEnergyTick >= 300) {
                 this.setEnergy(this.getMaxEnergy());
                 this.resetEnergyTick = 0;
+            }
+        }
+        else this.resetEnergyTick = 0;
+    }
+
+    private void hasNoTargetManagement() {
+        if (this.getAttackTarget() == null) {
+            this.setCanWarn(true);
+
+            if (!this.isTamed() && this.getEnergy() < this.getMaxEnergy()) {
+                this.resetEnergyTick++;
+                if (this.resetEnergyTick >= 300) {
+                    this.setEnergy(this.getMaxEnergy());
+                    this.resetEnergyTick = 0;
+                }
             }
         }
         else this.resetEnergyTick = 0;
@@ -1271,6 +1287,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //for turret mode
         this.setTurretMode(compound.getBoolean("TurretMode"));
         this.setTurretModeTargeting(TurretModeTargeting.values()[compound.getByte("TurretTargeting")]);
+    }
+
+    public boolean isWarning() {
+        return this.dataManager.get(WARNING);
+    }
+
+    public void setIsWarning(boolean value) {
+        this.dataManager.set(WARNING, value);
+    }
+
+    public boolean canWarn() {
+        return this.dataManager.get(CAN_WARN);
+    }
+
+    public void setCanWarn(boolean value) {
+        this.dataManager.set(CAN_WARN, value);
     }
 
     //move related stuff starts here
@@ -2982,18 +3014,27 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             @Override
             public PlayState test(AnimationEvent event) {
                 if (currentCreatureMove() == null) {
-                    if (isSitting() && !isBeingRidden() && !hasTarget() && !isInWater()) {
+                    //for warning
+                    if (isWarning()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".warn", false));
+                        return PlayState.CONTINUE;
+                    }
+                    //sitting
+                    else if (isSitting() && !isBeingRidden() && !hasTarget() && !isInWater()) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sitting", true));
                         return PlayState.CONTINUE;
                     }
+                    //swimming for water creatures
                     else if (user instanceof RiftWaterCreature && user.isInWater()) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".swim", true));
                         return PlayState.CONTINUE;
                     }
+                    //flopping for water creatures
                     else if (user instanceof RiftWaterCreature && ((RiftWaterCreature)user).canFlop() && !user.isInWater()) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".flop", true));
                         return PlayState.CONTINUE;
                     }
+                    //walking
                     else if (event.isMoving() || (isSitting() && hasTarget())) {
                         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".walk", true));
                         return PlayState.CONTINUE;
@@ -3184,6 +3225,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public AnimationFactory getFactory() {
         return this.factory;
+    }
+
+    public SoundEvent getWarnSound() {
+        return null;
     }
 
     public class RiftCreatureInventory extends InventoryBasic {

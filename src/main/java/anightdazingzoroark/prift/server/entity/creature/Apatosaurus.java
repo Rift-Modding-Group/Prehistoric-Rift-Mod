@@ -87,13 +87,14 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
 
         this.tasks.addTask(3, new RiftCreatureUseLargeWeaponMounted(this));
         this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(5, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(5, new RiftCreatureWarnTarget(this, 2.25f, 0.75f));
+        this.tasks.addTask(6, new RiftBreakBlockWhilePursuingTarget(this));
+        this.tasks.addTask(7, new RiftCreatureUseMoveUnmounted(this));
 
-        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
-        this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(9, new RiftWander(this, 1.0D));
-        this.tasks.addTask(10, new RiftLookAround(this));
+        this.tasks.addTask(8, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
+        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
+        this.tasks.addTask(10, new RiftWander(this, 1.0D));
+        this.tasks.addTask(11, new RiftLookAround(this));
     }
 
     @Override
@@ -354,5 +355,9 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
 
     protected SoundEvent getDeathSound() {
         return RiftSounds.APATOSAURUS_DEATH;
+    }
+
+    public SoundEvent getWarnSound() {
+        return RiftSounds.APATOSAURUS_WARN;
     }
 }
