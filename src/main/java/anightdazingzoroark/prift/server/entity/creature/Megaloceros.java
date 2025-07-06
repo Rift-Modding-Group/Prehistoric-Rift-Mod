@@ -62,8 +62,8 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
 
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-
         this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
+        this.tasks.addTask(5, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
         this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
         this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(6, new RiftHarvestOnWander(this, 0.52F, 0.36F));
@@ -207,5 +207,9 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
 
     protected SoundEvent getDeathSound() {
         return RiftSounds.MEGALOCEROS_DEATH;
+    }
+
+    public SoundEvent getWarnSound() {
+        return RiftSounds.MEGALOCEROS_WARN;
     }
 }

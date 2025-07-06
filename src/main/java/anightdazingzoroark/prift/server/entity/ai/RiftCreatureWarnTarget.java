@@ -46,9 +46,9 @@ public class RiftCreatureWarnTarget extends EntityAIBase {
 
     @Override
     public void updateTask() {
-        this.animTick++;
         if (this.animTick == this.warnSoundTime) {
             this.creature.playSound(this.creature.getWarnSound(), 1f, 1f);
         }
+        this.animTick++;
     }
 }

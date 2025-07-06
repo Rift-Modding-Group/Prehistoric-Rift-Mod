@@ -22,6 +22,9 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.tyrannosaurus.charge")
     public static final SoundEvent TYRANNOSAURUS_CHARGE = createSoundEvent("prift.tyrannosaurus.charge");
 
+    @GameRegistry.ObjectHolder("prift.tyrannosaurus.warn")
+    public static final SoundEvent TYRANNOSAURUS_WARN = createSoundEvent("prift.tyrannosaurus.warn");
+
     @GameRegistry.ObjectHolder("prift.stegosaurus.idle")
     public static final SoundEvent STEGOSAURUS_IDLE = createSoundEvent("prift.stegosaurus.idle");
 
@@ -33,6 +36,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.stegosaurus.ranged_move")
     public static final SoundEvent STEGOSAURUS_RANGED_MOVE = createSoundEvent("prift.stegosaurus.ranged_move");
+
+    @GameRegistry.ObjectHolder("prift.stegosaurus.warn")
+    public static final SoundEvent STEGOSAURUS_WARN = createSoundEvent("prift.stegosaurus.warn");
 
     @GameRegistry.ObjectHolder("prift.dodo.idle")
     public static final SoundEvent DODO_IDLE = createSoundEvent("prift.dodo.idle");
@@ -60,6 +66,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.triceratops.bide_release")
     public static final SoundEvent TRICERATOPS_BIDE_RELEASE = createSoundEvent("prift.triceratops.bide_release");
+
+    @GameRegistry.ObjectHolder("prift.triceratops.warn")
+    public static final SoundEvent TRICERATOPS_WARN = createSoundEvent("prift.triceratops.warn");
 
     @GameRegistry.ObjectHolder("prift.utahraptor.idle")
     public static final SoundEvent UTAHRAPTOR_IDLE = createSoundEvent("prift.utahraptor.idle");
@@ -106,6 +115,9 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.parasaurolophus.sound_blast")
     public static final SoundEvent PARASAUROLOPHUS_SOUND_BLAST = createSoundEvent("prift.parasaurolophus.sound_blast");
 
+    @GameRegistry.ObjectHolder("prift.parasaurolophus.warn")
+    public static final SoundEvent PARASAUROLOPHUS_WARN = createSoundEvent("prift.parasaurolophus.warn");
+
     @GameRegistry.ObjectHolder("prift.dimetrodon.idle")
     public static final SoundEvent DIMETRODON_IDLE = createSoundEvent("prift.dimetrodon.idle");
 
@@ -132,6 +144,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.sarcosuchus.charge")
     public static final SoundEvent SARCOSUCHUS_CHARGE = createSoundEvent("prift.sarcosuchus.charge");
+
+    @GameRegistry.ObjectHolder("prift.sarcosuchus.warn")
+    public static final SoundEvent SARCOSUCHUS_WARN = createSoundEvent("prift.sarcosuchus.warn");
 
     @GameRegistry.ObjectHolder("prift.anomalocaris.idle")
     public static final SoundEvent ANOMALOCARIS_IDLE = createSoundEvent("prift.anomalocaris.idle");
@@ -160,6 +175,9 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.saurophaganax.light_blast")
     public static final SoundEvent SAUROPHAGANAX_LIGHT_BLAST = createSoundEvent("prift.saurophaganax.light_blast");
 
+    @GameRegistry.ObjectHolder("prift.saurophaganax.warn")
+    public static final SoundEvent SAUROPHAGANAX_WARN = createSoundEvent("prift.saurophaganax.warn");
+
     @GameRegistry.ObjectHolder("prift.direwolf.idle")
     public static final SoundEvent DIREWOLF_IDLE = createSoundEvent("prift.direwolf.idle");
 
@@ -172,11 +190,14 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.direwolf.howl")
     public static final SoundEvent DIREWOLF_HOWL = createSoundEvent("prift.direwolf.howl");
 
-    @GameRegistry.ObjectHolder("prift.direwolf.howl")
+    @GameRegistry.ObjectHolder("prift.direwolf.sniff")
     public static final SoundEvent DIREWOLF_SNIFF = createSoundEvent("prift.direwolf.sniff");
 
     @GameRegistry.ObjectHolder("prift.direwolf.growl")
     public static final SoundEvent DIREWOLF_GROWL = createSoundEvent("prift.direwolf.growl");
+
+    @GameRegistry.ObjectHolder("prift.direwolf.warn")
+    public static final SoundEvent DIREWOLF_WARN = createSoundEvent("prift.direwolf.warn");
 
     @GameRegistry.ObjectHolder("prift.megaloceros.idle")
     public static final SoundEvent MEGALOCEROS_IDLE = createSoundEvent("prift.megaloceros.idle");
@@ -195,6 +216,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.megaloceros.charge")
     public static final SoundEvent MEGALOCEROS_CHARGE = createSoundEvent("prift.megaloceros.charge");
+
+    @GameRegistry.ObjectHolder("prift.megaloceros.warn")
+    public static final SoundEvent MEGALOCEROS_WARN = createSoundEvent("prift.megaloceros.warn");
 
     @GameRegistry.ObjectHolder("prift.baryonyx.idle")
     public static final SoundEvent BARYONYX_IDLE = createSoundEvent("prift.baryonyx.idle");
@@ -222,6 +246,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.palaeocastor.charge")
     public static final SoundEvent PALAEOCASTOR_CHARGE = createSoundEvent("prift.palaeocastor.charge");
+
+    @GameRegistry.ObjectHolder("prift.palaeocastor.warn")
+    public static final SoundEvent PALAEOCASTOR_WARN = createSoundEvent("prift.palaeocastor.warn");
 
     @GameRegistry.ObjectHolder("prift.ankylosaurus.idle")
     public static final SoundEvent ANKYLOSAURUS_IDLE = createSoundEvent("prift.ankylosaurus.idle");
@@ -270,6 +297,9 @@ public class RiftSounds {
 
     @GameRegistry.ObjectHolder("prift.gallimimus.death")
     public static final SoundEvent GALLIMIMUS_DEATH = createSoundEvent("prift.gallimimus.death");
+
+    @GameRegistry.ObjectHolder("prift.gallimimus.warn")
+    public static final SoundEvent GALLIMIMUS_WARN = createSoundEvent("prift.gallimimus.warn");
 
     @GameRegistry.ObjectHolder("prift.generic_move.bite")
     public static final SoundEvent GENERIC_BITE_MOVE = createSoundEvent("prift.generic_move.bite");

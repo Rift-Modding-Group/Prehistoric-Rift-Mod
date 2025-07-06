@@ -43,7 +43,8 @@ public class Gallimimus extends RiftCreature {
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
         this.tasks.addTask(3, new RiftFleeFromEntities(this, 1f));
         this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
+        this.tasks.addTask(5, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
+        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
         this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
         this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));
@@ -123,5 +124,9 @@ public class Gallimimus extends RiftCreature {
 
     protected SoundEvent getDeathSound() {
         return RiftSounds.GALLIMIMUS_DEATH;
+    }
+
+    public SoundEvent getWarnSound() {
+        return RiftSounds.GALLIMIMUS_WARN;
     }
 }

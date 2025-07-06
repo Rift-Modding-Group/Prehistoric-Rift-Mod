@@ -34,6 +34,13 @@
     ],
     "subtitle": "sounds.subtitle.tyrannosaurus_charge"
   },
+  "prift.tyrannosaurus.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/tyrannosaurus/tyrannosaurus_warn"
+    ],
+    "subtitle": "sounds.subtitle.tyrannosaurus_warn"
+  },
 
   "prift.stegosaurus.idle": {
     "category": "neutral",
@@ -62,6 +69,13 @@
       "prift:entities/stegosaurus/stegosaurus_ranged_move"
     ],
     "subtitle": "sounds.subtitle.stegosaurus_ranged_move"
+  },
+  "prift.stegosaurus.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/stegosaurus/stegosaurus_warn"
+    ],
+    "subtitle": "sounds.subtitle.stegosaurus_warn"
   },
 
   "prift.dodo.idle": {
@@ -130,6 +144,13 @@
       "prift:entities/triceratops/triceratops_bide_release"
     ],
     "subtitle": "sounds.subtitle.triceratops_bide_release"
+  },
+  "prift.triceratops.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/triceratops/triceratops_warn"
+    ],
+    "subtitle": "sounds.subtitle.triceratops_warn"
   },
 
   "prift.utahraptor.idle": {
@@ -239,6 +260,13 @@
     ],
     "subtitle": "sounds.subtitle.parasaurolophus_sound_blast"
   },
+  "prift.parasaurolophus.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/parasaurolophus/parasaurolophus_warn"
+    ],
+    "subtitle": "sounds.subtitle.parasaurolophus_warn"
+  },
 
   "prift.dimetrodon.idle": {
     "category": "neutral",
@@ -303,6 +331,13 @@
       "prift:entities/sarcosuchus/sarcosuchus_charge"
     ],
     "subtitle": "sounds.subtitle.sarcosuchus_charge"
+  },
+  "prift.sarcosuchus.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/sarcosuchus/sarcosuchus_warn"
+    ],
+    "subtitle": "sounds.subtitle.sarcosuchus_warn"
   },
 
   "prift.anomalocaris.idle": {
@@ -369,6 +404,13 @@
     ],
     "subtitle": "sounds.subtitle.saurophaganax_light_blast"
   },
+  "prift.saurophaganax.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/saurophaganax/saurophaganax_warn"
+    ],
+    "subtitle": "sounds.subtitle.saurophaganax_warn"
+  },
 
   "prift.direwolf.idle": {
     "category": "neutral",
@@ -416,6 +458,13 @@
     ],
     "subtitle": "sounds.subtitle.direwolf_growl"
   },
+  "prift.direwolf.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/direwolf/direwolf_warn"
+    ],
+    "subtitle": "sounds.subtitle.direwolf_warn"
+  },
 
   "prift.megaloceros.idle": {
     "category": "neutral",
@@ -460,6 +509,13 @@
       "prift:entities/megaloceros/megaloceros_charge"
     ],
     "subtitle": "sounds.subtitle.megaloceros_charge"
+  },
+  "prift.megaloceros.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/megaloceros/megaloceros_warn"
+    ],
+    "subtitle": "sounds.subtitle.megaloceros_warn"
   },
 
   "prift.baryonyx.idle": {
@@ -529,6 +585,13 @@
       "prift:entities/palaeocastor/palaeocastor_charge"
     ],
     "subtitle": "sounds.subtitle.palaeocastor_charge"
+  },
+  "prift.palaeocastor.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/palaeocastor/palaeocastor_warn"
+    ],
+    "subtitle": "sounds.subtitle.palaeocastor_warn"
   },
 
   "prift.ankylosaurus.idle": {
@@ -647,6 +710,13 @@
       "prift:entities/gallimimus/gallimimus_leap"
     ],
     "subtitle": "sounds.subtitle.gallimimus_leap"
+  },
+  "prift.gallimimus.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/gallimimus/gallimimus_warn"
+    ],
+    "subtitle": "sounds.subtitle.gallimimus_warn"
   },
 
   "prift.generic_move.bite": {

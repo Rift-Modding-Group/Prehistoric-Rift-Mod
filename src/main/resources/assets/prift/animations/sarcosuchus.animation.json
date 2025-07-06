@@ -375,6 +375,32 @@
 		},
 		"animation.sarcosuchus.use_charged_infinite_spin_type_move_pt3": {
 			"animation_length": 0
+		},
+		"animation.sarcosuchus.warn": {
+			"animation_length": 1.25,
+			"bones": {
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-5.12076, 12.45167, -1.10693],
+						"0.5": [-10.23772, -12.3071, 2.20462],
+						"0.75": [-10.23976, 12.30403, -2.21016],
+						"1.0": [-10, 0, 0],
+						"1.25": [0, 0, 0]
+					}
+				},
+				"upperJaw": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-20, 0, 0],
+						"1.0": [-20, 0, 0],
+						"1.25": [0, 0, 0]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": [0, 0, 0]
+				}
+			}
 		}
 	}
 }
