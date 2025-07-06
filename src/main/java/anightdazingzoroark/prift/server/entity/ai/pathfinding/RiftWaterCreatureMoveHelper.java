@@ -1,10 +1,11 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import net.minecraft.block.material.Material;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public class RiftWaterCreatureMoveHelper extends EntityMoveHelper {
     private final RiftWaterCreature creature;
@@ -16,22 +17,31 @@ public class RiftWaterCreatureMoveHelper extends EntityMoveHelper {
 
     @Override
     public void onUpdateMoveHelper() {
-        if (this.creature.isInsideOfMaterial(Material.WATER)) this.creature.motionY += 0.005;
-        if (this.action == Action.MOVE_TO && !this.creature.getNavigator().noPath()) {
-            final double newSpeed = this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
-            this.creature.setAIMoveSpeed(this.creature.getAIMoveSpeed() + (float)(newSpeed - this.creature.getAIMoveSpeed()) * 0.125f);
+        if (this.action == Action.MOVE_TO) {
+            if (!this.creature.getNavigator().noPath() && this.creature.isInWater()) {
+                //make normalized vector based on diff between moveto pos and creature pos
+                Vec3d moveVector = new Vec3d(this.posX - this.creature.posX, this.posY - this.creature.posY, this.posZ - this.creature.posZ);
+                Vec3d mvNormalized = moveVector.normalize();
 
-            final double x = this.posX - this.creature.posX;
-            final double y = this.posY - this.creature.posY;
-            final double z = this.posZ - this.creature.posZ;
+                //make speed from vector and creature speed
+                double creatureSpeed = (float) (this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
+                Vec3d finalVectors = mvNormalized.scale(creatureSpeed);
 
-            if (y != 0) this.creature.motionY += this.creature.getAIMoveSpeed() * y / Math.sqrt(x * x + y * y + z * z) * 0.1;
-            if (x != 0 || z != 0) {
-                this.creature.rotationYaw = limitAngle(this.creature.rotationYaw, (float)(MathHelper.atan2(z, x) * 180 / Math.PI - 90), 90);
-                this.creature.setRenderYawOffset(this.creature.rotationYaw);
+                //set speed
+                this.creature.setAIMoveSpeed((float) Math.sqrt(finalVectors.x * finalVectors.x + finalVectors.z * finalVectors.z));
+                this.creature.setMoveVertical((float) finalVectors.y);
+
+                //set look angle
+                if (Math.abs(finalVectors.x) + Math.abs(finalVectors.z) > 0) {
+                    float f = (float) (MathHelper.atan2(finalVectors.z, finalVectors.x) * 180 / Math.PI - 90);
+                    this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, f, 90);
+                    this.creature.setRenderYawOffset(this.creature.rotationYaw);
+                }
             }
         }
-
-        else this.creature.setAIMoveSpeed(0);
+        else {
+            this.creature.setAIMoveSpeed(0);
+            this.creature.setMoveVertical(0);
+        }
     }
 }

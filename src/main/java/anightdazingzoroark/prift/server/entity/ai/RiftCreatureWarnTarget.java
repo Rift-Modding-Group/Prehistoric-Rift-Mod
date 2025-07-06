@@ -35,12 +35,14 @@ public class RiftCreatureWarnTarget extends EntityAIBase {
     @Override
     public void startExecuting() {
         this.creature.setIsWarning(true);
+        this.creature.setCanMove(false);
     }
 
     @Override
     public void resetTask() {
         this.creature.setIsWarning(false);
         this.creature.setCanWarn(false);
+        this.creature.setCanMove(true);
         this.animTick = 0;
     }
 

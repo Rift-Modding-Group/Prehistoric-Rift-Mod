@@ -20,7 +20,7 @@ public class RiftWanderWater extends EntityAIWander {
     @Override
     public boolean shouldExecute() {
         if (this.waterCreature.isTamed()) {
-            if (this.waterCreature.getEnergy() > 6
+            if (this.waterCreature.getEnergy() > this.waterCreature.getWeaknessEnergy()
                     && this.waterCreature.creatureBoxWithinReach()
                     && !this.waterCreature.isSitting()
                     && this.waterCreature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
@@ -41,7 +41,7 @@ public class RiftWanderWater extends EntityAIWander {
     @Override
     public boolean shouldContinueExecuting() {
         boolean hasNoHerdLeader = !this.waterCreature.hasHerdLeader();
-        return this.waterCreature.getEnergy() > 6 && this.waterCreature.creatureBoxWithinReach() && hasNoHerdLeader && this.waterCreature.isInWater() && super.shouldContinueExecuting();
+        return this.waterCreature.getEnergy() > this.waterCreature.getWeaknessEnergy() && this.waterCreature.creatureBoxWithinReach() && hasNoHerdLeader && this.waterCreature.isInWater() && super.shouldContinueExecuting();
     }
 
     @Override

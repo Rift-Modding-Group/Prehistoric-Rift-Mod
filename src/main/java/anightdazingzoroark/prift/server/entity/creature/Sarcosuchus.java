@@ -61,6 +61,7 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.tasks.addTask(8, new RiftWanderWater(this, 1.0D));
         this.tasks.addTask(9, new RiftWander(this, 1.0D));
     }
+
     @Override
     public float[] ageScaleParams() {
         return new float[]{0.3f, 1.5f};

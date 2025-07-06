@@ -45,8 +45,15 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         return  (this.creature.isTamed() || !this.creature.fleesFromDanger())
                 && (this.creature.getAttackTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getAttackTarget()))
                 && !this.creature.isBeingRidden()
-                && (!(this.creature instanceof RiftWaterCreature) || !((RiftWaterCreature) this.creature).canFlop());
+                && this.waterCreatureFlopTest();
                 //&& this.creature.getAttackTarget().canEntityBeSeen(this.creature);
+    }
+
+    private boolean waterCreatureFlopTest() {
+        if (!(this.creature instanceof RiftWaterCreature)) return true;
+
+        RiftWaterCreature waterCreature = (RiftWaterCreature) this.creature;
+        return !waterCreature.canFlop() || waterCreature.isInWater();
     }
 
     @Override

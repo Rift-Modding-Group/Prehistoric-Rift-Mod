@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.message.*;
@@ -37,12 +36,14 @@ public abstract class RiftWaterCreature extends RiftCreature {
         this.moveHelper = new RiftWaterCreatureMoveHelper(this);
         this.waterNavigate = new PathNavigateSwimmer(this, this.world);
         this.landNavigate = new PathNavigateGround(this, this.world);
-        this.amphibiousInWater = true;
         if (!this.isAmphibious()) {
             this.setPathPriority(PathNodeType.WATER, 0f);
             this.defaultWaterCost = 0F;
         }
-        else this.defaultWaterCost = this.getPathPriority(PathNodeType.WATER);
+        else {
+            this.amphibiousInWater = !this.isInWater();
+            this.defaultWaterCost = this.getPathPriority(PathNodeType.WATER);
+        }
     }
 
     @Override
@@ -97,6 +98,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
         //for changing navigator on land for amphibious
         if (this.isAmphibious()) {
             if (this.isInWater() && !this.amphibiousInWater) {
+                System.out.println("switch to water");
                 this.navigator = this.waterNavigate;
                 this.moveHelper = new RiftWaterCreatureMoveHelper(this);
                 this.setPathPriority(PathNodeType.WATER, 0);
@@ -104,6 +106,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 this.navigator.clearPath();
             }
             else if (!this.isInWater() && this.amphibiousInWater) {
+                System.out.println("switch to land");
                 this.navigator = this.landNavigate;
                 this.moveHelper = new EntityMoveHelper(this);
                 this.setPathPriority(PathNodeType.WATER, this.defaultWaterCost);
@@ -113,8 +116,8 @@ public abstract class RiftWaterCreature extends RiftCreature {
         }
 
         //for not sinkin in certain conditions
-        if (this.isBeingRidden() && this.isInWater() && !this.isUsingSwimControls()) this.motionY *= 0;
-        if (!this.isBeingRidden() && this.isInWater() && this.isSitting()) this.motionY *= 0;
+        //if (this.isBeingRidden() && this.isInWater() && !this.isUsingSwimControls()) this.motionY *= 0;
+        //if (!this.isBeingRidden() && this.isInWater() && this.isSitting()) this.motionY *= 0;
     }
 
     @Override
@@ -147,7 +150,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
     }
 
     protected PathNavigate createNavigator(World worldIn) {
-        return new PathNavigateRiftWaterCreature(this, this.world);
+        return new PathNavigateSwimmer(this, this.world);
     }
 
     protected boolean canTriggerWalking() {
@@ -249,21 +252,12 @@ public abstract class RiftWaterCreature extends RiftCreature {
         }
         else {
             if (this.isInWater()) {
-                if ((this.isSitting() && this.getAttackTarget() == null) || this.getNavigator().noPath()) {
-                    this.motionX = 0;
-                    this.motionY = 0;
-                    this.motionZ = 0;
-                }
-                else {
-                    this.moveRelative(strafe, vertical, forward, 0.01f);
-                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-
-                    this.motionX *= 0.9;
-                    this.motionY *= 0.9;
-                    this.motionZ *= 0.9;
-
-                    if (this.getAttackTarget() == null) this.motionY -= 0.005;
-                }
+                this.moveRelative(strafe, vertical, forward, 0.01F);
+                this.motionX *= 0.9;
+                this.motionY *= 0.9;
+                this.motionZ *= 0.9;
+                this.fallDistance = 0.0F;
+                this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
             }
             else super.travel(strafe, vertical, forward);
         }
