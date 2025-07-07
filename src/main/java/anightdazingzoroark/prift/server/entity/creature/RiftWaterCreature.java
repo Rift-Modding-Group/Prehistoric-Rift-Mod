@@ -98,7 +98,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         //for changing navigator on land for amphibious
         if (this.isAmphibious()) {
             if (this.isInWater() && !this.amphibiousInWater) {
-                System.out.println("switch to water");
                 this.navigator = this.waterNavigate;
                 this.moveHelper = new RiftWaterCreatureMoveHelper(this);
                 this.setPathPriority(PathNodeType.WATER, 0);
@@ -106,7 +105,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 this.navigator.clearPath();
             }
             else if (!this.isInWater() && this.amphibiousInWater) {
-                System.out.println("switch to land");
                 this.navigator = this.landNavigate;
                 this.moveHelper = new EntityMoveHelper(this);
                 this.setPathPriority(PathNodeType.WATER, this.defaultWaterCost);
@@ -114,10 +112,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
                 this.navigator.clearPath();
             }
         }
-
-        //for not sinkin in certain conditions
-        //if (this.isBeingRidden() && this.isInWater() && !this.isUsingSwimControls()) this.motionY *= 0;
-        //if (!this.isBeingRidden() && this.isInWater() && this.isSitting()) this.motionY *= 0;
     }
 
     @Override

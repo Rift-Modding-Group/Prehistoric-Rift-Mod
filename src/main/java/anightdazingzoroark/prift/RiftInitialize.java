@@ -50,7 +50,6 @@ public class RiftInitialize {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
-        RiftLib.initializePre();
         PROXY.preInit(event);
 
         //for general config
@@ -68,7 +67,7 @@ public class RiftInitialize {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        RiftLib.initializeMiddle();
+        RiftLib.initialize();
         PROXY.init(event);
 
         logger.info("MOMMY AYUNDA PLEASE BREASTFEED MEEEEEEEEEEEEEEE");
