@@ -22,10 +22,12 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
         super(CreatureMove.POWER_ROAR);
     }
 
+    /*
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return user.world.rand.nextInt(4) == 0 && user.isRecentlyHit();
+        return user.world.rand.nextInt(4) == 0;
     }
+     */
 
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {

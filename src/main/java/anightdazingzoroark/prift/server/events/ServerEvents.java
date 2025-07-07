@@ -427,7 +427,6 @@ public class ServerEvents {
                 //make sure that if a creature's target dies, their path is cleared
                 if (creature.getAttackTarget() != null) {
                     if (!creature.getAttackTarget().isEntityAlive()) {
-                        System.out.println("clear path");
                         creature.getNavigator().clearPath();
                     }
                 }

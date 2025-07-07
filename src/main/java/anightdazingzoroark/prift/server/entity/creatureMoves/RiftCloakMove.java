@@ -10,16 +10,7 @@ public class RiftCloakMove extends RiftCreatureMove {
 
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return user.canUtilizeCloaking()
-                && !user.isCloaked()
-                && user.getRevengeTarget() == null
-                && user.getAttackTarget() == null
-                && user.getGrabVictim() == null;
-    }
-
-    @Override
-    public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
-        return user.canUtilizeCloaking();
+        return user.getGrabVictim() == null;
     }
 
     @Override

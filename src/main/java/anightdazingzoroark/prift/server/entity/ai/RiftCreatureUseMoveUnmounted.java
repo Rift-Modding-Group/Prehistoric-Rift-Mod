@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.client.RiftSoundLooper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCondition;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -42,8 +43,9 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return  (this.creature.isTamed() || !this.creature.fleesFromDanger())
-                && (this.creature.getAttackTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getAttackTarget()))
+        return (this.creature.isTamed() || !this.creature.fleesFromDanger())
+                //&& (this.creature.getAttackTarget() != null && RiftUtil.checkForNoAssociations(this.creature, this.creature.getAttackTarget()))
+                && this.creature.getCurrentMoveCondition() != null
                 && !this.creature.isBeingRidden()
                 && this.waterCreatureFlopTest();
                 //&& this.creature.getAttackTarget().canEntityBeSeen(this.creature);
@@ -58,7 +60,8 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return !this.creature.isBeingRidden() && !this.finishedAnimMarker;
+        return !this.creature.isBeingRidden() && !this.finishedAnimMarker
+                && (this.creature.currentCreatureMove() != null || this.creature.getCurrentMoveCondition() != null);
     }
 
     @Override
@@ -83,6 +86,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     @Override
     public void resetTask() {
+        System.out.println("move use end");
         this.creature.setCanMove(true);
         if (this.currentInvokedMove != null) {
             this.creature.setUsingUnchargedAnim(false);
@@ -93,6 +97,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         this.creature.setPlayingInfiniteMoveAnim(false);
         this.setChargedMoveBeingUsed(false);
         this.creature.setCurrentCreatureMove(null);
+        this.creature.setCurrentMoveCondition(null);
 
         this.maxMoveAnimTime = 0;
         this.moveAnimInitDelayTime = 0;
@@ -324,7 +329,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     this.creature.setUsingUnchargedAnim(false);
                     this.currentInvokedMove.onStopExecuting(this.creature);
                     //the cloak move only has a cooldown when removing the cloaking
-                    if (this.creature.canUtilizeCloaking() && this.creature.currentCreatureMove() == CreatureMove.CLOAK && !this.creature.isCloaked()) {
+                    if (this.creature.currentCreatureMove() == CreatureMove.CLOAK && !this.creature.isCloaked()) {
                         this.creature.setMoveCooldown(this.creature.currentCreatureMove().maxCooldown);
                     }
                     //all other moves should have their cooldown applied as usual
@@ -349,17 +354,17 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
     }
 
     private void moveSelection() {
-        this.creature.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
+        if (this.target != null) this.creature.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
         //select the move
         if (this.selectingMove) {
             //when in turret mode, only select ranged moves
             if (this.creature.canEnterTurretMode() && this.creature.isTurretMode()) {
-                boolean hasUsableRangedMove = this.creature.getLearnedMoves().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
+                boolean hasUsableRangedMove = this.creature.getUsableMovesFromCondition().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
                         && !selectedMoveBlacklist.contains(m));
-                int usableRangedMoveCount = (int) this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
+                int usableRangedMoveCount = (int) this.creature.getUsableMovesFromCondition().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
                         && !selectedMoveBlacklist.contains(m)).count();
                 if (hasUsableRangedMove) {
-                    this.moveToTest = this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
+                    this.moveToTest = this.creature.getUsableMovesFromCondition().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
                                     && !this.selectedMoveBlacklist.contains(m))
                             .skip(this.creature.world.rand.nextInt(usableRangedMoveCount))
                             .findAny().get();
@@ -369,29 +374,29 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             }
             //otherwise just choose based on a pretty strict flowchart
             else {
-                if (this.creature.getLearnedMoves().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT
+                if (this.creature.getUsableMovesFromCondition().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT
                         && !selectedMoveBlacklist.contains(m))) {
-                    int usableSupportMoveCount = (int) this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT
+                    int usableSupportMoveCount = (int) this.creature.getUsableMovesFromCondition().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT
                             && !this.selectedMoveBlacklist.contains(m)).count();
-                    this.moveToTest = this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT
+                    this.moveToTest = this.creature.getUsableMovesFromCondition().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.SUPPORT
                                     && !this.selectedMoveBlacklist.contains(m))
                             .skip(this.creature.world.rand.nextInt(usableSupportMoveCount))
                             .findAny().get();
                     if (this.moveIsSelectable(moveToTest)) this.selectingMove = false;
                     else selectedMoveBlacklist.add(moveToTest);
                 }
-                else if (this.creature.getLearnedMoves().stream().anyMatch(m -> !selectedMoveBlacklist.contains(m))) {
-                    boolean hasUsableRangedMove = this.creature.getLearnedMoves().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
+                else if (this.creature.getUsableMovesFromCondition().stream().anyMatch(m -> !selectedMoveBlacklist.contains(m))) {
+                    boolean hasUsableRangedMove = this.creature.getUsableMovesFromCondition().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
                             && !selectedMoveBlacklist.contains(m));
-                    int usableRangedMoveCount = (int) this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
+                    int usableRangedMoveCount = (int) this.creature.getUsableMovesFromCondition().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
                             && !selectedMoveBlacklist.contains(m)).count();
-                    boolean hasUsableRangedSeldomMove = this.creature.getLearnedMoves().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM
+                    boolean hasUsableRangedSeldomMove = this.creature.getUsableMovesFromCondition().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM
                             && !selectedMoveBlacklist.contains(m));
-                    int usableRangedSeldomMoveCount = (int) this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM
+                    int usableRangedSeldomMoveCount = (int) this.creature.getUsableMovesFromCondition().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM
                             && !selectedMoveBlacklist.contains(m)).count();
-                    boolean hasUsableMeleeMove = this.creature.getLearnedMoves().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.MELEE
+                    boolean hasUsableMeleeMove = this.creature.getUsableMovesFromCondition().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.MELEE
                             && !selectedMoveBlacklist.contains(m));
-                    int usableMeleeMoveCount = (int) this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.MELEE
+                    int usableMeleeMoveCount = (int) this.creature.getUsableMovesFromCondition().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.MELEE
                             && !selectedMoveBlacklist.contains(m)).count();
 
                     //path to target to then use ranged attack
@@ -402,7 +407,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     else if (this.creature.getDistance(this.target) <= this.creature.rangedWidth()
                             && this.creature.getDistance(this.target) > (this.creature.attackWidth() + this.creature.width)) {
                         if (hasUsableRangedSeldomMove) {
-                            this.moveToTest = this.creature.getLearnedMoves().stream()
+                            this.moveToTest = this.creature.getUsableMovesFromCondition().stream()
                                     .filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM
                                             && !selectedMoveBlacklist.contains(m))
                                     .skip(this.creature.world.rand.nextInt(usableRangedSeldomMoveCount))
@@ -412,7 +417,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             else selectedMoveBlacklist.add(moveToTest);
                         }
                         else if (hasUsableRangedMove) {
-                            this.moveToTest = this.creature.getLearnedMoves().stream().parallel().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
+                            this.moveToTest = this.creature.getUsableMovesFromCondition().stream().parallel().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
                                             && !selectedMoveBlacklist.contains(m))
                                     .skip(this.creature.world.rand.nextInt(usableRangedMoveCount))
                                     .findFirst().get();
@@ -426,7 +431,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                     //either use ranged attack or use melee attack
                     else if (this.creature.getDistance(this.target) <= (this.creature.attackWidth() + this.creature.width)) {
                         if (hasUsableMeleeMove) {
-                            this.moveToTest = this.creature.getLearnedMoves().stream().parallel().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.MELEE
+                            this.moveToTest = this.creature.getUsableMovesFromCondition().stream().parallel().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.MELEE
                                             && !this.selectedMoveBlacklist.contains(m))
                                     .skip(this.creature.world.rand.nextInt(usableMeleeMoveCount))
                                     .findFirst().get();
@@ -434,7 +439,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             if (this.moveIsSelectable(this.moveToTest)) this.selectingMove = false;
                         }
                         else if (hasUsableRangedSeldomMove) {
-                            this.moveToTest = this.creature.getLearnedMoves().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM
+                            this.moveToTest = this.creature.getUsableMovesFromCondition().stream().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM
                                             && !this.selectedMoveBlacklist.contains(m))
                                     .skip(this.creature.world.rand.nextInt(usableRangedSeldomMoveCount))
                                     .findFirst().get();
@@ -443,7 +448,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             else this.selectedMoveBlacklist.add(this.moveToTest);
                         }
                         else if (hasUsableRangedMove) {
-                            this.moveToTest = this.creature.getLearnedMoves().stream().parallel().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
+                            this.moveToTest = this.creature.getUsableMovesFromCondition().stream().parallel().filter(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED
                                             && !this.selectedMoveBlacklist.contains(m))
                                     .skip(this.creature.world.rand.nextInt(usableRangedMoveCount))
                                     .findFirst().get();
@@ -535,7 +540,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
         if (move == null || move.creatureMove == null) return false;
 
         //get pos associated with move
-        int pos = this.creature.getLearnedMoves().indexOf(move);
+        int pos = this.creature.getUsableMovesFromCondition().indexOf(move);
         if (pos == -1) return false;
 
         //check if theres animators available for move
@@ -551,7 +556,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
 
     private void setChargedMoveBeingUsed(boolean value) {
         if (this.creature.currentCreatureMove() == null) return;
-        int movePos = this.creature.getLearnedMoves().indexOf(this.creature.currentCreatureMove());
+        int movePos = this.creature.getUsableMovesFromCondition().indexOf(this.creature.currentCreatureMove());
         switch (movePos) {
             case 0:
                 this.creature.setUsingMoveOne(value);

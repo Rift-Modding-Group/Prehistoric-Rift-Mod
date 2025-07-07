@@ -162,7 +162,7 @@ public class RiftBreakBlockWhilePursuingTarget extends EntityAIBase {
                 this.creature.setUsingUnchargedAnim(false);
                 this.currentInvokedMove.onStopExecuting(this.creature);
                 //the cloak move only has a cooldown when removing the cloaking
-                if (this.creature.canUtilizeCloaking() && this.creature.currentCreatureMove() == CreatureMove.CLOAK && !this.creature.isCloaked()) {
+                if (this.creature.currentCreatureMove() == CreatureMove.CLOAK && !this.creature.isCloaked()) {
                     this.creature.setMoveCooldown(this.creature.currentCreatureMove().maxCooldown);
                 }
                 //all other moves should have their cooldown applied as usual

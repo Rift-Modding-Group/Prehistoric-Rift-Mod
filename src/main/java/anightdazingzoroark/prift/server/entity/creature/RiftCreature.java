@@ -19,6 +19,7 @@ import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCondition;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
@@ -72,6 +73,7 @@ import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
+import scala.Int;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -139,6 +141,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> PLAY_INFINITE_MOVE_ANIM = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
+
+    private static final DataParameter<Integer> CURRENT_MOVE_CONDITION = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     private static final DataParameter<Boolean> BREAK_BLOCK_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_SET_BLOCK_BREAK_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -297,6 +301,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(PLAY_INFINITE_MOVE_ANIM, false);
 
         this.dataManager.register(MOVE_LIST, new ArrayList<>());
+
+        this.dataManager.register(CURRENT_MOVE_CONDITION, -1);
+
         this.dataManager.register(BREAK_BLOCK_MODE, false);
         this.dataManager.register(CAN_SET_BLOCK_BREAK_MODE, true);
 
@@ -337,10 +344,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.canDoHerding()) {
             if (!(livingdata instanceof HerdData)) return new HerdData(this);
             this.addToHerdLeader(((HerdData)livingdata).herdLeader);
-        }
-        //if creature can use cloaking, instantly cloak it
-        if (this.canUtilizeCloaking()) {
-            this.setCloaked(true);
         }
         return livingdata;
     }
@@ -389,9 +392,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageDiscoveryByPlayer();
             this.manageMoveAndWeaponCooldown();
             this.hasNoTargetManagement();
-            if (this.canUtilizeCloaking()) this.manageCloaking();
+            this.manageCloaking();
             if (this.isNocturnal()) this.manageSleepSchedule();
             if (this.canBePregnant()) this.createBabyWhenPregnant();
+
+            //move conditions ticking
+            if (this.getAttackTarget() != null && this.getAttackTarget().isEntityAlive()) this.setCurrentMoveCondition(CreatureMoveCondition.Condition.CHECK_TARGET);
+            if (this.getLearnedMoves().contains(CreatureMove.CLOAK) && !this.isCloaked()) this.setCurrentMoveCondition(CreatureMoveCondition.Condition.CHECK_UNCLOAKED);
+
             if (this.isTamed()) {
                 this.updateEnergyMove();
 
@@ -1575,6 +1583,40 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public abstract Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType();
     //move related stuff ends here
 
+    //move condition stuff starts here
+    public CreatureMoveCondition.Condition getCurrentMoveCondition() {
+        int conditionInt = this.dataManager.get(CURRENT_MOVE_CONDITION);
+        if (conditionInt >= 0) return CreatureMoveCondition.Condition.values()[conditionInt];
+        return null;
+    }
+
+    public void setCurrentMoveCondition(CreatureMoveCondition.Condition value) {
+        //prioritze clearing move condition
+        if (value == null) {
+            this.dataManager.set(CURRENT_MOVE_CONDITION, -1);
+            return;
+        }
+
+        //replace current condition based on comparing priorities
+        //or if it doesnt have a condition to begin with lmao
+        if (this.getCurrentMoveCondition() == null || value.ordinal() > this.getCurrentMoveCondition().ordinal()) {
+            System.out.println(value);
+            this.dataManager.set(CURRENT_MOVE_CONDITION, value.ordinal());
+        }
+    }
+
+    public List<CreatureMove> getUsableMovesFromCondition() {
+        if (this.getCurrentMoveCondition() == null) return Collections.EMPTY_LIST;
+        return this.getLearnedMoves().stream()
+                .filter(m -> m.moveCondition.conditions.contains(this.getCurrentMoveCondition()))
+                .collect(Collectors.toList());
+    }
+    //check intervals for each move that has an interval condition
+    private void checkMovesWithIntervals() {
+        //im too lazy to do this shit + i cant imagine uses + idk why i added it
+    }
+    //move condition stuff ends here
+
     public boolean inBlockBreakMode() {
         return this.dataManager.get(BREAK_BLOCK_MODE);
     }
@@ -2222,6 +2264,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         //additionally, get the damage received for use later
         this.recentlyHitDamage = amount;
+
+        //apply check hit condition
+        System.out.println("ouchies");
+        this.setCurrentMoveCondition(CreatureMoveCondition.Condition.CHECK_HIT);
 
         //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
         if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
