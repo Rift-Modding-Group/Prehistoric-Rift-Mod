@@ -8,7 +8,7 @@ public enum CreatureMove {
     SCRATCH(RiftScratchMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     BITE(RiftBiteMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     SNARL(RiftSnarlMove.class, MoveAnimType.GROWL, ChargeType.NONE, 0, new int[]{0}, 0, 60, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
-    POWER_ROAR(RiftPowerRoarMove.class, MoveAnimType.ROAR, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false, new CreatureMoveCondition().setCheckForHit()),
+    POWER_ROAR(RiftPowerRoarMove.class, MoveAnimType.ROAR, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false, new CreatureMoveCondition().setCheckForHit().setRNGChance(4)),
     TAIL_SLAP(RiftTailSlapMove.class, MoveAnimType.TAIL, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     THAGOMIZE(RiftThagomizeMove.class, MoveAnimType.TAIL, ChargeType.GRADIENT_THEN_USE, 80, new int[]{10, 20}, 100, 200, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     PLATE_FLING(RiftPlateFlingMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 25, new int[]{2}, 0, 100, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
