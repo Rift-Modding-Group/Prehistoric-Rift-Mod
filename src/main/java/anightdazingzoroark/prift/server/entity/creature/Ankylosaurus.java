@@ -180,10 +180,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         return true;
     }
 
-    private boolean isHidingInShell() {
-        return this.currentCreatureMove() != null && (this.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.DEFENSE || this.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.SPIN);
-    }
-
     @Override
     public List<String> blocksToHarvest() {
         return RiftConfigHandler.getConfig(this.creatureType).general.harvestableBlocks;

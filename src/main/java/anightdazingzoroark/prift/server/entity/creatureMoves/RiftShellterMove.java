@@ -41,5 +41,6 @@ public class RiftShellterMove extends RiftCreatureMove {
     public void onStopExecuting(RiftCreature user) {
         user.setCanMove(true);
         user.enableCanRotateMounted();
+        user.removePotionEffect(MobEffects.REGENERATION);
     }
 }

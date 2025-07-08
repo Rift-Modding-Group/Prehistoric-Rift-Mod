@@ -570,11 +570,20 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
             rng = this.creature.world.rand.nextInt(move.moveCondition.getRNGChance()) == 0;
         }
 
+        //create boolean for if health is below certain percentage associated with move
+        boolean belowHPPercentage = true;
+        if (move.moveCondition.conditions.contains(CreatureMoveCondition.Condition.HEALTH_BELOW_VALUE)) {
+            belowHPPercentage = this.creature.getHealth() <= this.creature.getMaxHealth() * move.moveCondition.getBelowHealthPercentage();
+        }
+
+        //create boolean for if creature age is within certain interval for use
+        boolean interval = true;
+
         //invoke the move to get its associated check for use
         RiftCreatureMove invokedCreatureMove = move.invokeMove();
         boolean energyCheck = move.chargeType.requiresCharge() ? (this.creature.getEnergy() - move.energyUse[0] >= this.creature.getWeaknessEnergy()) : (this.creature.getEnergy() - move.energyUse[0] >= 0);
         return this.creature.getMoveCooldown(pos) == 0
-                && energyCheck && rng
+                && energyCheck && rng && belowHPPercentage
                 && invokedCreatureMove.canBeExecutedUnmounted(this.creature, this.target);
     }
 

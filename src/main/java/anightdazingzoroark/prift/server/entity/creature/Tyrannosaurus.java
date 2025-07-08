@@ -81,8 +81,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
             else return false;
         }
     };
-    private static final DataParameter<Boolean> ROARING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> STOMPING = EntityDataManager.<Boolean>createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USING_WORKSTATION = EntityDataManager.createKey(Tyrannosaurus.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> WORKSTATION_X_POS = EntityDataManager.createKey(Tyrannosaurus.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> WORKSTATION_Y_POS = EntityDataManager.createKey(Tyrannosaurus.class, DataSerializers.VARINT);
@@ -107,8 +105,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(STOMPING, false);
-        this.dataManager.register(ROARING, false);
         this.dataManager.register(USING_WORKSTATION, false);
         this.dataManager.register(WORKSTATION_X_POS, 0);
         this.dataManager.register(WORKSTATION_Y_POS, 0);
@@ -298,22 +294,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     public boolean canBeKnockedBack() {
         return true;
-    }
-
-    public void setRoaring(boolean value) {
-        this.dataManager.set(ROARING, value);
-    }
-
-    public boolean isRoaring() {
-        return this.dataManager.get(ROARING);
-    }
-
-    public void setStomping(boolean value) {
-        this.dataManager.set(STOMPING, value);
-    }
-
-    public boolean isStomping() {
-        return this.dataManager.get(STOMPING);
     }
 
     @Override

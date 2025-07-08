@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Triceratops extends RiftCreature implements IWorkstationUser, ILeadWorkstationUser, IHarvestWhenWandering {
-    private static final DataParameter<Boolean> STOMPING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> HARVESTING = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> CAN_HARVEST = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LOWER_HEAD = EntityDataManager.createKey(Triceratops.class, DataSerializers.BOOLEAN);
@@ -63,7 +62,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(STOMPING, false);
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
         this.dataManager.register(LOWER_HEAD, false);
@@ -168,14 +166,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     @Override
     public float rangedWidth() {
         return 32f;
-    }
-
-    public boolean isStomping() {
-        return this.dataManager.get(STOMPING);
-    }
-
-    public void setStomping(boolean value) {
-        this.dataManager.set(STOMPING, value);
     }
 
     @Override

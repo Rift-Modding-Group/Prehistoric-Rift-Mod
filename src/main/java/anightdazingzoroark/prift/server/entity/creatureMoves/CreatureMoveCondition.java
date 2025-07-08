@@ -13,6 +13,8 @@ public class CreatureMoveCondition {
     private boolean checkForTarget; //whether or not target being detected is a trigger, pretty obvious lmao
     private boolean checkForUncloaked; //whether or not being uncloaked is a trigger
     private boolean checkForHit; //whether or not being hit is a trigger
+    private double belowHealthPercentage; //whether or not users health in percent form is this or below
+    private boolean canLeapOverLedge; //for navigation, for making creatures use leap related moves to cross gaps
 
     //rng has no Condition attached to it
     //it is meant to be attached to other conditions
@@ -65,12 +67,34 @@ public class CreatureMoveCondition {
         return this.checkForHit;
     }
 
+    public CreatureMoveCondition setBelowHealthPercentage(double percentage) {
+        this.belowHealthPercentage = percentage;
+        this.conditions.add(Condition.HEALTH_BELOW_VALUE);
+        return this;
+    }
+
+    public double getBelowHealthPercentage() {
+        return this.belowHealthPercentage;
+    }
+
+    public CreatureMoveCondition setCanLeapOverLedge() {
+        this.canLeapOverLedge = true;
+        this.conditions.add(Condition.LEAP_OVER_LEDGE);
+        return this;
+    }
+
+    public boolean getCanLeapOverLedge() {
+        return this.canLeapOverLedge;
+    }
+
     public enum Condition {
         //order of values determines priority
         //higher position, higher priority
+        HEALTH_BELOW_VALUE,
         CHECK_UNCLOAKED,
         CHECK_HIT,
         INTERVAL,
+        LEAP_OVER_LEDGE,
         CHECK_TARGET
     }
 }

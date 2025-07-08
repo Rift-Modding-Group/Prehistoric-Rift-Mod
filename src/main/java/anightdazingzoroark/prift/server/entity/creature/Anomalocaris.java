@@ -101,11 +101,6 @@ public class Anomalocaris extends RiftWaterCreature {
     }
 
     @Override
-    public boolean canUtilizeCloaking() {
-        return true;
-    }
-
-    @Override
     public EnumCreatureAttribute getCreatureAttribute()
     {
         return EnumCreatureAttribute.ARTHROPOD;

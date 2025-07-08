@@ -399,6 +399,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.getAttackTarget() != null && this.getAttackTarget().isEntityAlive()) this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_TARGET);
             else this.removeFromConditionStack(CreatureMoveCondition.Condition.CHECK_TARGET);
             if (this.getLearnedMoves().contains(CreatureMove.CLOAK) && !this.isCloaked()) this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_UNCLOAKED);
+            this.checkMovesWithHealthBelowValue();
+            this.checkMovesWithIntervals();
 
             if (this.isTamed()) {
                 this.updateEnergyMove();
@@ -1626,9 +1628,32 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 .filter(m -> m.moveCondition.conditions.contains(this.getMoveConditionStack().getConditions().get(0)))
                 .collect(Collectors.toList());
     }
+
+    private void checkMovesWithHealthBelowValue() {
+        if (this.getMoveConditionStack().getConditions().contains(CreatureMoveCondition.Condition.HEALTH_BELOW_VALUE)) return;
+        double highestBelowHPPercentage = 0D;
+        for (CreatureMove move : this.getLearnedMoves()) {
+            if (move.moveCondition.conditions.contains(CreatureMoveCondition.Condition.HEALTH_BELOW_VALUE)) {
+                if (move.moveCondition.getBelowHealthPercentage() >= highestBelowHPPercentage) {
+                    highestBelowHPPercentage = move.moveCondition.getBelowHealthPercentage();
+                }
+            }
+        }
+        if (this.getHealth() <= this.getMaxHealth() * highestBelowHPPercentage)
+            this.addToConditionStack(CreatureMoveCondition.Condition.HEALTH_BELOW_VALUE);
+    }
+
     //check intervals for each move that has an interval condition
     private void checkMovesWithIntervals() {
-        //im too lazy to do this shit + i cant imagine uses + idk why i added it
+        if (this.getMoveConditionStack().getConditions().contains(CreatureMoveCondition.Condition.INTERVAL)) return;
+        for (CreatureMove move : this.getLearnedMoves()) {
+            if (move.moveCondition.conditions.contains(CreatureMoveCondition.Condition.INTERVAL)) {
+                if (move.moveCondition.getTickInterval() % this.getAgeInTicks() == 0) {
+                    this.addToConditionStack(CreatureMoveCondition.Condition.INTERVAL);
+                    break;
+                }
+            }
+        }
     }
     //move condition stuff ends here
 
@@ -2060,10 +2085,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //mob grabbing management ends here
 
     //cloaking management starts here
-    public boolean canUtilizeCloaking() {
-        return false;
-    }
-
     public boolean isCloaked() {
         return this.dataManager.get(CLOAKED);
     }
@@ -2098,17 +2119,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setAttacking(boolean value) {
         this.dataManager.set(ATTACKING, value);
     }
-
-    public boolean isStomping() {
-        return false;
-    }
-
-    public void setStomping(boolean value) {}
-
-    public boolean isRoaring() {
-        return false;
-    }
-
     //old move anims end here
 
     public boolean isSitting() {
@@ -2281,7 +2291,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.recentlyHitDamage = amount;
 
         //apply check hit condition if it has move with said condition
-        this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_HIT);
+        if ((RiftUtil.checkForNoAssociations(this, source.getImmediateSource()) || RiftUtil.checkForNoAssociations(this, source.getTrueSource()))
+                && (RiftUtil.checkForNoHerdAssociations(this, source.getImmediateSource()) || RiftUtil.checkForNoHerdAssociations(this, source.getTrueSource())))
+            this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_HIT);
 
         //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
         if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
