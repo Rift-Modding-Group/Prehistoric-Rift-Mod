@@ -37,12 +37,7 @@ public class RiftShockBlastMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        for (EntityLivingBase entity : user.world.getEntitiesWithinAABB(EntityLivingBase.class, user.getEntityBoundingBox().grow(8D), new Predicate<EntityLivingBase>() {
-            @Override
-            public boolean apply(@Nullable EntityLivingBase entityLivingBase) {
-                return RiftUtil.isAppropriateSize(entityLivingBase, RiftUtil.getMobSize(user)) && RiftUtil.checkForNoAssociations(user, entityLivingBase) && !user.equals(entityLivingBase);
-            }
-        })) {
+        for (EntityLivingBase entity : user.world.getEntitiesWithinAABB(EntityLivingBase.class, user.getEntityBoundingBox().grow(8D), this.generalEntityPredicate(user, true))) {
             entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 255));
         }
     }

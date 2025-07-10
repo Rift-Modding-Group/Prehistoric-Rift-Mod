@@ -13,19 +13,18 @@ public class RiftShellterMove extends RiftCreatureMove {
 
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return user.getHealth()/user.getMaxHealth() <= 0.5f || user.getEnergy() <= user.getWeaknessEnergy();
+        return user.getHealth()/user.getMaxHealth() <= 0.25f || user.getEnergy() <= user.getWeaknessEnergy();
     }
 
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setCanMove(false);
         user.disableCanRotateMounted();
+        user.setEntityInvulnerable(true);
     }
 
     @Override
-    public void whileChargingUp(RiftCreature user) {
-
-    }
+    public void whileChargingUp(RiftCreature user) {}
 
     @Override
     public void whileExecuting(RiftCreature user) {
@@ -40,6 +39,7 @@ public class RiftShellterMove extends RiftCreatureMove {
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.setCanMove(true);
+        user.setEntityInvulnerable(false);
         user.enableCanRotateMounted();
         user.removePotionEffect(MobEffects.REGENERATION);
     }

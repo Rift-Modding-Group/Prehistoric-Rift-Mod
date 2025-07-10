@@ -193,12 +193,17 @@ public abstract class RiftCreatureMove {
     }
 
     protected Predicate<Entity> generalEntityPredicate(RiftCreature user) {
+        return this.generalEntityPredicate(user, false);
+    }
+
+    protected Predicate<Entity> generalEntityPredicate(RiftCreature user, boolean considerSize) {
         return new Predicate<Entity>() {
             @Override
             public boolean apply(@Nullable Entity entity) {
                 if (entity instanceof EntityLivingBase || entity instanceof MultiPartEntityPart)
                     return RiftUtil.checkForNoAssociations(user, entity)
-                        && RiftUtil.checkForNoHerdAssociations(user, entity);
+                            && RiftUtil.checkForNoHerdAssociations(user, entity)
+                            && (considerSize ? RiftUtil.isAppropriateSizeNotEqual(entity, RiftUtil.getMobSize(user)) : true);
                 else return false;
             }
         };

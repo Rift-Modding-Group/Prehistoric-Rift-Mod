@@ -51,15 +51,10 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
     }
 
     private void roar(RiftCreature roarUser, double strength) {
-        for (EntityLivingBase entity : roarUser.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea(roarUser, strength * 6d), new Predicate<EntityLivingBase>() {
-            @Override
-            public boolean apply(@Nullable EntityLivingBase entityLivingBase) {
-                return RiftUtil.isAppropriateSize(entityLivingBase, RiftUtil.getMobSize(roarUser)) && RiftUtil.checkForNoAssociations(roarUser, entityLivingBase);
-            }
-        })) {
+        for (EntityLivingBase entity : roarUser.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea(roarUser, strength * 6d), this.generalEntityPredicate(roarUser))) {
             if (entity != roarUser) {
                 entity.attackEntityFrom(DamageSource.causeMobDamage(roarUser), 2);
-                this.roarKnockback(roarUser, entity, strength);
+                if (RiftUtil.isAppropriateSizeNotEqual(entity, RiftUtil.getMobSize(roarUser))) this.roarKnockback(roarUser, entity, strength);
             }
         }
         this.roarBreakBlocks(roarUser, strength);

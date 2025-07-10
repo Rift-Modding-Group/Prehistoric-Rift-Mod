@@ -211,7 +211,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             this.currentInvokedMove.creatureMove.energyUse[0],
                             this.currentInvokedMove.creatureMove.energyUse[1])), this.creature.getWeaknessEnergy()));
                     this.creature.setCurrentMoveUse(0);
-                    this.moveChoiceCooldown = 60;
+                    this.moveChoiceCooldown = 20;
                     this.animTime = 0;
                     this.finishedAnimMarker = true;
                     this.finishedMoveMarker = true;
@@ -290,7 +290,7 @@ public class RiftCreatureUseMoveUnmounted extends EntityAIBase {
                             this.currentInvokedMove.creatureMove.energyUse[0],
                             this.currentInvokedMove.creatureMove.energyUse[1])), this.creature.getWeaknessEnergy()));
                     this.creature.setCurrentMoveUse(0);
-                    this.moveChoiceCooldown = 60;
+                    this.moveChoiceCooldown = 20;
                     this.animTime = 0;
                     this.finishedAnimMarker = true;
                     this.finishedMoveMarker = true;
