@@ -15,6 +15,9 @@ public class CreatureMoveCondition {
     private boolean checkForHit; //whether or not being hit is a trigger
     private double belowHealthPercentage; //whether or not users health in percent form is this or below
     private boolean canLeapOverLedge; //for navigation, for making creatures use leap related moves to cross gaps
+    private boolean targetTooClose;
+    private boolean breakBlocks;
+    private boolean restrictBySize; //if target is strictly of larger size than user, dont use
 
     //rng has no Condition attached to it
     //it is meant to be attached to other conditions
@@ -87,14 +90,52 @@ public class CreatureMoveCondition {
         return this.canLeapOverLedge;
     }
 
+    public CreatureMoveCondition setTargetTooClose() {
+        this.targetTooClose = true;
+        this.conditions.add(Condition.TARGET_TOO_CLOSE);
+        return this;
+    }
+
+    public boolean getTargetTooClose() {
+        return this.targetTooClose;
+    }
+
+    public CreatureMoveCondition setBreakBlocks() {
+        this.breakBlocks = true;
+        this.conditions.add(Condition.BREAK_BLOCKS);
+        return this;
+    }
+
+    public boolean getBreakBlocks() {
+        return this.breakBlocks;
+    }
+
+    //not implemented yet
+    public CreatureMoveCondition restrictTargetingBySize() {
+        this.restrictBySize = true;
+        return this;
+    }
+
+    public boolean isRestrictedBySize() {
+        return this.restrictBySize;
+    }
+
     public enum Condition {
         //order of values determines priority
         //higher position, higher priority
         HEALTH_BELOW_VALUE,
         CHECK_UNCLOAKED,
         CHECK_HIT,
-        INTERVAL,
         LEAP_OVER_LEDGE,
-        CHECK_TARGET
+        TARGET_TOO_CLOSE,
+        BREAK_BLOCKS,
+        CHECK_TARGET,
+        INTERVAL
+    }
+
+    public enum Restriction {
+        //there isn't a
+        RNG,
+        SIZE
     }
 }

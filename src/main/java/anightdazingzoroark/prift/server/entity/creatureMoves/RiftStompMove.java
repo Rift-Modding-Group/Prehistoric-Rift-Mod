@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.List;
 
@@ -25,12 +26,16 @@ public class RiftStompMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        List<Entity> targets = user.getAllTargetsInFront(false);
-        for (Entity entity : targets) {
-            if (entity instanceof MultiPartEntityPart
-                    && ((MultiPartEntityPart)entity).parent instanceof EntityLivingBase)
-                user.attackEntityAsMob((EntityLivingBase) ((MultiPartEntityPart)entity).parent);
-            else if (entity instanceof EntityLivingBase) user.attackEntityAsMob(entity);
+        if (target != null) {
+            //attack target first
+            user.attackEntityAsMob(target);
+
+            //get mobs surrounding target and deal 1/4 the damage done to the target
+            AxisAlignedBB aabb = target.getEntityBoundingBox().grow(4D, 0, 4D);
+            for (EntityLivingBase entityLivingBase : user.world.getEntitiesWithinAABB(EntityLivingBase.class, aabb, this.generalEntityPredicate(user))) {
+                if (!entityLivingBase.equals(target) && !entityLivingBase.equals(user))
+                    user.attackEntityAsMobWithMultiplier(entityLivingBase, 0.25f);
+            }
         }
     }
 

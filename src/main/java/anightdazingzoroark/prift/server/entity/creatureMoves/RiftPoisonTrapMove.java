@@ -13,7 +13,7 @@ public class RiftPoisonTrapMove extends RiftCreatureMove {
 
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return false;
+        return !user.isTamed();
     }
 
     @Override

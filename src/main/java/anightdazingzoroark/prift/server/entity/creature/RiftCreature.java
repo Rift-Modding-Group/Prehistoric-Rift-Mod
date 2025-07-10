@@ -205,6 +205,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private Entity grabVictim;
     private int chosenAnimFromMultiple = -1;
     private int resetEnergyTick;
+    public int lastIntervalForMoveCall;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -396,8 +397,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.canBePregnant()) this.createBabyWhenPregnant();
 
             //move conditions ticking
-            if (this.getAttackTarget() != null && this.getAttackTarget().isEntityAlive()) this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_TARGET);
-            else this.removeFromConditionStack(CreatureMoveCondition.Condition.CHECK_TARGET);
+            if (this.getAttackTarget() != null && this.getAttackTarget().isEntityAlive()) {
+                this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_TARGET);
+
+                //if target is too close, add target too close condition
+                AxisAlignedBB aabb = this.getEntityBoundingBox().grow(0.5D);
+                if (this.checkIfHasMovesWithCondition(CreatureMoveCondition.Condition.TARGET_TOO_CLOSE)) {
+                    List<EntityLivingBase> nearbyEntities = this.world.getEntitiesWithinAABB(EntityLivingBase.class, aabb, null);
+
+                    if (nearbyEntities.contains(this.getAttackTarget())) this.addToConditionStack(CreatureMoveCondition.Condition.TARGET_TOO_CLOSE);
+                    else this.removeFromConditionStack(CreatureMoveCondition.Condition.TARGET_TOO_CLOSE);
+                }
+            }
+            else {
+                this.removeFromConditionStack(CreatureMoveCondition.Condition.CHECK_TARGET);
+                this.removeFromConditionStack(CreatureMoveCondition.Condition.TARGET_TOO_CLOSE);
+            }
             if (this.getLearnedMoves().contains(CreatureMove.CLOAK) && !this.isCloaked()) this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_UNCLOAKED);
             this.checkMovesWithHealthBelowValue();
             this.checkMovesWithIntervals();
@@ -1621,11 +1636,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setMoveConditionStack(toModify);
     }
 
-    //rng is not considered condition, that happens in RiftCreatureUseMoveUnmounted
-    public List<CreatureMove> getUsableMovesFromCondition() {
+    public void clearConditionStack() {
+        CreatureMoveConditionStack toModify = this.getMoveConditionStack();
+        toModify.getConditions().clear();
+        this.setMoveConditionStack(toModify);
+    }
+
+    public List<CreatureMove> getUsableMovesFromConditionInStack(CreatureMoveCondition.Condition condition) {
         if (this.getMoveConditionStack() == null || this.getMoveConditionStack().getConditions().isEmpty()) return Collections.EMPTY_LIST;
         return this.getLearnedMoves().stream()
-                .filter(m -> m.moveCondition.conditions.contains(this.getMoveConditionStack().getConditions().get(0)))
+                .filter(m -> m.moveCondition.conditions.contains(condition))
                 .collect(Collectors.toList());
     }
 
@@ -1648,12 +1668,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.getMoveConditionStack().getConditions().contains(CreatureMoveCondition.Condition.INTERVAL)) return;
         for (CreatureMove move : this.getLearnedMoves()) {
             if (move.moveCondition.conditions.contains(CreatureMoveCondition.Condition.INTERVAL)) {
-                if (move.moveCondition.getTickInterval() % this.getAgeInTicks() == 0) {
+                if (this.getAgeInTicks() % move.moveCondition.getTickInterval() == 0 && this.getAgeInTicks() > 24000) {
+                    this.lastIntervalForMoveCall = move.moveCondition.getTickInterval(); //this will be called up again in RiftCreatureUseUnmounted, its server only there too so all will be fine :tm:
                     this.addToConditionStack(CreatureMoveCondition.Condition.INTERVAL);
                     break;
                 }
             }
         }
+    }
+
+    private boolean hasMovesWithSizeRestrictions() {
+        for (CreatureMove move : this.getLearnedMoves()) {
+            if (move.moveCondition.isRestrictedBySize()) return true;
+        }
+        return false;
     }
     //move condition stuff ends here
 
@@ -3056,6 +3084,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Nullable
     @Override
     public EntityAgeable createChild(EntityAgeable ageable) {
+        if (!this.isTamed()) return null;
+
         RiftCreatureType.CreatureCategory category = this.creatureType.getCreatureCategory();
         if (category.equals(RiftCreatureType.CreatureCategory.DINOSAUR) || category.equals(RiftCreatureType.CreatureCategory.REPTILE) || category.equals(RiftCreatureType.CreatureCategory.BIRD) || this.creatureType.equals(RiftCreatureType.DIMETRODON)) {
             RiftEgg egg = new RiftEgg(this.world);

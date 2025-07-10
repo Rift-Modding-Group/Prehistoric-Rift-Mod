@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 public class RiftPounceMove extends RiftCreatureMove {
     private boolean notOnGroundFlag = false;
+    private Entity targetToLeapTo;
 
     public RiftPounceMove() {
         super(CreatureMove.POUNCE);
@@ -23,6 +24,7 @@ public class RiftPounceMove extends RiftCreatureMove {
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.disableCanRotateMounted();
+        if (!user.isBeingRidden()) this.targetToLeapTo = target;
     }
 
     @Override
@@ -40,9 +42,17 @@ public class RiftPounceMove extends RiftCreatureMove {
                 //remove duplicates
                 leapedIntoMobs = leapedIntoMobs.stream().distinct().collect(Collectors.toList());
 
-                if (!leapedIntoMobs.isEmpty()) {
-                    for (Entity entity : leapedIntoMobs) user.attackEntityAsMob(entity);
-                    this.forceStopFlag = true;
+                if (user.isBeingRidden()) {
+                    if (!leapedIntoMobs.isEmpty()) {
+                        for (Entity entity : leapedIntoMobs) user.attackEntityAsMob(entity);
+                        this.forceStopFlag = true;
+                    }
+                }
+                else {
+                    if (!leapedIntoMobs.isEmpty() && leapedIntoMobs.contains(this.targetToLeapTo)) {
+                        user.attackEntityAsMob(this.targetToLeapTo);
+                        this.forceStopFlag = true;
+                    }
                 }
             }
             else this.forceStopFlag = true;

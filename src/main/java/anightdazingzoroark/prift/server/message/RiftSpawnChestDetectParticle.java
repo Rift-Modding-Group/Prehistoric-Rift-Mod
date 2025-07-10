@@ -10,15 +10,13 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftSpawnChestDetectParticle implements IMessage {
-    private int playerId;
     private int xPos;
     private int yPos;
     private int zPos;
 
     public RiftSpawnChestDetectParticle() {}
 
-    public RiftSpawnChestDetectParticle(EntityPlayer player, int xPos, int yPos, int zPos) {
-        this.playerId = player.getEntityId();
+    public RiftSpawnChestDetectParticle(int xPos, int yPos, int zPos) {
         this.xPos = xPos;
         this.yPos = yPos;
         this.zPos = zPos;
@@ -26,7 +24,6 @@ public class RiftSpawnChestDetectParticle implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.playerId = buf.readInt();
         this.xPos = buf.readInt();
         this.yPos = buf.readInt();
         this.zPos = buf.readInt();
@@ -34,7 +31,6 @@ public class RiftSpawnChestDetectParticle implements IMessage {
 
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeInt(this.playerId);
         buf.writeInt(this.xPos);
         buf.writeInt(this.yPos);
         buf.writeInt(this.zPos);

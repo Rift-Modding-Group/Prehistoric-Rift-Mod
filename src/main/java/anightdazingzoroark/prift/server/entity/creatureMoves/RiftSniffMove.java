@@ -2,27 +2,38 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.MobSize;
+import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftSpawnChestDetectParticle;
 import anightdazingzoroark.prift.server.message.RiftSpawnDetectParticle;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
 public class RiftSniffMove extends RiftCreatureMove {
+    private EntityLiving targetToAttack;
+
     public RiftSniffMove() {
         super(CreatureMove.SNIFF);
     }
 
-    @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return false;
+        if (user.isTamed()) {
+                return user.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                        && !user.busyAtWork()
+                        && !user.busyAtTurretMode()
+                        && user.getTameBehavior().equals(TameBehaviorType.AGGRESSIVE);
+        }
+        return true;
     }
 
     @Override
@@ -31,14 +42,10 @@ public class RiftSniffMove extends RiftCreatureMove {
     }
 
     @Override
-    public void whileChargingUp(RiftCreature user) {
-
-    }
+    public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
@@ -47,17 +54,35 @@ public class RiftSniffMove extends RiftCreatureMove {
         AxisAlignedBB mobDetectAABB = new AxisAlignedBB(user.posX - mobSniffRange, user.posY - mobSniffRange, user.posZ - mobSniffRange, user.posX + mobSniffRange, user.posY + mobSniffRange, user.posZ + mobSniffRange);
         for (EntityLivingBase entityLivingBase : user.world.getEntitiesWithinAABB(EntityLivingBase.class, mobDetectAABB, null)) {
             if (entityLivingBase != user && entityLivingBase != user.getOwner() && !RiftUtil.entityIsUnderwater(entityLivingBase) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(RiftConfigHandler.getConfig(user.creatureType).general.maximumMobSniffSize))) {
-                RiftMessages.WRAPPER.sendToAll(new RiftSpawnDetectParticle((EntityPlayer)user.getControllingPassenger(), (int)entityLivingBase.posX, (int)entityLivingBase.posY, (int)entityLivingBase.posZ));
+                //spawn particle for owner
+                if (user.getOwner() != null) RiftMessages.WRAPPER.sendTo(
+                        new RiftSpawnDetectParticle((int)entityLivingBase.posX, (int)entityLivingBase.posY, (int)entityLivingBase.posZ),
+                        (EntityPlayerMP) user.getOwner()
+                );
+
+                //if not mounted, set first creature spotted as target
+                if (!user.isBeingRidden()
+                        && entityLivingBase instanceof EntityLiving
+                        && RiftUtil.checkForNoAssociations(user, entityLivingBase)
+                        && RiftUtil.checkForNoHerdAssociations(user, entityLivingBase)) {
+                    this.targetToAttack = (EntityLiving) entityLivingBase;
+                }
             }
         }
-        //for chests
-        int blockSniffRange = RiftConfigHandler.getConfig(user.creatureType).general.blockSniffRange;
-        for (int x = -blockSniffRange; x <= blockSniffRange; x++) {
-            for (int y = -blockSniffRange; y <= blockSniffRange; y++) {
-                for (int z = -blockSniffRange; z <= blockSniffRange; z++) {
-                    BlockPos testPos = user.getPosition().add(x, y, z);
-                    if (this.isSniffableBlock(user, user.world.getBlockState(testPos))) {
-                        RiftMessages.WRAPPER.sendToAll(new RiftSpawnChestDetectParticle((EntityPlayer)user.getControllingPassenger(), testPos.getX(), testPos.getY(), testPos.getZ()));
+
+        //for chests, only for when it has an owner (aka its tamed)
+        if (user.isTamed()) {
+            int blockSniffRange = RiftConfigHandler.getConfig(user.creatureType).general.blockSniffRange;
+            for (int x = -blockSniffRange; x <= blockSniffRange; x++) {
+                for (int y = -blockSniffRange; y <= blockSniffRange; y++) {
+                    for (int z = -blockSniffRange; z <= blockSniffRange; z++) {
+                        BlockPos testPos = user.getPosition().add(x, y, z);
+                        if (this.isSniffableBlock(user, user.world.getBlockState(testPos)) && user.getOwner() != null) {
+                            RiftMessages.WRAPPER.sendTo(
+                                    new RiftSpawnChestDetectParticle(testPos.getX(), testPos.getY(), testPos.getZ()),
+                                    (EntityPlayerMP) user.getOwner()
+                            );
+                        }
                     }
                 }
             }
@@ -80,5 +105,6 @@ public class RiftSniffMove extends RiftCreatureMove {
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.setCanMove(true);
+        if (this.targetToAttack != null && user.getAttackTarget() == null) user.setAttackTarget(this.targetToAttack);
     }
 }

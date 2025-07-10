@@ -3,22 +3,22 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 public enum CreatureMove {
     BOUNCE(RiftBounceMove.class, MoveAnimType.STATUS, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     TACKLE(RiftTackleMove.class, MoveAnimType.CHARGE, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, true, false, new CreatureMoveCondition().setCheckForTarget()),
-    HEADBUTT(RiftHeadbuttMove.class, MoveAnimType.HEAD, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
-    STOMP(RiftStompMove.class, MoveAnimType.STOMP, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
-    SCRATCH(RiftScratchMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
-    BITE(RiftBiteMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
+    HEADBUTT(RiftHeadbuttMove.class, MoveAnimType.HEAD, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget().setBreakBlocks()),
+    STOMP(RiftStompMove.class, MoveAnimType.STOMP, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget().setBreakBlocks()),
+    SCRATCH(RiftScratchMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget().setBreakBlocks()),
+    BITE(RiftBiteMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget().setBreakBlocks()),
     SNARL(RiftSnarlMove.class, MoveAnimType.GROWL, ChargeType.NONE, 0, new int[]{0}, 0, 60, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     POWER_ROAR(RiftPowerRoarMove.class, MoveAnimType.ROAR, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false, new CreatureMoveCondition().setCheckForHit().setRNGChance(4)),
-    TAIL_SLAP(RiftTailSlapMove.class, MoveAnimType.TAIL, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
+    TAIL_SLAP(RiftTailSlapMove.class, MoveAnimType.TAIL, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget().setBreakBlocks()),
     THAGOMIZE(RiftThagomizeMove.class, MoveAnimType.TAIL, ChargeType.GRADIENT_THEN_USE, 80, new int[]{10, 20}, 100, 200, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     PLATE_FLING(RiftPlateFlingMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 25, new int[]{2}, 0, 100, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
-    CHARGE(RiftChargeMove.class, MoveAnimType.CHARGE, ChargeType.GRADIENT_THEN_USE, 75, new int[]{10, 20}, 100, 200, true, true, false, new CreatureMoveCondition().setCheckForTarget()),
+    CHARGE(RiftChargeMove.class, MoveAnimType.CHARGE, ChargeType.GRADIENT_THEN_USE, 75, new int[]{10, 20}, 100, 200, true, true, false, new CreatureMoveCondition().setCheckForTarget().setBreakBlocks()),
     BIDE(RiftBideMove.class, MoveAnimType.DEFENSE, ChargeType.GRADIENT_THEN_USE, 0, new int[]{20, 40}, 100, 200, false, false, true, new CreatureMoveCondition().setCheckForTarget()), //basically like the since removed move from pokemon, absorb all damage you take, then reflect it all back to the opponent
-    SELF_DESTRUCT(RiftSelfDestructMove.class, MoveAnimType.SELF_DESTRUCTION, ChargeType.NONE, 300, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()), //will be given only to anky for now
-    POUNCE(RiftPounceMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 50, new int[]{6}, 0, 100, false, true, false, new CreatureMoveCondition().setCheckForTarget()),
+    SELF_DESTRUCT(RiftSelfDestructMove.class, MoveAnimType.SELF_DESTRUCTION, ChargeType.NONE, 300, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
+    POUNCE(RiftPounceMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 50, new int[]{6}, 0, 100, false, true, false, new CreatureMoveCondition().setCheckForTarget().setCanLeapOverLedge()),
     PACK_CALL(RiftPackCallMove.class, MoveAnimType.ROAR, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 3600, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
-    TAIL_WHIP(RiftTailWhipMove.class, MoveAnimType.TAIL, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
-    POWER_BLOW(RiftPowerBlowMove.class, MoveAnimType.BLOW, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
+    TAIL_WHIP(RiftTailWhipMove.class, MoveAnimType.TAIL, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget().setTargetTooClose().restrictTargetingBySize()),
+    POWER_BLOW(RiftPowerBlowMove.class, MoveAnimType.BLOW, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false, new CreatureMoveCondition().setCheckForTarget().setBreakBlocks()),
     SHOCK_BLAST(RiftShockBlastMove.class, MoveAnimType.ROAR, ChargeType.COOLDOWN_ONLY, 0, new int[]{20}, 0, 3600, false, false, false, new CreatureMoveCondition().setCheckForHit().setRNGChance(4)),
     DEATH_ROLL(RiftDeathRollMove.class, MoveAnimType.SPIN, ChargeType.GRADIENT_WHILE_USE, 60, new int[]{10, 20}, 100, 200, false, true, true, new CreatureMoveCondition().setCheckForTarget()),
     LUNGE(RiftLungeMove.class, MoveAnimType.CHARGE, ChargeType.COOLDOWN_ONLY, 25, new int[]{8}, 0, 100, false, true, false, new CreatureMoveCondition().setCheckForTarget()),
@@ -27,15 +27,15 @@ public enum CreatureMove {
     CLOAK(RiftCloakMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 200, false, false, false, new CreatureMoveCondition().setCheckForUncloaked()),
     LIGHT_BLAST(RiftLightBlastMove.class, MoveAnimType.ROAR, ChargeType.BUILDUP, 60, new int[]{20}, 10, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     SNIFF(RiftSniffMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 100, false, false, false, new CreatureMoveCondition().setInterval(3000)),
-    LEAP(RiftLeapMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 0, new int[]{6}, 0, 100, false, true, false, new CreatureMoveCondition()),
+    LEAP(RiftLeapMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 0, new int[]{6}, 0, 100, false, true, false, new CreatureMoveCondition().setCanLeapOverLedge()),
     POISON_CLAW(RiftPoisonClawMove.class, MoveAnimType.CLAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     POISON_SPIT(RiftPoisonSpitMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 25, new int[]{2}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     SHELLTER(RiftShellterMove.class, MoveAnimType.DEFENSE, ChargeType.GRADIENT_WHILE_USE, 0, new int[]{0, 0}, 100, 100, false, true, true, new CreatureMoveCondition().setBelowHealthPercentage(0.25)),
     SHELL_SPIN(RiftShellSpinMove.class, MoveAnimType.SPIN, ChargeType.GRADIENT_WHILE_USE, 45, new int[]{20, 40}, 100, 300, false, true, true, new CreatureMoveCondition().setCheckForTarget()),
-    POISON_TRAP(RiftPoisonTrapMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{10}, 0, 200, false, false, false, new CreatureMoveCondition()),
-    KICK(RiftKickMove.class, MoveAnimType.KICK, ChargeType.COOLDOWN_ONLY, 25, new int[]{6}, 0, 100, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
-    PECK(RiftPeckMove.class, MoveAnimType.BEAK, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()), //peck wih a beak
-    LEECH(RiftLeechMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()), //bite to deal little damage but drain some health
+    POISON_TRAP(RiftPoisonTrapMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{10}, 0, 200, false, false, false, new CreatureMoveCondition().setInterval(3000)),
+    KICK(RiftKickMove.class, MoveAnimType.KICK, ChargeType.COOLDOWN_ONLY, 25, new int[]{6}, 0, 100, false, false, false, new CreatureMoveCondition().setCheckForTarget().setTargetTooClose().restrictTargetingBySize()),
+    PECK(RiftPeckMove.class, MoveAnimType.BEAK, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget().setBreakBlocks()), //peck wih a beak
+    LEECH(RiftLeechMove.class, MoveAnimType.JAW, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget().setBreakBlocks()), //bite to deal little damage but drain some health
     VENOM_BOMB(RiftVenomBombMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 25, new int[]{5, 15}, 0, 100, false, false, false, new CreatureMoveCondition().setCheckForTarget()), //spit a bomb that explodes and deals lots of damage + poisons mobs in range
     CLIMATE_BLAST(RiftClimateBlastMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 25, new int[]{8}, 0, 100, false, false, false, new CreatureMoveCondition().setCheckForTarget()), //blast fire or frost depending on temperature
     BURROW(RiftBurrowMove.class, MoveAnimType.BURROW, ChargeType.GRADIENT_WHILE_USE, 40, new int[]{4, 8}, 100, 200, false, true, true, new CreatureMoveCondition().setCheckForTarget()), //burrow into the ground

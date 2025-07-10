@@ -46,6 +46,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -253,7 +254,22 @@ public class RiftUtil {
     }
 
     public static boolean isAppropriateSize(Entity entity, MobSize size) {
+        //if hitbox is hit, perform recursion involving the parent
+        if (entity instanceof MultiPartEntityPart) {
+            Entity parent = (Entity) ((MultiPartEntityPart) entity).parent;
+            return isAppropriateSize(parent, size);
+        }
         if (size != null) return getMobSize(entity).ordinal() <= size.ordinal();
+        else return true;
+    }
+
+    public static boolean isAppropriateSizeNotEqual(Entity entity, MobSize size) {
+        //if hitbox is hit, perform recursion involving the parent
+        if (entity instanceof MultiPartEntityPart) {
+            Entity parent = (Entity) ((MultiPartEntityPart) entity).parent;
+            return isAppropriateSize(parent, size);
+        }
+        if (size != null) return getMobSize(entity).ordinal() < size.ordinal();
         else return true;
     }
 
@@ -570,5 +586,17 @@ public class RiftUtil {
         }
 
         return false;
+    }
+
+    public static <T> T getRandomFromList(List<T> list, Predicate<T> predicate) {
+        if (list.isEmpty()) return null;
+
+        if (predicate != null) {
+            list = list.stream().filter(predicate).collect(Collectors.toList());
+            if (list.isEmpty()) return null;
+        }
+
+        int listSize = list.size();
+        return list.get(new Random().nextInt(listSize));
     }
 }
