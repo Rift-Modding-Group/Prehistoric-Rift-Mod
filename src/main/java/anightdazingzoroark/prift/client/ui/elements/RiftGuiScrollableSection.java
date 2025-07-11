@@ -262,17 +262,31 @@ public abstract class RiftGuiScrollableSection {
             int contentBoxY = tabY + tabHeight + 4;
             int contentPadding = 4;
 
+            //draw contents
             String activeTab = this.activeTabs.computeIfAbsent(tab.getId(), id -> tabs.get(0));
-            RiftGuiScrollableSectionContents.Element content = tab.getTabContents().get(activeTab);
+            List<RiftGuiScrollableSectionContents.Element> content = tab.getTabContents().get(activeTab);
 
             int contentInnerHeight = 0;
-            if (content != null) {
+            if (content != null && !content.isEmpty()) {
                 int contentInnerX = x + contentPadding;
                 int contentInnerY = contentBoxY + contentPadding;
 
-                contentInnerHeight = this.drawElement(content, contentInnerX, contentInnerY, mouseX, mouseY, partialTicks);
+                for (int i = 0; i < content.size(); i++) {
+                    RiftGuiScrollableSectionContents.Element elementInTab = content.get(i);
 
-                // Draw content outline box after measuring
+                    int usedHeight = this.drawElement(elementInTab, contentInnerX, contentInnerY, mouseX, mouseY, partialTicks);
+                    contentInnerY += usedHeight;
+                    contentInnerHeight += usedHeight;
+
+                    //extra bottom height for certain elements
+                    if (i < content.size() - 1) {
+                        int bottomSpace = this.elementBottomSpace(elementInTab);
+                        contentInnerY += bottomSpace;
+                        contentInnerHeight += bottomSpace;
+                    }
+                }
+
+                //draw content outline box after measuring
                 this.drawRectOutline(x, contentBoxY, this.width, contentInnerHeight + contentPadding * 2, 0xFF000000);
             }
 

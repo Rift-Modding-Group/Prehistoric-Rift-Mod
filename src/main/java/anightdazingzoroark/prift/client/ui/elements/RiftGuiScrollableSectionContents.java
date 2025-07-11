@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.client.ui.elements;
 
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.helper.RiftUtil;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.*;
@@ -150,7 +149,7 @@ public class RiftGuiScrollableSectionContents {
 
     public static class TabElement extends Element {
         private String id = "";
-        private final Map<String, Element> tabContents = new HashMap<>();
+        private final Map<String, List<Element>> tabContents = new HashMap<>();
         private final List<String> tabOrder = new ArrayList<>();
 
         public TabElement setId(String id) {
@@ -162,13 +161,13 @@ public class RiftGuiScrollableSectionContents {
             return this.id;
         }
 
-        public TabElement addTab(String name, Element contents) {
+        public TabElement addTab(String name, List<Element> contents) {
             this.tabContents.put(name, contents);
             this.tabOrder.add(name);
             return this;
         }
 
-        public Map<String, Element> getTabContents() {
+        public Map<String, List<Element>> getTabContents() {
             return this.tabContents;
         }
 
@@ -196,14 +195,8 @@ public class RiftGuiScrollableSectionContents {
             return this;
         }
 
-        public ItemListElement addItems(List<RiftCreatureConfig.Meal> toAdd) {
-            //turn list of meals into list of strings
-            List<String> mealsToAdd = new ArrayList<>();
-            for (RiftCreatureConfig.Meal meal : toAdd) {
-                mealsToAdd.add(meal.itemId);
-            }
-
-            this.itemIds = RiftUtil.uniteTwoLists(this.itemIds, mealsToAdd);
+        public ItemListElement addItems(List<String> toAdd) {
+            this.itemIds = RiftUtil.uniteTwoLists(this.itemIds, toAdd);
             return this;
         }
 

@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.gui.GuiScreen;
@@ -60,7 +59,7 @@ public class RiftNewJournalScreen extends GuiScreen {
         //hover detection and tooltip rendering for items in item lists
         ItemStack hoveredStack = null;
 
-        // Check which section (if any) has a hovered item
+        //check which section (if any) has a hovered item
         ItemStack hoveredFromInfo = this.journalInfoSection.getHoveredItemStack(mouseX, mouseY);
         ItemStack hoveredFromEntries = this.journalEntriesSection.getHoveredItemStack(mouseX, mouseY);
 

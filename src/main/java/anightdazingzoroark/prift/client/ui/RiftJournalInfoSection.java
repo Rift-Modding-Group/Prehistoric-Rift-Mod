@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSectionContents;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -15,6 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class RiftJournalInfoSection extends RiftGuiScrollableSection {
@@ -45,17 +49,39 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
 
         //add contents
         if (this.entryType != null) {
+            //get favorite meals as item list
+            List<RiftCreatureConfig.Meal> mealsList = RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals;
+            List<String> mealsAsStrings = new ArrayList<>();
+            if (mealsList != null) {
+                for (RiftCreatureConfig.Meal meal : mealsList) {
+                    mealsAsStrings.add(meal.itemId);
+                }
+            }
+            RiftGuiScrollableSectionContents.ItemListElement mealsElement = mealsAsStrings.isEmpty() ? null : new RiftGuiScrollableSectionContents.ItemListElement()
+                    .setHeaderText("taming_foods")
+                    .addItems(mealsAsStrings);
+
+            //get favorite foods as item list
+            List<RiftCreatureConfig.Food> foodList = RiftConfigHandler.getConfig(this.entryType).general.favoriteFood;
+            List<String> foodAsStrings = new ArrayList<>();
+            if (foodList != null) {
+                for (RiftCreatureConfig.Food food : foodList) {
+                    foodAsStrings.add(food.itemId);
+                }
+            }
+            RiftGuiScrollableSectionContents.ItemListElement foodElement = foodAsStrings.isEmpty() ? null : new RiftGuiScrollableSectionContents.ItemListElement()
+                    .setHeaderText("favorite_foods")
+                    .addItems(foodAsStrings);
+
+            //now make the tab elements
             toReturn.addTabElement(new RiftGuiScrollableSectionContents.TabElement()
                     .setId("creatureInfo")
                     //entry, just the journal entry
-                    .addTab("entry", new RiftGuiScrollableSectionContents.TextElement()
-                            .setContents(this.getJournalEntry())
+                    .addTab("entry", Arrays.asList(new RiftGuiScrollableSectionContents.TextElement()
+                            .setContents(this.getJournalEntry()))
                     )
                     //info, such as diet, foods they will consume, etc
-                    .addTab("info", new RiftGuiScrollableSectionContents.ItemListElement()
-                            .setHeaderText("taming_foods")
-                            .addItems(RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals)
-                    )
+                    .addTab("info", Arrays.asList(mealsElement, foodElement))
             );
         }
         else {
