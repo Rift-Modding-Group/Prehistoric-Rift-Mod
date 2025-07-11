@@ -21,6 +21,8 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
 
     public RiftJournalInfoSection(int guiWidth, int guiHeight, FontRenderer fontRenderer, Minecraft minecraft) {
         super(264, 190, guiWidth, guiHeight, 60, 7, fontRenderer, minecraft);
+        this.scrollbarXOffset = 5;
+        this.scrollbarYOffset = 0;
     }
 
     public void setEntryType(RiftCreatureType entryType) {
@@ -31,10 +33,33 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
     public RiftGuiScrollableSectionContents defineSectionContents() {
         RiftGuiScrollableSectionContents toReturn = new RiftGuiScrollableSectionContents();
 
+        //add image
+        if (this.entryType != null) {
+            toReturn.addImageElement(new RiftGuiScrollableSectionContents.ImageElement()
+                    .setImageLocation(new ResourceLocation(RiftInitialize.MODID, "textures/journal/"+this.entryType.name().toLowerCase()+"_journal.png"))
+                    .setImageScale(0.75f)
+                    .setImageSize(240, 180)
+            );
+        }
+
         //add text
-        toReturn.addTextElement(new RiftGuiScrollableSectionContents.TextElement()
-                .setContents(this.getJournalEntry())
-        );
+        if (this.entryType != null) {
+            toReturn.addTabElement(new RiftGuiScrollableSectionContents.TabElement()
+                    .setId("creatureInfo")
+                    //entry, just the journal entry
+                    .addTab("entry", new RiftGuiScrollableSectionContents.TextElement()
+                            .setContents(this.getJournalEntry())
+                    )
+                    //info, such as diet, foods they will consume, etc
+                    .addTab("info", new RiftGuiScrollableSectionContents.TextElement()
+                            .setContents("More to come soon..."))
+            );
+        }
+        else {
+            toReturn.addTextElement(new RiftGuiScrollableSectionContents.TextElement()
+                    .setContents(this.getJournalEntry())
+            );
+        }
 
         return toReturn;
     }

@@ -67,6 +67,7 @@ public class RiftGuiScrollableSectionContents {
         private ResourceLocation imageLocation;
         private int[] imageSize;
         private float imageScale = 1f;
+        private int bottomSpace = 9;
 
         public ImageElement setImageLocation(ResourceLocation imageLocation) {
             this.imageLocation = imageLocation;
@@ -93,6 +94,15 @@ public class RiftGuiScrollableSectionContents {
 
         public float getImageScale() {
             return this.imageScale;
+        }
+
+        public ImageElement setBottomSpace(int value) {
+            this.bottomSpace = value;
+            return this;
+        }
+
+        public int getBottomSpace() {
+            return this.bottomSpace;
         }
     }
 
@@ -142,6 +152,7 @@ public class RiftGuiScrollableSectionContents {
     public static class TabElement extends Element {
         private String id = "";
         private final Map<String, Element> tabContents = new HashMap<>();
+        private final List<String> tabOrder = new ArrayList<>();
 
         public TabElement setId(String id) {
             this.id = id;
@@ -154,11 +165,16 @@ public class RiftGuiScrollableSectionContents {
 
         public TabElement addTab(String name, Element contents) {
             this.tabContents.put(name, contents);
+            this.tabOrder.add(name);
             return this;
         }
 
         public Map<String, Element> getTabContents() {
             return this.tabContents;
+        }
+
+        public List<String> getTabOrder() {
+            return this.tabOrder;
         }
     }
 

@@ -80,8 +80,14 @@ public class RiftNewJournalScreen extends GuiScreen {
         this.journalEntriesSection.mouseClicked(mouseX, mouseY, mouseButton);
 
         //manage buttons
+        //all the additional logic here is for ensuring clicking out of bounds results in nothing
+        int sectionTop = (this.journalEntriesSection.guiHeight - this.journalEntriesSection.height) / 2 + this.journalEntriesSection.yOffset;
+        int sectionBottom = sectionTop + this.journalEntriesSection.height;
         for (RiftGuiSectionButton b : this.journalEntriesSection.getActiveButtons()) {
-            if (b.mousePressed(this.mc, mouseX, mouseY)) {
+            int buttonTop = b.y;
+            int buttonBottom = b.y + b.height;
+            boolean clickWithinVisiblePart = mouseY >= Math.max(buttonTop, sectionTop) && mouseY <= Math.min(buttonBottom, sectionBottom);
+            if (clickWithinVisiblePart && b.mousePressed(this.mc, mouseX, mouseY)) {
                 b.playPressSound(this.mc.getSoundHandler());
                 this.onButtonClicked(b);
             }
@@ -117,14 +123,19 @@ public class RiftNewJournalScreen extends GuiScreen {
                     this.lastEntry = null;
                     this.journalEntriesSection.reenableAllButtons();
                     this.journalEntriesSection.setCurrentCategory(null);
+                    this.journalEntriesSection.resetScroll();
+                    this.journalInfoSection.setEntryType(null);
                 }
                 else {
                     RiftCreatureType typeToChoose = RiftCreatureType.safeValOf(button.buttonId);
                     if (typeToChoose != null && typeToChoose != this.lastEntry) {
+                        this.journalInfoSection.setEntryType(typeToChoose);
                         if (this.lastEntry != null) this.journalEntriesSection.reenableButtonById(this.lastEntry.toString());
                         this.journalEntriesSection.disableButtonById(typeToChoose.toString());
                         this.lastEntry = typeToChoose;
                     }
+                    this.journalInfoSection.resetScroll();
+                    this.journalInfoSection.resetTabs();
                 }
             }
         }

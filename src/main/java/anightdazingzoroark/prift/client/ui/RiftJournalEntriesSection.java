@@ -17,7 +17,8 @@ public class RiftJournalEntriesSection extends RiftGuiScrollableSection {
     private RiftCreatureType.CreatureCategory currentCategory;
 
     public RiftJournalEntriesSection(int guiWidth, int guiHeight, FontRenderer fontRenderer, Minecraft minecraft) {
-        super(100, 190, guiWidth, guiHeight, -147, 7, fontRenderer, minecraft);
+        super(100, 195, guiWidth, guiHeight, -149, 7, fontRenderer, minecraft);
+        this.scrollbarXOffset = 3;
     }
 
     public void setCurrentCategory(RiftCreatureType.CreatureCategory currentCategory) {
