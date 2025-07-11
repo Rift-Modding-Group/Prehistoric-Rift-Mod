@@ -1,12 +1,11 @@
 package anightdazingzoroark.prift.client.ui.elements;
 
+import anightdazingzoroark.prift.config.RiftCreatureConfig;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RiftGuiScrollableSectionContents {
     private final List<Element> list = new ArrayList<>();
@@ -179,7 +178,46 @@ public class RiftGuiScrollableSectionContents {
     }
 
     public static class ItemListElement extends Element {
-        private String headerText;
+        private String headerText = "";
+        private List<String> itemIds = new ArrayList<>();
         private int headerTextColor = 0x000000;
+
+        public ItemListElement setHeaderText(String value) {
+            this.headerText = value;
+            return this;
+        }
+
+        public String getHeaderText() {
+            return this.headerText;
+        }
+
+        public ItemListElement addItem(String itemId) {
+            this.itemIds.add(itemId);
+            return this;
+        }
+
+        public ItemListElement addItems(List<RiftCreatureConfig.Meal> toAdd) {
+            //turn list of meals into list of strings
+            List<String> mealsToAdd = new ArrayList<>();
+            for (RiftCreatureConfig.Meal meal : toAdd) {
+                mealsToAdd.add(meal.itemId);
+            }
+
+            this.itemIds = RiftUtil.uniteTwoLists(this.itemIds, mealsToAdd);
+            return this;
+        }
+
+        public List<String> getItemsById() {
+            return this.itemIds;
+        }
+
+        public ItemListElement setHeaderColor(int value) {
+            this.headerTextColor = value;
+            return this;
+        }
+
+        public int getHeaderTextColor() {
+            return this.headerTextColor;
+        }
     }
 }

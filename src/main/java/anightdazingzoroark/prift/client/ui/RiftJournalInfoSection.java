@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSectionContents;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -42,7 +43,7 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
             );
         }
 
-        //add text
+        //add contents
         if (this.entryType != null) {
             toReturn.addTabElement(new RiftGuiScrollableSectionContents.TabElement()
                     .setId("creatureInfo")
@@ -51,8 +52,10 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
                             .setContents(this.getJournalEntry())
                     )
                     //info, such as diet, foods they will consume, etc
-                    .addTab("info", new RiftGuiScrollableSectionContents.TextElement()
-                            .setContents("More to come soon..."))
+                    .addTab("info", new RiftGuiScrollableSectionContents.ItemListElement()
+                            .setHeaderText("taming_foods")
+                            .addItems(RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals)
+                    )
             );
         }
         else {

@@ -1,17 +1,23 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class RiftNewJournalScreen extends GuiScreen {
@@ -50,6 +56,37 @@ public class RiftNewJournalScreen extends GuiScreen {
         RenderHelper.disableStandardItemLighting();
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
+
+        //hover detection and tooltip rendering for items in item lists
+        ItemStack hoveredStack = null;
+
+        // Check which section (if any) has a hovered item
+        ItemStack hoveredFromInfo = this.journalInfoSection.getHoveredItemStack(mouseX, mouseY);
+        ItemStack hoveredFromEntries = this.journalEntriesSection.getHoveredItemStack(mouseX, mouseY);
+
+        if (hoveredFromInfo != null) {
+            hoveredStack = hoveredFromInfo;
+        }
+        else if (hoveredFromEntries != null) {
+            hoveredStack = hoveredFromEntries;
+        }
+
+        //if hovering an item, render its tooltip above all
+        if (hoveredStack != null) {
+            List<String> tooltip = this.itemToolTip(hoveredStack);
+            this.drawHoveringText(tooltip, mouseX, mouseY);
+        }
+    }
+
+    private List<String> itemToolTip(ItemStack stack) {
+        List<String> tooltip = new ArrayList<>();
+
+        tooltip.add(stack.getDisplayName());
+        if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) {
+            tooltip.add(I18n.format("journal.open_in_jei"));
+        }
+
+        return tooltip;
     }
 
     protected void drawGuiContainerBackgroundLayer() {

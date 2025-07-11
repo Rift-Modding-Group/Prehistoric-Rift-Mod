@@ -1,13 +1,21 @@
 package anightdazingzoroark.prift.client.ui.elements;
 
+import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.compat.jei.RiftJEI;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.common.Loader;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +53,9 @@ public abstract class RiftGuiScrollableSection {
     //logic involved in disabling buttons
     private final List<String> disabledButtonIds = new ArrayList<>();
 
+    //for item lists
+    private final List<ItemClickRegion> itemClickRegions = new ArrayList<>();
+
     //other important shite
     protected Minecraft minecraft;
     protected final FontRenderer fontRenderer;
@@ -80,6 +91,7 @@ public abstract class RiftGuiScrollableSection {
     public void drawSectionContents(int mouseX, int mouseY, float partialTicks) {
         this.activeButtons.clear();
         this.activeTabRegions.clear();
+        this.itemClickRegions.clear();
 
         int sectionX = (this.guiWidth - this.width) / 2 + this.xOffset;
         int sectionY = (this.guiHeight - this.height) / 2 + this.yOffset;
@@ -178,6 +190,39 @@ public abstract class RiftGuiScrollableSection {
 
             return buttonH;
         }
+        else if (element instanceof RiftGuiScrollableSectionContents.ItemListElement) {
+            RiftGuiScrollableSectionContents.ItemListElement itemList = (RiftGuiScrollableSectionContents.ItemListElement) element;
+
+            //make label
+            int headerHeight = this.fontRenderer.FONT_HEIGHT;
+            this.fontRenderer.drawSplitString(I18n.format("gui.item_list."+itemList.getHeaderText()), x, y, this.width, itemList.getHeaderTextColor());
+
+            int itemsPerRow = 6;
+            int itemSize = 16;
+            int itemSpacing = 4;
+            int fullItemSize = itemSize + itemSpacing;
+
+            int totalItems = itemList.getItemsById().size();
+            int totalRows = (int) Math.ceil(totalItems / (float) itemsPerRow);
+            int gridYOffset = y + headerHeight + 4;
+
+            for (int i = 0; i < totalItems; i++) {
+                String itemId = itemList.getItemsById().get(i);
+                ItemStack itemStack = RiftUtil.getItemStackFromString(itemId);
+
+                int col = i % itemsPerRow;
+                int row = i / itemsPerRow;
+
+                int itemX = x + col * fullItemSize;
+                int itemY = gridYOffset + row * fullItemSize;
+
+                this.renderItem(itemStack, itemX, itemY);
+                this.itemClickRegions.add(new ItemClickRegion(itemX, itemY, itemStack));
+            }
+
+            return headerHeight + 4 + (totalRows * fullItemSize);
+
+        }
         else if (element instanceof RiftGuiScrollableSectionContents.TabElement) {
             RiftGuiScrollableSectionContents.TabElement tab = (RiftGuiScrollableSectionContents.TabElement) element;
             List<String> tabs = tab.getTabOrder();
@@ -201,8 +246,8 @@ public abstract class RiftGuiScrollableSection {
 
                 //text color logic
                 int textColor = 0xFFFFFFFF; // normal white;
-                if (isHovered) textColor = 0xFFFF00; //yellow for hover
-                else if (isActive) textColor = 0x0000FF; //blue for active
+                if (isActive) textColor = 0x5A3B1A; //blue for active
+                else if (isHovered) textColor = 0xFFFF00; //yellow for hover
 
                 //draw outline
                 this.drawRectOutline(tabX, tabY, tabWidth, tabHeight, 0xFF000000);
@@ -266,13 +311,23 @@ public abstract class RiftGuiScrollableSection {
     public void mouseClicked(int mouseX, int mouseY, int button) {
         //for tab clicking
         for (TabClickRegion region : this.activeTabRegions) {
-            if (region.isHovered(mouseX, mouseY)) {
+            if (region.isHovered(mouseX, mouseY) && !region.isActive(this.activeTabs)) {
                 if (this.activeTabs.containsKey(region.tabElement.getId())) this.activeTabs.replace(region.tabElement.getId(), region.tabName);
                 else this.activeTabs.put(region.tabElement.getId(), region.tabName);
 
                 //change in tab should lead to scroll progress being reset
                 this.resetScroll();
 
+                break;
+            }
+        }
+
+        //for item clicking
+        for (ItemClickRegion region : itemClickRegions) {
+            if (region.isHovered(mouseX, mouseY)) {
+                if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) {
+                    RiftJEI.showRecipesForItemStack(region.stack, false);
+                }
                 break;
             }
         }
@@ -349,12 +404,28 @@ public abstract class RiftGuiScrollableSection {
         drawRect(x + w - 1, y, x + w, y + h, color);     // right
     }
 
-    private static class TabClickRegion {
-        int x, y, w, h;
-        RiftGuiScrollableSectionContents.TabElement tabElement;
-        String tabName;
+    private void renderItem(ItemStack stack, int x, int y) {
+        RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
+        renderItem.renderItemAndEffectIntoGUI(stack, x, y);
+        renderItem.renderItemOverlayIntoGUI(this.fontRenderer, stack, x, y, null);
+    }
 
-        TabClickRegion(int x, int y, int w, int h, RiftGuiScrollableSectionContents.TabElement tabElement, String tabName) {
+    @Nullable
+    public ItemStack getHoveredItemStack(int mouseX, int mouseY) {
+        for (RiftGuiScrollableSection.ItemClickRegion region : this.itemClickRegions) {
+            if (region.isHovered(mouseX, mouseY)) {
+                return region.stack;
+            }
+        }
+        return null;
+    }
+
+    private static class TabClickRegion {
+        private final int x, y, w, h;
+        private final RiftGuiScrollableSectionContents.TabElement tabElement;
+        private final String tabName;
+
+        public TabClickRegion(int x, int y, int w, int h, RiftGuiScrollableSectionContents.TabElement tabElement, String tabName) {
             this.x = x;
             this.y = y;
             this.w = w;
@@ -363,8 +434,27 @@ public abstract class RiftGuiScrollableSection {
             this.tabName = tabName;
         }
 
-        boolean isHovered(int mouseX, int mouseY) {
-            return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
+        private boolean isHovered(int mouseX, int mouseY) {
+            return mouseX >= this.x && mouseX < this.x + this.w && mouseY >= y && mouseY < this.y + this.h;
+        }
+
+        private boolean isActive(Map<String, String> activeTabs) {
+            return this.tabName.equals(activeTabs.getOrDefault(tabElement.getId(), tabElement.getTabOrder().get(0)));
+        }
+    }
+
+    private static class ItemClickRegion {
+        private final int x, y, size = 16;
+        private final ItemStack stack;
+
+        private ItemClickRegion(int x, int y, ItemStack stack) {
+            this.x = x;
+            this.y = y;
+            this.stack = stack;
+        }
+
+        private boolean isHovered(int mouseX, int mouseY) {
+            return mouseX >= this.x && mouseX < this.x + this.size && mouseY >= this.y && mouseY < this.y + this.size;
         }
     }
 }
