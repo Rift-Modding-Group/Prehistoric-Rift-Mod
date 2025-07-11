@@ -264,7 +264,7 @@ public class RiftJournalScreen extends GuiScreen {
         int x = (this.width - 248)/2 + 60;
         int y = (this.height - 200)/2 + 8;
 
-        // for scaling
+        //for scaling
         int scaleFactor = new ScaledResolution(this.mc).getScaleFactor();
 
         int scissorX = x * scaleFactor;

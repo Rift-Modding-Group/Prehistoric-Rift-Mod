@@ -6,8 +6,7 @@ import anightdazingzoroark.prift.server.message.RiftJournalEditOne;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.minecraft.entity.player.EntityPlayer;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PlayerJournalProgressHelper {
     public static IPlayerJournalProgress getPlayerJournalProgress(EntityPlayer player) {
@@ -76,5 +75,20 @@ public class PlayerJournalProgressHelper {
             getPlayerJournalProgress(player).resetEntries();
             RiftMessages.WRAPPER.sendToAll(new RiftJournalEditAll(false));
         }
+    }
+
+    public static Map<RiftCreatureType, Boolean> getUnlockedEntriesFromCategory(EntityPlayer player, RiftCreatureType.CreatureCategory category) {
+        Map<RiftCreatureType, Boolean> toReturn = new HashMap<>();
+        Map<RiftCreatureType, Boolean> unlockedCreatures = getUnlockedCreatures(player);
+
+        if (category == RiftCreatureType.CreatureCategory.ALL) return unlockedCreatures;
+
+        if (!unlockedCreatures.isEmpty()) {
+            for (Map.Entry<RiftCreatureType, Boolean> entry: unlockedCreatures.entrySet()) {
+                if (entry.getKey().getCreatureCategory().equals(category)) toReturn.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return toReturn;
     }
 }
