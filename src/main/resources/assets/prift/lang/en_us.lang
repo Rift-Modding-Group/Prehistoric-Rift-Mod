@@ -26,6 +26,14 @@ creature_box.deployed_creatures=Deployed Creatures
 
 death.attack.prift_bleed=%s bled to death
 
+diet.creature.herbivore=Herbivore
+diet.creature.fungivore=Fungivore
+diet.creature.carnivore=Carnivore
+diet.creature.piscivore=Piscivore
+diet.creature.insectivore=Insectivore
+diet.creature.omnivore=Omnivore
+diet.creature.saxumavore=Saxumavore
+
 entity.tyrannosaurus.name=Tyrannosaurus
 entity.stegosaurus.name=Stegosaurus
 entity.dodo.name=Dodo
@@ -189,9 +197,19 @@ journal.warning.no_party_members=you have no party members lol
 journal.taming_or_breeding_foods=Taming/Breeding Foods:
 journal.breeding_foods=Breeding Foods:
 journal.favorite_foods=Favorite Foods:
+journal.mining_levels=Mining Levels:
 journal.workstations=Workstations:
 journal.open_in_jei=Click to see JEI recipe
 journal.must_kill_for_egg=This creature must be killed for a chance to obtain its egg for hatching and taming
+journal.mining_info=This creature can mine blocks requiring a/an %s of mining level %s
+journal.diet=Diet: %s
+journal.levelup_rate=Levelup Rate: %s
+
+levelup_rate.creature.very_slow=Very Slow
+levelup_rate.creature.slow=Slow
+levelup_rate.creature.normal=Normal
+levelup_rate.creature.fast=Fast
+levelup_rate.creature.very_fast=Very Fast
 
 radial.choice.ride=Ride
 radial.choice.state=State

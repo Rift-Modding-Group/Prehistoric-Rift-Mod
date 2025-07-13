@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.gui.GuiScreen;
@@ -16,7 +17,9 @@ import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SideOnly(Side.CLIENT)
 public class RiftNewJournalScreen extends GuiScreen {
@@ -24,6 +27,11 @@ public class RiftNewJournalScreen extends GuiScreen {
     private RiftJournalInfoSection journalInfoSection;
     private RiftJournalEntriesSection journalEntriesSection;
     private RiftCreatureType lastEntry;
+    private RiftCreatureType.CreatureCategory lastCategory;
+    private int savedInfoScroll = 0;
+    private int savedEntriesScroll = 0;
+    private Map<String, String> savedInfoTabs = new HashMap<>();
+    private Map<String, String> savedEntriesTabs = new HashMap<>();
     protected final int xSize = 420;
     protected final int ySize = 240;
 
@@ -31,8 +39,35 @@ public class RiftNewJournalScreen extends GuiScreen {
     public void initGui() {
         super.initGui();
 
+        //save current scroll progress and tabs
+        if (this.journalInfoSection != null) {
+            this.savedInfoScroll = this.journalInfoSection.getScrollOffset();
+            this.savedInfoTabs = this.journalInfoSection.getActiveTabs();
+        }
+        if (this.journalEntriesSection != null) {
+            this.savedEntriesScroll = this.journalEntriesSection.getScrollOffset();
+            this.savedEntriesTabs = this.journalEntriesSection.getActiveTabs();
+        }
+
         this.journalInfoSection = new RiftJournalInfoSection(this.width, this.height, this.fontRenderer, this.mc);
         this.journalEntriesSection = new RiftJournalEntriesSection(this.width, this.height, this.fontRenderer, this.mc);
+
+        //restore tabs
+        this.journalInfoSection.setActiveTabs(this.savedInfoTabs);
+        this.journalEntriesSection.setActiveTabs(this.savedEntriesTabs);
+
+        //restore category and entry
+        if (this.lastCategory != null) {
+            this.journalEntriesSection.setCurrentCategory(this.lastCategory);
+            if (this.lastEntry != null) {
+                this.journalInfoSection.setEntryType(this.lastEntry);
+                this.journalEntriesSection.disableButtonById(this.lastEntry.toString());
+            }
+        }
+
+        //restore scroll
+        this.journalInfoSection.setScrollOffset(this.savedInfoScroll);
+        this.journalEntriesSection.setScrollOffset(this.savedEntriesScroll);
     }
 
     @Override
@@ -72,20 +107,20 @@ public class RiftNewJournalScreen extends GuiScreen {
 
         //if hovering an item, render its tooltip above all
         if (hoveredStack != null) {
-            List<String> tooltip = this.itemToolTip(hoveredStack);
+            List<String> tooltip = new ArrayList<>();
+
+            tooltip.add(hoveredStack.getDisplayName());
+            if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) {
+                tooltip.add(I18n.format("journal.open_in_jei"));
+            }
             this.drawHoveringText(tooltip, mouseX, mouseY);
         }
-    }
 
-    private List<String> itemToolTip(ItemStack stack) {
-        List<String> tooltip = new ArrayList<>();
-
-        tooltip.add(stack.getDisplayName());
-        if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) {
-            tooltip.add(I18n.format("journal.open_in_jei"));
+        //mining level related stuff
+        RiftGuiScrollableSection.MiningLevelRegion miningLevelRegion = this.journalInfoSection.getHoveredMiningLevel(mouseX, mouseY);
+        if (miningLevelRegion != null) {
+            this.drawHoveringText(I18n.format("journal.mining_info", miningLevelRegion.miningTool , miningLevelRegion.miningLevel), mouseX, mouseY);
         }
-
-        return tooltip;
     }
 
     protected void drawGuiContainerBackgroundLayer() {
@@ -149,19 +184,22 @@ public class RiftNewJournalScreen extends GuiScreen {
         if (this.journalEntriesSection.getActiveButtons().contains(button)) {
             //choose a category
             if (this.journalEntriesSection.getCurrentCategory() == null) {
-                this.journalEntriesSection.setCurrentCategory(
-                        RiftCreatureType.CreatureCategory.safeValOf(button.buttonId)
-                );
+                RiftCreatureType.CreatureCategory chosenCategory = RiftCreatureType.CreatureCategory.safeValOf(button.buttonId);
+                this.lastCategory = chosenCategory;
+                this.journalEntriesSection.setCurrentCategory(chosenCategory);
             }
-            //choose a creature whose entry shall be read
             else {
+                //go back to index
                 if (button.buttonId.equals("NULL")) {
                     this.lastEntry = null;
+                    this.lastCategory = null;
                     this.journalEntriesSection.reenableAllButtons();
                     this.journalEntriesSection.setCurrentCategory(null);
-                    this.journalEntriesSection.resetScroll();
+                    this.journalEntriesSection.resetScrollProgress();
                     this.journalInfoSection.setEntryType(null);
+                    this.journalInfoSection.resetScrollProgress();
                 }
+                //choose a creature whose entry shall be read
                 else {
                     RiftCreatureType typeToChoose = RiftCreatureType.safeValOf(button.buttonId);
                     if (typeToChoose != null && typeToChoose != this.lastEntry) {
@@ -170,7 +208,7 @@ public class RiftNewJournalScreen extends GuiScreen {
                         this.journalEntriesSection.disableButtonById(typeToChoose.toString());
                         this.lastEntry = typeToChoose;
                     }
-                    this.journalInfoSection.resetScroll();
+                    this.journalInfoSection.resetScrollProgress();
                     this.journalInfoSection.resetTabs();
                 }
             }

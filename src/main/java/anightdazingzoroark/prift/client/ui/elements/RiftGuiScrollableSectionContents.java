@@ -149,6 +149,7 @@ public class RiftGuiScrollableSectionContents {
 
     public static class TabElement extends Element {
         private String id = "";
+        private int width; //no width means that it will inherit the width of the section
         private final Map<String, List<Element>> tabContents = new HashMap<>();
         private final List<String> tabOrder = new ArrayList<>();
 
@@ -159,6 +160,15 @@ public class RiftGuiScrollableSectionContents {
 
         public String getId() {
             return this.id;
+        }
+
+        public TabElement setWidth(int value) {
+            this.width = value;
+            return this;
+        }
+
+        public int getWidth() {
+            return this.width;
         }
 
         public TabElement addTab(String name, List<Element> contents) {
@@ -205,6 +215,39 @@ public class RiftGuiScrollableSectionContents {
         }
 
         public ItemListElement setHeaderColor(int value) {
+            this.headerTextColor = value;
+            return this;
+        }
+
+        public int getHeaderTextColor() {
+            return this.headerTextColor;
+        }
+    }
+
+    public static class MiningLevelListElement extends Element {
+        private String headerText = "";
+        private List<String> miningLevels = new ArrayList<>();
+        private int headerTextColor = 0x000000;
+
+        public MiningLevelListElement setHeaderText(String value) {
+            this.headerText = value;
+            return this;
+        }
+
+        public String getHeaderText() {
+            return this.headerText;
+        }
+
+        public MiningLevelListElement addMiningLevels(List<String> toAdd) {
+            this.miningLevels = RiftUtil.uniteTwoLists(this.miningLevels, toAdd);
+            return this;
+        }
+
+        public List<String> getMiningLevels() {
+            return this.miningLevels;
+        }
+
+        public MiningLevelListElement setHeaderColor(int value) {
             this.headerTextColor = value;
             return this;
         }

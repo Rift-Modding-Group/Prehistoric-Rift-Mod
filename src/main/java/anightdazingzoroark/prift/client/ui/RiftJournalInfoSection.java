@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 
@@ -49,6 +50,14 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
 
         //add contents
         if (this.entryType != null) {
+            //get diet
+            RiftGuiScrollableSectionContents.TextElement dietElement = this.entryType.getCreatureDiet() == null ? null : new RiftGuiScrollableSectionContents.TextElement()
+                    .setContents(I18n.format("journal.diet", this.entryType.getCreatureDiet().getTranslatedName()));
+
+            //get levelup rate
+            RiftGuiScrollableSectionContents.TextElement levelupRateElement = this.entryType.getLevelupRate() == null ? null : new RiftGuiScrollableSectionContents.TextElement()
+                    .setContents(I18n.format("journal.levelup_rate", this.entryType.getLevelupRate().getTranslatedName()));
+
             //get favorite meals as item list
             List<RiftCreatureConfig.Meal> mealsList = RiftConfigHandler.getConfig(this.entryType).general.favoriteMeals;
             List<String> mealsAsStrings = new ArrayList<>();
@@ -58,7 +67,7 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
                 }
             }
             RiftGuiScrollableSectionContents.ItemListElement mealsElement = mealsAsStrings.isEmpty() ? null : new RiftGuiScrollableSectionContents.ItemListElement()
-                    .setHeaderText("taming_foods")
+                    .setHeaderText(I18n.format("journal.breeding_foods"))
                     .addItems(mealsAsStrings);
 
             //get favorite foods as item list
@@ -70,18 +79,31 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
                 }
             }
             RiftGuiScrollableSectionContents.ItemListElement foodElement = foodAsStrings.isEmpty() ? null : new RiftGuiScrollableSectionContents.ItemListElement()
-                    .setHeaderText("favorite_foods")
+                    .setHeaderText(I18n.format("journal.favorite_foods"))
                     .addItems(foodAsStrings);
+
+            //get mining levels
+            boolean hasMiningLevels = RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels != null && !RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels.isEmpty();
+            RiftGuiScrollableSectionContents.MiningLevelListElement miningLevelListElement = !hasMiningLevels ? null : new RiftGuiScrollableSectionContents.MiningLevelListElement()
+                    .setHeaderText(I18n.format("journal.mining_levels"))
+                    .addMiningLevels(RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels);
 
             //now make the tab elements
             toReturn.addTabElement(new RiftGuiScrollableSectionContents.TabElement()
                     .setId("creatureInfo")
+                    .setWidth(240)
                     //entry, just the journal entry
                     .addTab("entry", Arrays.asList(new RiftGuiScrollableSectionContents.TextElement()
                             .setContents(this.getJournalEntry()))
                     )
                     //info, such as diet, foods they will consume, etc
-                    .addTab("info", Arrays.asList(mealsElement, foodElement))
+                    .addTab("info", Arrays.asList(
+                            dietElement,
+                            levelupRateElement,
+                            mealsElement,
+                            foodElement,
+                            miningLevelListElement
+                    ))
             );
         }
         else {

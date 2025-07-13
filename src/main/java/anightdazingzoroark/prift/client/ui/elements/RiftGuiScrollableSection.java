@@ -5,7 +5,6 @@ import anightdazingzoroark.prift.compat.jei.RiftJEI;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
@@ -56,6 +55,9 @@ public abstract class RiftGuiScrollableSection {
     //for item lists
     private final List<ItemClickRegion> itemClickRegions = new ArrayList<>();
 
+    //for mining level lists
+    private final List<MiningLevelRegion> miningLevelRegions = new ArrayList<>();
+
     //other important shite
     protected Minecraft minecraft;
     protected final FontRenderer fontRenderer;
@@ -92,6 +94,7 @@ public abstract class RiftGuiScrollableSection {
         this.activeButtons.clear();
         this.activeTabRegions.clear();
         this.itemClickRegions.clear();
+        this.miningLevelRegions.clear();
 
         int sectionX = (this.guiWidth - this.width) / 2 + this.xOffset;
         int sectionY = (this.guiHeight - this.height) / 2 + this.yOffset;
@@ -111,7 +114,7 @@ public abstract class RiftGuiScrollableSection {
             RiftGuiScrollableSectionContents.Element element = this.defineSectionContents().getContents().get(i);
 
             //draw the elements and add up their height
-            totalHeight += this.drawElement(element,  sectionX, drawY + totalHeight, mouseX, mouseY, partialTicks);
+            totalHeight += this.drawElement(element, this.width, sectionX, drawY + totalHeight, mouseX, mouseY, partialTicks);
 
             //extra bottom height for certain elements
             if (i < this.defineSectionContents().getContents().size() - 1) totalHeight += this.elementBottomSpace(element);
@@ -136,11 +139,11 @@ public abstract class RiftGuiScrollableSection {
     }
 
     //return value is the total height created by these elements
-    private int drawElement(RiftGuiScrollableSectionContents.Element element, int x, int y, int mouseX, int mouseY, float partialTicks) {
+    private int drawElement(RiftGuiScrollableSectionContents.Element element, int elementWidth, int x, int y, int mouseX, int mouseY, float partialTicks) {
         if (element instanceof RiftGuiScrollableSectionContents.TextElement) {
             RiftGuiScrollableSectionContents.TextElement text = (RiftGuiScrollableSectionContents.TextElement) element;
-            this.fontRenderer.drawSplitString(text.getContents(), x, y, this.width, text.getTextColor());
-            int lines = this.fontRenderer.listFormattedStringToWidth(text.getContents(), this.width).size();
+            this.fontRenderer.drawSplitString(text.getContents(), x, y, elementWidth, text.getTextColor());
+            int lines = this.fontRenderer.listFormattedStringToWidth(text.getContents(), elementWidth).size();
             return lines * this.fontRenderer.FONT_HEIGHT;
         }
         else if (element instanceof RiftGuiScrollableSectionContents.ImageElement) {
@@ -153,7 +156,7 @@ public abstract class RiftGuiScrollableSection {
 
             int scaledW = (int)(imgW * scale);
             int scaledH = (int)(imgH * scale);
-            int imgX = x + (this.width - scaledW) / 2;
+            int imgX = x + (elementWidth - scaledW) / 2;
 
             GlStateManager.pushMatrix();
             GlStateManager.translate(imgX, y, 0);
@@ -169,7 +172,7 @@ public abstract class RiftGuiScrollableSection {
 
             int buttonW = but.getSize()[0];
             int buttonH = but.getSize()[1];
-            int buttonX = x + (this.width - buttonW) / 2;
+            int buttonX = x + (elementWidth - buttonW) / 2;
             int buttonY = y;
 
             //compute scrollable section bounds
@@ -195,9 +198,10 @@ public abstract class RiftGuiScrollableSection {
 
             //make label
             int headerHeight = this.fontRenderer.FONT_HEIGHT;
-            this.fontRenderer.drawSplitString(I18n.format("gui.item_list."+itemList.getHeaderText()), x, y, this.width, itemList.getHeaderTextColor());
+            this.fontRenderer.drawSplitString(itemList.getHeaderText(), x, y, elementWidth, itemList.getHeaderTextColor());
 
-            int itemsPerRow = 6;
+            //now make the item list
+            int itemsPerRow = 8;
             int itemSize = 16;
             int itemSpacing = 4;
             int fullItemSize = itemSize + itemSpacing;
@@ -222,6 +226,50 @@ public abstract class RiftGuiScrollableSection {
 
             return headerHeight + 4 + (totalRows * fullItemSize);
 
+        }
+        else if (element instanceof RiftGuiScrollableSectionContents.MiningLevelListElement) {
+            RiftGuiScrollableSectionContents.MiningLevelListElement miningLevelList = (RiftGuiScrollableSectionContents.MiningLevelListElement) element;
+
+            //make label
+            int headerHeight = this.fontRenderer.FONT_HEIGHT;
+            this.fontRenderer.drawSplitString(miningLevelList.getHeaderText(), x, y, elementWidth, miningLevelList.getHeaderTextColor());
+
+            //now visualize the mining levels using wooden tools and a number
+            //why wooden tools? well theres mods that let u modify mining levels of tools and am not wanna deal with
+            //that shit, so just 1 tool type would make it easier
+            int itemsPerRow = 8;
+            int itemSize = 16;
+            int itemSpacing = 4;
+            int fullItemSize = itemSize + itemSpacing;
+
+            int totalItems = miningLevelList.getMiningLevels().size();
+            int totalRows = (int) Math.ceil(totalItems / (float) itemsPerRow);
+            int gridYOffset = y + headerHeight + 4;
+
+            for (int i = 0; i < totalItems; i++) {
+                //get tool type and mining level from string
+                String miningLevel = miningLevelList.getMiningLevels().get(i);
+                String tool = miningLevel.substring(0, miningLevel.indexOf(":"));
+                int level = Integer.parseInt(miningLevel.substring(miningLevel.indexOf(":")+1));
+
+                //get wooden tool associated with tool type
+                ItemStack itemStack = this.getToolTypeForMiningLevel(tool);
+
+                int col = i % itemsPerRow;
+                int row = i / itemsPerRow;
+
+                int itemX = x + col * fullItemSize;
+                int itemY = gridYOffset + row * fullItemSize;
+
+                //render tool
+                this.renderItem(itemStack, itemX, itemY);
+                this.miningLevelRegions.add(new MiningLevelRegion(itemX, itemY, tool, level));
+
+                //render mining level
+                this.fontRenderer.renderString(String.valueOf(level), itemX + 9, itemY + 12, 0, false);
+            }
+
+            return headerHeight + 4 + (totalRows * fullItemSize);
         }
         else if (element instanceof RiftGuiScrollableSectionContents.TabElement) {
             RiftGuiScrollableSectionContents.TabElement tab = (RiftGuiScrollableSectionContents.TabElement) element;
@@ -274,7 +322,7 @@ public abstract class RiftGuiScrollableSection {
                 for (int i = 0; i < content.size(); i++) {
                     RiftGuiScrollableSectionContents.Element elementInTab = content.get(i);
 
-                    int usedHeight = this.drawElement(elementInTab, contentInnerX, contentInnerY, mouseX, mouseY, partialTicks);
+                    int usedHeight = this.drawElement(elementInTab, this.getTabContentWidth(tab), contentInnerX, contentInnerY, mouseX, mouseY, partialTicks);
                     contentInnerY += usedHeight;
                     contentInnerHeight += usedHeight;
 
@@ -287,13 +335,23 @@ public abstract class RiftGuiScrollableSection {
                 }
 
                 //draw content outline box after measuring
-                this.drawRectOutline(x, contentBoxY, this.width, contentInnerHeight + contentPadding * 2, 0xFF000000);
+                this.drawRectOutline(x, contentBoxY, this.getTabContentWidth(tab) + contentPadding * 2, contentInnerHeight + contentPadding * 2, 0xFF000000);
             }
 
             return tabHeight + 4 + contentInnerHeight + contentPadding * 2; //total vertical space used
         }
 
         return 0;
+    }
+
+    private ItemStack getToolTypeForMiningLevel(String value) {
+        String fullTool = "minecraft:wooden_"+value;
+        return RiftUtil.getItemStackFromString(fullTool);
+    }
+
+    private int getTabContentWidth(RiftGuiScrollableSectionContents.TabElement tabElement) {
+        if (tabElement.getWidth() > 0) return tabElement.getWidth();
+        return this.width;
     }
 
     private int elementBottomSpace(RiftGuiScrollableSectionContents.Element element) {
@@ -330,14 +388,14 @@ public abstract class RiftGuiScrollableSection {
                 else this.activeTabs.put(region.tabElement.getId(), region.tabName);
 
                 //change in tab should lead to scroll progress being reset
-                this.resetScroll();
+                this.resetScrollProgress();
 
                 break;
             }
         }
 
         //for item clicking
-        for (ItemClickRegion region : itemClickRegions) {
+        for (ItemClickRegion region : this.itemClickRegions) {
             if (region.isHovered(mouseX, mouseY)) {
                 if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) {
                     RiftJEI.showRecipesForItemStack(region.stack, false);
@@ -387,7 +445,7 @@ public abstract class RiftGuiScrollableSection {
         this.scrollOffset = MathHelper.clamp((int)(scrollRatio * this.maxScroll), 0, this.maxScroll);
     }
 
-    public void resetScroll() {
+    public void resetScrollProgress() {
         this.scrollOffset = 0;
     }
 
@@ -411,6 +469,23 @@ public abstract class RiftGuiScrollableSection {
         this.activeTabs.clear();
     }
 
+    public int getScrollOffset() {
+        return this.scrollOffset;
+    }
+
+    public void setScrollOffset(int value) {
+        this.scrollOffset = value;
+    }
+
+    public Map<String, String> getActiveTabs() {
+        return new HashMap<>(this.activeTabs); // defensive copy
+    }
+
+    public void setActiveTabs(Map<String, String> tabs) {
+        this.activeTabs.clear();
+        if (tabs != null) this.activeTabs.putAll(tabs);
+    }
+
     private void drawRectOutline(int x, int y, int w, int h, int color) {
         drawRect(x, y, x + w, y + 1, color);             // top
         drawRect(x, y + h - 1, x + w, y + h, color);     // bottom
@@ -424,11 +499,19 @@ public abstract class RiftGuiScrollableSection {
         renderItem.renderItemOverlayIntoGUI(this.fontRenderer, stack, x, y, null);
     }
 
-    @Nullable
     public ItemStack getHoveredItemStack(int mouseX, int mouseY) {
         for (RiftGuiScrollableSection.ItemClickRegion region : this.itemClickRegions) {
             if (region.isHovered(mouseX, mouseY)) {
                 return region.stack;
+            }
+        }
+        return null;
+    }
+
+    public MiningLevelRegion getHoveredMiningLevel(int mouseX, int mouseY) {
+        for (RiftGuiScrollableSection.MiningLevelRegion region : this.miningLevelRegions) {
+            if (region.isHovered(mouseX, mouseY)) {
+                return region;
             }
         }
         return null;
@@ -465,6 +548,23 @@ public abstract class RiftGuiScrollableSection {
             this.x = x;
             this.y = y;
             this.stack = stack;
+        }
+
+        private boolean isHovered(int mouseX, int mouseY) {
+            return mouseX >= this.x && mouseX < this.x + this.size && mouseY >= this.y && mouseY < this.y + this.size;
+        }
+    }
+
+    public static class MiningLevelRegion {
+        private final int x, y, size = 16;
+        public final String miningTool;
+        public final int miningLevel;
+
+        private MiningLevelRegion(int x, int y, String miningTool, int miningLevel) {
+            this.x = x;
+            this.y = y;
+            this.miningTool = miningTool;
+            this.miningLevel = miningLevel;
         }
 
         private boolean isHovered(int mouseX, int mouseY) {

@@ -611,6 +611,10 @@ public enum RiftCreatureType {
         INSECTIVORE,
         OMNIVORE,
         SAXUMAVORE;
+
+        public String getTranslatedName() {
+            return I18n.format("diet.creature."+this.name().toLowerCase());
+        }
     }
 
     public enum LevelupRate {
@@ -628,6 +632,10 @@ public enum RiftCreatureType {
 
         public double getRate() {
             return this.rate;
+        }
+
+        public String getTranslatedName() {
+            return I18n.format("levelup_rate.creature."+this.name().toLowerCase());
         }
     }
 
