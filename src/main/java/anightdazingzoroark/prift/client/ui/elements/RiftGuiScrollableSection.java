@@ -534,6 +534,10 @@ public abstract class RiftGuiScrollableSection {
         return "";
     }
 
+    public Map<String, String> getTempTextField() {
+        return this.tempTextField;
+    }
+
     public void resetTextFields() {
         this.textFields.clear();
     }

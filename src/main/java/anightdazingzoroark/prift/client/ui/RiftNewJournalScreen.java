@@ -240,6 +240,8 @@ public class RiftNewJournalScreen extends GuiScreen {
             this.journalInfoSection.setSearchMode(false);
             this.journalInfoSection.resetTextFields();
             this.journalInfoSection.setEntryType(null);
+            this.journalInfoSection.getTempTextField().clear();
+            this.searchText = "";
             this.journalEntriesSection.setSearchMode(false);
             this.journalEntriesSection.setStringForSearch("");
             this.journalEntriesSection.reenableAllButtons();
