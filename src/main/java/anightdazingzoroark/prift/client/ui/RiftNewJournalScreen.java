@@ -74,6 +74,7 @@ public class RiftNewJournalScreen extends GuiScreen {
             if (this.lastEntry != null) {
                 this.journalInfoSection.setEntryType(this.lastEntry);
                 this.journalEntriesSection.disableButtonById(this.lastEntry.toString());
+                this.journalEntriesSection.setStringForSearch(this.searchText);
             }
         }
         else {
@@ -143,17 +144,6 @@ public class RiftNewJournalScreen extends GuiScreen {
         //draw screen
         this.drawGuiContainerBackgroundLayer();
 
-        //change journal entries section depending on what was searched for
-        if (this.searchMode) {
-            this.searchText = this.journalInfoSection.getTextFieldString("searchBox");
-            if (!this.journalInfoSection.getTextFields().isEmpty() && this.journalInfoSection.getTextFields().containsKey("searchBox")) {
-                //reset scroll progress when a change is made
-                System.out.println("searchText: "+this.searchText);
-                if (!this.journalEntriesSection.getStringForSearch().equals(this.searchText)) this.journalEntriesSection.resetScrollProgress();
-                this.journalEntriesSection.setStringForSearch(this.searchText);
-            }
-        }
-
         //draw sections
         this.journalInfoSection.drawSectionContents(mouseX, mouseY, partialTicks);
         this.journalEntriesSection.drawSectionContents(mouseX, mouseY, partialTicks);
@@ -163,6 +153,17 @@ public class RiftNewJournalScreen extends GuiScreen {
         this.indexClickableSection.drawSection(mouseX, mouseY);
         this.searchClickableSection.drawSection(mouseX, mouseY);
         this.partyClickableSection.drawSection(mouseX, mouseY);
+
+        //change journal entries section depending on what was searched for
+        if (this.searchMode) {
+            //make sure search text can be changed as long as the text field can be seen
+            if (this.journalInfoSection.getEntryType() == null) this.searchText = this.journalInfoSection.getTextFieldString("searchBox");
+            if (!this.journalInfoSection.getTextFields().isEmpty() && this.journalInfoSection.getTextFields().containsKey("searchBox")) {
+                //reset scroll progress when a change is made
+                if (!this.journalEntriesSection.getStringForSearch().equals(this.searchText)) this.journalEntriesSection.resetScrollProgress();
+                this.journalEntriesSection.setStringForSearch(this.searchText);
+            }
+        }
 
         GlStateManager.disableRescaleNormal();
         RenderHelper.disableStandardItemLighting();

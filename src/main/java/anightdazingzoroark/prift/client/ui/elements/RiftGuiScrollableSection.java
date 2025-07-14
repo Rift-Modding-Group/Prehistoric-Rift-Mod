@@ -289,7 +289,7 @@ public abstract class RiftGuiScrollableSection {
                 textField.drawTextBox();
                 if (!this.tempTextField.isEmpty() && this.tempTextField.containsKey(textBox.getId())) {
                     textField.setText(this.tempTextField.get(textBox.getId()));
-                    this.tempTextField.remove(textBox.getId());
+                    //this.tempTextField.remove(textBox.getId());
                 }
                 this.textFields.put(textBox.getId(), textField);
             }

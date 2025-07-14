@@ -36,6 +36,10 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
         this.entryType = entryType;
     }
 
+    public RiftCreatureType getEntryType() {
+        return this.entryType;
+    }
+
     public void setSearchMode(boolean value) {
         this.searchMode = value;
     }
@@ -49,7 +53,6 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
             if (this.entryType != null) toReturn = this.defaultContents();
             else {
                 toReturn.addTextBoxElement(new RiftGuiScrollableSectionContents.TextBoxElement()
-                        //.setDefaultText("Search...")
                         .setId("searchBox")
                         .setWidth(180)
                 );
