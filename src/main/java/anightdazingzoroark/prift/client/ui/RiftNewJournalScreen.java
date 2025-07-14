@@ -111,7 +111,7 @@ public class RiftNewJournalScreen extends GuiScreen {
                 1
         );
 
-        this.partyClickableSection = new RiftClickableSection(13, 12, this.width, this.height, 192, -112, this.fontRenderer, this.mc);
+        this.partyClickableSection = new RiftClickableSection(12, 12, this.width, this.height, 191, -112, this.fontRenderer, this.mc);
         this.partyClickableSection.addImage(
                 background,
                 13,
@@ -147,6 +147,9 @@ public class RiftNewJournalScreen extends GuiScreen {
         if (this.searchMode) {
             this.searchText = this.journalInfoSection.getTextFieldString("searchBox");
             if (!this.journalInfoSection.getTextFields().isEmpty() && this.journalInfoSection.getTextFields().containsKey("searchBox")) {
+                //reset scroll progress when a change is made
+                System.out.println("searchText: "+this.searchText);
+                if (!this.journalEntriesSection.getStringForSearch().equals(this.searchText)) this.journalEntriesSection.resetScrollProgress();
                 this.journalEntriesSection.setStringForSearch(this.searchText);
             }
         }

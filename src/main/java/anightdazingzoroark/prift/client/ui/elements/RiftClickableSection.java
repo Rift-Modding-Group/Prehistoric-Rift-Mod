@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui.elements;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
@@ -96,6 +97,7 @@ public class RiftClickableSection {
 
         //draw image
         if (this.textureLocation != null) {
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
             int k = (this.guiWidth - this.width) / 2 + this.xOffset;
             int l = (this.guiHeight - this.height) / 2 + this.yOffset;

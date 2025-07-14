@@ -35,6 +35,10 @@ public class RiftJournalEntriesSection extends RiftGuiScrollableSection {
         this.searchMode = value;
     }
 
+    public String getStringForSearch() {
+        return this.stringForSearch;
+    }
+
     public void setStringForSearch(String value) {
         this.stringForSearch = value;
     }

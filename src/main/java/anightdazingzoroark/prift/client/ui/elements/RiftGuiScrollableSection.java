@@ -513,12 +513,10 @@ public abstract class RiftGuiScrollableSection {
     }
 
     public void setTextFieldString(String id, String value) {
-        System.out.println("text fields: "+this.textFields);
         if (this.textFields.isEmpty()) this.tempTextField.put(id, value);
         else {
             for (Map.Entry<String, GuiTextField> entry : this.textFields.entrySet()) {
                 if (entry.getKey() != null && entry.getKey().equals(id)) {
-                    System.out.println("hello");
                     GuiTextField textField = entry.getValue();
                     textField.setText(value);
                     this.textFields.replace(id, textField);
