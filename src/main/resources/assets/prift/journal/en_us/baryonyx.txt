@@ -1,4 +1,3 @@
-Diet: Carnivore
 Behavior: Hostile
 
 The Baryonyx is an amphibious creature that primarily hunts in water, swiftly moving to catch its aquatic prey, while also venturing to land to hunt for terrestrial creatures. Its attacks include biting with its strong jaws and slashing with its weaker yet poisonous claws. Encountering a Baryonyx requires caution due to the unpredictability surrounding what form of attack it will choose.

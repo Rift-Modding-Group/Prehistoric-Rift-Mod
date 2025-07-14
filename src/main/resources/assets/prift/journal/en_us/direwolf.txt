@@ -1,4 +1,3 @@
-Diet: Carnivore
 Behavior: Hostile
 
 Direwolves are pack hunters with a keen sense of smell. This makes it so that they can find prey by simply sniffing them out. Simply hiding being walls isn't an option as they will know that you're somehow there, until you are out of the range of their nose. They are also naturally disposed to fight for their packmates, with the leader motivating them by howling to push them to their limits.

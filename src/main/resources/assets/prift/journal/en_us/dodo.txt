@@ -1,4 +1,3 @@
-Diet: Herbivore
 Behavior: Passive
 
 How peaceful it must be to be a Dodo, with no care in the world or concern for its own safety. Even other animals run upon being harmed, but this one never panics at the sight of… anything threatening. The only reason why they must be still alive is how they breed constantly, to the point where its not unusual to see one.

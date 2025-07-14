@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.client.ui.elements;
 
-import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.util.ResourceLocation;
 
@@ -8,9 +7,6 @@ import java.util.*;
 
 public class RiftGuiScrollableSectionContents {
     private final List<Element> list = new ArrayList<>();
-    private int totalHeight;
-
-    private void getTotalHeight() {}
 
     public RiftGuiScrollableSectionContents addTextElement(TextElement element) {
         this.list.add(element);
@@ -23,6 +19,11 @@ public class RiftGuiScrollableSectionContents {
     }
 
     public RiftGuiScrollableSectionContents addButtonElement(ButtonElement element) {
+        this.list.add(element);
+        return this;
+    }
+
+    public RiftGuiScrollableSectionContents addTextBoxElement(TextBoxElement element) {
         this.list.add(element);
         return this;
     }
@@ -254,6 +255,39 @@ public class RiftGuiScrollableSectionContents {
 
         public int getHeaderTextColor() {
             return this.headerTextColor;
+        }
+    }
+
+    public static class TextBoxElement extends Element {
+        private int width = 0;
+        private String defaultText = "";
+        private String id = "";
+
+        public TextBoxElement setWidth(int value) {
+            this.width = value;
+            return this;
+        }
+
+        public int getWidth() {
+            return this.width;
+        }
+
+        public TextBoxElement setDefaultText(String value) {
+            this.defaultText = value;
+            return this;
+        }
+
+        public String getDefaultText() {
+            return this.defaultText;
+        }
+
+        public TextBoxElement setId(String value) {
+            this.id = value;
+            return this;
+        }
+
+        public String getId() {
+            return this.id;
         }
     }
 }

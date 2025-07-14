@@ -1,4 +1,3 @@
-Diet: Herbivore
 Behavior: Neutral
 
 Apatosauruses are amongst the largest creatures brought over by the Rift. They don't seem to care about their surroundings, and most smaller creatures don't bother it, probably out of respect for its imposing stature. Other than the fact that they can crush you or whip you to some place far away, not much else should be said of its power.

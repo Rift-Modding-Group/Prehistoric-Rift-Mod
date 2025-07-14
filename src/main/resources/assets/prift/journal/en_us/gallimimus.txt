@@ -1,4 +1,3 @@
-Diet: Herbivore
 Behavior: Skittish
 
 Gallimimus run and scatter upon the sight of anything that they deem dangerous, whether its predators or other humans, and do so at high speeds. It is also their only form of self-defense. They only seem to herd as a way to alert others in danger instead of for actual defense.

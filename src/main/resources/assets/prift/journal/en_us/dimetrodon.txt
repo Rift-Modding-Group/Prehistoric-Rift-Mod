@@ -1,4 +1,3 @@
-Diet: Carnivore
 Behavior: Neutral
 
 The sail of the Dimetrodon inverts the temperature of the environment, causing warmer places to make it emit cold and vice versa. It even spreads to its fangs, allowing it to apply the harsher effects of the temperature its in to those it attacks, with flame mode letting them burn their targets and frost mode letting them cripple them.

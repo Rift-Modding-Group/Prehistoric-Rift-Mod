@@ -182,8 +182,8 @@ item.box_range_upgrade.tooltip=Use this on any creature box to increase the wand
 jei.min_power=Minimum Power: %s R
 jei.chance=Chance: %s
 
-journal.top_button.entries=Journal
-journal.top_button.party=Party
+journal.index_button=Index
+journal.search_button=Search
 journal.party_button.dismiss=Dismiss
 journal.party_button.summon=Summon
 journal.party_button.teleport=Teleport

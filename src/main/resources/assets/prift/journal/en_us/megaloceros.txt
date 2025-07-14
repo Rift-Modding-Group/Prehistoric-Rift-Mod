@@ -1,4 +1,3 @@
-Diet: Herbivore
 Behavior: Neutral
 
 A notable trait of the Megaloceros are its antlers, which are its main source of strength. Yet its fragility makes it so weak it cannot break harder blocks or do worthwhile damage to their targets. For this, they stick in herds to ensure security, and run away if all else fails.

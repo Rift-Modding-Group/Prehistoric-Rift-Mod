@@ -1,4 +1,3 @@
-Diet: Herbivore
 Behavior: Neutral
 
 Parasaurolophus are simple-minded herbivores that go in herds. The horns, besides making lots of noise, allow them to breathe in large amounts of air to then blow at their targets, possibly throwing them to far away places. This seems imposing, but one can sigh of relief over the fact that they are incapable of harm whatsoever. That doesn't mean they can't blow you into something else that is dangerous.

@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 public class RiftJournalInfoSection extends RiftGuiScrollableSection {
     private RiftCreatureType entryType;
+    private boolean searchMode;
 
     public RiftJournalInfoSection(int guiWidth, int guiHeight, FontRenderer fontRenderer, Minecraft minecraft) {
         super(264, 190, guiWidth, guiHeight, 60, 7, fontRenderer, minecraft);
@@ -35,8 +36,39 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
         this.entryType = entryType;
     }
 
+    public void setSearchMode(boolean value) {
+        this.searchMode = value;
+    }
+
     @Override
     public RiftGuiScrollableSectionContents defineSectionContents() {
+        RiftGuiScrollableSectionContents toReturn = new RiftGuiScrollableSectionContents();
+
+        //for when searching
+        if (this.searchMode) {
+            if (this.entryType != null) toReturn = this.defaultContents();
+            else {
+                toReturn.addTextBoxElement(new RiftGuiScrollableSectionContents.TextBoxElement()
+                        //.setDefaultText("Search...")
+                        .setId("searchBox")
+                        .setWidth(180)
+                );
+            }
+        }
+        //for when not searching
+        else {
+            if (this.entryType != null) toReturn = this.defaultContents();
+            else {
+                toReturn.addTextElement(new RiftGuiScrollableSectionContents.TextElement()
+                        .setContents(this.getJournalEntry())
+                );
+            }
+        }
+
+        return toReturn;
+    }
+
+    private RiftGuiScrollableSectionContents defaultContents() {
         RiftGuiScrollableSectionContents toReturn = new RiftGuiScrollableSectionContents();
 
         //add image
@@ -104,11 +136,6 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
                             foodElement,
                             miningLevelListElement
                     ))
-            );
-        }
-        else {
-            toReturn.addTextElement(new RiftGuiScrollableSectionContents.TextElement()
-                    .setContents(this.getJournalEntry())
             );
         }
 

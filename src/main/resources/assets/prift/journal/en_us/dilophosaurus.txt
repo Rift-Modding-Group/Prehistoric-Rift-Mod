@@ -1,4 +1,3 @@
-Diet: Carnivore
 Behavior: Hostile
 
 Dilophosauruses are rather ineffective at physical attacks, and thus completely rely on their spittable venom produced in a special organ in their neck. This venom, though not potent, is sticky, blinding the target for a short while.

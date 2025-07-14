@@ -1,1 +1,1 @@
-This is where information pertaining to creatures you manage to kill or tame can be read, as well as where you can manage your party.
+This is where information pertaining to creatures you manage to kill or tame can be read.

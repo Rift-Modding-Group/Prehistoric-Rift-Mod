@@ -1,4 +1,3 @@
-Diet: Saxumavore
 Behavior: Neutral
 
 Scurrying beneath the surface lies the Palaeocastor, small creatures that feed off rocks and presumably metals and other minerals. They do not pose any threat whatsoever, though they do not take kindly to attackers. As the lowest on the food chain amongst the cavernous creatures, not much else is to be expected.

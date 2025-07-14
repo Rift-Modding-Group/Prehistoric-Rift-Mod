@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.compat.jei.RiftJEI;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
@@ -68,6 +69,10 @@ public abstract class RiftGuiScrollableSection {
     //tab stuff
     private final Map<String, String> activeTabs = new HashMap<>(); //1st string is id for tabs list, 2nd string is name of tab
     private final List<TabClickRegion> activeTabRegions = new ArrayList<>();
+
+    //text box stuff
+    private final Map<String, GuiTextField> textFields = new HashMap<>();
+    private final Map<String, String> tempTextField = new HashMap<>();
 
     public RiftGuiScrollableSection(int width, int height, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
         this.width = width;
@@ -271,6 +276,28 @@ public abstract class RiftGuiScrollableSection {
 
             return headerHeight + 4 + (totalRows * fullItemSize);
         }
+        else if (element instanceof RiftGuiScrollableSectionContents.TextBoxElement) {
+            RiftGuiScrollableSectionContents.TextBoxElement textBox = (RiftGuiScrollableSectionContents.TextBoxElement) element;
+
+            int textBoxX = x + (elementWidth - textBox.getWidth()) / 2;
+            int textBoxY = y + 5;
+
+            //create text field if it doesn't exist
+            if (!this.textFields.containsKey(textBox.getId())) {
+                GuiTextField textField = new GuiTextField(0, this.fontRenderer, textBoxX, textBoxY, textBox.getWidth(), 20);
+                textField.setFocused(true);
+                textField.drawTextBox();
+                if (!this.tempTextField.isEmpty() && this.tempTextField.containsKey(textBox.getId())) {
+                    textField.setText(this.tempTextField.get(textBox.getId()));
+                    this.tempTextField.remove(textBox.getId());
+                }
+                this.textFields.put(textBox.getId(), textField);
+            }
+            //just draw it if it does exist
+            else this.textFields.get(textBox.getId()).drawTextBox();
+
+            return 25 + this.fontRenderer.FONT_HEIGHT;
+        }
         else if (element instanceof RiftGuiScrollableSectionContents.TabElement) {
             RiftGuiScrollableSectionContents.TabElement tab = (RiftGuiScrollableSectionContents.TabElement) element;
             List<String> tabs = tab.getTabOrder();
@@ -294,7 +321,7 @@ public abstract class RiftGuiScrollableSection {
 
                 //text color logic
                 int textColor = 0xFFFFFFFF; // normal white;
-                if (isActive) textColor = 0x5A3B1A; //blue for active
+                if (isActive) textColor = 0x5A3B1A; //brown for active
                 else if (isHovered) textColor = 0xFFFF00; //yellow for hover
 
                 //draw outline
@@ -479,6 +506,38 @@ public abstract class RiftGuiScrollableSection {
 
     public Map<String, String> getActiveTabs() {
         return new HashMap<>(this.activeTabs); // defensive copy
+    }
+
+    public Map<String, GuiTextField> getTextFields() {
+        return this.textFields;
+    }
+
+    public void setTextFieldString(String id, String value) {
+        System.out.println("text fields: "+this.textFields);
+        if (this.textFields.isEmpty()) this.tempTextField.put(id, value);
+        else {
+            for (Map.Entry<String, GuiTextField> entry : this.textFields.entrySet()) {
+                if (entry.getKey() != null && entry.getKey().equals(id)) {
+                    System.out.println("hello");
+                    GuiTextField textField = entry.getValue();
+                    textField.setText(value);
+                    this.textFields.replace(id, textField);
+                }
+            }
+        }
+    }
+
+    public String getTextFieldString(String id) {
+        for (Map.Entry<String, GuiTextField> entry : this.textFields.entrySet()) {
+            if (entry.getKey() != null && entry.getKey().equals(id)) {
+                return entry.getValue().getText();
+            }
+        }
+        return "";
+    }
+
+    public void resetTextFields() {
+        this.textFields.clear();
     }
 
     public void setActiveTabs(Map<String, String> tabs) {

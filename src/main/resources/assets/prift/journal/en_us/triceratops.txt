@@ -1,4 +1,3 @@
-Diet: Herbivore
 Behavior: Passive
 
 The main weapon of the Triceratops is its entire head, which serves as a shield. Completely impenetrable, it must be hit at other parts of the body, but thats easier said than done. The spikes on its head serve as additional weapons that can puncture their enemies, and one must take caution if it ever prepares to charge.
