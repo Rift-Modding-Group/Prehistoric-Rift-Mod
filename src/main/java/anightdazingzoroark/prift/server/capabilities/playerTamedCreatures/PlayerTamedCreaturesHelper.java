@@ -173,21 +173,6 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
-    public static int getPartySizeLevel(EntityPlayer player) {
-        return getPlayerTamedCreatures(player).getPartySizeLevel();
-    }
-
-    public static void upgradePlayerParty(EntityPlayer player, int value) {
-        if (player.world.isRemote) {
-            getPlayerTamedCreatures(player).setPartySizeLevel(value);
-            RiftMessages.WRAPPER.sendToServer(new RiftUpgradePlayerParty(player, value));
-        }
-        else {
-            getPlayerTamedCreatures(player).setPartySizeLevel(value);
-            RiftMessages.WRAPPER.sendToAll(new RiftUpgradePlayerParty(player, value));
-        }
-    }
-
     public static int getBoxSizeLevel(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getBoxSizeLevel();
     }

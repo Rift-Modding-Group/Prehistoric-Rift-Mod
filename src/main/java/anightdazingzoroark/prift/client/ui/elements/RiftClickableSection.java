@@ -9,8 +9,8 @@ import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 
 public class RiftClickableSection {
     //width and height of the section
-    private final int width;
-    private final int height;
+    protected final int width;
+    protected final int height;
 
     //x and y offsets of the section
     public final int xOffset;
@@ -20,8 +20,8 @@ public class RiftClickableSection {
     public int guiWidth;
     public int guiHeight;
 
-    private boolean isHovered;
-    private boolean isSelected;
+    protected boolean isHovered;
+    protected boolean isSelected;
 
     //other important shite
     protected Minecraft minecraft;
@@ -35,9 +35,9 @@ public class RiftClickableSection {
     private int stringYOffset;
 
     //image related stuff
-    private ResourceLocation textureLocation;
-    private int textureWidth, textureHeight, uvWidth, uvHeight;
-    private int xUV, yUV, hoveredXUV, hoveredYUV;
+    protected ResourceLocation textureLocation;
+    protected int textureWidth, textureHeight, uvWidth, uvHeight;
+    protected int xUV, yUV, hoveredXUV, hoveredYUV;
 
     public RiftClickableSection(int width, int height, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
         this.width = width;

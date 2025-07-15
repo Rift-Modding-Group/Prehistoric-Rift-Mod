@@ -37,6 +37,7 @@ public class RiftPlayerCreatureUpgradeItem extends Item {
         ItemStack itemstack = player.getHeldItem(handIn);
 
         switch (this.type) {
+            /*
             case "player_party_upgrade":
                 if (PlayerTamedCreaturesHelper.getPartySizeLevel(player) >= 4) {
                     if (world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.party_level_max"), false);
@@ -48,6 +49,7 @@ public class RiftPlayerCreatureUpgradeItem extends Item {
                     if (world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.party_level_upgraded", newLevel), false);
                     return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
                 }
+            */
             case "player_box_upgrade":
                 if (PlayerTamedCreaturesHelper.getBoxSizeLevel(player) >= 4) {
                     if (world.isRemote) player.sendStatusMessage(new TextComponentTranslation("reminder.box_level_max"), false);

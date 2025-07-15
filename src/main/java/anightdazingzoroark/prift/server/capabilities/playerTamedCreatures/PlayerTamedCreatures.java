@@ -20,7 +20,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private List<NBTTagCompound> partyCreatures = new ArrayList<>();
     private List<NBTTagCompound> boxCreatures = new ArrayList<>();
     private int lastSelected = 0;
-    private int partySizeLevel = 0;
     private int boxSizeLevel = 0;
     private int partyLastOpenedTime = 0;
     private int boxLastOpenedTime = 0;
@@ -33,21 +32,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public int getLastSelected() {
         return this.lastSelected;
-    }
-
-    @Override
-    public int getMaxPartySize() {
-        return 4 + this.partySizeLevel * 2;
-    }
-
-    @Override
-    public void setPartySizeLevel(int value) {
-        this.partySizeLevel = value;
-    }
-
-    @Override
-    public int getPartySizeLevel() {
-        return this.partySizeLevel;
     }
 
     @Override
