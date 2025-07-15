@@ -51,18 +51,12 @@ public class RiftForceSyncPartySizeLevel implements IMessage {
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-                if (message.partySizeLevel < 0) RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartySizeLevel(player, playerTamedCreatures.getPartySizeLevel()));
-                else playerTamedCreatures.setPartySizeLevel(message.partySizeLevel);
             }
             if (ctx.side == Side.CLIENT) {
                 EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-                if (message.partySizeLevel < 0) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartySizeLevel(player, playerTamedCreatures.getPartySizeLevel()));
-                else playerTamedCreatures.setPartySizeLevel(message.partySizeLevel);
             }
         }
     }

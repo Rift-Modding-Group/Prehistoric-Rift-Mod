@@ -18,6 +18,11 @@ import net.minecraft.world.World;
 import java.util.List;
 import java.util.UUID;
 
+/*
+todo: make it so only server side gets truly edited
+this means that all getter functions update client to sync w server info first before returning value
+while setter functions update only server side
+*/
 public class PlayerTamedCreaturesHelper {
     //player party and creature box
     public static IPlayerTamedCreatures getPlayerTamedCreatures(EntityPlayer player) {

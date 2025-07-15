@@ -1,16 +1,29 @@
 package anightdazingzoroark.prift.client.ui.elements;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 
 public class RiftPartyMemButton extends RiftClickableSection {
-    public RiftPartyMemButton(int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
+    private final NBTTagCompound creatureNBT;
+
+    public RiftPartyMemButton(NBTTagCompound creatureNBT, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
         super(57, 38, guiWidth, guiHeight, xOffset, yOffset, fontRenderer, minecraft);
+        this.creatureNBT = creatureNBT;
+
         //deal with uv textures
         this.textureLocation = new ResourceLocation(RiftInitialize.MODID, "textures/ui/party_background.png");
         this.uvWidth = 57;
@@ -26,7 +39,7 @@ public class RiftPartyMemButton extends RiftClickableSection {
         //deal with hovering
         this.isHovered = this.isHovered(mouseX, mouseY);
 
-        //draw image
+        //draw background
         if (this.textureLocation != null) {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
@@ -37,6 +50,10 @@ public class RiftPartyMemButton extends RiftClickableSection {
             drawModalRectWithCustomSizedTexture(k, l, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
         }
 
+        //some important variables
+        RiftCreatureType creatureType = RiftCreatureType.values()[this.creatureNBT.getByte("CreatureType")];
+        PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[this.creatureNBT.getByte("DeploymentType")];
+
         //put on white overlay when hovered
         if (this.isHovered) {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -45,5 +62,110 @@ public class RiftPartyMemButton extends RiftClickableSection {
             int l = (this.guiHeight - this.height) / 2 + this.yOffset;
             drawModalRectWithCustomSizedTexture(k, l, 0, 216, 57, 30, this.textureWidth, this.textureHeight);
         }
+
+        //put on yellow hoverlay when selected
+        if (this.isSelected) {
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+            int k = (this.guiWidth - this.width) / 2 + this.xOffset;
+            int l = (this.guiHeight - this.height) / 2 + this.yOffset;
+            drawModalRectWithCustomSizedTexture(k, l, 0, 246, 57, 30, this.textureWidth, this.textureHeight);
+        }
+
+        //create green background for icon overlay if creature has been deployed
+        if (deploymentType.equals(PlayerTamedCreatures.DeploymentType.PARTY)) {
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+            int k = (this.guiWidth - 18) / 2 + this.xOffset - 18;
+            int l = (this.guiHeight - 18) / 2 + this.yOffset - 8;
+            drawModalRectWithCustomSizedTexture(k, l, 57, 178, 18, 18, this.textureWidth, this.textureHeight);
+        }
+
+        //create creature icon overlay
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        ResourceLocation iconLocation = new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+creatureType.name().toLowerCase()+"_icon.png");
+        this.minecraft.getTextureManager().bindTexture(iconLocation);
+        float iconScale = 0.75f;
+        int k = (int) ((this.guiWidth - 24) / (2 * iconScale) + (this.xOffset - 14) / iconScale);
+        int l = (int) ((this.guiHeight - 24) / (2 * iconScale) + (this.yOffset - 5) / iconScale);
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(iconScale, iconScale, iconScale);
+        drawModalRectWithCustomSizedTexture(k, l, 0, 0, 24, 24, 24, 24);
+        GlStateManager.popMatrix();
+
+        //render creature level
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        String levelString = I18n.format("tametrait.level", this.creatureNBT.getInteger("Level"));
+        float levelStringScale = 0.5f;
+        int levelStringX = (int) (((this.guiWidth - this.fontRenderer.getStringWidth(levelString)) / 2f + this.xOffset + 20) / levelStringScale);
+        int levelStringY = (int) (((this.guiHeight - this.fontRenderer.FONT_HEIGHT) / 2f + this.yOffset - 5) / levelStringScale);
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(levelStringScale, levelStringScale, levelStringScale);
+        this.fontRenderer.drawString(levelString, levelStringX, levelStringY, 0x000000);
+        GlStateManager.popMatrix();
+
+        //render creature nickname or name
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        String nameString = (this.creatureNBT.hasKey("CustomName") && !this.creatureNBT.getString("CustomName").isEmpty()) ? this.creatureNBT.getString("CustomName") : creatureType.getTranslatedName();
+        float nameStringScale = 0.5f;
+        int nameStringX = (int) ((this.guiWidth / 2f + this.xOffset - 24) / nameStringScale);
+        int nameStringY = (int) (((this.guiHeight - this.fontRenderer.FONT_HEIGHT) / 2f + this.yOffset + 8) / nameStringScale);
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(nameStringScale, nameStringScale, nameStringScale);
+        this.fontRenderer.drawString(nameString, nameStringX, nameStringY, 0x000000);
+        GlStateManager.popMatrix();
+
+        //render creature healthbar
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        //get health first
+        float health = this.creatureNBT.getFloat("Health");
+        float maxHealth = health;
+        for (NBTBase nbtBase: this.creatureNBT.getTagList("Attributes", 10).tagList) {
+            if (nbtBase instanceof NBTTagCompound) {
+                NBTTagCompound tagCompound = (NBTTagCompound) nbtBase;
+
+                if (!tagCompound.hasKey("generic.maxHealth") || !tagCompound.getString("Name").equals("generic.maxHealth")) continue;
+
+                maxHealth = Math.min((float) tagCompound.getDouble("Base"), health);
+            }
+        }
+        //now draw the hp bar
+        this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+        int hpBarLength = MathHelper.clamp((int) ((health / maxHealth) * 51),0,51);
+        int hpBarX = this.guiWidth / 2 + this.xOffset - 26;
+        int hpBarY = (this.guiHeight - 1) / 2 + this.yOffset + 12;
+        drawModalRectWithCustomSizedTexture(hpBarX, hpBarY, 0, 276, hpBarLength, 1, this.textureWidth, this.textureHeight);
+
+        //render creature energy
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        float energy = this.creatureNBT.getInteger("Energy");
+        float maxEnergy = RiftConfigHandler.getConfig(creatureType).stats.maxEnergy;
+        this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+        int energyBarLength = MathHelper.clamp((int) ((energy / maxEnergy) * 51),0,51);
+        int energyBarX = this.guiWidth / 2 + this.xOffset - 26;
+        int energyBarY = (this.guiHeight - 1) / 2 + this.yOffset + 14;
+        drawModalRectWithCustomSizedTexture(energyBarX, energyBarY, 0, 277, energyBarLength, 1, this.textureWidth, this.textureHeight);
+
+        //render creature xp
+        //note: xp is always equal to 0 for some reason, might see if adding
+        //constant nbt updates can fix it
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        float xp = this.creatureNBT.getInteger("XP");
+        float maxXP = creatureType.getMaxXP(this.creatureNBT.getInteger("Level"));
+        this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+        int xpBarLength = MathHelper.clamp((int) ((xp / maxXP) * 51),0,51);
+        int xpBarX = this.guiWidth / 2 + this.xOffset - 26;
+        int xpBarY = (this.guiHeight - 1) / 2 + this.yOffset + 16;
+        drawModalRectWithCustomSizedTexture(xpBarX, xpBarY, 0, 278, xpBarLength, 1, this.textureWidth, this.textureHeight);
+    }
+
+    public NBTTagCompound getCreatureNBT() {
+        return this.creatureNBT;
+    }
+
+    //for best performance, DO NOT USE THIS IN METHODS MEANT TO BE LOOPED
+    //USE getCreatureNBT() FOR THAT INSTEAD
+    public RiftCreature getCreatureFromNBT() {
+        return PlayerTamedCreaturesHelper.createCreatureFromNBT(this.minecraft.world, this.creatureNBT);
     }
 }

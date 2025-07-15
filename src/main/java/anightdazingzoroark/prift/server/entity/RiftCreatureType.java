@@ -569,6 +569,10 @@ public enum RiftCreatureType {
         }
     }
 
+    public int getMaxXP(int level) {
+        return (int)Math.round((double)level * this.levelupRate.getRate() * 25D);
+    }
+
     public enum InventoryGearType {
         SADDLE,
         LARGE_WEAPON

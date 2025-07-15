@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @SideOnly(Side.CLIENT)
-public class RiftNewJournalScreen extends GuiScreen {
+public class RiftJournalScreen extends GuiScreen {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
     private RiftJournalInfoSection journalInfoSection;
     private RiftJournalEntriesSection journalEntriesSection;

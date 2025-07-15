@@ -47,14 +47,12 @@ public class RiftUpgradePlayerParty implements IMessage {
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                playerTamedCreatures.setPartySizeLevel(message.value);
             }
             if (ctx.side == Side.CLIENT) {
                 EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                playerTamedCreatures.setPartySizeLevel(message.value);
             }
         }
     }
