@@ -248,6 +248,7 @@ public class RiftJournalScreen extends GuiScreen {
             this.journalEntriesSection.setSearchMode(false);
             this.journalEntriesSection.setStringForSearch("");
             this.journalEntriesSection.reenableAllButtons();
+            this.indexClickableSection.playPressSound(this.mc.getSoundHandler());
         }
         //transition to search mode
         else if (this.searchClickableSection.isHovered(mouseX, mouseY) && !this.searchClickableSection.isSelected()) {
@@ -260,6 +261,7 @@ public class RiftJournalScreen extends GuiScreen {
             this.journalEntriesSection.setSearchMode(true);
             this.journalEntriesSection.setCurrentCategory(null);
             this.journalEntriesSection.reenableAllButtons();
+            this.searchClickableSection.playPressSound(this.mc.getSoundHandler());
         }
 
         //manage buttons
@@ -278,6 +280,7 @@ public class RiftJournalScreen extends GuiScreen {
 
         //return to party screen
         if (this.partyClickableSection.isHovered(mouseX, mouseY)) {
+            this.partyClickableSection.playPressSound(this.mc.getSoundHandler());
             this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, 0, 0, 0);
         }
     }

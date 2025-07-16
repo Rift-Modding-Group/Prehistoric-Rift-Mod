@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui.elements;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.*;
 
@@ -33,6 +34,11 @@ public class RiftGuiScrollableSectionContents {
         return this;
     }
 
+    public RiftGuiScrollableSectionContents addProgressBarElement(ProgressBarElement element) {
+        this.list.add(element);
+        return this;
+    }
+
     public List<Element> getContents() {
         return this.list;
     }
@@ -42,6 +48,8 @@ public class RiftGuiScrollableSectionContents {
     public static class TextElement extends Element {
         private String contents;
         private int textColor = 0x000000;
+        private float scale = 1f;
+        private int bottomSpace;
 
         public TextElement setContents(String value) {
             this.contents = value;
@@ -59,6 +67,24 @@ public class RiftGuiScrollableSectionContents {
 
         public int getTextColor() {
             return this.textColor;
+        }
+
+        public TextElement setScale(float value) {
+            this.scale = value;
+            return this;
+        }
+
+        public float getScale() {
+            return this.scale;
+        }
+
+        public TextElement setBottomSpace(int value) {
+            this.bottomSpace = value;
+            return this;
+        }
+
+        public int getBottomSpace() {
+            return this.bottomSpace;
         }
     }
 
@@ -288,6 +314,75 @@ public class RiftGuiScrollableSectionContents {
 
         public String getId() {
             return this.id;
+        }
+    }
+
+    public static class ProgressBarElement extends Element {
+        private String headerText = "";
+        private int width;
+        private int overlayColor;
+        private float percentage = 1f;
+        private int backgroundColor;
+        private int headerTextColor = 0x000000;
+        private float headerScale = 1f;
+
+        public ProgressBarElement setHeaderText(String value) {
+            this.headerText = value;
+            return this;
+        }
+
+        public String getHeaderText() {
+            return this.headerText;
+        }
+
+        public ProgressBarElement setColors(int overlayColor, int backgroundColor) {
+            this.overlayColor = overlayColor;
+            this.backgroundColor = backgroundColor;
+            return this;
+        }
+
+        public int getOverlayColor() {
+            return this.overlayColor;
+        }
+
+        public int getBackgroundColor() {
+            return this.backgroundColor;
+        }
+
+        public ProgressBarElement setWidth(int value) {
+            this.width = value;
+            return this;
+        }
+
+        public int getWidth() {
+            return this.width;
+        }
+
+        public ProgressBarElement setPercentage(float value) {
+            this.percentage = MathHelper.clamp(value, 0, 1f);
+            return this;
+        }
+
+        public float getPercentage() {
+            return this.percentage;
+        }
+
+        public ProgressBarElement setHeaderColor(int value) {
+            this.headerTextColor = value;
+            return this;
+        }
+
+        public int getHeaderTextColor() {
+            return this.headerTextColor;
+        }
+
+        public ProgressBarElement setHeaderScale(float value) {
+            this.headerScale = value;
+            return this;
+        }
+
+        public float getHeaderScale() {
+            return this.headerScale;
         }
     }
 }

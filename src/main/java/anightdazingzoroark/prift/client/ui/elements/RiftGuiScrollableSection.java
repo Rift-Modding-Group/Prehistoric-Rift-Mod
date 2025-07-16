@@ -147,9 +147,27 @@ public abstract class RiftGuiScrollableSection {
     private int drawElement(RiftGuiScrollableSectionContents.Element element, int elementWidth, int x, int y, int mouseX, int mouseY, float partialTicks) {
         if (element instanceof RiftGuiScrollableSectionContents.TextElement) {
             RiftGuiScrollableSectionContents.TextElement text = (RiftGuiScrollableSectionContents.TextElement) element;
-            this.fontRenderer.drawSplitString(text.getContents(), x, y, elementWidth, text.getTextColor());
-            int lines = this.fontRenderer.listFormattedStringToWidth(text.getContents(), elementWidth).size();
-            return lines * this.fontRenderer.FONT_HEIGHT;
+
+            float scale = text.getScale();
+            int lines = 1;
+
+            if (scale != 1f) {
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(scale, scale, scale);
+                this.fontRenderer.drawSplitString(
+                        text.getContents(),
+                        (int) (x / scale),
+                        (int) (y / scale),
+                        (int) (elementWidth / scale),
+                        text.getTextColor()
+                );
+                GlStateManager.popMatrix();
+            }
+            else {
+                this.fontRenderer.drawSplitString(text.getContents(), x, y, elementWidth, text.getTextColor());
+                lines = this.fontRenderer.listFormattedStringToWidth(text.getContents(), elementWidth).size();
+            }
+            return lines * this.fontRenderer.FONT_HEIGHT + text.getBottomSpace();
         }
         else if (element instanceof RiftGuiScrollableSectionContents.ImageElement) {
             RiftGuiScrollableSectionContents.ImageElement img = (RiftGuiScrollableSectionContents.ImageElement) element;
@@ -297,6 +315,42 @@ public abstract class RiftGuiScrollableSection {
             else this.textFields.get(textBox.getId()).drawTextBox();
 
             return 25 + this.fontRenderer.FONT_HEIGHT;
+        }
+        else if (element instanceof RiftGuiScrollableSectionContents.ProgressBarElement) {
+            RiftGuiScrollableSectionContents.ProgressBarElement pBar = (RiftGuiScrollableSectionContents.ProgressBarElement) element;
+
+            String label = pBar.getHeaderText();
+            float scale = pBar.getHeaderScale();
+            int scaledHeaderHeight = (int) (this.fontRenderer.FONT_HEIGHT * scale);
+
+            //draw label with scaling
+            if (scale != 1f) {
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(scale, scale, scale);
+                this.fontRenderer.drawString(
+                        label,
+                        (int)(x / scale),
+                        (int)(y / scale),
+                        pBar.getHeaderTextColor()
+                );
+                GlStateManager.popMatrix();
+            }
+            else this.fontRenderer.drawString(label, x, y, pBar.getHeaderTextColor());
+
+            //progress bar position below scaled label
+            int progressX = x;
+            int progressY = y + scaledHeaderHeight + 2;
+
+            //draw frame
+            this.drawRectOutline(progressX, progressY, pBar.getWidth() + 2, 3, 0xFF000000);
+
+            //draw background and overlay
+            this.drawRectOutline(progressX + 1, progressY + 1, pBar.getWidth(), 1, (0xFF000000 | pBar.getBackgroundColor()));
+            if (pBar.getPercentage() > 0) {
+                this.drawRectOutline(progressX + 1, progressY + 1, (int) (pBar.getWidth() * pBar.getPercentage()), 1, (0xFF000000 | pBar.getOverlayColor()));
+            }
+
+            return scaledHeaderHeight + 3 + this.fontRenderer.FONT_HEIGHT;
         }
         else if (element instanceof RiftGuiScrollableSectionContents.TabElement) {
             RiftGuiScrollableSectionContents.TabElement tab = (RiftGuiScrollableSectionContents.TabElement) element;

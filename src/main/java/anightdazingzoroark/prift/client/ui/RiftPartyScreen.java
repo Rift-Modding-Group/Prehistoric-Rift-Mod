@@ -1,8 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
-import anightdazingzoroark.prift.client.ui.elements.RiftPartyMemButton;
+import anightdazingzoroark.prift.client.ui.elements.*;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -27,7 +26,11 @@ public class RiftPartyScreen extends GuiScreen {
     private final List<GuiButton> partyMemManageButtons = new ArrayList<>();
     private RiftClickableSection swapPartyMemsButton;
     private RiftClickableSection journalButton;
+    private RiftClickableSection creatureInfoButton;
+    private RiftClickableSection creatureMovesButton;
+    private RiftPartyMemScrollableSection infoScrollableSection;
     private RiftCreature creatureToDraw;
+    private boolean moveManagement;
     private int partyMemPos = -1;
     protected final int xSize = 373;
     protected final int ySize = 182;
@@ -53,10 +56,10 @@ public class RiftPartyScreen extends GuiScreen {
 
         //create journal button
         String journalString = I18n.format("journal.party_button.journal");
-        this.journalButton = new RiftClickableSection(54, 10, this.width, this.height, -123, 67, this.fontRenderer, this.mc);
-        this.journalButton.addString(journalString, false, 0x000000, 5, 1, 0.75f);
+        this.journalButton = new RiftClickableSection(54, 11, this.width, this.height, -123, 67, this.fontRenderer, this.mc);
+        this.journalButton.addString(journalString, false, 0x000000, 0, 0, 0.75f);
 
-        //init buttons
+        //init party member management buttons
         this.partyMemManageButtons.clear();
         int xButtonOffset = (this.width - 80) / 2;
         int yButtonOffset = (this.height - 20) / 2 + 25;
@@ -75,6 +78,23 @@ public class RiftPartyScreen extends GuiScreen {
         String changeNameString = I18n.format("journal.party_button.change_name");
         GuiButton changeNameButton = new GuiButton(2, xButtonOffset, yButtonOffset + 50, 80, 20, changeNameString);
         this.partyMemManageButtons.add(changeNameButton);
+
+        //creature info button (when theres a selected creature)
+        String creatureInfoButtonString = I18n.format("journal.party_member.info");
+        this.creatureInfoButton = new RiftClickableSection(54, 11, this.width, this.height, 94, -85, this.fontRenderer, this.mc);
+        this.creatureInfoButton.addString(creatureInfoButtonString, false, 0x000000, 0, 1, 0.75f);
+        this.creatureInfoButton.setSelected(!this.moveManagement);
+
+        //creature moves button (when theres a selected creature)
+        String creatureMovesButtonString = I18n.format("journal.party_member.moves");
+        this.creatureMovesButton = new RiftClickableSection(54, 11, this.width, this.height, 152, -85, this.fontRenderer, this.mc);
+        this.creatureMovesButton.addString(creatureMovesButtonString, false, 0x000000, 0, 1, 0.75f);
+        this.creatureMovesButton.setSelected(this.moveManagement);
+
+        //scrollable section for creature info
+        this.infoScrollableSection = new RiftPartyMemScrollableSection(this.width, this.height, this.fontRenderer, this.mc);
+        if (this.partyMemPos >= 0) this.infoScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
+
 
         //by default selected button is the first one
         //PlayerTamedCreaturesHelper.setLastSelected(this.mc.player, 0);
@@ -95,7 +115,7 @@ public class RiftPartyScreen extends GuiScreen {
         this.drawGuiContainerBackgroundLayer();
 
         //draw party label
-        String partyLabel = "Party";
+        String partyLabel = I18n.format("journal.party_label.party");
         int partyLabelX = (this.width - this.fontRenderer.getStringWidth(partyLabel)) / 2 - 165 + selectedXOffset;
         int partyLabelY = (this.height - this.fontRenderer.FONT_HEIGHT) / 2 - 68 + selectedYOffset;
         this.fontRenderer.drawString(partyLabel, partyLabelX, partyLabelY, 0x000000);
@@ -151,6 +171,17 @@ public class RiftPartyScreen extends GuiScreen {
             for (GuiButton partyMemButton: this.partyMemManageButtons) {
                 partyMemButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
             }
+
+            //draw creature info button
+            this.creatureInfoButton.drawSection(mouseX, mouseY);
+
+            //draw creature moves button
+            this.creatureMovesButton.drawSection(mouseX, mouseY);
+
+            //draw moves when move management is true
+            if (this.moveManagement) {}
+            //draw info when move management is false
+            else this.infoScrollableSection.drawSectionContents(mouseX, mouseY, partialTicks);
         }
     }
 
@@ -166,17 +197,44 @@ public class RiftPartyScreen extends GuiScreen {
                 if (this.partyMemPos != x) {
                     this.creatureToDraw = partyMemButton.getCreatureFromNBT();
                     this.partyMemPos = x;
+                    this.infoScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
                 }
                 else {
                     this.creatureToDraw = null;
                     this.partyMemPos = -1;
+                    this.infoScrollableSection.setCreatureNBT(new NBTTagCompound());
                 }
+
+                //reset back to creature info
+                this.moveManagement = false;
+                this.creatureInfoButton.setSelected(true);
+                this.creatureMovesButton.setSelected(false);
+
+                //play sound
+                partyMemButton.playPressSound(this.mc.getSoundHandler());
             }
         }
 
         //open the journal upon opening journal button
         if (this.journalButton.isHovered(mouseX, mouseY)) {
+            //play sound
+            this.journalButton.playPressSound(this.mc.getSoundHandler());
+            //open ui
             this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_JOURNAL, this.mc.world, 0, 0, 0);
+        }
+
+        //open creature info
+        if (this.creatureInfoButton.isHovered(mouseX, mouseY)) {
+            if (this.moveManagement) this.creatureInfoButton.playPressSound(this.mc.getSoundHandler());
+            this.moveManagement = false;
+            this.creatureInfoButton.setSelected(true);
+            this.creatureMovesButton.setSelected(false);
+        }
+        else if (this.creatureMovesButton.isHovered(mouseX, mouseY)) {
+            if (!this.moveManagement) this.creatureMovesButton.playPressSound(this.mc.getSoundHandler());
+            this.moveManagement = true;
+            this.creatureInfoButton.setSelected(false);
+            this.creatureMovesButton.setSelected(true);
         }
     }
 

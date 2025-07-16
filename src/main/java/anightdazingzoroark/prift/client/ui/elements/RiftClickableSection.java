@@ -1,8 +1,11 @@
 package anightdazingzoroark.prift.client.ui.elements;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
@@ -106,16 +109,16 @@ public class RiftClickableSection {
             if (this.stringHasShadow) {
                 this.fontRenderer.drawStringWithShadow(
                         this.stringToRender,
-                        (int)(((this.guiWidth - stringWidth) / 2f + this.xOffset + this.stringXOffset + this.xAddOffset) / (this.scale * this.textScale)),
-                        (int)(((this.guiHeight - this.fontRenderer.FONT_HEIGHT) / 2f + this.yOffset + this.stringYOffset + this.yAddOffset) / (this.scale * this.textScale)),
+                        (int)(((this.guiWidth - (stringWidth * this.scale * this.textScale)) / 2f + this.xOffset + this.stringXOffset + this.xAddOffset) / (this.scale * this.textScale)),
+                        (int)(((this.guiHeight - (this.fontRenderer.FONT_HEIGHT * this.scale * this.textScale)) / 2f + this.yOffset + this.stringYOffset + this.yAddOffset) / (this.scale * this.textScale)),
                         this.getTextColor()
                 );
             }
             else {
                 this.fontRenderer.drawString(
                         this.stringToRender,
-                        (int)(((this.guiWidth - stringWidth) / 2f + this.xOffset + this.stringXOffset + this.xAddOffset) / (this.scale * this.textScale)),
-                        (int)(((this.guiHeight - this.fontRenderer.FONT_HEIGHT) / 2f + this.yOffset + this.stringYOffset + this.yAddOffset) / (this.scale * this.textScale)),
+                        (int)(((this.guiWidth - (stringWidth * this.scale * this.textScale)) / 2f + this.xOffset + this.stringXOffset + this.xAddOffset) / (this.scale * this.textScale)),
+                        (int)(((this.guiHeight - (this.fontRenderer.FONT_HEIGHT * this.scale * this.textScale)) / 2f + this.yOffset + this.stringYOffset + this.yAddOffset) / (this.scale * this.textScale)),
                         this.getTextColor()
                 );
             }
@@ -161,5 +164,9 @@ public class RiftClickableSection {
         if (this.isSelected) return 0x5A3B1A; //brown for active
         else if (this.isHovered) return 0xFFFF00; //yellow for hover
         return this.stringColor;
+    }
+
+    public void playPressSound(SoundHandler soundHandlerIn) {
+        soundHandlerIn.playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 }
