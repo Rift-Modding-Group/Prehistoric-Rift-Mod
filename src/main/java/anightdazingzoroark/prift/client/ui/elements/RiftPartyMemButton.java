@@ -29,9 +29,9 @@ public class RiftPartyMemButton extends RiftClickableSection {
         this.uvWidth = 57;
         this.uvHeight = 38;
         this.textureWidth = 400;
-        this.textureHeight = 312;
+        this.textureHeight = 360;
         this.xUV = 0;
-        this.yUV = 178;
+        this.yUV = 203;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class RiftPartyMemButton extends RiftClickableSection {
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
             int k = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
             int l = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
-            drawModalRectWithCustomSizedTexture(k, l, 0, 216, 57, 30, this.textureWidth, this.textureHeight);
+            drawModalRectWithCustomSizedTexture(k, l, 0, 241, 57, 30, this.textureWidth, this.textureHeight);
         }
 
         //put on yellow hoverlay when selected
@@ -69,7 +69,7 @@ public class RiftPartyMemButton extends RiftClickableSection {
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
             int k = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
             int l = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
-            drawModalRectWithCustomSizedTexture(k, l, 0, 246, 57, 30, this.textureWidth, this.textureHeight);
+            drawModalRectWithCustomSizedTexture(k, l, 0, 271, 57, 30, this.textureWidth, this.textureHeight);
         }
 
         //create green background for icon overlay if creature has been deployed
@@ -78,7 +78,7 @@ public class RiftPartyMemButton extends RiftClickableSection {
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
             int k = (this.guiWidth - 18) / 2 + this.xOffset + this.xAddOffset - 18;
             int l = (this.guiHeight - 18) / 2 + this.yOffset + this.yAddOffset - 8;
-            drawModalRectWithCustomSizedTexture(k, l, 57, 178, 18, 18, this.textureWidth, this.textureHeight);
+            drawModalRectWithCustomSizedTexture(k, l, 57, 203, 18, 18, this.textureWidth, this.textureHeight);
         }
 
         //create creature icon overlay
@@ -134,7 +134,7 @@ public class RiftPartyMemButton extends RiftClickableSection {
         int hpBarLength = MathHelper.clamp((int) ((health / maxHealth) * 51),0,51);
         int hpBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 26;
         int hpBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 12;
-        drawModalRectWithCustomSizedTexture(hpBarX, hpBarY, 0, 276, hpBarLength, 1, this.textureWidth, this.textureHeight);
+        drawModalRectWithCustomSizedTexture(hpBarX, hpBarY, 0, 301, hpBarLength, 1, this.textureWidth, this.textureHeight);
 
         //render creature energy
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -144,7 +144,7 @@ public class RiftPartyMemButton extends RiftClickableSection {
         int energyBarLength = MathHelper.clamp((int) ((energy / maxEnergy) * 51),0,51);
         int energyBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 26;
         int energyBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 14;
-        drawModalRectWithCustomSizedTexture(energyBarX, energyBarY, 0, 277, energyBarLength, 1, this.textureWidth, this.textureHeight);
+        drawModalRectWithCustomSizedTexture(energyBarX, energyBarY, 0, 302, energyBarLength, 1, this.textureWidth, this.textureHeight);
 
         //render creature xp
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -154,7 +154,7 @@ public class RiftPartyMemButton extends RiftClickableSection {
         int xpBarLength = MathHelper.clamp((int) ((xp / maxXP) * 51),0,51);
         int xpBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 26;
         int xpBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 16;
-        drawModalRectWithCustomSizedTexture(xpBarX, xpBarY, 0, 278, xpBarLength, 1, this.textureWidth, this.textureHeight);
+        drawModalRectWithCustomSizedTexture(xpBarX, xpBarY, 0, 303, xpBarLength, 1, this.textureWidth, this.textureHeight);
     }
 
     public NBTTagCompound getCreatureNBT() {

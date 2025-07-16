@@ -5,9 +5,12 @@ import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftPartyMemButton;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
@@ -21,12 +24,13 @@ import java.util.List;
 public class RiftPartyScreen extends GuiScreen {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/party_background.png");
     private final List<RiftPartyMemButton> partyMemButtons = new ArrayList<>();
+    private final List<GuiButton> partyMemManageButtons = new ArrayList<>();
     private RiftClickableSection swapPartyMemsButton;
     private RiftClickableSection journalButton;
     private RiftCreature creatureToDraw;
     private int partyMemPos = -1;
     protected final int xSize = 373;
-    protected final int ySize = 157;
+    protected final int ySize = 182;
 
     @Override
     public void initGui() {
@@ -34,7 +38,7 @@ public class RiftPartyScreen extends GuiScreen {
 
         //create swap party members button
         this.swapPartyMemsButton = new RiftClickableSection(19, 17, this.width, this.height, -71, -67, this.fontRenderer, this.mc);
-        this.swapPartyMemsButton.addImage(background, 20, 18, 400, 312, 75, 178, 95, 178);
+        this.swapPartyMemsButton.addImage(background, 20, 18, 400, 360, 75, 203, 95, 203);
         this.swapPartyMemsButton.setScale(0.75f);
 
         //create party buttons
@@ -48,9 +52,29 @@ public class RiftPartyScreen extends GuiScreen {
         }
 
         //create journal button
-        String journalString = "Journal";
+        String journalString = I18n.format("journal.party_button.journal");
         this.journalButton = new RiftClickableSection(54, 10, this.width, this.height, -123, 67, this.fontRenderer, this.mc);
         this.journalButton.addString(journalString, false, 0x000000, 5, 1, 0.75f);
+
+        //init buttons
+        this.partyMemManageButtons.clear();
+        int xButtonOffset = (this.width - 80) / 2;
+        int yButtonOffset = (this.height - 20) / 2 + 25;
+
+        //create summon/dismiss button
+        String summonString = I18n.format("journal.party_button.summon");
+        GuiButton summonButton = new GuiButton(0, xButtonOffset, yButtonOffset, 80, 20, summonString);
+        this.partyMemManageButtons.add(summonButton);
+
+        //create teleport button
+        String teleportString = I18n.format("journal.party_button.teleport");
+        GuiButton teleportButton = new GuiButton(1, xButtonOffset, yButtonOffset + 25, 80, 20, teleportString);
+        this.partyMemManageButtons.add(teleportButton);
+
+        //create change name button
+        String changeNameString = I18n.format("journal.party_button.change_name");
+        GuiButton changeNameButton = new GuiButton(2, xButtonOffset, yButtonOffset + 50, 80, 20, changeNameString);
+        this.partyMemManageButtons.add(changeNameButton);
 
         //by default selected button is the first one
         //PlayerTamedCreaturesHelper.setLastSelected(this.mc.player, 0);
@@ -65,7 +89,7 @@ public class RiftPartyScreen extends GuiScreen {
         else return;
 
         int selectedXOffset = this.hasSelectedCreature() ? 0 : 124;
-        int selectedYOffset = this.hasSelectedCreature() ? 0 : 3;
+        int selectedYOffset = this.hasSelectedCreature() ? -13 : 3;
 
         //draw screen
         this.drawGuiContainerBackgroundLayer();
@@ -88,8 +112,20 @@ public class RiftPartyScreen extends GuiScreen {
         this.swapPartyMemsButton.setAdditionalOffset(selectedXOffset, selectedYOffset);
         this.swapPartyMemsButton.drawSection(mouseX, mouseY);
 
-        //draw selected creature
+        //draw journal button
+        int jButtonXOffset = this.hasSelectedCreature() ? 0 : -2;
+        this.journalButton.setAdditionalOffset(selectedXOffset + jButtonXOffset, selectedYOffset);
+        this.journalButton.drawSection(mouseX, mouseY);
+
+        //everything else from here on out requires a selected creature
         if (this.hasSelectedCreature()) {
+            NBTTagCompound tagCompound = this.partyMemButtons.get(this.partyMemPos).getCreatureNBT();
+            RiftCreatureType creatureType = RiftCreatureType.values()[tagCompound.getByte("CreatureType")];
+            String partyMemName = (tagCompound.hasKey("CustomName") && !tagCompound.getString("CustomName").isEmpty()) ? tagCompound.getString("CustomName") : creatureType.getTranslatedName();
+
+            //todo: draw red background for ded creature
+
+            //draw selected creature
             GlStateManager.pushMatrix();
             GlStateManager.pushMatrix();
             GlStateManager.enableDepth();
@@ -100,12 +136,22 @@ public class RiftPartyScreen extends GuiScreen {
             this.mc.getRenderManager().renderEntity(this.creatureToDraw, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
             GlStateManager.popMatrix();
             GlStateManager.popMatrix();
-        }
 
-        //draw journal button
-        int jButtonXOffset = this.hasSelectedCreature() ? 0 : -2;
-        this.journalButton.setAdditionalOffset(selectedXOffset + jButtonXOffset, selectedYOffset);
-        this.journalButton.drawSection(mouseX, mouseY);
+            //draw creature name and level here
+            float partyMemNameScale = 0.75f;
+            String partyMemNameString = I18n.format("journal.party_member.name", partyMemName, tagCompound.getInteger("Level"));
+            int partyMemNameX = (int) ((this.width - this.fontRenderer.getStringWidth(partyMemNameString) * partyMemNameScale) / (2 * partyMemNameScale));
+            int partyMemNameY = (int) ((this.height - this.fontRenderer.FONT_HEIGHT * partyMemNameScale) / (2 * partyMemNameScale) + (15 * partyMemNameScale));
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(partyMemNameScale, partyMemNameScale, partyMemNameScale);
+            this.fontRenderer.renderString(partyMemNameString, partyMemNameX, partyMemNameY, 0x000000, false);
+            GlStateManager.popMatrix();
+
+            //draw member management buttons
+            for (GuiButton partyMemButton: this.partyMemManageButtons) {
+                partyMemButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
+            }
+        }
     }
 
     @Override
@@ -138,12 +184,12 @@ public class RiftPartyScreen extends GuiScreen {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(background);
         int xScreenSize = this.hasSelectedCreature() ? 373 : 125;
-        int yScreenSize = this.hasSelectedCreature() ? 157 : 151;
+        int yScreenSize = this.hasSelectedCreature() ? 182 : 151;
         int k = (this.width - xScreenSize) / 2;
         int l = (this.height - yScreenSize) / 2;
         int uvX = this.hasSelectedCreature() ? 0 : 162;
-        int uvY = this.hasSelectedCreature() ? 0 : 157;
-        drawModalRectWithCustomSizedTexture(k, l, uvX, uvY, xScreenSize, yScreenSize, 400f, 312f);
+        int uvY = this.hasSelectedCreature() ? 0 : 182;
+        drawModalRectWithCustomSizedTexture(k, l, uvX, uvY, xScreenSize, yScreenSize, 400f, 360f);
     }
 
     private boolean hasSelectedCreature() {
