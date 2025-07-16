@@ -33,11 +33,18 @@ public class RiftClickableSection {
     private int stringColor;
     private int stringXOffset;
     private int stringYOffset;
+    private float textScale = 1f;
 
     //image related stuff
     protected ResourceLocation textureLocation;
     protected int textureWidth, textureHeight, uvWidth, uvHeight;
     protected int xUV, yUV, hoveredXUV, hoveredYUV;
+
+    //scale related stuff
+    protected float scale = 1f;
+
+    //additional offsets
+    protected int xAddOffset, yAddOffset;
 
     public RiftClickableSection(int width, int height, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
         this.width = width;
@@ -50,12 +57,13 @@ public class RiftClickableSection {
         this.minecraft = minecraft;
     }
 
-    public void addString(String value, boolean withShadow, int color, int stringXOffset, int stringYOffset) {
+    public void addString(String value, boolean withShadow, int color, int stringXOffset, int stringYOffset, float textScale) {
         this.stringToRender = value;
         this.stringHasShadow = withShadow;
         this.stringColor = color;
         this.stringXOffset = stringXOffset;
         this.stringYOffset = stringYOffset;
+        this.textScale = textScale;
     }
 
     public void addImage(ResourceLocation texture, int uvWidth, int uvHeight, int textureWidth, int textureHeight, int xUV, int yUV, int hoveredXUV, int hoveredYUV) {
@@ -70,6 +78,15 @@ public class RiftClickableSection {
         this.hoveredYUV = hoveredYUV;
     }
 
+    public void setScale(float scale) {
+        this.scale = scale;
+    }
+
+    public void setAdditionalOffset(int xAddOffset, int yAddOffset) {
+        this.xAddOffset = xAddOffset;
+        this.yAddOffset = yAddOffset;
+    }
+
     public void drawSection(int mouseX, int mouseY) {
         //deal with hovering
         this.isHovered = this.isHovered(mouseX, mouseY);
@@ -77,40 +94,59 @@ public class RiftClickableSection {
         //draw string
         if (this.stringToRender != null) {
             int stringWidth = this.fontRenderer.getStringWidth(this.stringToRender);
+            //scaling start
+            if (this.scale < 1) {
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(this.scale, this.scale, this.scale);
+            }
+            if (this.textScale < 1) {
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(this.textScale, this.textScale, this.textScale);
+            }
             if (this.stringHasShadow) {
                 this.fontRenderer.drawStringWithShadow(
                         this.stringToRender,
-                        (int)((this.guiWidth - stringWidth) / 2 + this.xOffset + this.stringXOffset),
-                        (int)((this.guiHeight - this.fontRenderer.FONT_HEIGHT) / 2 + this.yOffset + this.stringYOffset),
+                        (int)(((this.guiWidth - stringWidth) / 2f + this.xOffset + this.stringXOffset + this.xAddOffset) / (this.scale * this.textScale)),
+                        (int)(((this.guiHeight - this.fontRenderer.FONT_HEIGHT) / 2f + this.yOffset + this.stringYOffset + this.yAddOffset) / (this.scale * this.textScale)),
                         this.getTextColor()
                 );
             }
             else {
                 this.fontRenderer.drawString(
                         this.stringToRender,
-                        (int)((this.guiWidth - stringWidth) / 2 + this.xOffset + this.stringXOffset),
-                        (int)((this.guiHeight - this.fontRenderer.FONT_HEIGHT) / 2 + this.yOffset + this.stringYOffset),
+                        (int)(((this.guiWidth - stringWidth) / 2f + this.xOffset + this.stringXOffset + this.xAddOffset) / (this.scale * this.textScale)),
+                        (int)(((this.guiHeight - this.fontRenderer.FONT_HEIGHT) / 2f + this.yOffset + this.stringYOffset + this.yAddOffset) / (this.scale * this.textScale)),
                         this.getTextColor()
                 );
             }
+            //end scaling
+            if (this.textScale < 1) GlStateManager.popMatrix();
+            if (this.scale < 1) GlStateManager.popMatrix();
         }
 
         //draw image
         if (this.textureLocation != null) {
+            //scaling start
+            if (this.scale < 1) {
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(this.scale, this.scale, this.scale);
+            }
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
-            int k = (this.guiWidth - this.width) / 2 + this.xOffset;
-            int l = (this.guiHeight - this.height) / 2 + this.yOffset;
+            int k = (int) (((float) (this.guiWidth - this.width) / 2f + this.xOffset + this.xAddOffset) / this.scale);
+            int l = (int) (((float) (this.guiHeight - this.height) / 2f + this.yOffset + this.yAddOffset) / this.scale);
             int xUVTexture = this.isHovered ? this.hoveredXUV : this.xUV;
             int yUVTexture = this.isHovered ? this.hoveredYUV : this.yUV;
             drawModalRectWithCustomSizedTexture(k, l, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
+            //end scaling
+            if (this.scale < 1) GlStateManager.popMatrix();
         }
     }
 
     public boolean isHovered(int mouseX, int mouseY) {
-        int x = (this.guiWidth - this.width) / 2 + this.xOffset;
-        int y = (this.guiHeight - this.height) / 2 + this.yOffset;
-        return mouseX >= x && mouseX <= x + this.width && mouseY >= y && mouseY <= y + this.height;
+        int x = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
+        int y = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
+        return mouseX >= x && mouseX <= x + this.width * this.scale && mouseY >= y && mouseY <= y + this.height * this.scale;
     }
 
     public void setSelected(boolean value) {

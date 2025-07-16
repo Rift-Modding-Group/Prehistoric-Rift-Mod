@@ -159,7 +159,7 @@ public class ServerEvents {
             RiftCreature creature = (RiftCreature)event.getEntityLiving();
             if (!PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(creature.creatureType)) {
                 PlayerJournalProgressHelper.unlockCreature(player, creature.creatureType);
-                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
             }
         }
     }

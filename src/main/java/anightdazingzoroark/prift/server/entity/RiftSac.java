@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.server.entity;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.server.RiftGui;
-import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
@@ -20,7 +19,6 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -30,7 +28,6 @@ import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 public class RiftSac extends EntityTameable implements IAnimatable {
     private static final DataParameter<Integer> HATCH_TIME = EntityDataManager.<Integer>createKey(RiftSac.class, DataSerializers.VARINT);
@@ -76,7 +73,7 @@ public class RiftSac extends EntityTameable implements IAnimatable {
                 //update journal
                 if (PlayerJournalProgressHelper.getUnlockedCreatures(owner).containsKey(this.getCreatureType()) && !PlayerJournalProgressHelper.getUnlockedCreatures(owner).get(this.getCreatureType())) {
                     PlayerJournalProgressHelper.unlockCreature(owner, this.getCreatureType());
-                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.getCreatureType().getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.getCreatureType().getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
                 }
 
                 //update player tamed creatures

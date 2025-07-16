@@ -107,7 +107,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
                 //update journal
                 if (PlayerJournalProgressHelper.getUnlockedCreatures(owner).containsKey(this.getCreatureType()) && !PlayerJournalProgressHelper.getUnlockedCreatures(owner).get(this.getCreatureType())) {
                     PlayerJournalProgressHelper.unlockCreature(owner, this.getCreatureType());
-                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.getCreatureType().getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.getCreatureType().getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
                 }
 
                 if (this.getCreatureType() != RiftCreatureType.DODO) {

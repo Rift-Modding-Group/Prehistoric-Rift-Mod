@@ -113,9 +113,11 @@ public class RiftGui implements IGuiHandler {
             IInventory playerInventory = player.inventory;
             return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);
         }
-        else if (id == GUI_JOURNAL) {
-            //return new RiftNewJournalScreen();
+        else if (id == GUI_PARTY) {
             return new RiftPartyScreen();
+        }
+        else if (id == GUI_JOURNAL) {
+            return new RiftJournalScreen();
         }
         else if (id == GUI_FEEDING_TROUGH) {
             if (tileEntity instanceof RiftTileEntityFeedingTrough) {

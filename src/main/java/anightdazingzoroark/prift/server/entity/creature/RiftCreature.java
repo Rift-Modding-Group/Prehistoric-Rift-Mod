@@ -74,7 +74,6 @@ import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
-import scala.Int;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -605,11 +604,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         })) {
             if (this.creatureType.isTameable) {
                 PlayerJournalProgressHelper.discoverCreature(player, this.creatureType);
-                player.sendStatusMessage(new TextComponentTranslation("reminder.discovered_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.discovered_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
             }
             else {
                 PlayerJournalProgressHelper.unlockCreature(player, this.creatureType);
-                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
             }
         }
     }
@@ -963,7 +962,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             //update journal
             if (PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(this.creatureType) && !PlayerJournalProgressHelper.getUnlockedCreatures(player).get(this.creatureType)) {
                 PlayerJournalProgressHelper.unlockCreature(player, this.creatureType);
-                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
             }
 
             //update tamed creature list
@@ -1870,7 +1869,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 //update journal
                 if (PlayerJournalProgressHelper.getUnlockedCreatures(owner).containsKey(baby.creatureType) && !PlayerJournalProgressHelper.getUnlockedCreatures(owner).get(baby.creatureType)) {
                     PlayerJournalProgressHelper.unlockCreature(owner, baby.creatureType);
-                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", baby.creatureType.getTranslatedName(), RiftControls.openJournal.getDisplayName()), false);
+                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", baby.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
                 }
 
                 //update player tamed creatures

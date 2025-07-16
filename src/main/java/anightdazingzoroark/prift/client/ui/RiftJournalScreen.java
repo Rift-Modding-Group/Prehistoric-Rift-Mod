@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
@@ -99,7 +100,8 @@ public class RiftJournalScreen extends GuiScreen {
                 true,
                 0xffffff,
                 0,
-                1
+                1,
+                1f
         );
         this.indexClickableSection.setSelected(true); //index is the first thing, so here
 
@@ -109,7 +111,8 @@ public class RiftJournalScreen extends GuiScreen {
                 true,
                 0xffffff,
                 0,
-                1
+                1,
+                1f
         );
 
         this.partyClickableSection = new RiftClickableSection(12, 12, this.width, this.height, 191, -112, this.fontRenderer, this.mc);
@@ -271,6 +274,11 @@ public class RiftJournalScreen extends GuiScreen {
                 b.playPressSound(this.mc.getSoundHandler());
                 this.onButtonClicked(b);
             }
+        }
+
+        //return to party screen
+        if (this.partyClickableSection.isHovered(mouseX, mouseY)) {
+            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, 0, 0, 0);
         }
     }
 
