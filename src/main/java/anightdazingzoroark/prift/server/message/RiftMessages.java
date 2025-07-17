@@ -117,5 +117,10 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftChangeDeploymentType.Handler.class, RiftChangeDeploymentType.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftManageBlockBreakControl.Handler.class, RiftManageBlockBreakControl.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetEntityMotion.Handler.class, RiftSetEntityMotion.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftNewUpdatePartyDeployed.Handler.class, RiftNewUpdatePartyDeployed.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftNewUpdatePartyDeployed.Handler.class, RiftNewUpdatePartyDeployed.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftNewAddToParty.Handler.class, RiftNewAddToParty.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftNewRemoveCreature.Handler.class, RiftNewRemoveCreature.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftNewRemoveCreature.Handler.class, RiftNewRemoveCreature.class, id++, Side.CLIENT);
     }
 }

@@ -18,7 +18,7 @@ import net.minecraft.util.math.MathHelper;
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 
 public class RiftPartyMemButton extends RiftClickableSection {
-    private final NBTTagCompound creatureNBT;
+    private NBTTagCompound creatureNBT;
 
     public RiftPartyMemButton(NBTTagCompound creatureNBT, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
         super(57, 38, guiWidth, guiHeight, xOffset, yOffset, fontRenderer, minecraft);
@@ -124,9 +124,9 @@ public class RiftPartyMemButton extends RiftClickableSection {
             if (nbtBase instanceof NBTTagCompound) {
                 NBTTagCompound tagCompound = (NBTTagCompound) nbtBase;
 
-                if (!tagCompound.hasKey("generic.maxHealth") || !tagCompound.getString("Name").equals("generic.maxHealth")) continue;
+                if (!tagCompound.hasKey("Name") || !tagCompound.getString("Name").equals("generic.maxHealth")) continue;
 
-                maxHealth = Math.min((float) tagCompound.getDouble("Base"), health);
+                maxHealth = (float) tagCompound.getDouble("Base");
             }
         }
         //now draw the hp bar
@@ -155,6 +155,10 @@ public class RiftPartyMemButton extends RiftClickableSection {
         int xpBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 26;
         int xpBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 16;
         drawModalRectWithCustomSizedTexture(xpBarX, xpBarY, 0, 303, xpBarLength, 1, this.textureWidth, this.textureHeight);
+    }
+
+    public void setCreatureNBT(NBTTagCompound nbtTagCompound) {
+        this.creatureNBT = nbtTagCompound;
     }
 
     public NBTTagCompound getCreatureNBT() {

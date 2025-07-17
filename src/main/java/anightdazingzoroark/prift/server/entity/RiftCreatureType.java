@@ -393,7 +393,7 @@ public enum RiftCreatureType {
             300,
             0.5f,
             EggTemperature.COLD
-    ),
+    )/*,
     TENONTOSAURUS(
             Tenontosaurus.class,
             null,
@@ -412,7 +412,7 @@ public enum RiftCreatureType {
             180,
             1f,
             EggTemperature.WARM
-    );
+    )*/;
 
     private final Class<? extends RiftCreature> creature;
     private final Class<? extends RiftCreatureConfig> config;

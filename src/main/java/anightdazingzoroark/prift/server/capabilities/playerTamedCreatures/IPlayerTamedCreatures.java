@@ -12,6 +12,7 @@ public interface IPlayerTamedCreatures {
     //for direct values
     void setPartyNBT(List<NBTTagCompound> compound);
     List<NBTTagCompound> getPartyNBT();
+    void setPartyMemNBT(int index, NBTTagCompound compound);
     void addToPartyNBT(NBTTagCompound compound);
     void removeFromPartyNBT(NBTTagCompound compound);
     void setBoxNBT(List<NBTTagCompound> compound);

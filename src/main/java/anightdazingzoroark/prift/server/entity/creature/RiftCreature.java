@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
@@ -205,6 +206,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int chosenAnimFromMultiple = -1;
     private int resetEnergyTick;
     public int lastIntervalForMoveCall;
+    private int ticksSinceHitboxRemoval = 0;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -445,7 +447,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             RiftMessages.WRAPPER.sendToServer(new RiftSetSprinting(this, this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting()));
         }
         if (this.isBurrowing()) this.manageBurrowingEffects();
-        this.updateParts();
+        if (this.getDeploymentType() != PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
+                && this.getDeploymentType() != PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) this.updateParts();
+        else {
+            this.deleteAllHitboxes();
+            this.ticksSinceHitboxRemoval++;
+            if (this.ticksSinceHitboxRemoval > 2 && !this.world.isRemote) {
+                this.world.removeEntity(this);
+            }
+        }
         this.manageGrabVictim();
     }
 
@@ -966,10 +976,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
 
             //update tamed creature list
-            if (PlayerTamedCreaturesHelper.getPlayerParty(player).size() < PlayerTamedCreaturesHelper.getMaxPartySize(player)) {
+            if (NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(player).size() < NewPlayerTamedCreaturesHelper.getMaxPartySize(player)) {
                 this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                RiftMessages.WRAPPER.sendToAll(new RiftChangeDeploymentType(this, PlayerTamedCreatures.DeploymentType.PARTY));
-                PlayerTamedCreaturesHelper.addToPlayerParty(player, this);
+                NewPlayerTamedCreaturesHelper.addCreatureToParty(player, this);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
             }
             else if (PlayerTamedCreaturesHelper.getPlayerBox(player).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(player)) {
@@ -2275,6 +2284,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public World getWorld() {
         return this.world;
+    }
+
+    private void deleteAllHitboxes() {
+        for (Entity entity : this.hitboxArray) {
+            EntityHitbox hitbox = (EntityHitbox) entity;
+            this.world.removeEntityDangerously(hitbox);
+        }
     }
 
     public EntityHitbox getHeadHitbox() {

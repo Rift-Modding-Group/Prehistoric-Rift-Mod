@@ -1,10 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -75,7 +72,7 @@ public class RiftDeployPartyMem implements IMessage {
 
                     //create creature
                     NBTTagCompound creatureCompound = playerTamedCreatures.getPartyNBT().get(message.position);
-                    RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(messagePlayer.world, creatureCompound);
+                    RiftCreature creature = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(messagePlayer.world, creatureCompound);
 
                     if (creature != null) {
                         creature.setPosition(player.posX, player.posY, player.posZ);
@@ -92,34 +89,12 @@ public class RiftDeployPartyMem implements IMessage {
                     RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, uuid);
                     if (partyMember != null) {
                         partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                        PlayerTamedCreaturesHelper.updatePartyMem(partyMember);
+                        //creature removal is already handled in RiftCreature
                     }
                 }
 
                 //repeat on the client side
-                if (!message.interMessage) RiftMessages.WRAPPER.sendToAll(new RiftDeployPartyMem(player, message.position, message.deploy, true));
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                UUID uuid = playerTamedCreatures.getPartyCreatures(messagePlayer.world).get(message.position).getUniqueID();
-
-                if (message.deploy) {
-                    //edit nbt
-                    NBTTagCompound compound = new NBTTagCompound();
-                    compound.setByte("DeploymentType", (byte) PlayerTamedCreatures.DeploymentType.PARTY.ordinal());
-                    playerTamedCreatures.modifyCreature(uuid, compound);
-                }
-                else {
-                    //edit nbt
-                    NBTTagCompound compound = new NBTTagCompound();
-                    compound.setByte("DeploymentType", (byte) PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE.ordinal());
-                    playerTamedCreatures.modifyCreature(uuid, compound);
-                }
-
-                //repeat on the server side
-                if (!message.interMessage) RiftMessages.WRAPPER.sendToServer(new RiftDeployPartyMem(player, message.position, message.deploy, true));
+                //if (!message.interMessage) RiftMessages.WRAPPER.sendToAll(new RiftDeployPartyMem(player, message.position, message.deploy, true));
             }
         }
     }

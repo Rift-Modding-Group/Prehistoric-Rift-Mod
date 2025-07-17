@@ -11,7 +11,8 @@ import java.util.Map;
 
 public class Tenontosaurus extends RiftCreature {
     public Tenontosaurus(World worldIn) {
-        super(worldIn, RiftCreatureType.TENONTOSAURUS);
+        //super(worldIn, RiftCreatureType.TENONTOSAURUS);
+        super(worldIn, null);
     }
 
     @Override

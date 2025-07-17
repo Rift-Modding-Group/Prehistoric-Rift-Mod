@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -76,18 +77,14 @@ public class RiftForceSyncPartyNBT implements IMessage {
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-                if (message.tagCompounds.isEmpty()) RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartyNBT(player, playerTamedCreatures.getPartyNBT()));
-                else playerTamedCreatures.setPartyNBT(message.tagCompounds);
+                RiftMessages.WRAPPER.sendTo(new RiftForceSyncPartyNBT(player, playerTamedCreatures.getPartyNBT()), (EntityPlayerMP) player);
             }
             if (ctx.side == Side.CLIENT) {
                 EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-                if (message.tagCompounds.isEmpty()) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player, playerTamedCreatures.getPartyNBT()));
-                else playerTamedCreatures.setPartyNBT(message.tagCompounds);
+                playerTamedCreatures.setPartyNBT(message.tagCompounds);
             }
         }
     }

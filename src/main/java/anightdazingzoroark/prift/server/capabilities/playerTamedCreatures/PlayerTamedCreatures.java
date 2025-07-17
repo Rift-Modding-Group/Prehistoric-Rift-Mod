@@ -277,6 +277,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
+    public void setPartyMemNBT(int index, NBTTagCompound compound) {
+        this.partyCreatures.set(index, compound);
+    }
+
+    @Override
     public void addToPartyNBT(NBTTagCompound compound) {
         this.partyCreatures.add(compound);
     }

@@ -3,6 +3,8 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.*;
 import anightdazingzoroark.prift.server.RiftGui;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -38,6 +40,7 @@ public class RiftPartyScreen extends GuiScreen {
     @Override
     public void initGui() {
         super.initGui();
+        //NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
         //create swap party members button
         this.swapPartyMemsButton = new RiftClickableSection(19, 17, this.width, this.height, -71, -67, this.fontRenderer, this.mc);
@@ -46,7 +49,7 @@ public class RiftPartyScreen extends GuiScreen {
 
         //create party buttons
         this.partyMemButtons.clear();
-        List<NBTTagCompound> playerPartyNBT = new ArrayList(PlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
+        List<NBTTagCompound> playerPartyNBT = new ArrayList(NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
         for (int x = 0; x < playerPartyNBT.size(); x++) {
             int partyMemXOffset = -154 + (x % 2) * 60;
             int partyMemYOffset = -41 + (x / 2) * 40;
@@ -111,6 +114,9 @@ public class RiftPartyScreen extends GuiScreen {
         int selectedXOffset = this.hasSelectedCreature() ? 0 : 124;
         int selectedYOffset = this.hasSelectedCreature() ? -13 : 3;
 
+        //constantly update party members as long as this screen is opened
+        this.updateAllPartyMems();
+
         //draw screen
         this.drawGuiContainerBackgroundLayer();
 
@@ -169,6 +175,11 @@ public class RiftPartyScreen extends GuiScreen {
 
             //draw member management buttons
             for (GuiButton partyMemButton: this.partyMemManageButtons) {
+                //extra stuff for the buttons
+                //for summon/dismiss
+                if (partyMemButton.id == 0) {
+                    partyMemButton.displayString = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY ? I18n.format("journal.party_button.dismiss") : I18n.format("journal.party_button.summon");
+                }
                 partyMemButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
             }
 
@@ -236,6 +247,23 @@ public class RiftPartyScreen extends GuiScreen {
             this.creatureInfoButton.setSelected(false);
             this.creatureMovesButton.setSelected(true);
         }
+
+        //deal with manage party member buttons
+        for (GuiButton button : this.partyMemManageButtons) {
+            //summon/dismiss
+            if (button.id == 0 && button.isMouseOver()) {
+                if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                    if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
+                        NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, false);
+                        button.playPressSound(this.mc.getSoundHandler());
+                    }
+                }
+                else if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, true);
+                    button.playPressSound(this.mc.getSoundHandler());
+                }
+            }
+        }
     }
 
     protected void drawGuiContainerBackgroundLayer() {
@@ -252,5 +280,32 @@ public class RiftPartyScreen extends GuiScreen {
 
     private boolean hasSelectedCreature() {
         return this.partyMemPos >= 0 && this.creatureToDraw != null;
+    }
+
+    private void updateAllPartyMems() {
+        List<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
+        for (int x = 0; x < this.partyMemButtons.size(); x++) {
+            RiftPartyMemButton button = this.partyMemButtons.get(x);
+            button.setCreatureNBT(newPartyNBT.get(x));
+        }
+        //add new members
+        if (newPartyNBT.size() > this.partyMemButtons.size()) {
+            for (int x = this.partyMemButtons.size(); x < newPartyNBT.size(); x++) {
+                int partyMemXOffset = -154 + (x % 2) * 60;
+                int partyMemYOffset = -41 + (x / 2) * 40;
+                RiftPartyMemButton partyMemButton = new RiftPartyMemButton(newPartyNBT.get(x), this.width, this.height, partyMemXOffset, partyMemYOffset, this.fontRenderer, this.mc);
+                this.partyMemButtons.add(partyMemButton);
+            }
+        }
+    }
+
+    private NBTTagCompound getMemberNBT() {
+        if (this.partyMemPos >= 0) return this.partyMemButtons.get(this.partyMemPos).getCreatureNBT();
+        return new NBTTagCompound();
+    }
+
+    private PlayerTamedCreatures.DeploymentType getPartyMemDeployment() {
+        if (this.getMemberNBT().hasKey("DeploymentType")) return PlayerTamedCreatures.DeploymentType.values()[this.getMemberNBT().getByte("DeploymentType")];
+        return PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE;
     }
 }

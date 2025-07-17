@@ -52,7 +52,11 @@ public class RiftRemoveCreature implements IMessage {
                 }
                 else {
                     EntityHitbox creaturePart = (EntityHitbox) messagePlayer.world.getEntityByID(message.entityId);
-                    if (creaturePart != null) messagePlayer.world.removeEntityDangerously(creaturePart);
+                    System.out.println("msg part to remove: "+creaturePart);
+                    if (creaturePart != null) {
+                        System.out.println("remove part server");
+                        messagePlayer.world.removeEntityDangerously(creaturePart);
+                    }
                 }
             }
             if (ctx.side == Side.CLIENT) {
@@ -64,7 +68,11 @@ public class RiftRemoveCreature implements IMessage {
                 }
                 else {
                     EntityHitbox creaturePart = (EntityHitbox) messagePlayer.world.getEntityByID(message.entityId);
-                    if (creaturePart != null) messagePlayer.world.removeEntityDangerously(creaturePart);
+                    System.out.println("msg part to remove: "+creaturePart);
+                    if (creaturePart != null) {
+                        System.out.println("remove part client");
+                        messagePlayer.world.removeEntityDangerously(creaturePart);
+                    }
                 }
             }
         }

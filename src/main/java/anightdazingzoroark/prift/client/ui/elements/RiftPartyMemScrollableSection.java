@@ -45,9 +45,9 @@ public class RiftPartyMemScrollableSection extends RiftGuiScrollableSection {
                 if (nbtBase instanceof NBTTagCompound) {
                     NBTTagCompound tagCompound = (NBTTagCompound) nbtBase;
 
-                    if (!tagCompound.hasKey("generic.maxHealth") || !tagCompound.getString("Name").equals("generic.maxHealth")) continue;
+                    if (!tagCompound.hasKey("Name") || !tagCompound.getString("Name").equals("generic.maxHealth")) continue;
 
-                    maxHealth = Math.min((float) tagCompound.getDouble("Base"), health);
+                    maxHealth = (float) tagCompound.getDouble("Base");
                 }
             }
             toReturn.addProgressBarElement(new RiftGuiScrollableSectionContents.ProgressBarElement()
