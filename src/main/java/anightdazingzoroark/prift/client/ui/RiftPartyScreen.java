@@ -8,6 +8,9 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftNewUpdatePartyDeployed;
+import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -40,7 +43,7 @@ public class RiftPartyScreen extends GuiScreen {
     @Override
     public void initGui() {
         super.initGui();
-        //NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
         //create swap party members button
         this.swapPartyMemsButton = new RiftClickableSection(19, 17, this.width, this.height, -71, -67, this.fontRenderer, this.mc);
@@ -149,9 +152,18 @@ public class RiftPartyScreen extends GuiScreen {
             RiftCreatureType creatureType = RiftCreatureType.values()[tagCompound.getByte("CreatureType")];
             String partyMemName = (tagCompound.hasKey("CustomName") && !tagCompound.getString("CustomName").isEmpty()) ? tagCompound.getString("CustomName") : creatureType.getTranslatedName();
 
-            //todo: draw red background for ded creature
+            //draw red background for ded creature
+            if (tagCompound.hasKey("Health") && tagCompound.getFloat("Health") <= 0) {
+                GlStateManager.color(1f, 1f, 1f, 1f);
+                this.mc.getTextureManager().bindTexture(background);
+                int deadBGX = (this.width - 105) / 2;
+                int deadBGY = (this.height - 66) / 2 - 31;
+                drawModalRectWithCustomSizedTexture(deadBGX, deadBGY, 57, 249, 105, 66, 400f, 360f);
+            }
 
             //draw selected creature
+            //todo: remove the red overlay on rendered creature
+            GlStateManager.color(1f, 1f, 1f, 1f);
             GlStateManager.pushMatrix();
             GlStateManager.pushMatrix();
             GlStateManager.enableDepth();
@@ -160,6 +172,7 @@ public class RiftPartyScreen extends GuiScreen {
             GlStateManager.rotate(150, 0f, 1f, 0f);
             GlStateManager.scale(20f, 20f, 20f);
             this.mc.getRenderManager().renderEntity(this.creatureToDraw, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
+            GlStateManager.disableDepth();
             GlStateManager.popMatrix();
             GlStateManager.popMatrix();
 
@@ -173,16 +186,6 @@ public class RiftPartyScreen extends GuiScreen {
             this.fontRenderer.renderString(partyMemNameString, partyMemNameX, partyMemNameY, 0x000000, false);
             GlStateManager.popMatrix();
 
-            //draw member management buttons
-            for (GuiButton partyMemButton: this.partyMemManageButtons) {
-                //extra stuff for the buttons
-                //for summon/dismiss
-                if (partyMemButton.id == 0) {
-                    partyMemButton.displayString = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY ? I18n.format("journal.party_button.dismiss") : I18n.format("journal.party_button.summon");
-                }
-                partyMemButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
-            }
-
             //draw creature info button
             this.creatureInfoButton.drawSection(mouseX, mouseY);
 
@@ -193,6 +196,51 @@ public class RiftPartyScreen extends GuiScreen {
             if (this.moveManagement) {}
             //draw info when move management is false
             else this.infoScrollableSection.drawSectionContents(mouseX, mouseY, partialTicks);
+
+            //draw member management buttons
+            for (GuiButton partyMemButton: this.partyMemManageButtons) {
+                //extra stuff for the buttons
+                //for summon/dismiss
+                if (partyMemButton.id == 0) {
+                    partyMemButton.displayString = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY ? I18n.format("journal.party_button.dismiss") : I18n.format("journal.party_button.summon");
+
+                    //disable if creature is ded
+                    partyMemButton.enabled = NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)
+                            && (!this.getMemberNBT().hasKey("Health") || this.getMemberNBT().getFloat("Health") > 0);
+                }
+                else if (partyMemButton.id == 1) {
+                    //disable if creature is not summoned
+                    partyMemButton.enabled = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY && NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos);
+                }
+                GlStateManager.disableLighting();
+                GlStateManager.disableDepth();
+                GlStateManager.enableBlend();
+                GlStateManager.color(1f, 1f, 1f, 1f);
+                partyMemButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
+
+                //overlays for buttons
+                if (partyMemButton.id == 0) {
+                    //draw overlay text for when the summon/dismiss button is disabled
+                    if ((!NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)
+                            || (this.getMemberNBT().hasKey("Health") && this.getMemberNBT().getFloat("Health") <= 0))
+                            && partyMemButton.isMouseOver()) {
+                        String cannotSummonLocation = I18n.format("journal.warning.cannot_summon");
+                        String cannotSummonDead = I18n.format("journal.warning.cannot_summon_dead");
+                        String finalOverlayString = (this.getMemberNBT().hasKey("Health") && this.getMemberNBT().getFloat("Health") <= 0)
+                                ? cannotSummonDead
+                                : cannotSummonLocation;
+                        this.drawHoveringText(finalOverlayString, mouseX, mouseY);
+                    }
+                }
+                else if (partyMemButton.id == 1) {
+                    if ((this.getPartyMemDeployment() != PlayerTamedCreatures.DeploymentType.PARTY
+                            || !NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos))
+                            && partyMemButton.isMouseOver()) {
+                        String finalOverlayString = I18n.format("journal.warning.cannot_teleport");
+                        this.drawHoveringText(finalOverlayString, mouseX, mouseY);
+                    }
+                }
+            }
         }
     }
 
@@ -250,17 +298,29 @@ public class RiftPartyScreen extends GuiScreen {
 
         //deal with manage party member buttons
         for (GuiButton button : this.partyMemManageButtons) {
+            if (!button.enabled) continue;
+
             //summon/dismiss
-            if (button.id == 0 && button.isMouseOver()) {
-                if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
-                    if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
-                        NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, false);
+            if (button.isMouseOver()) {
+                if (button.id == 0) {
+                    if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                        if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
+                            NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, false);
+                            button.playPressSound(this.mc.getSoundHandler());
+                        }
+                    }
+                    else if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                        NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, true);
                         button.playPressSound(this.mc.getSoundHandler());
                     }
                 }
-                else if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
-                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, true);
-                    button.playPressSound(this.mc.getSoundHandler());
+                else if (button.id == 1) {
+                    if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                        if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
+                            RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(this.mc.player, this.partyMemPos));
+                            button.playPressSound(this.mc.getSoundHandler());
+                        }
+                    }
                 }
             }
         }
@@ -283,6 +343,7 @@ public class RiftPartyScreen extends GuiScreen {
     }
 
     private void updateAllPartyMems() {
+        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
         List<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
             RiftPartyMemButton button = this.partyMemButtons.get(x);

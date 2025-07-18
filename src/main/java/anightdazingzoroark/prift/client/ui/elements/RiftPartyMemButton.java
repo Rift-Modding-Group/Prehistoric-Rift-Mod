@@ -40,19 +40,27 @@ public class RiftPartyMemButton extends RiftClickableSection {
         this.isHovered = this.isHovered(mouseX, mouseY);
 
         //draw background
-        if (this.textureLocation != null) {
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.minecraft.getTextureManager().bindTexture(this.textureLocation);
-            int k = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
-            int l = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
-            int xUVTexture = this.xUV;
-            int yUVTexture = this.yUV;
-            drawModalRectWithCustomSizedTexture(k, l, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
-        }
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+        int bgX = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
+        int bgY = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
+        int xUVTexture = this.xUV;
+        int yUVTexture = this.yUV;
+        drawModalRectWithCustomSizedTexture(bgX, bgY, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
 
         //some important variables
         RiftCreatureType creatureType = RiftCreatureType.values()[this.creatureNBT.getByte("CreatureType")];
         PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[this.creatureNBT.getByte("DeploymentType")];
+        float health = this.creatureNBT.getFloat("Health");
+
+        //put on red bg when creature is ded
+        if (health <= 0) {
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+            int k = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset + 1;
+            int l = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset + 1;
+            drawModalRectWithCustomSizedTexture(k, l, 57, 221, 55, 28, this.textureWidth, this.textureHeight);
+        }
 
         //put on white overlay when hovered
         if (this.isHovered) {
@@ -118,7 +126,6 @@ public class RiftPartyMemButton extends RiftClickableSection {
         //render creature healthbar
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         //get health first
-        float health = this.creatureNBT.getFloat("Health");
         float maxHealth = health;
         for (NBTBase nbtBase: this.creatureNBT.getTagList("Attributes", 10).tagList) {
             if (nbtBase instanceof NBTTagCompound) {

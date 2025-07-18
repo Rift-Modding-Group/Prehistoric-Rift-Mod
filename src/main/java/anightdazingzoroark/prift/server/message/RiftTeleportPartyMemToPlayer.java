@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,25 +15,26 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import java.util.UUID;
 
 public class RiftTeleportPartyMemToPlayer implements IMessage {
-    private UUID creatureUUID;
+    private int playerId;
+    private int partyMemPos;
 
     public RiftTeleportPartyMemToPlayer() {}
 
-    public RiftTeleportPartyMemToPlayer(RiftCreature creature) {
-        this.creatureUUID = creature.getUniqueID();
+    public RiftTeleportPartyMemToPlayer(EntityPlayer player, int partyMemPos) {
+        this.playerId = player.getEntityId();
+        this.partyMemPos = partyMemPos;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        long mostSigBits = buf.readLong();
-        long leastSigBits = buf.readLong();
-        this.creatureUUID = new UUID(mostSigBits, leastSigBits);
+        this.playerId = buf.readInt();
+        this.partyMemPos = buf.readInt();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeLong(this.creatureUUID.getMostSignificantBits());
-        buf.writeLong(this.creatureUUID.getLeastSignificantBits());
+        buf.writeInt(this.playerId);
+        buf.writeInt(this.partyMemPos);
     }
 
     public static class Handler implements IMessageHandler<RiftTeleportPartyMemToPlayer, IMessage> {
@@ -42,10 +45,14 @@ public class RiftTeleportPartyMemToPlayer implements IMessage {
         }
 
         private void handle(RiftTeleportPartyMemToPlayer message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(playerEntity.world, message.creatureUUID);
-            EntityPlayer owner = (EntityPlayer) partyMember.getOwner();
-            if (owner != null) partyMember.setPosition(owner.posX, owner.posY, owner.posZ);
+            EntityPlayer messagePlayer = ctx.getServerHandler().player;
+            EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+            IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+            UUID creatureUUID = playerTamedCreatures.getPartyNBT().get(message.partyMemPos).getUniqueId("UniqueID");
+
+            RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, creatureUUID);
+
+            if (partyMember != null) partyMember.setPosition(player.posX, player.posY, player.posZ);
         }
     }
 }

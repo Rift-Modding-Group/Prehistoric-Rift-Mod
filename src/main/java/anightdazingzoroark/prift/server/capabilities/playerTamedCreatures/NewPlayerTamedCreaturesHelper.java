@@ -26,6 +26,10 @@ public class NewPlayerTamedCreaturesHelper {
         return player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
     }
 
+    public static void updateAllPartyMems(EntityPlayer player) {
+        RiftMessages.WRAPPER.sendToServer(new RiftNewUpdatePartyDeployed(player));
+    }
+
     public static List<NBTTagCompound> getPlayerPartyNBT(EntityPlayer player) {
         if (player.world.isRemote) {
             RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
