@@ -350,6 +350,11 @@ public class RiftPartyScreen extends GuiScreen {
                     this.movesScrollableSection.selectClickableSectionById(moveSection.getStringID());
                     moveSection.playPressSound(this.mc.getSoundHandler());
                 }
+                else if (moveSection.isHovered(mouseX, mouseY) && this.movesScrollableSection.getSelectedMoveID().equals(moveSection.getStringID())) {
+                    this.movesScrollableSection.setSelectedMove("");
+                    this.movesScrollableSection.unselectAllClickableSections();
+                    moveSection.playPressSound(this.mc.getSoundHandler());
+                }
             }
         }
     }
