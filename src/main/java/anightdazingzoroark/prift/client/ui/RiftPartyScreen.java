@@ -224,8 +224,11 @@ public class RiftPartyScreen extends GuiScreen {
                 GlStateManager.enableBlend();
                 GlStateManager.color(1f, 1f, 1f, 1f);
                 partyMemButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
+            }
 
-                //overlays for buttons
+
+            //draw text overlays for member management buttons
+            for (GuiButton partyMemButton: this.partyMemManageButtons) {
                 if (partyMemButton.id == 0) {
                     //draw overlay text for when the summon/dismiss button is disabled
                     if ((!NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)
