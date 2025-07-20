@@ -13,7 +13,7 @@ public class RiftPartyMemScrollableSection extends RiftGuiScrollableSection {
     private NBTTagCompound creatureNBT;
 
     public RiftPartyMemScrollableSection(int guiWidth, int guiHeight, FontRenderer fontRenderer, Minecraft minecraft) {
-        super(117, 121, guiWidth, guiHeight, 130, -10, fontRenderer, minecraft);
+        super(120, 124, guiWidth, guiHeight, 127, -13, fontRenderer, minecraft);
     }
 
     public void setCreatureNBT(NBTTagCompound tagCompound) {
@@ -51,7 +51,7 @@ public class RiftPartyMemScrollableSection extends RiftGuiScrollableSection {
                 }
             }
             toReturn.addProgressBarElement(new RiftGuiScrollableSectionContents.ProgressBarElement()
-                    .setHeaderText(I18n.format("tametrait.health", health, maxHealth))
+                    .setHeaderText(I18n.format("tametrait.health", Math.round(health), maxHealth))
                     .setHeaderScale(0.5f)
                     .setPercentage(MathHelper.clamp(health / maxHealth, 0, 1))
                     .setColors(0xff0000, 0x868686)

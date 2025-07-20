@@ -15,7 +15,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.common.Loader;
 import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +65,10 @@ public abstract class RiftGuiScrollableSection {
     //button stuff
     private final List<RiftGuiSectionButton> activeButtons = new ArrayList<>();
 
+    //clickable sections
+    private final List<RiftClickableSection> clickableSections = new ArrayList<>();
+    private final List<String> selectedClickableSections = new ArrayList<>();
+
     //tab stuff
     private final Map<String, String> activeTabs = new HashMap<>(); //1st string is id for tabs list, 2nd string is name of tab
     private final List<TabClickRegion> activeTabRegions = new ArrayList<>();
@@ -100,6 +103,7 @@ public abstract class RiftGuiScrollableSection {
         this.activeTabRegions.clear();
         this.itemClickRegions.clear();
         this.miningLevelRegions.clear();
+        this.clickableSections.clear();
 
         int sectionX = (this.guiWidth - this.width) / 2 + this.xOffset;
         int sectionY = (this.guiHeight - this.height) / 2 + this.yOffset;
@@ -148,6 +152,23 @@ public abstract class RiftGuiScrollableSection {
         if (element instanceof RiftGuiScrollableSectionContents.TextElement) {
             RiftGuiScrollableSectionContents.TextElement text = (RiftGuiScrollableSectionContents.TextElement) element;
 
+            if (text.getBackground() != null) {
+                GlStateManager.color(1f, 1f, 1f, 1f);
+                this.minecraft.getTextureManager().bindTexture(text.getBackground());
+                GlStateManager.pushMatrix();
+                int bgX = text.getBGCentered() ? x + (elementWidth - text.getBGUVSize()[0]) / 2 : x;
+                GlStateManager.translate(bgX, y, 0);
+                drawModalRectWithCustomSizedTexture(0, 0,
+                        text.getBGImageUV()[0],
+                        text.getBGImageUV()[1],
+                        text.getBGUVSize()[0],
+                        text.getBGUVSize()[1],
+                        text.getBGImageSize()[0],
+                        text.getBGImageSize()[1]
+                );
+                GlStateManager.popMatrix();
+            }
+
             float scale = text.getScale();
             int lines = 1;
 
@@ -156,9 +177,9 @@ public abstract class RiftGuiScrollableSection {
                 GlStateManager.scale(scale, scale, scale);
                 this.fontRenderer.drawSplitString(
                         text.getContents(),
-                        (int) (x / scale),
-                        (int) (y / scale),
-                        (int) (elementWidth / scale),
+                        (int) ((x + text.getWidthOffset()) / scale),
+                        (int) ((y + text.getHeightOffset()) / scale),
+                        (int) ((elementWidth - text.getWidthOffset()) / scale),
                         text.getTextColor()
                 );
                 GlStateManager.popMatrix();
@@ -167,6 +188,7 @@ public abstract class RiftGuiScrollableSection {
                 this.fontRenderer.drawSplitString(text.getContents(), x, y, elementWidth, text.getTextColor());
                 lines = this.fontRenderer.listFormattedStringToWidth(text.getContents(), elementWidth).size();
             }
+
             return lines * this.fontRenderer.FONT_HEIGHT + text.getBottomSpace();
         }
         else if (element instanceof RiftGuiScrollableSectionContents.ImageElement) {
@@ -351,6 +373,57 @@ public abstract class RiftGuiScrollableSection {
             }
 
             return scaledHeaderHeight + 3 + this.fontRenderer.FONT_HEIGHT;
+        }
+        else if (element instanceof RiftGuiScrollableSectionContents.ClickableSectionElement) {
+            RiftGuiScrollableSectionContents.ClickableSectionElement clickableSectionElement = (RiftGuiScrollableSectionContents.ClickableSectionElement) element;
+
+            int secX = clickableSectionElement.getSectionCentered() ? x + (elementWidth - clickableSectionElement.getSize()[0]) / 2 : x;
+
+            RiftClickableSection clickableSection = new RiftClickableSection(
+                    clickableSectionElement.getSize()[0],
+                    clickableSectionElement.getSize()[1],
+                    clickableSectionElement.getSize()[0],
+                    clickableSectionElement.getSize()[1],
+                    secX,
+                    y,
+                    this.fontRenderer,
+                    this.minecraft
+            );
+
+            if (clickableSectionElement.getImage() != null) {
+                clickableSection.addImage(
+                        clickableSectionElement.getImage(),
+                        clickableSectionElement.getUVSize()[0],
+                        clickableSectionElement.getUVSize()[1],
+                        clickableSectionElement.getImageSize()[0],
+                        clickableSectionElement.getImageSize()[1],
+                        clickableSectionElement.getImageUV()[0],
+                        clickableSectionElement.getImageUV()[1],
+                        clickableSectionElement.getImageHoveredUV()[0],
+                        clickableSectionElement.getImageHoveredUV()[1]
+                );
+                if (clickableSectionElement.getImageSelectedUV() != null) clickableSection.setSelectedUV(clickableSectionElement.getImageSelectedUV()[0], clickableSectionElement.getImageSelectedUV()[1]);
+            }
+
+            if (clickableSectionElement.getTextContent() != null) {
+                clickableSection.addString(
+                        clickableSectionElement.getTextContent(),
+                        false,
+                        clickableSectionElement.getTextColor(),
+                        clickableSectionElement.getTextOffsets()[0],
+                        clickableSectionElement.getTextOffsets()[1],
+                        clickableSectionElement.getTextScale()
+                );
+                if (clickableSectionElement.getTextHoveredColor() >= 0) clickableSection.setStringHoveredColor(clickableSectionElement.getTextHoveredColor());
+                if (clickableSectionElement.getTextSelectedColor() >= 0) clickableSection.setStringSelectedColor(clickableSectionElement.getTextSelectedColor());
+            }
+
+            clickableSection.setID(clickableSectionElement.getID());
+            if (this.selectedClickableSections.contains(clickableSectionElement.getID())) clickableSection.setSelected(true);
+            clickableSection.drawSection(mouseX, mouseY);
+            this.clickableSections.add(clickableSection);
+
+            return clickableSectionElement.getSize()[1] + clickableSectionElement.getBottomSpace();
         }
         else if (element instanceof RiftGuiScrollableSectionContents.TabElement) {
             RiftGuiScrollableSectionContents.TabElement tab = (RiftGuiScrollableSectionContents.TabElement) element;
@@ -544,6 +617,22 @@ public abstract class RiftGuiScrollableSection {
 
     public void reenableAllButtons() {
         this.disabledButtonIds.clear();
+    }
+
+    public List<RiftClickableSection> getClickableSections() {
+        return this.clickableSections;
+    }
+
+    public void selectClickableSectionById(String value) {
+        this.selectedClickableSections.add(value);
+    }
+
+    public void unselectClickableSectionById(String value) {
+        this.selectedClickableSections.remove(value);
+    }
+
+    public void unselectAllClickableSections() {
+        this.selectedClickableSections.clear();
     }
 
     public void resetTabs() {

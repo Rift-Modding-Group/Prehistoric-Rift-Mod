@@ -39,6 +39,11 @@ public class RiftGuiScrollableSectionContents {
         return this;
     }
 
+    public RiftGuiScrollableSectionContents addClickableSectionElement(ClickableSectionElement element) {
+        this.list.add(element);
+        return this;
+    }
+
     public List<Element> getContents() {
         return this.list;
     }
@@ -50,6 +55,15 @@ public class RiftGuiScrollableSectionContents {
         private int textColor = 0x000000;
         private float scale = 1f;
         private int bottomSpace;
+        private int widthOffset = 0;
+        private int heightOffset = 0;
+        private ResourceLocation bgImage;
+        private int[] bgImageSize; //size of the entire texture
+        private int[] bgImageUV; //uv start pos of texture
+        private int[] bgImageSelectedUV; //uv start pos of texture when selected
+        private int[] bgUVSize; //size of the portion of the texture to be used
+        private float bgImageScale = 1f;
+        private boolean bgCentered = false;
 
         public TextElement setContents(String value) {
             this.contents = value;
@@ -86,6 +100,57 @@ public class RiftGuiScrollableSectionContents {
         public int getBottomSpace() {
             return this.bottomSpace;
         }
+
+        public TextElement setWidthOffset(int value) {
+            this.widthOffset = value;
+            return this;
+        }
+
+        public int getWidthOffset() {
+            return this.widthOffset;
+        }
+
+        public TextElement setHeightOffset(int value) {
+            this.heightOffset = value;
+            return this;
+        }
+
+        public int getHeightOffset() {
+            return this.heightOffset;
+        }
+
+        public TextElement setBackground(ResourceLocation bgImage, int bgTextureWidth, int bgTextureHeight, int bgUVWidth, int bgUVHeight, int bgUVX, int bgUVY) {
+            this.bgImage = bgImage;
+            this.bgImageSize = new int[]{bgTextureWidth, bgTextureHeight};
+            this.bgImageUV = new int[]{bgUVX, bgUVY};
+            this.bgUVSize = new int[]{bgUVWidth, bgUVHeight};
+            return this;
+        }
+
+        public ResourceLocation getBackground() {
+            return this.bgImage;
+        }
+
+        public int[] getBGImageSize() {
+            return this.bgImageSize;
+        }
+
+        public int[] getBGImageUV() {
+            return this.bgImageUV;
+        }
+
+        public int[] getBGUVSize() {
+            return this.bgUVSize;
+        }
+
+        public TextElement setBGCentered() {
+            this.bgCentered = true;
+            return this;
+        }
+
+        public boolean getBGCentered() {
+            return this.bgCentered;
+        }
     }
 
     public static class ImageElement extends Element {
@@ -93,6 +158,8 @@ public class RiftGuiScrollableSectionContents {
         private int[] imageSize;
         private float imageScale = 1f;
         private int bottomSpace = 9;
+        private String textContents;
+        private float textScale = 1f;
 
         public ImageElement setImageLocation(ResourceLocation imageLocation) {
             this.imageLocation = imageLocation;
@@ -128,6 +195,24 @@ public class RiftGuiScrollableSectionContents {
 
         public int getBottomSpace() {
             return this.bottomSpace;
+        }
+
+        public ImageElement setTextContents(String value) {
+            this.textContents = value;
+            return this;
+        }
+
+        public String getTextContents() {
+            return this.textContents;
+        }
+
+        public ImageElement setTextScale(float value) {
+            this.textScale = value;
+            return this;
+        }
+
+        public float getTextScale() {
+            return this.textScale;
         }
     }
 
@@ -383,6 +468,163 @@ public class RiftGuiScrollableSectionContents {
 
         public float getHeaderScale() {
             return this.headerScale;
+        }
+    }
+
+    public static class ClickableSectionElement extends Element {
+        private int[] size; //size of clickable element
+        private String id = "";
+        private int bottomSpace = 0;
+        private boolean sectionCentered = false;
+        private String textContent;
+        private int textColor = 0x000000;
+        private int textHoveredColor = -1;
+        private int textSelectedColor = -1;
+        private float textScale = 1f;
+        private int[] textOffsets = {0, 0};
+        private ResourceLocation imageContent;
+        private int[] imageSize; //size of the entire texture
+        private int[] imageUV; //uv start pos of texture
+        private int[] imageHoveredUV; //uv start pos of texture when hovered
+        private int[] imageSelectedUV;
+        private int[] uvSize; //size of the portion of the texture to be used
+        private float imageScale = 1f;
+
+        public ClickableSectionElement setSize(int width, int height) {
+            this.size = new int[]{width, height};
+            return this;
+        }
+
+        public int[] getSize() {
+            return this.size;
+        }
+
+        public ClickableSectionElement setID(String value) {
+            this.id = value;
+            return this;
+        }
+
+        public String getID() {
+            return this.id;
+        }
+
+        public ClickableSectionElement setBottomSpace(int value) {
+            this.bottomSpace = value;
+            return this;
+        }
+
+        public int getBottomSpace() {
+            return this.bottomSpace;
+        }
+
+        public ClickableSectionElement setCentered() {
+            this.sectionCentered = true;
+            return this;
+        }
+
+        public boolean getSectionCentered() {
+            return this.sectionCentered;
+        }
+
+        public ClickableSectionElement setTextContent(String value) {
+            this.textContent = value;
+            return this;
+        }
+
+        public String getTextContent() {
+            return this.textContent;
+        }
+
+        public ClickableSectionElement setTextColor(int value) {
+            this.textColor = value;
+            return this;
+        }
+
+        public int getTextColor() {
+            return this.textColor;
+        }
+
+        public ClickableSectionElement setTextHoveredColor(int value) {
+            this.textHoveredColor = value;
+            return this;
+        }
+
+        public int getTextHoveredColor() {
+            return this.textHoveredColor;
+        }
+
+        public ClickableSectionElement setTextSelectedColor(int value) {
+            this.textSelectedColor = value;
+            return this;
+        }
+
+        public int getTextSelectedColor() {
+            return this.textSelectedColor;
+        }
+
+        public ClickableSectionElement setTextScale(float value) {
+            this.textScale = value;
+            return this;
+        }
+
+        public float getTextScale() {
+            return this.textScale;
+        }
+
+        public ClickableSectionElement setTextOffsets(int x, int y) {
+            this.textOffsets = new int[]{x, y};
+            return this;
+        }
+
+        public int[] getTextOffsets() {
+            return this.textOffsets;
+        }
+
+        public ClickableSectionElement setImage(ResourceLocation location, int textureWidth, int textureHeight, int uvWidth, int uvHeight, int uvX, int uvY, int uvHoveredX, int uvHoveredY) {
+            this.imageContent = location;
+            this.imageSize = new int[]{textureWidth, textureHeight};
+            this.imageUV = new int[]{uvX, uvY};
+            this.imageHoveredUV = new int[]{uvHoveredX, uvHoveredY};
+            this.uvSize = new int[]{uvWidth, uvHeight};
+            return this;
+        }
+
+        public ResourceLocation getImage() {
+            return this.imageContent;
+        }
+
+        public int[] getImageSize() {
+            return this.imageSize;
+        }
+
+        public int[] getImageUV() {
+            return this.imageUV;
+        }
+
+        public int[] getImageHoveredUV() {
+            return this.imageHoveredUV;
+        }
+
+        public int[] getUVSize() {
+            return this.uvSize;
+        }
+
+        public ClickableSectionElement setImageSelectedUV(int uvX, int uvY) {
+            this.imageSelectedUV = new int[]{uvX, uvY};
+            return this;
+        }
+
+        public int[] getImageSelectedUV() {
+            return this.imageSelectedUV;
+        }
+
+        public ClickableSectionElement setImageScale(float value) {
+            this.imageScale = value;
+            return this;
+        }
+
+        public float getImageScale() {
+            return this.imageScale;
         }
     }
 }

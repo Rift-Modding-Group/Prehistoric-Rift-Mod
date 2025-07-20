@@ -5,11 +5,9 @@ import anightdazingzoroark.prift.client.ui.elements.*;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftNewUpdatePartyDeployed;
 import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -34,6 +32,8 @@ public class RiftPartyScreen extends GuiScreen {
     private RiftClickableSection creatureInfoButton;
     private RiftClickableSection creatureMovesButton;
     private RiftPartyMemScrollableSection infoScrollableSection;
+    private RiftPartyMemMovesSection movesScrollableSection;
+
     private RiftCreature creatureToDraw;
     private boolean moveManagement;
     private int partyMemPos = -1;
@@ -101,6 +101,10 @@ public class RiftPartyScreen extends GuiScreen {
         this.infoScrollableSection = new RiftPartyMemScrollableSection(this.width, this.height, this.fontRenderer, this.mc);
         if (this.partyMemPos >= 0) this.infoScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
 
+        //scrollable section for moves info
+        this.movesScrollableSection = new RiftPartyMemMovesSection(this.width, this.height, this.fontRenderer, this.mc);
+        if (this.partyMemPos >= 0) this.movesScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
+
 
         //by default selected button is the first one
         //PlayerTamedCreaturesHelper.setLastSelected(this.mc.player, 0);
@@ -167,10 +171,13 @@ public class RiftPartyScreen extends GuiScreen {
             GlStateManager.pushMatrix();
             GlStateManager.pushMatrix();
             GlStateManager.enableDepth();
-            GlStateManager.translate(this.width / 2f, this.height / 2f, 180f);
+            GlStateManager.translate(this.width / 2f, this.height / 2f, 210f);
             GlStateManager.rotate(180, 1f, 0f, 0f);
             GlStateManager.rotate(150, 0f, 1f, 0f);
             GlStateManager.scale(20f, 20f, 20f);
+            this.creatureToDraw.deathTime = 0;
+            this.creatureToDraw.isDead = false;
+            this.creatureToDraw.hurtTime = 0;
             this.mc.getRenderManager().renderEntity(this.creatureToDraw, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
             GlStateManager.disableDepth();
             GlStateManager.popMatrix();
@@ -193,7 +200,7 @@ public class RiftPartyScreen extends GuiScreen {
             this.creatureMovesButton.drawSection(mouseX, mouseY);
 
             //draw moves when move management is true
-            if (this.moveManagement) {}
+            if (this.moveManagement) this.movesScrollableSection.drawSectionContents(mouseX, mouseY, partialTicks);
             //draw info when move management is false
             else this.infoScrollableSection.drawSectionContents(mouseX, mouseY, partialTicks);
 
@@ -257,11 +264,15 @@ public class RiftPartyScreen extends GuiScreen {
                     this.creatureToDraw = partyMemButton.getCreatureFromNBT();
                     this.partyMemPos = x;
                     this.infoScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
+                    this.movesScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
+                    this.movesScrollableSection.setSelectedMove("");
+                    this.movesScrollableSection.unselectAllClickableSections();
                 }
                 else {
                     this.creatureToDraw = null;
                     this.partyMemPos = -1;
                     this.infoScrollableSection.setCreatureNBT(new NBTTagCompound());
+                    this.movesScrollableSection.setCreatureNBT(new NBTTagCompound());
                 }
 
                 //reset back to creature info
@@ -288,6 +299,8 @@ public class RiftPartyScreen extends GuiScreen {
             this.moveManagement = false;
             this.creatureInfoButton.setSelected(true);
             this.creatureMovesButton.setSelected(false);
+            this.movesScrollableSection.setSelectedMove("");
+            this.movesScrollableSection.unselectAllClickableSections();
         }
         else if (this.creatureMovesButton.isHovered(mouseX, mouseY)) {
             if (!this.moveManagement) this.creatureMovesButton.playPressSound(this.mc.getSoundHandler());
@@ -321,6 +334,18 @@ public class RiftPartyScreen extends GuiScreen {
                             button.playPressSound(this.mc.getSoundHandler());
                         }
                     }
+                }
+            }
+        }
+
+        //deal with setting selected move
+        if (this.moveManagement) {
+            for (RiftClickableSection moveSection : this.movesScrollableSection.getClickableSections()) {
+                if (moveSection.isHovered(mouseX, mouseY) && !this.movesScrollableSection.getSelectedMoveID().equals(moveSection.getStringID())) {
+                    this.movesScrollableSection.setSelectedMove(moveSection.getStringID());
+                    this.movesScrollableSection.unselectAllClickableSections();
+                    this.movesScrollableSection.selectClickableSectionById(moveSection.getStringID());
+                    moveSection.playPressSound(this.mc.getSoundHandler());
                 }
             }
         }

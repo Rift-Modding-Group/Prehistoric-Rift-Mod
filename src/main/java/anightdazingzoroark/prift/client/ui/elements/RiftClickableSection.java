@@ -34,6 +34,8 @@ public class RiftClickableSection {
     private String stringToRender;
     private boolean stringHasShadow;
     private int stringColor;
+    private int stringHoveredColor = 0xFFFF00;
+    private int stringSelectedColor = 0x5A3B1A;
     private int stringXOffset;
     private int stringYOffset;
     private float textScale = 1f;
@@ -42,12 +44,15 @@ public class RiftClickableSection {
     protected ResourceLocation textureLocation;
     protected int textureWidth, textureHeight, uvWidth, uvHeight;
     protected int xUV, yUV, hoveredXUV, hoveredYUV;
+    protected int selectedXUV = -1, selectedYUV = -1;
 
     //scale related stuff
     protected float scale = 1f;
 
     //additional offsets
     protected int xAddOffset, yAddOffset;
+
+    protected String stringID = "";
 
     public RiftClickableSection(int width, int height, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
         this.width = width;
@@ -69,6 +74,22 @@ public class RiftClickableSection {
         this.textScale = textScale;
     }
 
+    public void setStringHoveredColor(int value) {
+        this.stringHoveredColor = value;
+    }
+
+    public int getStringHoveredColor() {
+        return this.stringHoveredColor;
+    }
+
+    public void setStringSelectedColor(int value) {
+        this.stringSelectedColor = value;
+    }
+
+    public int getStringSelectedColor() {
+        return this.stringSelectedColor;
+    }
+
     public void addImage(ResourceLocation texture, int uvWidth, int uvHeight, int textureWidth, int textureHeight, int xUV, int yUV, int hoveredXUV, int hoveredYUV) {
         this.textureLocation = texture;
         this.uvWidth = uvWidth;
@@ -79,6 +100,19 @@ public class RiftClickableSection {
         this.yUV = yUV;
         this.hoveredXUV = hoveredXUV;
         this.hoveredYUV = hoveredYUV;
+    }
+
+    public void setSelectedUV(int xUV, int yUV) {
+        this.selectedXUV = xUV;
+        this.selectedYUV = yUV;
+    }
+
+    public void setID(String value) {
+        this.stringID = value;
+    }
+
+    public String getStringID() {
+        return this.stringID;
     }
 
     public void setScale(float scale) {
@@ -93,6 +127,24 @@ public class RiftClickableSection {
     public void drawSection(int mouseX, int mouseY) {
         //deal with hovering
         this.isHovered = this.isHovered(mouseX, mouseY);
+
+        //draw image
+        if (this.textureLocation != null) {
+            //scaling start
+            if (this.scale < 1) {
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(this.scale, this.scale, this.scale);
+            }
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+            int k = (int) (((float) (this.guiWidth - this.width) / 2f + this.xOffset + this.xAddOffset) / this.scale);
+            int l = (int) (((float) (this.guiHeight - this.height) / 2f + this.yOffset + this.yAddOffset) / this.scale);
+            int xUVTexture = (this.selectedXUV >= 0 && this.selectedYUV >= 0 && this.isSelected) ? this.selectedXUV : (this.isHovered ? this.hoveredXUV : this.xUV);
+            int yUVTexture = (this.selectedXUV >= 0 && this.selectedYUV >= 0 && this.isSelected) ? this.selectedYUV : (this.isHovered ? this.hoveredYUV : this.yUV);
+            drawModalRectWithCustomSizedTexture(k, l, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
+            //end scaling
+            if (this.scale < 1) GlStateManager.popMatrix();
+        }
 
         //draw string
         if (this.stringToRender != null) {
@@ -126,24 +178,6 @@ public class RiftClickableSection {
             if (this.textScale < 1) GlStateManager.popMatrix();
             if (this.scale < 1) GlStateManager.popMatrix();
         }
-
-        //draw image
-        if (this.textureLocation != null) {
-            //scaling start
-            if (this.scale < 1) {
-                GlStateManager.pushMatrix();
-                GlStateManager.scale(this.scale, this.scale, this.scale);
-            }
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.minecraft.getTextureManager().bindTexture(this.textureLocation);
-            int k = (int) (((float) (this.guiWidth - this.width) / 2f + this.xOffset + this.xAddOffset) / this.scale);
-            int l = (int) (((float) (this.guiHeight - this.height) / 2f + this.yOffset + this.yAddOffset) / this.scale);
-            int xUVTexture = this.isHovered ? this.hoveredXUV : this.xUV;
-            int yUVTexture = this.isHovered ? this.hoveredYUV : this.yUV;
-            drawModalRectWithCustomSizedTexture(k, l, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
-            //end scaling
-            if (this.scale < 1) GlStateManager.popMatrix();
-        }
     }
 
     public boolean isHovered(int mouseX, int mouseY) {
@@ -161,8 +195,8 @@ public class RiftClickableSection {
     }
 
     private int getTextColor() {
-        if (this.isSelected) return 0x5A3B1A; //brown for active
-        else if (this.isHovered) return 0xFFFF00; //yellow for hover
+        if (this.isSelected) return this.stringSelectedColor; //brown for active
+        else if (this.isHovered) return this.stringHoveredColor; //yellow for hover
         return this.stringColor;
     }
 
