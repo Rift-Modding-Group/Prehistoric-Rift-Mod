@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -17,7 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PlayerTamedCreatures implements IPlayerTamedCreatures {
-    private List<NBTTagCompound> partyCreatures = new ArrayList<>();
+    private FixedSizeList<NBTTagCompound> partyCreatures = new FixedSizeList(6, new NBTTagCompound());
     private List<NBTTagCompound> boxCreatures = new ArrayList<>();
     private int lastSelected = 0;
     private int boxSizeLevel = 0;
@@ -72,7 +73,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public NBTTagCompound getPartyMemberTag(UUID uuid) {
         //find in party first
-        for (NBTTagCompound partyMemCompound : this.partyCreatures) {
+        for (NBTTagCompound partyMemCompound : this.partyCreatures.getList()) {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
                 return partyMemCompound;
             }
@@ -85,7 +86,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         if (this.partyCreatures.size() < this.getMaxPartySize()) {
             boolean canAdd = false;
             if (this.partyCreatures.isEmpty()) canAdd = true;
-            else if (this.partyCreatures.stream().noneMatch(nbt -> nbt.getUniqueId("UniqueID").equals(creature.getUniqueID()))) canAdd = true;
+            else if (this.partyCreatures.getList().stream().noneMatch(nbt -> nbt.getUniqueId("UniqueID").equals(creature.getUniqueID()))) canAdd = true;
 
             if (canAdd) {
                 NBTTagCompound compound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
@@ -259,7 +260,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public List<RiftCreature> getPartyCreatures(World world) {
         List<RiftCreature> creatures = new ArrayList<>();
-        for (NBTTagCompound compound : this.partyCreatures) {
+        for (NBTTagCompound compound : this.partyCreatures.getList()) {
             RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(world, compound);
             if (creature != null) creatures.add(creature);
         }
@@ -267,12 +268,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
-    public void setPartyNBT(List<NBTTagCompound> compound) {
+    public void setPartyNBT(FixedSizeList<NBTTagCompound> compound) {
         this.partyCreatures = compound;
     }
 
     @Override
-    public List<NBTTagCompound> getPartyNBT() {
+    public FixedSizeList<NBTTagCompound> getPartyNBT() {
         return this.partyCreatures;
     }
 
@@ -332,7 +333,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public void modifyCreature(UUID uuid, NBTTagCompound compound) {
         //find in party first
-        for (NBTTagCompound partyMemCompound : this.partyCreatures) {
+        for (NBTTagCompound partyMemCompound : this.partyCreatures.getList()) {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
                 //replace each nbt tag
                 for (String key : compound.getKeySet()) {
@@ -447,10 +448,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
 
     @Override
     public void removeCreature(UUID uuid) {
-        this.partyCreatures = this.partyCreatures.stream()
+        /*
+        this.partyCreatures = this.partyCreatures..stream()
                 .filter(compound -> {
                     return compound.getUniqueId("UniqueID") != null && !compound.getUniqueId("UniqueID").equals(uuid);
                 }).collect(Collectors.toList());
+         */
         this.boxCreatures = this.boxCreatures.stream()
                 .filter(compound -> {
                     return compound.getUniqueId("UniqueID") != null && !compound.getUniqueId("UniqueID").equals(uuid);

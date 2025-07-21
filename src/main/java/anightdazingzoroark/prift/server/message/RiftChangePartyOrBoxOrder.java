@@ -91,40 +91,6 @@ public class RiftChangePartyOrBoxOrder implements IMessage {
                     }
                 }
             }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-
-                SwapType swapType = SwapType.values()[message.swapTypeBit];
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-                if (message.posToSwap != -1) {
-                    switch (swapType) {
-                        case REARRANGE_PARTY:
-                            playerTamedCreatures.rearrangePartyCreatures(message.posSelected, message.posToSwap);
-                            break;
-                        case REARRANGE_BOX:
-                            playerTamedCreatures.rearrangeBoxCreatures(message.posSelected, message.posToSwap);
-                            break;
-                        case PARTY_BOX_SWAP:
-                            playerTamedCreatures.partyCreatureToBoxCreature(message.posSelected, message.posToSwap);
-                            break;
-                        case BOX_PARTY_SWAP:
-                            playerTamedCreatures.boxCreatureToPartyCreature(message.posSelected, message.posToSwap);
-                            break;
-                    }
-                }
-                else {
-                    switch (swapType) {
-                        case PARTY_TO_BOX:
-                            playerTamedCreatures.partyCreatureToBox(message.posSelected);
-                            break;
-                        case BOX_TO_PARTY:
-                            playerTamedCreatures.boxCreatureToParty(message.posSelected);
-                            break;
-                    }
-                }
-            }
         }
     }
 

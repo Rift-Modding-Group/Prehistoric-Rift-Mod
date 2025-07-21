@@ -58,7 +58,7 @@ public class RiftAddToParty implements IMessage {
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
                 RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.uuid);
 
-                boolean creatureInList = playerTamedCreatures.getPartyNBT().stream()
+                boolean creatureInList = playerTamedCreatures.getPartyNBT().getList().stream()
                         .noneMatch(nbt -> nbt.hasKey("UniqueIDMost") && nbt.hasKey("UniqueIDLeast") && nbt.getUniqueId("UniqueID").equals(message.uuid));
                 if (creatureInList && creature != null) playerTamedCreatures.addToPartyCreatures(creature);
             }
@@ -69,7 +69,7 @@ public class RiftAddToParty implements IMessage {
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
                 RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, message.uuid);
 
-                boolean creatureInList = playerTamedCreatures.getPartyNBT().stream()
+                boolean creatureInList = playerTamedCreatures.getPartyNBT().getList().stream()
                         .noneMatch(nbt -> nbt.hasKey("UniqueIDMost") && nbt.hasKey("UniqueIDLeast") && nbt.getUniqueId("UniqueID").equals(message.uuid));
                 if (creatureInList && creature != null) playerTamedCreatures.addToPartyCreatures(creature);
             }

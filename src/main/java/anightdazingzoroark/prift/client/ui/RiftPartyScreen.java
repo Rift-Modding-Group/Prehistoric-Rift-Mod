@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.*;
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -40,6 +41,9 @@ public class RiftPartyScreen extends GuiScreen {
     protected final int xSize = 373;
     protected final int ySize = 182;
 
+    //managing swapping party members
+    private boolean swapPartyMemsMode;
+
     @Override
     public void initGui() {
         super.initGui();
@@ -48,11 +52,12 @@ public class RiftPartyScreen extends GuiScreen {
         //create swap party members button
         this.swapPartyMemsButton = new RiftClickableSection(19, 17, this.width, this.height, -71, -67, this.fontRenderer, this.mc);
         this.swapPartyMemsButton.addImage(background, 20, 18, 400, 360, 75, 203, 95, 203);
+        this.swapPartyMemsButton.setSelectedUV(115, 203);
         this.swapPartyMemsButton.setScale(0.75f);
 
         //create party buttons
         this.partyMemButtons.clear();
-        List<NBTTagCompound> playerPartyNBT = new ArrayList(NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
+        FixedSizeList<NBTTagCompound> playerPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
         for (int x = 0; x < playerPartyNBT.size(); x++) {
             int partyMemXOffset = -154 + (x % 2) * 60;
             int partyMemYOffset = -41 + (x / 2) * 40;
@@ -261,31 +266,76 @@ public class RiftPartyScreen extends GuiScreen {
         //manage party button clicking
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
             RiftPartyMemButton partyMemButton = this.partyMemButtons.get(x);
-            if (partyMemButton.isHovered(mouseX, mouseY)) {
-                //PlayerTamedCreaturesHelper.setLastSelected(this.mc.player, x);
-                if (this.partyMemPos != x) {
-                    this.creatureToDraw = partyMemButton.getCreatureFromNBT();
-                    this.partyMemPos = x;
-                    this.infoScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
-                    this.movesScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
-                    this.movesScrollableSection.setSelectedMove("");
-                    this.movesScrollableSection.unselectAllClickableSections();
-                }
-                else {
-                    this.creatureToDraw = null;
-                    this.partyMemPos = -1;
-                    this.infoScrollableSection.setCreatureNBT(new NBTTagCompound());
-                    this.movesScrollableSection.setCreatureNBT(new NBTTagCompound());
-                }
+            //for swapping around party members
+            if (this.swapPartyMemsMode) {
+                if (partyMemButton.isHovered(mouseX, mouseY)) {
+                    if (this.partyMemPos == -1 && !partyMemButton.getCreatureNBT().isEmpty()) {
+                        this.partyMemPos = x;
 
-                //reset back to creature info
+                        //play sound
+                        partyMemButton.playPressSound(this.mc.getSoundHandler());
+                    }
+                    else if (this.partyMemPos > -1) {
+                        NewPlayerTamedCreaturesHelper.rearrangePartyCreatures(this.mc.player, x, this.partyMemPos);
+                        this.partyMemPos = -1;
+
+                        //play sound
+                        partyMemButton.playPressSound(this.mc.getSoundHandler());
+                    }
+                }
+            }
+            //for just managing individual party members
+            else {
+                if (partyMemButton.isHovered(mouseX, mouseY) && !partyMemButton.getCreatureNBT().isEmpty()) {
+                    //PlayerTamedCreaturesHelper.setLastSelected(this.mc.player, x);
+                    if (this.partyMemPos != x) {
+                        this.creatureToDraw = partyMemButton.getCreatureFromNBT();
+                        this.partyMemPos = x;
+                        this.infoScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
+                        this.movesScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
+                        this.movesScrollableSection.setSelectedMove("");
+                        this.movesScrollableSection.unselectAllClickableSections();
+                    }
+                    else {
+                        this.creatureToDraw = null;
+                        this.partyMemPos = -1;
+                        this.infoScrollableSection.setCreatureNBT(new NBTTagCompound());
+                        this.movesScrollableSection.setCreatureNBT(new NBTTagCompound());
+                    }
+
+                    //reset back to creature info
+                    this.moveManagement = false;
+                    this.creatureInfoButton.setSelected(true);
+                    this.creatureMovesButton.setSelected(false);
+
+                    //play sound
+                    partyMemButton.playPressSound(this.mc.getSoundHandler());
+                }
+            }
+        }
+
+        //manage swapping party mode
+        if (this.swapPartyMemsButton.isHovered(mouseX, mouseY)) {
+            //swap out of switch party mems mode
+            if (this.swapPartyMemsMode) {
+                this.swapPartyMemsMode = false;
+                this.swapPartyMemsButton.setSelected(false);
+            }
+            //switch to switch party mems mode
+            else {
+                this.swapPartyMemsMode = true;
+                this.swapPartyMemsButton.setSelected(true);
+
+                //reset everything else
+                this.creatureToDraw = null;
+                this.partyMemPos = -1;
+                this.infoScrollableSection.setCreatureNBT(new NBTTagCompound());
+                this.movesScrollableSection.setCreatureNBT(new NBTTagCompound());
                 this.moveManagement = false;
                 this.creatureInfoButton.setSelected(true);
                 this.creatureMovesButton.setSelected(false);
-
-                //play sound
-                partyMemButton.playPressSound(this.mc.getSoundHandler());
             }
+            this.swapPartyMemsButton.playPressSound(this.mc.getSoundHandler());
         }
 
         //open the journal upon opening journal button
@@ -377,19 +427,10 @@ public class RiftPartyScreen extends GuiScreen {
 
     private void updateAllPartyMems() {
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
-        List<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
+        FixedSizeList<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
             RiftPartyMemButton button = this.partyMemButtons.get(x);
             button.setCreatureNBT(newPartyNBT.get(x));
-        }
-        //add new members
-        if (newPartyNBT.size() > this.partyMemButtons.size()) {
-            for (int x = this.partyMemButtons.size(); x < newPartyNBT.size(); x++) {
-                int partyMemXOffset = -154 + (x % 2) * 60;
-                int partyMemYOffset = -41 + (x / 2) * 40;
-                RiftPartyMemButton partyMemButton = new RiftPartyMemButton(newPartyNBT.get(x), this.width, this.height, partyMemXOffset, partyMemYOffset, this.fontRenderer, this.mc);
-                this.partyMemButtons.add(partyMemButton);
-            }
         }
     }
 

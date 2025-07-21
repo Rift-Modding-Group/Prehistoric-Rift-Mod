@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -23,7 +24,7 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
         //for party creatures
         NBTTagList partyCreaturesList = new NBTTagList();
         if (!instance.getPartyNBT().isEmpty()) {
-            for (NBTTagCompound partyNBT : instance.getPartyNBT()) partyCreaturesList.appendTag(partyNBT);
+            for (NBTTagCompound partyNBT : instance.getPartyNBT().getList()) partyCreaturesList.appendTag(partyNBT);
             compound.setTag("PartyCreatures", partyCreaturesList);
         }
         else compound.setTag("PartyCreatures", partyCreaturesList);
@@ -56,9 +57,9 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
             if (compound.hasKey("PartyCreatures")) {
                 NBTTagList partyCreaturesList = compound.getTagList("PartyCreatures", 10);
                 if (!partyCreaturesList.isEmpty()) {
-                    List<NBTTagCompound> finalPartyCreatures = new ArrayList<>();
+                    FixedSizeList<NBTTagCompound> finalPartyCreatures = new FixedSizeList<>(NewPlayerTamedCreaturesHelper.maxPartySize, new NBTTagCompound());
                     for (int i = 0; i < partyCreaturesList.tagCount(); i++) {
-                        finalPartyCreatures.add(partyCreaturesList.getCompoundTagAt(i));
+                        finalPartyCreatures.set(i, partyCreaturesList.getCompoundTagAt(i));
                     }
                     instance.setPartyNBT(finalPartyCreatures);
                 }

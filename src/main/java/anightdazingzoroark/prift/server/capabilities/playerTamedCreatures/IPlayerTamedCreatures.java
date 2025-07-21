@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
@@ -10,8 +11,8 @@ import java.util.UUID;
 
 public interface IPlayerTamedCreatures {
     //for direct values
-    void setPartyNBT(List<NBTTagCompound> compound);
-    List<NBTTagCompound> getPartyNBT();
+    void setPartyNBT(FixedSizeList<NBTTagCompound> compound);
+    FixedSizeList<NBTTagCompound> getPartyNBT();
     void setPartyMemNBT(int index, NBTTagCompound compound);
     void addToPartyNBT(NBTTagCompound compound);
     void removeFromPartyNBT(NBTTagCompound compound);

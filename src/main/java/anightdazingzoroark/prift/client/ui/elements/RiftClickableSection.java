@@ -139,8 +139,9 @@ public class RiftClickableSection {
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
             int k = (int) (((float) (this.guiWidth - this.width) / 2f + this.xOffset + this.xAddOffset) / this.scale);
             int l = (int) (((float) (this.guiHeight - this.height) / 2f + this.yOffset + this.yAddOffset) / this.scale);
-            int xUVTexture = (this.selectedXUV >= 0 && this.selectedYUV >= 0 && this.isSelected) ? this.selectedXUV : (this.isHovered ? this.hoveredXUV : this.xUV);
-            int yUVTexture = (this.selectedXUV >= 0 && this.selectedYUV >= 0 && this.isSelected) ? this.selectedYUV : (this.isHovered ? this.hoveredYUV : this.yUV);
+            boolean isSelected = this.selectedXUV >= 0 && this.selectedYUV >= 0 && this.isSelected;
+            int xUVTexture = this.isHovered ? this.hoveredXUV : (isSelected ? this.selectedXUV : this.xUV);
+            int yUVTexture = this.isHovered ? this.hoveredYUV : (isSelected ? this.selectedYUV : this.yUV);
             drawModalRectWithCustomSizedTexture(k, l, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
             //end scaling
             if (this.scale < 1) GlStateManager.popMatrix();
@@ -195,8 +196,8 @@ public class RiftClickableSection {
     }
 
     private int getTextColor() {
-        if (this.isSelected) return this.stringSelectedColor; //brown for active
-        else if (this.isHovered) return this.stringHoveredColor; //yellow for hover
+        if (this.isHovered) return this.stringHoveredColor;
+        else if (this.isSelected) return this.stringSelectedColor;
         return this.stringColor;
     }
 

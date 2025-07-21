@@ -976,7 +976,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
 
             //update tamed creature list
-            if (NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(player).size() < NewPlayerTamedCreaturesHelper.getMaxPartySize(player)) {
+            if (NewPlayerTamedCreaturesHelper.canAddToParty(player)) {
                 this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                 NewPlayerTamedCreaturesHelper.addCreatureToParty(player, this);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
@@ -1882,7 +1882,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
 
                 //update player tamed creatures
-                if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
+                if (NewPlayerTamedCreaturesHelper.canAddToParty(owner)) {
                     baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                     this.world.spawnEntity(baby);
                     PlayerTamedCreaturesHelper.addToPlayerParty(owner, baby);

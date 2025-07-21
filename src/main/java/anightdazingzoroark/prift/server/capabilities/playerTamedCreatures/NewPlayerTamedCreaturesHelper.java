@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
@@ -20,6 +21,8 @@ and on server side they just return the value
 while setter functions update only server side
 */
 public class NewPlayerTamedCreaturesHelper {
+    public static final int maxPartySize = 6;
+
     //player party and creature box
     public static IPlayerTamedCreatures getPlayerTamedCreatures(EntityPlayer player) {
         if (player == null) return null;
@@ -30,15 +33,29 @@ public class NewPlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftNewUpdatePartyDeployed(player));
     }
 
-    public static List<NBTTagCompound> getPlayerPartyNBT(EntityPlayer player) {
+    public static FixedSizeList<NBTTagCompound> getPlayerPartyNBT(EntityPlayer player) {
         if (player.world.isRemote) {
             RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
-            return getPlayerTamedCreatures(player).getPartyNBT();
         }
-        else return getPlayerTamedCreatures(player).getPartyNBT();
+        return getPlayerTamedCreatures(player).getPartyNBT();
     }
 
-    public static void setPlayerPartyNBT(EntityPlayer player, List<NBTTagCompound> tagCompounds) {
+    public static boolean canAddToParty(EntityPlayer player) {
+        if (player.world.isRemote) {
+            RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
+        }
+        int pos = -1;
+
+        for (int x = 0; x < getPlayerPartyNBT(player).size(); x++) {
+            if (getPlayerPartyNBT(player).get(x).isEmpty()) {
+                pos = x;
+                break;
+            }
+        }
+        return pos >= 0;
+    }
+
+    public static void setPlayerPartyNBT(EntityPlayer player, FixedSizeList<NBTTagCompound> tagCompounds) {
         RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player, tagCompounds));
     }
 
@@ -99,4 +116,10 @@ public class NewPlayerTamedCreaturesHelper {
         creature.writeEntityToNBT(compound);
         return compound;
     }
+
+    //swapping related stuff starts here
+    public static void rearrangePartyCreatures(EntityPlayer player, int posSelected, int posToSwap) {
+        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, player, posSelected, posToSwap));
+    }
+    //swapping related stuff ends here
 }

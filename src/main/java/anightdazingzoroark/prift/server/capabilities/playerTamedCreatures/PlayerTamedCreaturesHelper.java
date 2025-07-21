@@ -49,20 +49,24 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    /*
     public static List<NBTTagCompound> getPlayerPartyNBT(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getPartyNBT();
     }
+     */
 
+    /*
     public static void setPlayerPartyNBT(EntityPlayer player, List<NBTTagCompound> tagCompounds) {
         if (player.world.isRemote) {
-            getPlayerTamedCreatures(player).setPartyNBT(tagCompounds);
+            //getPlayerTamedCreatures(player).setPartyNBT(tagCompounds);
             RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player, tagCompounds));
         }
         else {
-            getPlayerTamedCreatures(player).setPartyNBT(tagCompounds);
+            //getPlayerTamedCreatures(player).setPartyNBT(tagCompounds);
             RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartyNBT(player, tagCompounds));
         }
     }
+     */
 
     public static List<RiftCreature> getPlayerBox(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getBoxCreatures(player.world);
@@ -99,7 +103,7 @@ public class PlayerTamedCreaturesHelper {
     //force sync client to data and vice versa
     public static void forceSyncParty(EntityPlayer player) {
         if (player.world.isRemote) {
-            if (getPlayerPartyNBT(player).isEmpty()) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
+            //if (getPlayerPartyNBT(player).isEmpty()) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
         }
         else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartyNBT(player));
     }

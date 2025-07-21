@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import io.netty.buffer.ByteBuf;
@@ -21,46 +22,52 @@ import java.util.List;
 
 public class RiftForceSyncPartyNBT implements IMessage {
     private int playerId;
-    private List<NBTTagCompound> tagCompounds;
+    private int listSize;
+    private FixedSizeList<NBTTagCompound> tagCompounds;
 
     public RiftForceSyncPartyNBT() {}
 
     public RiftForceSyncPartyNBT(EntityPlayer player) {
-        this(player, new ArrayList<>());
+        this(player, new FixedSizeList<>(0));
     }
 
-    public RiftForceSyncPartyNBT(EntityPlayer player, List<NBTTagCompound> tagCompounds) {
+    public RiftForceSyncPartyNBT(EntityPlayer player, FixedSizeList<NBTTagCompound> tagCompounds) {
         this.playerId = player.getEntityId();
+        this.listSize = tagCompounds.size();
         this.tagCompounds = tagCompounds;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.playerId = buf.readInt();
+        this.listSize = buf.readInt();
 
         NBTTagCompound compound = ByteBufUtils.readTag(buf);
-        this.tagCompounds = this.setNBTTagListToNBTList(compound.getTagList("List", 10));
+        this.tagCompounds = this.setNBTTagListToNBTList(compound.getTagList("List", 10), this.listSize);
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.playerId);
+        buf.writeInt(this.listSize);
 
         NBTTagCompound compound = new NBTTagCompound();
-        if (this.tagCompounds.isEmpty()) compound.setTag("List", new NBTTagList());
-        else compound.setTag("List", this.setNBTListToNBTTagList(this.tagCompounds));
+        compound.setTag("List", this.setNBTListToNBTTagList(this.tagCompounds));
         ByteBufUtils.writeTag(buf, compound);
     }
 
-    private NBTTagList setNBTListToNBTTagList(List<NBTTagCompound> tagCompounds) {
+    private NBTTagList setNBTListToNBTTagList(FixedSizeList<NBTTagCompound> tagCompounds) {
         NBTTagList tagList = new NBTTagList();
-        for (NBTTagCompound tagCompound : tagCompounds) tagList.appendTag(tagCompound);
+        for (NBTTagCompound tagCompound : tagCompounds.getList()) tagList.appendTag(tagCompound);
         return tagList;
     }
 
-    private List<NBTTagCompound> setNBTTagListToNBTList(NBTTagList tagList) {
-        List<NBTTagCompound> compoundList = new ArrayList<>();
-        for (NBTBase nbtBase : tagList) compoundList.add((NBTTagCompound) nbtBase);
+    private FixedSizeList<NBTTagCompound> setNBTTagListToNBTList(NBTTagList tagList, int size) {
+        FixedSizeList<NBTTagCompound> compoundList = new FixedSizeList<>(size, new NBTTagCompound());
+        for (int x = 0; x < tagList.tagCount(); x++) {
+            NBTTagCompound tagCompound = (NBTTagCompound) tagList.get(x);
+            compoundList.set(x, tagCompound);
+        }
         return compoundList;
     }
 

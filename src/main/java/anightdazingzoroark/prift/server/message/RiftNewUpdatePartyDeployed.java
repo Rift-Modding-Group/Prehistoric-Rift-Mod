@@ -67,8 +67,10 @@ public class RiftNewUpdatePartyDeployed implements IMessage {
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
                 if (playerTamedCreatures != null) {
-                    List<NBTTagCompound> partyNBT = playerTamedCreatures.getPartyNBT();
+                    List<NBTTagCompound> partyNBT = playerTamedCreatures.getPartyNBT().getList();
                     for (int x = 0; x < partyNBT.size(); x++) {
+                        if (partyNBT.get(x).isEmpty()) continue;
+
                         //get uuid
                         UUID memberUUID = partyNBT.get(x).getUniqueId("UniqueID");
                         if (memberUUID == null || memberUUID.equals(RiftUtil.nilUUID)) continue;
