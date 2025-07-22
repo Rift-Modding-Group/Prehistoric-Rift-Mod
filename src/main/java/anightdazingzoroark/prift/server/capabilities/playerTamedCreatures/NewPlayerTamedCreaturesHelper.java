@@ -122,4 +122,14 @@ public class NewPlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, player, posSelected, posToSwap));
     }
     //swapping related stuff ends here
+
+    //move swapping related stuff starts here
+    public static void partyMemSwapLearntMoves(EntityPlayer player, int partyMemPos, int posSelected, int posToSwap) {
+        RiftMessages.WRAPPER.sendToServer(new RiftChangeLearntMovesOrder(player, partyMemPos, posSelected, posToSwap));
+    }
+
+    public static void partyMemSwapLearntMoveWithLearnableMove(EntityPlayer player, int partyMemPos, int learntMovePos, String learnableMove) {
+        RiftMessages.WRAPPER.sendToServer(new RiftChangeLearntMoveWithLearnableMove(player, partyMemPos, learntMovePos, learnableMove));
+    }
+    //move swapping related stuff ends here
 }

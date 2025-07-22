@@ -142,6 +142,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> PLAY_INFINITE_MOVE_ANIM = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
+    private static final DataParameter<List<CreatureMove>> LEARNABLE_MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
     private static final DataParameter<CreatureMoveConditionStack> MOVE_CONDITION_STACK = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.MOVE_CONDITION_STACK);
 
     private static final DataParameter<Boolean> BREAK_BLOCK_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -303,6 +304,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(PLAY_INFINITE_MOVE_ANIM, false);
 
         this.dataManager.register(MOVE_LIST, new ArrayList<>());
+        this.dataManager.register(LEARNABLE_MOVE_LIST, new ArrayList<>());
         this.dataManager.register(MOVE_CONDITION_STACK, new CreatureMoveConditionStack());
 
         this.dataManager.register(BREAK_BLOCK_MODE, false);
@@ -1008,6 +1010,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         if (this.justSpawned()) {
             this.setLearnedMoves(this.possibleStartingMoves().next());
+
+            //initialize learnable moves
+            List<CreatureMove> learnableMoves = this.initialLearnableMoves();
+            //remove learnable moves already learnt by user
+            learnableMoves.removeAll(this.getLearnedMoves());
+            this.setLearnableMoves(learnableMoves);
             this.heal((float) (this.maxCreatureHealth + (0.1D) * (this.getLevel() - 1) * this.maxCreatureHealth));
             this.setSpeed(this.speed);
             this.setWaterSpeed(this.waterSpeed);
@@ -1244,6 +1252,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         compound.setByte("DeploymentType", (byte) this.getDeploymentType().ordinal());
         compound.setInteger("BoxReviveTime", this.boxReviveTime);
+
         //for moves
         NBTTagList nbttaglist = new NBTTagList();
         for (CreatureMove learnedMove : this.getLearnedMoves()) {
@@ -1252,9 +1261,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             nbttaglist.appendTag(nbttagcompound);
         }
         compound.setTag("LearnedMoves", nbttaglist);
+
         //for learnable moves
         NBTTagList learnableMovesTagList = new NBTTagList();
-        for (CreatureMove learnableMove : this.learnableMoves()) {
+        for (CreatureMove learnableMove : this.getLearnableMoves()) {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
             nbttagcompound.setInteger("Move", learnableMove.ordinal());
             learnableMovesTagList.appendTag(nbttagcompound);
@@ -1312,6 +1322,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
         this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getByte("DeploymentType")]);
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
+
         //for learned moves
         NBTTagList nbtTagList = compound.getTagList("LearnedMoves", 10);
         List<CreatureMove> moveList = new ArrayList<>();
@@ -1321,6 +1332,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (!this.getLearnedMoves().contains(moveToAdd)) moveList.add(moveToAdd);
         }
         this.setLearnedMoves(moveList);
+
+        //for learnable moves
+        NBTTagList learnableMovesTagList = compound.getTagList("LearnableMoves", 10);
+        List<CreatureMove> learnableMoveList = new ArrayList<>();
+        for (int i = 0; i < learnableMovesTagList.tagCount(); i++) {
+            NBTTagCompound nbttagcompound = learnableMovesTagList.getCompoundTagAt(i);
+            CreatureMove moveToAdd = CreatureMove.values()[nbttagcompound.getInteger("Move")];
+            if (!this.getLearnedMoves().contains(moveToAdd)) learnableMoveList.add(moveToAdd);
+        }
+        this.setLearnableMoves(learnableMoveList);
+
         this.setMoveOneCooldown(compound.getInteger("CooldownMoveOne"));
         this.setMoveTwoCooldown(compound.getInteger("CooldownMoveTwo"));
         this.setMoveThreeCooldown(compound.getInteger("CooldownMoveThree"));
@@ -1350,13 +1372,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //move related stuff starts here
     public abstract WeightedList<List<CreatureMove>> possibleStartingMoves();
 
-    public List<CreatureMove> learnableMoves() {
+    public List<CreatureMove> initialLearnableMoves() {
         List<List<CreatureMove>> possibleStartingMoves = this.possibleStartingMoves().possibleOutcomes();
         List<CreatureMove> toOutput = new ArrayList<>();
         for (List<CreatureMove> creatureMoves : possibleStartingMoves) {
             toOutput = RiftUtil.uniteTwoLists(toOutput, creatureMoves);
         }
-        return toOutput;
+        //delete duplicates
+        Set<CreatureMove> toOutputNoDuplicates = new HashSet<>(toOutput);
+        return new ArrayList<>(toOutputNoDuplicates);
     }
 
     public List<CreatureMove> getLearnedMoves() {
@@ -1381,6 +1405,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setCurrentCreatureMove(CreatureMove value) {
         if (value != null) this.dataManager.set(CURRENT_MOVE, value.ordinal());
         else this.dataManager.set(CURRENT_MOVE, -1);
+    }
+
+    public void setLearnableMoves(List<CreatureMove> value) {
+        this.dataManager.set(LEARNABLE_MOVE_LIST, value);
+    }
+
+    public List<CreatureMove> getLearnableMoves() {
+        return this.dataManager.get(LEARNABLE_MOVE_LIST);
     }
 
     public int getMoveUse(int pos) {

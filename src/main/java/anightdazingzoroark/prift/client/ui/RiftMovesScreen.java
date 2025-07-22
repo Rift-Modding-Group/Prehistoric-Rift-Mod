@@ -26,7 +26,7 @@ public class RiftMovesScreen extends GuiScreen {
 
     //for switching
     private int learnedMoveToSwitch = -1;
-    private int learnableMoveToSwitch = -1;
+    private String learnableMoveToSwitch = "";
 
     public RiftMovesScreen(int pos) {
         super();
@@ -55,6 +55,9 @@ public class RiftMovesScreen extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         if (this.mc != null && this.mc.world != null) this.drawDefaultBackground();
         else return;
+
+        //constantly update as long as screen is open
+        this.updateMoves();
 
         //draw screen
         this.drawGuiContainerBackgroundLayer();
@@ -107,7 +110,73 @@ public class RiftMovesScreen extends GuiScreen {
         for (int i = 0; i < this.memberCurrentMoves.getClickableSections().size(); i++) {
             RiftClickableSection currentMove = this.memberCurrentMoves.getClickableSections().get(i);
             if (currentMove.isHovered(mouseX, mouseY)) {
-                //if (this.learnedMoveToSwitch < 0) this.learnedMoveToSwitch = i;
+                //select learnt move
+                if (this.learnedMoveToSwitch < 0 && this.learnableMoveToSwitch.isEmpty()) {
+                    this.learnedMoveToSwitch = i;
+                    this.memberCurrentMoves.setSelectedMove(currentMove.getStringID());
+                    this.memberCurrentMoves.selectClickableSectionById(currentMove.getStringID());
+                    currentMove.playPressSound(this.mc.getSoundHandler());
+                }
+                //switch this learnt move with an already selected learnable move
+                else if (!this.learnableMoveToSwitch.isEmpty()) {
+                    NewPlayerTamedCreaturesHelper.partyMemSwapLearntMoveWithLearnableMove(this.mc.player, this.pos, i, this.learnableMoveToSwitch);
+
+                    //reset
+                    this.learnedMoveToSwitch = -1;
+                    this.learnableMoveToSwitch = "";
+                    this.learnableMovesSection.setSelectedMove("");
+                    this.learnableMovesSection.unselectAllClickableSections();
+                    currentMove.playPressSound(this.mc.getSoundHandler());
+                }
+                //switch this learnt move with an already selected learnt move
+                else {
+                    NewPlayerTamedCreaturesHelper.partyMemSwapLearntMoves(this.mc.player, this.pos, this.learnedMoveToSwitch, i);
+
+                    //reset
+                    this.learnedMoveToSwitch = -1;
+                    this.learnableMoveToSwitch = "";
+                    this.memberCurrentMoves.setSelectedMove("");
+                    this.memberCurrentMoves.unselectAllClickableSections();
+                    this.learnableMovesSection.unselectAllClickableSections();
+                    currentMove.playPressSound(this.mc.getSoundHandler());
+                }
+            }
+        }
+
+        //for selecting move in learnable moves for swapping
+        for (int i = 0; i < this.learnableMovesSection.getClickableSections().size(); i++) {
+            RiftClickableSection currentMove = this.learnableMovesSection.getClickableSections().get(i);
+            if (currentMove.isHovered(mouseX, mouseY)) {
+                //select learnable move
+                if (this.learnedMoveToSwitch < 0 && this.learnableMoveToSwitch.isEmpty()) {
+                    this.learnableMoveToSwitch = currentMove.getStringID();
+                    this.learnableMovesSection.setSelectedMove(currentMove.getStringID());
+                    this.learnableMovesSection.unselectAllClickableSections();
+                    this.learnableMovesSection.selectClickableSectionById(currentMove.getStringID());
+                    currentMove.playPressSound(this.mc.getSoundHandler());
+                }
+                //deselect learnable move if it is selected twice
+                else if (this.learnedMoveToSwitch < 0 && this.learnableMoveToSwitch.equals(currentMove.getStringID())) {
+                    //reset
+                    this.learnedMoveToSwitch = -1;
+                    this.learnableMoveToSwitch = "";
+                    this.memberCurrentMoves.setSelectedMove("");
+                    this.memberCurrentMoves.unselectAllClickableSections();
+                    this.learnableMovesSection.unselectAllClickableSections();
+                    currentMove.playPressSound(this.mc.getSoundHandler());
+                }
+                //switch this learnable move with an already selected learnt move
+                else {
+                    NewPlayerTamedCreaturesHelper.partyMemSwapLearntMoveWithLearnableMove(this.mc.player, this.pos, this.learnedMoveToSwitch, currentMove.getStringID());
+
+                    //reset
+                    this.learnedMoveToSwitch = -1;
+                    this.learnableMoveToSwitch = "";
+                    this.memberCurrentMoves.setSelectedMove("");
+                    this.memberCurrentMoves.unselectAllClickableSections();
+                    this.learnableMovesSection.unselectAllClickableSections();
+                    currentMove.playPressSound(this.mc.getSoundHandler());
+                }
             }
         }
     }
@@ -122,5 +191,11 @@ public class RiftMovesScreen extends GuiScreen {
 
     private NBTTagCompound getNBTFromPos() {
         return NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.pos);
+    }
+
+    private void updateMoves() {
+        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+        this.memberCurrentMoves.setCreatureNBT(this.getNBTFromPos());
+        this.learnableMovesSection.setCreatureNBT(this.getNBTFromPos());
     }
 }

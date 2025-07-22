@@ -407,7 +407,7 @@ public class RiftUtil {
     }
 
     public static <T> List<T> uniteTwoLists(List<T> listOne, List<T> listTwo) {
-        if (listTwo != null && !listTwo.isEmpty()) for (T item : listTwo) listOne.add(item);
+        if (listTwo != null && !listTwo.isEmpty()) listOne.addAll(listTwo);
         return listOne;
     }
 

@@ -122,5 +122,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftNewAddToParty.Handler.class, RiftNewAddToParty.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftNewRemoveCreature.Handler.class, RiftNewRemoveCreature.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftNewRemoveCreature.Handler.class, RiftNewRemoveCreature.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftChangeLearntMovesOrder.Handler.class, RiftChangeLearntMovesOrder.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftChangeLearntMoveWithLearnableMove.Handler.class, RiftChangeLearntMoveWithLearnableMove.class, id++, Side.SERVER);
     }
 }

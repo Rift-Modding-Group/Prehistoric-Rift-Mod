@@ -45,7 +45,6 @@ public class RiftMovesLearnableMovesSection extends RiftGuiScrollableSection {
             //get moves
             List<NBTBase> learnableMovesNBT = this.creatureNBT.getTagList("LearnableMoves", 10).tagList;
             List<NBTBase> learnedMovesNBT = this.creatureNBT.getTagList("LearnedMoves", 10).tagList;
-            learnableMovesNBT.removeIf(learnedMovesNBT::contains);
 
             //add clickable sections for each move
             for (NBTBase nbtBase : learnableMovesNBT) {
