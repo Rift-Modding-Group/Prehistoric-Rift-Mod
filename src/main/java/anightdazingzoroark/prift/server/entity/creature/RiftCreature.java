@@ -449,8 +449,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             RiftMessages.WRAPPER.sendToServer(new RiftSetSprinting(this, this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting()));
         }
         if (this.isBurrowing()) this.manageBurrowingEffects();
+
+        //deal with hitbox and creature removal upon being dismissed
         if (this.getDeploymentType() != PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
-                && this.getDeploymentType() != PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) this.updateParts();
+                && this.getDeploymentType() != PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) {
+            this.updateParts();
+            this.ticksSinceHitboxRemoval = 0;
+        }
         else {
             this.deleteAllHitboxes();
             this.ticksSinceHitboxRemoval++;

@@ -66,17 +66,29 @@ public class RiftDeployPartyMem implements IMessage {
 
                 if (message.deploy) {
                     //edit nbt
-                    NBTTagCompound compound = new NBTTagCompound();
-                    compound.setByte("DeploymentType", (byte) PlayerTamedCreatures.DeploymentType.PARTY.ordinal());
-                    playerTamedCreatures.modifyCreature(uuid, compound);
-
-                    //create creature
                     NBTTagCompound creatureCompound = playerTamedCreatures.getPartyNBT().get(message.position);
-                    RiftCreature creature = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(messagePlayer.world, creatureCompound);
 
-                    if (creature != null) {
-                        creature.setPosition(player.posX, player.posY, player.posZ);
-                        player.world.spawnEntity(creature);
+                    //due to the way creature dismissal works, there's a delay in when a creature gets dismissed
+                    //so if the deploy button is activated during that small delay, the process must stop and
+                    //the creature stays
+                    //hence, there should be a check on whether or not the creature exists in the world
+                    //when dealing with this
+                    UUID creatureUUID = creatureCompound.getUniqueId("UniqueID");
+                    if (RiftUtil.checkForEntityWithUUID(messagePlayer.world, creatureUUID)) {
+                        RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, creatureUUID);
+                        if (creature != null) creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                    }
+                    else {
+                        creatureCompound.setByte("DeploymentType", (byte) PlayerTamedCreatures.DeploymentType.PARTY.ordinal());
+                        playerTamedCreatures.setPartyMemNBT(message.position, creatureCompound);
+
+                        //create creature
+                        RiftCreature creature = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(messagePlayer.world, creatureCompound);
+
+                        if (creature != null) {
+                            creature.setPosition(player.posX, player.posY, player.posZ);
+                            player.world.spawnEntity(creature);
+                        }
                     }
                 }
                 else {

@@ -70,6 +70,20 @@ public class RiftUtil {
         return null;
     }
 
+    public static boolean checkForEntityWithUUID(World world, UUID uuid) {
+        if (world != null) {
+            for (Entity entity : world.getLoadedEntityList()) {
+                if (entity instanceof EntityLivingBase) {
+                    EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
+                    if (entityLivingBase.getUniqueID().equals(uuid)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public static double highestWaterPos(RiftCreature creature) {
         double maxHeight = creature.world.getActualHeight() - creature.getPosition().getY();
         if (creature.isInWater()) {
