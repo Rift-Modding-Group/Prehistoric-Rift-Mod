@@ -115,7 +115,7 @@ public class RiftGui implements IGuiHandler {
             return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);
         }
         else if (id == GUI_PARTY) {
-            return new RiftPartyScreen(x);
+            return new RiftPartyScreen(x, y);
         }
         else if (id == GUI_MOVES) {
             return new RiftMovesScreen(x);

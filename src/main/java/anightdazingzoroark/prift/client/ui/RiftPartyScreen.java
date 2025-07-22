@@ -45,9 +45,13 @@ public class RiftPartyScreen extends GuiScreen {
     //managing swapping party members
     private boolean swapPartyMemsMode;
 
-    public RiftPartyScreen(int pos) {
+    //only relevant in very specific circumstances
+    private boolean openedFromManageMoves;
+
+    public RiftPartyScreen(int pos, int openedFromManageMoves) {
         super();
         this.partyMemPos = pos;
+        this.openedFromManageMoves = openedFromManageMoves >= 0;
     }
 
     @Override
@@ -126,8 +130,14 @@ public class RiftPartyScreen extends GuiScreen {
         //PlayerTamedCreaturesHelper.setLastSelected(this.mc.player, 0);
 
         //set creature to draw
-
         if (this.partyMemPos >= 0) this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, playerPartyNBT.get(this.partyMemPos));
+
+        //if opened from manage moves, enable move management related stuff
+        if (this.partyMemPos >= 0 && this.openedFromManageMoves) {
+            this.moveManagement = true;
+            this.creatureInfoButton.setSelected(false);
+            this.creatureMovesButton.setSelected(true);
+        }
     }
 
     @Override

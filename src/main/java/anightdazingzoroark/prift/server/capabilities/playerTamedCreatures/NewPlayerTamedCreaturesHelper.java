@@ -4,13 +4,16 @@ import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -132,4 +135,19 @@ public class NewPlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftChangeLearntMoveWithLearnableMove(player, partyMemPos, learntMovePos, learnableMove));
     }
     //move swapping related stuff ends here
+
+    //helper functions for debugging
+    public static List<CreatureMove> getMoveListFromNBT(NBTTagList moveListNBT) {
+        List<CreatureMove> toReturn = new ArrayList<>();
+
+        if (moveListNBT != null && !moveListNBT.isEmpty()) {
+            for (int x = 0; x < moveListNBT.tagCount(); x++) {
+                NBTTagCompound moveNBT = moveListNBT.getCompoundTagAt(x);
+                CreatureMove move = CreatureMove.values()[moveNBT.getInteger("Move")];
+                toReturn.add(move);
+            }
+        }
+
+        return toReturn;
+    }
 }
