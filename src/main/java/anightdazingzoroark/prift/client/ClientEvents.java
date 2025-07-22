@@ -131,7 +131,7 @@ public class ClientEvents {
     public void openParty(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (RiftControls.openParty.isKeyDown()) {
-            player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, player.world, 0, 0, 0);
+            player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, player.world, -1, 0, 0);
         }
     }
 }

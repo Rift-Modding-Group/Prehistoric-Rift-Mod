@@ -281,7 +281,7 @@ public class RiftJournalScreen extends GuiScreen {
         //return to party screen
         if (this.partyClickableSection.isHovered(mouseX, mouseY)) {
             this.partyClickableSection.playPressSound(this.mc.getSoundHandler());
-            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, 0, 0, 0);
+            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, -1, 0, 0);
         }
     }
 

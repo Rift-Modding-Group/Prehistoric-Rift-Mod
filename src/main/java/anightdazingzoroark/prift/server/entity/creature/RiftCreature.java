@@ -1252,6 +1252,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             nbttaglist.appendTag(nbttagcompound);
         }
         compound.setTag("LearnedMoves", nbttaglist);
+        //for learnable moves
+        NBTTagList learnableMovesTagList = new NBTTagList();
+        for (CreatureMove learnableMove : this.learnableMoves()) {
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            nbttagcompound.setInteger("Move", learnableMove.ordinal());
+            learnableMovesTagList.appendTag(nbttagcompound);
+        }
+        compound.setTag("LearnableMoves", learnableMovesTagList);
+
         compound.setInteger("CooldownMoveOne", this.getMoveOneCooldown());
         compound.setInteger("CooldownMoveTwo", this.getMoveTwoCooldown());
         compound.setInteger("CooldownMoveThree", this.getMoveThreeCooldown());

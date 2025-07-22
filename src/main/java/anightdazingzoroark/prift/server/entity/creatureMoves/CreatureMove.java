@@ -88,6 +88,13 @@ public enum CreatureMove {
         return this.moveAnimType.toString().toLowerCase()+"_type";
     }
 
+    public static CreatureMove safeValueOf(String value) {
+        for (CreatureMove move : CreatureMove.values()) {
+            if (move.toString().equals(value)) return move;
+        }
+        return null;
+    }
+
     public enum MoveAnimType {
         CHARGE(MoveType.RANGED_SELDOM), //movement based (always requires movement to use),
         LEAP(MoveType.RANGED_SELDOM), //involves jumping

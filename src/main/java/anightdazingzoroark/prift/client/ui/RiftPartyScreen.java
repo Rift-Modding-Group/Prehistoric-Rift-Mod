@@ -32,17 +32,23 @@ public class RiftPartyScreen extends GuiScreen {
     private RiftClickableSection journalButton;
     private RiftClickableSection creatureInfoButton;
     private RiftClickableSection creatureMovesButton;
+    private RiftClickableSection swapMovesButton;
     private RiftPartyMemScrollableSection infoScrollableSection;
     private RiftPartyMemMovesSection movesScrollableSection;
 
     private RiftCreature creatureToDraw;
     private boolean moveManagement;
-    private int partyMemPos = -1;
+    private int partyMemPos;
     protected final int xSize = 373;
     protected final int ySize = 182;
 
     //managing swapping party members
     private boolean swapPartyMemsMode;
+
+    public RiftPartyScreen(int pos) {
+        super();
+        this.partyMemPos = pos;
+    }
 
     @Override
     public void initGui() {
@@ -110,12 +116,18 @@ public class RiftPartyScreen extends GuiScreen {
         this.movesScrollableSection = new RiftPartyMemMovesSection(this.width, this.height, this.fontRenderer, this.mc);
         if (this.partyMemPos >= 0) this.movesScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
 
+        //swap moves button
+        this.swapMovesButton = new RiftClickableSection(19, 17, this.width, this.height, 177, -67, this.fontRenderer, this.mc);
+        this.swapMovesButton.addImage(background, 20, 18, 400, 360, 75, 203, 95, 203);
+        this.swapMovesButton.setSelectedUV(115, 203);
+        this.swapMovesButton.setScale(0.75f);
 
         //by default selected button is the first one
         //PlayerTamedCreaturesHelper.setLastSelected(this.mc.player, 0);
 
         //set creature to draw
-        //this.creatureToDraw = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, playerPartyNBT.get(0));
+
+        if (this.partyMemPos >= 0) this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, playerPartyNBT.get(this.partyMemPos));
     }
 
     @Override
@@ -204,8 +216,11 @@ public class RiftPartyScreen extends GuiScreen {
             //draw creature moves button
             this.creatureMovesButton.drawSection(mouseX, mouseY);
 
-            //draw moves when move management is true
-            if (this.moveManagement) this.movesScrollableSection.drawSectionContents(mouseX, mouseY, partialTicks);
+            //draw moves and swap moves button when move management is true
+            if (this.moveManagement) {
+                this.movesScrollableSection.drawSectionContents(mouseX, mouseY, partialTicks);
+                this.swapMovesButton.drawSection(mouseX, mouseY);
+            }
             //draw info when move management is false
             else this.infoScrollableSection.drawSectionContents(mouseX, mouseY, partialTicks);
 
@@ -406,6 +421,14 @@ public class RiftPartyScreen extends GuiScreen {
                     moveSection.playPressSound(this.mc.getSoundHandler());
                 }
             }
+        }
+
+        //open the moves screen when clicking on swap moves button
+        if (this.swapMovesButton.isHovered(mouseX, mouseY)) {
+            //play sound
+            this.journalButton.playPressSound(this.mc.getSoundHandler());
+            //open ui
+            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MOVES, this.mc.world, this.partyMemPos, 0, 0);
         }
     }
 

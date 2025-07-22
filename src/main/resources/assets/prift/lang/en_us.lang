@@ -212,6 +212,7 @@ journal.diet=Diet: %s
 journal.levelup_rate=Levelup Rate: %s
 journal.party_member.info=Info
 journal.party_member.moves=Moves
+journal.moves_label.available_moves=Available Moves
 
 levelup_rate.creature.very_slow=Very Slow
 levelup_rate.creature.slow=Slow
@@ -587,6 +588,7 @@ creature_move.plate_scatter.name=Plate Scatter
 creature_move.plate_scatter.description=The user scatters its plates to damage multiple targets in front of it.
 creature_move.gnash.name=Gnash
 creature_move.gnash.description=The user picks up its target using its jaws, then shakes it around rapidly to repeatedly damage it within quick intervals.
+creature_move.select_move=Choose a move to swap around
 
 gui.tab_header.entry=Entry
 gui.tab_header.info=Info
