@@ -125,5 +125,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftJournalEditOne.Handler.class, RiftJournalEditOne.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftJournalEditAll.Handler.class, RiftJournalEditAll.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangePartyMemName.Handler.class, RiftChangePartyMemName.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftUpdatePartyAfterOpenPartyScreen.Handler.class, RiftUpdatePartyAfterOpenPartyScreen.class, id++, Side.SERVER);
     }
 }

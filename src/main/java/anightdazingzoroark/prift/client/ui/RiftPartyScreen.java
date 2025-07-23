@@ -57,6 +57,9 @@ public class RiftPartyScreen extends GuiScreen {
     @Override
     public void initGui() {
         super.initGui();
+
+        //update creatures upon opening
+        NewPlayerTamedCreaturesHelper.updateAfterOpenPartyScreen(this.mc.player, (int) this.mc.world.getTotalWorldTime());
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
         //create swap party members button
@@ -463,7 +466,8 @@ public class RiftPartyScreen extends GuiScreen {
     }
 
     private void updateAllPartyMems() {
-        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player); //update nbt from deployed creatures
+        //update creatures while ui is opened
         FixedSizeList<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
             RiftPartyMemButton button = this.partyMemButtons.get(x);

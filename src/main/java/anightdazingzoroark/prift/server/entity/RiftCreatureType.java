@@ -2,13 +2,17 @@ package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.*;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.enums.*;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -542,6 +546,73 @@ public enum RiftCreatureType {
 
     public String getIdentifier() {
         return "prift:"+this.name().toLowerCase();
+    }
+
+    public boolean isFavoriteFood(ItemStack stack) {
+        RiftCreatureConfig creatureConfig = RiftConfigHandler.getConfig(this);
+        if (creatureConfig != null) {
+            List<RiftCreatureConfig.Food> favoriteFood = creatureConfig.general.favoriteFood;
+            for (RiftCreatureConfig.Food food : favoriteFood) {
+                if (RiftUtil.itemStackEqualToString(stack, food.itemId)) return true;
+            }
+        }
+        return false;
+    }
+
+    public int getFavoriteFoodHeal(ItemStack stack, double maxHealth) {
+        RiftCreatureConfig creatureConfig = RiftConfigHandler.getConfig(this);
+        if (creatureConfig != null) {
+            List<RiftCreatureConfig.Food> favoriteFood = creatureConfig.general.favoriteFood;
+            for (RiftCreatureConfig.Food food : favoriteFood) {
+                if (RiftUtil.itemStackEqualToString(stack, food.itemId)) {
+                    return (int)Math.ceil(maxHealth * food.percentageHeal);
+                }
+            }
+        }
+        return 0;
+    }
+
+    public boolean isEnergyRegenItem(ItemStack stack) {
+        List<String> itemList = new ArrayList<>();
+        if (this.getCreatureDiet() == RiftCreatureType.CreatureDiet.HERBIVORE || this.getCreatureDiet() == RiftCreatureType.CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (this.getCreatureDiet() == RiftCreatureType.CreatureDiet.CARNIVORE || this.getCreatureDiet() == RiftCreatureType.CreatureDiet.PISCIVORE || this.getCreatureDiet() == RiftCreatureType.CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+        else if (this.getCreatureDiet() == RiftCreatureType.CreatureDiet.OMNIVORE) {
+            itemList = new ArrayList<>(Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods));
+            itemList.addAll(Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods));
+        }
+
+        for (String foodItem : itemList) {
+            int first = foodItem.indexOf(":");
+            int second = foodItem.indexOf(":", first + 1);
+            int third = foodItem.indexOf(":", second + 1);
+            String itemId = foodItem.substring(0, second);
+            int itemData = Integer.parseInt(foodItem.substring(second + 1, third));
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId)) && (itemData == -1 || itemData == stack.getMetadata())) return true;
+        }
+
+        return false;
+    }
+
+    public int getEnergyRegenItemValue(ItemStack stack) {
+        List<String> itemList = new ArrayList<>();
+        if (this.getCreatureDiet() == RiftCreatureType.CreatureDiet.HERBIVORE || this.getCreatureDiet() == RiftCreatureType.CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (this.getCreatureDiet() == RiftCreatureType.CreatureDiet.CARNIVORE || this.getCreatureDiet() == RiftCreatureType.CreatureDiet.PISCIVORE || this.getCreatureDiet() == RiftCreatureType.CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+        else if (this.getCreatureDiet() == RiftCreatureType.CreatureDiet.OMNIVORE) {
+            itemList = new ArrayList<>(Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods));
+            itemList.addAll(Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods));
+        }
+
+        for (String itemEntry : itemList) {
+            int first = itemEntry.indexOf(":");
+            int second = itemEntry.indexOf(":", first + 1);
+            int third = itemEntry.indexOf(":", second + 1);
+            String itemId = itemEntry.substring(0, second);
+            int itemData = Integer.parseInt(itemEntry.substring(second + 1, third));
+            if (stack.getItem().equals(Item.getByNameOrId(itemId)) && (itemData == -1 || itemData == stack.getMetadata())) {
+                return Integer.parseInt(itemEntry.substring(third + 1));
+            }
+        }
+        return 0;
     }
 
     public static RiftCreatureType safeValOf(String string) {
