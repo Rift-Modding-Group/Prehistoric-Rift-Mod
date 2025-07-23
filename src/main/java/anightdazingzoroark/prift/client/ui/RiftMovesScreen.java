@@ -189,6 +189,12 @@ public class RiftMovesScreen extends GuiScreen {
         drawModalRectWithCustomSizedTexture(k, l, 0, 0, 249, 129, 250f, 202f);
     }
 
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) {
+        if (keyCode == 1)
+            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, this.pos, 0, 0);
+    }
+
     private NBTTagCompound getNBTFromPos() {
         return NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.pos);
     }

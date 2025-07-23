@@ -366,7 +366,7 @@ public class RiftJournalScreen extends GuiScreen {
 
     @Override
     protected void keyTyped(char typedChar, int keyCode) {
-        if (keyCode == 1) this.mc.player.closeScreen();
+        if (keyCode == 1) this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, -1, 0, 0);
 
         //deal with text box's input
         if (this.journalInfoSection != null) {

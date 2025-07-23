@@ -81,7 +81,7 @@ public class RiftPopupFromPlayerParty extends GuiScreen {
 
     @Override
     protected void keyTyped(char typedChar, int keyCode) {
-        if (keyCode == 1) this.mc.player.closeScreen();
+        if (keyCode == 1) this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, this.pos, -1, 0);
 
         //deal with text box's input
         for (Map.Entry<String, GuiTextField> textBoxEntry : this.changeName.getTextFields().entrySet()) {
