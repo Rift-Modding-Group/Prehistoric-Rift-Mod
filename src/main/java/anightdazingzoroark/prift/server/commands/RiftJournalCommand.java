@@ -1,12 +1,7 @@
 package anightdazingzoroark.prift.server.commands;
 
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.message.RiftJournalEditAll;
-import anightdazingzoroark.prift.server.message.RiftJournalEditOne;
-import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;

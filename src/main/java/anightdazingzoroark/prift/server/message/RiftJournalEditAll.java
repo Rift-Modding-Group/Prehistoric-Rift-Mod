@@ -2,9 +2,7 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -13,21 +11,25 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
 public class RiftJournalEditAll implements IMessage {
+    private int playerId;
     private boolean add;
 
     public RiftJournalEditAll() {}
 
-    public RiftJournalEditAll(boolean add) {
+    public RiftJournalEditAll(EntityPlayer player, boolean add) {
+        this.playerId = player.getEntityId();
         this.add = add; //add all if true, remove all if false
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
+        this.playerId = buf.readInt();
         this.add = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
+        buf.writeInt(this.playerId);
         buf.writeBoolean(this.add);
     }
 
@@ -42,14 +44,8 @@ public class RiftJournalEditAll implements IMessage {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
-                IPlayerJournalProgress journalProgress = messagePlayer.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-                if (message.add) journalProgress.unlockAllEntries();
-                else journalProgress.resetEntries();
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-
-                IPlayerJournalProgress journalProgress = messagePlayer.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
+                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+                IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
                 if (message.add) journalProgress.unlockAllEntries();
                 else journalProgress.resetEntries();
             }

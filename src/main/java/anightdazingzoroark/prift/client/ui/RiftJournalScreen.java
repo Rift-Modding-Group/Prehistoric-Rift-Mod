@@ -249,6 +249,7 @@ public class RiftJournalScreen extends GuiScreen {
             this.journalEntriesSection.setSearchMode(false);
             this.journalEntriesSection.setStringForSearch("");
             this.journalEntriesSection.reenableAllButtons();
+            this.journalEntriesSection.resetScrollProgress();
             this.indexClickableSection.playPressSound(this.mc.getSoundHandler());
         }
         //transition to search mode
@@ -263,6 +264,7 @@ public class RiftJournalScreen extends GuiScreen {
             this.journalEntriesSection.setSearchMode(true);
             this.journalEntriesSection.setCurrentCategory(null);
             this.journalEntriesSection.reenableAllButtons();
+            this.journalEntriesSection.resetScrollProgress();
             this.searchClickableSection.playPressSound(this.mc.getSoundHandler());
         }
 

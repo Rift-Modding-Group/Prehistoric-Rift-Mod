@@ -26,8 +26,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftGrabbedEntitySetPos.Handler.class, RiftGrabbedEntitySetPos.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftHoverChangeControl.Handler.class, RiftHoverChangeControl.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftIncrementControlUse.Handler.class, RiftIncrementControlUse.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftJournalEditOne.Handler.class, RiftJournalEditOne.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftJournalEditOne.Handler.class, RiftJournalEditOne.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftLaunchLWeaponProjectile.Handler.class, RiftLaunchLWeaponProjectile.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftCanUseMoveTriggerButton.Handler.class, RiftCanUseMoveTriggerButton.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftDeployPartyMem.Handler.class, RiftDeployPartyMem.class, id++, Side.SERVER);
@@ -59,8 +57,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetTurretMode.Handler.class, RiftSetTurretMode.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeTurretTargetingFromMenu.Handler.class, RiftChangeTurretTargetingFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpdatePlayerJournalProgress.Handler.class, RiftUpdatePlayerJournalProgress.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftJournalEditAll.Handler.class, RiftJournalEditAll.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftJournalEditAll.Handler.class, RiftJournalEditAll.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftUpdateNonPotionEffects.Handler.class, RiftUpdateNonPotionEffects.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetBleeding.Handler.class, RiftSetBleeding.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetBleeding.Handler.class, RiftSetBleeding.class, id++, Side.CLIENT);
@@ -124,5 +120,9 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftNewRemoveCreature.Handler.class, RiftNewRemoveCreature.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftChangeLearntMovesOrder.Handler.class, RiftChangeLearntMovesOrder.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeLearntMoveWithLearnableMove.Handler.class, RiftChangeLearntMoveWithLearnableMove.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftSyncJournal.Handler.class, RiftSyncJournal.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftSyncJournal.Handler.class, RiftSyncJournal.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftJournalEditOne.Handler.class, RiftJournalEditOne.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftJournalEditAll.Handler.class, RiftJournalEditAll.class, id++, Side.SERVER);
     }
 }
