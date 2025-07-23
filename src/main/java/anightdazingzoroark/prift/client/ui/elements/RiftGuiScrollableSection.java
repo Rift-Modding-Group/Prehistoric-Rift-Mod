@@ -173,11 +173,12 @@ public abstract class RiftGuiScrollableSection {
             int lines = 1;
 
             if (scale != 1f) {
+                int totalTextX = text.getTextCentered() ? x + text.getWidthOffset() - (elementWidth / 2) : x + text.getWidthOffset();
                 GlStateManager.pushMatrix();
                 GlStateManager.scale(scale, scale, scale);
                 this.fontRenderer.drawSplitString(
                         text.getContents(),
-                        (int) ((x + text.getWidthOffset()) / scale),
+                        (int) (totalTextX / scale),
                         (int) ((y + text.getHeightOffset()) / scale),
                         (int) ((elementWidth - text.getWidthOffset()) / scale),
                         text.getTextColor()
@@ -185,7 +186,9 @@ public abstract class RiftGuiScrollableSection {
                 GlStateManager.popMatrix();
             }
             else {
-                this.fontRenderer.drawSplitString(text.getContents(), x, y, elementWidth, text.getTextColor());
+                int finalTextWidth = Math.min(elementWidth, this.fontRenderer.getStringWidth(text.getContents()));
+                int totalTextX = text.getTextCentered() ? x + (elementWidth - finalTextWidth) / 2 : x;
+                this.fontRenderer.drawSplitString(text.getContents(), totalTextX, y, elementWidth, text.getTextColor());
                 lines = this.fontRenderer.listFormattedStringToWidth(text.getContents(), elementWidth).size();
             }
 
@@ -493,6 +496,56 @@ public abstract class RiftGuiScrollableSection {
             }
 
             return tabHeight + 4 + contentInnerHeight + contentPadding * 2; //total vertical space used
+        }
+        else if (element instanceof RiftGuiScrollableSectionContents.ButtonRowElement) {
+            RiftGuiScrollableSectionContents.ButtonRowElement buttonRowElement = (RiftGuiScrollableSectionContents.ButtonRowElement) element;
+
+            //get width of entire row
+            int totalButtonWidth = 0;
+            int spacing = 5;
+
+            for (RiftGuiScrollableSectionContents.ButtonElement button : buttonRowElement.getButtonElements()) {
+                totalButtonWidth += button.getSize()[0];
+            }
+            totalButtonWidth += spacing * (buttonRowElement.getButtonElements().size() - 1);
+
+            //calculate start X to center the row
+            int startX = x + (elementWidth - totalButtonWidth) / 2;
+
+            //get highest height amongst buttons, this will determine the height of the element
+            int maxButtonH = 0;
+            for (RiftGuiScrollableSectionContents.ButtonElement buttonElement : buttonRowElement.getButtonElements()) {
+                if (maxButtonH < buttonElement.getSize()[1]) maxButtonH = buttonElement.getSize()[1];
+            }
+
+            //section bounds
+            int sectionTop = (this.guiHeight - this.height) / 2 + this.yOffset;
+            int sectionBottom = sectionTop + this.height;
+
+            //render each button using the existing ButtonElement rendering logic
+            int currentX = startX;
+            for (RiftGuiScrollableSectionContents.ButtonElement but : buttonRowElement.getButtonElements()) {
+                int buttonW = but.getSize()[0];
+                int buttonH = but.getSize()[1];
+                int buttonY = y + (maxButtonH - buttonH) / 2;
+
+                if ((buttonY + buttonH) > sectionTop && buttonY < sectionBottom) {
+                    RiftGuiSectionButton button = new RiftGuiSectionButton(but.getId(), currentX, buttonY, buttonW, buttonH, but.getName());
+                    button.scrollTop = sectionTop;
+                    button.scrollBottom = sectionBottom;
+
+                    if (this.disabledButtonIds.contains(but.getId())) {
+                        button.enabled = false;
+                    }
+
+                    button.drawButton(this.minecraft, mouseX, mouseY, partialTicks);
+                    this.activeButtons.add(button);
+                }
+
+                currentX += buttonW + spacing;
+            }
+
+            return maxButtonH;
         }
 
         return 0;

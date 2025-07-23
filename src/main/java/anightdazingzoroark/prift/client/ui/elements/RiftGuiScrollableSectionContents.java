@@ -44,6 +44,11 @@ public class RiftGuiScrollableSectionContents {
         return this;
     }
 
+    public RiftGuiScrollableSectionContents addButtonRowElement(ButtonRowElement element) {
+        this.list.add(element);
+        return this;
+    }
+
     public List<Element> getContents() {
         return this.list;
     }
@@ -57,6 +62,7 @@ public class RiftGuiScrollableSectionContents {
         private int bottomSpace;
         private int widthOffset = 0;
         private int heightOffset = 0;
+        private boolean textCentered = false;
         private ResourceLocation bgImage;
         private int[] bgImageSize; //size of the entire texture
         private int[] bgImageUV; //uv start pos of texture
@@ -117,6 +123,15 @@ public class RiftGuiScrollableSectionContents {
 
         public int getHeightOffset() {
             return this.heightOffset;
+        }
+
+        public TextElement setTextCentered() {
+            this.textCentered = true;
+            return this;
+        }
+
+        public boolean getTextCentered() {
+            return this.textCentered;
         }
 
         public TextElement setBackground(ResourceLocation bgImage, int bgTextureWidth, int bgTextureHeight, int bgUVWidth, int bgUVHeight, int bgUVX, int bgUVY) {
@@ -625,6 +640,19 @@ public class RiftGuiScrollableSectionContents {
 
         public float getImageScale() {
             return this.imageScale;
+        }
+    }
+
+    public static class ButtonRowElement extends Element {
+        private List<ButtonElement> buttonElements = new ArrayList<>();
+
+        public ButtonRowElement addButtonElement(ButtonElement buttonElement) {
+            this.buttonElements.add(buttonElement);
+            return this;
+        }
+
+        public List<ButtonElement> getButtonElements() {
+            return this.buttonElements;
         }
     }
 }

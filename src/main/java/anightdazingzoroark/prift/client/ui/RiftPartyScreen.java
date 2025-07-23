@@ -193,7 +193,6 @@ public class RiftPartyScreen extends GuiScreen {
             }
 
             //draw selected creature
-            //todo: remove the red overlay on rendered creature
             GlStateManager.color(1f, 1f, 1f, 1f);
             GlStateManager.pushMatrix();
             GlStateManager.pushMatrix();
@@ -255,7 +254,6 @@ public class RiftPartyScreen extends GuiScreen {
                 GlStateManager.color(1f, 1f, 1f, 1f);
                 partyMemButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
             }
-
 
             //draw text overlays for member management buttons
             for (GuiButton partyMemButton: this.partyMemManageButtons) {
@@ -391,8 +389,8 @@ public class RiftPartyScreen extends GuiScreen {
         for (GuiButton button : this.partyMemManageButtons) {
             if (!button.enabled) continue;
 
-            //summon/dismiss
             if (button.isMouseOver()) {
+                //summon/dismiss
                 if (button.id == 0) {
                     if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
                         if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
@@ -405,6 +403,7 @@ public class RiftPartyScreen extends GuiScreen {
                         button.playPressSound(this.mc.getSoundHandler());
                     }
                 }
+                //teleport
                 else if (button.id == 1) {
                     if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
                         if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
@@ -412,6 +411,11 @@ public class RiftPartyScreen extends GuiScreen {
                             button.playPressSound(this.mc.getSoundHandler());
                         }
                     }
+                }
+                //change name
+                else if (button.id == 2) {
+                    this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_MENU_FROM_PARTY, this.mc.world, this.partyMemPos, 0, 0);
+                    button.playPressSound(this.mc.getSoundHandler());
                 }
             }
         }

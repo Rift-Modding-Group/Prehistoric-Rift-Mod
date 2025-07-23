@@ -32,15 +32,16 @@ public class RiftGui implements IGuiHandler {
     public static final int GUI_JOURNAL = 5;
     public static final int GUI_PARTY = 6;
     public static final int GUI_MOVES = 7;
-    public static final int GUI_FEEDING_TROUGH = 8;
-    public static final int GUI_SEMI_MANUAL_EXTRACTOR = 9;
-    public static final int GUI_SEMI_MANUAL_PRESSER = 10;
-    public static final int GUI_SEMI_MANUAL_EXTRUDER = 11;
-    public static final int GUI_SEMI_MANUAL_HAMMERER = 12;
-    public static final int GUI_MILLSTONE = 13;
-    public static final int GUI_MECHANICAL_FILTER = 14;
-    public static final int GUI_CREATURE_BOX = 15;
-    public static final int GUI_MENU_FROM_CREATURE_BOX = 16;
+    public static final int GUI_MENU_FROM_PARTY = 8;
+    public static final int GUI_FEEDING_TROUGH = 9;
+    public static final int GUI_SEMI_MANUAL_EXTRACTOR = 10;
+    public static final int GUI_SEMI_MANUAL_PRESSER = 11;
+    public static final int GUI_SEMI_MANUAL_EXTRUDER = 12;
+    public static final int GUI_SEMI_MANUAL_HAMMERER = 13;
+    public static final int GUI_MILLSTONE = 14;
+    public static final int GUI_MECHANICAL_FILTER = 15;
+    public static final int GUI_CREATURE_BOX = 16;
+    public static final int GUI_MENU_FROM_CREATURE_BOX = 17;
 
     @Nullable
     @Override
@@ -119,6 +120,9 @@ public class RiftGui implements IGuiHandler {
         }
         else if (id == GUI_MOVES) {
             return new RiftMovesScreen(x);
+        }
+        else if (id == GUI_MENU_FROM_PARTY) {
+            return new RiftPopupFromPlayerParty(x);
         }
         else if (id == GUI_JOURNAL) {
             return new RiftJournalScreen();
