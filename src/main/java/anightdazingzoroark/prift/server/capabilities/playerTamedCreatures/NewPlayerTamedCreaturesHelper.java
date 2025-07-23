@@ -124,6 +124,8 @@ public class NewPlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyAfterOpenPartyScreen(player, lastOpenedTime));
     }
 
+    public static void updateWhilePartyScreenOpen(EntityPlayer player, boolean isSingleplayer) {}
+
     //swapping related stuff starts here
     public static void rearrangePartyCreatures(EntityPlayer player, int posSelected, int posToSwap) {
         RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, player, posSelected, posToSwap));
