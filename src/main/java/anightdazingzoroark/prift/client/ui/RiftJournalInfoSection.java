@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSectionContents;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -19,6 +20,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -123,22 +125,31 @@ public class RiftJournalInfoSection extends RiftGuiScrollableSection {
                     .setHeaderText(I18n.format("journal.mining_levels"))
                     .addMiningLevels(RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels);
 
+            //modify contents based on whether or not the creatures entry is unlocked
+            boolean isUnlocked = PlayerJournalProgressHelper.getUnlockedCreatures(this.minecraft.player).get(this.entryType);
+            String finalEntry = isUnlocked
+                    ? this.getJournalEntry()
+                    : I18n.format("journal.entry.locked");
+            List<RiftGuiScrollableSectionContents.Element> finalInfoElements = isUnlocked
+                    ? Arrays.asList(
+                        dietElement,
+                        levelupRateElement,
+                        mealsElement,
+                        foodElement,
+                        miningLevelListElement
+                    )
+                    : Collections.singletonList(mealsElement);
+
             //now make the tab elements
             toReturn.addTabElement(new RiftGuiScrollableSectionContents.TabElement()
                     .setId("creatureInfo")
                     .setWidth(240)
                     //entry, just the journal entry
                     .addTab("entry", Arrays.asList(new RiftGuiScrollableSectionContents.TextElement()
-                            .setContents(this.getJournalEntry()))
+                            .setContents(finalEntry))
                     )
                     //info, such as diet, foods they will consume, etc
-                    .addTab("info", Arrays.asList(
-                            dietElement,
-                            levelupRateElement,
-                            mealsElement,
-                            foodElement,
-                            miningLevelListElement
-                    ))
+                    .addTab("info", finalInfoElements)
             );
         }
 
