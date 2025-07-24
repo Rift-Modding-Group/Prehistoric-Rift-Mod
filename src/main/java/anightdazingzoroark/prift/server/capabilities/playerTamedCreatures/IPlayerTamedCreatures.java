@@ -34,6 +34,10 @@ public interface IPlayerTamedCreatures {
     int getBoxLastOpenedTime();
     NBTTagCompound getPartyMemberTag(UUID uuid);
 
+    //for selected party creature from ui overlay
+    int getSelectedPosInOverlay();
+    void setSelectedPosInOverlay(int value);
+
     //for indirect values
     void addToPartyCreatures(RiftCreature creature);
     List<RiftCreature> getPartyCreatures(World world);

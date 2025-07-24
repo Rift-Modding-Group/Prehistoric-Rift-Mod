@@ -126,6 +126,15 @@ public class NewPlayerTamedCreaturesHelper {
 
     public static void updateWhilePartyScreenOpen(EntityPlayer player, boolean isSingleplayer) {}
 
+    public static int getSelectedPartyPosFromOverlay(EntityPlayer player) {
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncSelectedPartyPosFromOverlay(player));
+        return getPlayerTamedCreatures(player).getSelectedPosInOverlay();
+    }
+
+    public static void setSelectedPartyPosFromOverlay(EntityPlayer player, int value) {
+        RiftMessages.WRAPPER.sendToServer(new RiftSetSelectedPartyPosFromOverlay(player, value));
+    }
+
     //swapping related stuff starts here
     public static void rearrangePartyCreatures(EntityPlayer player, int posSelected, int posToSwap) {
         RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, player, posSelected, posToSwap));

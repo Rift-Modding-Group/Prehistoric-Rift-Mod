@@ -40,6 +40,8 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
         compound.setInteger("PartyLastOpenedTime", instance.getPartyLastOpenedTime());
         compound.setInteger("BoxLastOpenedTime", instance.getBoxLastOpenedTime());
 
+        compound.setInteger("SelectedPosInOverlay", instance.getSelectedPosInOverlay());
+
         return compound;
     }
 
@@ -79,6 +81,8 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
 
             instance.setPartyLastOpenedTime(compound.getInteger("PartyLastOpenedTime"));
             instance.setBoxLastOpenedTime(compound.getInteger("BoxLastOpenedTime"));
+
+            instance.setSelectedPosInOverlay(compound.getInteger("SelectedPosInOverlay"));
         }
     }
 }

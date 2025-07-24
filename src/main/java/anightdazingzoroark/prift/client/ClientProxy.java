@@ -1,20 +1,21 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.overlay.RiftCreatureControls;
+import anightdazingzoroark.prift.client.overlay.RiftLargeWeaponControls;
+import anightdazingzoroark.prift.client.overlay.RiftMountEnergyBar;
+import anightdazingzoroark.prift.client.overlay.RiftPartyMembersOverlay;
 import anightdazingzoroark.prift.client.particle.*;
 import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.renderer.FluidRenderer;
 import anightdazingzoroark.prift.client.renderer.ItemRenderer;
-import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
 import anightdazingzoroark.prift.server.entity.RiftCreatureHitboxLinker;
 import anightdazingzoroark.prift.server.entity.RiftCreatureRidePosLinker;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.Tyrannosaurus;
 import anightdazingzoroark.riftlib.RiftLibLinkerRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -58,6 +59,7 @@ public class ClientProxy extends ServerProxy {
         MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());
         MinecraftForge.EVENT_BUS.register(new RiftCreatureControls());
         MinecraftForge.EVENT_BUS.register(new RiftLargeWeaponControls());
+        MinecraftForge.EVENT_BUS.register(new RiftPartyMembersOverlay());
     }
 
     @SideOnly(Side.CLIENT)

@@ -24,6 +24,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private int boxSizeLevel = 0;
     private int partyLastOpenedTime = 0;
     private int boxLastOpenedTime = 0;
+    private int selectedPosInOverlay = 0;
 
     @Override
     public void setLastSelected(int value) {
@@ -79,6 +80,16 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             }
         }
         return new NBTTagCompound();
+    }
+
+    @Override
+    public int getSelectedPosInOverlay() {
+        return this.selectedPosInOverlay;
+    }
+
+    @Override
+    public void setSelectedPosInOverlay(int value) {
+        this.selectedPosInOverlay = value;
     }
 
     @Override
