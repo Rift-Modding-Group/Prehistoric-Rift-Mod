@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -29,7 +30,6 @@ import static net.minecraft.client.gui.Gui.drawRect;
 
 public class RiftPartyMembersOverlay {
     private static final ResourceLocation hud = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
-    private static final ResourceLocation genericButtonIcon = new ResourceLocation(RiftInitialize.MODID, "textures/ui/generic_button_icon.png");
     private final double barChangeTolerance = 0.05;
     private int selectedPos = -1;
 
@@ -183,6 +183,8 @@ public class RiftPartyMembersOverlay {
         int maxOffsetLeft = (int)((xSize - (bgScale * 38)) / 2f - ((1 - bgScale) * 19));
         int xPosOnScreen = Math.max(-maxOffsetLeft, -210);
         int yPosOnScreen = -20;
+        float health = this.getCreatureHealthFromNBT(partyMemNBT)[0];
+        PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
 
         //render background
         Minecraft.getMinecraft().getTextureManager().bindTexture(hud);
@@ -192,9 +194,12 @@ public class RiftPartyMembersOverlay {
         float unscaledBGY = (ySize - (38 * bgScale)) / 2f + yPosOnScreen + yOffset;
         int k = (int) (Math.max((1 - bgScale) * 19, unscaledBGX) / bgScale);
         int l = (int) (Math.max(0, unscaledBGY) / bgScale);
+        int xUv = (!partyMemNBT.isEmpty() && health == 0) ? 76 : (
+                    !partyMemNBT.isEmpty() && deploymentType == PlayerTamedCreatures.DeploymentType.PARTY ? 38 : 0
+                );
         GlStateManager.pushMatrix();
         GlStateManager.scale(bgScale, bgScale, bgScale);
-        Gui.drawModalRectWithCustomSizedTexture(k, l, 0, 29, 38, 38, 256, 256);
+        Gui.drawModalRectWithCustomSizedTexture(k, l, xUv, 29, 38, 38, 256, 256);
         GlStateManager.popMatrix();
         GlStateManager.disableBlend();
 
@@ -208,7 +213,6 @@ public class RiftPartyMembersOverlay {
             float unscaledIconX = (xSize - (24 * creatureIconScale)) / 2f + xPosOnScreen;
             float unscaledIconY = (ySize - (24 * creatureIconScale)) / 2f + yPosOnScreen + yOffset;
             int iconXPos = (int) (Math.max((1 - creatureIconScale) * 12, unscaledIconX) / creatureIconScale);
-            //int iconXPos = (int) (Math.max((1 - bgScale) * 19, unscaledBGX) / creatureIconScale);
             int iconYPos = (int) (Math.max(0, unscaledIconY) / creatureIconScale);
             GlStateManager.pushMatrix();
             GlStateManager.scale(creatureIconScale, creatureIconScale, creatureIconScale);

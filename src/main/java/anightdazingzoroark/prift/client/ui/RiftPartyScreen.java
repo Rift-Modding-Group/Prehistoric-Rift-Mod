@@ -244,8 +244,7 @@ public class RiftPartyScreen extends GuiScreen {
                     partyMemButton.displayString = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY ? I18n.format("journal.party_button.dismiss") : I18n.format("journal.party_button.summon");
 
                     //disable if creature is ded
-                    partyMemButton.enabled = NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)
-                            && (!this.getMemberNBT().hasKey("Health") || this.getMemberNBT().getFloat("Health") > 0);
+                    partyMemButton.enabled = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos) && (!this.getMemberNBT().hasKey("Health") || this.getMemberNBT().getFloat("Health") > 0));
                 }
                 else if (partyMemButton.id == 1) {
                     //disable if creature is not summoned
@@ -262,9 +261,7 @@ public class RiftPartyScreen extends GuiScreen {
             for (GuiButton partyMemButton: this.partyMemManageButtons) {
                 if (partyMemButton.id == 0) {
                     //draw overlay text for when the summon/dismiss button is disabled
-                    if ((!NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)
-                            || (this.getMemberNBT().hasKey("Health") && this.getMemberNBT().getFloat("Health") <= 0))
-                            && partyMemButton.isMouseOver()) {
+                    if (!(this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos) && (!this.getMemberNBT().hasKey("Health") || this.getMemberNBT().getFloat("Health") > 0)))) {
                         String cannotSummonLocation = I18n.format("journal.warning.cannot_summon");
                         String cannotSummonDead = I18n.format("journal.warning.cannot_summon_dead");
                         String finalOverlayString = (this.getMemberNBT().hasKey("Health") && this.getMemberNBT().getFloat("Health") <= 0)
