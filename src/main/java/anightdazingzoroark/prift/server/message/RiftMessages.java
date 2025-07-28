@@ -129,5 +129,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftForceSyncSelectedPartyPosFromOverlay.Handler.class, RiftForceSyncSelectedPartyPosFromOverlay.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncSelectedPartyPosFromOverlay.Handler.class, RiftForceSyncSelectedPartyPosFromOverlay.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetSelectedPartyPosFromOverlay.Handler.class, RiftSetSelectedPartyPosFromOverlay.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftUpdateIndividualCreature.Handler.class, RiftUpdateIndividualCreature.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftUpdateIndividualCreature.Handler.class, RiftUpdateIndividualCreature.class, id++, Side.CLIENT);
     }
 }

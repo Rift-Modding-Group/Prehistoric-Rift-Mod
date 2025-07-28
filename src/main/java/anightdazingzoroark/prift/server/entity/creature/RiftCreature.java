@@ -208,6 +208,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int resetEnergyTick;
     public int lastIntervalForMoveCall;
     private int ticksSinceHitboxRemoval = 0;
+    //for updating hud stuff when creature is deployed from party
+    private int cachedHealthBucket = -1;
+    private int cachedEnergyBucket = -1;
+    private int cachedXPBucket = -1;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -437,6 +441,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     BlockPos teleportPos = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.getHomePos(), this.world, this);
                     if (teleportPos != null) this.setPosition(teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
                 }
+                //when creature is deployed from party and is visible on the quick summon/dismiss widget
+                //update when health, energy, or xp is at a certain percent threshold
+                this.updateForPartyHUD();
             }
             else {
                 if (this.canDoHerding()) this.manageHerding();
@@ -464,6 +471,29 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         this.manageGrabVictim();
+    }
+
+    private void updateForPartyHUD() {
+        //update health
+        int currentHealthBucket = (int)((this.getHealth() / this.getMaxHealth()) * 10);
+        if (currentHealthBucket != this.cachedHealthBucket) {
+            this.cachedHealthBucket = currentHealthBucket;
+            NewPlayerTamedCreaturesHelper.updateIndividualPartyMem((EntityPlayer) this.getOwner(), this);
+        }
+
+        //energy
+        int energyBucket = (int)(((float) this.getEnergy() / this.getMaxEnergy()) * 10);
+        if (energyBucket != this.cachedEnergyBucket) {
+            this.cachedEnergyBucket = energyBucket;
+            NewPlayerTamedCreaturesHelper.updateIndividualPartyMem((EntityPlayer) this.getOwner(), this);
+        }
+
+        //xp
+        int xpBucket = (int)(((float) this.getXP() / this.getMaxXP()) * 10);
+        if (xpBucket != this.cachedXPBucket) {
+            this.cachedXPBucket = xpBucket;
+            NewPlayerTamedCreaturesHelper.updateIndividualPartyMem((EntityPlayer) this.getOwner(), this);
+        }
     }
 
     @SideOnly(Side.CLIENT)

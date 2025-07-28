@@ -21,6 +21,7 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -30,7 +31,6 @@ import static net.minecraft.client.gui.Gui.drawRect;
 
 public class RiftPartyMembersOverlay {
     private static final ResourceLocation hud = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
-    private final double barChangeTolerance = 0.05;
     private int selectedPos = -1;
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -86,7 +86,6 @@ public class RiftPartyMembersOverlay {
         int boxHeight = 25;
         int maxOffsetLeft = (int)((xSize - boxWidth) / 2f + 5);
         int xPosOnScreen = Math.max(-maxOffsetLeft, -200);
-        //int xPosOnScreen = -maxOffsetLeft;
         int yPosOnScreen = -20;
 
         //draw
@@ -258,6 +257,35 @@ public class RiftPartyMembersOverlay {
         if (RiftControls.switchRightwards.isKeyDown()) {
             this.selectedPos = this.selectedPos + 1 >= NewPlayerTamedCreaturesHelper.maxPartySize ? 0 : this.selectedPos + 1;
             NewPlayerTamedCreaturesHelper.setSelectedPartyPosFromOverlay(player, this.selectedPos);
+            Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        }
+        if (RiftControls.quickSummonAndDismiss.isKeyDown() && this.selectedPos >= 0) {
+            NBTTagCompound partyMemNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.selectedPos);
+            PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
+
+            //for dismissing, when creature is deployed
+            if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
+                NewPlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, false);
+                NewPlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
+                player.sendStatusMessage(new TextComponentTranslation("journal.warning.dismiss_success"), false);
+            }
+            //for summoning, when creature is dismissed
+            else if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                //dont summon when creature is dead
+                float health = this.getCreatureHealthFromNBT(partyMemNBT)[0];
+                if (health <= 0) {
+                    player.sendStatusMessage(new TextComponentTranslation("journal.warning.cannot_summon_dead"), false);
+                }
+                //dont summon when player not in apt position
+                else if (!NewPlayerTamedCreaturesHelper.canBeDeployed(player, this.selectedPos)) {
+                    player.sendStatusMessage(new TextComponentTranslation("journal.warning.cannot_summon"), false);
+                }
+                else {
+                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, true);
+                    player.sendStatusMessage(new TextComponentTranslation("journal.warning.summon_success"), false);
+                }
+            }
+
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
     }

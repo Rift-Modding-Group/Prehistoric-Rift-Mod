@@ -9,17 +9,20 @@ public class RiftControls {
     public static KeyBinding toggleAttackOrBlockBreak;
     public static KeyBinding switchLeftwards;
     public static KeyBinding switchRightwards;
+    public static KeyBinding quickSummonAndDismiss;
 
     public static void init() {
         openParty = new KeyBinding("key.prift.open_party", Keyboard.KEY_J, "key.categories.gameplay");
         toggleAttackOrBlockBreak = new KeyBinding("key.prift.toggle_block_break", Keyboard.KEY_C, "key.categories.gameplay");
         switchLeftwards = new KeyBinding("key.prift.switch_party_mem_leftwards", Keyboard.KEY_LEFT, "key.categories.gameplay");
         switchRightwards = new KeyBinding("key.prift.switch_party_mem_rightwards", Keyboard.KEY_RIGHT, "key.categories.gameplay");
+        quickSummonAndDismiss = new KeyBinding("key.prift.quick_summon_dismiss", Keyboard.KEY_K, "key.categories.gameplay");
 
         ClientRegistry.registerKeyBinding(openParty);
         ClientRegistry.registerKeyBinding(toggleAttackOrBlockBreak);
         ClientRegistry.registerKeyBinding(switchLeftwards);
         ClientRegistry.registerKeyBinding(switchRightwards);
+        ClientRegistry.registerKeyBinding(quickSummonAndDismiss);
     }
 
     public static String getStringFromKeyBinding(KeyBinding keyBinding) {

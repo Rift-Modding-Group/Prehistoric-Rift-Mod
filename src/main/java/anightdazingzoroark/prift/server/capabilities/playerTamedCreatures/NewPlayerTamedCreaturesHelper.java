@@ -33,10 +33,17 @@ public class NewPlayerTamedCreaturesHelper {
     }
 
     public static void updateAllPartyMems(EntityPlayer player) {
+        if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftNewUpdatePartyDeployed(player));
     }
 
+    public static void forceSyncPartyNBT(EntityPlayer player) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
+    }
+
     public static FixedSizeList<NBTTagCompound> getPlayerPartyNBT(EntityPlayer player) {
+        if (player == null) return new FixedSizeList<>(maxPartySize, new NBTTagCompound());
         if (player.world.isRemote) {
             RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
         }
@@ -44,6 +51,7 @@ public class NewPlayerTamedCreaturesHelper {
     }
 
     public static boolean canAddToParty(EntityPlayer player) {
+        if (player == null) return false;
         if (player.world.isRemote) {
             RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
         }
@@ -59,10 +67,17 @@ public class NewPlayerTamedCreaturesHelper {
     }
 
     public static void setPlayerPartyNBT(EntityPlayer player, FixedSizeList<NBTTagCompound> tagCompounds) {
+        if (player == null || tagCompounds == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player, tagCompounds));
     }
 
+    public static void updateIndividualPartyMem(EntityPlayer player, RiftCreature creature) {
+        if (player == null || creature == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualCreature(player, creature));
+    }
+
     public static void addCreatureToParty(EntityPlayer player, RiftCreature creature) {
+        if (player == null || creature == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftNewAddToParty(player, creature));
     }
 
@@ -71,6 +86,7 @@ public class NewPlayerTamedCreaturesHelper {
     }
 
     public static void deployCreatureFromParty(EntityPlayer player, int position, boolean deploy) {
+        if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftDeployPartyMem(player, position, deploy));
     }
 
@@ -121,32 +137,36 @@ public class NewPlayerTamedCreaturesHelper {
     }
 
     public static void updateAfterOpenPartyScreen(EntityPlayer player, int lastOpenedTime) {
+        if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyAfterOpenPartyScreen(player, lastOpenedTime));
     }
 
-    public static void updateWhilePartyScreenOpen(EntityPlayer player, boolean isSingleplayer) {}
-
     public static int getSelectedPartyPosFromOverlay(EntityPlayer player) {
+        if (player == null) return -1;
         if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncSelectedPartyPosFromOverlay(player));
         return getPlayerTamedCreatures(player).getSelectedPosInOverlay();
     }
 
     public static void setSelectedPartyPosFromOverlay(EntityPlayer player, int value) {
+        if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftSetSelectedPartyPosFromOverlay(player, value));
     }
 
     //swapping related stuff starts here
     public static void rearrangePartyCreatures(EntityPlayer player, int posSelected, int posToSwap) {
+        if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, player, posSelected, posToSwap));
     }
     //swapping related stuff ends here
 
     //move swapping related stuff starts here
     public static void partyMemSwapLearntMoves(EntityPlayer player, int partyMemPos, int posSelected, int posToSwap) {
+        if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftChangeLearntMovesOrder(player, partyMemPos, posSelected, posToSwap));
     }
 
     public static void partyMemSwapLearntMoveWithLearnableMove(EntityPlayer player, int partyMemPos, int learntMovePos, String learnableMove) {
+        if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftChangeLearntMoveWithLearnableMove(player, partyMemPos, learntMovePos, learnableMove));
     }
     //move swapping related stuff ends here

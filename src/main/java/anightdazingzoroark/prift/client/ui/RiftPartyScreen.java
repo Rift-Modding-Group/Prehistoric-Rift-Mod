@@ -59,7 +59,7 @@ public class RiftPartyScreen extends GuiScreen {
         super.initGui();
 
         //update creatures upon opening
-        NewPlayerTamedCreaturesHelper.updateAfterOpenPartyScreen(this.mc.player, (int) this.mc.world.getTotalWorldTime());
+        //NewPlayerTamedCreaturesHelper.updateAfterOpenPartyScreen(this.mc.player, (int) this.mc.world.getTotalWorldTime());
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
         //create swap party members button
