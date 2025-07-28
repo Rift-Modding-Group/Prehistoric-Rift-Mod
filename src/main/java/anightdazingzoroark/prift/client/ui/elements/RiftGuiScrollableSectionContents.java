@@ -425,6 +425,7 @@ public class RiftGuiScrollableSectionContents {
         private int backgroundColor;
         private int headerTextColor = 0x000000;
         private float headerScale = 1f;
+        private float factor = 0; //change in progress bar
 
         public ProgressBarElement setHeaderText(String value) {
             this.headerText = value;
@@ -483,6 +484,15 @@ public class RiftGuiScrollableSectionContents {
 
         public float getHeaderScale() {
             return this.headerScale;
+        }
+
+        public ProgressBarElement setFactor(float value) {
+            this.factor = value;
+            return this;
+        }
+
+        public float getFactor() {
+            return this.factor;
         }
     }
 

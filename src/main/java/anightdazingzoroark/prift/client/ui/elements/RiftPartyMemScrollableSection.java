@@ -56,6 +56,7 @@ public class RiftPartyMemScrollableSection extends RiftGuiScrollableSection {
                     .setPercentage(MathHelper.clamp(health / maxHealth, 0, 1))
                     .setColors(0xff0000, 0x868686)
                     .setWidth(100)
+                    .setFactor(0.1f)
             );
 
             //energy bar
@@ -67,6 +68,7 @@ public class RiftPartyMemScrollableSection extends RiftGuiScrollableSection {
                     .setPercentage(MathHelper.clamp(energy / maxEnergy, 0, 1))
                     .setColors(0xffff00, 0x868686)
                     .setWidth(100)
+                    .setFactor(0.1f)
             );
 
             //exp bar
@@ -78,6 +80,7 @@ public class RiftPartyMemScrollableSection extends RiftGuiScrollableSection {
                     .setPercentage(MathHelper.clamp(xp / maxXP, 0, 1))
                     .setColors(0x98d06b, 0x868686)
                     .setWidth(100)
+                    .setFactor(0.1f)
             );
 
             //soon more info like personality and all that stuff would be added

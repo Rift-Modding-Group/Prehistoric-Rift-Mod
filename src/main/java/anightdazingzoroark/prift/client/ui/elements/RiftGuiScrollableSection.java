@@ -372,7 +372,12 @@ public abstract class RiftGuiScrollableSection {
             //draw background and overlay
             this.drawRectOutline(progressX + 1, progressY + 1, pBar.getWidth(), 1, (0xFF000000 | pBar.getBackgroundColor()));
             if (pBar.getPercentage() > 0) {
-                this.drawRectOutline(progressX + 1, progressY + 1, (int) (pBar.getWidth() * pBar.getPercentage()), 1, (0xFF000000 | pBar.getOverlayColor()));
+                float clampedPercentage = pBar.getFactor() > 0 ? MathHelper.clamp(
+                        this.clampToFactor(pBar.getPercentage(), pBar.getFactor()),
+                        0,
+                        1f
+                ) : pBar.getPercentage();
+                this.drawRectOutline(progressX + 1, progressY + 1, (int) (pBar.getWidth() * clampedPercentage), 1, (0xFF000000 | pBar.getOverlayColor()));
             }
 
             return scaledHeaderHeight + 3 + this.fontRenderer.FONT_HEIGHT;
@@ -772,6 +777,10 @@ public abstract class RiftGuiScrollableSection {
             }
         }
         return null;
+    }
+
+    private float clampToFactor(float rawPercent, float factor) {
+        return MathHelper.clamp((float) Math.floor(rawPercent / factor) * factor, 0f, 1f);
     }
 
     private static class TabClickRegion {
