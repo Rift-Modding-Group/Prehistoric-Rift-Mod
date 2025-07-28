@@ -25,6 +25,8 @@ public class RiftControls {
     public static String getStringFromKeyBinding(KeyBinding keyBinding) {
         if (keyBinding.getKeyCode() == Keyboard.KEY_LEFT) return "<-";
         else if (keyBinding.getKeyCode() == Keyboard.KEY_RIGHT) return "->";
+        else if (keyBinding.getKeyCode() == Keyboard.KEY_UP) return "↑";
+        else if (keyBinding.getKeyCode() == Keyboard.KEY_DOWN) return "↓";
 
         return keyBinding.getDisplayName();
     }
