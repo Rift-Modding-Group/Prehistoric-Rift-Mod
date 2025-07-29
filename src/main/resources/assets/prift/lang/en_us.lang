@@ -217,6 +217,12 @@ journal.party_member.info=Info
 journal.party_member.moves=Moves
 journal.moves_label.available_moves=Available Moves
 
+key.prift.open_party=Open Party
+key.prift.toggle_block_break=Toggle Block Break
+key.prift.switch_party_mem_up=Switch up for party member
+key.prift.switch_party_mem_down=Switch down for party member
+key.prift.quick_summon_dismiss=Quick summon/dismiss from party
+
 levelup_rate.creature.very_slow=Very Slow
 levelup_rate.creature.slow=Slow
 levelup_rate.creature.normal=Normal
@@ -504,7 +510,8 @@ hwyla.energy=Energy: %s / %s
 hwyla.power_consumed=Power Consumed: %s
 hwyla.power_created=Power Created: %s
 
-creature_control.spacebar.water=Swim Up/Down
+creature_control.spacebar.water_ascend=Swim Up
+creature_control.spacebar.water_descend=Swim Down
 creature_control.spacebar.air=Fly Up/Down
 creature_control.block_break_mode.enable=Enable Block Break
 creature_control.block_break_mode.disable=Disable Block Break

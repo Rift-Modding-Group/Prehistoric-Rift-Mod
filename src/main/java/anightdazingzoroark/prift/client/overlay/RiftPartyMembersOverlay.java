@@ -249,12 +249,12 @@ public class RiftPartyMembersOverlay {
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
     public void changeSelectedPartyPos(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
-        if (RiftControls.switchLeftwards.isKeyDown()) {
+        if (RiftControls.switchUpwards.isKeyDown()) {
             this.selectedPos = this.selectedPos - 1 < 0 ? NewPlayerTamedCreaturesHelper.maxPartySize - 1 : this.selectedPos - 1;
             NewPlayerTamedCreaturesHelper.setSelectedPartyPosFromOverlay(player, this.selectedPos);
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
-        if (RiftControls.switchRightwards.isKeyDown()) {
+        if (RiftControls.switchDownwards.isKeyDown()) {
             this.selectedPos = this.selectedPos + 1 >= NewPlayerTamedCreaturesHelper.maxPartySize ? 0 : this.selectedPos + 1;
             NewPlayerTamedCreaturesHelper.setSelectedPartyPosFromOverlay(player, this.selectedPos);
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));

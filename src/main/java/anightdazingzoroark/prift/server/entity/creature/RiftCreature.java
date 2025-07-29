@@ -520,11 +520,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 boolean rightClickOnly = !settings.keyBindAttack.isKeyDown() && settings.keyBindUseItem.isKeyDown() && !settings.keyBindPickBlock.isKeyDown() && this.canUseRightClick();
                 boolean middleClickOnly = !settings.keyBindAttack.isKeyDown() && !settings.keyBindUseItem.isKeyDown() && settings.keyBindPickBlock.isKeyDown() && this.canUseMiddleClick();
                 boolean jump = settings.keyBindJump.isKeyDown();
+                boolean descend = RiftControls.descend.isKeyDown();
                 boolean toggleBetweenAttackOrBreak = RiftControls.toggleAttackOrBlockBreak.isKeyDown();
 
                 //for using jump in navigating
-                if (this instanceof RiftWaterCreature)
-                    RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, jump));
+                if (this instanceof RiftWaterCreature) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftHoverChangeControl(this, jump, descend));
+                }
 
                 //for switching between attack or block break
                 RiftMessages.WRAPPER.sendToServer(new RiftManageBlockBreakControl(this, toggleBetweenAttackOrBreak));

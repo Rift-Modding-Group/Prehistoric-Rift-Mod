@@ -11,25 +11,29 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftHoverChangeControl implements IMessage {
     private int creatureId;
-    private boolean isUsing;
+    private boolean ascend;
+    private boolean descend;
 
     public RiftHoverChangeControl() {}
 
-    public RiftHoverChangeControl(RiftCreature creature, boolean isUsing) {
+    public RiftHoverChangeControl(RiftCreature creature, boolean ascend, boolean descend) {
         this.creatureId = creature.getEntityId();
-        this.isUsing = isUsing;
+        this.ascend = ascend;
+        this.descend = descend;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.creatureId = buf.readInt();
-        this.isUsing = buf.readBoolean();
+        this.ascend = buf.readBoolean();
+        this.descend = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.creatureId);
-        buf.writeBoolean(this.isUsing);
+        buf.writeBoolean(this.ascend);
+        buf.writeBoolean(this.descend);
     }
 
     public static class Handler implements IMessageHandler<RiftHoverChangeControl, IMessage> {
@@ -42,16 +46,18 @@ public class RiftHoverChangeControl implements IMessage {
         private void handle(RiftHoverChangeControl message, MessageContext ctx) {
             EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             RiftWaterCreature creature = (RiftWaterCreature)playerEntity.world.getEntityByID(message.creatureId);
-            if (creature.isInWater()) {
-                //the players look direction shall affect ascending or descending
-                //look up is ascend, look down is descend
-                if (playerEntity.rotationPitch <= 0) {
-                    creature.setIsAscending(message.isUsing);
+            if (creature != null && creature.isInWater()) {
+                if (message.ascend && !message.descend) {
+                    creature.setIsAscending(true);
                     creature.setIsDescending(false);
+                }
+                else if (!message.ascend && message.descend) {
+                    creature.setIsAscending(false);
+                    creature.setIsDescending(true);
                 }
                 else {
                     creature.setIsAscending(false);
-                    creature.setIsDescending(message.isUsing);
+                    creature.setIsDescending(false);
                 }
             }
         }
