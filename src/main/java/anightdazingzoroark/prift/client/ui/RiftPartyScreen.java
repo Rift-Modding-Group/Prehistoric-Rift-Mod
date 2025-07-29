@@ -261,7 +261,9 @@ public class RiftPartyScreen extends GuiScreen {
             for (GuiButton partyMemButton: this.partyMemManageButtons) {
                 if (partyMemButton.id == 0) {
                     //draw overlay text for when the summon/dismiss button is disabled
-                    if (!(this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos) && (!this.getMemberNBT().hasKey("Health") || this.getMemberNBT().getFloat("Health") > 0)))) {
+                    if (!(this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos) && (!this.getMemberNBT().hasKey("Health") || this.getMemberNBT().getFloat("Health") > 0)))
+                        && partyMemButton.isMouseOver()
+                    ) {
                         String cannotSummonLocation = I18n.format("journal.warning.cannot_summon");
                         String cannotSummonDead = I18n.format("journal.warning.cannot_summon_dead");
                         String finalOverlayString = (this.getMemberNBT().hasKey("Health") && this.getMemberNBT().getFloat("Health") <= 0)
