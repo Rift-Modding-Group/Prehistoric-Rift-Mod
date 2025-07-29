@@ -222,6 +222,7 @@ key.prift.toggle_block_break=Toggle Block Break
 key.prift.switch_party_mem_up=Switch up for party member
 key.prift.switch_party_mem_down=Switch down for party member
 key.prift.quick_summon_dismiss=Quick summon/dismiss from party
+key.prift.descend=Descend (for swimming/flying mounts)
 
 levelup_rate.creature.very_slow=Very Slow
 levelup_rate.creature.slow=Slow
