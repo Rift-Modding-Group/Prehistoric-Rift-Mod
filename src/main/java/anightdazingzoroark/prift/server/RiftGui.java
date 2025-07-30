@@ -1,6 +1,11 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.client.ui.*;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftNewCreatureBoxScreen;
+import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
+import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftPopupFromPlayerParty;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.server.entity.RiftEgg;

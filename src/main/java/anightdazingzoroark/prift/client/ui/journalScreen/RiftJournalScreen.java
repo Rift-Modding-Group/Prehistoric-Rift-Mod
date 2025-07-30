@@ -1,9 +1,11 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.ui.journalScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
+import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalEntriesSection;
+import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalInfoSection;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.gui.GuiScreen;

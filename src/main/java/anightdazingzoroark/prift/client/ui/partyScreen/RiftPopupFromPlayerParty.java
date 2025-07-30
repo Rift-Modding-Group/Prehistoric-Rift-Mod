@@ -1,13 +1,12 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.ui.partyScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
-import anightdazingzoroark.prift.client.ui.elements.RiftPopupFromPlayerPartyChangeName;
+import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPopupFromPlayerPartyChangeName;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.message.RiftChangePartyMemName;
 import anightdazingzoroark.prift.server.message.RiftMessages;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;

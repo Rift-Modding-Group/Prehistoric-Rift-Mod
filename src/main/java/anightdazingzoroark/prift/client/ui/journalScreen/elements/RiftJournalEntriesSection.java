@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.ui.journalScreen.elements;
 
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSectionContents;

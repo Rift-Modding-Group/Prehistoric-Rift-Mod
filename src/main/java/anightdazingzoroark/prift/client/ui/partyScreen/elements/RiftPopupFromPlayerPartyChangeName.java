@@ -1,5 +1,7 @@
-package anightdazingzoroark.prift.client.ui.elements;
+package anightdazingzoroark.prift.client.ui.partyScreen.elements;
 
+import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
+import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSectionContents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;

@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.ui.creatureBoxScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import net.minecraft.client.gui.GuiScreen;
@@ -17,6 +17,8 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
 
         //draw background
         this.drawGuiContainerBackgroundLayer();
+
+        //draw party members
     }
 
     protected void drawGuiContainerBackgroundLayer() {

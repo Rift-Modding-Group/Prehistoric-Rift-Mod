@@ -1,6 +1,7 @@
-package anightdazingzoroark.prift.client.ui.elements;
+package anightdazingzoroark.prift.client.ui.partyScreen.elements;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;

@@ -1,7 +1,10 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.ui.partyScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.*;
+import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButton;
+import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemMovesSection;
+import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemScrollableSection;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;

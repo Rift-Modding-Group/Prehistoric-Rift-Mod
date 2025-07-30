@@ -1,9 +1,9 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.ui.movesScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
-import anightdazingzoroark.prift.client.ui.elements.RiftMovesLearnableMovesSection;
-import anightdazingzoroark.prift.client.ui.elements.RiftMovesMemMovesSection;
+import anightdazingzoroark.prift.client.ui.movesScreen.elements.RiftMovesLearnableMovesSection;
+import anightdazingzoroark.prift.client.ui.movesScreen.elements.RiftMovesMemMovesSection;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import net.minecraft.client.gui.GuiScreen;
