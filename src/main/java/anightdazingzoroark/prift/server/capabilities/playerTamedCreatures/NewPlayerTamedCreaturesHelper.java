@@ -26,7 +26,7 @@ while setter functions update only server side
 public class NewPlayerTamedCreaturesHelper {
     public static final int maxPartySize = 6;
 
-    //player party and creature box
+    //party stuff starts here
     public static IPlayerTamedCreatures getPlayerTamedCreatures(EntityPlayer player) {
         if (player == null) return null;
         return player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
@@ -151,11 +151,29 @@ public class NewPlayerTamedCreaturesHelper {
         if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftSetSelectedPartyPosFromOverlay(player, value));
     }
+    //party stuff ends here
+
+    //box stuff starts here
+    public static void forceSyncBoxNBT(EntityPlayer player) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player));
+    }
+    //box stuff ends here
 
     //swapping related stuff starts here
     public static void rearrangePartyCreatures(EntityPlayer player, int posSelected, int posToSwap) {
         if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_PARTY, player, posSelected, posToSwap));
+        RiftMessages.WRAPPER.sendToServer(new RiftNewChangePartyOrBoxOrder(player, posSelected, posToSwap));
+    }
+
+    public static void rearrangeBoxCreatures(EntityPlayer player, int boxSelected, int posSelected, int boxToSwap, int posToSwap) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftNewChangePartyOrBoxOrder(RiftNewChangePartyOrBoxOrder.BoxSwapType.REARRANGE_BOX, player, boxSelected, posSelected, boxToSwap, posToSwap));
+    }
+
+    public static void boxPartySwap(EntityPlayer player, int boxSelected, int posSelected, int partyPosToSwap) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftNewChangePartyOrBoxOrder(RiftNewChangePartyOrBoxOrder.BoxSwapType.BOX_TO_PARTY, player, boxSelected, posSelected, -1, partyPosToSwap));
     }
     //swapping related stuff ends here
 

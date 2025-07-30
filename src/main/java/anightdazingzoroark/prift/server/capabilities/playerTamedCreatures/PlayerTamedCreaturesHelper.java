@@ -15,6 +15,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -72,6 +73,7 @@ public class PlayerTamedCreaturesHelper {
         return getPlayerTamedCreatures(player).getBoxCreatures(player.world);
     }
 
+    @Deprecated
     public static void addToPlayerBox(EntityPlayer player, RiftCreature creature) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).addToBoxCreatures(creature);
@@ -96,8 +98,9 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static List<NBTTagCompound> getPlayerBoxNBT(EntityPlayer player) {
-        return getPlayerTamedCreatures(player).getBoxNBT();
+        return new ArrayList<>();
     }
 
     //force sync client to data and vice versa
@@ -109,10 +112,12 @@ public class PlayerTamedCreaturesHelper {
     }
 
     public static void forceSyncBox(EntityPlayer player) {
+        /*
         if (player.world.isRemote) {
             if (getPlayerBoxNBT(player).isEmpty()) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player));
         }
         else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncBoxNBT(player));
+         */
     }
 
     public static void forceSyncPartySizeLevel(EntityPlayer player) {
@@ -152,6 +157,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void updatePartyMem(RiftCreature creature) {
         if (creature.getOwner() == null) return;
         if (creature.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyDeployed((EntityPlayer) creature.getOwner(), creature));
@@ -525,6 +531,7 @@ public class PlayerTamedCreaturesHelper {
     }
 
     //swapping related stuff (good lord im going insane)
+    @Deprecated
     public static void rearrangePartyCreatures(EntityPlayer player, int posSelected, int posToSwap) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).rearrangePartyCreatures(posSelected, posToSwap);
@@ -536,6 +543,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void partyBoxSwap(EntityPlayer player, int posSelected, int posToSwap) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).partyCreatureToBoxCreature(posSelected, posToSwap);
@@ -547,6 +555,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void partyToBox(EntityPlayer player, int posSelected) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).partyCreatureToBox(posSelected);
@@ -558,6 +567,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void partyBoxDeployedSwap(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).partyCreatureToBoxCreatureDeployed(player.world, pos, posSelected, posToSwap);
@@ -569,6 +579,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void partyToBoxDeployed(EntityPlayer player, BlockPos pos, int posSelected) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).partyCreatureToBoxDeployed(player.world, pos, posSelected);
@@ -580,7 +591,9 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void rearrangeBoxCreatures(EntityPlayer player, int posSelected, int posToSwap) {
+        /*
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).rearrangeBoxCreatures(posSelected, posToSwap);
             RiftMessages.WRAPPER.sendToServer(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_BOX, player, posSelected, posToSwap));
@@ -589,8 +602,10 @@ public class PlayerTamedCreaturesHelper {
             getPlayerTamedCreatures(player).rearrangeBoxCreatures(posSelected, posToSwap);
             RiftMessages.WRAPPER.sendToAll(new RiftChangePartyOrBoxOrder(RiftChangePartyOrBoxOrder.SwapType.REARRANGE_BOX, player, posSelected, posToSwap));
         }
+         */
     }
 
+    @Deprecated
     public static void boxPartySwap(EntityPlayer player, int posSelected, int posToSwap) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).boxCreatureToPartyCreature(posSelected, posToSwap);
@@ -602,6 +617,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void boxToParty(EntityPlayer player, int posSelected) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).boxCreatureToParty(posSelected);
@@ -613,6 +629,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void boxBoxDeployedSwap(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).boxCreatureToBoxCreatureDeployed(player.world, pos, posSelected, posToSwap);
@@ -624,6 +641,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void boxToBoxDeployed(EntityPlayer player, BlockPos pos, int posSelected) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).boxCreatureToBoxDeployed(player.world, pos, posSelected);
@@ -635,8 +653,10 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void rearrangeBoxDeployedCreatures(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {}
 
+    @Deprecated
     public static void boxDeployedPartySwap(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).boxCreatureDeployedToPartyCreature(player.world, pos, posSelected, posToSwap);
@@ -648,6 +668,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void boxDeployedToParty(EntityPlayer player, BlockPos pos, int posSelected) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).boxCreatureDeployedToParty(player.world, pos, posSelected);
@@ -659,6 +680,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void boxDeployedBoxSwap(EntityPlayer player, BlockPos pos, int posSelected, int posToSwap) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).boxCreatureDeployedToBoxCreature(player.world, pos, posSelected, posToSwap);
@@ -670,6 +692,7 @@ public class PlayerTamedCreaturesHelper {
         }
     }
 
+    @Deprecated
     public static void boxDeployedToBox(EntityPlayer player, BlockPos pos, int posSelected) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).boxCreatureDeployedToBox(player.world, pos, posSelected);

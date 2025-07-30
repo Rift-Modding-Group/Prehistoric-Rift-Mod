@@ -70,7 +70,7 @@ public class RiftChangePartyOrBoxOrder implements IMessage {
                             playerTamedCreatures.rearrangePartyCreatures(message.posSelected, message.posToSwap);
                             break;
                         case REARRANGE_BOX:
-                            playerTamedCreatures.rearrangeBoxCreatures(message.posSelected, message.posToSwap);
+                            //playerTamedCreatures.rearrangeBoxCreatures(message.posSelected, message.posToSwap);
                             break;
                         case PARTY_BOX_SWAP:
                             playerTamedCreatures.partyCreatureToBoxCreature(message.posSelected, message.posToSwap);

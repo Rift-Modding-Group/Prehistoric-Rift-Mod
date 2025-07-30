@@ -8,8 +8,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerTamedCreatures> {
     @Nullable
@@ -30,12 +28,7 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
         else compound.setTag("PartyCreatures", partyCreaturesList);
 
         //for box creatures
-        NBTTagList boxCreaturesList = new NBTTagList();
-        if (!instance.getBoxNBT().isEmpty()) {
-            for (NBTTagCompound boxNBT : instance.getBoxNBT()) boxCreaturesList.appendTag(boxNBT);
-            compound.setTag("BoxCreatures", boxCreaturesList);
-        }
-        else compound.setTag("BoxCreatures", boxCreaturesList);
+        compound.setTag("CreatureBoxStorage", instance.getBoxNBT().writeNBTList());
 
         compound.setInteger("PartyLastOpenedTime", instance.getPartyLastOpenedTime());
         compound.setInteger("BoxLastOpenedTime", instance.getBoxLastOpenedTime());
@@ -68,15 +61,8 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
             }
 
             //for box creatures
-            if (compound.hasKey("BoxCreatures")) {
-                NBTTagList boxCreaturesList = compound.getTagList("BoxCreatures", 10);
-                if (!boxCreaturesList.isEmpty()) {
-                    List<NBTTagCompound> finalBoxCreatures = new ArrayList<>();
-                    for (int i = 0; i < boxCreaturesList.tagCount(); i++) {
-                        finalBoxCreatures.add(boxCreaturesList.getCompoundTagAt(i));
-                    }
-                    instance.setBoxNBT(finalBoxCreatures);
-                }
+            if (compound.hasKey("CreatureBoxStorage")) {
+                instance.setBoxNBT(new CreatureBoxStorage(compound.getTagList("CreatureBoxStorage", 10)));
             }
 
             instance.setPartyLastOpenedTime(compound.getInteger("PartyLastOpenedTime"));

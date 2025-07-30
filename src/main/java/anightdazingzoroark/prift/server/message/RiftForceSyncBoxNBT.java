@@ -1,11 +1,13 @@
 package anightdazingzoroark.prift.server.message;
 
+import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -15,22 +17,19 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class RiftForceSyncBoxNBT implements IMessage {
     private int playerId;
-    private List<NBTTagCompound> tagCompounds;
+    private CreatureBoxStorage creatureBoxStorage;
 
     public RiftForceSyncBoxNBT() {}
 
     public RiftForceSyncBoxNBT(EntityPlayer player) {
-        this(player, new ArrayList<>());
+        this(player, new CreatureBoxStorage());
     }
 
-    public RiftForceSyncBoxNBT(EntityPlayer player, List<NBTTagCompound> tagCompounds) {
+    public RiftForceSyncBoxNBT(EntityPlayer player, CreatureBoxStorage creatureBoxStorage) {
         this.playerId = player.getEntityId();
-        this.tagCompounds = tagCompounds;
+        this.creatureBoxStorage = creatureBoxStorage;
     }
 
     @Override
@@ -38,29 +37,15 @@ public class RiftForceSyncBoxNBT implements IMessage {
         this.playerId = buf.readInt();
 
         NBTTagCompound compound = ByteBufUtils.readTag(buf);
-        this.tagCompounds = this.setNBTTagListToNBTList(compound.getTagList("List", 10));
+        this.creatureBoxStorage = new CreatureBoxStorage(compound.getTagList("CreatureBoxStorage", 10));
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.playerId);
-
         NBTTagCompound compound = new NBTTagCompound();
-        if (this.tagCompounds.isEmpty()) compound.setTag("List", new NBTTagList());
-        else compound.setTag("List", this.setNBTListToNBTTagList(this.tagCompounds));
+        compound.setTag("CreatureBoxStorage", this.creatureBoxStorage.writeNBTList());
         ByteBufUtils.writeTag(buf, compound);
-    }
-
-    private NBTTagList setNBTListToNBTTagList(List<NBTTagCompound> tagCompounds) {
-        NBTTagList tagList = new NBTTagList();
-        for (NBTTagCompound tagCompound : tagCompounds) tagList.appendTag(tagCompound);
-        return tagList;
-    }
-
-    private List<NBTTagCompound> setNBTTagListToNBTList(NBTTagList tagList) {
-        List<NBTTagCompound> compoundList = new ArrayList<>();
-        for (NBTBase nbtBase : tagList) compoundList.add((NBTTagCompound) nbtBase);
-        return compoundList;
     }
 
     public static class Handler implements IMessageHandler<RiftForceSyncBoxNBT, IMessage> {
@@ -76,18 +61,18 @@ public class RiftForceSyncBoxNBT implements IMessage {
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-                if (message.tagCompounds.isEmpty()) RiftMessages.WRAPPER.sendToAll(new RiftForceSyncBoxNBT(player, playerTamedCreatures.getBoxNBT()));
-                else playerTamedCreatures.setBoxNBT(message.tagCompounds);
+                if (playerTamedCreatures != null) {
+                    RiftMessages.WRAPPER.sendTo(new RiftForceSyncBoxNBT(player, playerTamedCreatures.getBoxNBT()), (EntityPlayerMP) player);
+                }
             }
             if (ctx.side == Side.CLIENT) {
                 EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-                if (message.tagCompounds.isEmpty()) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player, playerTamedCreatures.getBoxNBT()));
-                else playerTamedCreatures.setBoxNBT(message.tagCompounds);
+                if (playerTamedCreatures != null) {
+                    playerTamedCreatures.setBoxNBT(message.creatureBoxStorage);
+                }
             }
         }
     }

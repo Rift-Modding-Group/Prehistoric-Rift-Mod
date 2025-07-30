@@ -1103,7 +1103,7 @@ public class RiftCreatureBoxMenu extends GuiScreen {
     }
 
     private List<NBTTagCompound> getPlayerBoxedCreatures() {
-        return this.playerTamedCreatures().getBoxNBT();
+        return new ArrayList<>();
     }
 
     private RiftTileEntityCreatureBox getCreatureBox() {

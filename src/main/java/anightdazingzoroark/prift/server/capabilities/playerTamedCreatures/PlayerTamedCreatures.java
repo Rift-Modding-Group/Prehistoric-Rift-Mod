@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private FixedSizeList<NBTTagCompound> partyCreatures = new FixedSizeList(6, new NBTTagCompound());
-    private List<NBTTagCompound> boxCreatures = new ArrayList<>();
+    private CreatureBoxStorage boxCreatures = new CreatureBoxStorage();
     private int lastSelected = 0;
     private int boxSizeLevel = 0;
     private int partyLastOpenedTime = 0;
@@ -92,6 +92,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         this.selectedPosInOverlay = value;
     }
 
+    @Deprecated
     @Override
     public void addToPartyCreatures(RiftCreature creature) {
         if (this.partyCreatures.size() < this.getMaxPartySize()) {
@@ -116,12 +117,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
-    public void rearrangeBoxCreatures(int posSelected, int posToSwap) {
+    public void rearrangeBoxCreatures(int selectedBox, int posSelected, int boxToSwapWith, int posToSwap) {
         if (posSelected == posToSwap) return;
-        NBTTagCompound compoundSelected = this.boxCreatures.get(posSelected);
-        NBTTagCompound compoundToSwap = this.boxCreatures.get(posToSwap);
-        this.boxCreatures.set(posSelected, compoundToSwap);
-        this.boxCreatures.set(posToSwap, compoundSelected);
+        NBTTagCompound compoundSelected = this.boxCreatures.getBoxContents(selectedBox).get(posSelected);
+        NBTTagCompound compoundToSwap = this.boxCreatures.getBoxContents(boxToSwapWith).get(posToSwap);
+        this.boxCreatures.setBoxCreature(boxToSwapWith, posToSwap, compoundSelected);
+        this.boxCreatures.setBoxCreature(selectedBox, posSelected, compoundToSwap);
     }
 
     public void rearrangeDeployedBoxCreatures(World world, BlockPos pos, int posSelected, int posToSwap) {
@@ -138,23 +139,42 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         }
     }
 
+    public void boxPartySwap(int selectedBox, int boxPosSelected, int partyPosToSwap) {
+        NBTTagCompound selectedBoxCreature = this.boxCreatures.getBoxContents(selectedBox).get(boxPosSelected);
+        NBTTagCompound partyMemToSwap = this.partyCreatures.get(partyPosToSwap);
+        this.boxCreatures.setBoxCreature(selectedBox, boxPosSelected, partyMemToSwap);
+        this.partyCreatures.set(partyPosToSwap, selectedBoxCreature);
+    }
+
+    public void boxDeployedPartySwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int partyPosToSwap) {}
+
+    public void boxDeployedBoxSwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int boxToSwapWith, int boxPosToSwap) {}
+
+    @Deprecated
     public void partyCreatureToBoxCreature(int partyPosSelected, int boxPosSelected) {
+        /*
         NBTTagCompound compoundPartySelected = this.partyCreatures.get(partyPosSelected);
         NBTTagCompound compoundBoxSelected = this.boxCreatures.get(boxPosSelected);
         compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
         compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
         this.partyCreatures.set(partyPosSelected, compoundBoxSelected);
         this.boxCreatures.set(boxPosSelected, compoundPartySelected);
+         */
     }
 
+    @Deprecated
     public void partyCreatureToBox(int partyPosSelected) {
+        /*
         NBTTagCompound compoundPartySelected = this.partyCreatures.get(partyPosSelected);
         compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
         this.partyCreatures.remove(partyPosSelected);
         this.boxCreatures.add(compoundPartySelected);
+         */
     }
 
+    @Deprecated
     public void partyCreatureToBoxCreatureDeployed(World world, BlockPos pos, int partyPosSelected, int boxDepPosSelected) {
+        /*
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
@@ -165,9 +185,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundPartySelected);
             }
         }
+         */
     }
 
+    @Deprecated
     public void partyCreatureToBoxDeployed(World world, BlockPos pos, int partyPosSelected) {
+        /*
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
@@ -177,25 +200,34 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 creatureBox.addToCreatureList(compoundPartySelected);
             }
         }
+         */
     }
 
+    @Deprecated
     public void boxCreatureToPartyCreature(int boxPosSelected, int partyPosSelected) {
+        /*
         NBTTagCompound compoundBoxSelected = this.boxCreatures.get(boxPosSelected);
         NBTTagCompound compoundPartySelected = this.partyCreatures.get(partyPosSelected);
         compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
         compoundPartySelected.setByte("DeploymentType", (byte) DeploymentType.BASE_INACTIVE.ordinal());
         this.boxCreatures.set(boxPosSelected, compoundPartySelected);
         this.partyCreatures.set(partyPosSelected, compoundBoxSelected);
+         */
     }
 
+    @Deprecated
     public void boxCreatureToParty(int boxPosSelected) {
+        /*
         NBTTagCompound compoundBoxSelected = this.boxCreatures.get(boxPosSelected);
         compoundBoxSelected.setByte("DeploymentType", (byte) DeploymentType.PARTY_INACTIVE.ordinal());
         this.boxCreatures.remove(boxPosSelected);
         this.partyCreatures.add(compoundBoxSelected);
+         */
     }
 
+    @Deprecated
     public void boxCreatureToBoxCreatureDeployed(World world, BlockPos pos, int boxPosSelected, int boxDepPosSelected) {
+        /*
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
@@ -206,9 +238,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 creatureBox.replaceInCreatureList(boxDepPosSelected, compoundBoxSelected);
             }
         }
+         */
     }
 
+    @Deprecated
     public void boxCreatureToBoxDeployed(World world, BlockPos pos, int boxPosSelected) {
+        /*
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
@@ -218,9 +253,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 creatureBox.addToCreatureList(compoundBoxSelected);
             }
         }
+         */
     }
 
+    @Deprecated
     public void boxCreatureDeployedToPartyCreature(World world, BlockPos pos, int boxDepPosSelected, int partyPosSelected) {
+        /*
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
@@ -231,9 +269,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 this.partyCreatures.set(partyPosSelected, compoundBoxDepSelected);
             }
         }
+         */
     }
 
+    @Deprecated
     public void boxCreatureDeployedToParty(World world, BlockPos pos, int boxDepPosSelected) {
+        /*
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
@@ -242,9 +283,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 creatureBox.removeFromCreatureList(boxDepPosSelected);
             }
         }
+         */
     }
 
+    @Deprecated
     public void boxCreatureDeployedToBoxCreature(World world, BlockPos pos, int boxDepPosSelected, int boxPosSelected) {
+        /*
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
@@ -255,9 +299,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 this.boxCreatures.set(boxPosSelected, compoundBoxDepSelected);
             }
         }
+         */
     }
 
+    @Deprecated
     public void boxCreatureDeployedToBox(World world, BlockPos pos, int boxDepPosSelected) {
+        /*
         if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
             RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
             if (creatureBox != null) {
@@ -266,6 +313,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 creatureBox.removeFromCreatureList(boxDepPosSelected);
             }
         }
+         */
     }
 
     @Override
@@ -303,44 +351,47 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         this.partyCreatures.remove(compound);
     }
 
+    @Deprecated
     @Override
     public void addToBoxCreatures(RiftCreature creature) {
+        /*
         if (this.boxCreatures.size() < this.getMaxBoxSize()) {
             NBTTagCompound compound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
             this.boxCreatures.add(compound);
         }
+         */
     }
 
+    @Deprecated
     @Override
     public List<RiftCreature> getBoxCreatures(World world) {
+        /*
         List<RiftCreature> creatures = new ArrayList<>();
         for (NBTTagCompound compound : this.boxCreatures) {
             RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(world, compound);
             if (creature != null) creatures.add(creature);
         }
         return creatures;
+         */
+        return new ArrayList<>();
     }
 
     @Override
-    public void setBoxNBT(List<NBTTagCompound> compound) {
+    public void setBoxNBT(CreatureBoxStorage compound) {
         this.boxCreatures = compound;
     }
 
     @Override
-    public List<NBTTagCompound> getBoxNBT() {
+    public CreatureBoxStorage getBoxNBT() {
         return this.boxCreatures;
     }
 
     @Override
     public void addToBoxNBT(NBTTagCompound compound) {
-        this.boxCreatures.add(compound);
+        this.boxCreatures.addCreatureToBox(compound);
     }
 
-    @Override
-    public void removeFromBoxNBT(NBTTagCompound compound) {
-        this.boxCreatures.remove(compound);
-    }
-
+    @Deprecated
     @Override
     public void modifyCreature(UUID uuid, NBTTagCompound compound) {
         //find in party first
@@ -355,6 +406,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             }
         }
         //find in creature box
+        /*
         for (NBTTagCompound partyMemCompound : this.boxCreatures) {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
                 //replace each nbt tag
@@ -365,25 +417,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                 return;
             }
         }
-    }
-
-    @Override
-    public void replaceCreature(UUID uuid, NBTTagCompound compound) {
-        //find in party first
-        for (int x = 0; x < this.partyCreatures.size(); x++) {
-            if (this.partyCreatures.get(x).getUniqueId("UniqueID").equals(uuid)) {
-                this.partyCreatures.set(x, compound);
-                return;
-            }
-        }
-
-        //find in creature box
-        for (int x = 0; x < this.boxCreatures.size(); x++) {
-            if (this.boxCreatures.get(x).getUniqueId("UniqueID").equals(uuid)) {
-                this.boxCreatures.set(x, compound);
-                return;
-            }
-        }
+         */
     }
 
     @Override
@@ -465,10 +499,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
                     return compound.getUniqueId("UniqueID") != null && !compound.getUniqueId("UniqueID").equals(uuid);
                 }).collect(Collectors.toList());
          */
+        /*
         this.boxCreatures = this.boxCreatures.stream()
                 .filter(compound -> {
                     return compound.getUniqueId("UniqueID") != null && !compound.getUniqueId("UniqueID").equals(uuid);
                 }).collect(Collectors.toList());
+         */
     }
 
     public void removeCreatureFromBoxDeployed(World world, BlockPos pos, UUID uuid) {

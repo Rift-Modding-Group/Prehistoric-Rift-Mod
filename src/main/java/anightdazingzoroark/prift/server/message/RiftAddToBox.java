@@ -51,6 +51,7 @@ public class RiftAddToBox implements IMessage {
         }
 
         private void handle(RiftAddToBox message, MessageContext ctx) {
+            /*
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
@@ -73,6 +74,7 @@ public class RiftAddToBox implements IMessage {
                         .noneMatch(nbt -> nbt.hasKey("UniqueIDMost") && nbt.hasKey("UniqueIDLeast") && nbt.getUniqueId("UniqueID").equals(message.uuid));
                 if (creatureInList && creature != null) playerTamedCreatures.addToBoxCreatures(creature);
             }
+             */
         }
     }
 }
