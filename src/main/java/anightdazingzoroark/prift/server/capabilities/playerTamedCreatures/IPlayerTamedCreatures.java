@@ -26,13 +26,21 @@ public interface IPlayerTamedCreatures {
     default int getMaxPartySize() {
         return 6;
     }
+    @Deprecated
     int getMaxBoxSize();
+    @Deprecated
     void setBoxSizeLevel(int value);
+    @Deprecated
     int getBoxSizeLevel();
+    //party extra info
     void setPartyLastOpenedTime(int value);
     int getPartyLastOpenedTime();
+    //box extra info
+    void setLastOpenedBox(int value);
+    int getLastOpenedBox();
     void setBoxLastOpenedTime(int value);
     int getBoxLastOpenedTime();
+    @Deprecated
     NBTTagCompound getPartyMemberTag(UUID uuid);
 
     //for selected party creature from ui overlay

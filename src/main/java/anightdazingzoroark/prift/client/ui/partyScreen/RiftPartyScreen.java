@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.client.ui.partyScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.*;
-import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButton;
+import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemMovesSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemScrollableSection;
 import anightdazingzoroark.prift.helper.FixedSizeList;
@@ -29,7 +29,7 @@ import java.util.List;
 @SideOnly(Side.CLIENT)
 public class RiftPartyScreen extends GuiScreen {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/party_background.png");
-    private final List<RiftPartyMemButton> partyMemButtons = new ArrayList<>();
+    private final List<RiftPartyMemButtonForParty> partyMemButtons = new ArrayList<>();
     private final List<GuiButton> partyMemManageButtons = new ArrayList<>();
     private RiftClickableSection swapPartyMemsButton;
     private RiftClickableSection journalButton;
@@ -77,7 +77,7 @@ public class RiftPartyScreen extends GuiScreen {
         for (int x = 0; x < playerPartyNBT.size(); x++) {
             int partyMemXOffset = -154 + (x % 2) * 60;
             int partyMemYOffset = -41 + (x / 2) * 40;
-            RiftPartyMemButton partyMemButton = new RiftPartyMemButton(playerPartyNBT.get(x), this.width, this.height, partyMemXOffset, partyMemYOffset, this.fontRenderer, this.mc);
+            RiftPartyMemButtonForParty partyMemButton = new RiftPartyMemButtonForParty(playerPartyNBT.get(x), this.width, this.height, partyMemXOffset, partyMemYOffset, this.fontRenderer, this.mc);
             this.partyMemButtons.add(partyMemButton);
         }
 
@@ -168,7 +168,7 @@ public class RiftPartyScreen extends GuiScreen {
 
         //draw party buttons
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
-            RiftPartyMemButton partyMemButton = this.partyMemButtons.get(x);
+            RiftPartyMemButtonForParty partyMemButton = this.partyMemButtons.get(x);
             partyMemButton.setAdditionalOffset(selectedXOffset, selectedYOffset);
             partyMemButton.drawSection(mouseX, mouseY);
             partyMemButton.setSelected(x == this.partyMemPos);
@@ -293,7 +293,7 @@ public class RiftPartyScreen extends GuiScreen {
 
         //manage party button clicking
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
-            RiftPartyMemButton partyMemButton = this.partyMemButtons.get(x);
+            RiftPartyMemButtonForParty partyMemButton = this.partyMemButtons.get(x);
             //for swapping around party members
             if (this.swapPartyMemsMode) {
                 if (partyMemButton.isHovered(mouseX, mouseY)) {
@@ -472,7 +472,7 @@ public class RiftPartyScreen extends GuiScreen {
         //update creatures while ui is opened
         FixedSizeList<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
-            RiftPartyMemButton button = this.partyMemButtons.get(x);
+            RiftPartyMemButtonForParty button = this.partyMemButtons.get(x);
             button.setCreatureNBT(newPartyNBT.get(x));
         }
     }

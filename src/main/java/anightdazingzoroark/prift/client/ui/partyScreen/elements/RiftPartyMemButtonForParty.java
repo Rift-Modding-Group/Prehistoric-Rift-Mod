@@ -18,10 +18,10 @@ import net.minecraft.util.math.MathHelper;
 
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 
-public class RiftPartyMemButton extends RiftClickableSection {
+public class RiftPartyMemButtonForParty extends RiftClickableSection {
     private NBTTagCompound creatureNBT;
 
-    public RiftPartyMemButton(NBTTagCompound creatureNBT, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
+    public RiftPartyMemButtonForParty(NBTTagCompound creatureNBT, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
         super(57, 38, guiWidth, guiHeight, xOffset, yOffset, fontRenderer, minecraft);
         this.creatureNBT = creatureNBT;
 

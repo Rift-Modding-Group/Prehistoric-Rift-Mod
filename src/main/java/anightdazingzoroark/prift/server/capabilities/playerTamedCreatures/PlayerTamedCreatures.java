@@ -24,6 +24,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private int boxSizeLevel = 0;
     private int partyLastOpenedTime = 0;
     private int boxLastOpenedTime = 0;
+    private int lastOpenedBox = 0;
     private int selectedPosInOverlay = 0;
 
     @Override
@@ -69,6 +70,16 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public int getBoxLastOpenedTime() {
         return this.boxLastOpenedTime;
+    }
+
+    @Override
+    public void setLastOpenedBox(int value) {
+        this.lastOpenedBox = value;
+    }
+
+    @Override
+    public int getLastOpenedBox() {
+        return this.lastOpenedBox;
     }
 
     @Override

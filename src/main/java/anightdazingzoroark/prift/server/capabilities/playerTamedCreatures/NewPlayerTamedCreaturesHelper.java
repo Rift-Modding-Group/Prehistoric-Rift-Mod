@@ -158,6 +158,28 @@ public class NewPlayerTamedCreaturesHelper {
         if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player));
     }
+
+    public static void forceSyncLastOpenedBox(EntityPlayer player) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftForceSyncLastOpenedBox(player));
+    }
+
+    public static CreatureBoxStorage getCreatureBoxStorage(EntityPlayer player) {
+        if (player == null) return new CreatureBoxStorage();
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT());
+        return getPlayerTamedCreatures(player).getBoxNBT();
+    }
+
+    public static void setLastOpenedBox(EntityPlayer player, int value) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftSetLastOpenedBox(player, value));
+    }
+
+    public static int getLastOpenedBox(EntityPlayer player) {
+        if (player == null) return 0;
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncLastOpenedBox(player));
+        return getPlayerTamedCreatures(player).getLastOpenedBox();
+    }
     //box stuff ends here
 
     //swapping related stuff starts here

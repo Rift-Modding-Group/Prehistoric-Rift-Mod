@@ -77,7 +77,7 @@ public class RiftMovesLearnableMovesSection extends RiftGuiScrollableSection {
 
     public boolean noHoveredClickableSection() {
         for (RiftClickableSection clickableSection : this.getClickableSections()) {
-            if (clickableSection.isHovered) return false;
+            if (clickableSection.isHovered()) return false;
         }
         return true;
     }

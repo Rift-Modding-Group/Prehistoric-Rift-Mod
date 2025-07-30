@@ -1,74 +1,61 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftForceSyncBoxNBT implements IMessage {
+public class RiftForceSyncLastOpenedBox implements IMessage {
     private int playerId;
-    private CreatureBoxStorage creatureBoxStorage;
+    private int lastOpenedBox;
 
-    public RiftForceSyncBoxNBT() {}
+    public RiftForceSyncLastOpenedBox() {}
 
-    public RiftForceSyncBoxNBT(EntityPlayer player) {
-        this(player, new CreatureBoxStorage());
+    public RiftForceSyncLastOpenedBox(EntityPlayer player) {
+        this(player, -1);
     }
 
-    public RiftForceSyncBoxNBT(EntityPlayer player, CreatureBoxStorage creatureBoxStorage) {
+    public RiftForceSyncLastOpenedBox(EntityPlayer player, int lastOpenedBox) {
         this.playerId = player.getEntityId();
-        this.creatureBoxStorage = creatureBoxStorage;
+        this.lastOpenedBox = lastOpenedBox;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.playerId = buf.readInt();
-
-        NBTTagCompound compound = ByteBufUtils.readTag(buf);
-        this.creatureBoxStorage = new CreatureBoxStorage(compound.getTagList("CreatureBoxStorage", 10));
+        this.lastOpenedBox = buf.readInt();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.playerId);
-        NBTTagCompound compound = new NBTTagCompound();
-        if (this.creatureBoxStorage != null) {
-            compound.setTag("CreatureBoxStorage", this.creatureBoxStorage.writeNBTList());
-            ByteBufUtils.writeTag(buf, compound);
-        }
-        else {
-            compound.setTag("CreatureBoxStorage", new CreatureBoxStorage().writeNBTList());
-            ByteBufUtils.writeTag(buf, compound);
-        }
+        buf.writeInt(this.lastOpenedBox);
     }
 
-    public static class Handler implements IMessageHandler<RiftForceSyncBoxNBT, IMessage> {
+    public static class Handler implements IMessageHandler<RiftForceSyncLastOpenedBox, IMessage> {
         @Override
-        public IMessage onMessage(RiftForceSyncBoxNBT message, MessageContext ctx) {
+        public IMessage onMessage(RiftForceSyncLastOpenedBox message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handle(RiftForceSyncBoxNBT message, MessageContext ctx) {
+        private void handle(RiftForceSyncLastOpenedBox message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+
                 if (playerTamedCreatures != null) {
-                    RiftMessages.WRAPPER.sendTo(new RiftForceSyncBoxNBT(player, playerTamedCreatures.getBoxNBT()), (EntityPlayerMP) player);
+                    int value = playerTamedCreatures.getLastOpenedBox();
+                    RiftMessages.WRAPPER.sendTo(new RiftForceSyncLastOpenedBox(player, value), (EntityPlayerMP) player);
                 }
             }
             if (ctx.side == Side.CLIENT) {
@@ -76,8 +63,9 @@ public class RiftForceSyncBoxNBT implements IMessage {
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+
                 if (playerTamedCreatures != null) {
-                    playerTamedCreatures.setBoxNBT(message.creatureBoxStorage);
+                    playerTamedCreatures.setLastOpenedBox(message.lastOpenedBox);
                 }
             }
         }

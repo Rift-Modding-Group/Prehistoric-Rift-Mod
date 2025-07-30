@@ -187,6 +187,10 @@ public class RiftClickableSection {
         return mouseX >= x && mouseX <= x + this.width * this.scale && mouseY >= y && mouseY <= y + this.height * this.scale;
     }
 
+    public boolean isHovered() {
+        return this.isHovered;
+    }
+
     public void setSelected(boolean value) {
         this.isSelected = value;
     }

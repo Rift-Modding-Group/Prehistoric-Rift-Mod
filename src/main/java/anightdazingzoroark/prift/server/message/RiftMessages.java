@@ -131,5 +131,8 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetSelectedPartyPosFromOverlay.Handler.class, RiftSetSelectedPartyPosFromOverlay.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpdateIndividualCreature.Handler.class, RiftUpdateIndividualCreature.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpdateIndividualCreature.Handler.class, RiftUpdateIndividualCreature.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.Handler.class, RiftForceSyncLastOpenedBox.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.Handler.class, RiftForceSyncLastOpenedBox.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftSetLastOpenedBox.Handler.class, RiftSetLastOpenedBox.class, id++, Side.SERVER);
     }
 }

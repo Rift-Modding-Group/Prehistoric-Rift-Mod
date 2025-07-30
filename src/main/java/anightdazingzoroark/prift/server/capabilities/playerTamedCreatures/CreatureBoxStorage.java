@@ -10,18 +10,18 @@ import java.util.List;
 //this is a helper class of sorts where how storage of creatures stored in the
 //creature box are figured out
 public class CreatureBoxStorage {
-    private final int maxBoxAmnt = 20;
-    private final int maxBoxStorableCreatures = 20;
+    public static final int maxBoxAmnt = 20;
+    public static final int maxBoxStorableCreatures = 20;
     private final List<String> creatureBoxNames = new ArrayList<>();
     private final List<FixedSizeList<NBTTagCompound>> creatureBoxContents = new ArrayList<>();
 
     public CreatureBoxStorage() {
-        for (int x = 0; x < this.maxBoxAmnt; x++) {
+        for (int x = 0; x < maxBoxAmnt; x++) {
             //initialize names
             this.creatureBoxNames.add("Box "+(x + 1));
 
             //initialize contents of each box
-            this.creatureBoxContents.add(new FixedSizeList<>(this.maxBoxStorableCreatures, new NBTTagCompound()));
+            this.creatureBoxContents.add(new FixedSizeList<>(maxBoxStorableCreatures, new NBTTagCompound()));
         }
     }
 
@@ -45,29 +45,29 @@ public class CreatureBoxStorage {
     }
 
     public String getBoxName(int index) {
-        if (index < 0 || index >= this.maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
+        if (index < 0 || index >= maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
         return this.creatureBoxNames.get(index);
     }
 
     public void setBoxName(int index, String newName) {
-        if (index < 0 || index >= this.maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
+        if (index < 0 || index >= maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
         this.creatureBoxNames.set(index, newName);
     }
 
     public FixedSizeList<NBTTagCompound> getBoxContents(int index) {
-        if (index < 0 || index >= this.maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
+        if (index < 0 || index >= maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
         return this.creatureBoxContents.get(index);
     }
 
     public void setBoxCreature(int index, int indexInBox, NBTTagCompound creatureNBT) {
-        if (index < 0 || index >= this.maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
+        if (index < 0 || index >= maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
         FixedSizeList<NBTTagCompound> changedList = this.creatureBoxContents.get(index);
         changedList.set(indexInBox, creatureNBT);
         this.creatureBoxContents.set(index, changedList);
     }
 
     public void addCreatureToBox(NBTTagCompound creatureNBT) {
-        for (int x = 0; x < this.maxBoxAmnt; x++) {
+        for (int x = 0; x < maxBoxAmnt; x++) {
             int validSpace = validSpaceInBox(x);
             if (validSpace >= 0) {
                 FixedSizeList<NBTTagCompound> box = this.creatureBoxContents.get(x);
@@ -93,7 +93,7 @@ public class CreatureBoxStorage {
     public NBTTagList writeNBTList() {
         NBTTagList toReturn = new NBTTagList();
 
-        for (int x = 0; x < this.maxBoxAmnt; x++) {
+        for (int x = 0; x < maxBoxAmnt; x++) {
             NBTTagCompound tagToAdd = new NBTTagCompound();
 
             //save name
@@ -101,7 +101,7 @@ public class CreatureBoxStorage {
 
             //save creatures
             NBTTagList creaturesNBT = new NBTTagList();
-            for (int y = 0; y < this.maxBoxStorableCreatures; y++) {
+            for (int y = 0; y < maxBoxStorableCreatures; y++) {
                 creaturesNBT.appendTag(this.creatureBoxContents.get(x).get(y));
             }
             tagToAdd.setTag("BoxCreatures", creaturesNBT);
