@@ -2,11 +2,13 @@ package anightdazingzoroark.prift.client.ui.creatureBoxScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMemButtonForBox;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftCreatureBoxSelectedScrollableSection;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMemButtonForBox;
 import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -24,6 +26,8 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
     private final List<RiftPartyMemButtonForBox> partyMemButtons = new ArrayList<>();
     private String boxName = "";
     private final List<RiftBoxMemButtonForBox> boxMemButtons = new ArrayList<>();
+    private RiftCreature creatureToDraw;
+    private RiftCreatureBoxSelectedScrollableSection selectedScrollableSection;
     private RiftClickableSection leftBoxButton;
     private RiftClickableSection rightBoxButton;
 
@@ -33,8 +37,6 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
 
         //update info upon opening
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
-        NewPlayerTamedCreaturesHelper.forceSyncPartyNBT(this.mc.player);
-        NewPlayerTamedCreaturesHelper.forceSyncBoxNBT(this.mc.player);
 
         //create party buttons
         this.partyMemButtons.clear();
@@ -52,6 +54,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         //create box name
         this.boxName = creatureBoxStorage.getBoxName(this.currentBox);
         //create box member buttons
+        this.boxMemButtons.clear();
         FixedSizeList<NBTTagCompound> creatureBoxNBT = creatureBoxStorage.getBoxContents(this.currentBox);
         for (int x = 0; x < creatureBoxNBT.size(); x++) {
             int creatureBoxMemX = -47 + (x % 5) * 35;
@@ -66,6 +69,9 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
 
         this.rightBoxButton = new RiftClickableSection(13, 13, this.width, this.height, 83, -113, this.fontRenderer, this.mc);
         this.rightBoxButton.addImage(background, 13, 13, 400, 300, 160, 268, 186, 268);
+
+        //create scrollable section for selected creature
+        this.selectedScrollableSection = new RiftCreatureBoxSelectedScrollableSection(this.width, this.height, this.fontRenderer, this.mc);
     }
 
     @Override
@@ -73,11 +79,15 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         if (this.mc != null && this.mc.world != null) this.drawDefaultBackground();
         else return;
 
-        //draw background
-        this.drawGuiContainerBackgroundLayer();
-
         //offset for when theres selected creature
         int selectedXOffset = this.selectedPos != null ? -62 : 0;
+
+        //constantly update party members and boxed
+        //creatures as long as this screen is opened
+        this.updateAllCreatures();
+
+        //draw background
+        this.drawGuiContainerBackgroundLayer();
 
         //draw label for party members
         String partyLabel = I18n.format("journal.party_label.party");
@@ -116,10 +126,43 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         this.rightBoxButton.setAdditionalOffset(selectedXOffset, 0);
         this.rightBoxButton.drawSection(mouseX, mouseY);
 
-        //draw creatures in creature box buttons
-        for (RiftBoxMemButtonForBox boxMemButton : this.boxMemButtons) {
+        //draw creature box buttons
+        for (int x = 0; x < this.boxMemButtons.size(); x++) {
+            RiftBoxMemButtonForBox boxMemButton = this.boxMemButtons.get(x);
+
             boxMemButton.setAdditionalOffset(selectedXOffset, 0);
             boxMemButton.drawSection(mouseX, mouseY);
+
+            //enable/disable selection
+            if (this.selectedPos != null && this.selectedPos.selectedPosType == SelectedPosType.BOX) {
+                boxMemButton.setSelected(this.currentBox == this.selectedPos.pos[0] && x == this.selectedPos.pos[1]);
+            }
+            else boxMemButton.setSelected(false);
+        }
+
+        //draw creature info
+        if (this.selectedPos != null && this.selectedScrollableSection.getCreatureNBT() != null && !this.selectedScrollableSection.getCreatureNBT().isEmpty()) {
+            //draw creature
+            if (this.creatureToDraw != null) {
+                GlStateManager.color(1f, 1f, 1f, 1f);
+                GlStateManager.pushMatrix();
+                GlStateManager.pushMatrix();
+                GlStateManager.enableDepth();
+                GlStateManager.translate(this.width / 2f + 110, this.height / 2f - 30, 210f);
+                GlStateManager.rotate(180, 1f, 0f, 0f);
+                GlStateManager.rotate(150, 0f, 1f, 0f);
+                GlStateManager.scale(20f, 20f, 20f);
+                this.creatureToDraw.deathTime = 0;
+                this.creatureToDraw.isDead = false;
+                this.creatureToDraw.hurtTime = 0;
+                this.mc.getRenderManager().renderEntity(this.creatureToDraw, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
+                GlStateManager.disableDepth();
+                GlStateManager.popMatrix();
+                GlStateManager.popMatrix();
+            }
+
+            //draw section
+            this.selectedScrollableSection.drawSectionContents(mouseX, mouseY, partialTicks);
         }
     }
 
@@ -143,14 +186,45 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
             //select creature
             if (partyMemButton.isHovered(mouseX, mouseY) && partyMemButton.getCreatureNBT() != null && !partyMemButton.getCreatureNBT().isEmpty()) {
                 //if theres a selected pos and the clicked button is
-                //equal to said selected pos, clear it
+                //equal to said selected pos, clear it and the creature to display
                 if (this.selectedPos != null && this.selectedPos.selectedPosType == SelectedPosType.PARTY && this.selectedPos.pos[0] == x) {
                     this.selectedPos = null;
+                    this.creatureToDraw = null;
+                    this.selectedScrollableSection.setCreatureNBT(new NBTTagCompound());
                 }
-                //otherwise set it
-                else this.selectedPos = new SelectedPos(SelectedPosType.PARTY, new int[]{x});
+                //otherwise set it and use its nbt to create the creature to display
+                else {
+                    this.selectedPos = new SelectedPos(SelectedPosType.PARTY, new int[]{x});
+                    this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, partyMemButton.getCreatureNBT());
+                    this.selectedScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
+                }
 
                 partyMemButton.playPressSound(this.mc.getSoundHandler());
+            }
+        }
+
+        //manage box button clicking
+        for (int x = 0; x < this.boxMemButtons.size(); x++) {
+            RiftBoxMemButtonForBox boxMemButton = this.boxMemButtons.get(x);
+
+            //select creature
+            if (boxMemButton.isHovered(mouseX, mouseY) && boxMemButton.getCreatureNBT() != null && !boxMemButton.getCreatureNBT().isEmpty()) {
+                //if theres a selected pos and the clicked button is
+                //equal to said selected pos, clear it and the creature to display
+                if (this.selectedPos != null && this.selectedPos.selectedPosType == SelectedPosType.BOX
+                        && this.selectedPos.pos[0] == this.currentBox && this.selectedPos.pos[1] == x) {
+                    this.selectedPos = null;
+                    this.creatureToDraw = null;
+                    this.selectedScrollableSection.setCreatureNBT(new NBTTagCompound());
+                }
+                //otherwise set it and use its nbt to create the creature to display
+                else {
+                    this.selectedPos = new SelectedPos(SelectedPosType.BOX, new int[]{this.currentBox, x});
+                    this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, boxMemButton.getCreatureNBT());
+                    this.selectedScrollableSection.setCreatureNBT(boxMemButton.getCreatureNBT());
+                }
+
+                boxMemButton.playPressSound(this.mc.getSoundHandler());
             }
         }
 
@@ -196,6 +270,41 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
             }
             this.rightBoxButton.playPressSound(this.mc.getSoundHandler());
         }
+    }
+
+    private void updateAllCreatures() {
+        //update party creatures while ui is opened
+        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player); //update nbt from deployed creatures
+        FixedSizeList<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
+        for (int x = 0; x < this.partyMemButtons.size(); x++) {
+            RiftPartyMemButtonForBox button = this.partyMemButtons.get(x);
+            button.setCreatureNBT(newPartyNBT.get(x));
+        }
+
+        //update box creatures while ui is opened
+        NewPlayerTamedCreaturesHelper.forceSyncBoxNBT(this.mc.player);
+        if (this.currentBox < 0 || this.currentBox >= CreatureBoxStorage.maxBoxAmnt) return; //skip if current box is out of bounds for safety purposes
+        FixedSizeList<NBTTagCompound> newBoxNBT = NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.currentBox);
+        for (int x = 0; x < this.boxMemButtons.size(); x++) {
+            RiftBoxMemButtonForBox button = this.boxMemButtons.get(x);
+            button.setCreatureNBT(newBoxNBT.get(x));
+        }
+    }
+
+    private NBTTagCompound getNBTFromSelectedPos() {
+        //if theres no selected pos, just return empty nbt
+        if (this.selectedPos == null) return new NBTTagCompound();
+
+        //get nbt for party creature
+        if (this.selectedPos.selectedPosType == SelectedPosType.PARTY) {
+            return this.partyMemButtons.get(this.selectedPos.pos[0]).getCreatureNBT();
+        }
+        //get nbt for creature box creature
+        else if (this.selectedPos.selectedPosType == SelectedPosType.BOX) {
+            return this.boxMemButtons.get(this.selectedPos.pos[1]).getCreatureNBT();
+        }
+        //just return empty nbt if theres no other selectedPosType for some reason
+        return new NBTTagCompound();
     }
 
     private enum SelectedPosType {

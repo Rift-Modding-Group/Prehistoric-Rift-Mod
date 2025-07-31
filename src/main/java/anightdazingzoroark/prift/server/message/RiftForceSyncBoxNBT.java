@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlaye
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -65,7 +66,11 @@ public class RiftForceSyncBoxNBT implements IMessage {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+                Entity potentialPlayer = messagePlayer.world.getEntityByID(message.playerId);
+                if (!(potentialPlayer instanceof EntityPlayer)) return;
+
+                EntityPlayer player = (EntityPlayer) potentialPlayer;
+
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
                 if (playerTamedCreatures != null) {
                     RiftMessages.WRAPPER.sendTo(new RiftForceSyncBoxNBT(player, playerTamedCreatures.getBoxNBT()), (EntityPlayerMP) player);
@@ -74,7 +79,11 @@ public class RiftForceSyncBoxNBT implements IMessage {
             if (ctx.side == Side.CLIENT) {
                 EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
 
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+                Entity potentialPlayer = messagePlayer.world.getEntityByID(message.playerId);
+                if (!(potentialPlayer instanceof EntityPlayer)) return;
+
+                EntityPlayer player = (EntityPlayer) potentialPlayer;
+
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
                 if (playerTamedCreatures != null) {
                     playerTamedCreatures.setBoxNBT(message.creatureBoxStorage);

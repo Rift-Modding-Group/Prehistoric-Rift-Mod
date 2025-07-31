@@ -134,5 +134,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.Handler.class, RiftForceSyncLastOpenedBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.Handler.class, RiftForceSyncLastOpenedBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetLastOpenedBox.Handler.class, RiftSetLastOpenedBox.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftNewAddToBox.Handler.class, RiftNewAddToBox.class, id++, Side.SERVER);
     }
 }

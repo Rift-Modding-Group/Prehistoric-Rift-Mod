@@ -69,8 +69,8 @@ public class RiftBoxMemButtonForBox extends RiftClickableSection {
             ResourceLocation iconLocation = new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+creatureType.name().toLowerCase()+"_icon.png");
             this.minecraft.getTextureManager().bindTexture(iconLocation);
             float iconScale = 0.75f;
-            int k = (int) ((this.guiWidth - 24) / (2 * iconScale) + (this.xOffset + this.xAddOffset + 8) / iconScale);
-            int l = (int) ((this.guiHeight - 24) / (2 * iconScale) + (this.yOffset + this.yAddOffset + 8) / iconScale);
+            int k = (int) ((this.guiWidth - 24) / (2 * iconScale) + (this.xOffset + this.xAddOffset + 4) / iconScale);
+            int l = (int) ((this.guiHeight - 24) / (2 * iconScale) + (this.yOffset + this.yAddOffset + 4) / iconScale);
             GlStateManager.pushMatrix();
             GlStateManager.scale(iconScale, iconScale, iconScale);
             drawModalRectWithCustomSizedTexture(k, l, 0, 0, 24, 24, 24, 24);

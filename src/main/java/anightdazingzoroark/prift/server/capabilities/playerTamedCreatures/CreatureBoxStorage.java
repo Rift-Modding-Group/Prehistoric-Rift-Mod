@@ -68,7 +68,7 @@ public class CreatureBoxStorage {
 
     public void addCreatureToBox(NBTTagCompound creatureNBT) {
         for (int x = 0; x < maxBoxAmnt; x++) {
-            int validSpace = validSpaceInBox(x);
+            int validSpace = this.validSpaceInBox(x);
             if (validSpace >= 0) {
                 FixedSizeList<NBTTagCompound> box = this.creatureBoxContents.get(x);
                 box.set(validSpace, creatureNBT);
@@ -82,7 +82,7 @@ public class CreatureBoxStorage {
        int toReturn = -1;
        for (int x = 0; x < this.creatureBoxContents.get(box).size(); x++) {
            NBTTagCompound nbtToTest = this.creatureBoxContents.get(box).get(x);
-           if (!nbtToTest.isEmpty()) {
+           if (nbtToTest.isEmpty()) {
                toReturn = x;
                break;
            }

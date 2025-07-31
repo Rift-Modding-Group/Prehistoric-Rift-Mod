@@ -55,15 +55,12 @@ public class NewPlayerTamedCreaturesHelper {
         if (player.world.isRemote) {
             RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
         }
-        int pos = -1;
-
         for (int x = 0; x < getPlayerPartyNBT(player).size(); x++) {
             if (getPlayerPartyNBT(player).get(x).isEmpty()) {
-                pos = x;
-                break;
+                return true;
             }
         }
-        return pos >= 0;
+        return false;
     }
 
     public static void setPlayerPartyNBT(EntityPlayer player, FixedSizeList<NBTTagCompound> tagCompounds) {
@@ -162,6 +159,21 @@ public class NewPlayerTamedCreaturesHelper {
     public static void forceSyncLastOpenedBox(EntityPlayer player) {
         if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftForceSyncLastOpenedBox(player));
+    }
+
+    public static void addCreatureToBox(EntityPlayer player, RiftCreature creature) {
+        if (player == null || creature == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftNewAddToBox(player, creature));
+    }
+
+    public static boolean canAddCreatureToBox(EntityPlayer player) {
+        if (player == null) return false;
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player));
+        for (int x = 0; x < CreatureBoxStorage.maxBoxAmnt; x++) {
+            int validSpace = getCreatureBoxStorage(player).validSpaceInBox(x);
+            if (validSpace >= 0) return true;
+        }
+        return false;
     }
 
     public static CreatureBoxStorage getCreatureBoxStorage(EntityPlayer player) {
