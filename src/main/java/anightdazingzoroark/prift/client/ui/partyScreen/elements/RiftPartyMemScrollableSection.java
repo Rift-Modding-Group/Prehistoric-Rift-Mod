@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client.ui.partyScreen.elements;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSectionContents;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -83,6 +84,14 @@ public class RiftPartyMemScrollableSection extends RiftGuiScrollableSection {
                     .setColors(0x98d06b, 0x868686)
                     .setWidth(100)
                     .setFactor(0.1f)
+            );
+
+            //acquisition info
+            CreatureAcquisitionInfo acquisitionInfo = new CreatureAcquisitionInfo(this.creatureNBT.getCompoundTag("AcquisitionInfo"));
+            toReturn.addTextElement(new RiftGuiScrollableSectionContents.TextElement()
+                    .setContents(acquisitionInfo.acquisitionInfoString())
+                    .setScale(0.5f)
+                    .setBottomSpace(-7)
             );
 
             //soon more info like personality and all that stuff would be added

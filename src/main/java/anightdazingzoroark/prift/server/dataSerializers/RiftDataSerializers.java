@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.dataSerializers;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCondition;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveConditionStack;
@@ -69,8 +70,44 @@ public class RiftDataSerializers {
         }
     };
 
+    public static final DataSerializer<CreatureAcquisitionInfo> ACQUISITION_INFO = new DataSerializer<CreatureAcquisitionInfo>() {
+        @Override
+        public void write(PacketBuffer buf, CreatureAcquisitionInfo value) {
+            if (value == null) {
+                buf.writeByte(-1);
+                buf.writeLong(0L);
+            }
+            else {
+                byte acquisitionMethodByte = value.acquisitionMethod != null ? (byte) value.acquisitionMethod.ordinal() : (byte) -1;
+                buf.writeByte(acquisitionMethodByte);
+                buf.writeLong(value.acquisitionTime);
+            }
+        }
+
+        @Override
+        public CreatureAcquisitionInfo read(PacketBuffer buf) throws IOException {
+            byte methodByte = buf.readByte();
+            CreatureAcquisitionInfo.AcquisitionMethod method = methodByte >= 0 ? CreatureAcquisitionInfo.AcquisitionMethod.values()[methodByte] : null;
+
+            long acquisitionTime = buf.readLong();
+
+            return new CreatureAcquisitionInfo(method, acquisitionTime);
+        }
+
+        @Override
+        public DataParameter<CreatureAcquisitionInfo> createKey(int id) {
+            return new DataParameter<>(id, this);
+        }
+
+        @Override
+        public CreatureAcquisitionInfo copyValue(CreatureAcquisitionInfo value) {
+            return value;
+        }
+    };
+
     public static void registerSerializers() {
         ServerProxy.registryPrimer.register(new DataSerializerEntry(LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "move_list"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(MOVE_CONDITION_STACK).setRegistryName(RiftInitialize.MODID, "move_condition_stack"));
+        ServerProxy.registryPrimer.register(new DataSerializerEntry(ACQUISITION_INFO).setRegistryName(RiftInitialize.MODID, "acquisition_info"));
     }
 }

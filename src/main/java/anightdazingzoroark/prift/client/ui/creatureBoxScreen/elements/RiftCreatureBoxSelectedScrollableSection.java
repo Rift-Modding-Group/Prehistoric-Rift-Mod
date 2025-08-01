@@ -15,7 +15,7 @@ public class RiftCreatureBoxSelectedScrollableSection extends RiftGuiScrollableS
     private NBTTagCompound creatureNBT;
 
     public RiftCreatureBoxSelectedScrollableSection(int guiWidth, int guiHeight, FontRenderer fontRenderer, Minecraft minecraft) {
-        super(100, 124, guiWidth, guiHeight, 110, 40, fontRenderer, minecraft);
+        super(100, 114, guiWidth, guiHeight, 110, 35, fontRenderer, minecraft);
     }
 
     public void setCreatureNBT(NBTTagCompound tagCompound) {
@@ -39,13 +39,6 @@ public class RiftCreatureBoxSelectedScrollableSection extends RiftGuiScrollableS
             String finalCreatureName = I18n.format("journal.party_member.name", creatureName, creatureLevel);
             toReturn.addTextElement(new RiftGuiScrollableSectionContents.TextElement()
                     .setContents(finalCreatureName)
-                    .setScale(0.5f)
-                    .setBottomSpace(-7)
-            );
-
-            //creature species
-            toReturn.addTextElement(new RiftGuiScrollableSectionContents.TextElement()
-                    .setContents(I18n.format("tametrait.species", creatureType.getTranslatedName()))
                     .setScale(0.5f)
                     .setBottomSpace(-7)
             );

@@ -14,10 +14,7 @@ import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.Playe
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftEgg;
-import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
-import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCondition;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveConditionStack;
@@ -77,6 +74,7 @@ import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -119,6 +117,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> CAN_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> WARNING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_WARN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+
+    private static final DataParameter<CreatureAcquisitionInfo> ACQUISITION_INFO = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.ACQUISITION_INFO);
 
     private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
@@ -285,6 +285,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(CAN_MOVE, true);
         this.dataManager.register(WARNING, false);
         this.dataManager.register(CAN_WARN, true);
+
+        this.dataManager.register(ACQUISITION_INFO, new CreatureAcquisitionInfo(null, 0L));
 
         this.dataManager.register(CURRENT_MOVE, -1);
 
@@ -1003,7 +1005,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setTameProgress(0);
         this.setTamedBy(player);
         this.setAttackTarget(null);
+        this.setAcquisitionInfo(CreatureAcquisitionInfo.AcquisitionMethod.TAMED_FROM_WILD, System.currentTimeMillis() / 1000L);
         if (this.isBaby()) this.setTameBehavior(TameBehaviorType.PASSIVE);
+
         this.world.setEntityState(this, (byte)7);
 
         if (!this.world.isRemote) {
@@ -1028,6 +1032,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
 
         this.enablePersistence();
+    }
+
+    public void setAcquisitionInfo(CreatureAcquisitionInfo.AcquisitionMethod method, long time) {
+        this.dataManager.set(ACQUISITION_INFO, new CreatureAcquisitionInfo(method, time));
+    }
+
+    public void setAcquisitionInfo(CreatureAcquisitionInfo value) {
+        this.dataManager.set(ACQUISITION_INFO, value);
+    }
+
+    public CreatureAcquisitionInfo getAcquisitionInfo() {
+        return this.dataManager.get(ACQUISITION_INFO);
     }
 
     protected void manageAttributes() {
@@ -1314,6 +1330,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //for turret mode
         compound.setBoolean("TurretMode", this.isTurretMode());
         compound.setByte("TurretTargeting", (byte) this.getTurretTargeting().ordinal());
+        //for acquisition
+        compound.setTag("AcquisitionInfo", this.getAcquisitionInfo().getNBT());
     }
 
     @Override
@@ -1383,6 +1401,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //for turret mode
         this.setTurretMode(compound.getBoolean("TurretMode"));
         this.setTurretModeTargeting(TurretModeTargeting.values()[compound.getByte("TurretTargeting")]);
+        //for acquisition
+        NBTTagCompound acquisitionNBT = compound.getCompoundTag("AcquisitionInfo");
+        this.setAcquisitionInfo(new CreatureAcquisitionInfo(acquisitionNBT));
     }
 
     public boolean isWarning() {
@@ -1941,6 +1962,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 baby.setAgeInDays(0);
                 baby.setTamed(true);
                 baby.setOwnerId(this.getOwnerId());
+                this.setAcquisitionInfo(CreatureAcquisitionInfo.AcquisitionMethod.BORN, System.currentTimeMillis() / 1000L);
                 baby.setTameBehavior(TameBehaviorType.PASSIVE);
                 baby.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
                 this.setPregnant(false, 0);

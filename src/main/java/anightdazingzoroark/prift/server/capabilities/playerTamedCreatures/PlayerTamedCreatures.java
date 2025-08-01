@@ -129,7 +129,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
 
     @Override
     public void rearrangeBoxCreatures(int selectedBox, int posSelected, int boxToSwapWith, int posToSwap) {
-        if (posSelected == posToSwap) return;
+        if (selectedBox == boxToSwapWith && posSelected == posToSwap) return;
         NBTTagCompound compoundSelected = this.boxCreatures.getBoxContents(selectedBox).get(posSelected);
         NBTTagCompound compoundToSwap = this.boxCreatures.getBoxContents(boxToSwapWith).get(posToSwap);
         this.boxCreatures.setBoxCreature(boxToSwapWith, posToSwap, compoundSelected);

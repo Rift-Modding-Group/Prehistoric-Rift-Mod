@@ -64,6 +64,7 @@ public class RiftSac extends EntityTameable implements IAnimatable {
                 creature.setTamed(true);
                 creature.setOwnerId(this.getOwnerId());
                 creature.setTameBehavior(TameBehaviorType.PASSIVE);
+                creature.setAcquisitionInfo(CreatureAcquisitionInfo.AcquisitionMethod.BORN, System.currentTimeMillis() / 1000L);
             }
 
             creature.setLocationAndAngles(Math.floor(this.posX), Math.floor(this.posY) + 1, Math.floor(this.posZ), this.world.rand.nextFloat() * 360.0F, 0.0F);

@@ -10,6 +10,13 @@ action.creature_stop_harvesting=This creature will no longer harvest while wande
 action.creature_start_turret_mode=Turret mode enabled
 action.creature_stop_turret_mode=Turret mode disabled
 
+acquisition.unknown=Acquired a long, long, time ago...
+acquisition.tamed_from_wild=Tamed from the wild on %s
+acquisition.hatched=Hatched on %s
+acquisition.born=Born on %s
+acquisition.purchased=Purchased on %s
+acquisition.received=Received on %s
+
 creature_box.change_name=Change Name
 creature_box.open_inventory=Open Inventory
 creature_box.change_position=Change Position
