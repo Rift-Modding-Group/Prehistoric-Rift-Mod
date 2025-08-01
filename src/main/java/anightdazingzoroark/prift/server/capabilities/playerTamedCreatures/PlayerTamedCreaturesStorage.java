@@ -21,11 +21,8 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
 
         //for party creatures
         NBTTagList partyCreaturesList = new NBTTagList();
-        if (!instance.getPartyNBT().isEmpty()) {
-            for (NBTTagCompound partyNBT : instance.getPartyNBT().getList()) partyCreaturesList.appendTag(partyNBT);
-            compound.setTag("PartyCreatures", partyCreaturesList);
-        }
-        else compound.setTag("PartyCreatures", partyCreaturesList);
+        for (NBTTagCompound partyNBT : instance.getPartyNBT().getList()) partyCreaturesList.appendTag(partyNBT);
+        compound.setTag("PartyCreatures", partyCreaturesList);
 
         //for box creatures
         compound.setTag("CreatureBoxStorage", instance.getBoxNBT().writeNBTList());

@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -28,8 +29,10 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
     private final List<RiftBoxMemButtonForBox> boxMemButtons = new ArrayList<>();
     private RiftCreature creatureToDraw;
     private RiftCreatureBoxSelectedScrollableSection selectedScrollableSection;
+    private RiftClickableSection switchMembersButton;
     private RiftClickableSection leftBoxButton;
     private RiftClickableSection rightBoxButton;
+    private boolean switchMembersMode;
 
     @Override
     public void initGui() {
@@ -63,6 +66,12 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
             this.boxMemButtons.add(boxMemButton);
         }
 
+        //create switch button (and scale it)
+        this.switchMembersButton = new RiftClickableSection(20, 18, this.width, this.height, 103, -111, this.fontRenderer, this.mc);
+        this.switchMembersButton.addImage(background, 20, 18, 400, 300, 160, 282, 180, 282);
+        this.switchMembersButton.setSelectedUV(200, 282);
+        this.switchMembersButton.setScale(0.75f);
+
         //create left and right box buttons
         this.leftBoxButton = new RiftClickableSection(13, 13, this.width, this.height, -37, -113, this.fontRenderer, this.mc);
         this.leftBoxButton.addImage(background, 13, 13, 400, 300, 173, 268, 199, 268);
@@ -80,7 +89,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         else return;
 
         //offset for when theres selected creature
-        int selectedXOffset = this.selectedPos != null ? -62 : 0;
+        int selectedXOffset = this.selectedPos != null && !this.switchMembersMode ? -62 : 0;
 
         //constantly update party members and boxed
         //creatures as long as this screen is opened
@@ -120,6 +129,10 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         int boxNameY = (this.height - this.fontRenderer.FONT_HEIGHT) / 2 - 112;
         this.fontRenderer.drawString(this.boxName, boxNameX, boxNameY, 0xffffff);
 
+        //draw swap creatures button
+        this.switchMembersButton.setAdditionalOffset(selectedXOffset, 0);
+        this.switchMembersButton.drawSection(mouseX, mouseY);
+
         //draw arrows
         this.leftBoxButton.setAdditionalOffset(selectedXOffset, 0);
         this.leftBoxButton.drawSection(mouseX, mouseY);
@@ -141,7 +154,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         }
 
         //draw creature info
-        if (this.selectedPos != null && this.selectedScrollableSection.getCreatureNBT() != null && !this.selectedScrollableSection.getCreatureNBT().isEmpty()) {
+        if (!this.switchMembersMode && this.selectedPos != null && this.selectedScrollableSection.getCreatureNBT() != null && !this.selectedScrollableSection.getCreatureNBT().isEmpty()) {
             //draw creature
             if (this.creatureToDraw != null) {
                 GlStateManager.color(1f, 1f, 1f, 1f);
@@ -169,10 +182,10 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
     protected void drawGuiContainerBackgroundLayer() {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(background);
-        int backgroundWidth = this.selectedPos != null ? 351 : 227;
+        int backgroundWidth = this.selectedPos != null && !this.switchMembersMode ? 351 : 227;
         int k = (this.width - backgroundWidth) / 2;
-        int l = (this.height - 245) / 2;
-        drawModalRectWithCustomSizedTexture(k, l, 0, 0, backgroundWidth, 245, 400f, 300f);
+        int l = (this.height - 246) / 2;
+        drawModalRectWithCustomSizedTexture(k, l, 0, 0, backgroundWidth, 246, 400f, 300f);
     }
 
     @Override
@@ -183,23 +196,62 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
             RiftPartyMemButtonForBox partyMemButton = this.partyMemButtons.get(x);
 
-            //select creature
-            if (partyMemButton.isHovered(mouseX, mouseY) && partyMemButton.getCreatureNBT() != null && !partyMemButton.getCreatureNBT().isEmpty()) {
-                //if theres a selected pos and the clicked button is
-                //equal to said selected pos, clear it and the creature to display
-                if (this.selectedPos != null && this.selectedPos.selectedPosType == SelectedPosType.PARTY && this.selectedPos.pos[0] == x) {
-                    this.selectedPos = null;
-                    this.creatureToDraw = null;
-                    this.selectedScrollableSection.setCreatureNBT(new NBTTagCompound());
-                }
-                //otherwise set it and use its nbt to create the creature to display
-                else {
-                    this.selectedPos = new SelectedPos(SelectedPosType.PARTY, new int[]{x});
-                    this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, partyMemButton.getCreatureNBT());
-                    this.selectedScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
-                }
+            //switch creatures around
+            if (this.switchMembersMode) {
+                //switch creature from party with something already selected
+                if (this.selectedPos != null) {
+                    if (partyMemButton.isHovered(mouseX, mouseY)) {
+                        //switch box creature with party creature
+                        if (this.selectedPos.selectedPosType == SelectedPosType.BOX) {
+                            //safety check for box to party: dismiss the party member first if its deployed
+                            NBTTagCompound partyMemNBT = partyMemButton.getCreatureNBT();
+                            if (partyMemNBT != null && !partyMemNBT.isEmpty()) {
+                                PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
+                                if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
+                                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, x, false);
+                                }
+                            }
+                            NewPlayerTamedCreaturesHelper.boxPartySwap(this.mc.player, this.selectedPos.pos[0], this.selectedPos.pos[1], x);
+                            this.selectedPos = null;
 
-                partyMemButton.playPressSound(this.mc.getSoundHandler());
+                            partyMemButton.playPressSound(this.mc.getSoundHandler());
+                        }
+                        //switch within party
+                        else if (this.selectedPos.selectedPosType == SelectedPosType.PARTY) {
+                            NewPlayerTamedCreaturesHelper.rearrangePartyCreatures(this.mc.player, x, this.selectedPos.pos[0]);
+                            this.selectedPos = null;
+
+                            partyMemButton.playPressSound(this.mc.getSoundHandler());
+                        }
+                    }
+                }
+                //if theres nothing already initially selected, select the creature
+                else {
+                    if (partyMemButton.isHovered(mouseX, mouseY)) {
+                        this.selectedPos = new SelectedPos(SelectedPosType.PARTY, new int[]{x});
+                        partyMemButton.playPressSound(this.mc.getSoundHandler());
+                    }
+                }
+            }
+            //select creature
+            else {
+                if (partyMemButton.isHovered(mouseX, mouseY) && partyMemButton.getCreatureNBT() != null && !partyMemButton.getCreatureNBT().isEmpty()) {
+                    //if theres a selected pos and the clicked button is
+                    //equal to said selected pos, clear it and the creature to display
+                    if (this.selectedPos != null && this.selectedPos.selectedPosType == SelectedPosType.PARTY && this.selectedPos.pos[0] == x) {
+                        this.selectedPos = null;
+                        this.creatureToDraw = null;
+                        this.selectedScrollableSection.setCreatureNBT(new NBTTagCompound());
+                    }
+                    //otherwise set it and use its nbt to create the creature to display
+                    else {
+                        this.selectedPos = new SelectedPos(SelectedPosType.PARTY, new int[]{x});
+                        this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, partyMemButton.getCreatureNBT());
+                        this.selectedScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
+                    }
+
+                    partyMemButton.playPressSound(this.mc.getSoundHandler());
+                }
             }
         }
 
@@ -207,25 +259,74 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         for (int x = 0; x < this.boxMemButtons.size(); x++) {
             RiftBoxMemButtonForBox boxMemButton = this.boxMemButtons.get(x);
 
-            //select creature
-            if (boxMemButton.isHovered(mouseX, mouseY) && boxMemButton.getCreatureNBT() != null && !boxMemButton.getCreatureNBT().isEmpty()) {
-                //if theres a selected pos and the clicked button is
-                //equal to said selected pos, clear it and the creature to display
-                if (this.selectedPos != null && this.selectedPos.selectedPosType == SelectedPosType.BOX
-                        && this.selectedPos.pos[0] == this.currentBox && this.selectedPos.pos[1] == x) {
-                    this.selectedPos = null;
-                    this.creatureToDraw = null;
-                    this.selectedScrollableSection.setCreatureNBT(new NBTTagCompound());
-                }
-                //otherwise set it and use its nbt to create the creature to display
-                else {
-                    this.selectedPos = new SelectedPos(SelectedPosType.BOX, new int[]{this.currentBox, x});
-                    this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, boxMemButton.getCreatureNBT());
-                    this.selectedScrollableSection.setCreatureNBT(boxMemButton.getCreatureNBT());
-                }
+            //switch creatures around
+            if (this.switchMembersMode) {
+                //switch creature from box with something already selected
+                if (this.selectedPos != null) {
+                    if (boxMemButton.isHovered(mouseX, mouseY)) {
+                        //switch within box
+                        if (this.selectedPos.selectedPosType == SelectedPosType.BOX) {
+                            NewPlayerTamedCreaturesHelper.rearrangeBoxCreatures(this.mc.player, this.currentBox, x, this.selectedPos.pos[0], this.selectedPos.pos[1]);
+                            this.selectedPos = null;
 
-                boxMemButton.playPressSound(this.mc.getSoundHandler());
+                            boxMemButton.playPressSound(this.mc.getSoundHandler());
+                        }
+                        //switch party creature with box creature
+                        else if (this.selectedPos.selectedPosType == SelectedPosType.PARTY) {
+                            //safety check for box to party: dismiss the party member first if its deployed
+                            NBTTagCompound partyMemNBT = this.partyMemButtons.get(this.selectedPos.pos[0]).getCreatureNBT();
+                            if (partyMemNBT != null && !partyMemNBT.isEmpty()) {
+                                PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
+                                if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
+                                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedPos.pos[0], false);
+                                }
+                            }
+                            NewPlayerTamedCreaturesHelper.boxPartySwap(this.mc.player, this.currentBox, x, this.selectedPos.pos[0]);
+                            this.selectedPos = null;
+
+                            boxMemButton.playPressSound(this.mc.getSoundHandler());
+                        }
+                    }
+                }
+                else {
+                    //if theres nothing already initially selected, select the creature
+                    if (boxMemButton.isHovered(mouseX, mouseY)) {
+                        this.selectedPos = new SelectedPos(SelectedPosType.BOX, new int[]{this.currentBox, x});
+                        boxMemButton.playPressSound(this.mc.getSoundHandler());
+                    }
+                }
             }
+            else {
+                //select creature
+                if (boxMemButton.isHovered(mouseX, mouseY) && boxMemButton.getCreatureNBT() != null && !boxMemButton.getCreatureNBT().isEmpty()) {
+                    //if theres a selected pos and the clicked button is
+                    //equal to said selected pos, clear it and the creature to display
+                    if (this.selectedPos != null && this.selectedPos.selectedPosType == SelectedPosType.BOX
+                            && this.selectedPos.pos[0] == this.currentBox && this.selectedPos.pos[1] == x) {
+                        this.selectedPos = null;
+                        this.creatureToDraw = null;
+                        this.selectedScrollableSection.setCreatureNBT(new NBTTagCompound());
+                    }
+                    //otherwise set it and use its nbt to create the creature to display
+                    else {
+                        this.selectedPos = new SelectedPos(SelectedPosType.BOX, new int[]{this.currentBox, x});
+                        this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, boxMemButton.getCreatureNBT());
+                        this.selectedScrollableSection.setCreatureNBT(boxMemButton.getCreatureNBT());
+                    }
+
+                    boxMemButton.playPressSound(this.mc.getSoundHandler());
+                }
+            }
+        }
+
+        //manage switch creatures button
+        if (this.switchMembersButton.isHovered(mouseX, mouseY)) {
+            this.switchMembersMode = !this.switchMembersMode;
+            this.switchMembersButton.setSelected(this.switchMembersMode);
+            this.selectedScrollableSection.setCreatureNBT(null);
+            //when switching back out of switch mode, remove selected creature
+            if (!this.switchMembersMode) this.selectedPos = null;
+            this.switchMembersButton.playPressSound(this.mc.getSoundHandler());
         }
 
         //manage left box clicking

@@ -71,7 +71,16 @@ public class FixedSizeList<T> {
     }
 
     public boolean isEmpty() {
-        return this.list.isEmpty();
+        //check if entire list is default values
+        for (T value : this.list) {
+            if (this.defaultValue == null) {
+                if (value != null) return false;
+            }
+            else {
+                if (value.equals(this.defaultValue)) return false;
+            }
+        }
+        return true;
     }
 
     public int size() {

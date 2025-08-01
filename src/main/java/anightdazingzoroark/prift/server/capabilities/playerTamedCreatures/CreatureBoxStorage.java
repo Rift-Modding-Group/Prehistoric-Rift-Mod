@@ -90,6 +90,15 @@ public class CreatureBoxStorage {
        return toReturn;
     }
 
+    public boolean isEmpty() {
+        for (int x = 0; x < maxBoxAmnt; x++) {
+            for (int y = 0; y < maxBoxStorableCreatures; y++) {
+                if (!this.creatureBoxContents.get(x).get(y).equals(new NBTTagCompound())) return false;
+            }
+        }
+        return true;
+    }
+
     public NBTTagList writeNBTList() {
         NBTTagList toReturn = new NBTTagList();
 

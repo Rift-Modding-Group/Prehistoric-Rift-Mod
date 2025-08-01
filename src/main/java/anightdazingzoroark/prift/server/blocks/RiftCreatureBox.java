@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.blocks;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -76,7 +77,6 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
-            IPlayerTamedCreatures tamedCreatures = playerIn.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             RiftTileEntityCreatureBox tileEntity = (RiftTileEntityCreatureBox) worldIn.getTileEntity(pos);
 
             if (tileEntity == null) return false;
@@ -92,38 +92,11 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
                 }
             }
             else {
-                ItemStack itemStack = playerIn.getHeldItem(hand);
-
-                if (itemStack.isEmpty()) {
-                    if (tamedCreatures.getPartyCreatures(worldIn).isEmpty() && tamedCreatures.getBoxCreatures(worldIn).isEmpty() && tileEntity.getCreatures().isEmpty()) {
-                        RiftMessages.WRAPPER.sendToAll(new RiftOpenCreatureBoxNoCreaturesMenu(playerIn));
-                    }
-                    else RiftMessages.WRAPPER.sendToAll(new RiftOpenCreatureBoxMenu(playerIn, pos));
+                if (NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(playerIn).isEmpty()
+                        && NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(playerIn).isEmpty() && tileEntity.getCreatures().isEmpty()) {
+                    RiftMessages.WRAPPER.sendToAll(new RiftOpenCreatureBoxNoCreaturesMenu(playerIn));
                 }
-                else {
-                    if (itemStack.getItem() == RiftItems.BOX_RANGE_UPGRADE) {
-                        if (tileEntity.getWanderRangeLevel() >= 4) {
-                            playerIn.sendStatusMessage(new TextComponentTranslation("reminder.box_range_level_max"), false);
-                        }
-                        else {
-                            int newLevel = tileEntity.getWanderRangeLevel() + 1;
-                            tileEntity.setWanderRangeLevel(newLevel);
-                            playerIn.sendStatusMessage(new TextComponentTranslation("reminder.box_range_level_upgraded", newLevel), false);
-                            itemStack.setCount(itemStack.getCount() - 1);
-                        }
-                    }
-                    else if (itemStack.getItem() == RiftItems.BOX_WANDERER_UPGRADE) {
-                        if (tileEntity.getCreatureAmntLevel() >= 4) {
-                            playerIn.sendStatusMessage(new TextComponentTranslation("reminder.box_wanderer_level_max"), false);
-                        }
-                        else {
-                            int newLevel = tileEntity.getCreatureAmntLevel() + 1;
-                            tileEntity.setCreatureAmntLevel(newLevel);
-                            playerIn.sendStatusMessage(new TextComponentTranslation("reminder.box_wanderer_level_upgraded", newLevel), false);
-                            itemStack.setCount(itemStack.getCount() - 1);
-                        }
-                    }
-                }
+                else RiftMessages.WRAPPER.sendToAll(new RiftOpenCreatureBoxMenu(playerIn, pos));
             }
         }
         return true;
