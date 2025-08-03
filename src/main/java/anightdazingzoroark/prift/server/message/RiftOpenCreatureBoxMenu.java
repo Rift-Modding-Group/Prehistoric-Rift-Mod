@@ -56,7 +56,7 @@ public class RiftOpenCreatureBoxMenu implements IMessage {
 
             EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
             ClientProxy.creatureBoxBlockPos = new BlockPos(message.posX, message.posY, message.posZ);
-            player.openGui(RiftInitialize.instance, RiftGui.GUI_CREATURE_BOX, messagePlayer.world, -1, 0, 0);
+            player.openGui(RiftInitialize.instance, RiftGui.GUI_CREATURE_BOX, messagePlayer.world, -1, -1, -1);
         }
     }
 }

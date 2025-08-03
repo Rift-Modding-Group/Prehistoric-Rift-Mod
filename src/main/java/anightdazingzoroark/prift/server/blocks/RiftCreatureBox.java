@@ -19,6 +19,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
@@ -94,9 +95,9 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
             else {
                 if (NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(playerIn).isEmpty()
                         && NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(playerIn).isEmpty() && tileEntity.getCreatures().isEmpty()) {
-                    RiftMessages.WRAPPER.sendToAll(new RiftOpenCreatureBoxNoCreaturesMenu(playerIn));
+                    RiftMessages.WRAPPER.sendTo(new RiftOpenCreatureBoxNoCreaturesMenu(playerIn), (EntityPlayerMP) playerIn);
                 }
-                else RiftMessages.WRAPPER.sendToAll(new RiftOpenCreatureBoxMenu(playerIn, pos));
+                else RiftMessages.WRAPPER.sendTo(new RiftOpenCreatureBoxMenu(playerIn, pos), (EntityPlayerMP) playerIn);
             }
         }
         return true;

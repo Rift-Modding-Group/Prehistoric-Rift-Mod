@@ -36,6 +36,16 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
     private RiftClickableSection rightBoxButton;
     private boolean switchMembersMode;
 
+    public RiftNewCreatureBoxScreen(int selectedPosType, int selectedPosOne, int selectedPosTwo) {
+        super();
+
+        if (selectedPosType >= 0) {
+            SelectedPosType type = SelectedPosType.values()[selectedPosType];
+            if (type == SelectedPosType.PARTY) this.selectedPos = new SelectedPos(type, new int[]{selectedPosOne});
+            else if (type == SelectedPosType.BOX) this.selectedPos = new SelectedPos(type, new int[]{selectedPosOne, selectedPosTwo});
+        }
+    }
+
     @Override
     public void initGui() {
         super.initGui();
@@ -83,6 +93,19 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
 
         //create scrollable section for selected creature
         this.selectedScrollableSection = new RiftCreatureBoxSelectedScrollableSection(this.width, this.height, this.fontRenderer, this.mc);
+        //add info to scrollable section if there somehow is data
+        if (this.selectedPos != null) {
+            if (this.selectedPos.selectedPosType == SelectedPosType.PARTY) {
+                NBTTagCompound selectedNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.selectedPos.pos[0]);
+                this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, selectedNBT);
+                this.selectedScrollableSection.setCreatureNBT(selectedNBT);
+            }
+            else if (this.selectedPos.selectedPosType == SelectedPosType.BOX) {
+                NBTTagCompound selectedNBT = NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.selectedPos.pos[0]).get(this.selectedPos.pos[1]);
+                this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, selectedNBT);
+                this.selectedScrollableSection.setCreatureNBT(selectedNBT);
+            }
+        }
     }
 
     @Override

@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftNewCreatureBoxS
 import anightdazingzoroark.prift.client.ui.elements.RiftCreatureInfoScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftCreatureMovesScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.gui.GuiScreen;
@@ -13,8 +14,12 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
+import java.io.IOException;
+
 public class RiftCreatureBoxInfoScreen extends GuiScreen {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/info_from_creature_box_background.png");
+
+    //for creature selection
     private final RiftNewCreatureBoxScreen.SelectedPosType selectedPosType;
     private final int selectedPosOne;
     private final int selectedPosTwo;
@@ -110,5 +115,35 @@ public class RiftCreatureBoxInfoScreen extends GuiScreen {
         int k = (this.width - 252) / 2;
         int l = (this.height - 144) / 2;
         drawModalRectWithCustomSizedTexture(k, l, 0, 0, 252, 152, 400f, 300f);
+    }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+
+        //deal with buttons on creature info buttons
+        int sectionTop = (this.infoButtons.guiHeight - this.infoButtons.height) / 2 + this.infoButtons.yOffset;
+        int sectionBottom = sectionTop + this.infoButtons.height;
+        for (RiftGuiSectionButton button : this.infoButtons.getActiveButtons()) {
+            int buttonTop = button.y;
+            int buttonBottom = button.y + button.height;
+            boolean clickWithinVisiblePart = mouseY >= Math.max(buttonTop, sectionTop) && mouseY <= Math.min(buttonBottom, sectionBottom);
+            if (clickWithinVisiblePart && button.mousePressed(this.mc, mouseX, mouseY)) {
+                if (button.buttonId.equals("backToBox")) {
+                    this.mc.player.openGui(
+                            RiftInitialize.instance,
+                            RiftGui.GUI_CREATURE_BOX,
+                            this.mc.world,
+                            this.selectedPosType.ordinal(),
+                            this.selectedPosOne,
+                            this.selectedPosTwo
+                    );
+                }
+                else if (button.buttonId.equals("release")) {
+
+                }
+                button.playPressSound(this.mc.getSoundHandler());
+            }
+        }
     }
 }

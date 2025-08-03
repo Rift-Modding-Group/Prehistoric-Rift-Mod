@@ -170,7 +170,7 @@ public class RiftGui implements IGuiHandler {
             }
         }
         else if (id == GUI_CREATURE_BOX) {
-            return new RiftNewCreatureBoxScreen();
+            return new RiftNewCreatureBoxScreen(x, y, z);
         }
         else if (id == GUI_INFO_FROM_BOX) {
             return new RiftCreatureBoxInfoScreen(x, y, z);
