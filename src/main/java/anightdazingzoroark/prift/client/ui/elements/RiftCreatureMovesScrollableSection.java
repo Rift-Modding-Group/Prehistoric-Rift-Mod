@@ -1,8 +1,6 @@
-package anightdazingzoroark.prift.client.ui.partyScreen.elements;
+package anightdazingzoroark.prift.client.ui.elements;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
-import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSectionContents;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -13,13 +11,13 @@ import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
 
-public class RiftPartyMemMovesSection extends RiftGuiScrollableSection {
+public class RiftCreatureMovesScrollableSection extends RiftGuiScrollableSection {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/party_background.png");
     private NBTTagCompound creatureNBT;
     private String selectedMoveID = "";
 
-    public RiftPartyMemMovesSection(int guiWidth, int guiHeight, FontRenderer fontRenderer, Minecraft minecraft) {
-        super(115, 124, guiWidth, guiHeight, 124, -13, fontRenderer, minecraft);
+    public RiftCreatureMovesScrollableSection(int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
+        super(115, 124, guiWidth, guiHeight, xOffset, yOffset, fontRenderer, minecraft);
     }
 
     public void setCreatureNBT(NBTTagCompound tagCompound) {

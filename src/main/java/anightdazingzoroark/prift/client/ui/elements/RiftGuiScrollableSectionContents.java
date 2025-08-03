@@ -70,6 +70,7 @@ public class RiftGuiScrollableSectionContents {
         private int[] bgUVSize; //size of the portion of the texture to be used
         private float bgImageScale = 1f;
         private boolean bgCentered = false;
+        private boolean singleLine = false;
 
         public TextElement setContents(String value) {
             this.contents = value;
@@ -132,6 +133,15 @@ public class RiftGuiScrollableSectionContents {
 
         public boolean getTextCentered() {
             return this.textCentered;
+        }
+
+        public TextElement setSingleLine() {
+            this.singleLine = true;
+            return this;
+        }
+
+        public boolean getIsSingleLine() {
+            return this.singleLine;
         }
 
         public TextElement setBackground(ResourceLocation bgImage, int bgTextureWidth, int bgTextureHeight, int bgUVWidth, int bgUVHeight, int bgUVX, int bgUVY) {

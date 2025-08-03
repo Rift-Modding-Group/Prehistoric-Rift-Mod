@@ -1,7 +1,5 @@
-package anightdazingzoroark.prift.client.ui.partyScreen.elements;
+package anightdazingzoroark.prift.client.ui.elements;
 
-import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
-import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSectionContents;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -12,11 +10,11 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 
-public class RiftPartyMemScrollableSection extends RiftGuiScrollableSection {
+public class RiftCreatureInfoScrollableSection extends RiftGuiScrollableSection {
     private NBTTagCompound creatureNBT;
 
-    public RiftPartyMemScrollableSection(int guiWidth, int guiHeight, FontRenderer fontRenderer, Minecraft minecraft) {
-        super(120, 124, guiWidth, guiHeight, 127, -13, fontRenderer, minecraft);
+    public RiftCreatureInfoScrollableSection(int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
+        super(120, 124, guiWidth, guiHeight, xOffset, yOffset, fontRenderer, minecraft);
     }
 
     public void setCreatureNBT(NBTTagCompound tagCompound) {
@@ -99,6 +97,4 @@ public class RiftPartyMemScrollableSection extends RiftGuiScrollableSection {
 
         return toReturn;
     }
-
-    private void setOwnerName() {}
 }

@@ -5,7 +5,9 @@ import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMem
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftCreatureBoxSelectedScrollableSection;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMemButtonForBox;
 import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
+import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -371,6 +373,32 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
             }
             this.rightBoxButton.playPressSound(this.mc.getSoundHandler());
         }
+
+        //manage buttons on selected creature info
+        int sectionTop = (this.selectedScrollableSection.guiHeight - this.selectedScrollableSection.height) / 2 + this.selectedScrollableSection.yOffset;
+        int sectionBottom = sectionTop + this.selectedScrollableSection.height;
+        for (RiftGuiSectionButton button : this.selectedScrollableSection.getActiveButtons()) {
+            int buttonTop = button.y;
+            int buttonBottom = button.y + button.height;
+            boolean clickWithinVisiblePart = mouseY >= Math.max(buttonTop, sectionTop) && mouseY <= Math.min(buttonBottom, sectionBottom);
+            if (clickWithinVisiblePart && button.mousePressed(this.mc, mouseX, mouseY)) {
+                if (button.buttonId.equals("moreInfo") && this.selectedPos != null) {
+                    int posOne = this.selectedPos.pos[0];
+                    int posTwo = this.selectedPos.pos.length > 1 ? this.selectedPos.pos[1] : -1;
+                    this.mc.player.openGui(
+                            RiftInitialize.instance,
+                            RiftGui.GUI_INFO_FROM_BOX,
+                            this.mc.world,
+                            this.selectedPos.selectedPosType.ordinal(),
+                            posOne,
+                            posTwo
+                    );
+                }
+                else if (button.buttonId.equals("release")) {}
+
+                button.playPressSound(this.mc.getSoundHandler());
+            }
+        }
     }
 
     private void updateAllCreatures() {
@@ -408,7 +436,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         return new NBTTagCompound();
     }
 
-    private enum SelectedPosType {
+    public enum SelectedPosType {
         PARTY,
         BOX,
         BOX_DEPLOYED

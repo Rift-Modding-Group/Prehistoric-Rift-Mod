@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.client.ui.*;
+import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftNewCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
 import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
@@ -38,15 +39,16 @@ public class RiftGui implements IGuiHandler {
     public static final int GUI_PARTY = 6;
     public static final int GUI_MOVES = 7;
     public static final int GUI_MENU_FROM_PARTY = 8;
-    public static final int GUI_FEEDING_TROUGH = 9;
-    public static final int GUI_SEMI_MANUAL_EXTRACTOR = 10;
-    public static final int GUI_SEMI_MANUAL_PRESSER = 11;
-    public static final int GUI_SEMI_MANUAL_EXTRUDER = 12;
-    public static final int GUI_SEMI_MANUAL_HAMMERER = 13;
-    public static final int GUI_MILLSTONE = 14;
-    public static final int GUI_MECHANICAL_FILTER = 15;
-    public static final int GUI_CREATURE_BOX = 16;
-    public static final int GUI_MENU_FROM_CREATURE_BOX = 17;
+    public static final int GUI_INFO_FROM_BOX = 9;
+    public static final int GUI_FEEDING_TROUGH = 10;
+    public static final int GUI_SEMI_MANUAL_EXTRACTOR = 11;
+    public static final int GUI_SEMI_MANUAL_PRESSER = 12;
+    public static final int GUI_SEMI_MANUAL_EXTRUDER = 13;
+    public static final int GUI_SEMI_MANUAL_HAMMERER = 14;
+    public static final int GUI_MILLSTONE = 15;
+    public static final int GUI_MECHANICAL_FILTER = 16;
+    public static final int GUI_CREATURE_BOX = 17;
+    public static final int GUI_MENU_FROM_CREATURE_BOX = 18;
 
     @Nullable
     @Override
@@ -168,8 +170,10 @@ public class RiftGui implements IGuiHandler {
             }
         }
         else if (id == GUI_CREATURE_BOX) {
-            //return new RiftCreatureBoxMenu(x, y, z);
             return new RiftNewCreatureBoxScreen();
+        }
+        else if (id == GUI_INFO_FROM_BOX) {
+            return new RiftCreatureBoxInfoScreen(x, y, z);
         }
         else if (id == GUI_MENU_FROM_CREATURE_BOX) {
             return new RiftPopupFromCreatureBox(y, z);

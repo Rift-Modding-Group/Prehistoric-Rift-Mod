@@ -3,8 +3,8 @@ package anightdazingzoroark.prift.client.ui.partyScreen;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.*;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
-import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemMovesSection;
-import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemScrollableSection;
+import anightdazingzoroark.prift.client.ui.elements.RiftCreatureMovesScrollableSection;
+import anightdazingzoroark.prift.client.ui.elements.RiftCreatureInfoScrollableSection;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
@@ -36,8 +36,8 @@ public class RiftPartyScreen extends GuiScreen {
     private RiftClickableSection creatureInfoButton;
     private RiftClickableSection creatureMovesButton;
     private RiftClickableSection swapMovesButton;
-    private RiftPartyMemScrollableSection infoScrollableSection;
-    private RiftPartyMemMovesSection movesScrollableSection;
+    private RiftCreatureInfoScrollableSection infoScrollableSection;
+    private RiftCreatureMovesScrollableSection movesScrollableSection;
 
     private RiftCreature creatureToDraw;
     private boolean moveManagement;
@@ -119,11 +119,11 @@ public class RiftPartyScreen extends GuiScreen {
         this.creatureMovesButton.setSelected(this.moveManagement);
 
         //scrollable section for creature info
-        this.infoScrollableSection = new RiftPartyMemScrollableSection(this.width, this.height, this.fontRenderer, this.mc);
+        this.infoScrollableSection = new RiftCreatureInfoScrollableSection(this.width, this.height,127, -13, this.fontRenderer, this.mc);
         if (this.partyMemPos >= 0) this.infoScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
 
         //scrollable section for moves info
-        this.movesScrollableSection = new RiftPartyMemMovesSection(this.width, this.height, this.fontRenderer, this.mc);
+        this.movesScrollableSection = new RiftCreatureMovesScrollableSection(this.width, this.height, 124, -13, this.fontRenderer, this.mc);
         if (this.partyMemPos >= 0) this.movesScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
 
         //swap moves button

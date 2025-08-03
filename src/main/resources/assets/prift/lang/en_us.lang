@@ -32,6 +32,7 @@ creature_box.creature_box=%s's Creature Box
 creature_box.rearrange_creatures=Rearrange
 creature_box.stop_rearrange_creatures=Finished
 creature_box.deployed_creatures=Deployed Creatures
+creature_box.back_to_box=Return to Box
 
 death.attack.prift_bleed=%s bled to death
 

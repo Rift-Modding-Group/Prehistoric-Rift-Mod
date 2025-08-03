@@ -173,16 +173,28 @@ public abstract class RiftGuiScrollableSection {
             int lines = 1;
 
             if (scale != 1f) {
-                int totalTextX = text.getTextCentered() ? x + text.getWidthOffset() - (elementWidth / 2) : x + text.getWidthOffset();
+                int stringWidth = (int) (this.fontRenderer.getStringWidth(text.getContents()) * scale);
                 GlStateManager.pushMatrix();
                 GlStateManager.scale(scale, scale, scale);
-                this.fontRenderer.drawSplitString(
-                        text.getContents(),
-                        (int) (totalTextX / scale),
-                        (int) ((y + text.getHeightOffset()) / scale),
-                        (int) ((elementWidth - text.getWidthOffset()) / scale),
-                        text.getTextColor()
-                );
+                if (text.getIsSingleLine()) {
+                    int totalTextX = text.getTextCentered() ? x + (elementWidth - stringWidth) / 2 : x + text.getWidthOffset();
+                    this.fontRenderer.drawString(
+                            text.getContents(),
+                            (int) (totalTextX / scale),
+                            (int) ((y + text.getHeightOffset()) / scale),
+                            text.getTextColor()
+                    );
+                }
+                else {
+                    int totalTextX = text.getTextCentered() ? x + (elementWidth - stringWidth) / 2 : x + text.getWidthOffset();
+                    this.fontRenderer.drawSplitString(
+                            text.getContents(),
+                            (int) (totalTextX / scale),
+                            (int) ((y + text.getHeightOffset()) / scale),
+                            (int) (stringWidth / scale),
+                            text.getTextColor()
+                    );
+                }
                 GlStateManager.popMatrix();
             }
             else {
