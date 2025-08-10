@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.journalScreen.RiftNewJournalScreen;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
@@ -9,6 +10,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftOpenWeaponInventory;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.GameSettings;
@@ -131,7 +133,8 @@ public class ClientEvents {
     public void openParty(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (RiftControls.openParty.isKeyDown()) {
-            player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, player.world, -1, -1, 0);
+            RiftLibUIHelper.showUI(player, new RiftNewJournalScreen());
+            //player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, player.world, -1, -1, 0);
         }
     }
 }
