@@ -42,7 +42,7 @@ public class RiftNewJournalScreen extends RiftLibUI {
 
     //this is where creatures are indexed
     private RiftLibUISection createIndexSection() {
-        return new RiftJournalIndexSection("journalIndex", this.width, this.height, -149, 7, this.fontRenderer, this.mc);
+        return new RiftJournalIndexSection("journalIndex", this.width, this.height, -147, 7, this.fontRenderer, this.mc);
     }
 
     //get the index section

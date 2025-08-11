@@ -43,6 +43,7 @@ public class RiftJournalIndexSection extends RiftLibUISection {
                 backButton.setID("NULL");
                 backButton.setSize(96, 20);
                 backButton.setBottomSpace(5);
+                backButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                 toReturn.add(backButton);
 
                 //add the other elements
@@ -55,6 +56,7 @@ public class RiftJournalIndexSection extends RiftLibUISection {
                         creatureButton.setID(creatureType.toString());
                         creatureButton.setSize(96, 20);
                         creatureButton.setBottomSpace(5);
+                        creatureButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                         toReturn.add(creatureButton);
                     }
                 }
@@ -70,6 +72,7 @@ public class RiftJournalIndexSection extends RiftLibUISection {
                     categoryButton.setID(PlayerJournalProgressHelper.getUnlockedCategories(this.minecraft.player).get(x).toString());
                     categoryButton.setSize(96, 20);
                     categoryButton.setBottomSpace(5);
+                    categoryButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                     toReturn.add(categoryButton);
                 }
             }
@@ -85,6 +88,7 @@ public class RiftJournalIndexSection extends RiftLibUISection {
                 backButton.setID("NULL");
                 backButton.setSize(96, 20);
                 backButton.setBottomSpace(5);
+                backButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                 toReturn.add(backButton);
 
                 //add the other elements
@@ -97,6 +101,7 @@ public class RiftJournalIndexSection extends RiftLibUISection {
                         creatureButton.setID(creatureType.toString());
                         creatureButton.setSize(96, 20);
                         creatureButton.setBottomSpace(5);
+                        creatureButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                         toReturn.add(creatureButton);
                     }
                 }
