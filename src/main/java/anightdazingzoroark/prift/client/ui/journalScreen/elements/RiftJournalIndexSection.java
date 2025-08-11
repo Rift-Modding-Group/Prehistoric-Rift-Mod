@@ -26,7 +26,40 @@ public class RiftJournalIndexSection extends RiftLibUISection {
         List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
 
         //in search mode, only add what's searched for
-        if (this.searchMode) {}
+        if (this.searchMode) {
+            if (!this.stringForSearch.isEmpty()) {
+                //get creature types
+                List<RiftCreatureType> creatureTypeList = PlayerJournalProgressHelper.getUnlockedCreatures(this.minecraft.player)
+                        .keySet().stream().sorted(Comparator.comparing(Enum::name)).collect(Collectors.toList());
+                Map<RiftCreatureType, Boolean> encounteredMap = PlayerJournalProgressHelper.getUnlockedCreatures(this.minecraft.player);
+
+                //filter by those that match stringForSearch
+                creatureTypeList = creatureTypeList.stream().filter(type -> type.getTranslatedName().toLowerCase().contains(this.stringForSearch.toLowerCase()))
+                        .collect(Collectors.toList());
+
+                //add a back button
+                RiftLibUIElement.ButtonElement backButton = new RiftLibUIElement.ButtonElement();
+                backButton.setText(I18n.format("type.creature.back"));
+                backButton.setID("NULL");
+                backButton.setSize(96, 20);
+                backButton.setBottomSpace(5);
+                toReturn.add(backButton);
+
+                //add the other elements
+                for (RiftCreatureType creatureType : creatureTypeList) {
+                    if (encounteredMap.get(creatureType) != null) {
+                        String name = encounteredMap.get(creatureType) ? creatureType.getTranslatedName() : "("+creatureType.getTranslatedName()+")";
+
+                        RiftLibUIElement.ButtonElement creatureButton = new RiftLibUIElement.ButtonElement();
+                        creatureButton.setText(name);
+                        creatureButton.setID(creatureType.toString());
+                        creatureButton.setSize(96, 20);
+                        creatureButton.setBottomSpace(5);
+                        toReturn.add(creatureButton);
+                    }
+                }
+            }
+        }
         //else, show regular index
         else {
             //for categories unlocked by the player
