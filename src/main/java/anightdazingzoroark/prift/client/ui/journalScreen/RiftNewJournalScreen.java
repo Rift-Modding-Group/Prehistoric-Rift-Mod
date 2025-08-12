@@ -133,6 +133,11 @@ public class RiftNewJournalScreen extends RiftLibUI {
     }
 
     @Override
+    public RiftLibUISection modifyUISection(RiftLibUISection section) {
+        return section;
+    }
+
+    @Override
     public ResourceLocation drawBackground() {
         return new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
     }

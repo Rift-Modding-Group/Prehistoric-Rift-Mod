@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -18,7 +19,7 @@ import net.minecraft.util.math.MathHelper;
 
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 
-public class RiftPartyMemButtonForParty extends RiftClickableSection {
+public class RiftPartyMemButtonForParty extends RiftLibClickableSection {
     private NBTTagCompound creatureNBT;
 
     public RiftPartyMemButtonForParty(NBTTagCompound creatureNBT, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
@@ -179,6 +180,12 @@ public class RiftPartyMemButtonForParty extends RiftClickableSection {
                 drawModalRectWithCustomSizedTexture(k, l, 0, 315, 57, 38, this.textureWidth, this.textureHeight);
             }
         }
+    }
+
+    public boolean isHovered(int mouseX, int mouseY) {
+        int x = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
+        int y = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
+        return mouseX >= x && mouseX <= x + this.width * this.scale && mouseY >= y && mouseY <= y + this.height * this.scale;
     }
 
     private boolean isHoveredNoNBT(int mouseX, int mouseY) {
