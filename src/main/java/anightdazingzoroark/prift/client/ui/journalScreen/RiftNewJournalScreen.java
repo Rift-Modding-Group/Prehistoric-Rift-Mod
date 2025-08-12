@@ -3,8 +3,10 @@ package anightdazingzoroark.prift.client.ui.journalScreen;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalIndexSection;
 import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftNewJournalInfoSection;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftNewPartyScreen;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
@@ -12,11 +14,14 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RiftNewJournalScreen extends RiftLibUI {
+    private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
     private boolean searchMode;
 
     public RiftNewJournalScreen() {
@@ -25,7 +30,14 @@ public class RiftNewJournalScreen extends RiftLibUI {
 
     @Override
     public List<RiftLibUISection> uiSections() {
-        return Arrays.asList(this.createInfoSection(), this.createIndexSection(), this.createSearchSection(), this.createIndexTabSection(), this.createSearchTabSection());
+        return Arrays.asList(
+                this.createInfoSection(),
+                this.createIndexSection(),
+                this.createSearchSection(),
+                this.createIndexTabSection(),
+                this.createSearchTabSection(),
+                this.createBackToPartyButton()
+        );
     }
 
     //this is where creature info is made
@@ -100,6 +112,7 @@ public class RiftNewJournalScreen extends RiftLibUI {
         };
     }
 
+    //make the search section
     private RiftLibUISection createSearchSection() {
         RiftLibUISection toReturn = new RiftLibUISection("journalSearch", this.width, this.height, 268, 194, 60, 7, this.fontRenderer, this.mc) {
             @Override
@@ -119,6 +132,34 @@ public class RiftNewJournalScreen extends RiftLibUI {
         this.setUISectionVisibility("journalSearch", false);
 
         return toReturn;
+    }
+
+    //make the lickable section for returning to the party
+    private RiftLibUISection createBackToPartyButton() {
+        return new RiftLibUISection("backToPartySection", this.width, this.height, 13, 13, 192, -112, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement clickableSection = new RiftLibUIElement.ClickableSectionElement();
+                clickableSection.setID("backToParty");
+                clickableSection.setImage(
+                        background,
+                        560,
+                        240,
+                        13,
+                        13,
+                        420,
+                        136,
+                        420,
+                        149
+                );
+                clickableSection.setSize(12, 12);
+                toReturn.add(clickableSection);
+
+                return toReturn;
+            }
+        };
     }
 
     @Override
@@ -144,7 +185,7 @@ public class RiftNewJournalScreen extends RiftLibUI {
 
     @Override
     public ResourceLocation drawBackground() {
-        return new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
+        return this.background;
     }
 
     @Override
@@ -250,6 +291,17 @@ public class RiftNewJournalScreen extends RiftLibUI {
                 this.getIndexSection().setStringForSearch("");
             }
             if (this.getInfoSection() != null) this.getInfoSection().setEntryType(null);
+        }
+        //go back to party screen
+        if (riftLibClickableSection.getStringID().equals("backToParty")) RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen());
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (this.getPopupSection() != null) super.keyTyped(typedChar, keyCode);
+        else {
+            if (keyCode == 1) RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen());
+            else super.keyTyped(typedChar, keyCode);
         }
     }
 }

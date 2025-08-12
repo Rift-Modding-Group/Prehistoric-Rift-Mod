@@ -1,17 +1,20 @@
 package anightdazingzoroark.prift.client.ui.partyScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.journalScreen.RiftNewJournalScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -19,7 +22,6 @@ import net.minecraft.util.ResourceLocation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class RiftNewPartyScreen extends RiftLibUI {
@@ -36,7 +38,13 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
     @Override
     public List<RiftLibUISection> uiSections() {
-        return Arrays.asList(this.partyLabelSection(), this.shuffleCreaturesSection(), this.selectedCreatureSection());
+        return Arrays.asList(
+                this.partyLabelSection(),
+                this.shuffleCreaturesSection(),
+                this.selectedCreatureSection(),
+                this.openJournalSection(),
+                this.partyMemberManagementSection()
+        );
     }
 
     private RiftLibUISection partyLabelSection() {
@@ -95,6 +103,59 @@ public class RiftNewPartyScreen extends RiftLibUI {
         };
     }
 
+    private RiftLibUISection openJournalSection() {
+        return new RiftLibUISection("openJournalSection", this.width, this.height, 54, 11, -1, 70, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement journalSection = new RiftLibUIElement.ClickableSectionElement();
+                journalSection.setID("openJournal");
+                journalSection.setTextContent(I18n.format("journal.party_button.journal"));
+                journalSection.setTextScale(0.75f);
+                journalSection.setSize(54, 11);
+                toReturn.add(journalSection);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection partyMemberManagementSection() {
+        return new RiftLibUISection("partyMemManagementSection", this.width, this.height, 80, 70, 0, 45, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //summon or dismiss
+                RiftLibUIElement.ButtonElement summonDismissButton = new RiftLibUIElement.ButtonElement();
+                summonDismissButton.setSize(80, 20);
+                summonDismissButton.setBottomSpace(5);
+                summonDismissButton.setID("summonDismiss");
+                summonDismissButton.setText(I18n.format("journal.party_button.summon"));
+                toReturn.add(summonDismissButton);
+
+                //teleport
+                RiftLibUIElement.ButtonElement teleportButton = new RiftLibUIElement.ButtonElement();
+                teleportButton.setSize(80, 20);
+                teleportButton.setBottomSpace(5);
+                teleportButton.setID("teleport");
+                teleportButton.setText(I18n.format("journal.party_button.teleport"));
+                toReturn.add(teleportButton);
+
+                //change name
+                RiftLibUIElement.ButtonElement changeNameButton = new RiftLibUIElement.ButtonElement();
+                changeNameButton.setSize(80, 20);
+                changeNameButton.setBottomSpace(5);
+                changeNameButton.setID("changeName");
+                changeNameButton.setText(I18n.format("journal.party_button.change_name"));
+                toReturn.add(changeNameButton);
+
+                return toReturn;
+            }
+        };
+    }
+
     @Override
     public void initGui() {
         super.initGui();
@@ -141,6 +202,25 @@ public class RiftNewPartyScreen extends RiftLibUI {
             RiftLibUIElement.RenderedEntityElement renderedEntityElement = (RiftLibUIElement.RenderedEntityElement) element;
             if (this.creatureToDraw != null) renderedEntityElement.setEntity(this.creatureToDraw);
         }
+        if (section.id.equals("partyMemManagementSection")) {
+            //change summon/dismiss button based on if creature is deployed or not
+            if (element.getID().equals("summonDismiss")) {
+                RiftLibUIElement.ButtonElement summonDismissButton = (RiftLibUIElement.ButtonElement) element;
+
+                //change text
+                String displayString = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY ? I18n.format("journal.party_button.dismiss") : I18n.format("journal.party_button.summon");;
+                summonDismissButton.setText(displayString);
+
+                //set usability based on if is deployable in area
+                boolean deployable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos) && (!this.getMemberNBT().hasKey("Health") || this.getMemberNBT().getFloat("Health") > 0));
+                this.setButtonUsabilityByID("summonDismiss", deployable);
+            }
+            else if (element.getID().equals("teleport")) {
+                //set usability
+                boolean teleportable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY && NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos);
+                this.setButtonUsabilityByID("teleport", teleportable);
+            }
+        }
         return element;
     }
 
@@ -148,16 +228,27 @@ public class RiftNewPartyScreen extends RiftLibUI {
     public RiftLibUISection modifyUISection(RiftLibUISection section) {
         //some sections are visible only based on whether or not there's a selected creature
         this.setUISectionVisibility("selectedCreatureSection", this.hasSelectedCreature());
+        this.setUISectionVisibility("partyMemManagementSection", this.hasSelectedCreature());
 
-        if (section.id.equals("partyLabelSection")) {
-            int xOffset = this.hasSelectedCreature() ? -124 : 0;
-            int YOffset = this.hasSelectedCreature() ? -81 : -65;
-            section.repositionSection(xOffset, YOffset);
-        }
-        else if (section.id.equals("shuffleCreaturesSection")) {
-            int xOffset = this.hasSelectedCreature() ? -74 : 50;
-            int YOffset = this.hasSelectedCreature() ? -81 : -65;
-            section.repositionSection(xOffset, YOffset);
+        switch (section.id) {
+            case "partyLabelSection": {
+                int xOffset = this.hasSelectedCreature() ? -124 : 0;
+                int YOffset = this.hasSelectedCreature() ? -81 : -65;
+                section.repositionSection(xOffset, YOffset);
+                break;
+            }
+            case "shuffleCreaturesSection": {
+                int xOffset = this.hasSelectedCreature() ? -74 : 50;
+                int YOffset = this.hasSelectedCreature() ? -81 : -65;
+                section.repositionSection(xOffset, YOffset);
+                break;
+            }
+            case "openJournalSection": {
+                int xOffset = this.hasSelectedCreature() ? -123 : -1;
+                int yOffset = this.hasSelectedCreature() ? 54 : 70;
+                section.repositionSection(xOffset, yOffset);
+                break;
+            }
         }
         return section;
     }
@@ -225,8 +316,28 @@ public class RiftNewPartyScreen extends RiftLibUI {
     }
 
     @Override
-    public void onButtonClicked(RiftLibButton riftLibButton) {}
+    public void onButtonClicked(RiftLibButton riftLibButton) {
+        if (riftLibButton.buttonId.equals("summonDismiss")) {
+            if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
+                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, false);
+                }
+            }
+            else if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, true);
+            }
+        }
+        else if (riftLibButton.buttonId.equals("teleport")) {
+            if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
+                RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(this.mc.player, this.partyMemPos));
+            }
+        }
+    }
 
     @Override
-    public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {}
+    public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
+        if (riftLibClickableSection.getStringID().equals("openJournal")) {
+            RiftLibUIHelper.showUI(this.mc.player, new RiftNewJournalScreen());
+        }
+    }
 }
