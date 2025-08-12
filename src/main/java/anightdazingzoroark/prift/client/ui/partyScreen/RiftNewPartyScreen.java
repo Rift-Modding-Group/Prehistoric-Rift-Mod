@@ -36,7 +36,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
     @Override
     public List<RiftLibUISection> uiSections() {
-        return Arrays.asList(this.partyLabelSection(), this.shuffleCreaturesSection());
+        return Arrays.asList(this.partyLabelSection(), this.shuffleCreaturesSection(), this.selectedCreatureSection());
     }
 
     private RiftLibUISection partyLabelSection() {
@@ -69,6 +69,26 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 clickableSection.setImageScale(0.75f);
                 clickableSection.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                 toReturn.add(clickableSection);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection selectedCreatureSection() {
+        return new RiftLibUISection("selectedCreatureSection", RiftNewPartyScreen.this.width, RiftNewPartyScreen.this.height, 99, 60, 0, -31, RiftNewPartyScreen.this.fontRenderer, RiftNewPartyScreen.this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.RenderedEntityElement entityToRender = new RiftLibUIElement.RenderedEntityElement();
+                entityToRender.setID("selectedCreature");
+                entityToRender.setNotLimitedByBounds();
+                entityToRender.setScale(20f);
+                entityToRender.setAdditionalSize(0, 40);
+                entityToRender.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                entityToRender.setRotationAngle(150);
+                toReturn.add(entityToRender);
 
                 return toReturn;
             }
@@ -116,7 +136,19 @@ public class RiftNewPartyScreen extends RiftLibUI {
     }
 
     @Override
+    public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection section, RiftLibUIElement.Element element) {
+        if (section.id.equals("selectedCreatureSection") && element.getID().equals("selectedCreature")) {
+            RiftLibUIElement.RenderedEntityElement renderedEntityElement = (RiftLibUIElement.RenderedEntityElement) element;
+            if (this.creatureToDraw != null) renderedEntityElement.setEntity(this.creatureToDraw);
+        }
+        return element;
+    }
+
+    @Override
     public RiftLibUISection modifyUISection(RiftLibUISection section) {
+        //some sections are visible only based on whether or not there's a selected creature
+        this.setUISectionVisibility("selectedCreatureSection", this.hasSelectedCreature());
+
         if (section.id.equals("partyLabelSection")) {
             int xOffset = this.hasSelectedCreature() ? -124 : 0;
             int YOffset = this.hasSelectedCreature() ? -81 : -65;

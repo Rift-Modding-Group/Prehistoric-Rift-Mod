@@ -133,6 +133,11 @@ public class RiftNewJournalScreen extends RiftLibUI {
     }
 
     @Override
+    public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection section, RiftLibUIElement.Element element) {
+        return element;
+    }
+
+    @Override
     public RiftLibUISection modifyUISection(RiftLibUISection section) {
         return section;
     }
