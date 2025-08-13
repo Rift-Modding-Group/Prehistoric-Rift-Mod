@@ -6,7 +6,9 @@ import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButt
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.message.RiftChangePartyMemName;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
@@ -122,10 +124,26 @@ public class RiftNewPartyScreen extends RiftLibUI {
     }
 
     private RiftLibUISection partyMemberManagementSection() {
-        return new RiftLibUISection("partyMemManagementSection", this.width, this.height, 80, 70, 0, 45, this.fontRenderer, this.mc) {
+        return new RiftLibUISection("partyMemManagementSection", this.width, this.height, 100, 90, 0, 52, this.fontRenderer, this.mc) {
             @Override
             public List<RiftLibUIElement.Element> defineSectionContents() {
                 List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //for getting party member name
+                NBTTagCompound tagCompound = partyMemButtons.get(partyMemPos).getCreatureNBT();
+                RiftCreatureType creatureType = RiftCreatureType.values()[tagCompound.getByte("CreatureType")];
+                String partyMemName = (tagCompound.hasKey("CustomName") && !tagCompound.getString("CustomName").isEmpty()) ? tagCompound.getString("CustomName") : creatureType.getTranslatedName();
+                String partyMemNameString = I18n.format("journal.party_member.name", partyMemName, tagCompound.getInteger("Level"));
+
+                //party member name
+                RiftLibUIElement.TextElement creatureName = new RiftLibUIElement.TextElement();
+                creatureName.setSingleLine();
+                creatureName.setText(partyMemNameString);
+                creatureName.setScale(0.75f);
+                creatureName.setBottomSpace(0);
+                creatureName.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                creatureName.setNotLimitedByBounds();
+                toReturn.add(creatureName);
 
                 //summon or dismiss
                 RiftLibUIElement.ButtonElement summonDismissButton = new RiftLibUIElement.ButtonElement();
@@ -133,6 +151,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 summonDismissButton.setBottomSpace(5);
                 summonDismissButton.setID("summonDismiss");
                 summonDismissButton.setText(I18n.format("journal.party_button.summon"));
+                summonDismissButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                 toReturn.add(summonDismissButton);
 
                 //teleport
@@ -141,14 +160,16 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 teleportButton.setBottomSpace(5);
                 teleportButton.setID("teleport");
                 teleportButton.setText(I18n.format("journal.party_button.teleport"));
+                teleportButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                 toReturn.add(teleportButton);
 
                 //change name
                 RiftLibUIElement.ButtonElement changeNameButton = new RiftLibUIElement.ButtonElement();
                 changeNameButton.setSize(80, 20);
                 changeNameButton.setBottomSpace(5);
-                changeNameButton.setID("changeName");
+                changeNameButton.setID("openChangeNamePopup");
                 changeNameButton.setText(I18n.format("journal.party_button.change_name"));
+                changeNameButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                 toReturn.add(changeNameButton);
 
                 return toReturn;
@@ -214,11 +235,26 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 //set usability based on if is deployable in area
                 boolean deployable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos) && (!this.getMemberNBT().hasKey("Health") || this.getMemberNBT().getFloat("Health") > 0));
                 this.setButtonUsabilityByID("summonDismiss", deployable);
+
+                //add overlay text if its not deployable
+                if (!deployable) {
+                    String cannotSummonLocation = I18n.format("journal.warning.cannot_summon");
+                    String cannotSummonDead = I18n.format("journal.warning.cannot_summon_dead");
+                    String finalOverlayString = (this.getMemberNBT().hasKey("Health") && this.getMemberNBT().getFloat("Health") <= 0)
+                            ? cannotSummonDead
+                            : cannotSummonLocation;
+                    summonDismissButton.setOverlayText(finalOverlayString);
+                }
             }
             else if (element.getID().equals("teleport")) {
+                RiftLibUIElement.ButtonElement teleportButton = (RiftLibUIElement.ButtonElement) element;
+
                 //set usability
                 boolean teleportable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY && NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos);
                 this.setButtonUsabilityByID("teleport", teleportable);
+
+                //add overlay text if its not teleportable
+                if (!teleportable) teleportButton.setOverlayText(I18n.format("journal.warning.cannot_teleport"));
             }
         }
         return element;
@@ -332,6 +368,14 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(this.mc.player, this.partyMemPos));
             }
         }
+        else if (riftLibButton.buttonId.equals("openChangeNamePopup")) this.createPopup(this.changeNamePopup());
+        //for setting the name of a tamed creature
+        else if (riftLibButton.buttonId.equals("setNewName")) {
+            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyMemName(this.mc.player, this.partyMemPos, this.getTextFieldTextByID("newName")));
+            this.clearPopup();
+        }
+        //universal, for exiting popup
+        else if (riftLibButton.buttonId.equals("exitPopup")) this.clearPopup();
     }
 
     @Override
@@ -339,5 +383,42 @@ public class RiftNewPartyScreen extends RiftLibUI {
         if (riftLibClickableSection.getStringID().equals("openJournal")) {
             RiftLibUIHelper.showUI(this.mc.player, new RiftNewJournalScreen());
         }
+    }
+
+    private List<RiftLibUIElement.Element> changeNamePopup() {
+        List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+        RiftLibUIElement.TextBoxElement textBox = new RiftLibUIElement.TextBoxElement();
+        textBox.setID("newName");
+        textBox.setWidth(100);
+        textBox.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+        if (this.getMemberNBT().hasKey("CustomName") && !this.getMemberNBT().getString("CustomName").isEmpty()) {
+            textBox.setDefaultText(this.getMemberNBT().getString("CustomName"));
+        }
+        toReturn.add(textBox);
+
+        //table for buttons
+        RiftLibUIElement.TableContainerElement buttonContainer = new RiftLibUIElement.TableContainerElement();
+        buttonContainer.setCellSize(70, 20);
+        buttonContainer.setRowCount(2);
+        buttonContainer.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+
+        //confirm button
+        RiftLibUIElement.ButtonElement confirmButton = new RiftLibUIElement.ButtonElement();
+        confirmButton.setSize(60, 20);
+        confirmButton.setText(I18n.format("radial.popup_button.confirm"));
+        confirmButton.setID("setNewName");
+        buttonContainer.addElement(confirmButton);
+
+        //cancel button
+        RiftLibUIElement.ButtonElement cancelButton = new RiftLibUIElement.ButtonElement();
+        cancelButton.setSize(60, 20);
+        cancelButton.setText(I18n.format("radial.popup_button.cancel"));
+        cancelButton.setID("exitPopup");
+        buttonContainer.addElement(cancelButton);
+
+        toReturn.add(buttonContainer);
+
+        return toReturn;
     }
 }
