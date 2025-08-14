@@ -16,7 +16,6 @@ public interface IPlayerTamedCreatures {
     FixedSizeList<NBTTagCompound> getPartyNBT();
     void setPartyMemNBT(int index, NBTTagCompound compound);
     void addToPartyNBT(NBTTagCompound compound);
-    void removeFromPartyNBT(NBTTagCompound compound);
     //box stuff
     void setBoxNBT(CreatureBoxStorage creatureBoxStorage);
     CreatureBoxStorage getBoxNBT();

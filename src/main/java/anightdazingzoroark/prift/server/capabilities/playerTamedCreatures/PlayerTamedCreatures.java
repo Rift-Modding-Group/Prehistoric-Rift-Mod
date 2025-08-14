@@ -357,11 +357,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         this.partyCreatures.add(compound);
     }
 
-    @Override
-    public void removeFromPartyNBT(NBTTagCompound compound) {
-        this.partyCreatures.remove(compound);
-    }
-
     @Deprecated
     @Override
     public void addToBoxCreatures(RiftCreature creature) {
