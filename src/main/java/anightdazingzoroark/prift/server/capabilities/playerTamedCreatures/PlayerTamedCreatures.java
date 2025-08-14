@@ -83,17 +83,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
-    public NBTTagCompound getPartyMemberTag(UUID uuid) {
-        //find in party first
-        for (NBTTagCompound partyMemCompound : this.partyCreatures.getList()) {
-            if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
-                return partyMemCompound;
-            }
-        }
-        return new NBTTagCompound();
-    }
-
-    @Override
     public int getSelectedPosInOverlay() {
         return this.selectedPosInOverlay;
     }

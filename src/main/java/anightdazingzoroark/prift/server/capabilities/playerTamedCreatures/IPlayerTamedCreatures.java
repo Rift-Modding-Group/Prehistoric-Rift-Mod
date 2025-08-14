@@ -39,8 +39,6 @@ public interface IPlayerTamedCreatures {
     int getLastOpenedBox();
     void setBoxLastOpenedTime(int value);
     int getBoxLastOpenedTime();
-    @Deprecated
-    NBTTagCompound getPartyMemberTag(UUID uuid);
 
     //for selected party creature from ui overlay
     int getSelectedPosInOverlay();

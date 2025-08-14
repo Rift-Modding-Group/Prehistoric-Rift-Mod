@@ -35,10 +35,6 @@ public class PlayerTamedCreaturesHelper {
         return getPlayerTamedCreatures(player).getPartyCreatures(player.world);
     }
 
-    public static NBTTagCompound getPartyMemberTag(EntityPlayer player, UUID uuid) {
-        return getPlayerTamedCreatures(player).getPartyMemberTag(uuid);
-    }
-
     public static void addToPlayerParty(EntityPlayer player, RiftCreature creature) {
         if (player.world.isRemote) {
             getPlayerTamedCreatures(player).addToPartyCreatures(creature);
@@ -49,25 +45,6 @@ public class PlayerTamedCreaturesHelper {
             RiftMessages.WRAPPER.sendToAll(new RiftAddToParty(player, creature));
         }
     }
-
-    /*
-    public static List<NBTTagCompound> getPlayerPartyNBT(EntityPlayer player) {
-        return getPlayerTamedCreatures(player).getPartyNBT();
-    }
-     */
-
-    /*
-    public static void setPlayerPartyNBT(EntityPlayer player, List<NBTTagCompound> tagCompounds) {
-        if (player.world.isRemote) {
-            //getPlayerTamedCreatures(player).setPartyNBT(tagCompounds);
-            RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player, tagCompounds));
-        }
-        else {
-            //getPlayerTamedCreatures(player).setPartyNBT(tagCompounds);
-            RiftMessages.WRAPPER.sendToAll(new RiftForceSyncPartyNBT(player, tagCompounds));
-        }
-    }
-     */
 
     public static List<RiftCreature> getPlayerBox(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getBoxCreatures(player.world);
