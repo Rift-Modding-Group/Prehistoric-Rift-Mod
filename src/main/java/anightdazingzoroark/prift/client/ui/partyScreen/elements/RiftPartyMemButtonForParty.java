@@ -143,8 +143,8 @@ public class RiftPartyMemButtonForParty extends RiftLibClickableSection {
             //now draw the hp bar
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
             int hpBarLength = MathHelper.clamp((int) ((health / maxHealth) * 51),0,51);
-            int hpBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 26;
-            int hpBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 12;
+            int hpBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 25;
+            int hpBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 13;
             drawModalRectWithCustomSizedTexture(hpBarX, hpBarY, 0, 301, hpBarLength, 1, this.textureWidth, this.textureHeight);
 
             //render creature energy
@@ -153,8 +153,8 @@ public class RiftPartyMemButtonForParty extends RiftLibClickableSection {
             float maxEnergy = RiftConfigHandler.getConfig(creatureType).stats.maxEnergy;
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
             int energyBarLength = MathHelper.clamp((int) ((energy / maxEnergy) * 51),0,51);
-            int energyBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 26;
-            int energyBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 14;
+            int energyBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 25;
+            int energyBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 15;
             drawModalRectWithCustomSizedTexture(energyBarX, energyBarY, 0, 302, energyBarLength, 1, this.textureWidth, this.textureHeight);
 
             //render creature xp
@@ -163,8 +163,8 @@ public class RiftPartyMemButtonForParty extends RiftLibClickableSection {
             float maxXP = creatureType.getMaxXP(this.creatureNBT.getInteger("Level"));
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
             int xpBarLength = MathHelper.clamp((int) ((xp / maxXP) * 51),0,51);
-            int xpBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 26;
-            int xpBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 16;
+            int xpBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 25;
+            int xpBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 17;
             drawModalRectWithCustomSizedTexture(xpBarX, xpBarY, 0, 303, xpBarLength, 1, this.textureWidth, this.textureHeight);
         }
         //blank contents, means slot is empty
@@ -183,12 +183,14 @@ public class RiftPartyMemButtonForParty extends RiftLibClickableSection {
     }
 
     public boolean isHovered(int mouseX, int mouseY) {
+        if (!this.doHoverEffects) return false;
         int x = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
         int y = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
         return mouseX >= x && mouseX <= x + this.width * this.scale && mouseY >= y && mouseY <= y + this.height * this.scale;
     }
 
     private boolean isHoveredNoNBT(int mouseX, int mouseY) {
+        if (!this.doHoverEffects) return false;
         int x = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
         int y = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
         return mouseX >= x && mouseX <= x + 57 * this.scale && mouseY >= y && mouseY <= y + 38 * this.scale;

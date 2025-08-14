@@ -2,8 +2,8 @@ package anightdazingzoroark.prift.client.ui.partyScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftNewJournalScreen;
+import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftNewPartyMembersSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
-import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -21,17 +21,16 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class RiftNewPartyScreen extends RiftLibUI {
     private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/party_background.png");
-    private final List<RiftPartyMemButtonForParty> partyMemButtons = new ArrayList<>();
 
     private RiftCreature creatureToDraw;
     private boolean moveManagement;
+    private boolean shufflePartyMemsMode;
     private int partyMemPos = -1;
 
     public RiftNewPartyScreen() {
@@ -45,7 +44,8 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 this.shuffleCreaturesSection(),
                 this.selectedCreatureSection(),
                 this.openJournalSection(),
-                this.partyMemberManagementSection()
+                this.partyMemberManagementSection(),
+                this.partyMembersSection()
         );
     }
 
@@ -129,52 +129,64 @@ public class RiftNewPartyScreen extends RiftLibUI {
             public List<RiftLibUIElement.Element> defineSectionContents() {
                 List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
 
-                //for getting party member name
-                NBTTagCompound tagCompound = partyMemButtons.get(partyMemPos).getCreatureNBT();
-                RiftCreatureType creatureType = RiftCreatureType.values()[tagCompound.getByte("CreatureType")];
-                String partyMemName = (tagCompound.hasKey("CustomName") && !tagCompound.getString("CustomName").isEmpty()) ? tagCompound.getString("CustomName") : creatureType.getTranslatedName();
-                String partyMemNameString = I18n.format("journal.party_member.name", partyMemName, tagCompound.getInteger("Level"));
+                if (getPartyMembersSection() != null) {
+                    //for getting party member name
+                    NBTTagCompound tagCompound = getPartyMembersSection().getPartyMembersNBT().get(partyMemPos);
+                    RiftCreatureType creatureType = RiftCreatureType.values()[tagCompound.getByte("CreatureType")];
+                    String partyMemName = (tagCompound.hasKey("CustomName") && !tagCompound.getString("CustomName").isEmpty()) ? tagCompound.getString("CustomName") : creatureType.getTranslatedName();
+                    String partyMemNameString = I18n.format("journal.party_member.name", partyMemName, tagCompound.getInteger("Level"));
 
-                //party member name
-                RiftLibUIElement.TextElement creatureName = new RiftLibUIElement.TextElement();
-                creatureName.setSingleLine();
-                creatureName.setText(partyMemNameString);
-                creatureName.setScale(0.75f);
-                creatureName.setBottomSpace(0);
-                creatureName.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-                creatureName.setNotLimitedByBounds();
-                toReturn.add(creatureName);
+                    //party member name
+                    RiftLibUIElement.TextElement creatureName = new RiftLibUIElement.TextElement();
+                    creatureName.setSingleLine();
+                    creatureName.setText(partyMemNameString);
+                    creatureName.setScale(0.75f);
+                    creatureName.setBottomSpace(0);
+                    creatureName.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                    creatureName.setNotLimitedByBounds();
+                    toReturn.add(creatureName);
 
-                //summon or dismiss
-                RiftLibUIElement.ButtonElement summonDismissButton = new RiftLibUIElement.ButtonElement();
-                summonDismissButton.setSize(80, 20);
-                summonDismissButton.setBottomSpace(5);
-                summonDismissButton.setID("summonDismiss");
-                summonDismissButton.setText(I18n.format("journal.party_button.summon"));
-                summonDismissButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-                toReturn.add(summonDismissButton);
+                    //summon or dismiss
+                    RiftLibUIElement.ButtonElement summonDismissButton = new RiftLibUIElement.ButtonElement();
+                    summonDismissButton.setSize(80, 20);
+                    summonDismissButton.setBottomSpace(5);
+                    summonDismissButton.setID("summonDismiss");
+                    summonDismissButton.setText(I18n.format("journal.party_button.summon"));
+                    summonDismissButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                    toReturn.add(summonDismissButton);
 
-                //teleport
-                RiftLibUIElement.ButtonElement teleportButton = new RiftLibUIElement.ButtonElement();
-                teleportButton.setSize(80, 20);
-                teleportButton.setBottomSpace(5);
-                teleportButton.setID("teleport");
-                teleportButton.setText(I18n.format("journal.party_button.teleport"));
-                teleportButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-                toReturn.add(teleportButton);
+                    //teleport
+                    RiftLibUIElement.ButtonElement teleportButton = new RiftLibUIElement.ButtonElement();
+                    teleportButton.setSize(80, 20);
+                    teleportButton.setBottomSpace(5);
+                    teleportButton.setID("teleport");
+                    teleportButton.setText(I18n.format("journal.party_button.teleport"));
+                    teleportButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                    toReturn.add(teleportButton);
 
-                //change name
-                RiftLibUIElement.ButtonElement changeNameButton = new RiftLibUIElement.ButtonElement();
-                changeNameButton.setSize(80, 20);
-                changeNameButton.setBottomSpace(5);
-                changeNameButton.setID("openChangeNamePopup");
-                changeNameButton.setText(I18n.format("journal.party_button.change_name"));
-                changeNameButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-                toReturn.add(changeNameButton);
+                    //change name
+                    RiftLibUIElement.ButtonElement changeNameButton = new RiftLibUIElement.ButtonElement();
+                    changeNameButton.setSize(80, 20);
+                    changeNameButton.setBottomSpace(5);
+                    changeNameButton.setID("openChangeNamePopup");
+                    changeNameButton.setText(I18n.format("journal.party_button.change_name"));
+                    changeNameButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                    toReturn.add(changeNameButton);
+                }
 
                 return toReturn;
             }
         };
+    }
+
+    //create the party members section
+    private RiftLibUISection partyMembersSection() {
+        return new RiftNewPartyMembersSection(this.width, this.height, 120, 120, -1, 3, this.fontRenderer, this.mc);
+    }
+
+    //get the party members section once its created
+    private RiftNewPartyMembersSection getPartyMembersSection() {
+        return (RiftNewPartyMembersSection) this.getSectionByID("partyMembersSection");
     }
 
     @Override
@@ -185,40 +197,15 @@ public class RiftNewPartyScreen extends RiftLibUI {
         //NewPlayerTamedCreaturesHelper.updateAfterOpenPartyScreen(this.mc.player, (int) this.mc.world.getTotalWorldTime());
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
-        //create party buttons
-        this.partyMemButtons.clear();
-        FixedSizeList<NBTTagCompound> playerPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
-        for (int x = 0; x < playerPartyNBT.size(); x++) {
-            int partyMemXOffset = -154 + (x % 2) * 60;
-            int partyMemYOffset = -41 + (x / 2) * 40;
-            RiftPartyMemButtonForParty partyMemButton = new RiftPartyMemButtonForParty(playerPartyNBT.get(x), this.width, this.height, partyMemXOffset, partyMemYOffset, this.fontRenderer, this.mc);
-            this.partyMemButtons.add(partyMemButton);
-        }
-
         //set creature to draw
-        if (this.partyMemPos >= 0) this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, playerPartyNBT.get(this.partyMemPos));
-    }
-
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        super.drawScreen(mouseX, mouseY, partialTicks);
-
-        //constantly update party members as long as this screen is opened
-        this.updateAllPartyMems();
-
-        //draw the party buttons
-        for (int x = 0; x < this.partyMemButtons.size(); x++) {
-            RiftPartyMemButtonForParty partyMemButton = this.partyMemButtons.get(x);
-            int selectedXOffset = this.hasSelectedCreature() ? 0 : 124;
-            int selectedYOffset = this.hasSelectedCreature() ? -13 : 3;
-            partyMemButton.setAdditionalOffset(selectedXOffset, selectedYOffset);
-            partyMemButton.drawSection(mouseX, mouseY);
-            partyMemButton.setSelected(x == this.partyMemPos);
-        }
+        if (this.partyMemPos >= 0) this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.partyMemPos));
     }
 
     @Override
     public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection section, RiftLibUIElement.Element element) {
+        //for updating all party members
+        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+
         if (section.id.equals("selectedCreatureSection") && element.getID().equals("selectedCreature")) {
             RiftLibUIElement.RenderedEntityElement renderedEntityElement = (RiftLibUIElement.RenderedEntityElement) element;
             if (this.creatureToDraw != null) renderedEntityElement.setEntity(this.creatureToDraw);
@@ -285,6 +272,19 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 section.repositionSection(xOffset, yOffset);
                 break;
             }
+            case "partyMembersSection": {
+                //update party members
+                NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+                RiftNewPartyMembersSection partyMembersSection = (RiftNewPartyMembersSection) section;
+                partyMembersSection.setPartyMembersNBT(NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
+
+                //change position based on if theres a selected creature or not
+                int xOffset = this.hasSelectedCreature() ? -125 : -1;
+                int yOffset = this.hasSelectedCreature() ? -13 : 3;
+                partyMembersSection.repositionSection(xOffset, yOffset);
+
+                break;
+            }
         }
         return section;
     }
@@ -293,18 +293,11 @@ public class RiftNewPartyScreen extends RiftLibUI {
         return this.partyMemPos >= 0 && this.creatureToDraw != null;
     }
 
-    private void updateAllPartyMems() {
-        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player); //update nbt from deployed creatures
-        //update creatures while ui is opened
-        FixedSizeList<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
-        for (int x = 0; x < this.partyMemButtons.size(); x++) {
-            RiftPartyMemButtonForParty button = this.partyMemButtons.get(x);
-            button.setCreatureNBT(newPartyNBT.get(x));
-        }
-    }
-
     private NBTTagCompound getMemberNBT() {
-        if (this.partyMemPos >= 0) return this.partyMemButtons.get(this.partyMemPos).getCreatureNBT();
+        if (this.partyMemPos >= 0) {
+            //RiftLibUIElement.TableContainerElement partyMemberTable = this.byi
+            if (this.getPartyMembersSection() != null) return this.getPartyMembersSection().getPartyMembersNBT().get(this.partyMemPos);
+        }
         return new NBTTagCompound();
     }
 
@@ -335,20 +328,6 @@ public class RiftNewPartyScreen extends RiftLibUI {
         int xScreenSize = this.hasSelectedCreature() ? 373 : 125;
         int yScreenSize = this.hasSelectedCreature() ? 182 : 151;
         return new int[]{xScreenSize, yScreenSize};
-    }
-
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-
-        //party related stuff stays here cos yes
-        for (int i = 0; i < this.partyMemButtons.size(); i++) {
-            RiftPartyMemButtonForParty partyMemButton = this.partyMemButtons.get(i);
-            if (partyMemButton.isHovered(mouseX, mouseY)) {
-                this.partyMemPos = i;
-                this.creatureToDraw = partyMemButton.getCreatureFromNBT();
-                this.playPressSound();
-            }
-        }
     }
 
     @Override
@@ -382,6 +361,33 @@ public class RiftNewPartyScreen extends RiftLibUI {
     public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
         if (riftLibClickableSection.getStringID().equals("openJournal")) {
             RiftLibUIHelper.showUI(this.mc.player, new RiftNewJournalScreen());
+        }
+        if (riftLibClickableSection.getStringID().startsWith("partyMember:")) {
+            RiftPartyMemButtonForParty partyMemButtonForParty = (RiftPartyMemButtonForParty) riftLibClickableSection;
+            int clickedPosition = Integer.parseInt(riftLibClickableSection.getStringID().substring(
+                    riftLibClickableSection.getStringID().indexOf(":") + 1
+            ));
+
+            //for swapping party members, stuff here works as expected
+            if (this.shufflePartyMemsMode) {}
+            //when not swapping party members, just select a reature
+            else {
+                if (clickedPosition != this.partyMemPos) {
+                    this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, false);
+                    this.partyMemPos = clickedPosition;
+                    if (partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().isEmpty()) this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, true);
+                    this.creatureToDraw = partyMemButtonForParty.getCreatureFromNBT();
+                }
+                else {
+                    this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, false);
+                    this.partyMemPos = -1;
+                    this.creatureToDraw = null;
+                }
+            }
+        }
+        if (riftLibClickableSection.getStringID().equals("shuffleCreatures")) {
+            this.shufflePartyMemsMode = !this.shufflePartyMemsMode;
+            this.setSelectClickableSectionByID("shuffleCreatures", this.shufflePartyMemsMode);
         }
     }
 
