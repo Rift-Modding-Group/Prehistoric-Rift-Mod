@@ -249,26 +249,26 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
     @Override
     public RiftLibUISection modifyUISection(RiftLibUISection section) {
-        //some sections are visible only based on whether or not there's a selected creature
-        this.setUISectionVisibility("selectedCreatureSection", this.hasSelectedCreature());
-        this.setUISectionVisibility("partyMemManagementSection", this.hasSelectedCreature());
+        //some sections are visible only based on whether or not there's a selected creature and if its not shuffle party mems mode
+        this.setUISectionVisibility("selectedCreatureSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
+        this.setUISectionVisibility("partyMemManagementSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
 
         switch (section.id) {
             case "partyLabelSection": {
-                int xOffset = this.hasSelectedCreature() ? -124 : 0;
-                int YOffset = this.hasSelectedCreature() ? -81 : -65;
+                int xOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -124 : 0;
+                int YOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -81 : -65;
                 section.repositionSection(xOffset, YOffset);
                 break;
             }
             case "shuffleCreaturesSection": {
-                int xOffset = this.hasSelectedCreature() ? -74 : 50;
-                int YOffset = this.hasSelectedCreature() ? -81 : -65;
+                int xOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -74 : 50;
+                int YOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -81 : -65;
                 section.repositionSection(xOffset, YOffset);
                 break;
             }
             case "openJournalSection": {
-                int xOffset = this.hasSelectedCreature() ? -123 : -1;
-                int yOffset = this.hasSelectedCreature() ? 54 : 70;
+                int xOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -123 : -1;
+                int yOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? 54 : 70;
                 section.repositionSection(xOffset, yOffset);
                 break;
             }
@@ -279,8 +279,8 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 partyMembersSection.setPartyMembersNBT(NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
 
                 //change position based on if theres a selected creature or not
-                int xOffset = this.hasSelectedCreature() ? -125 : -1;
-                int yOffset = this.hasSelectedCreature() ? -13 : 3;
+                int xOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -125 : -1;
+                int yOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -13 : 3;
                 partyMembersSection.repositionSection(xOffset, yOffset);
 
                 break;
@@ -295,7 +295,6 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
     private NBTTagCompound getMemberNBT() {
         if (this.partyMemPos >= 0) {
-            //RiftLibUIElement.TableContainerElement partyMemberTable = this.byi
             if (this.getPartyMembersSection() != null) return this.getPartyMembersSection().getPartyMembersNBT().get(this.partyMemPos);
         }
         return new NBTTagCompound();
@@ -318,15 +317,15 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
     @Override
     public int[] backgroundUV() {
-        int uvX = this.hasSelectedCreature() ? 0 : 162;
-        int uvY = this.hasSelectedCreature() ? 0 : 182;
+        int uvX = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? 0 : 162;
+        int uvY = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? 0 : 182;
         return new int[]{uvX, uvY};
     }
 
     @Override
     public int[] backgroundSize() {
-        int xScreenSize = this.hasSelectedCreature() ? 373 : 125;
-        int yScreenSize = this.hasSelectedCreature() ? 182 : 151;
+        int xScreenSize = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? 373 : 125;
+        int yScreenSize = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? 182 : 151;
         return new int[]{xScreenSize, yScreenSize};
     }
 
@@ -369,7 +368,17 @@ public class RiftNewPartyScreen extends RiftLibUI {
             ));
 
             //for swapping party members, stuff here works as expected
-            if (this.shufflePartyMemsMode) {}
+            if (this.shufflePartyMemsMode) {
+                if (this.partyMemPos == -1 && partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().isEmpty()) {
+                    this.partyMemPos = clickedPosition;
+                    this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, true);
+                }
+                else if (this.partyMemPos > -1) {
+                    NewPlayerTamedCreaturesHelper.rearrangePartyCreatures(this.mc.player, this.partyMemPos, clickedPosition);
+                    this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, false);
+                    this.partyMemPos = -1;
+                }
+            }
             //when not swapping party members, just select a reature
             else {
                 if (clickedPosition != this.partyMemPos) {
