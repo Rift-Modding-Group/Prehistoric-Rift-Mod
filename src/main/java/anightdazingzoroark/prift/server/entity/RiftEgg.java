@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
@@ -112,17 +113,17 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
                 }
 
                 if (this.getCreatureType() != RiftCreatureType.DODO) {
-                    //update player tamed creatures
-                    if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
+                    //update party of owner
+                    if (NewPlayerTamedCreaturesHelper.canAddToParty(owner)) {
                         creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                        this.world.spawnEntity(creature);
-                        PlayerTamedCreaturesHelper.addToPlayerParty(owner, creature);
-                        owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_party"), false);
+                        NewPlayerTamedCreaturesHelper.addCreatureToParty(owner, creature);
+                        owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
                     }
-                    else if (PlayerTamedCreaturesHelper.getPlayerBox(owner).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(owner)) {
+                    //update box of owner
+                    else if (NewPlayerTamedCreaturesHelper.canAddCreatureToBox(owner)) {
                         creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                        PlayerTamedCreaturesHelper.addToPlayerBoxViaNBT(owner, creature);
-                        owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_box"), false);
+                        NewPlayerTamedCreaturesHelper.addCreatureToBox(owner, creature);
+                        owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
                     }
                 }
                 else this.world.spawnEntity(creature);

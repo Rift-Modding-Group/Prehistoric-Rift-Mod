@@ -35,17 +35,6 @@ public class PlayerTamedCreaturesHelper {
         return getPlayerTamedCreatures(player).getPartyCreatures(player.world);
     }
 
-    public static void addToPlayerParty(EntityPlayer player, RiftCreature creature) {
-        if (player.world.isRemote) {
-            getPlayerTamedCreatures(player).addToPartyCreatures(creature);
-            RiftMessages.WRAPPER.sendToServer(new RiftAddToParty(player, creature));
-        }
-        else {
-            getPlayerTamedCreatures(player).addToPartyCreatures(creature);
-            RiftMessages.WRAPPER.sendToAll(new RiftAddToParty(player, creature));
-        }
-    }
-
     public static List<RiftCreature> getPlayerBox(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getBoxCreatures(player.world);
     }
@@ -59,19 +48,6 @@ public class PlayerTamedCreaturesHelper {
         else {
             getPlayerTamedCreatures(player).addToBoxCreatures(creature);
             RiftMessages.WRAPPER.sendToAll(new RiftAddToBox(player, creature));
-        }
-    }
-
-    public static void addToPlayerBoxViaNBT(EntityPlayer player, RiftCreature creature) {
-        if (player.world.isRemote) {
-            NBTTagCompound tagCompound = createNBTFromCreature(creature);
-            getPlayerTamedCreatures(player).addToBoxNBT(tagCompound);
-            RiftMessages.WRAPPER.sendToServer(new RiftAddToBoxNBT(player, tagCompound));
-        }
-        else {
-            NBTTagCompound tagCompound = createNBTFromCreature(creature);
-            getPlayerTamedCreatures(player).addToBoxNBT(tagCompound);
-            RiftMessages.WRAPPER.sendToAll(new RiftAddToBoxNBT(player, tagCompound));
         }
     }
 
@@ -148,21 +124,6 @@ public class PlayerTamedCreaturesHelper {
 
     public static int getMaxBoxSize(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getMaxBoxSize();
-    }
-
-    public static int getLastSelected(EntityPlayer player) {
-        return getPlayerTamedCreatures(player).getLastSelected();
-    }
-
-    public static void setLastSelected(EntityPlayer player, int value) {
-        if (player.world.isRemote) {
-            getPlayerTamedCreatures(player).setLastSelected(value);
-            RiftMessages.WRAPPER.sendToServer(new RiftSetPartyLastSelected(player, value));
-        }
-        else {
-            getPlayerTamedCreatures(player).setLastSelected(value);
-            RiftMessages.WRAPPER.sendToAll(new RiftSetPartyLastSelected(player, value));
-        }
     }
 
     public static int getBoxSizeLevel(EntityPlayer player) {

@@ -47,8 +47,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftRemoveCreatureFromBox.Handler.class, RiftRemoveCreatureFromBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftRemoveAfterSendToBox.Handler.class, RiftRemoveAfterSendToBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftRemoveAfterSendToBox.Handler.class, RiftRemoveAfterSendToBox.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftAddToParty.Handler.class, RiftAddToParty.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftAddToParty.Handler.class, RiftAddToParty.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftUpdatePlayerTamedCreatures.Handler.class, RiftUpdatePlayerTamedCreatures.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftChangeBoxDeployedOrder.Handler.class, RiftChangeBoxDeployedOrder.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeBoxDeployedOrder.Handler.class, RiftChangeBoxDeployedOrder.class, id++, Side.CLIENT);
@@ -68,8 +66,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetRiding.Handler.class, RiftSetRiding.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftUpgradePlayerParty.Handler.class, RiftUpgradePlayerParty.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpgradePlayerParty.Handler.class, RiftUpgradePlayerParty.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftSetPartyLastSelected.Handler.class, RiftSetPartyLastSelected.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftSetPartyLastSelected.Handler.class, RiftSetPartyLastSelected.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftUpgradePlayerBox.Handler.class, RiftUpgradePlayerBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpgradePlayerBox.Handler.class, RiftUpgradePlayerBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftOpenCreatureBoxMenu.Handler.class, RiftOpenCreatureBoxMenu.class, id++, Side.CLIENT);
@@ -102,8 +98,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftForceSyncBoxLastOpenedTime.Handler.class, RiftForceSyncBoxLastOpenedTime.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftAddToBox.Handler.class, RiftAddToBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftAddToBox.Handler.class, RiftAddToBox.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftAddToBoxNBT.Handler.class, RiftAddToBoxNBT.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftAddToBoxNBT.Handler.class, RiftAddToBoxNBT.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftManualUseMove.Handler.class, RiftManualUseMove.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftManualUseLargeWeapon.Handler.class, RiftManualUseLargeWeapon.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetSprinting.Handler.class, RiftSetSprinting.class, id++, Side.SERVER);

@@ -448,44 +448,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         }
     }
 
-    private NBTTagCompound boxCreatureDeployedModified(NBTTagCompound compoundBoxDepSelected, boolean toParty) {
-        byte deploymentTypeByte = toParty ? (byte) DeploymentType.PARTY_INACTIVE.ordinal() : (byte) DeploymentType.BASE_INACTIVE.ordinal();
-        compoundBoxDepSelected.setByte("DeploymentType", deploymentTypeByte);
-        compoundBoxDepSelected.setBoolean("HasHomePos", false);
-        compoundBoxDepSelected.removeTag("HomePosX");
-        compoundBoxDepSelected.removeTag("HomePosY");
-        compoundBoxDepSelected.removeTag("HomePosZ");
-        compoundBoxDepSelected.setBoolean("Sitting", false);
-        //for dimetrodons
-        if (RiftCreatureType.values()[compoundBoxDepSelected.getByte("CreatureType")] == RiftCreatureType.DIMETRODON) {
-            compoundBoxDepSelected.setBoolean("TakingCareOfEgg", false);
-        }
-        //for speed
-        double oldSpeed = RiftCreatureType.values()[compoundBoxDepSelected.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).getSpeed();
-        double oldWaterSpeed = RiftCreatureType.values()[compoundBoxDepSelected.getByte("CreatureType")].invokeClass(Minecraft.getMinecraft().world).getWaterSpeed();
-        NBTTagList attributeTagList = compoundBoxDepSelected.getTagList("Attributes", 10);
-        for (int x = 0; x < attributeTagList.tagList.size(); x++) {
-            NBTTagCompound attributeTagCompound = (NBTTagCompound) attributeTagList.get(x);
-            if (attributeTagCompound.getString("Name").equals("generic.movementSpeed")) {
-                attributeTagCompound.setDouble("Base", oldSpeed);
-                attributeTagList.set(x, attributeTagCompound);
-            }
-            else if (attributeTagCompound.getString("Name").equals("forge.swimSpeed")) {
-                attributeTagCompound.setDouble("Base", oldWaterSpeed);
-                attributeTagList.set(x, attributeTagCompound);
-            }
-        }
-        //for creatures with workstations
-        if (compoundBoxDepSelected.hasKey("HasWorkstation")) compoundBoxDepSelected.setBoolean("HasWorkstation", false);
-        //for creatures with lead based workstations
-        if (compoundBoxDepSelected.hasKey("UsingLeadForWork")) compoundBoxDepSelected.setBoolean("UsingLeadForWork", false);
-        //for turret mode users
-        if (compoundBoxDepSelected.hasKey("TurretMode")) compoundBoxDepSelected.setBoolean("TurretMode", false);
-        //for harvest on wander users
-        if (compoundBoxDepSelected.hasKey("CanHarvest")) compoundBoxDepSelected.setBoolean("CanHarvest", false);
-        return compoundBoxDepSelected;
-    }
-
     @Override
     public void removeCreature(UUID uuid) {
         /*

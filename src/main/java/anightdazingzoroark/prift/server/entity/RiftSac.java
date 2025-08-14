@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -77,17 +78,17 @@ public class RiftSac extends EntityTameable implements IAnimatable {
                     owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.getCreatureType().getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
                 }
 
-                //update player tamed creatures
-                if (PlayerTamedCreaturesHelper.getPlayerParty(owner).size() < PlayerTamedCreaturesHelper.getMaxPartySize(owner)) {
+                //update party of owner
+                if (NewPlayerTamedCreaturesHelper.canAddToParty(owner)) {
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                    this.world.spawnEntity(creature);
-                    PlayerTamedCreaturesHelper.addToPlayerParty(owner, creature);
-                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_party"), false);
+                    NewPlayerTamedCreaturesHelper.addCreatureToParty(owner, creature);
+                    owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
                 }
-                else if (PlayerTamedCreaturesHelper.getPlayerBox(owner).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(owner)) {
+                //update box of owner
+                else if (NewPlayerTamedCreaturesHelper.canAddCreatureToBox(owner)) {
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                    PlayerTamedCreaturesHelper.addToPlayerBoxViaNBT(owner, creature);
-                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_box"), false);
+                    NewPlayerTamedCreaturesHelper.addCreatureToBox(owner, creature);
+                    owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
                 }
             }
             this.setDead();
