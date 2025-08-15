@@ -12,10 +12,10 @@ import java.util.UUID;
 public interface IPlayerTamedCreatures {
     //for direct values
     //party stuff
-    void setPartyNBT(FixedSizeList<NBTTagCompound> compound);
-    FixedSizeList<NBTTagCompound> getPartyNBT();
-    void setPartyMemNBT(int index, NBTTagCompound compound);
-    void addToPartyNBT(NBTTagCompound compound);
+    void setPartyNBT(FixedSizeList<CreatureNBT> compound);
+    FixedSizeList<CreatureNBT> getPartyNBT();
+    void setPartyMemNBT(int index, CreatureNBT compound);
+    void addToPartyNBT(CreatureNBT compound);
     //box stuff
     void setBoxNBT(CreatureBoxStorage creatureBoxStorage);
     CreatureBoxStorage getBoxNBT();
@@ -45,8 +45,6 @@ public interface IPlayerTamedCreatures {
     void setSelectedPosInOverlay(int value);
 
     //for indirect values
-    @Deprecated
-    void addToPartyCreatures(RiftCreature creature);
     @Deprecated
     List<RiftCreature> getPartyCreatures(World world);
     @Deprecated

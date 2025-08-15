@@ -101,6 +101,7 @@ public class RiftPopupFromPlayerParty extends GuiScreen {
     }
 
     private NBTTagCompound getNBTFromPos() {
-        return NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.pos);
+        //return NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.pos);
+        return new NBTTagCompound();
     }
 }

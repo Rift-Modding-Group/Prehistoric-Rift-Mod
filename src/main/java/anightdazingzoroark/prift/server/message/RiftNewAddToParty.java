@@ -1,9 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,25 +14,25 @@ import net.minecraftforge.fml.relauncher.Side;
 
 public class RiftNewAddToParty implements IMessage {
     private int playerId;
-    private NBTTagCompound creatureNBT;
+    private CreatureNBT creatureNBT;
 
     public RiftNewAddToParty() {}
 
     public RiftNewAddToParty(EntityPlayer player, RiftCreature creature) {
         this.playerId = player.getEntityId();
-        this.creatureNBT = NewPlayerTamedCreaturesHelper.createNBTFromCreature(creature);
+        this.creatureNBT = new CreatureNBT(creature);
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.playerId = buf.readInt();
-        this.creatureNBT = ByteBufUtils.readTag(buf);
+        this.creatureNBT = new CreatureNBT(ByteBufUtils.readTag(buf));
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.playerId);
-        ByteBufUtils.writeTag(buf, this.creatureNBT);
+        ByteBufUtils.writeTag(buf, this.creatureNBT.getCreatureNBT());
     }
 
     public static class Handler implements IMessageHandler<RiftNewAddToParty, IMessage> {

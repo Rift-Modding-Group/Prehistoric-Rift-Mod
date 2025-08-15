@@ -48,7 +48,7 @@ public class RiftTeleportPartyMemToPlayer implements IMessage {
             EntityPlayer messagePlayer = ctx.getServerHandler().player;
             EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
             IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-            UUID creatureUUID = playerTamedCreatures.getPartyNBT().get(message.partyMemPos).getUniqueId("UniqueID");
+            UUID creatureUUID = playerTamedCreatures.getPartyNBT().get(message.partyMemPos).getUniqueID();
 
             RiftCreature partyMember = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, creatureUUID);
 

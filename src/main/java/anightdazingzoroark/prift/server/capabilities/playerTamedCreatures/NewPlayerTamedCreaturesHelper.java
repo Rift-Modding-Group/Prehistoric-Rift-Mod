@@ -42,8 +42,8 @@ public class NewPlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
     }
 
-    public static FixedSizeList<NBTTagCompound> getPlayerPartyNBT(EntityPlayer player) {
-        if (player == null) return new FixedSizeList<>(maxPartySize, new NBTTagCompound());
+    public static FixedSizeList<CreatureNBT> getPlayerPartyNBT(EntityPlayer player) {
+        if (player == null) return new FixedSizeList<>(maxPartySize, new CreatureNBT());
         if (player.world.isRemote) {
             RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
         }
@@ -56,14 +56,14 @@ public class NewPlayerTamedCreaturesHelper {
             RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
         }
         for (int x = 0; x < getPlayerPartyNBT(player).size(); x++) {
-            if (getPlayerPartyNBT(player).get(x).isEmpty()) {
+            if (getPlayerPartyNBT(player).get(x).nbtIsEmpty()) {
                 return true;
             }
         }
         return false;
     }
 
-    public static void setPlayerPartyNBT(EntityPlayer player, FixedSizeList<NBTTagCompound> tagCompounds) {
+    public static void setPlayerPartyNBT(EntityPlayer player, FixedSizeList<CreatureNBT> tagCompounds) {
         if (player == null || tagCompounds == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player, tagCompounds));
     }
@@ -89,7 +89,7 @@ public class NewPlayerTamedCreaturesHelper {
 
     public static boolean canBeDeployed(EntityPlayer player, int position) {
         if (player == null) return false;
-        RiftCreature creature = createCreatureFromNBT(player.world, getPlayerPartyNBT(player).get(position));
+        RiftCreature creature = getPlayerPartyNBT(player).get(position).getCreatureAsNBT(player.world);
         if (creature == null) return false;
         if (creature instanceof RiftWaterCreature) {
             if (player.world.getBlockState(player.getPosition()).getMaterial() == Material.WATER) return true;

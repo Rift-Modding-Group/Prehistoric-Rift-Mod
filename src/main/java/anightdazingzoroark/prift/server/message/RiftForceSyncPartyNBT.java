@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import io.netty.buffer.ByteBuf;
@@ -23,7 +24,7 @@ import java.util.List;
 public class RiftForceSyncPartyNBT implements IMessage {
     private int playerId;
     private int listSize;
-    private FixedSizeList<NBTTagCompound> tagCompounds;
+    private FixedSizeList<CreatureNBT> tagCompounds;
 
     public RiftForceSyncPartyNBT() {}
 
@@ -31,7 +32,7 @@ public class RiftForceSyncPartyNBT implements IMessage {
         this(player, new FixedSizeList<>(0));
     }
 
-    public RiftForceSyncPartyNBT(EntityPlayer player, FixedSizeList<NBTTagCompound> tagCompounds) {
+    public RiftForceSyncPartyNBT(EntityPlayer player, FixedSizeList<CreatureNBT> tagCompounds) {
         this.playerId = player.getEntityId();
         this.listSize = tagCompounds.size();
         this.tagCompounds = tagCompounds;
@@ -56,16 +57,16 @@ public class RiftForceSyncPartyNBT implements IMessage {
         ByteBufUtils.writeTag(buf, compound);
     }
 
-    private NBTTagList setNBTListToNBTTagList(FixedSizeList<NBTTagCompound> tagCompounds) {
+    private NBTTagList setNBTListToNBTTagList(FixedSizeList<CreatureNBT> tagCompounds) {
         NBTTagList tagList = new NBTTagList();
-        for (NBTTagCompound tagCompound : tagCompounds.getList()) tagList.appendTag(tagCompound);
+        for (CreatureNBT tagCompound : tagCompounds.getList()) tagList.appendTag(tagCompound.getCreatureNBT());
         return tagList;
     }
 
-    private FixedSizeList<NBTTagCompound> setNBTTagListToNBTList(NBTTagList tagList, int size) {
-        FixedSizeList<NBTTagCompound> compoundList = new FixedSizeList<>(size, new NBTTagCompound());
+    private FixedSizeList<CreatureNBT> setNBTTagListToNBTList(NBTTagList tagList, int size) {
+        FixedSizeList<CreatureNBT> compoundList = new FixedSizeList<>(size, new CreatureNBT());
         for (int x = 0; x < tagList.tagCount(); x++) {
-            NBTTagCompound tagCompound = (NBTTagCompound) tagList.get(x);
+            CreatureNBT tagCompound = new CreatureNBT((NBTTagCompound) tagList.get(x));
             compoundList.set(x, tagCompound);
         }
         return compoundList;

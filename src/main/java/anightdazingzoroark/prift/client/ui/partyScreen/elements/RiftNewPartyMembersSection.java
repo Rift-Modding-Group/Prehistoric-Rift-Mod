@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui.partyScreen.elements;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.Minecraft;
@@ -12,13 +13,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class RiftNewPartyMembersSection extends RiftLibUISection {
-    private FixedSizeList<NBTTagCompound> partyMembersNBT = new FixedSizeList<>(6, new NBTTagCompound());
+    private FixedSizeList<CreatureNBT> partyMembersNBT = new FixedSizeList<>(6, new CreatureNBT());
 
     public RiftNewPartyMembersSection( int guiWidth, int guiHeight, int width, int height, int xPos, int yPos, FontRenderer fontRenderer, Minecraft minecraft) {
         super("partyMembersSection", guiWidth, guiHeight, width, height, xPos, yPos, fontRenderer, minecraft);
     }
 
-    public void setPartyMembersNBT(FixedSizeList<NBTTagCompound> tagCompounds) {
+    public void setPartyMembersNBT(FixedSizeList<CreatureNBT> tagCompounds) {
         this.partyMembersNBT = tagCompounds;
     }
 
@@ -34,7 +35,7 @@ public class RiftNewPartyMembersSection extends RiftLibUISection {
         table.setCellSize(60, 40);
 
         for (int i = 0; i < this.partyMembersNBT.size(); i++) {
-            NBTTagCompound partyMember = this.partyMembersNBT.get(i);
+            CreatureNBT partyMember = this.partyMembersNBT.get(i);
             PartyMemberElement partyMemberElement = new PartyMemberElement();
             partyMemberElement.setPartyMemNBT(partyMember);
             partyMemberElement.setID("partyMember:"+i);
@@ -84,20 +85,20 @@ public class RiftNewPartyMembersSection extends RiftLibUISection {
         return super.drawElement(element, draw, sectionWidth, x, y, mouseX, mouseY, partialTicks);
     }
 
-    public FixedSizeList<NBTTagCompound> getPartyMembersNBT() {
+    public FixedSizeList<CreatureNBT> getPartyMembersNBT() {
         return this.partyMembersNBT;
     }
 
     //a new element exclusive to this section only
     public static class PartyMemberElement extends RiftLibUIElement.Element {
-        private NBTTagCompound partyMemNBT;
+        private CreatureNBT partyMemNBT;
         private final int[] size = {57, 38};
 
-        public void setPartyMemNBT(NBTTagCompound tagCompound) {
+        public void setPartyMemNBT(CreatureNBT tagCompound) {
             this.partyMemNBT = tagCompound;
         }
 
-        public NBTTagCompound getPartyMemNBT() {
+        public CreatureNBT getPartyMemNBT() {
             return this.partyMemNBT;
         }
 

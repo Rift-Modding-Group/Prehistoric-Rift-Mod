@@ -51,6 +51,7 @@ public class RiftUpdatePartyAfterOpenPartyScreen implements IMessage {
 
         private void handle(RiftUpdatePartyAfterOpenPartyScreen message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
+                /*
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
@@ -203,6 +204,7 @@ public class RiftUpdatePartyAfterOpenPartyScreen implements IMessage {
                     }
                     playerTamedCreatures.setPartyLastOpenedTime(message.lastOpenedTime);
                 }
+                */
             }
         }
     }

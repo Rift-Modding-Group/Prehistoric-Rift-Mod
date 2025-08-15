@@ -73,6 +73,7 @@ public class RiftPartyScreen extends GuiScreen {
 
         //create party buttons
         this.partyMemButtons.clear();
+        /*
         FixedSizeList<NBTTagCompound> playerPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
         for (int x = 0; x < playerPartyNBT.size(); x++) {
             int partyMemXOffset = -154 + (x % 2) * 60;
@@ -80,6 +81,7 @@ public class RiftPartyScreen extends GuiScreen {
             RiftPartyMemButtonForParty partyMemButton = new RiftPartyMemButtonForParty(playerPartyNBT.get(x), this.width, this.height, partyMemXOffset, partyMemYOffset, this.fontRenderer, this.mc);
             this.partyMemButtons.add(partyMemButton);
         }
+         */
 
         //create journal button
         String journalString = I18n.format("journal.party_button.journal");
@@ -120,11 +122,11 @@ public class RiftPartyScreen extends GuiScreen {
 
         //scrollable section for creature info
         this.infoScrollableSection = new RiftCreatureInfoScrollableSection(this.width, this.height,127, -13, this.fontRenderer, this.mc);
-        if (this.partyMemPos >= 0) this.infoScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
+        //if (this.partyMemPos >= 0) this.infoScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
 
         //scrollable section for moves info
         this.movesScrollableSection = new RiftCreatureMovesScrollableSection(this.width, this.height, 124, -13, this.fontRenderer, this.mc);
-        if (this.partyMemPos >= 0) this.movesScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
+        //if (this.partyMemPos >= 0) this.movesScrollableSection.setCreatureNBT(playerPartyNBT.get(this.partyMemPos));
 
         //swap moves button
         this.swapMovesButton = new RiftClickableSection(19, 17, this.width, this.height, 177, -67, this.fontRenderer, this.mc);
@@ -136,7 +138,7 @@ public class RiftPartyScreen extends GuiScreen {
         //PlayerTamedCreaturesHelper.setLastSelected(this.mc.player, 0);
 
         //set creature to draw
-        if (this.partyMemPos >= 0) this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, playerPartyNBT.get(this.partyMemPos));
+        //if (this.partyMemPos >= 0) this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, playerPartyNBT.get(this.partyMemPos));
 
         //if opened from manage moves, enable move management related stuff
         if (this.partyMemPos >= 0 && this.openedFromManageMoves) {
@@ -184,6 +186,7 @@ public class RiftPartyScreen extends GuiScreen {
         this.journalButton.drawSection(mouseX, mouseY);
 
         //everything else from here on out requires a selected creature
+        /*
         if (this.hasSelectedCreature()) {
             NBTTagCompound tagCompound = this.partyMemButtons.get(this.partyMemPos).getCreatureNBT();
             RiftCreatureType creatureType = RiftCreatureType.values()[tagCompound.getByte("CreatureType")];
@@ -285,12 +288,14 @@ public class RiftPartyScreen extends GuiScreen {
                 }
             }
         }
+        */
     }
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         super.mouseClicked(mouseX, mouseY, mouseButton);
 
+        /*
         //manage party button clicking
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
             RiftPartyMemButtonForParty partyMemButton = this.partyMemButtons.get(x);
@@ -341,6 +346,7 @@ public class RiftPartyScreen extends GuiScreen {
                 }
             }
         }
+         */
 
         //manage swapping party mode
         if (this.swapPartyMemsButton.isHovered(mouseX, mouseY)) {
@@ -470,15 +476,15 @@ public class RiftPartyScreen extends GuiScreen {
     private void updateAllPartyMems() {
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player); //update nbt from deployed creatures
         //update creatures while ui is opened
-        FixedSizeList<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
+        //FixedSizeList<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
             RiftPartyMemButtonForParty button = this.partyMemButtons.get(x);
-            button.setCreatureNBT(newPartyNBT.get(x));
+            //button.setCreatureNBT(newPartyNBT.get(x));
         }
     }
 
     private NBTTagCompound getMemberNBT() {
-        if (this.partyMemPos >= 0) return this.partyMemButtons.get(this.partyMemPos).getCreatureNBT();
+        //if (this.partyMemPos >= 0) return this.partyMemButtons.get(this.partyMemPos).getCreatureNBT();
         return new NBTTagCompound();
     }
 

@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
 import java.util.UUID;
@@ -56,9 +57,19 @@ public class CreatureNBT {
         return I18n.format("tametrait.level", this.getCreatureLevel());
     }
 
+    public String getCustomName() {
+        if (this.creatureNBT.isEmpty()) return "";
+        return this.creatureNBT.getString("CustomName");
+    }
+
+    public void setCustomName(String name) {
+        if (this.creatureNBT.isEmpty()) return;
+        this.creatureNBT.setString("CustomName", name);
+    }
+
     public String getCreatureName(boolean includeLevel) {
         if (this.creatureNBT.isEmpty()) return "";
-        String partyMemName = (this.creatureNBT.hasKey("CustomName") && !this.creatureNBT.getString("CustomName").isEmpty()) ? this.creatureNBT.getString("CustomName") : this.getCreatureType().getTranslatedName();
+        String partyMemName = (!this.getCustomName().isEmpty()) ? this.getCustomName() : this.getCreatureType().getTranslatedName();
         return includeLevel ? I18n.format("journal.party_member.name", partyMemName, this.getCreatureLevel()) : partyMemName;
     }
 
@@ -112,8 +123,70 @@ public class CreatureNBT {
         CreatureAcquisitionInfo acquisitionInfo = new CreatureAcquisitionInfo(this.creatureNBT.getCompoundTag("AcquisitionInfo"));
         return acquisitionInfo.acquisitionInfoString();
     }
+
     public UUID getUniqueID() {
         if (this.creatureNBT.isEmpty()) return RiftUtil.nilUUID;
         return this.creatureNBT.getUniqueId("UniqueID");
+    }
+
+    public PlayerTamedCreatures.DeploymentType getDeploymentType() {
+        if (this.creatureNBT.isEmpty()) return null;
+        return PlayerTamedCreatures.DeploymentType.values()[this.creatureNBT.getByte("DeploymentType")];
+    }
+
+    public void setDeploymentType(PlayerTamedCreatures.DeploymentType deploymentType) {
+        if (this.creatureNBT.isEmpty()) return;
+        this.creatureNBT.setByte("DeploymentType", (byte) deploymentType.ordinal());
+    }
+
+    public NBTTagList getMovesListNBT() {
+        if (this.creatureNBT.isEmpty()) return new NBTTagList();
+        return this.creatureNBT.getTagList("LearnedMoves", 10);
+    }
+
+    public void setMovesListNBT(NBTTagList newMovesList) {
+        if (this.creatureNBT.isEmpty()) return;
+        this.creatureNBT.setTag("LearnedMoves", newMovesList);
+    }
+
+    public NBTTagList getLearnableMovesListNBT() {
+        if (this.creatureNBT.isEmpty()) return new NBTTagList();
+        return this.creatureNBT.getTagList("LearnableMoves", 10);
+    }
+
+    public void setLearnableMovesListNBT(NBTTagList newMovesList) {
+        if (this.creatureNBT.isEmpty()) return;
+        this.creatureNBT.setTag("LearnableMoves", newMovesList);
+    }
+
+    public int getMoveCooldown(int moveIndex) {
+        switch (moveIndex) {
+            case 0:
+                return this.creatureNBT.getInteger("CooldownMoveOne");
+            case 1:
+                return this.creatureNBT.getInteger("CooldownMoveTwo");
+            case 2:
+                return this.creatureNBT.getInteger("CooldownMoveThree");
+        }
+        return 0;
+    }
+
+    public void setMoveCooldown(int moveIndex, int cooldown) {
+        switch (moveIndex) {
+            case 0:
+                this.creatureNBT.setInteger("CooldownMoveOne", cooldown);
+                break;
+            case 1:
+                this.creatureNBT.setInteger("CooldownMoveTwo", cooldown);
+                break;
+            case 2:
+                this.creatureNBT.setInteger("CooldownMoveThree", cooldown);
+                break;
+        }
+    }
+
+    public NBTTagList getItemListNBT() {
+        if (this.creatureNBT.isEmpty()) return new NBTTagList();
+        return this.creatureNBT.getTagList("Items", 10);
     }
 }

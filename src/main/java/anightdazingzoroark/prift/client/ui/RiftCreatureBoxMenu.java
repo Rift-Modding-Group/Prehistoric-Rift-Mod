@@ -1099,7 +1099,8 @@ public class RiftCreatureBoxMenu extends GuiScreen {
     }
 
     private List<NBTTagCompound> getPlayerParty() {
-        return this.playerTamedCreatures().getPartyNBT().getList();
+        //return this.playerTamedCreatures().getPartyNBT().getList();
+        return new ArrayList<>();
     }
 
     private List<NBTTagCompound> getPlayerBoxedCreatures() {

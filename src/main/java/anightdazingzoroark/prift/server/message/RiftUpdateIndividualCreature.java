@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
@@ -23,7 +24,7 @@ public class RiftUpdateIndividualCreature implements IMessage {
     private int playerId;
     private int creatureId;
     private int pos;
-    private NBTTagCompound tagCompound;
+    private CreatureNBT tagCompound;
 
     public RiftUpdateIndividualCreature() {}
 
@@ -31,10 +32,10 @@ public class RiftUpdateIndividualCreature implements IMessage {
         this.playerId = player.getEntityId();
         this.creatureId = creature.getEntityId();
         this.pos = -1;
-        this.tagCompound = new NBTTagCompound();
+        this.tagCompound = new CreatureNBT();
     }
 
-    public RiftUpdateIndividualCreature(EntityPlayer player, int pos, NBTTagCompound tagCompound) {
+    public RiftUpdateIndividualCreature(EntityPlayer player, int pos, CreatureNBT tagCompound) {
         this.playerId = player.getEntityId();
         this.creatureId = -1;
         this.pos = pos;
@@ -46,7 +47,7 @@ public class RiftUpdateIndividualCreature implements IMessage {
         this.playerId = buf.readInt();
         this.creatureId = buf.readInt();
         this.pos = buf.readInt();
-        this.tagCompound = ByteBufUtils.readTag(buf);
+        this.tagCompound = new CreatureNBT(ByteBufUtils.readTag(buf));
     }
 
     @Override
@@ -54,7 +55,7 @@ public class RiftUpdateIndividualCreature implements IMessage {
         buf.writeInt(this.playerId);
         buf.writeInt(this.creatureId);
         buf.writeInt(this.pos);
-        ByteBufUtils.writeTag(buf, this.tagCompound);
+        ByteBufUtils.writeTag(buf, this.tagCompound.getCreatureNBT());
     }
 
     public static class Handler implements IMessageHandler<RiftUpdateIndividualCreature, IMessage> {
@@ -76,10 +77,10 @@ public class RiftUpdateIndividualCreature implements IMessage {
                     int pos = -1;
                     UUID creatureUUID = creature.getUniqueID();
                     for (int x = 0; x < playerTamedCreatures.getPartyNBT().size(); x++) {
-                        NBTTagCompound partyMemNBT = playerTamedCreatures.getPartyNBT().get(x);
-                        if (!partyMemNBT.isEmpty()
-                                && partyMemNBT.getUniqueId("UniqueID") != null
-                                && partyMemNBT.getUniqueId("UniqueID").equals(creatureUUID)) {
+                        CreatureNBT partyMemNBT = playerTamedCreatures.getPartyNBT().get(x);
+                        if (!partyMemNBT.nbtIsEmpty()
+                                && partyMemNBT.getUniqueID() != null
+                                && partyMemNBT.getUniqueID().equals(creatureUUID)) {
                             pos = x;
                             break;
                         }
@@ -87,7 +88,7 @@ public class RiftUpdateIndividualCreature implements IMessage {
                     if (pos < 0) return;
 
                     //if creature is in the party, go on and update
-                    NBTTagCompound creatureNBT = NewPlayerTamedCreaturesHelper.createNBTFromCreature(creature);
+                    CreatureNBT creatureNBT = new CreatureNBT(creature);
                     RiftMessages.WRAPPER.sendTo(new RiftUpdateIndividualCreature(player, pos, creatureNBT), (EntityPlayerMP) player);
                 }
             }

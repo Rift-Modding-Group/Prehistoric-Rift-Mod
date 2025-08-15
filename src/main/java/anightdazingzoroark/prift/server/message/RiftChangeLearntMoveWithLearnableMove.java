@@ -1,10 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import io.netty.buffer.ByteBuf;
@@ -67,18 +64,17 @@ public class RiftChangeLearntMoveWithLearnableMove implements IMessage {
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
 
                 if (playerTamedCreatures != null) {
-                    NBTTagCompound partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.partyMemPos);
+                    CreatureNBT partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.partyMemPos);
 
                     //get learnt moves and learnable moves
-                    NBTTagList learntMovesNBT = partyMemNBT.getTagList("LearnedMoves", 10);
-                    NBTTagList learnableMovesNBT = partyMemNBT.getTagList("LearnableMoves", 10);
+                    NBTTagList learntMovesNBT = partyMemNBT.getMovesListNBT();
+                    NBTTagList learnableMovesNBT = partyMemNBT.getLearnableMovesListNBT();
 
                     //now here's where things get tricky
                     //if creature is deployed, edit the creature itself
                     //otherwise, edit its nbt
-                    PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
-                    if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
-                        UUID creatureUUID = partyMemNBT.getUniqueId("UniqueID");
+                    if (partyMemNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                        UUID creatureUUID = partyMemNBT.getUniqueID();
                         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, creatureUUID);
                         if (creature != null) {
                             //get learnable move and its int position
@@ -132,8 +128,8 @@ public class RiftChangeLearntMoveWithLearnableMove implements IMessage {
                             learnableMovesNBT.set(learnableMovePos, learntMoveToSwitch);
 
                             //update nbt
-                            partyMemNBT.setTag("LearnedMoves", learntMovesNBT);
-                            partyMemNBT.setTag("LearnableMoves", learnableMovesNBT);
+                            partyMemNBT.setMovesListNBT(learntMovesNBT);
+                            partyMemNBT.setLearnableMovesListNBT(learnableMovesNBT);
                             playerTamedCreatures.setPartyMemNBT(message.partyMemPos, partyMemNBT);
                         }
                     }

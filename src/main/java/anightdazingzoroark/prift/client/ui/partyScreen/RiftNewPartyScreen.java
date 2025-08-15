@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftNewJournalScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftNewPartyMembersSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -131,15 +132,12 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
                 if (getPartyMembersSection() != null) {
                     //for getting party member name
-                    NBTTagCompound tagCompound = getPartyMembersSection().getPartyMembersNBT().get(partyMemPos);
-                    RiftCreatureType creatureType = RiftCreatureType.values()[tagCompound.getByte("CreatureType")];
-                    String partyMemName = (tagCompound.hasKey("CustomName") && !tagCompound.getString("CustomName").isEmpty()) ? tagCompound.getString("CustomName") : creatureType.getTranslatedName();
-                    String partyMemNameString = I18n.format("journal.party_member.name", partyMemName, tagCompound.getInteger("Level"));
+                    CreatureNBT tagCompound = getPartyMembersSection().getPartyMembersNBT().get(partyMemPos);
 
                     //party member name
                     RiftLibUIElement.TextElement creatureName = new RiftLibUIElement.TextElement();
                     creatureName.setSingleLine();
-                    creatureName.setText(partyMemNameString);
+                    creatureName.setText(tagCompound.getCreatureName(true));
                     creatureName.setScale(0.75f);
                     creatureName.setBottomSpace(0);
                     creatureName.setAlignment(RiftLibUIElement.ALIGN_CENTER);
@@ -198,7 +196,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
         //set creature to draw
-        if (this.partyMemPos >= 0) this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.partyMemPos));
+        if (this.partyMemPos >= 0) this.creatureToDraw = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.partyMemPos).getCreatureAsNBT(this.mc.world);
     }
 
     @Override
@@ -220,14 +218,14 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 summonDismissButton.setText(displayString);
 
                 //set usability based on if is deployable in area
-                boolean deployable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos) && (!this.getMemberNBT().hasKey("Health") || this.getMemberNBT().getFloat("Health") > 0));
+                boolean deployable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos) && this.getMemberNBT().getCreatureHealth()[0] > 0);
                 this.setButtonUsabilityByID("summonDismiss", deployable);
 
                 //add overlay text if its not deployable
                 if (!deployable) {
                     String cannotSummonLocation = I18n.format("journal.warning.cannot_summon");
                     String cannotSummonDead = I18n.format("journal.warning.cannot_summon_dead");
-                    String finalOverlayString = (this.getMemberNBT().hasKey("Health") && this.getMemberNBT().getFloat("Health") <= 0)
+                    String finalOverlayString = (this.getMemberNBT().getCreatureHealth()[0] <= 0)
                             ? cannotSummonDead
                             : cannotSummonLocation;
                     summonDismissButton.setOverlayText(finalOverlayString);
@@ -293,16 +291,16 @@ public class RiftNewPartyScreen extends RiftLibUI {
         return this.partyMemPos >= 0 && this.creatureToDraw != null;
     }
 
-    private NBTTagCompound getMemberNBT() {
+    private CreatureNBT getMemberNBT() {
         if (this.partyMemPos >= 0) {
             if (this.getPartyMembersSection() != null) return this.getPartyMembersSection().getPartyMembersNBT().get(this.partyMemPos);
         }
-        return new NBTTagCompound();
+        return new CreatureNBT();
     }
 
     private PlayerTamedCreatures.DeploymentType getPartyMemDeployment() {
-        if (this.getMemberNBT().hasKey("DeploymentType")) return PlayerTamedCreatures.DeploymentType.values()[this.getMemberNBT().getByte("DeploymentType")];
-        return PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE;
+        if (this.getMemberNBT() == null || this.getMemberNBT().nbtIsEmpty()) return PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE;
+        return this.getMemberNBT().getDeploymentType();
     }
 
     @Override
@@ -369,7 +367,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
             //for swapping party members, stuff here works as expected
             if (this.shufflePartyMemsMode) {
-                if (this.partyMemPos == -1 && partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().isEmpty()) {
+                if (this.partyMemPos == -1 && partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().nbtIsEmpty()) {
                     this.partyMemPos = clickedPosition;
                     this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, true);
                 }
@@ -384,7 +382,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 if (clickedPosition != this.partyMemPos) {
                     this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, false);
                     this.partyMemPos = clickedPosition;
-                    if (partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().isEmpty()) this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, true);
+                    if (partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().nbtIsEmpty()) this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, true);
                     this.creatureToDraw = partyMemButtonForParty.getCreatureFromNBT();
                 }
                 else {
@@ -407,8 +405,8 @@ public class RiftNewPartyScreen extends RiftLibUI {
         textBox.setID("newName");
         textBox.setWidth(100);
         textBox.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-        if (this.getMemberNBT().hasKey("CustomName") && !this.getMemberNBT().getString("CustomName").isEmpty()) {
-            textBox.setDefaultText(this.getMemberNBT().getString("CustomName"));
+        if (!this.getMemberNBT().getCustomName().isEmpty()) {
+            textBox.setDefaultText(this.getMemberNBT().getCustomName());
         }
         toReturn.add(textBox);
 

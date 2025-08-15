@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
@@ -65,13 +66,12 @@ public class RiftChangeLearntMovesOrder implements IMessage {
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
 
                 if (playerTamedCreatures != null) {
-                    NBTTagCompound partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.partyMemPos);
+                    CreatureNBT partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.partyMemPos);
 
                     //if creature is deployed, edit the creature itself
                     //otherwise, edit its nbt
-                    PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
-                    if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
-                        UUID creatureUUID = partyMemNBT.getUniqueId("UniqueID");
+                    if (partyMemNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                        UUID creatureUUID = partyMemNBT.getUniqueID();
                         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, creatureUUID);
                         if (creature != null) {
                             //get moves
@@ -94,7 +94,7 @@ public class RiftChangeLearntMovesOrder implements IMessage {
                     }
                     else {
                         //get moves
-                        NBTTagList movesNBT = partyMemNBT.getTagList("LearnedMoves", 10);
+                        NBTTagList movesNBT = partyMemNBT.getMovesListNBT();
                         NBTTagCompound moveSelected = movesNBT.getCompoundTagAt(message.movePosSelected);
                         NBTTagCompound moveToMove = movesNBT.getCompoundTagAt(message.movePosToMove);
 
@@ -104,29 +104,17 @@ public class RiftChangeLearntMovesOrder implements IMessage {
 
                         //swap associated cooldowns so that people will never exploit this
                         //to try skip move cooldowns
-                        int selectedCooldown = this.getMoveCooldownFromNBT(partyMemNBT, message.movePosSelected);
-                        int toMoveCooldown = this.getMoveCooldownFromNBT(partyMemNBT, message.movePosToMove);
-                        partyMemNBT = this.setMoveCooldownNBT(partyMemNBT, message.movePosSelected, toMoveCooldown);
-                        partyMemNBT = this.setMoveCooldownNBT(partyMemNBT, message.movePosToMove, selectedCooldown);
+                        int selectedCooldown = partyMemNBT.getMoveCooldown(message.movePosSelected);
+                        int toMoveCooldown = partyMemNBT.getMoveCooldown(message.movePosToMove);
+                        partyMemNBT.setMoveCooldown(message.movePosSelected, toMoveCooldown);
+                        partyMemNBT.setMoveCooldown(message.movePosToMove, selectedCooldown);
 
                         //update
-                        partyMemNBT.setTag("LearnedMoves", movesNBT);
+                        partyMemNBT.setMovesListNBT(movesNBT);
                         playerTamedCreatures.setPartyMemNBT(message.partyMemPos, partyMemNBT);
                     }
                 }
             }
-        }
-
-        private int getMoveCooldownFromNBT(NBTTagCompound creatureNBT, int moveIndex) {
-            switch (moveIndex) {
-                case 0:
-                    return creatureNBT.getInteger("CooldownMoveOne");
-                case 1:
-                    return creatureNBT.getInteger("CooldownMoveTwo");
-                case 2:
-                    return creatureNBT.getInteger("CooldownMoveThree");
-            }
-            return 0;
         }
 
         private NBTTagCompound setMoveCooldownNBT(NBTTagCompound creatureNBT, int moveIndex, int cooldown) {

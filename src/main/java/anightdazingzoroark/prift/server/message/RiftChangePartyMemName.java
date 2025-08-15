@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
@@ -59,17 +60,16 @@ public class RiftChangePartyMemName implements IMessage {
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
 
                 if (playerTamedCreatures != null) {
-                    NBTTagCompound partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.partyMemPos);
+                    CreatureNBT partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.partyMemPos);
 
                     //test if creature is deployed
-                    PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
-                    if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
-                        UUID creatureUUID = partyMemNBT.getUniqueId("UniqueID");
+                    if (partyMemNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                        UUID creatureUUID = partyMemNBT.getUniqueID();
                         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, creatureUUID);
                         if (creature != null) creature.setCustomNameTag(message.newName);
                     }
                     else {
-                        partyMemNBT.setString("CustomName", message.newName);
+                        partyMemNBT.setCustomName(message.newName);
                         playerTamedCreatures.setPartyMemNBT(message.partyMemPos, partyMemNBT);
                     }
                 }

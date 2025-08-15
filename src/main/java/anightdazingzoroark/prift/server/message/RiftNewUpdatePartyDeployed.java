@@ -1,10 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -25,15 +22,15 @@ import java.util.UUID;
 public class RiftNewUpdatePartyDeployed implements IMessage {
     private int playerId;
     private int index;
-    private NBTTagCompound tagCompound;
+    private CreatureNBT tagCompound;
 
     public RiftNewUpdatePartyDeployed() {}
 
     public RiftNewUpdatePartyDeployed(EntityPlayer player) {
-        this(player, -1, new NBTTagCompound());
+        this(player, -1, new CreatureNBT());
     }
 
-    public RiftNewUpdatePartyDeployed(EntityPlayer player, int index, NBTTagCompound tagCompound) {
+    public RiftNewUpdatePartyDeployed(EntityPlayer player, int index, CreatureNBT tagCompound) {
         this.playerId = player.getEntityId();
         this.index = index;
         this.tagCompound = tagCompound;
@@ -43,14 +40,14 @@ public class RiftNewUpdatePartyDeployed implements IMessage {
     public void fromBytes(ByteBuf buf) {
         this.playerId = buf.readInt();
         this.index = buf.readInt();
-        this.tagCompound = ByteBufUtils.readTag(buf);
+        this.tagCompound = new CreatureNBT(ByteBufUtils.readTag(buf));
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.playerId);
         buf.writeInt(this.index);
-        ByteBufUtils.writeTag(buf, this.tagCompound);
+        ByteBufUtils.writeTag(buf, this.tagCompound.getCreatureNBT());
     }
 
     public static class Handler implements IMessageHandler<RiftNewUpdatePartyDeployed, IMessage> {
@@ -67,12 +64,12 @@ public class RiftNewUpdatePartyDeployed implements IMessage {
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
                 if (playerTamedCreatures != null) {
-                    List<NBTTagCompound> partyNBT = playerTamedCreatures.getPartyNBT().getList();
+                    List<CreatureNBT> partyNBT = playerTamedCreatures.getPartyNBT().getList();
                     for (int x = 0; x < partyNBT.size(); x++) {
-                        if (partyNBT.get(x).isEmpty()) continue;
+                        if (partyNBT.get(x).nbtIsEmpty()) continue;
 
                         //get uuid
-                        UUID memberUUID = partyNBT.get(x).getUniqueId("UniqueID");
+                        UUID memberUUID = partyNBT.get(x).getUniqueID();
                         if (memberUUID == null || memberUUID.equals(RiftUtil.nilUUID)) continue;
 
                         //get creature from uuid
@@ -80,9 +77,8 @@ public class RiftNewUpdatePartyDeployed implements IMessage {
                         if (creature == null) continue;
 
                         //get nbt from creature
-                        NBTTagCompound partyMemNBT = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
-                        if (partyMemNBT.hasKey("DeploymentType")
-                                && PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")] == PlayerTamedCreatures.DeploymentType.PARTY) {
+                        CreatureNBT partyMemNBT = new CreatureNBT(creature);
+                        if (partyMemNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                             playerTamedCreatures.setPartyMemNBT(x, partyMemNBT);
                         }
                     }

@@ -49,7 +49,7 @@ public class RiftCreatureBoxInfoScreen extends GuiScreen {
 
         //get current nbt and creature to draw
         if (this.selectedPosType == RiftNewCreatureBoxScreen.SelectedPosType.PARTY) {
-            this.selectedCreatureNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.selectedPosOne);
+            //this.selectedCreatureNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.selectedPosOne);
             this.selectedCreatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, this.selectedCreatureNBT);
         }
         else if (this.selectedPosType == RiftNewCreatureBoxScreen.SelectedPosType.BOX) {

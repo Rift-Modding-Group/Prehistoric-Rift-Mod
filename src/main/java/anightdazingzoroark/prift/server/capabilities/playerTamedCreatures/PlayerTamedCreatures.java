@@ -18,7 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PlayerTamedCreatures implements IPlayerTamedCreatures {
-    private FixedSizeList<NBTTagCompound> partyCreatures = new FixedSizeList(6, new NBTTagCompound());
+    private FixedSizeList<CreatureNBT> partyCreatures = new FixedSizeList(6, new CreatureNBT());
     private CreatureBoxStorage boxCreatures = new CreatureBoxStorage();
     private int lastSelected = 0;
     private int boxSizeLevel = 0;
@@ -92,26 +92,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         this.selectedPosInOverlay = value;
     }
 
-    @Deprecated
-    @Override
-    public void addToPartyCreatures(RiftCreature creature) {
-        if (this.partyCreatures.size() < this.getMaxPartySize()) {
-            boolean canAdd = false;
-            if (this.partyCreatures.isEmpty()) canAdd = true;
-            else if (this.partyCreatures.getList().stream().noneMatch(nbt -> nbt.getUniqueId("UniqueID").equals(creature.getUniqueID()))) canAdd = true;
-
-            if (canAdd) {
-                NBTTagCompound compound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
-                this.partyCreatures.add(compound);
-            }
-        }
-    }
-
     @Override
     public void rearrangePartyCreatures(int posSelected, int posToSwap) {
         if (posSelected == posToSwap) return;
-        NBTTagCompound compoundSelected = this.partyCreatures.get(posSelected);
-        NBTTagCompound compoundToSwap = this.partyCreatures.get(posToSwap);
+        CreatureNBT compoundSelected = this.partyCreatures.get(posSelected);
+        CreatureNBT compoundToSwap = this.partyCreatures.get(posToSwap);
         this.partyCreatures.set(posSelected, compoundToSwap);
         this.partyCreatures.set(posToSwap, compoundSelected);
     }
@@ -141,9 +126,9 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
 
     public void boxPartySwap(int selectedBox, int boxPosSelected, int partyPosToSwap) {
         NBTTagCompound selectedBoxCreature = this.boxCreatures.getBoxContents(selectedBox).get(boxPosSelected);
-        NBTTagCompound partyMemToSwap = this.partyCreatures.get(partyPosToSwap);
-        this.boxCreatures.setBoxCreature(selectedBox, boxPosSelected, partyMemToSwap);
-        this.partyCreatures.set(partyPosToSwap, selectedBoxCreature);
+        CreatureNBT partyMemToSwap = this.partyCreatures.get(partyPosToSwap);
+        this.boxCreatures.setBoxCreature(selectedBox, boxPosSelected, partyMemToSwap.getCreatureNBT());
+        this.partyCreatures.set(partyPosToSwap, new CreatureNBT(selectedBoxCreature));
     }
 
     public void boxDeployedPartySwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int partyPosToSwap) {}
@@ -319,30 +304,30 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public List<RiftCreature> getPartyCreatures(World world) {
         List<RiftCreature> creatures = new ArrayList<>();
-        for (NBTTagCompound compound : this.partyCreatures.getList()) {
-            RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(world, compound);
+        for (CreatureNBT compound : this.partyCreatures.getList()) {
+            RiftCreature creature = compound.getCreatureAsNBT(world);
             if (creature != null) creatures.add(creature);
         }
         return creatures;
     }
 
     @Override
-    public void setPartyNBT(FixedSizeList<NBTTagCompound> compound) {
+    public void setPartyNBT(FixedSizeList<CreatureNBT> compound) {
         this.partyCreatures = compound;
     }
 
     @Override
-    public FixedSizeList<NBTTagCompound> getPartyNBT() {
+    public FixedSizeList<CreatureNBT> getPartyNBT() {
         return this.partyCreatures;
     }
 
     @Override
-    public void setPartyMemNBT(int index, NBTTagCompound compound) {
+    public void setPartyMemNBT(int index, CreatureNBT compound) {
         this.partyCreatures.set(index, compound);
     }
 
     @Override
-    public void addToPartyNBT(NBTTagCompound compound) {
+    public void addToPartyNBT(CreatureNBT compound) {
         this.partyCreatures.add(compound);
     }
 
@@ -390,8 +375,9 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public void modifyCreature(UUID uuid, NBTTagCompound compound) {
         //find in party first
-        for (NBTTagCompound partyMemCompound : this.partyCreatures.getList()) {
-            if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
+        /*
+        for (CreatureNBT partyMemCompound : this.partyCreatures.getList()) {
+            if (partyMemCompound.getUniqueID().equals(uuid)) {
                 //replace each nbt tag
                 for (String key : compound.getKeySet()) {
                     NBTBase value = compound.getTag(key);
@@ -401,7 +387,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
             }
         }
         //find in creature box
-        /*
         for (NBTTagCompound partyMemCompound : this.boxCreatures) {
             if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
                 //replace each nbt tag
@@ -417,9 +402,9 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
 
     @Override
     public void removePartyCreatureInventory(int partyPos) {
-        NBTTagCompound partyMember = this.partyCreatures.get(partyPos);
-        NBTTagList nbtItemList = partyMember.getTagList("Items", 10);
-        RiftCreatureType creatureType = RiftCreatureType.values()[partyMember.getByte("CreatureType")];
+        CreatureNBT partyMember = this.partyCreatures.get(partyPos);
+        NBTTagList nbtItemList = partyMember.getCreatureNBT().getTagList("Items", 10);
+        RiftCreatureType creatureType = partyMember.getCreatureType();
         for (int x = 0; x < nbtItemList.tagCount(); x++) {
             NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
             int j = nbttagcompound.getByte("Slot") & 255;

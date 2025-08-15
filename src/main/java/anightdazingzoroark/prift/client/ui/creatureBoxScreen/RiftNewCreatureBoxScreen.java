@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -55,7 +56,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
 
         //create party buttons
         this.partyMemButtons.clear();
-        FixedSizeList<NBTTagCompound> playerPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
+        FixedSizeList<CreatureNBT> playerPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
         for (int x = 0; x < playerPartyNBT.size(); x++) {
             int partyMemXOffset = -101 + (x % 2) * 22;
             int partyMemYOffset = -78 + (x / 2) * 22;
@@ -96,9 +97,9 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         //add info to scrollable section if there somehow is data
         if (this.selectedPos != null) {
             if (this.selectedPos.selectedPosType == SelectedPosType.PARTY) {
-                NBTTagCompound selectedNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.selectedPos.pos[0]);
-                this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, selectedNBT);
-                this.selectedScrollableSection.setCreatureNBT(selectedNBT);
+                CreatureNBT selectedNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.selectedPos.pos[0]);
+                this.creatureToDraw = selectedNBT.getCreatureAsNBT(this.mc.world);
+                //this.selectedScrollableSection.setCreatureNBT(selectedNBT);
             }
             else if (this.selectedPos.selectedPosType == SelectedPosType.BOX) {
                 NBTTagCompound selectedNBT = NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.selectedPos.pos[0]).get(this.selectedPos.pos[1]);
@@ -229,10 +230,9 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
                         //switch box creature with party creature
                         if (this.selectedPos.selectedPosType == SelectedPosType.BOX) {
                             //safety check for box to party: dismiss the party member first if its deployed
-                            NBTTagCompound partyMemNBT = partyMemButton.getCreatureNBT();
-                            if (partyMemNBT != null && !partyMemNBT.isEmpty()) {
-                                PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
-                                if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
+                            CreatureNBT partyMemNBT = partyMemButton.getCreatureNBT();
+                            if (partyMemNBT != null && !partyMemNBT.nbtIsEmpty()) {
+                                if (partyMemNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                                     NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, x, false);
                                 }
                             }
@@ -260,7 +260,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
             }
             //select creature
             else {
-                if (partyMemButton.isHovered(mouseX, mouseY) && partyMemButton.getCreatureNBT() != null && !partyMemButton.getCreatureNBT().isEmpty()) {
+                if (partyMemButton.isHovered(mouseX, mouseY) && partyMemButton.getCreatureNBT() != null && !partyMemButton.getCreatureNBT().nbtIsEmpty()) {
                     //if theres a selected pos and the clicked button is
                     //equal to said selected pos, clear it and the creature to display
                     if (this.selectedPos != null && this.selectedPos.selectedPosType == SelectedPosType.PARTY && this.selectedPos.pos[0] == x) {
@@ -271,8 +271,8 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
                     //otherwise set it and use its nbt to create the creature to display
                     else {
                         this.selectedPos = new SelectedPos(SelectedPosType.PARTY, new int[]{x});
-                        this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, partyMemButton.getCreatureNBT());
-                        this.selectedScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
+                        this.creatureToDraw = partyMemButton.getCreatureNBT().getCreatureAsNBT(this.mc.world);
+                        //this.selectedScrollableSection.setCreatureNBT(partyMemButton.getCreatureNBT());
                     }
 
                     partyMemButton.playPressSound(this.mc.getSoundHandler());
@@ -299,10 +299,9 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
                         //switch party creature with box creature
                         else if (this.selectedPos.selectedPosType == SelectedPosType.PARTY) {
                             //safety check for box to party: dismiss the party member first if its deployed
-                            NBTTagCompound partyMemNBT = this.partyMemButtons.get(this.selectedPos.pos[0]).getCreatureNBT();
-                            if (partyMemNBT != null && !partyMemNBT.isEmpty()) {
-                                PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
-                                if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
+                            CreatureNBT partyMemNBT = this.partyMemButtons.get(this.selectedPos.pos[0]).getCreatureNBT();
+                            if (partyMemNBT != null && !partyMemNBT.nbtIsEmpty()) {
+                                if (partyMemNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                                     NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedPos.pos[0], false);
                                 }
                             }
@@ -427,7 +426,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
     private void updateAllCreatures() {
         //update party creatures while ui is opened
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player); //update nbt from deployed creatures
-        FixedSizeList<NBTTagCompound> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
+        FixedSizeList<CreatureNBT> newPartyNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player);
         for (int x = 0; x < this.partyMemButtons.size(); x++) {
             RiftPartyMemButtonForBox button = this.partyMemButtons.get(x);
             button.setCreatureNBT(newPartyNBT.get(x));
@@ -449,7 +448,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
 
         //get nbt for party creature
         if (this.selectedPos.selectedPosType == SelectedPosType.PARTY) {
-            return this.partyMemButtons.get(this.selectedPos.pos[0]).getCreatureNBT();
+            return this.partyMemButtons.get(this.selectedPos.pos[0]).getCreatureNBT().getCreatureNBT();
         }
         //get nbt for creature box creature
         else if (this.selectedPos.selectedPosType == SelectedPosType.BOX) {

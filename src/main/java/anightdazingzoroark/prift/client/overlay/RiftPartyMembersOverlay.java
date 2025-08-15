@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -49,13 +50,13 @@ public class RiftPartyMembersOverlay {
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
             ScaledResolution resolution = event.getResolution();
-            FixedSizeList<NBTTagCompound> partyNBT = playerTamedCreatures.getPartyNBT();
+            FixedSizeList<CreatureNBT> partyNBT = playerTamedCreatures.getPartyNBT();
             this.renderHUD(partyNBT, resolution.getScaledWidth(), resolution.getScaledHeight());
         }
     }
 
-    private void renderHUD(FixedSizeList<NBTTagCompound> partyNBT, int xSize, int ySize) {
-        NBTTagCompound middlePartyMemNBT = partyNBT.get(this.selectedPos);
+    private void renderHUD(FixedSizeList<CreatureNBT> partyNBT, int xSize, int ySize) {
+        CreatureNBT middlePartyMemNBT = partyNBT.get(this.selectedPos);
 
         //black transparent background and middle creature info
         this.drawSelectedInfo(middlePartyMemNBT, xSize, ySize);
@@ -65,7 +66,7 @@ public class RiftPartyMembersOverlay {
 
         //render up
         int upPos = this.selectedPos - 1 < 0 ? NewPlayerTamedCreaturesHelper.maxPartySize - 1 : this.selectedPos - 1;
-        NBTTagCompound leftPartyMemNBT = partyNBT.get(upPos);
+        CreatureNBT leftPartyMemNBT = partyNBT.get(upPos);
         this.renderPartySlot(leftPartyMemNBT, xSize, ySize, 0.5f, 0.5f, -30);
 
         //render middle
@@ -73,14 +74,14 @@ public class RiftPartyMembersOverlay {
 
         //render down
         int downPos = this.selectedPos + 1 >= NewPlayerTamedCreaturesHelper.maxPartySize ? 0 : this.selectedPos + 1;
-        NBTTagCompound rightPartyMemNBT = partyNBT.get(downPos);
+        CreatureNBT rightPartyMemNBT = partyNBT.get(downPos);
         this.renderPartySlot(rightPartyMemNBT, xSize, ySize, 0.5f, 0.5f, 30);
 
         //down arrow
         this.drawArrow(xSize, ySize, false);
     }
 
-    private void drawSelectedInfo(NBTTagCompound partyMemNBT, int xSize, int ySize) {
+    private void drawSelectedInfo(CreatureNBT partyMemNBT, int xSize, int ySize) {
         //common values
         int boxWidth = 70;
         int boxHeight = 25;
@@ -93,15 +94,13 @@ public class RiftPartyMembersOverlay {
         int y = (Math.max(0, ySize - boxHeight)) / 2 + yPosOnScreen;
         Gui.drawRect(x, y, x + boxWidth, y + boxHeight, 0xC0000000);
 
-        if (!partyMemNBT.isEmpty()) {
+        if (!partyMemNBT.nbtIsEmpty()) {
             //some common values
-            RiftCreatureType creatureType = RiftCreatureType.values()[partyMemNBT.getByte("CreatureType")];
             FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
 
             //name and level
             float textScale = 0.5f;
-            String partyMemName = (partyMemNBT.hasKey("CustomName") && !partyMemNBT.getString("CustomName").isEmpty()) ? partyMemNBT.getString("CustomName") : creatureType.getTranslatedName();
-            int partyMemLevel = partyMemNBT.getInteger("Level");
+            String partyMemName = partyMemNBT.getCreatureName(true);
             float partyMemNameHeight = fontRenderer.FONT_HEIGHT * textScale;
             float unscaledPartyMemNameX = xSize / 2f + xPosOnScreen + 5;
             float unscaledPartyMemNameY = (ySize - partyMemNameHeight) / 2f + yPosOnScreen - 5;
@@ -109,7 +108,7 @@ public class RiftPartyMembersOverlay {
             int partyMemNameY = (int) (Math.max(1 - textScale, unscaledPartyMemNameY) / textScale);
             GlStateManager.pushMatrix();
             GlStateManager.scale(textScale, textScale, textScale);
-            fontRenderer.drawString(I18n.format("journal.party_member.name", partyMemName, partyMemLevel), partyMemNameX, partyMemNameY, 0xFFFFFF);
+            fontRenderer.drawString(partyMemName, partyMemNameX, partyMemNameY, 0xFFFFFF);
             GlStateManager.popMatrix();
 
             //common stuff for bars
@@ -117,9 +116,7 @@ public class RiftPartyMembersOverlay {
             int barHeight = 1;
 
             //health bar
-            float health = this.getCreatureHealthFromNBT(partyMemNBT)[0];
-            float maxHealth = this.getCreatureHealthFromNBT(partyMemNBT)[1];
-            float healthPercentage = health / maxHealth;
+            float healthPercentage = partyMemNBT.getCreatureHealth()[0] / partyMemNBT.getCreatureHealth()[1];
             int healthBarX = (int) (xSize / 2 + xPosOnScreen + 5);
             int healthBarY = (int) ((ySize - barHeight) / 2 + yPosOnScreen);
 
@@ -130,9 +127,7 @@ public class RiftPartyMembersOverlay {
                 this.drawRectOutline(healthBarX, healthBarY, (int) (barWidth * healthPercentage), barHeight, 0xFFFF0000);
 
             //render energy bar
-            int energy = partyMemNBT.getInteger("Energy");
-            int maxEnergy = RiftConfigHandler.getConfig(creatureType).stats.maxEnergy;
-            float energyPercentage = (float) energy / maxEnergy;
+            float energyPercentage = (float) partyMemNBT.getCreatureEnergy()[0] / partyMemNBT.getCreatureEnergy()[1];
             int energyBarX = (int) (xSize / 2 + xPosOnScreen + 5);
             int energyBarY = (int) ((ySize - barHeight) / 2 + yPosOnScreen + 4);
 
@@ -143,9 +138,7 @@ public class RiftPartyMembersOverlay {
                 this.drawRectOutline(energyBarX, energyBarY, (int) (barWidth * energyPercentage), barHeight, 0xFFFFFF00);
 
             //xp bar
-            int experience = partyMemNBT.getInteger("XP");
-            int maxExperience = creatureType.getMaxXP(partyMemNBT.getInteger("Level"));
-            float experiencePercentage = (float) experience / maxExperience;
+            float experiencePercentage = (float) partyMemNBT.getCreatureXP()[0] / partyMemNBT.getCreatureXP()[1];
             int experienceBarX = (int) (xSize / 2 + xPosOnScreen + 5);
             int experienceBarY = (int) ((ySize - barHeight) / 2 + yPosOnScreen + 8);
 
@@ -177,13 +170,13 @@ public class RiftPartyMembersOverlay {
         GlStateManager.disableBlend();
     }
 
-    private void renderPartySlot(NBTTagCompound partyMemNBT, int xSize, int ySize, float bgScale, float creatureIconScale, int yOffset) {
+    private void renderPartySlot(CreatureNBT partyMemNBT, int xSize, int ySize, float bgScale, float creatureIconScale, int yOffset) {
         //common stuff
         int maxOffsetLeft = (int)((xSize - (bgScale * 38)) / 2f - ((1 - bgScale) * 19));
         int xPosOnScreen = Math.max(-maxOffsetLeft, -210);
         int yPosOnScreen = -20;
-        float health = this.getCreatureHealthFromNBT(partyMemNBT)[0];
-        PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
+        float health = partyMemNBT.getCreatureHealth()[0];
+        PlayerTamedCreatures.DeploymentType deploymentType = partyMemNBT.getDeploymentType();
 
         //render background
         Minecraft.getMinecraft().getTextureManager().bindTexture(hud);
@@ -193,8 +186,8 @@ public class RiftPartyMembersOverlay {
         float unscaledBGY = (ySize - (38 * bgScale)) / 2f + yPosOnScreen + yOffset;
         int k = (int) (Math.max((1 - bgScale) * 19, unscaledBGX) / bgScale);
         int l = (int) (Math.max(0, unscaledBGY) / bgScale);
-        int xUv = (!partyMemNBT.isEmpty() && health == 0) ? 76 : (
-                    !partyMemNBT.isEmpty() && deploymentType == PlayerTamedCreatures.DeploymentType.PARTY ? 38 : 0
+        int xUv = (!partyMemNBT.nbtIsEmpty() && health == 0) ? 76 : (
+                    !partyMemNBT.nbtIsEmpty() && deploymentType == PlayerTamedCreatures.DeploymentType.PARTY ? 38 : 0
                 );
         GlStateManager.pushMatrix();
         GlStateManager.scale(bgScale, bgScale, bgScale);
@@ -203,8 +196,8 @@ public class RiftPartyMembersOverlay {
         GlStateManager.disableBlend();
 
         //render creature icon
-        if (!partyMemNBT.isEmpty()) {
-            RiftCreatureType creatureType = RiftCreatureType.values()[partyMemNBT.getByte("CreatureType")];
+        if (!partyMemNBT.nbtIsEmpty()) {
+            RiftCreatureType creatureType = partyMemNBT.getCreatureType();
             ResourceLocation creatureIcon = new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+creatureType.name().toLowerCase()+"_icon.png");
             Minecraft.getMinecraft().getTextureManager().bindTexture(creatureIcon);
             GlStateManager.enableBlend();
@@ -260,8 +253,8 @@ public class RiftPartyMembersOverlay {
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
         if (RiftControls.quickSummonAndDismiss.isKeyDown() && this.selectedPos >= 0) {
-            NBTTagCompound partyMemNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.selectedPos);
-            PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[partyMemNBT.getByte("DeploymentType")];
+            CreatureNBT partyMemNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.selectedPos);
+            PlayerTamedCreatures.DeploymentType deploymentType = partyMemNBT.getDeploymentType();
 
             //for dismissing, when creature is deployed
             if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
@@ -272,7 +265,7 @@ public class RiftPartyMembersOverlay {
             //for summoning, when creature is dismissed
             else if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                 //dont summon when creature is dead
-                float health = this.getCreatureHealthFromNBT(partyMemNBT)[0];
+                float health = partyMemNBT.getCreatureHealth()[0];
                 if (health <= 0) {
                     player.sendStatusMessage(new TextComponentTranslation("journal.warning.cannot_summon_dead"), false);
                 }

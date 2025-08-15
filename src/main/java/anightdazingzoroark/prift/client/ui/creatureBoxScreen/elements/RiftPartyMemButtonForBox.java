@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -15,9 +16,9 @@ import net.minecraft.util.ResourceLocation;
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 
 public class RiftPartyMemButtonForBox extends RiftClickableSection {
-    private NBTTagCompound creatureNBT;
+    private CreatureNBT creatureNBT;
 
-    public RiftPartyMemButtonForBox(NBTTagCompound creatureNBT, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
+    public RiftPartyMemButtonForBox(CreatureNBT creatureNBT, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
         super(20, 20, guiWidth, guiHeight, xOffset, yOffset, fontRenderer, minecraft);
         this.creatureNBT = creatureNBT;
 
@@ -32,14 +33,9 @@ public class RiftPartyMemButtonForBox extends RiftClickableSection {
     @Override
     public void drawSection(int mouseX, int mouseY) {
         //normal contents, means slot has a creature
-        if (this.creatureNBT != null && !this.creatureNBT.isEmpty()) {
+        if (this.creatureNBT != null && !this.creatureNBT.nbtIsEmpty()) {
             //deal with hovering
             this.isHovered = this.isHovered(mouseX, mouseY);
-
-            //some important variables
-            RiftCreatureType creatureType = RiftCreatureType.values()[this.creatureNBT.getByte("CreatureType")];
-            PlayerTamedCreatures.DeploymentType deploymentType = PlayerTamedCreatures.DeploymentType.values()[this.creatureNBT.getByte("DeploymentType")];
-            float health = this.creatureNBT.getFloat("Health");
 
             //draw background
             //background changes based on whether or not creature is deployed or not
@@ -47,8 +43,8 @@ public class RiftPartyMemButtonForBox extends RiftClickableSection {
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
             int bgX = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
             int bgY = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
-            int xUVTexture = health <= 0 ? 40 : (
-                deploymentType == PlayerTamedCreatures.DeploymentType.PARTY ? 20 : 0
+            int xUVTexture = this.creatureNBT.getCreatureHealth()[0] <= 0 ? 40 : (
+                this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY ? 20 : 0
             );
             int yUVTexture = 248;
             drawModalRectWithCustomSizedTexture(bgX, bgY, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
@@ -73,7 +69,7 @@ public class RiftPartyMemButtonForBox extends RiftClickableSection {
 
             //create creature icon overlay
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            ResourceLocation iconLocation = new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+creatureType.name().toLowerCase()+"_icon.png");
+            ResourceLocation iconLocation = new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+this.creatureNBT.getCreatureType().name().toLowerCase()+"_icon.png");
             this.minecraft.getTextureManager().bindTexture(iconLocation);
             float iconScale = 0.5f;
             int k = (int) ((this.guiWidth - 24) / (2 * iconScale) + (this.xOffset + this.xAddOffset + 5) / iconScale);
@@ -104,17 +100,11 @@ public class RiftPartyMemButtonForBox extends RiftClickableSection {
         return mouseX >= x && mouseX <= x + 20 * this.scale && mouseY >= y && mouseY <= y + 20 * this.scale;
     }
 
-    public void setCreatureNBT(NBTTagCompound nbtTagCompound) {
-        this.creatureNBT = nbtTagCompound;
+    public void setCreatureNBT(CreatureNBT creatureNBT) {
+        this.creatureNBT = creatureNBT;
     }
 
-    public NBTTagCompound getCreatureNBT() {
+    public CreatureNBT getCreatureNBT() {
         return this.creatureNBT;
-    }
-
-    //for best performance, DO NOT USE THIS IN METHODS MEANT TO BE LOOPED
-    //USE getCreatureNBT() FOR THAT INSTEAD
-    public RiftCreature getCreatureFromNBT() {
-        return PlayerTamedCreaturesHelper.createCreatureFromNBT(this.minecraft.world, this.creatureNBT);
     }
 }
