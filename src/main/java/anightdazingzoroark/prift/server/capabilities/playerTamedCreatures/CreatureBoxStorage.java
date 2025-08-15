@@ -13,7 +13,7 @@ public class CreatureBoxStorage {
     public static final int maxBoxAmnt = 20;
     public static final int maxBoxStorableCreatures = 20;
     private final List<String> creatureBoxNames = new ArrayList<>();
-    private final List<FixedSizeList<NBTTagCompound>> creatureBoxContents = new ArrayList<>();
+    private final List<FixedSizeList<CreatureNBT>> creatureBoxContents = new ArrayList<>();
 
     public CreatureBoxStorage() {
         for (int x = 0; x < maxBoxAmnt; x++) {
@@ -21,7 +21,7 @@ public class CreatureBoxStorage {
             this.creatureBoxNames.add("Box "+(x + 1));
 
             //initialize contents of each box
-            this.creatureBoxContents.add(new FixedSizeList<>(maxBoxStorableCreatures, new NBTTagCompound()));
+            this.creatureBoxContents.add(new FixedSizeList<>(maxBoxStorableCreatures, new CreatureNBT()));
         }
     }
 
@@ -35,9 +35,9 @@ public class CreatureBoxStorage {
 
             //initialize creatures
             NBTTagList storedCreaturesNBT = nbtFromList.getTagList("BoxCreatures", 10);
-            FixedSizeList<NBTTagCompound> storedCreaturesToAdd = new FixedSizeList<>(storedCreaturesNBT.tagCount(), new NBTTagCompound());
+            FixedSizeList<CreatureNBT> storedCreaturesToAdd = new FixedSizeList<>(storedCreaturesNBT.tagCount(), new CreatureNBT());
             for (int y = 0; y < storedCreaturesNBT.tagCount(); y++) {
-                NBTTagCompound storedCreature = storedCreaturesNBT.getCompoundTagAt(y);
+                CreatureNBT storedCreature = new CreatureNBT(storedCreaturesNBT.getCompoundTagAt(y));
                 storedCreaturesToAdd.set(y, storedCreature);
             }
             this.creatureBoxContents.add(storedCreaturesToAdd);
@@ -54,23 +54,23 @@ public class CreatureBoxStorage {
         this.creatureBoxNames.set(index, newName);
     }
 
-    public FixedSizeList<NBTTagCompound> getBoxContents(int index) {
+    public FixedSizeList<CreatureNBT> getBoxContents(int index) {
         if (index < 0 || index >= maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
         return this.creatureBoxContents.get(index);
     }
 
-    public void setBoxCreature(int index, int indexInBox, NBTTagCompound creatureNBT) {
+    public void setBoxCreature(int index, int indexInBox, CreatureNBT creatureNBT) {
         if (index < 0 || index >= maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
-        FixedSizeList<NBTTagCompound> changedList = this.creatureBoxContents.get(index);
+        FixedSizeList<CreatureNBT> changedList = this.creatureBoxContents.get(index);
         changedList.set(indexInBox, creatureNBT);
         this.creatureBoxContents.set(index, changedList);
     }
 
-    public void addCreatureToBox(NBTTagCompound creatureNBT) {
+    public void addCreatureToBox(CreatureNBT creatureNBT) {
         for (int x = 0; x < maxBoxAmnt; x++) {
             int validSpace = this.validSpaceInBox(x);
             if (validSpace >= 0) {
-                FixedSizeList<NBTTagCompound> box = this.creatureBoxContents.get(x);
+                FixedSizeList<CreatureNBT> box = this.creatureBoxContents.get(x);
                 box.set(validSpace, creatureNBT);
                 this.creatureBoxContents.set(x, box);
                 break;
@@ -81,8 +81,8 @@ public class CreatureBoxStorage {
     public int validSpaceInBox(int box) {
        int toReturn = -1;
        for (int x = 0; x < this.creatureBoxContents.get(box).size(); x++) {
-           NBTTagCompound nbtToTest = this.creatureBoxContents.get(box).get(x);
-           if (nbtToTest.isEmpty()) {
+           CreatureNBT nbtToTest = this.creatureBoxContents.get(box).get(x);
+           if (nbtToTest.nbtIsEmpty()) {
                toReturn = x;
                break;
            }
@@ -111,7 +111,7 @@ public class CreatureBoxStorage {
             //save creatures
             NBTTagList creaturesNBT = new NBTTagList();
             for (int y = 0; y < maxBoxStorableCreatures; y++) {
-                creaturesNBT.appendTag(this.creatureBoxContents.get(x).get(y));
+                creaturesNBT.appendTag(this.creatureBoxContents.get(x).get(y).getCreatureNBT());
             }
             tagToAdd.setTag("BoxCreatures", creaturesNBT);
 

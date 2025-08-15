@@ -19,7 +19,7 @@ public interface IPlayerTamedCreatures {
     //box stuff
     void setBoxNBT(CreatureBoxStorage creatureBoxStorage);
     CreatureBoxStorage getBoxNBT();
-    void addToBoxNBT(NBTTagCompound compound);
+    void addToBoxNBT(CreatureNBT compound);
     void setLastSelected(int value);
     int getLastSelected();
     default int getMaxPartySize() {

@@ -1,9 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -53,8 +50,7 @@ public class RiftNewAddToBox implements IMessage {
                 RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
                 if (playerTamedCreatures != null && creature != null) {
                     //turn creature into nbt
-                    NBTTagCompound creatureNBT = NewPlayerTamedCreaturesHelper.createNBTFromCreature(creature);
-                    playerTamedCreatures.addToBoxNBT(creatureNBT);
+                    playerTamedCreatures.addToBoxNBT(new CreatureNBT(creature));
 
                     //remove creature
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);

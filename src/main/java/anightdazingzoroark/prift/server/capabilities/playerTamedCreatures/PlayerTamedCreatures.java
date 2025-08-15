@@ -104,8 +104,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public void rearrangeBoxCreatures(int selectedBox, int posSelected, int boxToSwapWith, int posToSwap) {
         if (selectedBox == boxToSwapWith && posSelected == posToSwap) return;
-        NBTTagCompound compoundSelected = this.boxCreatures.getBoxContents(selectedBox).get(posSelected);
-        NBTTagCompound compoundToSwap = this.boxCreatures.getBoxContents(boxToSwapWith).get(posToSwap);
+        CreatureNBT compoundSelected = this.boxCreatures.getBoxContents(selectedBox).get(posSelected);
+        CreatureNBT compoundToSwap = this.boxCreatures.getBoxContents(boxToSwapWith).get(posToSwap);
         this.boxCreatures.setBoxCreature(boxToSwapWith, posToSwap, compoundSelected);
         this.boxCreatures.setBoxCreature(selectedBox, posSelected, compoundToSwap);
     }
@@ -125,10 +125,10 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     public void boxPartySwap(int selectedBox, int boxPosSelected, int partyPosToSwap) {
-        NBTTagCompound selectedBoxCreature = this.boxCreatures.getBoxContents(selectedBox).get(boxPosSelected);
+        CreatureNBT selectedBoxCreature = this.boxCreatures.getBoxContents(selectedBox).get(boxPosSelected);
         CreatureNBT partyMemToSwap = this.partyCreatures.get(partyPosToSwap);
-        this.boxCreatures.setBoxCreature(selectedBox, boxPosSelected, partyMemToSwap.getCreatureNBT());
-        this.partyCreatures.set(partyPosToSwap, new CreatureNBT(selectedBoxCreature));
+        this.boxCreatures.setBoxCreature(selectedBox, boxPosSelected, partyMemToSwap);
+        this.partyCreatures.set(partyPosToSwap, selectedBoxCreature);
     }
 
     public void boxDeployedPartySwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int partyPosToSwap) {}
@@ -367,7 +367,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
-    public void addToBoxNBT(NBTTagCompound compound) {
+    public void addToBoxNBT(CreatureNBT compound) {
         this.boxCreatures.addCreatureToBox(compound);
     }
 

@@ -53,7 +53,7 @@ public class RiftCreatureBoxInfoScreen extends GuiScreen {
             this.selectedCreatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, this.selectedCreatureNBT);
         }
         else if (this.selectedPosType == RiftNewCreatureBoxScreen.SelectedPosType.BOX) {
-            this.selectedCreatureNBT = NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.selectedPosOne).get(this.selectedPosTwo);
+            //this.selectedCreatureNBT = NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.selectedPosOne).get(this.selectedPosTwo);
             this.selectedCreatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, this.selectedCreatureNBT);
         }
 

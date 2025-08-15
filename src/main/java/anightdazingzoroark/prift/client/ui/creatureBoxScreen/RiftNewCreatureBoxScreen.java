@@ -71,6 +71,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         this.boxName = creatureBoxStorage.getBoxName(this.currentBox);
         //create box member buttons
         this.boxMemButtons.clear();
+        /*
         FixedSizeList<NBTTagCompound> creatureBoxNBT = creatureBoxStorage.getBoxContents(this.currentBox);
         for (int x = 0; x < creatureBoxNBT.size(); x++) {
             int creatureBoxMemX = -47 + (x % 5) * 35;
@@ -78,6 +79,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
             RiftBoxMemButtonForBox boxMemButton = new RiftBoxMemButtonForBox(creatureBoxNBT.get(x), this.width, this.height, creatureBoxMemX, creatureBoxMemY, this.fontRenderer, this.mc);
             this.boxMemButtons.add(boxMemButton);
         }
+         */
 
         //create switch button (and scale it)
         this.switchMembersButton = new RiftClickableSection(20, 18, this.width, this.height, 103, -111, this.fontRenderer, this.mc);
@@ -102,9 +104,11 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
                 //this.selectedScrollableSection.setCreatureNBT(selectedNBT);
             }
             else if (this.selectedPos.selectedPosType == SelectedPosType.BOX) {
+                /*
                 NBTTagCompound selectedNBT = NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.selectedPos.pos[0]).get(this.selectedPos.pos[1]);
                 this.creatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, selectedNBT);
                 this.selectedScrollableSection.setCreatureNBT(selectedNBT);
+                 */
             }
         }
     }
@@ -365,6 +369,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
             this.boxName = creatureBoxStorage.getBoxName(this.currentBox);
             //change box member buttons
             this.boxMemButtons.clear();
+            /*
             FixedSizeList<NBTTagCompound> creatureBoxNBT = creatureBoxStorage.getBoxContents(this.currentBox);
             for (int x = 0; x < creatureBoxNBT.size(); x++) {
                 int creatureBoxMemX = -47 + (x % 5) * 35;
@@ -372,6 +377,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
                 RiftBoxMemButtonForBox boxMemButton = new RiftBoxMemButtonForBox(creatureBoxNBT.get(x), this.width, this.height, creatureBoxMemX, creatureBoxMemY, this.fontRenderer, this.mc);
                 this.boxMemButtons.add(boxMemButton);
             }
+             */
             this.leftBoxButton.playPressSound(this.mc.getSoundHandler());
         }
         //manage right click box clicking
@@ -385,6 +391,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
             //change box name
             this.boxName = creatureBoxStorage.getBoxName(this.currentBox);
             //change box member buttons
+            /*
             this.boxMemButtons.clear();
             FixedSizeList<NBTTagCompound> creatureBoxNBT = creatureBoxStorage.getBoxContents(this.currentBox);
             for (int x = 0; x < creatureBoxNBT.size(); x++) {
@@ -393,6 +400,7 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
                 RiftBoxMemButtonForBox boxMemButton = new RiftBoxMemButtonForBox(creatureBoxNBT.get(x), this.width, this.height, creatureBoxMemX, creatureBoxMemY, this.fontRenderer, this.mc);
                 this.boxMemButtons.add(boxMemButton);
             }
+             */
             this.rightBoxButton.playPressSound(this.mc.getSoundHandler());
         }
 
@@ -435,11 +443,13 @@ public class RiftNewCreatureBoxScreen extends GuiScreen {
         //update box creatures while ui is opened
         NewPlayerTamedCreaturesHelper.forceSyncBoxNBT(this.mc.player);
         if (this.currentBox < 0 || this.currentBox >= CreatureBoxStorage.maxBoxAmnt) return; //skip if current box is out of bounds for safety purposes
+        /*
         FixedSizeList<NBTTagCompound> newBoxNBT = NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.currentBox);
         for (int x = 0; x < this.boxMemButtons.size(); x++) {
             RiftBoxMemButtonForBox button = this.boxMemButtons.get(x);
             button.setCreatureNBT(newBoxNBT.get(x));
         }
+         */
     }
 
     private NBTTagCompound getNBTFromSelectedPos() {
