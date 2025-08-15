@@ -35,6 +35,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
     private boolean moveManagement;
     private boolean shufflePartyMemsMode;
     private int partyMemPos = -1;
+    private int selectedMovePos = -1;
 
     public RiftNewPartyScreen() {
         super(0, 0, 0);
@@ -52,7 +53,9 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 this.partyMemberInfoSection(),
                 this.informationSection(),
                 this.movesSection(),
-                this.partyMemberMovesSection()
+                this.partyMemberMovesSection(),
+                this.moveDescriptionBackgroundSection(),
+                this.moveDescriptionSection()
         );
     }
 
@@ -297,7 +300,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
     //create the party member moves section
     private RiftUISectionCreatureNBTUser partyMemberMovesSection() {
-        return new RiftUISectionCreatureNBTUser("partyMemberMovesSection", this.getMemberNBT(), this.width, this.height, 115, 119, 124, -16, this.fontRenderer, this.mc) {
+        return new RiftUISectionCreatureNBTUser("partyMemberMovesSection", this.getMemberNBT(), this.width, this.height, 115, 65, 124, -46, this.fontRenderer, this.mc) {
             @Override
             public List<RiftLibUIElement.Element> defineSectionContents() {
                 List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
@@ -310,14 +313,14 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 shuffleMoves.setImageSelectedUV(115, 203);
                 shuffleMoves.setSize(19, 17);
                 shuffleMoves.setImageScale(0.75f);
-                shuffleMoves.setBottomSpace(3);
+                shuffleMoves.setBottomSpace(0);
                 toReturn.add(shuffleMoves);
 
                 //for moves
                 for (int i = 0; i < this.nbtTagCompound.getMovesListNBT().tagCount(); i++) {
                     CreatureMove move = this.nbtTagCompound.getMovesList().get(i);
                     RiftLibUIElement.ClickableSectionElement moveClickableSection = new RiftLibUIElement.ClickableSectionElement();
-                    moveClickableSection.setID("move:"+move.name());
+                    moveClickableSection.setID("move:"+i);
                     moveClickableSection.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                     moveClickableSection.setImage(background, 400, 360, 105, 13, 287, 237, 287, 250);
                     moveClickableSection.setImageSelectedUV(287, 263);
@@ -377,6 +380,48 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 return toReturn;
             }
         };
+    }
+
+    private RiftLibUISection moveDescriptionBackgroundSection() {
+        return new RiftLibUISection("moveDescriptionBGSection", this.width, this.height, 113, 55, 124, 15, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //the background image
+                RiftLibUIElement.ImageElement backgroundElement = new RiftLibUIElement.ImageElement();
+                backgroundElement.setImage(background, 400, 360, 113, 55, 287, 182);
+                toReturn.add(backgroundElement);
+
+                return toReturn;
+            }
+        };
+    }
+
+    //create move description section
+    private RiftUISectionCreatureNBTUser moveDescriptionSection() {
+        return new RiftUISectionCreatureNBTUser("moveDescriptionSection", this.getMemberNBT(), this.width, this.height, 107, 49, 124, 15, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //move description of selected move
+                if (selectedMovePos >= 0 && !this.nbtTagCompound.getMovesList().isEmpty()) {
+                    RiftLibUIElement.TextElement moveDescription = new RiftLibUIElement.TextElement();
+                    moveDescription.setText(this.nbtTagCompound.getMovesList().get(selectedMovePos).getTranslatedDescription());
+                    moveDescription.setScale(0.75f);
+                    moveDescription.setTextColor(0xFFFFFF);
+                    toReturn.add(moveDescription);
+                }
+
+                return toReturn;
+            }
+        };
+    }
+
+    //get move description section after its created
+    private RiftUISectionCreatureNBTUser getMoveDescription() {
+        return (RiftUISectionCreatureNBTUser) this.getSectionByID("moveDescriptionSection");
     }
 
     @Override
@@ -451,6 +496,9 @@ public class RiftNewPartyScreen extends RiftLibUI {
         this.setUISectionVisibility("partyMemberInfoSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && !this.moveManagement);
         this.setUISectionVisibility("partyMemberMovesSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement);
 
+        this.setUISectionVisibility("moveDescriptionBGSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement && this.selectedMovePos >= 0);
+        this.setUISectionVisibility("moveDescriptionSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement && this.selectedMovePos >= 0);
+
         switch (section.id) {
             case "partyLabelSection": {
                 int xOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -124 : 0;
@@ -489,6 +537,10 @@ public class RiftNewPartyScreen extends RiftLibUI {
             }
             case "partyMemberMovesSection": {
                 this.getPartyMemberMovesSection().setNBTTagCompound(this.getMemberNBT());
+                break;
+            }
+            case "moveDescriptionSection": {
+                this.getMoveDescription().setNBTTagCompound(this.getMemberNBT());
                 break;
             }
         }
@@ -598,17 +650,43 @@ public class RiftNewPartyScreen extends RiftLibUI {
                     this.partyMemPos = -1;
                     this.creatureToDraw = null;
                 }
+                //reset selected move, if there is
+                if (this.selectedMovePos >= 0) {
+                    this.setSelectClickableSectionByID("move:"+this.selectedMovePos, false);
+                    this.selectedMovePos = -1;
+                }
+                //reset to creature info mode when in move management mode
+                if (this.moveManagement) this.moveManagement = false;
             }
         }
         if (riftLibClickableSection.getStringID().equals("shuffleCreatures")) {
             this.shufflePartyMemsMode = !this.shufflePartyMemsMode;
             this.setSelectClickableSectionByID("shuffleCreatures", this.shufflePartyMemsMode);
+            //reset selected move, if there is
+            if (this.selectedMovePos >= 0) {
+                this.setSelectClickableSectionByID("move:"+this.selectedMovePos, false);
+                this.selectedMovePos = -1;
+            }
         }
         if (riftLibClickableSection.getStringID().equals("informationClickableSection") && this.moveManagement) {
             this.moveManagement = false;
         }
         if (riftLibClickableSection.getStringID().equals("movesClickableSection") && !this.moveManagement) {
             this.moveManagement = true;
+        }
+        if (riftLibClickableSection.getStringID().startsWith("move:")) {
+            int clickedPosition = Integer.parseInt(riftLibClickableSection.getStringID().substring(
+                    riftLibClickableSection.getStringID().indexOf(":") + 1
+            ));
+            if (clickedPosition != this.selectedMovePos) {
+                this.setSelectClickableSectionByID("move:"+clickedPosition, true);
+                if (this.selectedMovePos >= 0) this.setSelectClickableSectionByID("move:"+this.selectedMovePos, false);
+                this.selectedMovePos = clickedPosition;
+            }
+            else {
+                this.setSelectClickableSectionByID("move:"+clickedPosition, false);
+                this.selectedMovePos = -1;
+            }
         }
     }
 

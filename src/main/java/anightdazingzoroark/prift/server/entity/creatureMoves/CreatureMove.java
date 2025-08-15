@@ -94,6 +94,10 @@ public enum CreatureMove {
         return I18n.format("creature_move."+this.name().toLowerCase()+".name");
     }
 
+    public String getTranslatedDescription() {
+        return I18n.format("creature_move."+this.name().toLowerCase()+".description");
+    }
+
     public static CreatureMove safeValueOf(String value) {
         for (CreatureMove move : CreatureMove.values()) {
             if (move.toString().equals(value)) return move;
