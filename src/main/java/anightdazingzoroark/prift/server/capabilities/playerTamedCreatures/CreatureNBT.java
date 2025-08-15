@@ -5,12 +5,15 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 //a helper class where creature nbt is stored and various aspects of said nbt is taken
@@ -30,7 +33,7 @@ public class CreatureNBT {
     }
 
     public boolean nbtIsEmpty() {
-        return this.creatureNBT.isEmpty();
+        return this.creatureNBT == null || this.creatureNBT.isEmpty();
     }
 
     public RiftCreature getCreatureAsNBT(World world) {
@@ -147,6 +150,17 @@ public class CreatureNBT {
     public void setMovesListNBT(NBTTagList newMovesList) {
         if (this.creatureNBT.isEmpty()) return;
         this.creatureNBT.setTag("LearnedMoves", newMovesList);
+    }
+
+    public List<CreatureMove> getMovesList() {
+        if (this.creatureNBT.isEmpty()) return new ArrayList<>();
+        List<CreatureMove> toReturn = new ArrayList<>();
+        for (int i = 0; i < this.getMovesListNBT().tagCount(); i++) {
+            NBTTagCompound moveNBT = this.getMovesListNBT().getCompoundTagAt(i);
+            CreatureMove moveToAdd = CreatureMove.values()[moveNBT.getInteger("Move")];
+            toReturn.add(moveToAdd);
+        }
+        return toReturn;
     }
 
     public NBTTagList getLearnableMovesListNBT() {

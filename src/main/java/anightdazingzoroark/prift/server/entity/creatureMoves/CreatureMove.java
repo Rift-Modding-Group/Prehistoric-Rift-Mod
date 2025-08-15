@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import net.minecraft.client.resources.I18n;
+
 public enum CreatureMove {
     BOUNCE(RiftBounceMove.class, MoveAnimType.STATUS, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false, new CreatureMoveCondition().setCheckForTarget()),
     TACKLE(RiftTackleMove.class, MoveAnimType.CHARGE, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, true, false, new CreatureMoveCondition().setCheckForTarget()),
@@ -86,6 +88,10 @@ public enum CreatureMove {
     public String moveTypeName() {
         if (this == BIDE) return "bide";
         return this.moveAnimType.toString().toLowerCase()+"_type";
+    }
+
+    public String getTranslatedName() {
+        return I18n.format("creature_move."+this.name().toLowerCase()+".name");
     }
 
     public static CreatureMove safeValueOf(String value) {

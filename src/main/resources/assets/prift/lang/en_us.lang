@@ -480,6 +480,7 @@ tametrait.owner=Owner: %s
 tametrait.xp=Experience: %s/%s
 tametrait.uuid=Unique ID: %s
 tametrait.species=Species: %s
+tametrait.age=Age: %s day(s) old
 
 type.creature.back=Back
 type.creature.all=All

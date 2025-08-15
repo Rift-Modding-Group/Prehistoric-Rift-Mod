@@ -1,14 +1,15 @@
 package anightdazingzoroark.prift.client.ui.partyScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftNewJournalScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftNewPartyMembersSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.message.RiftChangePartyMemName;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
@@ -19,11 +20,12 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RiftNewPartyScreen extends RiftLibUI {
@@ -46,7 +48,11 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 this.selectedCreatureSection(),
                 this.openJournalSection(),
                 this.partyMemberManagementSection(),
-                this.partyMembersSection()
+                this.partyMembersSection(),
+                this.partyMemberInfoSection(),
+                this.informationSection(),
+                this.movesSection(),
+                this.partyMemberMovesSection()
         );
     }
 
@@ -139,7 +145,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
                     creatureName.setSingleLine();
                     creatureName.setText(tagCompound.getCreatureName(true));
                     creatureName.setScale(0.75f);
-                    creatureName.setBottomSpace(0);
+                    creatureName.setBottomSpace(3);
                     creatureName.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                     creatureName.setNotLimitedByBounds();
                     toReturn.add(creatureName);
@@ -187,6 +193,192 @@ public class RiftNewPartyScreen extends RiftLibUI {
         return (RiftNewPartyMembersSection) this.getSectionByID("partyMembersSection");
     }
 
+    //create the party members info section
+    private RiftLibUISection partyMemberInfoSection() {
+        return new RiftUISectionCreatureNBTUser("partyMemberInfoSection", this.getMemberNBT(), this.width, this.height, 115, 119, 124, -16, this.fontRenderer, this.mc ) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                if (!this.nbtTagCompound.nbtIsEmpty()) {
+                    //species name
+                    RiftLibUIElement.TextElement speciesName = new RiftLibUIElement.TextElement();
+                    speciesName.setSingleLine();
+                    speciesName.setText(I18n.format("tametrait.species", this.nbtTagCompound.getCreatureType().getTranslatedName()));
+                    speciesName.setScale(0.5f);
+                    speciesName.setBottomSpace(6);
+                    toReturn.add(speciesName);
+
+                    //health
+                    float health = this.nbtTagCompound.getCreatureHealth()[0];
+                    float maxHealth = this.nbtTagCompound.getCreatureHealth()[1];
+
+                    //health header
+                    RiftLibUIElement.TextElement healthHeader = new RiftLibUIElement.TextElement();
+                    healthHeader.setSingleLine();
+                    healthHeader.setText(I18n.format("tametrait.health", Math.round(health), maxHealth));
+                    healthHeader.setScale(0.5f);
+                    healthHeader.setBottomSpace(3);
+                    toReturn.add(healthHeader);
+
+                    //health bar
+                    RiftLibUIElement.ProgressBarElement healthBar = new RiftLibUIElement.ProgressBarElement();
+                    healthBar.setPercentage(MathHelper.clamp(health / maxHealth, 0, 1));
+                    healthBar.setColors(0xff0000, 0x868686);
+                    healthBar.setWidth(100);
+                    healthBar.setBottomSpace(6);
+                    toReturn.add(healthBar);
+
+                    //energy
+                    int energy = this.nbtTagCompound.getCreatureEnergy()[0];
+                    int maxEnergy = this.nbtTagCompound.getCreatureEnergy()[1];
+
+                    //energy header
+                    RiftLibUIElement.TextElement energyHeader = new RiftLibUIElement.TextElement();
+                    energyHeader.setSingleLine();
+                    energyHeader.setText(I18n.format("tametrait.energy", energy, maxEnergy));
+                    energyHeader.setScale(0.5f);
+                    energyHeader.setBottomSpace(3);
+                    toReturn.add(energyHeader);
+
+                    //energy bar
+                    RiftLibUIElement.ProgressBarElement energyBar = new RiftLibUIElement.ProgressBarElement();
+                    energyBar.setPercentage(MathHelper.clamp(energy / maxEnergy, 0, 1));
+                    energyBar.setColors(0xffff00, 0x868686);
+                    energyBar.setWidth(100);
+                    energyBar.setBottomSpace(6);
+                    toReturn.add(energyBar);
+
+                    //experience
+                    int xp = this.nbtTagCompound.getCreatureXP()[0];
+                    int maxXP = this.nbtTagCompound.getCreatureXP()[1];
+
+                    //experience header
+                    RiftLibUIElement.TextElement experienceHeader = new RiftLibUIElement.TextElement();
+                    experienceHeader.setSingleLine();
+                    experienceHeader.setText(I18n.format("tametrait.xp", xp, maxXP));
+                    experienceHeader.setScale(0.5f);
+                    experienceHeader.setBottomSpace(3);
+                    toReturn.add(experienceHeader);
+
+                    //experience bar
+                    RiftLibUIElement.ProgressBarElement xpBar = new RiftLibUIElement.ProgressBarElement();
+                    xpBar.setPercentage(MathHelper.clamp(xp / maxXP, 0, 1));
+                    xpBar.setColors(0x98d06b, 0x868686);
+                    xpBar.setWidth(100);
+                    xpBar.setBottomSpace(6);
+                    toReturn.add(xpBar);
+
+                    //age
+                    RiftLibUIElement.TextElement ageText = new RiftLibUIElement.TextElement();
+                    ageText.setSingleLine();
+                    ageText.setText(I18n.format("tametrait.age", this.nbtTagCompound.getAgeInDays()));
+                    ageText.setScale(0.5f);
+                    ageText.setBottomSpace(6);
+                    toReturn.add(ageText);
+
+                    //acquisition info
+                    RiftLibUIElement.TextElement acquisitionText = new RiftLibUIElement.TextElement();
+                    acquisitionText.setText(this.nbtTagCompound.getAcquisitionInfoString());
+                    acquisitionText.setScale(0.5f);
+                    acquisitionText.setBottomSpace(6);
+                    toReturn.add(acquisitionText);
+                }
+
+                return toReturn;
+            }
+        };
+    }
+
+    //get party member info section once its created
+    private RiftUISectionCreatureNBTUser getPartyMemberInfoSection() {
+        return (RiftUISectionCreatureNBTUser) this.getSectionByID("partyMemberInfoSection");
+    }
+
+    //create the party member moves section
+    private RiftUISectionCreatureNBTUser partyMemberMovesSection() {
+        return new RiftUISectionCreatureNBTUser("partyMemberMovesSection", this.getMemberNBT(), this.width, this.height, 115, 119, 124, -16, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //shuffle moves button
+                RiftLibUIElement.ClickableSectionElement shuffleMoves = new RiftLibUIElement.ClickableSectionElement();
+                shuffleMoves.setID("shuffleMoves");
+                shuffleMoves.setAlignment(RiftLibUIElement.ALIGN_RIGHT);
+                shuffleMoves.setImage(background, 400, 360, 20, 18, 75, 203, 95, 203);
+                shuffleMoves.setImageSelectedUV(115, 203);
+                shuffleMoves.setSize(19, 17);
+                shuffleMoves.setImageScale(0.75f);
+                shuffleMoves.setBottomSpace(3);
+                toReturn.add(shuffleMoves);
+
+                //for moves
+                for (int i = 0; i < this.nbtTagCompound.getMovesListNBT().tagCount(); i++) {
+                    CreatureMove move = this.nbtTagCompound.getMovesList().get(i);
+                    RiftLibUIElement.ClickableSectionElement moveClickableSection = new RiftLibUIElement.ClickableSectionElement();
+                    moveClickableSection.setID("move:"+move.name());
+                    moveClickableSection.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                    moveClickableSection.setImage(background, 400, 360, 105, 13, 287, 237, 287, 250);
+                    moveClickableSection.setImageSelectedUV(287, 263);
+                    moveClickableSection.setTextContent(move.getTranslatedName());
+                    moveClickableSection.setTextScale(0.75f);
+                    moveClickableSection.setTextOffsets(0, 1);
+                    moveClickableSection.setSize(105, 13);
+                    moveClickableSection.setBottomSpace(3);
+                    toReturn.add(moveClickableSection);
+                }
+
+                return toReturn;
+            }
+        };
+    }
+
+    //get party member moves section once its created
+    private RiftUISectionCreatureNBTUser getPartyMemberMovesSection() {
+        return (RiftUISectionCreatureNBTUser) this.getSectionByID("partyMemberMovesSection");
+    }
+
+    private RiftLibUISection informationSection() {
+        return new RiftLibUISection("informationSection", this.width, this.height, 54, 11, 94, -85, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //clickable section
+                RiftLibUIElement.ClickableSectionElement informationClickableSection = new RiftLibUIElement.ClickableSectionElement();
+                informationClickableSection.setID("informationClickableSection");
+                informationClickableSection.setTextContent(I18n.format("journal.party_member.info"));
+                informationClickableSection.setTextScale(0.75f);
+                informationClickableSection.setTextOffsets(0, 1);
+                informationClickableSection.setSize(55, 11);
+                toReturn.add(informationClickableSection);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection movesSection() {
+        return new RiftLibUISection("movesSection", this.width, this.height, 54, 11, 152, -85, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //clickable section
+                RiftLibUIElement.ClickableSectionElement movesClickableSection = new RiftLibUIElement.ClickableSectionElement();
+                movesClickableSection.setID("movesClickableSection");
+                movesClickableSection.setTextContent(I18n.format("journal.party_member.moves"));
+                movesClickableSection.setTextScale(0.75f);
+                movesClickableSection.setTextOffsets(0, 1);
+                movesClickableSection.setSize(55, 11);
+                toReturn.add(movesClickableSection);
+
+                return toReturn;
+            }
+        };
+    }
+
     @Override
     public void initGui() {
         super.initGui();
@@ -203,6 +395,9 @@ public class RiftNewPartyScreen extends RiftLibUI {
     public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection section, RiftLibUIElement.Element element) {
         //for updating all party members
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+
+        this.setSelectClickableSectionByID("informationClickableSection", !this.moveManagement);
+        this.setSelectClickableSectionByID("movesClickableSection", this.moveManagement);
 
         if (section.id.equals("selectedCreatureSection") && element.getID().equals("selectedCreature")) {
             RiftLibUIElement.RenderedEntityElement renderedEntityElement = (RiftLibUIElement.RenderedEntityElement) element;
@@ -250,6 +445,11 @@ public class RiftNewPartyScreen extends RiftLibUI {
         //some sections are visible only based on whether or not there's a selected creature and if its not shuffle party mems mode
         this.setUISectionVisibility("selectedCreatureSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
         this.setUISectionVisibility("partyMemManagementSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
+        this.setUISectionVisibility("informationSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
+        this.setUISectionVisibility("movesSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
+
+        this.setUISectionVisibility("partyMemberInfoSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && !this.moveManagement);
+        this.setUISectionVisibility("partyMemberMovesSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement);
 
         switch (section.id) {
             case "partyLabelSection": {
@@ -281,6 +481,14 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 int yOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -13 : 3;
                 partyMembersSection.repositionSection(xOffset, yOffset);
 
+                break;
+            }
+            case "partyMemberInfoSection": {
+                this.getPartyMemberInfoSection().setNBTTagCompound(this.getMemberNBT());
+                break;
+            }
+            case "partyMemberMovesSection": {
+                this.getPartyMemberMovesSection().setNBTTagCompound(this.getMemberNBT());
                 break;
             }
         }
@@ -395,6 +603,12 @@ public class RiftNewPartyScreen extends RiftLibUI {
         if (riftLibClickableSection.getStringID().equals("shuffleCreatures")) {
             this.shufflePartyMemsMode = !this.shufflePartyMemsMode;
             this.setSelectClickableSectionByID("shuffleCreatures", this.shufflePartyMemsMode);
+        }
+        if (riftLibClickableSection.getStringID().equals("informationClickableSection") && this.moveManagement) {
+            this.moveManagement = false;
+        }
+        if (riftLibClickableSection.getStringID().equals("movesClickableSection") && !this.moveManagement) {
+            this.moveManagement = true;
         }
     }
 
