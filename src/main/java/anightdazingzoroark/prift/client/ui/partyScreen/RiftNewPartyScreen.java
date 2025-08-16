@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
+import anightdazingzoroark.prift.client.ui.movesScreen.RiftNewMovesScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftNewPartyMembersSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
@@ -439,10 +440,13 @@ public class RiftNewPartyScreen extends RiftLibUI {
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
         //set creature to draw
-        if (this.selectedCreature != null) this.creatureToDraw = NewPlayerTamedCreaturesHelper
-                .getPlayerPartyNBT(this.mc.player)
-                .get(this.selectedCreature.pos[0])
-                .getCreatureAsNBT(this.mc.world);
+        if (this.selectedCreature != null) {
+            this.creatureToDraw = NewPlayerTamedCreaturesHelper
+                    .getPlayerPartyNBT(this.mc.player)
+                    .get(this.selectedCreature.pos[0])
+                    .getCreatureAsNBT(this.mc.world);
+            this.setSelectClickableSectionByID(false, "partyMember:"+this.selectedCreature.pos[0], true);
+        }
     }
 
     @Override
@@ -697,6 +701,10 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 this.setSelectClickableSectionByID("move:"+clickedPosition, false);
                 this.selectedMovePos = -1;
             }
+        }
+        //open moves ui
+        if (riftLibClickableSection.getStringID().equals("shuffleMoves")) {
+            RiftLibUIHelper.showUI(this.mc.player, new RiftNewMovesScreen(this.selectedCreature));
         }
     }
 

@@ -2,7 +2,9 @@ package anightdazingzoroark.prift.client.ui.movesScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftNewPartyScreen;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
@@ -65,5 +67,10 @@ public class RiftNewMovesScreen extends RiftLibUI {
     @Override
     public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
 
+    }
+
+    @Override
+    protected void onPressEscape() {
+        RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen(this.selectedCreature));
     }
 }
