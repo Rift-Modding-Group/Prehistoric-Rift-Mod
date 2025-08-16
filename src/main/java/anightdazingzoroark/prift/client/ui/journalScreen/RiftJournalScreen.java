@@ -11,6 +11,7 @@ import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 
@@ -296,11 +297,7 @@ public class RiftJournalScreen extends RiftLibUI {
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        if (this.getPopupSection() != null) super.keyTyped(typedChar, keyCode);
-        else {
-            if (keyCode == 1) RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen());
-            else super.keyTyped(typedChar, keyCode);
-        }
+    protected void onPressEscape() {
+        RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen());
     }
 }
