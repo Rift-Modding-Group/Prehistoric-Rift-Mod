@@ -118,7 +118,7 @@ public class CreatureNBT {
     }
 
     public int getAgeInDays() {
-        return this.getAgeInTicks() / 2400;
+        return this.getAgeInTicks() / 24000;
     }
 
     public String getAcquisitionInfoString() {

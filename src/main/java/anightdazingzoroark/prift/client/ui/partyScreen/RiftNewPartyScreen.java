@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui.partyScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftNewPartyMembersSection;
@@ -33,11 +34,17 @@ public class RiftNewPartyScreen extends RiftLibUI {
     private RiftCreature creatureToDraw;
     private boolean moveManagement;
     private boolean shufflePartyMemsMode;
-    private int partyMemPos = -1;
+    private SelectedCreatureInfo selectedCreature;
     private int selectedMovePos = -1;
 
     public RiftNewPartyScreen() {
         super(0, 0, 0);
+    }
+
+    public RiftNewPartyScreen(SelectedCreatureInfo selectedCreatureInfo) {
+        super(0, 0, 0);
+        if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY)
+            this.selectedCreature = selectedCreatureInfo;
     }
 
     @Override
@@ -140,7 +147,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
                 if (getPartyMembersSection() != null) {
                     //for getting party member name
-                    CreatureNBT tagCompound = getPartyMembersSection().getPartyMembersNBT().get(partyMemPos);
+                    CreatureNBT tagCompound = getPartyMembersSection().getPartyMembersNBT().get(selectedCreature.pos[0]);
 
                     //party member name
                     RiftLibUIElement.TextElement creatureName = new RiftLibUIElement.TextElement();
@@ -432,7 +439,10 @@ public class RiftNewPartyScreen extends RiftLibUI {
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
         //set creature to draw
-        if (this.partyMemPos >= 0) this.creatureToDraw = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.partyMemPos).getCreatureAsNBT(this.mc.world);
+        if (this.selectedCreature != null) this.creatureToDraw = NewPlayerTamedCreaturesHelper
+                .getPlayerPartyNBT(this.mc.player)
+                .get(this.selectedCreature.pos[0])
+                .getCreatureAsNBT(this.mc.world);
     }
 
     @Override
@@ -457,7 +467,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 summonDismissButton.setText(displayString);
 
                 //set usability based on if is deployable in area
-                boolean deployable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos) && this.getMemberNBT().getCreatureHealth()[0] > 0);
+                boolean deployable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY || (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedCreature.pos[0]) && this.getMemberNBT().getCreatureHealth()[0] > 0);
                 this.setButtonUsabilityByID("summonDismiss", deployable);
 
                 //add overlay text if its not deployable
@@ -474,7 +484,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 RiftLibUIElement.ButtonElement teleportButton = (RiftLibUIElement.ButtonElement) element;
 
                 //set usability
-                boolean teleportable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY && NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos);
+                boolean teleportable = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY && NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedCreature.pos[0]);
                 this.setButtonUsabilityByID("teleport", teleportable);
 
                 //add overlay text if its not teleportable
@@ -497,7 +507,6 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
         this.setUISectionVisibility("moveDescriptionBGSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement && this.selectedMovePos >= 0);
         this.setUISectionVisibility("moveDescriptionSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement && this.selectedMovePos >= 0);
-
         switch (section.id) {
             case "partyLabelSection": {
                 int xOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -124 : 0;
@@ -547,12 +556,14 @@ public class RiftNewPartyScreen extends RiftLibUI {
     }
 
     private boolean hasSelectedCreature() {
-        return this.partyMemPos >= 0 && this.creatureToDraw != null;
+        return this.selectedCreature != null && this.selectedCreature.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY && this.creatureToDraw != null;
     }
 
     private CreatureNBT getMemberNBT() {
-        if (this.partyMemPos >= 0) {
-            if (this.getPartyMembersSection() != null) return this.getPartyMembersSection().getPartyMembersNBT().get(this.partyMemPos);
+        if (this.selectedCreature != null && this.selectedCreature.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+            if (this.getPartyMembersSection() != null) return this.getPartyMembersSection()
+                    .getPartyMembersNBT()
+                    .get(this.selectedCreature.pos[0]);
         }
         return new CreatureNBT();
     }
@@ -590,23 +601,23 @@ public class RiftNewPartyScreen extends RiftLibUI {
     public void onButtonClicked(RiftLibButton riftLibButton) {
         if (riftLibButton.buttonId.equals("summonDismiss")) {
             if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
-                if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
-                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, false);
+                if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedCreature.pos[0])) {
+                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedCreature.pos[0], false);
                 }
             }
             else if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
-                NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.partyMemPos, true);
+                NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedCreature.pos[0], true);
             }
         }
         else if (riftLibButton.buttonId.equals("teleport")) {
-            if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.partyMemPos)) {
-                RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(this.mc.player, this.partyMemPos));
+            if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedCreature.pos[0])) {
+                RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(this.mc.player, this.selectedCreature.pos[0]));
             }
         }
         else if (riftLibButton.buttonId.equals("openChangeNamePopup")) this.createPopup(this.changeNamePopup());
         //for setting the name of a tamed creature
         else if (riftLibButton.buttonId.equals("setNewName")) {
-            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyMemName(this.mc.player, this.partyMemPos, this.getTextFieldTextByID("newName")));
+            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyMemName(this.mc.player, this.selectedCreature.pos[0], this.getTextFieldTextByID("newName")));
             this.clearPopup();
         }
         //universal, for exiting popup
@@ -626,27 +637,27 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
             //for swapping party members, stuff here works as expected
             if (this.shufflePartyMemsMode) {
-                if (this.partyMemPos == -1 && partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().nbtIsEmpty()) {
-                    this.partyMemPos = clickedPosition;
-                    this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, true);
+                if (this.selectedCreature == null && partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().nbtIsEmpty()) {
+                    this.selectedCreature = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{clickedPosition});
+                    this.setSelectClickableSectionByID("partyMember:"+clickedPosition, true);
                 }
-                else if (this.partyMemPos > -1) {
-                    NewPlayerTamedCreaturesHelper.rearrangePartyCreatures(this.mc.player, this.partyMemPos, clickedPosition);
-                    this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, false);
-                    this.partyMemPos = -1;
+                else if (this.selectedCreature != null) {
+                    NewPlayerTamedCreaturesHelper.rearrangePartyCreatures(this.mc.player, this.selectedCreature.pos[0], clickedPosition);
+                    this.setSelectClickableSectionByID("partyMember:"+this.selectedCreature.pos[0], false);
+                    this.selectedCreature = null;
                 }
             }
             //when not swapping party members, just select a reature
             else {
-                if (clickedPosition != this.partyMemPos) {
-                    this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, false);
-                    this.partyMemPos = clickedPosition;
-                    if (partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().nbtIsEmpty()) this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, true);
+                if (this.selectedCreature == null || clickedPosition != this.selectedCreature.pos[0]) {
+                    if (this.selectedCreature != null) this.setSelectClickableSectionByID("partyMember:"+this.selectedCreature.pos[0], false);
+                    this.selectedCreature = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{clickedPosition});
+                    if (partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().nbtIsEmpty()) this.setSelectClickableSectionByID("partyMember:"+this.selectedCreature.pos[0], true);
                     this.creatureToDraw = partyMemButtonForParty.getCreatureFromNBT();
                 }
                 else {
-                    this.setSelectClickableSectionByID("partyMember:"+this.partyMemPos, false);
-                    this.partyMemPos = -1;
+                    this.setSelectClickableSectionByID("partyMember:"+this.selectedCreature.pos[0], false);
+                    this.selectedCreature = null;
                     this.creatureToDraw = null;
                 }
                 //reset selected move, if there is
