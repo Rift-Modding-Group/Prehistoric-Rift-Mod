@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.client.ui.partyScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
-import anightdazingzoroark.prift.client.ui.journalScreen.RiftNewJournalScreen;
+import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftNewPartyMembersSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
@@ -25,7 +25,6 @@ import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class RiftNewPartyScreen extends RiftLibUI {
@@ -617,7 +616,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
     @Override
     public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
         if (riftLibClickableSection.getStringID().equals("openJournal")) {
-            RiftLibUIHelper.showUI(this.mc.player, new RiftNewJournalScreen());
+            RiftLibUIHelper.showUI(this.mc.player, new RiftJournalScreen());
         }
         if (riftLibClickableSection.getStringID().startsWith("partyMember:")) {
             RiftPartyMemButtonForParty partyMemButtonForParty = (RiftPartyMemButtonForParty) riftLibClickableSection;

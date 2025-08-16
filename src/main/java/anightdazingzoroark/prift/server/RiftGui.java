@@ -2,8 +2,6 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
-import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftNewCreatureBoxScreen;
-import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
 import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftPopupFromPlayerParty;
@@ -130,9 +128,6 @@ public class RiftGui implements IGuiHandler {
         }
         else if (id == GUI_MENU_FROM_PARTY) {
             return new RiftPopupFromPlayerParty(x);
-        }
-        else if (id == GUI_JOURNAL) {
-            return new RiftJournalScreen();
         }
         else if (id == GUI_FEEDING_TROUGH) {
             if (tileEntity instanceof RiftTileEntityFeedingTrough) {

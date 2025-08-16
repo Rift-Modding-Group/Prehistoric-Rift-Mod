@@ -1,365 +1,260 @@
 package anightdazingzoroark.prift.client.ui.journalScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
-import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSection;
-import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
-import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalEntriesSection;
+import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalIndexSection;
 import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalInfoSection;
-import anightdazingzoroark.prift.server.RiftGui;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftNewPartyScreen;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
+import anightdazingzoroark.riftlib.ui.RiftLibUI;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
+import anightdazingzoroark.riftlib.ui.RiftLibUISection;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-@SideOnly(Side.CLIENT)
-public class RiftJournalScreen extends GuiScreen {
-    private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
-    private RiftJournalInfoSection journalInfoSection;
-    private RiftJournalEntriesSection journalEntriesSection;
-    private RiftClickableSection indexClickableSection;
-    private RiftClickableSection searchClickableSection;
-    private RiftClickableSection partyClickableSection;
-    private RiftCreatureType lastEntry;
-    private RiftCreatureType.CreatureCategory lastCategory;
-    private int savedInfoScroll = 0;
-    private int savedEntriesScroll = 0;
-    private Map<String, String> savedInfoTabs = new HashMap<>();
-    private Map<String, String> savedEntriesTabs = new HashMap<>();
-    protected final int xSize = 420;
-    protected final int ySize = 240;
+public class RiftJournalScreen extends RiftLibUI {
+    private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
     private boolean searchMode;
-    private String searchText = "";
+
+    public RiftJournalScreen() {
+        super(0, 0, 0);
+    }
 
     @Override
-    public void initGui() {
-        super.initGui();
+    public List<RiftLibUISection> uiSections() {
+        return Arrays.asList(
+                this.createInfoSection(),
+                this.createIndexSection(),
+                this.createSearchSection(),
+                this.createIndexTabSection(),
+                this.createSearchTabSection(),
+                this.createBackToPartyButton()
+        );
+    }
 
-        //save current scroll progress and tabs
-        if (this.journalInfoSection != null) {
-            this.savedInfoScroll = this.journalInfoSection.getScrollOffset();
-            this.savedInfoTabs = this.journalInfoSection.getActiveTabs();
-        }
-        if (this.journalEntriesSection != null) {
-            this.savedEntriesScroll = this.journalEntriesSection.getScrollOffset();
-            this.savedEntriesTabs = this.journalEntriesSection.getActiveTabs();
-        }
+    //this is where creature info is made
+    private RiftLibUISection createInfoSection() {
+        return new RiftJournalInfoSection("journalInfo", this.width, this.height, 60, 7, this.fontRenderer, this.mc);
+    }
 
-        //create the sections
-        this.journalInfoSection = new RiftJournalInfoSection(this.width, this.height, this.fontRenderer, this.mc);
-        this.journalEntriesSection = new RiftJournalEntriesSection(this.width, this.height, this.fontRenderer, this.mc);
+    //get the info section
+    private RiftJournalInfoSection getInfoSection() {
+        RiftLibUISection sectionToTest = this.getSectionByID("journalInfo");
+        if (sectionToTest instanceof RiftJournalInfoSection) return (RiftJournalInfoSection) this.getSectionByID("journalInfo");
+        return null;
+    }
 
-        //restore search mode in the sections
-        this.journalInfoSection.setSearchMode(this.searchMode);
-        this.journalEntriesSection.setSearchMode(this.searchMode);
+    //this is where creatures are indexed
+    private RiftLibUISection createIndexSection() {
+        return new RiftJournalIndexSection("journalIndex", this.width, this.height, -147, 7, this.fontRenderer, this.mc);
+    }
 
-        //restore tabs
-        this.journalInfoSection.setActiveTabs(this.savedInfoTabs);
-        this.journalEntriesSection.setActiveTabs(this.savedEntriesTabs);
+    //get the index section
+    private RiftJournalIndexSection getIndexSection() {
+        RiftLibUISection sectionToTest = this.getSectionByID("journalIndex");
+        if (sectionToTest instanceof RiftJournalIndexSection) return (RiftJournalIndexSection) this.getSectionByID("journalIndex");
+        return null;
+    }
 
-        //restore based on if search mode was on or off
-        if (this.searchMode) {
-            this.journalInfoSection.setTextFieldString("searchBox", this.searchText);
-            if (this.lastEntry != null) {
-                this.journalInfoSection.setEntryType(this.lastEntry);
-                this.journalEntriesSection.disableButtonById(this.lastEntry.toString());
-                this.journalEntriesSection.setStringForSearch(this.searchText);
+    //make the clickable section for the index tab
+    private RiftLibUISection createIndexTabSection() {
+        //since this is gonna be what the player opens the journal to, create the section first
+        RiftLibUISection toReturn = new RiftLibUISection("journalIndexTab", this.width, this.height, 101, 12, -147, -112, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement indexClickableSection = new RiftLibUIElement.ClickableSectionElement();
+                indexClickableSection.setID("toJournalIndex");
+                indexClickableSection.setSize(101, 12);
+                indexClickableSection.setTextContent(I18n.format("journal.index_button"));
+                indexClickableSection.setTextColor(0xffffff);
+                indexClickableSection.setTextHoveredColor(0xffff00);
+                indexClickableSection.setTextSelectedColor(0xffff00);
+                indexClickableSection.setTextOffsets(0, 2);
+                toReturn.add(indexClickableSection);
+
+                return toReturn;
             }
-        }
-        else {
-            //restore category and entry
-            if (this.lastCategory != null) {
-                this.journalEntriesSection.setCurrentCategory(this.lastCategory);
-                if (this.lastEntry != null) {
-                    this.journalInfoSection.setEntryType(this.lastEntry);
-                    this.journalEntriesSection.disableButtonById(this.lastEntry.toString());
-                }
+        };
+        toReturn.setClickableSectionSelected("toJournalIndex", true);
+
+        return toReturn;
+    }
+
+    //make the clickable section for the search tab
+    private RiftLibUISection createSearchTabSection() {
+        return new RiftLibUISection("journalSearchTab", this.width, this.height, 101, 12, -32, -112, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement indexClickableSection = new RiftLibUIElement.ClickableSectionElement();
+                indexClickableSection.setID("toJournalSearch");
+                indexClickableSection.setSize(101, 12);
+                indexClickableSection.setTextContent(I18n.format("journal.search_button"));
+                indexClickableSection.setTextColor(0xffffff);
+                indexClickableSection.setTextHoveredColor(0xffff00);
+                indexClickableSection.setTextSelectedColor(0xffff00);
+                indexClickableSection.setTextOffsets(0, 2);
+                toReturn.add(indexClickableSection);
+
+                return toReturn;
             }
-        }
+        };
+    }
 
-        //restore scroll
-        this.journalInfoSection.setScrollOffset(this.savedInfoScroll);
-        this.journalEntriesSection.setScrollOffset(this.savedEntriesScroll);
+    //make the search section
+    private RiftLibUISection createSearchSection() {
+        RiftLibUISection toReturn = new RiftLibUISection("journalSearch", this.width, this.height, 268, 194, 60, 7, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
 
-        //create the clickable sections
-        this.indexClickableSection = new RiftClickableSection(101, 12, this.width, this.height, -147, -112, this.fontRenderer, this.mc);
-        this.indexClickableSection.addString(
-                I18n.format("journal.index_button"),
-                true,
-                0xffffff,
-                0,
-                1,
-                1f
-        );
-        this.indexClickableSection.setSelected(true); //index is the first thing, so here
+                RiftLibUIElement.TextBoxElement textBoxElement = new RiftLibUIElement.TextBoxElement();
+                textBoxElement.setID("searchBox");
+                textBoxElement.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                textBoxElement.setWidth(180);
+                toReturn.add(textBoxElement);
 
-        this.searchClickableSection = new RiftClickableSection(101, 12, this.width, this.height, -32, -112, this.fontRenderer, this.mc);
-        this.searchClickableSection.addString(
-                I18n.format("journal.search_button"),
-                true,
-                0xffffff,
-                0,
-                1,
-                1f
-        );
+                return toReturn;
+            }
+        };
 
-        this.partyClickableSection = new RiftClickableSection(12, 12, this.width, this.height, 191, -112, this.fontRenderer, this.mc);
-        this.partyClickableSection.addImage(
-                background,
-                13,
-                13,
-                560,
-                240,
-                420,
-                136,
-                420,
-                149
-        );
+        this.setUISectionVisibility("journalSearch", false);
 
-        //restore certain clickable section stuff based on search mode
-        if (this.searchMode) {
-            this.indexClickableSection.setSelected(false);
-            this.searchClickableSection.setSelected(true);
-        }
+        return toReturn;
+    }
+
+    //make the lickable section for returning to the party
+    private RiftLibUISection createBackToPartyButton() {
+        return new RiftLibUISection("backToPartySection", this.width, this.height, 13, 13, 192, -112, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement clickableSection = new RiftLibUIElement.ClickableSectionElement();
+                clickableSection.setID("backToParty");
+                clickableSection.setImage(
+                        background,
+                        560,
+                        240,
+                        13,
+                        13,
+                        420,
+                        136,
+                        420,
+                        149
+                );
+                clickableSection.setSize(12, 12);
+                toReturn.add(clickableSection);
+
+                return toReturn;
+            }
+        };
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        if (this.mc != null && this.mc.world != null) this.drawDefaultBackground();
-        else return;
+        super.drawScreen(mouseX, mouseY, partialTicks);
 
-        //update sections
-        this.journalInfoSection.updateGuiSize(this.width, this.height);
-        this.journalEntriesSection.updateGuiSize(this.width, this.height);
-
-        //draw screen
-        this.drawGuiContainerBackgroundLayer();
-
-        //draw sections
-        this.journalInfoSection.drawSectionContents(mouseX, mouseY, partialTicks);
-        this.journalEntriesSection.drawSectionContents(mouseX, mouseY, partialTicks);
-
-        //draw clickable regions on the top
-        //index is the default portion,
-        this.indexClickableSection.drawSection(mouseX, mouseY);
-        this.searchClickableSection.drawSection(mouseX, mouseY);
-        this.partyClickableSection.drawSection(mouseX, mouseY);
-
-        //change journal entries section depending on what was searched for
-        if (this.searchMode) {
-            //make sure search text can be changed as long as the text field can be seen
-            if (this.journalInfoSection.getEntryType() == null) this.searchText = this.journalInfoSection.getTextFieldString("searchBox");
-            if (!this.journalInfoSection.getTextFields().isEmpty() && this.journalInfoSection.getTextFields().containsKey("searchBox")) {
-                //reset scroll progress when a change is made
-                if (!this.journalEntriesSection.getStringForSearch().equals(this.searchText)) this.journalEntriesSection.resetScrollProgress();
-                this.journalEntriesSection.setStringForSearch(this.searchText);
-            }
-        }
-
-        GlStateManager.disableRescaleNormal();
-        RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableLighting();
-        GlStateManager.disableDepth();
-
-        //hover detection and tooltip rendering for items in item lists
-        ItemStack hoveredStack = null;
-
-        //check which section (if any) has a hovered item
-        ItemStack hoveredFromInfo = this.journalInfoSection.getHoveredItemStack(mouseX, mouseY);
-        ItemStack hoveredFromEntries = this.journalEntriesSection.getHoveredItemStack(mouseX, mouseY);
-
-        if (hoveredFromInfo != null) {
-            hoveredStack = hoveredFromInfo;
-        }
-        else if (hoveredFromEntries != null) {
-            hoveredStack = hoveredFromEntries;
-        }
-
-        //if hovering an item, render its tooltip above all
-        if (hoveredStack != null) {
-            List<String> tooltip = new ArrayList<>();
-
-            tooltip.add(hoveredStack.getDisplayName());
-            if (Loader.isModLoaded(RiftInitialize.JEI_MOD_ID)) {
-                tooltip.add(I18n.format("journal.open_in_jei"));
-            }
-            this.drawHoveringText(tooltip, mouseX, mouseY);
-        }
-
-        //mining level related stuff
-        RiftGuiScrollableSection.MiningLevelRegion miningLevelRegion = this.journalInfoSection.getHoveredMiningLevel(mouseX, mouseY);
-        if (miningLevelRegion != null) {
-            this.drawHoveringText(I18n.format("journal.mining_info", miningLevelRegion.miningTool , miningLevelRegion.miningLevel), mouseX, mouseY);
-        }
-    }
-
-    protected void drawGuiContainerBackgroundLayer() {
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(background);
-        int k = (this.width - this.xSize) / 2;
-        int l = (this.height - this.ySize) / 2;
-        drawModalRectWithCustomSizedTexture(k, l, 0, 0, this.xSize, this.ySize, 560F, 240F);
-    }
-
-    @Override
-    public void handleMouseInput() throws IOException {
-        super.handleMouseInput();
-        int delta = Mouse.getEventDWheel();
-        if (delta != 0) {
-            int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
-            int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
-            this.journalInfoSection.handleMouseInput(mouseX, mouseY, delta);
-            this.journalEntriesSection.handleMouseInput(mouseX, mouseY, delta);
+        //set search term in the index section
+        if (this.searchMode && this.getIndexSection() != null) {
+            String searchResult = this.getTextFieldTextByID("searchBox");
+            this.getIndexSection().setStringForSearch(searchResult);
         }
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-
-        //manually move scroll bar
-        this.journalInfoSection.mouseClicked(mouseX, mouseY, mouseButton);
-        this.journalEntriesSection.mouseClicked(mouseX, mouseY, mouseButton);
-
-        //manage clickable sections
-        //transition out of search mode
-        if (this.indexClickableSection.isHovered(mouseX, mouseY) && !this.indexClickableSection.isSelected()) {
-            this.lastEntry = null;
-            this.indexClickableSection.setSelected(true);
-            this.searchClickableSection.setSelected(false);
-            this.searchMode = false;
-            this.journalInfoSection.setSearchMode(false);
-            this.journalInfoSection.resetTextFields();
-            this.journalInfoSection.setEntryType(null);
-            this.journalInfoSection.getTempTextField().clear();
-            this.journalInfoSection.resetScrollProgress();
-            this.searchText = "";
-            this.journalEntriesSection.setSearchMode(false);
-            this.journalEntriesSection.setStringForSearch("");
-            this.journalEntriesSection.reenableAllButtons();
-            this.journalEntriesSection.resetScrollProgress();
-            this.indexClickableSection.playPressSound(this.mc.getSoundHandler());
-        }
-        //transition to search mode
-        else if (this.searchClickableSection.isHovered(mouseX, mouseY) && !this.searchClickableSection.isSelected()) {
-            this.lastEntry = null;
-            this.indexClickableSection.setSelected(false);
-            this.searchClickableSection.setSelected(true);
-            this.searchMode = true;
-            this.journalInfoSection.setSearchMode(true);
-            this.journalInfoSection.setEntryType(null);
-            this.journalInfoSection.resetScrollProgress();
-            this.journalEntriesSection.setSearchMode(true);
-            this.journalEntriesSection.setCurrentCategory(null);
-            this.journalEntriesSection.reenableAllButtons();
-            this.journalEntriesSection.resetScrollProgress();
-            this.searchClickableSection.playPressSound(this.mc.getSoundHandler());
-        }
-
-        //manage buttons
-        //all the additional logic here is for ensuring clicking out of bounds results in nothing
-        int sectionTop = (this.journalEntriesSection.guiHeight - this.journalEntriesSection.height) / 2 + this.journalEntriesSection.yOffset;
-        int sectionBottom = sectionTop + this.journalEntriesSection.height;
-        for (RiftGuiSectionButton b : this.journalEntriesSection.getActiveButtons()) {
-            int buttonTop = b.y;
-            int buttonBottom = b.y + b.height;
-            boolean clickWithinVisiblePart = mouseY >= Math.max(buttonTop, sectionTop) && mouseY <= Math.min(buttonBottom, sectionBottom);
-            if (clickWithinVisiblePart && b.mousePressed(this.mc, mouseX, mouseY)) {
-                b.playPressSound(this.mc.getSoundHandler());
-                this.onButtonClicked(b);
-            }
-        }
-
-        //return to party screen
-        if (this.partyClickableSection.isHovered(mouseX, mouseY)) {
-            this.partyClickableSection.playPressSound(this.mc.getSoundHandler());
-            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, -1, -1, 0);
-        }
+    public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection section, RiftLibUIElement.Element element) {
+        return element;
     }
 
     @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
-        super.mouseReleased(mouseX, mouseY, state);
-        this.journalInfoSection.mouseReleased(mouseX, mouseY, state);
-        this.journalEntriesSection.mouseReleased(mouseX, mouseY, state);
+    public RiftLibUISection modifyUISection(RiftLibUISection section) {
+        return section;
     }
 
     @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        this.journalInfoSection.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        this.journalEntriesSection.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+    public ResourceLocation drawBackground() {
+        return this.background;
     }
 
-    //for button click
-    private void onButtonClicked(RiftGuiSectionButton button) {
-        if (this.searchMode) {
-            //clear search results and go back to default search screen
-            if (button.buttonId.equals("NULL")) {
-                this.lastEntry = null;
-                this.lastCategory = null;
-                this.journalEntriesSection.reenableAllButtons();
-                this.journalEntriesSection.resetScrollProgress();
-                this.journalInfoSection.setEntryType(null);
-                this.journalInfoSection.resetScrollProgress();
+    @Override
+    public int[] backgroundTextureSize() {
+        return new int[]{560, 240};
+    }
+
+    @Override
+    public int[] backgroundUV() {
+        return new int[]{0, 0};
+    }
+
+    @Override
+    public int[] backgroundSize() {
+        return new int[]{420, 240};
+    }
+
+    @Override
+    public void onButtonClicked(RiftLibButton riftLibButton) {
+        if (this.buttonInSection("journalIndex", riftLibButton) && this.getInfoSection() != null && this.getIndexSection() != null) {
+            if (this.searchMode) {
+                //clear search results and go back to default search screen
+                if (riftLibButton.buttonId.equals("NULL")) {
+                    this.setAllButtonsUsability("journalIndex", true);
+                    this.getIndexSection().resetScrollProgress();
+                    this.getInfoSection().setEntryType(null);
+                    this.getInfoSection().resetScrollProgress();
+                    this.setUISectionVisibility("journalInfo", false);
+                    this.setUISectionVisibility("journalSearch", true);
+                }
+                //choose a creature whose entry shall be read
+                else {
+                    RiftCreatureType typeToChoose = RiftCreatureType.safeValOf(riftLibButton.buttonId);
+                    if (typeToChoose != null) {
+                        this.getInfoSection().setEntryType(typeToChoose);
+                        this.setAllButtonsUsability("journalIndex", true);
+                        this.setButtonUsabilityByID(typeToChoose.toString(), false);
+                    }
+                    this.getInfoSection().resetScrollProgress();
+                    this.getInfoSection().getOpenedTabs().clear();
+                    this.setUISectionVisibility("journalInfo", true);
+                    this.setUISectionVisibility("journalSearch", false);
+                }
             }
-            //choose a creature whose entry shall be read
             else {
-                RiftCreatureType typeToChoose = RiftCreatureType.safeValOf(button.buttonId);
-                if (typeToChoose != null && typeToChoose != this.lastEntry) {
-                    this.journalInfoSection.setEntryType(typeToChoose);
-                    if (this.lastEntry != null) this.journalEntriesSection.reenableButtonById(this.lastEntry.toString());
-                    this.journalEntriesSection.disableButtonById(typeToChoose.toString());
-                    this.lastEntry = typeToChoose;
+                //set a category for when at start of index
+                if (this.getIndexSection().getCurrentCategory() == null) {
+                    RiftCreatureType.CreatureCategory chosenCategory = RiftCreatureType.CreatureCategory.safeValOf(riftLibButton.buttonId);
+                    this.getIndexSection().setCurrentCategory(chosenCategory);
                 }
-                this.journalInfoSection.resetScrollProgress();
-                this.journalInfoSection.resetTabs();
-            }
-        }
-        else {
-            if (this.journalEntriesSection.getActiveButtons().contains(button)) {
-                //choose a category
-                if (this.journalEntriesSection.getCurrentCategory() == null) {
-                    RiftCreatureType.CreatureCategory chosenCategory = RiftCreatureType.CreatureCategory.safeValOf(button.buttonId);
-                    this.lastCategory = chosenCategory;
-                    this.journalEntriesSection.setCurrentCategory(chosenCategory);
-                }
+                //set a creature for when indexing thru a category
                 else {
                     //go back to index
-                    if (button.buttonId.equals("NULL")) {
-                        this.lastEntry = null;
-                        this.lastCategory = null;
-                        this.journalEntriesSection.reenableAllButtons();
-                        this.journalEntriesSection.setCurrentCategory(null);
-                        this.journalEntriesSection.resetScrollProgress();
-                        this.journalInfoSection.setEntryType(null);
-                        this.journalInfoSection.resetScrollProgress();
+                    if (riftLibButton.buttonId.equals("NULL")) {
+                        this.setAllButtonsUsability("journalIndex", true);
+                        this.getIndexSection().setCurrentCategory(null);
+                        this.getIndexSection().resetScrollProgress();
+                        this.getInfoSection().setEntryType(null);
+                        this.getInfoSection().resetScrollProgress();
                     }
                     //choose a creature whose entry shall be read
                     else {
-                        RiftCreatureType typeToChoose = RiftCreatureType.safeValOf(button.buttonId);
-                        if (typeToChoose != null && typeToChoose != this.lastEntry) {
-                            this.journalInfoSection.setEntryType(typeToChoose);
-                            if (this.lastEntry != null) this.journalEntriesSection.reenableButtonById(this.lastEntry.toString());
-                            this.journalEntriesSection.disableButtonById(typeToChoose.toString());
-                            this.lastEntry = typeToChoose;
+                        RiftCreatureType typeToChoose = RiftCreatureType.safeValOf(riftLibButton.buttonId);
+                        this.setAllButtonsUsability("journalIndex", true);
+                        if (typeToChoose != null) {
+                            this.getInfoSection().setEntryType(typeToChoose);
+                            this.setButtonUsabilityByID(typeToChoose.toString(), false);
                         }
-                        this.journalInfoSection.resetScrollProgress();
-                        this.journalInfoSection.resetTabs();
+                        this.getInfoSection().resetScrollProgress();
+                        this.getInfoSection().getOpenedTabs().clear();
                     }
                 }
             }
@@ -367,28 +262,45 @@ public class RiftJournalScreen extends GuiScreen {
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) {
-        if (keyCode == 1) this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, -1, 0, 0);
-
-        //deal with text box's input
-        if (this.journalInfoSection != null) {
-            for (Map.Entry<String, GuiTextField> textBoxEntry : this.journalInfoSection.getTextFields().entrySet()) {
-                if (textBoxEntry.getValue() != null) {
-                    textBoxEntry.getValue().textboxKeyTyped(typedChar, keyCode);
-                }
+    public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
+        //switch to search mode
+        if (this.clickableSectionInSection("journalSearchTab", riftLibClickableSection) && !this.searchMode) {
+            this.searchMode = true;
+            this.setSelectClickableSectionByID("toJournalIndex", false);
+            this.setAllButtonsUsability("journalIndex", true);
+            this.setUISectionVisibility("journalInfo", false);
+            this.setUISectionVisibility("journalSearch", true);
+            this.setSelectClickableSectionByID("toJournalSearch", true);
+            if (this.getIndexSection() != null) {
+                this.getIndexSection().setCurrentCategory(null);
+                this.getIndexSection().setSearchMode(true);
             }
         }
+        //switch to index mode
+        if (this.clickableSectionInSection("journalIndexTab", riftLibClickableSection) && this.searchMode) {
+            this.searchMode = false;
+            this.setSelectClickableSectionByID("toJournalIndex", true);
+            this.setAllButtonsUsability("journalIndex", true);
+            this.setUISectionVisibility("journalInfo", true);
+            this.setUISectionVisibility("journalSearch", false);
+            this.setSelectClickableSectionByID("toJournalSearch", false);
+            this.setTextFieldTextByID("searchBox", "");
+            if (this.getIndexSection() != null) {
+                this.getIndexSection().setSearchMode(false);
+                this.getIndexSection().setStringForSearch("");
+            }
+            if (this.getInfoSection() != null) this.getInfoSection().setEntryType(null);
+        }
+        //go back to party screen
+        if (riftLibClickableSection.getStringID().equals("backToParty")) RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen());
     }
 
     @Override
-    public void updateScreen() {
-        //deal with text boxes
-        if (this.journalInfoSection != null) {
-            for (Map.Entry<String, GuiTextField> textBoxEntry : this.journalInfoSection.getTextFields().entrySet()) {
-                if (textBoxEntry.getValue() != null) {
-                    textBoxEntry.getValue().updateCursorCounter();
-                }
-            }
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (this.getPopupSection() != null) super.keyTyped(typedChar, keyCode);
+        else {
+            if (keyCode == 1) RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen());
+            else super.keyTyped(typedChar, keyCode);
         }
     }
 }
