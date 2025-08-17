@@ -1,208 +1,331 @@
 package anightdazingzoroark.prift.client.ui.movesScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
-import anightdazingzoroark.prift.client.ui.movesScreen.elements.RiftMovesLearnableMovesSection;
-import anightdazingzoroark.prift.client.ui.movesScreen.elements.RiftMovesMemMovesSection;
-import anightdazingzoroark.prift.server.RiftGui;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.riftlib.ui.RiftLibUI;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
+import anightdazingzoroark.riftlib.ui.RiftLibUISection;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-@SideOnly(Side.CLIENT)
-public class RiftMovesScreen extends GuiScreen {
-    private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/moves_background.png");
-    private final int pos; //for now only party will be affected, there will be more ints that will direct to box and position in box
-    private RiftMovesMemMovesSection memberCurrentMoves;
-    private RiftClickableSection returnToPartyButton;
-    private RiftMovesLearnableMovesSection learnableMovesSection;
+public class RiftMovesScreen extends RiftLibUI {
+    private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/moves_background.png");
+    private final SelectedCreatureInfo selectedCreature;
+    private SelectedMoveInfo hoveredMoveInfo;
+    private SelectedMoveInfo selectedMoveInfo;
 
-    //for switching
-    private int learnedMoveToSwitch = -1;
-    private String learnableMoveToSwitch = "";
-
-    public RiftMovesScreen(int pos) {
-        super();
-        this.pos = pos;
+    public RiftMovesScreen(SelectedCreatureInfo selectedCreature) {
+        super(0, 0, 0);
+        this.selectedCreature = selectedCreature;
     }
 
     @Override
-    public void initGui() {
-        super.initGui();
+    public List<RiftLibUISection> uiSections() {
+        return Arrays.asList(
+                this.createLearntMovesSection(),
+                this.createBackButtonSection(),
+                this.createMoveDescriptionBGSection(),
+                this.createMoveDescriptionSection(),
+                this.createLearnableMovesHeaderSection(),
+                this.createLearnableMovesSection()
+        );
+    }
 
-        //create current moves
-        this.memberCurrentMoves = new RiftMovesMemMovesSection(this.width, this.height, this.fontRenderer, this.mc);
-        this.memberCurrentMoves.setCreatureNBT(this.getNBTFromPos());
+    //for creating section for learnt moves
+    private RiftUISectionCreatureNBTUser createLearntMovesSection() {
+        return new RiftUISectionCreatureNBTUser("learntMovesSection", this.selectedCreature.getCreatureNBT(this.mc.player), this.width, this.height, 115, 124, -62, 4, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
 
-        //create button to go back to party
-        this.returnToPartyButton = new RiftClickableSection(20, 18, this.width, this.height, -10, -49, this.fontRenderer, this.mc);
-        this.returnToPartyButton.addImage(background, 20, 18, 250, 202, 105, 129, 125, 129);
-        this.returnToPartyButton.setScale(0.75f);
+                //label
+                RiftLibUIElement.TextElement learntMovesLabel = new RiftLibUIElement.TextElement();
+                learntMovesLabel.setText(I18n.format("journal.party_label.moves"));
+                learntMovesLabel.setBottomSpace(6);
+                toReturn.add(learntMovesLabel);
 
-        //create section for learnable moves
-        this.learnableMovesSection = new RiftMovesLearnableMovesSection(this.width, this.height, this.fontRenderer, this.mc);
-        this.learnableMovesSection.setCreatureNBT(this.getNBTFromPos());
+                //moves
+                if (!this.nbtTagCompound.nbtIsEmpty() && !this.nbtTagCompound.getMovesList().isEmpty()) {
+                    for (int i = 0; i < this.nbtTagCompound.getMovesList().size(); i++) {
+                        RiftLibUIElement.ClickableSectionElement moveButton = new RiftLibUIElement.ClickableSectionElement();
+                        moveButton.setID("learntMove:"+i);
+                        moveButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                        moveButton.setSize(105, 13);
+                        moveButton.setTextContent(this.nbtTagCompound.getMovesList().get(i).getTranslatedName());
+                        moveButton.setTextOffsets(0, 1);
+                        moveButton.setTextScale(0.75f);
+                        moveButton.setImage(background, 250, 202, 105, 13, 0, 129, 0, 142);
+                        moveButton.setImageSelectedUV(0, 155);
+                        moveButton.setBottomSpace(3);
+                        moveButton.setHasOverlayEffects();
+                        toReturn.add(moveButton);
+                    }
+                }
+
+                return toReturn;
+            }
+        };
+    }
+
+    //get learnt moves section after its created
+    private RiftUISectionCreatureNBTUser getLearntMovesSection() {
+        return (RiftUISectionCreatureNBTUser) this.getSectionByID("learntMovesSection");
+    }
+
+    private RiftLibUISection createBackButtonSection() {
+        return new RiftLibUISection("backButtonSection", this.width, this.height, 20, 18, -12, -53, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement backButton = new RiftLibUIElement.ClickableSectionElement();
+                backButton.setSize(20, 18);
+                backButton.setID("backButton");
+                backButton.setImage(background, 250, 202, 20, 18, 105, 129, 125, 129);
+                backButton.setImageScale(0.75f);
+                toReturn.add(backButton);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection createMoveDescriptionBGSection() {
+        return new RiftLibUISection("moveDescriptionBGSection", this.width, this.height, 113, 55, -62, 34, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ImageElement backgroundElement = new RiftLibUIElement.ImageElement();
+                backgroundElement.setImage(background, 250, 202, 113, 55, 105, 147);
+                toReturn.add(backgroundElement);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection createMoveDescriptionSection() {
+        return new RiftUISectionCreatureNBTUser("moveDescriptionSection", this.selectedCreature.getCreatureNBT(this.mc.player), this.width, this.height, 107, 49, -62, 34, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                if (this.nbtTagCompound != null && !this.nbtTagCompound.nbtIsEmpty()) {
+                    if (hoveredMoveInfo != null) {
+                        RiftLibUIElement.TextElement description = new RiftLibUIElement.TextElement();
+                        description.setText(hoveredMoveInfo.getMoveUsingNBT(this.nbtTagCompound).getTranslatedDescription());
+                        description.setScale(0.75f);
+                        description.setTextColor(0xFFFFFF);
+                        toReturn.add(description);
+                    }
+                    else if (selectedMoveInfo != null) {
+                        RiftLibUIElement.TextElement description = new RiftLibUIElement.TextElement();
+                        description.setText(selectedMoveInfo.getMoveUsingNBT(this.nbtTagCompound).getTranslatedDescription());
+                        description.setScale(0.75f);
+                        description.setTextColor(0xFFFFFF);
+                        toReturn.add(description);
+                    }
+                }
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection createLearnableMovesHeaderSection() {
+        return new RiftLibUISection("learnableMovesHeaderSection", this.width, this.height, 113, 9, 62, -54, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.TextElement headerText = new RiftLibUIElement.TextElement();
+                headerText.setText(I18n.format("journal.moves_label.available_moves"));
+                toReturn.add(headerText);
+
+                return toReturn;
+            }
+        };
+    }
+
+    //for creating section for learnable moves
+    private RiftUISectionCreatureNBTUser createLearnableMovesSection() {
+        return new RiftUISectionCreatureNBTUser("learnableMovesSection", this.selectedCreature.getCreatureNBT(this.mc.player), this.width, this.height, 107,97, 62, 11, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                for (int i = 0; i < this.nbtTagCompound.getLearnableMovesList().size(); i++) {
+                    RiftLibUIElement.ClickableSectionElement moveButton = new RiftLibUIElement.ClickableSectionElement();
+                    moveButton.setID("learnableMove:"+i);
+                    moveButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                    moveButton.setSize(105, 13);
+                    moveButton.setTextContent(this.nbtTagCompound.getLearnableMovesList().get(i).getTranslatedName());
+                    moveButton.setTextOffsets(0, 1);
+                    moveButton.setTextScale(0.75f);
+                    moveButton.setImage(background, 250, 202, 105, 13, 0, 129, 0, 142);
+                    moveButton.setImageSelectedUV(0, 155);
+                    moveButton.setBottomSpace(3);
+                    moveButton.setHasOverlayEffects();
+                    toReturn.add(moveButton);
+                }
+
+                return toReturn;
+            }
+        };
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        if (this.mc != null && this.mc.world != null) this.drawDefaultBackground();
-        else return;
+    public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {
+        return element;
+    }
 
-        //constantly update as long as screen is open
-        this.updateMoves();
+    @Override
+    public RiftLibUISection modifyUISection(RiftLibUISection riftLibUISection) {
+        this.setUISectionVisibility("moveDescriptionBGSection", (this.hoveredMoveInfo != null || this.selectedMoveInfo != null));
+        this.setUISectionVisibility("moveDescriptionSection", (this.hoveredMoveInfo != null || this.selectedMoveInfo != null));
+        return riftLibUISection;
+    }
 
-        //draw screen
-        this.drawGuiContainerBackgroundLayer();
+    @Override
+    public ResourceLocation drawBackground() {
+        return background;
+    }
 
-        //when hovering over a move button, set move description
-        for (RiftClickableSection moveSection : this.memberCurrentMoves.getClickableSections()) {
-            if (moveSection.isHovered(mouseX, mouseY)) {
-                this.memberCurrentMoves.setSelectedMove(moveSection.getStringID());
+    @Override
+    public int[] backgroundTextureSize() {
+        return new int[]{250, 202};
+    }
+
+    @Override
+    public int[] backgroundUV() {
+        return new int[]{0, 0};
+    }
+
+    @Override
+    public int[] backgroundSize() {
+        return new int[]{249, 129};
+    }
+
+    @Override
+    public void onButtonClicked(RiftLibButton riftLibButton) {}
+
+    @Override
+    public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
+        if (this.clickableSectionInSection("learntMovesSection", riftLibClickableSection)) {
+            int clickedPosition = Integer.parseInt(riftLibClickableSection.getStringID().substring(
+                    riftLibClickableSection.getStringID().indexOf(":") + 1
+            ));
+
+            if (this.selectedMoveInfo != null) {
+                if (this.selectedMoveInfo.moveType == SelectedMoveType.LEARNT) {
+                    if (clickedPosition != this.selectedMoveInfo.movePos) {
+                        //todo: add logic for move swapping here soon
+
+                        this.setSelectClickableSectionByID("learntMove:"+this.selectedMoveInfo.movePos, false);
+                        this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNT, clickedPosition);
+                        this.setSelectClickableSectionByID("learntMove:"+clickedPosition, true);
+                    }
+                    else {
+                        this.setSelectClickableSectionByID("learntMove:"+this.selectedMoveInfo.movePos, false);
+                        this.selectedMoveInfo = null;
+                    }
+                }
+            }
+            else {
+                this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNT, clickedPosition);
+                this.setSelectClickableSectionByID("learntMove:"+clickedPosition, true);
             }
         }
+        else if (this.clickableSectionInSection("learnableMovesSection", riftLibClickableSection)) {
+            int clickedPosition = Integer.parseInt(riftLibClickableSection.getStringID().substring(
+                    riftLibClickableSection.getStringID().indexOf(":") + 1
+            ));
 
-        //draw current moves
-        this.memberCurrentMoves.drawSectionContents(mouseX, mouseY, partialTicks);
+            if (this.selectedMoveInfo != null) {
+                if (this.selectedMoveInfo.moveType == SelectedMoveType.LEARNABLE) {
+                    if (clickedPosition != this.selectedMoveInfo.movePos) {
+                        //todo: add logic for move swapping here soon
 
-        //draw back button
-        this.returnToPartyButton.drawSection(mouseX, mouseY);
-
-        //draw header for available moves
-        String availableMovesLabel = I18n.format("journal.moves_label.available_moves");
-        int partyLabelX = this.width / 2 + 5;
-        int partyLabelY = (this.height - this.fontRenderer.FONT_HEIGHT) / 2 - 54;
-        this.fontRenderer.drawString(availableMovesLabel, partyLabelX, partyLabelY, 0x000000);
-
-        //draw learnable moves section
-        this.learnableMovesSection.drawSectionContents(mouseX, mouseY, partialTicks);
-        //when hovering over a learnable move, set move description
-        for (RiftClickableSection moveSection : this.learnableMovesSection.getClickableSections()) {
-            if (moveSection.isHovered(mouseX, mouseY)) {
-                this.memberCurrentMoves.setSelectedMove(moveSection.getStringID());
+                        this.setSelectClickableSectionByID("learnableMove:"+this.selectedMoveInfo.movePos, false);
+                        this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNABLE, clickedPosition);
+                        this.setSelectClickableSectionByID("learnableMove:"+clickedPosition, true);
+                    }
+                    else {
+                        this.setSelectClickableSectionByID("learnableMove:"+this.selectedMoveInfo.movePos, false);
+                        this.selectedMoveInfo = null;
+                    }
+                }
+            }
+            else {
+                this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNABLE, clickedPosition);
+                this.setSelectClickableSectionByID("learnableMove:"+clickedPosition, true);
             }
         }
-
-        //if no move button is hovered over, clear move description
-        if (this.memberCurrentMoves.noHoveredClickableSection() && this.learnableMovesSection.noHoveredClickableSection()) {
-            this.memberCurrentMoves.setSelectedMove("");
+        else if (riftLibClickableSection.getStringID().equals("backButton")) {
+            RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen(this.selectedCreature));
         }
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-
-        //for going back to party after clicking the back button
-        if (this.returnToPartyButton.isHovered(mouseX, mouseY)) {
-            this.returnToPartyButton.playPressSound(this.mc.getSoundHandler());
-            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, this.pos, 0, 0);
+    public void onElementHovered(RiftLibUISection section, RiftLibUIElement.Element element) {
+        if (section.id.equals("learntMovesSection")
+                && element instanceof RiftLibUIElement.ClickableSectionElement
+                && element.getID().startsWith("learntMove:")) {
+            int hoveredPosition = Integer.parseInt(element.getID().substring(
+                    element.getID().indexOf(":") + 1
+            ));
+            this.hoveredMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNT, hoveredPosition);
         }
-
-        //for selecting move in current moves for swapping
-        for (int i = 0; i < this.memberCurrentMoves.getClickableSections().size(); i++) {
-            RiftClickableSection currentMove = this.memberCurrentMoves.getClickableSections().get(i);
-            if (currentMove.isHovered(mouseX, mouseY)) {
-                //select learnt move
-                if (this.learnedMoveToSwitch < 0 && this.learnableMoveToSwitch.isEmpty()) {
-                    this.learnedMoveToSwitch = i;
-                    this.memberCurrentMoves.setSelectedMove(currentMove.getStringID());
-                    this.memberCurrentMoves.selectClickableSectionById(currentMove.getStringID());
-                    currentMove.playPressSound(this.mc.getSoundHandler());
-                }
-                //switch this learnt move with an already selected learnable move
-                else if (!this.learnableMoveToSwitch.isEmpty()) {
-                    NewPlayerTamedCreaturesHelper.partyMemSwapLearntMoveWithLearnableMove(this.mc.player, this.pos, i, this.learnableMoveToSwitch);
-
-                    //reset
-                    this.learnedMoveToSwitch = -1;
-                    this.learnableMoveToSwitch = "";
-                    this.learnableMovesSection.setSelectedMove("");
-                    this.learnableMovesSection.unselectAllClickableSections();
-                    currentMove.playPressSound(this.mc.getSoundHandler());
-                }
-                //switch this learnt move with an already selected learnt move
-                else {
-                    NewPlayerTamedCreaturesHelper.partyMemSwapLearntMoves(this.mc.player, this.pos, this.learnedMoveToSwitch, i);
-
-                    //reset
-                    this.learnedMoveToSwitch = -1;
-                    this.learnableMoveToSwitch = "";
-                    this.memberCurrentMoves.setSelectedMove("");
-                    this.memberCurrentMoves.unselectAllClickableSections();
-                    this.learnableMovesSection.unselectAllClickableSections();
-                    currentMove.playPressSound(this.mc.getSoundHandler());
-                }
-            }
+        else if (section.id.equals("learnableMovesSection")
+                && element instanceof RiftLibUIElement.ClickableSectionElement
+                && element.getID().startsWith("learnableMove:")) {
+            int hoveredPosition = Integer.parseInt(element.getID().substring(
+                    element.getID().indexOf(":") + 1
+            ));
+            this.hoveredMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNABLE, hoveredPosition);
         }
-
-        //for selecting move in learnable moves for swapping
-        for (int i = 0; i < this.learnableMovesSection.getClickableSections().size(); i++) {
-            RiftClickableSection currentMove = this.learnableMovesSection.getClickableSections().get(i);
-            if (currentMove.isHovered(mouseX, mouseY)) {
-                //select learnable move
-                if (this.learnedMoveToSwitch < 0 && this.learnableMoveToSwitch.isEmpty()) {
-                    this.learnableMoveToSwitch = currentMove.getStringID();
-                    this.learnableMovesSection.setSelectedMove(currentMove.getStringID());
-                    this.learnableMovesSection.unselectAllClickableSections();
-                    this.learnableMovesSection.selectClickableSectionById(currentMove.getStringID());
-                    currentMove.playPressSound(this.mc.getSoundHandler());
-                }
-                //deselect learnable move if it is selected twice
-                else if (this.learnedMoveToSwitch < 0 && this.learnableMoveToSwitch.equals(currentMove.getStringID())) {
-                    //reset
-                    this.learnedMoveToSwitch = -1;
-                    this.learnableMoveToSwitch = "";
-                    this.memberCurrentMoves.setSelectedMove("");
-                    this.memberCurrentMoves.unselectAllClickableSections();
-                    this.learnableMovesSection.unselectAllClickableSections();
-                    currentMove.playPressSound(this.mc.getSoundHandler());
-                }
-                //switch this learnable move with an already selected learnt move
-                else {
-                    NewPlayerTamedCreaturesHelper.partyMemSwapLearntMoveWithLearnableMove(this.mc.player, this.pos, this.learnedMoveToSwitch, currentMove.getStringID());
-
-                    //reset
-                    this.learnedMoveToSwitch = -1;
-                    this.learnableMoveToSwitch = "";
-                    this.memberCurrentMoves.setSelectedMove("");
-                    this.memberCurrentMoves.unselectAllClickableSections();
-                    this.learnableMovesSection.unselectAllClickableSections();
-                    currentMove.playPressSound(this.mc.getSoundHandler());
-                }
-            }
-        }
-    }
-
-    protected void drawGuiContainerBackgroundLayer() {
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(background);
-        int k = (this.width - 249) / 2;
-        int l = (this.height - 129) / 2;
-        drawModalRectWithCustomSizedTexture(k, l, 0, 0, 249, 129, 250f, 202f);
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) {
-        if (keyCode == 1)
-            this.mc.player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, this.mc.world, this.pos, 0, 0);
+    protected void onPressEscape() {
+        RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen(this.selectedCreature));
     }
 
-    private NBTTagCompound getNBTFromPos() {
-        //return NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.pos);
-        return new NBTTagCompound();
+    //helper class to deal with selected moves
+    private class SelectedMoveInfo {
+        private final SelectedMoveType moveType;
+        private final int movePos;
+
+        private SelectedMoveInfo(SelectedMoveType moveType, int movePos) {
+            this.moveType = moveType;
+            this.movePos = movePos;
+        }
+
+        private CreatureMove getMoveUsingNBT(CreatureNBT creatureNBT) {
+            if (this.moveType == SelectedMoveType.LEARNT) {
+                return creatureNBT.getMovesList().get(this.movePos);
+            }
+            else if (this.moveType == SelectedMoveType.LEARNABLE) {
+                return creatureNBT.getLearnableMovesList().get(this.movePos);
+            }
+            return null;
+        }
     }
 
-    private void updateMoves() {
-        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
-        this.memberCurrentMoves.setCreatureNBT(this.getNBTFromPos());
-        this.learnableMovesSection.setCreatureNBT(this.getNBTFromPos());
+    private enum SelectedMoveType {
+        LEARNT,
+        LEARNABLE
     }
 }

@@ -7,7 +7,7 @@ import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 
-//this helper class is for sending information to UIs and no less
+//this helper class is for sending creature information to UIs and no less
 public class SelectedCreatureInfo {
     public final SelectedPosType selectedPosType;
     public final int[] pos;

@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
-import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
@@ -117,9 +116,6 @@ public class RiftGui implements IGuiHandler {
         else if (id == GUI_WEAPON_INVENTORY) {
             IInventory playerInventory = player.inventory;
             return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);
-        }
-        else if (id == GUI_MOVES) {
-            return new RiftMovesScreen(x);
         }
         else if (id == GUI_FEEDING_TROUGH) {
             if (tileEntity instanceof RiftTileEntityFeedingTrough) {

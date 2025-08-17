@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
-import anightdazingzoroark.prift.client.ui.movesScreen.RiftNewMovesScreen;
+import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftNewPartyMembersSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
@@ -709,7 +709,7 @@ public class RiftPartyScreen extends RiftLibUI {
         }
         //open moves ui
         if (riftLibClickableSection.getStringID().equals("shuffleMoves")) {
-            RiftLibUIHelper.showUI(this.mc.player, new RiftNewMovesScreen(this.selectedCreature));
+            RiftLibUIHelper.showUI(this.mc.player, new RiftMovesScreen(this.selectedCreature));
         }
     }
 
