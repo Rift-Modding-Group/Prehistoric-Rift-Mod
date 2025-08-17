@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftNewPartyScreen;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -133,7 +133,7 @@ public class ClientEvents {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (RiftControls.openParty.isKeyDown()) {
             //RiftLibUIHelper.showUI(player, new RiftNewJournalScreen());
-            RiftLibUIHelper.showUI(player, new RiftNewPartyScreen());
+            RiftLibUIHelper.showUI(player, new RiftPartyScreen());
             //player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, player.world, -1, -1, 0);
         }
     }

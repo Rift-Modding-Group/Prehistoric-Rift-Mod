@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client.ui.journalScreen;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalIndexSection;
 import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalInfoSection;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftNewPartyScreen;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
@@ -11,11 +11,9 @@ import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -293,7 +291,7 @@ public class RiftJournalScreen extends RiftLibUI {
             if (this.getInfoSection() != null) this.getInfoSection().setEntryType(null);
         }
         //go back to party screen
-        if (riftLibClickableSection.getStringID().equals("backToParty")) RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen());
+        if (riftLibClickableSection.getStringID().equals("backToParty")) RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen());
     }
 
     @Override
@@ -301,6 +299,6 @@ public class RiftJournalScreen extends RiftLibUI {
 
     @Override
     protected void onPressEscape() {
-        RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen());
+        RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen());
     }
 }

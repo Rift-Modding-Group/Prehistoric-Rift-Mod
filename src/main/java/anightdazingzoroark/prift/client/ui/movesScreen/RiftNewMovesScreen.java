@@ -3,9 +3,8 @@ package anightdazingzoroark.prift.client.ui.movesScreen;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftNewPartyScreen;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
@@ -18,7 +17,6 @@ import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class RiftNewMovesScreen extends RiftLibUI {
@@ -276,7 +274,7 @@ public class RiftNewMovesScreen extends RiftLibUI {
             }
         }
         else if (riftLibClickableSection.getStringID().equals("backButton")) {
-            RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen(this.selectedCreature));
+            RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen(this.selectedCreature));
         }
     }
 
@@ -302,7 +300,7 @@ public class RiftNewMovesScreen extends RiftLibUI {
 
     @Override
     protected void onPressEscape() {
-        RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen(this.selectedCreature));
+        RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen(this.selectedCreature));
     }
 
     //helper class to deal with selected moves

@@ -3,8 +3,6 @@ package anightdazingzoroark.prift.server;
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftPopupFromPlayerParty;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
@@ -120,14 +118,8 @@ public class RiftGui implements IGuiHandler {
             IInventory playerInventory = player.inventory;
             return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);
         }
-        else if (id == GUI_PARTY) {
-            return new RiftPartyScreen(x, y);
-        }
         else if (id == GUI_MOVES) {
             return new RiftMovesScreen(x);
-        }
-        else if (id == GUI_MENU_FROM_PARTY) {
-            return new RiftPopupFromPlayerParty(x);
         }
         else if (id == GUI_FEEDING_TROUGH) {
             if (tileEntity instanceof RiftTileEntityFeedingTrough) {

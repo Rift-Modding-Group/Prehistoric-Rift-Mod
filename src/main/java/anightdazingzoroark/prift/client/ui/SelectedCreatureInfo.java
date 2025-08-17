@@ -1,11 +1,9 @@
 package anightdazingzoroark.prift.client.ui;
 
-import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftNewCreatureBoxScreen;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftNewPartyScreen;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
-import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -30,7 +28,7 @@ public class SelectedCreatureInfo {
 
     public void exitToLastMenu(Minecraft minecraft) {
         if (this.menuOpenedFrom == MenuOpenedFrom.PARTY) {
-            RiftLibUIHelper.showUI(minecraft.player, new RiftNewPartyScreen(this));
+            RiftLibUIHelper.showUI(minecraft.player, new RiftPartyScreen(this));
         }
     }
 
