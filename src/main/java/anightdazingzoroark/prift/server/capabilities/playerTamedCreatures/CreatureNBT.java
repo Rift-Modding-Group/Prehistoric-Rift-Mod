@@ -173,6 +173,17 @@ public class CreatureNBT {
         this.creatureNBT.setTag("LearnableMoves", newMovesList);
     }
 
+    public List<CreatureMove> getLearnableMovesList() {
+        if (this.creatureNBT.isEmpty()) return new ArrayList<>();
+        List<CreatureMove> toReturn = new ArrayList<>();
+        for (int i = 0; i < this.getLearnableMovesListNBT().tagCount(); i++) {
+            NBTTagCompound moveNBT = this.getLearnableMovesListNBT().getCompoundTagAt(i);
+            CreatureMove moveToAdd = CreatureMove.values()[moveNBT.getInteger("Move")];
+            toReturn.add(moveToAdd);
+        }
+        return toReturn;
+    }
+
     public int getMoveCooldown(int moveIndex) {
         switch (moveIndex) {
             case 0:

@@ -468,6 +468,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
 
                 //change text
                 String displayString = this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY ? I18n.format("journal.party_button.dismiss") : I18n.format("journal.party_button.summon");;
+                summonDismissButton.setHasOverlayEffects();
                 summonDismissButton.setText(displayString);
 
                 //set usability based on if is deployable in area
@@ -481,6 +482,7 @@ public class RiftNewPartyScreen extends RiftLibUI {
                     String finalOverlayString = (this.getMemberNBT().getCreatureHealth()[0] <= 0)
                             ? cannotSummonDead
                             : cannotSummonLocation;
+                    summonDismissButton.setHasOverlayEffects();
                     summonDismissButton.setOverlayText(finalOverlayString);
                 }
             }
@@ -492,7 +494,10 @@ public class RiftNewPartyScreen extends RiftLibUI {
                 this.setButtonUsabilityByID("teleport", teleportable);
 
                 //add overlay text if its not teleportable
-                if (!teleportable) teleportButton.setOverlayText(I18n.format("journal.warning.cannot_teleport"));
+                if (!teleportable) {
+                    teleportButton.setHasOverlayEffects();
+                    teleportButton.setOverlayText(I18n.format("journal.warning.cannot_teleport"));
+                }
             }
         }
         return element;
@@ -707,6 +712,9 @@ public class RiftNewPartyScreen extends RiftLibUI {
             RiftLibUIHelper.showUI(this.mc.player, new RiftNewMovesScreen(this.selectedCreature));
         }
     }
+
+    @Override
+    public void onElementHovered(RiftLibUISection section, RiftLibUIElement.Element element) {}
 
     private List<RiftLibUIElement.Element> changeNamePopup() {
         List<RiftLibUIElement.Element> toReturn = new ArrayList<>();

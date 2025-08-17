@@ -2,9 +2,12 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftNewCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftNewPartyScreen;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 
 //this helper class is for sending information to UIs and no less
 public class SelectedCreatureInfo {
@@ -29,6 +32,11 @@ public class SelectedCreatureInfo {
         if (this.menuOpenedFrom == MenuOpenedFrom.PARTY) {
             RiftLibUIHelper.showUI(minecraft.player, new RiftNewPartyScreen(this));
         }
+    }
+
+    public CreatureNBT getCreatureNBT(EntityPlayer player) {
+        if (this.selectedPosType == SelectedPosType.PARTY) return NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.pos[0]);
+        return new CreatureNBT();
     }
 
     public enum SelectedPosType {

@@ -297,6 +297,9 @@ public class RiftJournalScreen extends RiftLibUI {
     }
 
     @Override
+    public void onElementHovered(RiftLibUISection section, RiftLibUIElement.Element element) {}
+
+    @Override
     protected void onPressEscape() {
         RiftLibUIHelper.showUI(this.mc.player, new RiftNewPartyScreen());
     }
