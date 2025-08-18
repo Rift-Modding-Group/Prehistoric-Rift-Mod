@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.blocks;
 
+import anightdazingzoroark.prift.client.ui.newCreatureBoxScreen.RiftNewCreatureBoxScreen;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
@@ -10,6 +11,9 @@ import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenCreatureBoxMenu;
 import anightdazingzoroark.prift.server.message.RiftOpenCreatureBoxNoCreaturesMenu;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import anightdazingzoroark.riftlib.RiftLib;
+import anightdazingzoroark.riftlib.ui.RiftLibUI;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.ITileEntityProvider;
@@ -97,7 +101,7 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
                         && NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(playerIn).isEmpty() && tileEntity.getCreatures().isEmpty()) {
                     RiftMessages.WRAPPER.sendTo(new RiftOpenCreatureBoxNoCreaturesMenu(playerIn), (EntityPlayerMP) playerIn);
                 }
-                else RiftMessages.WRAPPER.sendTo(new RiftOpenCreatureBoxMenu(playerIn, pos), (EntityPlayerMP) playerIn);
+                else RiftLibUIHelper.showUI(playerIn, new RiftNewCreatureBoxScreen(pos));
             }
         }
         return true;

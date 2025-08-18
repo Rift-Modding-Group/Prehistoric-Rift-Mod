@@ -30,20 +30,16 @@ public class RiftGui implements IGuiHandler {
     public static final int GUI_CREATURE_INVENTORY = 2;
     public static final int GUI_MENU_FROM_RADIAL = 3;
     public static final int GUI_WEAPON_INVENTORY = 4;
-    public static final int GUI_JOURNAL = 5;
-    public static final int GUI_PARTY = 6;
-    public static final int GUI_MOVES = 7;
-    public static final int GUI_MENU_FROM_PARTY = 8;
-    public static final int GUI_INFO_FROM_BOX = 9;
-    public static final int GUI_FEEDING_TROUGH = 10;
-    public static final int GUI_SEMI_MANUAL_EXTRACTOR = 11;
-    public static final int GUI_SEMI_MANUAL_PRESSER = 12;
-    public static final int GUI_SEMI_MANUAL_EXTRUDER = 13;
-    public static final int GUI_SEMI_MANUAL_HAMMERER = 14;
-    public static final int GUI_MILLSTONE = 15;
-    public static final int GUI_MECHANICAL_FILTER = 16;
-    public static final int GUI_CREATURE_BOX = 17;
-    public static final int GUI_MENU_FROM_CREATURE_BOX = 18;
+    public static final int GUI_INFO_FROM_BOX = 5;
+    public static final int GUI_FEEDING_TROUGH = 6;
+    public static final int GUI_SEMI_MANUAL_EXTRACTOR = 7;
+    public static final int GUI_SEMI_MANUAL_PRESSER = 8;
+    public static final int GUI_SEMI_MANUAL_EXTRUDER = 9;
+    public static final int GUI_SEMI_MANUAL_HAMMERER = 10;
+    public static final int GUI_MILLSTONE = 11;
+    public static final int GUI_MECHANICAL_FILTER = 12;
+    public static final int GUI_CREATURE_BOX = 13;
+    public static final int GUI_MENU_FROM_CREATURE_BOX = 14;
 
     @Nullable
     @Override
