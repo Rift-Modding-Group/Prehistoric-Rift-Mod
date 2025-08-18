@@ -43,9 +43,14 @@ public class RiftPartyScreen extends RiftLibUI {
     }
 
     public RiftPartyScreen(SelectedCreatureInfo selectedCreatureInfo) {
+        this(selectedCreatureInfo, false);
+    }
+
+    public RiftPartyScreen(SelectedCreatureInfo selectedCreatureInfo, boolean openedFromMoves) {
         super(0, 0, 0);
         if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY)
             this.selectedCreature = selectedCreatureInfo;
+        this.moveManagement = openedFromMoves;
     }
 
     @Override
@@ -709,6 +714,7 @@ public class RiftPartyScreen extends RiftLibUI {
         }
         //open moves ui
         if (riftLibClickableSection.getStringID().equals("shuffleMoves")) {
+            this.selectedCreature.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
             RiftLibUIHelper.showUI(this.mc.player, new RiftMovesScreen(this.selectedCreature));
         }
     }

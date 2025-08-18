@@ -163,6 +163,15 @@ public class CreatureNBT {
         return toReturn;
     }
 
+    public void setMove(int pos, CreatureMove creatureMove) {
+        if (this.creatureNBT.isEmpty()) return;
+        NBTTagList toReplace = this.getMovesListNBT();
+        NBTTagCompound newMoveNBT = new NBTTagCompound();
+        newMoveNBT.setInteger("Move", creatureMove.ordinal());
+        toReplace.set(pos, newMoveNBT);
+        this.setMovesListNBT(toReplace);
+    }
+
     public NBTTagList getLearnableMovesListNBT() {
         if (this.creatureNBT.isEmpty()) return new NBTTagList();
         return this.creatureNBT.getTagList("LearnableMoves", 10);
@@ -182,6 +191,15 @@ public class CreatureNBT {
             toReturn.add(moveToAdd);
         }
         return toReturn;
+    }
+
+    public void setLearnableMove(int pos, CreatureMove creatureMove) {
+        if (this.creatureNBT.isEmpty()) return;
+        NBTTagList toReplace = this.getLearnableMovesListNBT();
+        NBTTagCompound newMoveNBT = new NBTTagCompound();
+        newMoveNBT.setInteger("Move", creatureMove.ordinal());
+        toReplace.set(pos, newMoveNBT);
+        this.setLearnableMovesListNBT(toReplace);
     }
 
     public int getMoveCooldown(int moveIndex) {

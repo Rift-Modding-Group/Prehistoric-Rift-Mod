@@ -2,12 +2,10 @@ package anightdazingzoroark.prift.client.ui.movesScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
-import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
@@ -117,7 +115,7 @@ public class RiftMovesScreen extends RiftLibUI {
     }
 
     private RiftLibUISection createMoveDescriptionSection() {
-        return new RiftUISectionCreatureNBTUser("moveDescriptionSection", this.selectedCreature.getCreatureNBT(this.mc.player), this.width, this.height, 107, 49, -62, 34, this.fontRenderer, this.mc) {
+        return new RiftUISectionCreatureNBTUser("moveDescriptionSection", NewPlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.mc.player, this.selectedCreature), this.width, this.height, 107, 49, -62, 34, this.fontRenderer, this.mc) {
             @Override
             public List<RiftLibUIElement.Element> defineSectionContents() {
                 List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
@@ -161,7 +159,7 @@ public class RiftMovesScreen extends RiftLibUI {
 
     //for creating section for learnable moves
     private RiftUISectionCreatureNBTUser createLearnableMovesSection() {
-        return new RiftUISectionCreatureNBTUser("learnableMovesSection", this.selectedCreature.getCreatureNBT(this.mc.player), this.width, this.height, 107,97, 62, 11, this.fontRenderer, this.mc) {
+        return new RiftUISectionCreatureNBTUser("learnableMovesSection", NewPlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.mc.player, this.selectedCreature), this.width, this.height, 107,97, 62, 11, this.fontRenderer, this.mc) {
             @Override
             public List<RiftLibUIElement.Element> defineSectionContents() {
                 List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
@@ -186,8 +184,14 @@ public class RiftMovesScreen extends RiftLibUI {
         };
     }
 
+    //get learnable moves section after its created
+    private RiftUISectionCreatureNBTUser getLearnableMovesSection() {
+        return (RiftUISectionCreatureNBTUser) this.getSectionByID("learnableMovesSection");
+    }
+
     @Override
     public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {
+        NewPlayerTamedCreaturesHelper.forceSyncPartyNBT(this.mc.player);
         return element;
     }
 
@@ -195,6 +199,14 @@ public class RiftMovesScreen extends RiftLibUI {
     public RiftLibUISection modifyUISection(RiftLibUISection riftLibUISection) {
         this.setUISectionVisibility("moveDescriptionBGSection", (this.hoveredMoveInfo != null || this.selectedMoveInfo != null));
         this.setUISectionVisibility("moveDescriptionSection", (this.hoveredMoveInfo != null || this.selectedMoveInfo != null));
+
+        if (riftLibUISection.id.equals("learntMovesSection")) {
+            this.getLearntMovesSection().setNBTTagCompound(NewPlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.mc.player, this.selectedCreature));
+        }
+        if (riftLibUISection.id.equals("learnableMovesSection")) {
+            this.getLearnableMovesSection().setNBTTagCompound(NewPlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.mc.player, this.selectedCreature));
+        }
+
         return riftLibUISection;
     }
 
@@ -229,22 +241,35 @@ public class RiftMovesScreen extends RiftLibUI {
             ));
 
             if (this.selectedMoveInfo != null) {
-                if (this.selectedMoveInfo.moveType == SelectedMoveType.LEARNT) {
+                if (this.selectedMoveInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
                     if (clickedPosition != this.selectedMoveInfo.movePos) {
-                        //todo: add logic for move swapping here soon
+                        SelectedMoveInfo newSelectedMoveInfo = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, clickedPosition);
 
-                        this.setSelectClickableSectionByID("learntMove:"+this.selectedMoveInfo.movePos, false);
-                        this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNT, clickedPosition);
-                        this.setSelectClickableSectionByID("learntMove:"+clickedPosition, true);
+                        NewPlayerTamedCreaturesHelper.swapCreatureMoves(
+                                this.mc.player,
+                                this.selectedCreature,
+                                this.selectedMoveInfo,
+                                newSelectedMoveInfo
+                        );
+
                     }
-                    else {
-                        this.setSelectClickableSectionByID("learntMove:"+this.selectedMoveInfo.movePos, false);
-                        this.selectedMoveInfo = null;
-                    }
+                    this.setSelectClickableSectionByID("learntMove:"+this.selectedMoveInfo.movePos, false);
+                    this.selectedMoveInfo = null;
+                }
+                else if (this.selectedMoveInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
+                    SelectedMoveInfo moveToSwap = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, clickedPosition);
+                    NewPlayerTamedCreaturesHelper.swapCreatureMoves(
+                            this.mc.player,
+                            this.selectedCreature,
+                            this.selectedMoveInfo,
+                            moveToSwap
+                    );
+                    this.setSelectClickableSectionByID("learnableMove:"+this.selectedMoveInfo.movePos, false);
+                    this.selectedMoveInfo = null;
                 }
             }
             else {
-                this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNT, clickedPosition);
+                this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, clickedPosition);
                 this.setSelectClickableSectionByID("learntMove:"+clickedPosition, true);
             }
         }
@@ -254,27 +279,40 @@ public class RiftMovesScreen extends RiftLibUI {
             ));
 
             if (this.selectedMoveInfo != null) {
-                if (this.selectedMoveInfo.moveType == SelectedMoveType.LEARNABLE) {
+                if (this.selectedMoveInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
+                    SelectedMoveInfo moveToSwap = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, clickedPosition);
+                    NewPlayerTamedCreaturesHelper.swapCreatureMoves(
+                            this.mc.player,
+                            this.selectedCreature,
+                            this.selectedMoveInfo,
+                            moveToSwap
+                    );
+                    this.setSelectClickableSectionByID("learntMove:"+this.selectedMoveInfo.movePos, false);
+                    this.selectedMoveInfo = null;
+                }
+                else if (this.selectedMoveInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
                     if (clickedPosition != this.selectedMoveInfo.movePos) {
-                        //todo: add logic for move swapping here soon
+                        SelectedMoveInfo newSelectedMoveInfo = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, clickedPosition);
 
-                        this.setSelectClickableSectionByID("learnableMove:"+this.selectedMoveInfo.movePos, false);
-                        this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNABLE, clickedPosition);
-                        this.setSelectClickableSectionByID("learnableMove:"+clickedPosition, true);
+                        NewPlayerTamedCreaturesHelper.swapCreatureMoves(
+                                this.mc.player,
+                                this.selectedCreature,
+                                this.selectedMoveInfo,
+                                newSelectedMoveInfo
+                        );
+
                     }
-                    else {
-                        this.setSelectClickableSectionByID("learnableMove:"+this.selectedMoveInfo.movePos, false);
-                        this.selectedMoveInfo = null;
-                    }
+                    this.setSelectClickableSectionByID("learnableMove:"+this.selectedMoveInfo.movePos, false);
+                    this.selectedMoveInfo = null;
                 }
             }
             else {
-                this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNABLE, clickedPosition);
+                this.selectedMoveInfo = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, clickedPosition);
                 this.setSelectClickableSectionByID("learnableMove:"+clickedPosition, true);
             }
         }
         else if (riftLibClickableSection.getStringID().equals("backButton")) {
-            RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen(this.selectedCreature));
+            this.selectedCreature.exitToLastMenu(this.mc);
         }
     }
 
@@ -286,7 +324,7 @@ public class RiftMovesScreen extends RiftLibUI {
             int hoveredPosition = Integer.parseInt(element.getID().substring(
                     element.getID().indexOf(":") + 1
             ));
-            this.hoveredMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNT, hoveredPosition);
+            this.hoveredMoveInfo = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, hoveredPosition);
         }
         else if (section.id.equals("learnableMovesSection")
                 && element instanceof RiftLibUIElement.ClickableSectionElement
@@ -294,38 +332,12 @@ public class RiftMovesScreen extends RiftLibUI {
             int hoveredPosition = Integer.parseInt(element.getID().substring(
                     element.getID().indexOf(":") + 1
             ));
-            this.hoveredMoveInfo = new SelectedMoveInfo(SelectedMoveType.LEARNABLE, hoveredPosition);
+            this.hoveredMoveInfo = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, hoveredPosition);
         }
     }
 
     @Override
     protected void onPressEscape() {
-        RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen(this.selectedCreature));
-    }
-
-    //helper class to deal with selected moves
-    private class SelectedMoveInfo {
-        private final SelectedMoveType moveType;
-        private final int movePos;
-
-        private SelectedMoveInfo(SelectedMoveType moveType, int movePos) {
-            this.moveType = moveType;
-            this.movePos = movePos;
-        }
-
-        private CreatureMove getMoveUsingNBT(CreatureNBT creatureNBT) {
-            if (this.moveType == SelectedMoveType.LEARNT) {
-                return creatureNBT.getMovesList().get(this.movePos);
-            }
-            else if (this.moveType == SelectedMoveType.LEARNABLE) {
-                return creatureNBT.getLearnableMovesList().get(this.movePos);
-            }
-            return null;
-        }
-    }
-
-    private enum SelectedMoveType {
-        LEARNT,
-        LEARNABLE
+        this.selectedCreature.exitToLastMenu(this.mc);
     }
 }

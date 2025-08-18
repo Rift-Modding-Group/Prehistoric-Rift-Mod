@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -194,6 +196,19 @@ public class NewPlayerTamedCreaturesHelper {
     }
     //box stuff ends here
 
+    //getter stuff for SelectedCreatureInfo class starts here
+    public static CreatureNBT getCreatureNBTFromSelected(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
+        if (player == null || selectedCreatureInfo == null) return new CreatureNBT();
+        if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+            return getPlayerPartyNBT(player).get(selectedCreatureInfo.pos[0]);
+        }
+        else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+            return getCreatureBoxStorage(player).getBoxContents(selectedCreatureInfo.pos[0]).get(selectedCreatureInfo.pos[1]);
+        }
+        return new CreatureNBT();
+    }
+    //getter stuff for SelectedCreatureInfo class ends here
+
     //swapping related stuff starts here
     public static void rearrangePartyCreatures(EntityPlayer player, int posSelected, int posToSwap) {
         if (player == null) return;
@@ -212,14 +227,14 @@ public class NewPlayerTamedCreaturesHelper {
     //swapping related stuff ends here
 
     //move swapping related stuff starts here
-    public static void partyMemSwapLearntMoves(EntityPlayer player, int partyMemPos, int posSelected, int posToSwap) {
-        if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftChangeLearntMovesOrder(player, partyMemPos, posSelected, posToSwap));
-    }
-
     public static void partyMemSwapLearntMoveWithLearnableMove(EntityPlayer player, int partyMemPos, int learntMovePos, String learnableMove) {
         if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftChangeLearntMoveWithLearnableMove(player, partyMemPos, learntMovePos, learnableMove));
+    }
+
+    public static void swapCreatureMoves(EntityPlayer player, SelectedCreatureInfo selectedCreature, SelectedMoveInfo moveSelected, SelectedMoveInfo moveToSwap) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftSwapCreatureMoves(player, selectedCreature, moveSelected, moveToSwap));
     }
     //move swapping related stuff ends here
 

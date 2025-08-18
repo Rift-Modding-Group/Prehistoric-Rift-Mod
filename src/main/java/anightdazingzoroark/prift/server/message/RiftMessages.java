@@ -112,8 +112,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftNewAddToParty.Handler.class, RiftNewAddToParty.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftNewRemoveCreature.Handler.class, RiftNewRemoveCreature.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftNewRemoveCreature.Handler.class, RiftNewRemoveCreature.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftChangeLearntMovesOrder.Handler.class, RiftChangeLearntMovesOrder.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftChangeLearntMoveWithLearnableMove.Handler.class, RiftChangeLearntMoveWithLearnableMove.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSyncJournal.Handler.class, RiftSyncJournal.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSyncJournal.Handler.class, RiftSyncJournal.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftJournalEditOne.Handler.class, RiftJournalEditOne.class, id++, Side.SERVER);
@@ -130,5 +128,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetLastOpenedBox.Handler.class, RiftSetLastOpenedBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftNewAddToBox.Handler.class, RiftNewAddToBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftNewChangePartyOrBoxOrder.Handler.class, RiftNewChangePartyOrBoxOrder.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftSwapCreatureMoves.Handler.class, RiftSwapCreatureMoves.class, id++, Side.SERVER);
     }
 }
