@@ -6,16 +6,14 @@ import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class RiftNewPartyMembersSection extends RiftLibUISection {
+public class RiftPartyMembersSection extends RiftLibUISection {
     private FixedSizeList<CreatureNBT> partyMembersNBT = new FixedSizeList<>(6, new CreatureNBT());
 
-    public RiftNewPartyMembersSection( int guiWidth, int guiHeight, int width, int height, int xPos, int yPos, FontRenderer fontRenderer, Minecraft minecraft) {
+    public RiftPartyMembersSection(int guiWidth, int guiHeight, int width, int height, int xPos, int yPos, FontRenderer fontRenderer, Minecraft minecraft) {
         super("partyMembersSection", guiWidth, guiHeight, width, height, xPos, yPos, fontRenderer, minecraft);
     }
 

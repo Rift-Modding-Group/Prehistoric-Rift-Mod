@@ -5,7 +5,7 @@ import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
 import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
-import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftNewPartyMembersSection;
+import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMembersSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
@@ -200,12 +200,12 @@ public class RiftPartyScreen extends RiftLibUI {
 
     //create the party members section
     private RiftLibUISection partyMembersSection() {
-        return new RiftNewPartyMembersSection(this.width, this.height, 120, 120, -1, 3, this.fontRenderer, this.mc);
+        return new RiftPartyMembersSection(this.width, this.height, 120, 120, -1, 3, this.fontRenderer, this.mc);
     }
 
     //get the party members section once its created
-    private RiftNewPartyMembersSection getPartyMembersSection() {
-        return (RiftNewPartyMembersSection) this.getSectionByID("partyMembersSection");
+    private RiftPartyMembersSection getPartyMembersSection() {
+        return (RiftPartyMembersSection) this.getSectionByID("partyMembersSection");
     }
 
     //create the party members info section
@@ -543,7 +543,7 @@ public class RiftPartyScreen extends RiftLibUI {
             case "partyMembersSection": {
                 //update party members
                 NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
-                RiftNewPartyMembersSection partyMembersSection = (RiftNewPartyMembersSection) section;
+                RiftPartyMembersSection partyMembersSection = (RiftPartyMembersSection) section;
                 partyMembersSection.setPartyMembersNBT(NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
 
                 //change position based on if theres a selected creature or not
