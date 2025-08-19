@@ -8,6 +8,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.util.Arrays;
+
 //this helper class is for sending creature information to UIs and no less
 public class SelectedCreatureInfo {
     public final SelectedPosType selectedPosType;
@@ -40,6 +42,7 @@ public class SelectedCreatureInfo {
 
     public CreatureNBT getCreatureNBT(EntityPlayer player) {
         if (this.selectedPosType == SelectedPosType.PARTY) return NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.pos[0]);
+        else if (this.selectedPosType == SelectedPosType.BOX) return NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(player).getBoxContents(this.pos[0]).get(this.pos[1]);
         return new CreatureNBT();
     }
 
@@ -49,6 +52,14 @@ public class SelectedCreatureInfo {
         toReturn.setByte("SelectedPosType", (byte) this.selectedPosType.ordinal());
         toReturn.setIntArray("Position", this.pos);
         return toReturn;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null) return false;
+        if (!(object instanceof SelectedCreatureInfo)) return false;
+        SelectedCreatureInfo infoToTest = (SelectedCreatureInfo) object;
+        return infoToTest.selectedPosType == this.selectedPosType && Arrays.equals(infoToTest.pos, this.pos);
     }
 
     public enum SelectedPosType {

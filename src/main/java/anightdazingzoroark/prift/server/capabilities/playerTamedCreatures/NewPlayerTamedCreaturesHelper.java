@@ -180,7 +180,7 @@ public class NewPlayerTamedCreaturesHelper {
 
     public static CreatureBoxStorage getCreatureBoxStorage(EntityPlayer player) {
         if (player == null) return new CreatureBoxStorage();
-        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT());
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player));
         return getPlayerTamedCreatures(player).getBoxNBT();
     }
 
@@ -193,6 +193,10 @@ public class NewPlayerTamedCreaturesHelper {
         if (player == null) return 0;
         if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncLastOpenedBox(player));
         return getPlayerTamedCreatures(player).getLastOpenedBox();
+    }
+
+    public static void changeBoxName(EntityPlayer player, int boxPos, String newName) {
+        RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureBoxName(player, boxPos, newName));
     }
     //box stuff ends here
 

@@ -129,5 +129,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftNewAddToBox.Handler.class, RiftNewAddToBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftNewChangePartyOrBoxOrder.Handler.class, RiftNewChangePartyOrBoxOrder.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSwapCreatureMoves.Handler.class, RiftSwapCreatureMoves.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftChangeCreatureBoxName.Handler.class, RiftChangeCreatureBoxName.class, id++, Side.SERVER);
     }
 }
