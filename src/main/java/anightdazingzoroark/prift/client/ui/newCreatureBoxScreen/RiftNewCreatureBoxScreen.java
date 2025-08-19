@@ -1,7 +1,11 @@
 package anightdazingzoroark.prift.client.ui.newCreatureBoxScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
+import anightdazingzoroark.prift.client.ui.newCreatureBoxScreen.elements.RiftBoxMembersSection;
+import anightdazingzoroark.prift.client.ui.newCreatureBoxScreen.elements.RiftPartyMembersSection;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
@@ -18,6 +22,8 @@ import java.util.List;
 
 public class RiftNewCreatureBoxScreen extends RiftLibUI {
     private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/new_creature_box_background.png");
+    private SelectedCreatureInfo selectedCreatureInfo;
+    private int currentBox;
 
     public RiftNewCreatureBoxScreen(int x, int y, int z) {
         super(x, y, z);
@@ -30,7 +36,9 @@ public class RiftNewCreatureBoxScreen extends RiftLibUI {
     @Override
     public List<RiftLibUISection> uiSections() {
         return Arrays.asList(
-                this.createPartyHeaderSection()
+                this.createPartyHeaderSection(),
+                this.createPartyMembersSection(),
+                this.createBoxMembersSection()
         );
     }
 
@@ -49,16 +57,21 @@ public class RiftNewCreatureBoxScreen extends RiftLibUI {
         };
     }
 
-    /*
-    private RiftUISectionCreatureNBTUser createPartyMembersSection() {
-        return new RiftUISectionCreatureNBTUser("partyMembersSection", th) {
-            @Override
-            public List<RiftLibUIElement.Element> defineSectionContents() {
-                return Collections.emptyList();
-            }
-        };
+    private RiftLibUISection createPartyMembersSection() {
+        return new RiftPartyMembersSection(this.width, this.height, 44, 66, -90, -55, this.fontRenderer, this.mc);
     }
-     */
+
+    private RiftPartyMembersSection getPartyMembersSection() {
+        return (RiftPartyMembersSection) this.getSectionByID("partyMembersSection");
+    }
+
+    private RiftLibUISection createBoxMembersSection() {
+        return new RiftBoxMembersSection(this.width, this.height, 175, 140, 23, -35, this.fontRenderer, this.mc);
+    }
+
+    private RiftBoxMembersSection getBoxMembersSection() {
+        return (RiftBoxMembersSection) this.getSectionByID("boxMembersSection");
+    }
 
     @Override
     public ResourceLocation drawBackground() {
@@ -77,7 +90,9 @@ public class RiftNewCreatureBoxScreen extends RiftLibUI {
 
     @Override
     public int[] backgroundSize() {
-        return new int[]{227, 246};
+        int xOffset = this.selectedCreatureInfo != null ? 124 : 0;
+        //int yOffset = this.selectedCreatureInfo != null ? 196 : 0;
+        return new int[]{227 + xOffset, 246};
     }
 
     @Override
@@ -87,6 +102,14 @@ public class RiftNewCreatureBoxScreen extends RiftLibUI {
 
     @Override
     public RiftLibUISection modifyUISection(RiftLibUISection riftLibUISection) {
+        if (riftLibUISection.id.equals("partyMembersSection")) {
+            //update party members
+            NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+            this.getPartyMembersSection().setPartyMembersNBT(NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
+        }
+        if (riftLibUISection.id.equals("boxMembersSection")) {
+            this.getBoxMembersSection().setBoxMembersNBT(NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.currentBox));
+        }
         return riftLibUISection;
     }
 
