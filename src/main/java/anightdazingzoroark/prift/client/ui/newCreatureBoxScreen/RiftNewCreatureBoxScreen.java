@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.client.ui.newCreatureBoxScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
-import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.newCreatureBoxScreen.elements.RiftBoxMembersSection;
 import anightdazingzoroark.prift.client.ui.newCreatureBoxScreen.elements.RiftPartyMembersSection;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
@@ -38,7 +37,11 @@ public class RiftNewCreatureBoxScreen extends RiftLibUI {
         return Arrays.asList(
                 this.createPartyHeaderSection(),
                 this.createPartyMembersSection(),
-                this.createBoxMembersSection()
+                this.createBoxMembersSection(),
+                this.createBoxHeaderSection(),
+                this.createLeftButtonHeaderSection(),
+                this.createRightButtonHeaderSection(),
+                this.createShuffleCreaturesButtonSection()
         );
     }
 
@@ -73,6 +76,75 @@ public class RiftNewCreatureBoxScreen extends RiftLibUI {
         return (RiftBoxMembersSection) this.getSectionByID("boxMembersSection");
     }
 
+    private RiftLibUISection createBoxHeaderSection() {
+        return new RiftLibUISection("boxHeaderSection", this.width, this.height, 96, 13, 23, -114, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement boxHeaderElement = new RiftLibUIElement.ClickableSectionElement();
+                boxHeaderElement.setID("boxHeader");
+                boxHeaderElement.setSize(96, 13);
+                boxHeaderElement.setTextContent("");
+                boxHeaderElement.setTextOffsets(0, 1);
+                boxHeaderElement.setImage(background, 400, 300, 96, 13, 100, 255, 196, 255);
+                toReturn.add(boxHeaderElement);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection createLeftButtonHeaderSection() {
+        return new RiftLibUISection("leftButtonHeaderSection", this.width, this.height, 13, 13, -37, -114, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement leftButtonElement = new RiftLibUIElement.ClickableSectionElement();
+                leftButtonElement.setSize(13, 13);
+                leftButtonElement.setImage(background, 400, 300, 13, 13, 173, 268, 199, 268);
+                toReturn.add(leftButtonElement);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection createRightButtonHeaderSection() {
+        return new RiftLibUISection("rightButtonHeaderSection", this.width, this.height, 13, 13, 83, -114, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement rightButtonElement = new RiftLibUIElement.ClickableSectionElement();
+                rightButtonElement.setSize(13, 13);
+                rightButtonElement.setImage(background, 400, 300, 13, 13, 160, 268, 186, 268);
+                toReturn.add(rightButtonElement);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection createShuffleCreaturesButtonSection() {
+        return new RiftLibUISection("shuffleCreaturesButtonSection", this.width, this.height, 20, 18, 100, -113, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement shuffleButtonElement = new RiftLibUIElement.ClickableSectionElement();
+                shuffleButtonElement.setID("shuffleCreaturesButton");
+                shuffleButtonElement.setSize(20, 18);
+                shuffleButtonElement.setImage(background, 400, 300, 20, 18, 160, 282, 180, 282);
+                shuffleButtonElement.setImageScale(0.75f);
+                toReturn.add(shuffleButtonElement);
+
+                return toReturn;
+            }
+        };
+    }
+
     @Override
     public ResourceLocation drawBackground() {
         return this.background;
@@ -97,6 +169,10 @@ public class RiftNewCreatureBoxScreen extends RiftLibUI {
 
     @Override
     public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {
+        if (riftLibUISection.id.equals("boxHeaderSection") && element.getID().equals("boxHeader")) {
+            RiftLibUIElement.ClickableSectionElement boxHeaderElement = (RiftLibUIElement.ClickableSectionElement) element;
+            boxHeaderElement.setTextContent(NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxName(this.currentBox));
+        }
         return element;
     }
 
