@@ -1,152 +1,180 @@
 package anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.elements.RiftCreatureBoxInfoButtons;
-import anightdazingzoroark.prift.client.ui.elements.RiftCreatureInfoScrollableSection;
-import anightdazingzoroark.prift.client.ui.elements.RiftCreatureMovesScrollableSection;
-import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
-import anightdazingzoroark.prift.server.RiftGui;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.client.ui.CommonUISections;
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
+import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.nbt.NBTTagCompound;
+import anightdazingzoroark.riftlib.ui.RiftLibUI;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
+import anightdazingzoroark.riftlib.ui.RiftLibUISection;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class RiftCreatureBoxInfoScreen extends GuiScreen {
-    private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/info_from_creature_box_background.png");
+public class RiftCreatureBoxInfoScreen extends RiftLibUI {
+    private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/info_from_creature_box_background.png");
+    private final SelectedCreatureInfo selectedCreatureInfo;
 
-    //for creature selection
-    //private final RiftNewCreatureBoxScreen.SelectedPosType selectedPosType;
-    private final int selectedPosOne;
-    private final int selectedPosTwo;
+    public RiftCreatureBoxInfoScreen(int x, int y, int z) {
+        super(x, y, z);
+        this.selectedCreatureInfo = null;
+    }
 
-    //selected creature
-    private NBTTagCompound selectedCreatureNBT;
-    private RiftCreature selectedCreatureToDraw;
-
-    //sections
-    private RiftCreatureBoxInfoButtons infoButtons;
-    private RiftCreatureInfoScrollableSection infoScrollableSection;
-    private RiftCreatureMovesScrollableSection movesScrollableSection;
-
-    public RiftCreatureBoxInfoScreen(int selectedPosType, int selectedPosOne, int selectedPosTwo) {
-        super();
-        //this.selectedPosType = RiftNewCreatureBoxScreen.SelectedPosType.values()[selectedPosType];
-        this.selectedPosOne = selectedPosOne;
-        this.selectedPosTwo = selectedPosTwo;
+    public RiftCreatureBoxInfoScreen(BlockPos pos, SelectedCreatureInfo selectedCreatureInfo) {
+        super(pos.getX(), pos.getY(), pos.getZ());
+        this.selectedCreatureInfo = selectedCreatureInfo;
     }
 
     @Override
-    public void initGui() {
-        super.initGui();
-
-        //update deployed creature info upon opening
-        NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
-
-        //get current nbt and creature to draw
-        /*
-        if (this.selectedPosType == RiftNewCreatureBoxScreen.SelectedPosType.PARTY) {
-            //this.selectedCreatureNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.selectedPosOne);
-            this.selectedCreatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, this.selectedCreatureNBT);
-        }
-        else if (this.selectedPosType == RiftNewCreatureBoxScreen.SelectedPosType.BOX) {
-            //this.selectedCreatureNBT = NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.selectedPosOne).get(this.selectedPosTwo);
-            this.selectedCreatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, this.selectedCreatureNBT);
-        }
-         */
-
-        //init info buttons
-        this.infoButtons = new RiftCreatureBoxInfoButtons(this.width, this.height, this.fontRenderer, this.mc);
-        this.infoScrollableSection = new RiftCreatureInfoScrollableSection(this.width, this.height, 70, 10, this.fontRenderer, this.mc);
-        this.movesScrollableSection = new RiftCreatureMovesScrollableSection(this.width, this.height, 70, 10, this.fontRenderer, this.mc);
-
-        //add nbt to info sections
-        if (this.selectedCreatureNBT != null) {
-            this.infoButtons.setCreatureNBT(this.selectedCreatureNBT);
-            this.infoScrollableSection.setCreatureNBT(this.selectedCreatureNBT);
-            this.movesScrollableSection.setCreatureNBT(this.selectedCreatureNBT);
-        }
+    public List<RiftLibUISection> uiSections() {
+        return Arrays.asList(
+                this.createSelectedCreatureOptionsSection(),
+                CommonUISections.partyMemberInfoSection(this.width, this.height, 64, -17, this.fontRenderer, this.mc),
+                this.createCreatureToDrawSection()
+        );
     }
 
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        if (this.mc != null && this.mc.world != null) this.drawDefaultBackground();
-        else return;
+    private RiftLibUISection createCreatureToDrawSection() {
+        return new RiftLibUISection("creatureToDrawSection", this.width, this.height, 99, 60, -62, -38, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
 
-        //draw background
-        this.drawGuiContainerBackgroundLayer();
+                RiftLibUIElement.RenderedEntityElement creatureElement = new RiftLibUIElement.RenderedEntityElement();
+                creatureElement.setID("creatureToDraw");
+                creatureElement.setScale(20f);
+                creatureElement.setNotLimitedByBounds();
+                creatureElement.setAdditionalSize(0, 40);
+                creatureElement.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                creatureElement.setRotationAngle(150);
+                toReturn.add(creatureElement);
 
-        //draw creature
-        if (this.selectedCreatureToDraw != null) {
-            GlStateManager.color(1f, 1f, 1f, 1f);
-            GlStateManager.pushMatrix();
-            GlStateManager.pushMatrix();
-            GlStateManager.enableDepth();
-            GlStateManager.translate(this.width / 2f - 65, this.height / 2f + 15, 210f);
-            GlStateManager.rotate(180, 1f, 0f, 0f);
-            GlStateManager.rotate(150, 0f, 1f, 0f);
-            GlStateManager.scale(20f, 20f, 20f);
-            this.selectedCreatureToDraw.deathTime = 0;
-            this.selectedCreatureToDraw.isDead = false;
-            this.selectedCreatureToDraw.hurtTime = 0;
-            this.mc.getRenderManager().renderEntity(this.selectedCreatureToDraw, 0.0D, 0.0D, 0.0D, 0.0F, 0F, false);
-            GlStateManager.disableDepth();
-            GlStateManager.popMatrix();
-            GlStateManager.popMatrix();
-        }
-
-        //ensure nbt exists
-        if (this.selectedCreatureNBT != null) {
-            //draw info buttons section
-            this.infoButtons.drawSectionContents(mouseX, mouseY, partialTicks);
-
-            //draw party mem info
-            this.infoScrollableSection.drawSectionContents(mouseX, mouseY, partialTicks);
-        }
-        //if nbt somehow got removed, maybe it got corrupted or whatever, go back to party screen
-        else {}
-    }
-
-    protected void drawGuiContainerBackgroundLayer() {
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(background);
-        int k = (this.width - 252) / 2;
-        int l = (this.height - 144) / 2;
-        drawModalRectWithCustomSizedTexture(k, l, 0, 0, 252, 152, 400f, 300f);
-    }
-
-    @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-
-        /*
-        //deal with buttons on creature info buttons
-        int sectionTop = (this.infoButtons.guiHeight - this.infoButtons.height) / 2 + this.infoButtons.yOffset;
-        int sectionBottom = sectionTop + this.infoButtons.height;
-        for (RiftGuiSectionButton button : this.infoButtons.getActiveButtons()) {
-            int buttonTop = button.y;
-            int buttonBottom = button.y + button.height;
-            boolean clickWithinVisiblePart = mouseY >= Math.max(buttonTop, sectionTop) && mouseY <= Math.min(buttonBottom, sectionBottom);
-            if (clickWithinVisiblePart && button.mousePressed(this.mc, mouseX, mouseY)) {
-                if (button.buttonId.equals("backToBox")) {
-                    this.mc.player.openGui(
-                            RiftInitialize.instance,
-                            RiftGui.GUI_CREATURE_BOX,
-                            this.mc.world,
-                            this.selectedPosType.ordinal(),
-                            this.selectedPosOne,
-                            this.selectedPosTwo
-                    );
-                }
-                else if (button.buttonId.equals("release")) {
-
-                }
-                button.playPressSound(this.mc.getSoundHandler());
+                return toReturn;
             }
+        };
+    }
+
+    private RiftUISectionCreatureNBTUser createSelectedCreatureOptionsSection() {
+        return new RiftUISectionCreatureNBTUser("selectedCreatureOptionsSection", new CreatureNBT(), this.width, this.height, 100, 85, -62, 44, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                if (this.nbtTagCompound != null && !this.nbtTagCompound.nbtIsEmpty()) {
+                    //creature name
+                    RiftLibUIElement.TextElement creatureName = new RiftLibUIElement.TextElement();
+                    creatureName.setText(this.nbtTagCompound.getCreatureName(true));
+                    creatureName.setScale(0.5f);
+                    creatureName.setBottomSpace(6);
+                    toReturn.add(creatureName);
+
+                    //back to box
+                    RiftLibUIElement.ButtonElement backToBoxButton = new RiftLibUIElement.ButtonElement();
+                    backToBoxButton.setSize(100, 20);
+                    backToBoxButton.setText(I18n.format("creature_box.back_to_box"));
+                    backToBoxButton.setID("backToBox");
+                    backToBoxButton.setBottomSpace(6);
+                    toReturn.add(backToBoxButton);
+
+                    //change name button
+                    RiftLibUIElement.ButtonElement changeNameButton = new RiftLibUIElement.ButtonElement();
+                    changeNameButton.setSize(100, 20);
+                    changeNameButton.setText(I18n.format("creature_box.change_name"));
+                    changeNameButton.setID("changeName");
+                    changeNameButton.setBottomSpace(6);
+                    toReturn.add(changeNameButton);
+
+                    //release button
+                    RiftLibUIElement.ButtonElement releaseButton = new RiftLibUIElement.ButtonElement();
+                    releaseButton.setSize(100, 20);
+                    releaseButton.setText(I18n.format("creature_box.release"));
+                    releaseButton.setID("release");
+                    releaseButton.setBottomSpace(6);
+                    toReturn.add(releaseButton);
+                }
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftUISectionCreatureNBTUser getSelectedCreatureOptionsSection() {
+        return (RiftUISectionCreatureNBTUser) this.getSectionByID("selectedCreatureOptionsSection");
+    }
+
+    //get party member info section once its created
+    private RiftUISectionCreatureNBTUser getPartyMemberInfoSection() {
+        return (RiftUISectionCreatureNBTUser) this.getSectionByID("partyMemberInfoSection");
+    }
+
+    @Override
+    public ResourceLocation drawBackground() {
+        return this.background;
+    }
+
+    @Override
+    public int[] backgroundTextureSize() {
+        return new int[]{400, 300};
+    }
+
+    @Override
+    public int[] backgroundUV() {
+        return new int[]{0, 0};
+    }
+
+    @Override
+    public int[] backgroundSize() {
+        return new int[]{252, 184};
+    }
+
+    @Override
+    public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {
+        if (riftLibUISection.id.equals("creatureToDrawSection") && element.getID().equals("creatureToDraw")) {
+            RiftCreature creatureToDraw = this.selectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureAsNBT(this.mc.world);
+            RiftLibUIElement.RenderedEntityElement creatureElement = (RiftLibUIElement.RenderedEntityElement) element;
+            creatureElement.setEntity(creatureToDraw);
         }
-         */
+        return element;
+    }
+
+    @Override
+    public RiftLibUISection modifyUISection(RiftLibUISection riftLibUISection) {
+        if (riftLibUISection.id.equals("selectedCreatureOptionsSection")) {
+            this.getSelectedCreatureOptionsSection().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
+        }
+        if (riftLibUISection.id.equals("partyMemberInfoSection")) {
+            this.getPartyMemberInfoSection().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
+        }
+        return riftLibUISection;
+    }
+
+    @Override
+    public void onButtonClicked(RiftLibButton riftLibButton) {
+
+    }
+
+    @Override
+    public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
+
+    }
+
+    @Override
+    public void onElementHovered(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {
+
+    }
+
+    @Override
+    protected void onPressEscape() {
+        RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
     }
 }

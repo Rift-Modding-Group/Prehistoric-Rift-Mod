@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.client.ui.*;
-import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
@@ -30,16 +29,15 @@ public class RiftGui implements IGuiHandler {
     public static final int GUI_CREATURE_INVENTORY = 2;
     public static final int GUI_MENU_FROM_RADIAL = 3;
     public static final int GUI_WEAPON_INVENTORY = 4;
-    public static final int GUI_INFO_FROM_BOX = 5;
-    public static final int GUI_FEEDING_TROUGH = 6;
-    public static final int GUI_SEMI_MANUAL_EXTRACTOR = 7;
-    public static final int GUI_SEMI_MANUAL_PRESSER = 8;
-    public static final int GUI_SEMI_MANUAL_EXTRUDER = 9;
-    public static final int GUI_SEMI_MANUAL_HAMMERER = 10;
-    public static final int GUI_MILLSTONE = 11;
-    public static final int GUI_MECHANICAL_FILTER = 12;
-    public static final int GUI_CREATURE_BOX = 13;
-    public static final int GUI_MENU_FROM_CREATURE_BOX = 14;
+    public static final int GUI_FEEDING_TROUGH = 5;
+    public static final int GUI_SEMI_MANUAL_EXTRACTOR = 6;
+    public static final int GUI_SEMI_MANUAL_PRESSER = 7;
+    public static final int GUI_SEMI_MANUAL_EXTRUDER = 8;
+    public static final int GUI_SEMI_MANUAL_HAMMERER = 9;
+    public static final int GUI_MILLSTONE = 10;
+    public static final int GUI_MECHANICAL_FILTER = 11;
+    public static final int GUI_CREATURE_BOX = 12;
+    public static final int GUI_MENU_FROM_CREATURE_BOX = 13;
 
     @Nullable
     @Override
@@ -147,12 +145,6 @@ public class RiftGui implements IGuiHandler {
             if (tileEntity instanceof TileEntityMechanicalFilter) {
                 return new RiftMechanicalFilterMenu((TileEntityMechanicalFilter) tileEntity, player.inventory);
             }
-        }
-        else if (id == GUI_CREATURE_BOX) {
-            //return new RiftNewCreatureBoxScreen(x, y, z);
-        }
-        else if (id == GUI_INFO_FROM_BOX) {
-            return new RiftCreatureBoxInfoScreen(x, y, z);
         }
         else if (id == GUI_MENU_FROM_CREATURE_BOX) {
             return new RiftPopupFromCreatureBox(y, z);

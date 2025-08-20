@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.client.ui.creatureBoxScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
-import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftNewCreatureBoxInfoScreen;
+import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMembersSection;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMembersSection;
@@ -386,7 +386,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     @Override
     public void onButtonClicked(RiftLibButton riftLibButton) {
         if (riftLibButton.buttonId.equals("moreInfoButton")) {
-            RiftLibUIHelper.showUI(this.mc.player, new RiftNewCreatureBoxInfoScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+            RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxInfoScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
         }
         if (riftLibButton.buttonId.equals("setNewBoxName")) {
             NewPlayerTamedCreaturesHelper.changeBoxName(this.mc.player, this.currentBox, this.getTextFieldTextByID("newBoxName"));
