@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RiftBoxMembersSection extends RiftLibUISection {
-    private FixedSizeList<CreatureNBT> partyMembersNBT = new FixedSizeList<>(CreatureBoxStorage.maxBoxStorableCreatures, new CreatureNBT());
+    private FixedSizeList<CreatureNBT> boxMembersNBT = new FixedSizeList<>(CreatureBoxStorage.maxBoxStorableCreatures, new CreatureNBT());
+    private int selectedBox;
 
     public RiftBoxMembersSection(int guiWidth, int guiHeight, int width, int height, int xPos, int yPos, FontRenderer fontRenderer, Minecraft minecraft) {
         super("boxMembersSection", guiWidth, guiHeight, width, height, xPos, yPos, fontRenderer, minecraft);
@@ -27,11 +28,11 @@ public class RiftBoxMembersSection extends RiftLibUISection {
         table.setRowCount(5);
         table.setCellSize(35, 35);
 
-        for (int i = 0; i < this.partyMembersNBT.size(); i++) {
-            CreatureNBT partyMember = this.partyMembersNBT.get(i);
+        for (int i = 0; i < this.boxMembersNBT.size(); i++) {
+            CreatureNBT partyMember = this.boxMembersNBT.get(i);
             BoxMemberElement boxMemberElement = new BoxMemberElement();
             boxMemberElement.setPartyMemNBT(partyMember);
-            boxMemberElement.setID("boxMember:"+i);
+            boxMemberElement.setID("boxMember:"+this.selectedBox+":"+i);
             table.addElement(boxMemberElement);
         }
 
@@ -78,12 +79,13 @@ public class RiftBoxMembersSection extends RiftLibUISection {
         return super.drawElement(element, draw, sectionWidth, x, y, mouseX, mouseY, partialTicks);
     }
 
-    public void setBoxMembersNBT(FixedSizeList<CreatureNBT> tagCompounds) {
-        this.partyMembersNBT = tagCompounds;
+    public void setBoxMembersNBT(FixedSizeList<CreatureNBT> tagCompounds, int selectedBox) {
+        this.boxMembersNBT = tagCompounds;
+        this.selectedBox = selectedBox;
     }
 
     public FixedSizeList<CreatureNBT> getBoxMembersNBT() {
-        return this.partyMembersNBT;
+        return this.boxMembersNBT;
     }
 
     //a new element exclusive to this section only
