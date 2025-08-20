@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui.creatureBoxScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftNewCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMembersSection;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMembersSection;
@@ -10,6 +11,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Creatu
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
@@ -34,7 +36,20 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     }
 
     public RiftCreatureBoxScreen(BlockPos pos) {
+        this(pos, null);
+    }
+
+    public RiftCreatureBoxScreen(BlockPos pos, SelectedCreatureInfo selectedCreatureInfo) {
         super(pos.getX(), pos.getY(), pos.getZ());
+        this.selectedCreatureInfo = selectedCreatureInfo;
+    }
+
+    @Override
+    public void initGui() {
+        super.initGui();
+        if (this.creatureToDraw == null && this.selectedCreatureInfo != null) {
+            this.selectNewCreature(this.selectedCreatureInfo);
+        }
     }
 
     @Override
@@ -370,6 +385,9 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
     @Override
     public void onButtonClicked(RiftLibButton riftLibButton) {
+        if (riftLibButton.buttonId.equals("moreInfoButton")) {
+            RiftLibUIHelper.showUI(this.mc.player, new RiftNewCreatureBoxInfoScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+        }
         if (riftLibButton.buttonId.equals("setNewBoxName")) {
             NewPlayerTamedCreaturesHelper.changeBoxName(this.mc.player, this.currentBox, this.getTextFieldTextByID("newBoxName"));
             this.clearPopup();
@@ -450,10 +468,10 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         //select new creature
         if (newSelectedCreatureInfo != null) {
             if (newSelectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-                this.setSelectClickableSectionByID("partyMember:"+newSelectedCreatureInfo.pos[0], true);
+                this.setSelectClickableSectionByID(false, "partyMember:"+newSelectedCreatureInfo.pos[0], true);
             }
             else if (newSelectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
-                this.setSelectClickableSectionByID("boxMember:"+this.currentBox+":"+newSelectedCreatureInfo.pos[1], true);
+                this.setSelectClickableSectionByID(false, "boxMember:"+newSelectedCreatureInfo.pos[0]+":"+newSelectedCreatureInfo.pos[1], true);
             }
             this.selectedCreatureInfo = newSelectedCreatureInfo;
             this.creatureToDraw = newSelectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureAsNBT(this.mc.world);
