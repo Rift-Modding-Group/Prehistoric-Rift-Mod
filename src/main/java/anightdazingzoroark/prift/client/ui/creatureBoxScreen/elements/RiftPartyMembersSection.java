@@ -1,6 +1,5 @@
-package anightdazingzoroark.prift.client.ui.newCreatureBoxScreen.elements;
+package anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements;
 
-import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;

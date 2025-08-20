@@ -1,21 +1,19 @@
 package anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 
-public class RiftPartyMemButtonForBox extends RiftClickableSection {
+public class RiftPartyMemButtonForBox extends RiftLibClickableSection {
     private CreatureNBT creatureNBT;
 
     public RiftPartyMemButtonForBox(CreatureNBT creatureNBT, int guiWidth, int guiHeight, int xOffset, int yOffset, FontRenderer fontRenderer, Minecraft minecraft) {
@@ -28,6 +26,8 @@ public class RiftPartyMemButtonForBox extends RiftClickableSection {
         this.uvHeight = 20;
         this.textureWidth = 400;
         this.textureHeight = 300;
+        this.xUV = 0;
+        this.yUV = 248;
     }
 
     @Override
@@ -44,10 +44,10 @@ public class RiftPartyMemButtonForBox extends RiftClickableSection {
             int bgX = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
             int bgY = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
             int xUVTexture = this.creatureNBT.getCreatureHealth()[0] <= 0 ? 40 : (
-                this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY ? 20 : 0
+                    this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY ? 20 : 0
             );
             int yUVTexture = 248;
-            drawModalRectWithCustomSizedTexture(bgX, bgY, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
+            Gui.drawModalRectWithCustomSizedTexture(bgX, bgY, xUVTexture, yUVTexture, this.uvWidth, this.uvHeight, this.textureWidth, this.textureHeight);
 
             //put on yellow hoverlay when selected
             if (this.isSelected) {
@@ -89,22 +89,36 @@ public class RiftPartyMemButtonForBox extends RiftClickableSection {
                 this.minecraft.getTextureManager().bindTexture(this.textureLocation);
                 int k = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
                 int l = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
-                drawModalRectWithCustomSizedTexture(k, l, 60, 248, 20, 20, this.textureWidth, this.textureHeight);
+                Gui.drawModalRectWithCustomSizedTexture(k, l, 60, 248, 20, 20, this.textureWidth, this.textureHeight);
             }
         }
     }
 
-    private boolean isHoveredNoNBT(int mouseX, int mouseY) {
+    public boolean isHovered(int mouseX, int mouseY) {
+        if (!this.doHoverEffects) return false;
         int x = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
         int y = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
-        return mouseX >= x && mouseX <= x + 20 * this.scale && mouseY >= y && mouseY <= y + 20 * this.scale;
+        return mouseX >= x && mouseX <= x + this.width * this.scale && mouseY >= y && mouseY <= y + this.height * this.scale;
     }
 
-    public void setCreatureNBT(CreatureNBT creatureNBT) {
-        this.creatureNBT = creatureNBT;
+    private boolean isHoveredNoNBT(int mouseX, int mouseY) {
+        if (!this.doHoverEffects) return false;
+        int x = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
+        int y = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
+        return mouseX >= x && mouseX <= x + 57 * this.scale && mouseY >= y && mouseY <= y + 38 * this.scale;
+    }
+
+    public void setCreatureNBT(CreatureNBT nbtTagCompound) {
+        this.creatureNBT = nbtTagCompound;
     }
 
     public CreatureNBT getCreatureNBT() {
         return this.creatureNBT;
+    }
+
+    //for best performance, DO NOT USE THIS IN METHODS MEANT TO BE LOOPED
+    //USE getCreatureNBT() FOR THAT INSTEAD
+    public RiftCreature getCreatureFromNBT() {
+        return this.creatureNBT.getCreatureAsNBT(this.minecraft.world);
     }
 }

@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.elements.RiftCreatureBoxInfoButtons;
-import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftNewCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.elements.RiftCreatureInfoScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftCreatureMovesScrollableSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftGuiSectionButton;
@@ -20,7 +19,7 @@ public class RiftCreatureBoxInfoScreen extends GuiScreen {
     private static final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/info_from_creature_box_background.png");
 
     //for creature selection
-    private final RiftNewCreatureBoxScreen.SelectedPosType selectedPosType;
+    //private final RiftNewCreatureBoxScreen.SelectedPosType selectedPosType;
     private final int selectedPosOne;
     private final int selectedPosTwo;
 
@@ -35,7 +34,7 @@ public class RiftCreatureBoxInfoScreen extends GuiScreen {
 
     public RiftCreatureBoxInfoScreen(int selectedPosType, int selectedPosOne, int selectedPosTwo) {
         super();
-        this.selectedPosType = RiftNewCreatureBoxScreen.SelectedPosType.values()[selectedPosType];
+        //this.selectedPosType = RiftNewCreatureBoxScreen.SelectedPosType.values()[selectedPosType];
         this.selectedPosOne = selectedPosOne;
         this.selectedPosTwo = selectedPosTwo;
     }
@@ -48,6 +47,7 @@ public class RiftCreatureBoxInfoScreen extends GuiScreen {
         NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
 
         //get current nbt and creature to draw
+        /*
         if (this.selectedPosType == RiftNewCreatureBoxScreen.SelectedPosType.PARTY) {
             //this.selectedCreatureNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player).get(this.selectedPosOne);
             this.selectedCreatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, this.selectedCreatureNBT);
@@ -56,6 +56,7 @@ public class RiftCreatureBoxInfoScreen extends GuiScreen {
             //this.selectedCreatureNBT = NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.selectedPosOne).get(this.selectedPosTwo);
             this.selectedCreatureToDraw = NewPlayerTamedCreaturesHelper.createCreatureFromNBT(this.mc.world, this.selectedCreatureNBT);
         }
+         */
 
         //init info buttons
         this.infoButtons = new RiftCreatureBoxInfoButtons(this.width, this.height, this.fontRenderer, this.mc);
@@ -121,6 +122,7 @@ public class RiftCreatureBoxInfoScreen extends GuiScreen {
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         super.mouseClicked(mouseX, mouseY, mouseButton);
 
+        /*
         //deal with buttons on creature info buttons
         int sectionTop = (this.infoButtons.guiHeight - this.infoButtons.height) / 2 + this.infoButtons.yOffset;
         int sectionBottom = sectionTop + this.infoButtons.height;
@@ -145,5 +147,6 @@ public class RiftCreatureBoxInfoScreen extends GuiScreen {
                 button.playPressSound(this.mc.getSoundHandler());
             }
         }
+         */
     }
 }

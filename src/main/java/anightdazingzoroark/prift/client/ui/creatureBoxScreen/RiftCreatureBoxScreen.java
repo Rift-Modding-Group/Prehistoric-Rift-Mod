@@ -1,10 +1,10 @@
-package anightdazingzoroark.prift.client.ui.newCreatureBoxScreen;
+package anightdazingzoroark.prift.client.ui.creatureBoxScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
-import anightdazingzoroark.prift.client.ui.newCreatureBoxScreen.elements.RiftBoxMembersSection;
-import anightdazingzoroark.prift.client.ui.newCreatureBoxScreen.elements.RiftPartyMembersSection;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMembersSection;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMembersSection;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
@@ -23,17 +23,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class RiftNewCreatureBoxScreen extends RiftLibUI {
+public class RiftCreatureBoxScreen extends RiftLibUI {
     private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/new_creature_box_background.png");
     private SelectedCreatureInfo selectedCreatureInfo;
     private int currentBox;
     private RiftCreature creatureToDraw;
 
-    public RiftNewCreatureBoxScreen(int x, int y, int z) {
+    public RiftCreatureBoxScreen(int x, int y, int z) {
         super(x, y, z);
     }
 
-    public RiftNewCreatureBoxScreen(BlockPos pos) {
+    public RiftCreatureBoxScreen(BlockPos pos) {
         super(pos.getX(), pos.getY(), pos.getZ());
     }
 

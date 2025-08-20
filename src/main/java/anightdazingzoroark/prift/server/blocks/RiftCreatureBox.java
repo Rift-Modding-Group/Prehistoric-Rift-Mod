@@ -1,18 +1,12 @@
 package anightdazingzoroark.prift.server.blocks;
 
-import anightdazingzoroark.prift.client.ui.newCreatureBoxScreen.RiftNewCreatureBoxScreen;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftOpenCreatureBoxMenu;
 import anightdazingzoroark.prift.server.message.RiftOpenCreatureBoxNoCreaturesMenu;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
-import anightdazingzoroark.riftlib.RiftLib;
-import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -25,13 +19,11 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
-import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -101,7 +93,7 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
                         && NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(playerIn).isEmpty() && tileEntity.getCreatures().isEmpty()) {
                     RiftMessages.WRAPPER.sendTo(new RiftOpenCreatureBoxNoCreaturesMenu(playerIn), (EntityPlayerMP) playerIn);
                 }
-                else RiftLibUIHelper.showUI(playerIn, new RiftNewCreatureBoxScreen(pos));
+                else RiftLibUIHelper.showUI(playerIn, new RiftCreatureBoxScreen(pos));
             }
         }
         return true;
