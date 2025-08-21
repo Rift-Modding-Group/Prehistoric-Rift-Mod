@@ -220,7 +220,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
                     //health bar
                     RiftLibUIElement.ProgressBarElement healthBar = new RiftLibUIElement.ProgressBarElement();
-                    healthBar.setPercentage(MathHelper.clamp(health / maxHealth, 0, 1));
+                    healthBar.setPercentage(health / maxHealth);
                     healthBar.setColors(0xff0000, 0x868686);
                     healthBar.setWidth(100);
                     healthBar.setBottomSpace(6);
@@ -240,7 +240,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
                     //energy bar
                     RiftLibUIElement.ProgressBarElement energyBar = new RiftLibUIElement.ProgressBarElement();
-                    energyBar.setPercentage(MathHelper.clamp(energy / maxEnergy, 0, 1));
+                    energyBar.setPercentage(energy / (float) maxEnergy);
                     energyBar.setColors(0xffff00, 0x868686);
                     energyBar.setWidth(100);
                     energyBar.setBottomSpace(6);
@@ -260,7 +260,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
                     //experience bar
                     RiftLibUIElement.ProgressBarElement xpBar = new RiftLibUIElement.ProgressBarElement();
-                    xpBar.setPercentage(MathHelper.clamp(xp / maxXP, 0, 1));
+                    xpBar.setPercentage(xp / (float) maxXP);
                     xpBar.setColors(0x98d06b, 0x868686);
                     xpBar.setWidth(100);
                     xpBar.setBottomSpace(6);
