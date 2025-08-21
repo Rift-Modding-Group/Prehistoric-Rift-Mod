@@ -31,6 +31,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     private SelectedCreatureInfo selectedCreatureInfo;
     private int currentBox;
     private RiftCreature creatureToDraw;
+    private boolean shufflePartyMemsMode;
 
     public RiftCreatureBoxScreen(int x, int y, int z) {
         super(x, y, z);
@@ -163,6 +164,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 shuffleButtonElement.setID("shuffleCreaturesButton");
                 shuffleButtonElement.setSize(20, 18);
                 shuffleButtonElement.setImage(background, 400, 360, 20, 18, 160, 282, 180, 282);
+                shuffleButtonElement.setImageSelectedUV(200, 282);
                 shuffleButtonElement.setImageScale(0.75f);
                 toReturn.add(shuffleButtonElement);
 
@@ -326,7 +328,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
     @Override
     public int[] backgroundSize() {
-        int xOffset = this.selectedCreatureInfo != null ? 124 : 0;
+        int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? 124 : 0;
         //int yOffset = this.selectedCreatureInfo != null ? 196 : 0;
         return new int[]{227 + xOffset, 246};
     }
@@ -346,7 +348,8 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
     @Override
     public RiftLibUISection modifyUISection(RiftLibUISection riftLibUISection) {
-        this.setUISectionVisibility("deathBGSelectedCreatureSection", this.selectedCreatureInfo != null && this.selectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0);
+        this.setUISectionVisibility("deathBGSelectedCreatureSection", !this.shufflePartyMemsMode && this.selectedCreatureInfo != null && this.selectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0);
+        this.setUISectionVisibility("creatureToDrawSection", !this.shufflePartyMemsMode);
 
         switch (riftLibUISection.id) {
             case "partyMembersSection": {
@@ -354,7 +357,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
                 this.getPartyMembersSection().setPartyMembersNBT(NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
 
-                int xOffset = this.selectedCreatureInfo != null ? -152 : -90;
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -152 : -90;
                 this.getPartyMembersSection().repositionSection(xOffset, -55);
                 break;
             }
@@ -364,37 +367,37 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                         this.currentBox
                 );
 
-                int xOffset = this.selectedCreatureInfo != null ? -39 : 23;
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -39 : 23;
                 this.getBoxMembersSection().repositionSection(xOffset, -35);
                 break;
             }
             case "selectedCreatureInfoSection": {
-                if (this.selectedCreatureInfo != null) this.getSelectedCreatureInfoSection().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
+                if (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) this.getSelectedCreatureInfoSection().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
                 else this.getSelectedCreatureInfoSection().setNBTTagCompound(new CreatureNBT());
                 break;
             }
             case "partyHeaderSection": {
-                int xOffset = this.selectedCreatureInfo != null ? -150 : -88;
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -150 : -88;
                 this.getSectionByID("partyHeaderSection").repositionSection(xOffset, -96);
                 break;
             }
             case "boxHeaderSection": {
-                int xOffset = this.selectedCreatureInfo != null ? -39 : 23;
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -39 : 23;
                 this.getSectionByID("boxHeaderSection").repositionSection(xOffset, -114);
                 break;
             }
             case "leftButtonHeaderSection": {
-                int xOffset = this.selectedCreatureInfo != null ? -99 : -37;
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -99 : -37;
                 this.getSectionByID("leftButtonHeaderSection").repositionSection(xOffset, -114);
                 break;
             }
             case "rightButtonHeaderSection": {
-                int xOffset = this.selectedCreatureInfo != null ? 21 : 83;
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? 21 : 83;
                 this.getSectionByID("rightButtonHeaderSection").repositionSection(xOffset, -114);
                 break;
             }
             case "shuffleCreaturesButtonSection": {
-                int xOffset = this.selectedCreatureInfo != null ? 38 : 100;
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? 38 : 100;
                 this.getSectionByID("shuffleCreaturesButtonSection").repositionSection(xOffset, -113);
                 break;
             }
@@ -429,17 +432,22 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             ));
             SelectedCreatureInfo selectionToTest = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{clickedPosition});
 
-            if (this.selectedCreatureInfo != null) {
-                if (selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
-                    this.selectNewCreature(null);
+            //swap something with a creature from the party
+            if (this.shufflePartyMemsMode) {}
+            //when not shuffling creatures, just select creature from party
+            else {
+                if (this.selectedCreatureInfo != null) {
+                    if (selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
+                        this.selectNewCreature(null);
+                    }
+                    else if (this.selectedCreatureInfo.equals(selectionToTest)) {
+                        this.selectNewCreature(null);
+                    }
+                    else this.selectNewCreature(selectionToTest);
                 }
-                else if (this.selectedCreatureInfo.equals(selectionToTest)) {
-                    this.selectNewCreature(null);
+                else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
+                    this.selectNewCreature(selectionToTest);
                 }
-                else this.selectNewCreature(selectionToTest);
-            }
-            else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
-                this.selectNewCreature(selectionToTest);
             }
         }
         else if (riftLibClickableSection.getStringID().startsWith("boxMember:")) {
@@ -450,21 +458,31 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             ));
             SelectedCreatureInfo selectionToTest = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.BOX, new int[]{this.currentBox, clickedPosition});
 
-            if (this.selectedCreatureInfo != null) {
-                if (selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
-                    this.selectNewCreature(null);
+            //swap something with a creature from the box
+            if (this.shufflePartyMemsMode) {}
+            //when not shuffling creatures, just select creature from box
+            else {
+                if (this.selectedCreatureInfo != null) {
+                    if (selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
+                        this.selectNewCreature(null);
+                    }
+                    else if (this.selectedCreatureInfo.equals(selectionToTest)) {
+                        this.selectNewCreature(null);
+                    }
+                    else this.selectNewCreature(selectionToTest);
                 }
-                else if (this.selectedCreatureInfo.equals(selectionToTest)) {
-                    this.selectNewCreature(null);
+                else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
+                    this.selectNewCreature(selectionToTest);
                 }
-                else this.selectNewCreature(selectionToTest);
-            }
-            else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
-                this.selectNewCreature(selectionToTest);
             }
         }
 
         switch (riftLibClickableSection.getStringID()) {
+            case "shuffleCreaturesButton": {
+                this.shufflePartyMemsMode = !this.shufflePartyMemsMode;
+                this.setSelectClickableSectionByID("shuffleCreaturesButton", this.shufflePartyMemsMode);
+                break;
+            }
             case "leftButton": {
                 this.currentBox = (this.currentBox <= 0) ? CreatureBoxStorage.maxBoxAmnt - 1 : this.currentBox - 1;
                 break;
