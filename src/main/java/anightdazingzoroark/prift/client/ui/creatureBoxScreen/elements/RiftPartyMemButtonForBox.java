@@ -25,7 +25,7 @@ public class RiftPartyMemButtonForBox extends RiftLibClickableSection {
         this.uvWidth = 20;
         this.uvHeight = 20;
         this.textureWidth = 400;
-        this.textureHeight = 300;
+        this.textureHeight = 360;
         this.xUV = 0;
         this.yUV = 248;
     }

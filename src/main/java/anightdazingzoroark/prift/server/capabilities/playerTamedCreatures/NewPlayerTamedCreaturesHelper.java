@@ -70,9 +70,14 @@ public class NewPlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player, tagCompounds));
     }
 
-    public static void updateIndividualPartyMem(EntityPlayer player, RiftCreature creature) {
+    public static void updateIndividualPartyMemClient(EntityPlayer player, RiftCreature creature) {
         if (player == null || creature == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualCreature(player, creature));
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualCreatureClient(player, creature));
+    }
+
+    public static void updateIndividualPartyMemServer(EntityPlayer player, RiftCreature creature) {
+        if (player == null || creature == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualCreatureServer(player, creature));
     }
 
     public static void addCreatureToParty(EntityPlayer player, RiftCreature creature) {

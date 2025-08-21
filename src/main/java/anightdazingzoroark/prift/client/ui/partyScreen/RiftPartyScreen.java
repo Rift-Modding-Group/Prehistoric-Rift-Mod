@@ -26,6 +26,7 @@ import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RiftPartyScreen extends RiftLibUI {
@@ -57,6 +58,7 @@ public class RiftPartyScreen extends RiftLibUI {
         return Arrays.asList(
                 this.partyLabelSection(),
                 this.shuffleCreaturesSection(),
+                this.deathBGSelectedCreature(),
                 this.selectedCreatureSection(),
                 this.openJournalSection(),
                 this.partyMemberManagementSection(),
@@ -106,6 +108,21 @@ public class RiftPartyScreen extends RiftLibUI {
                 clickableSection.setImageScale(0.75f);
                 clickableSection.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                 toReturn.add(clickableSection);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection deathBGSelectedCreature() {
+        return new RiftLibUISection("deathBGSelectedCreatureSection", this.width, this.height, 105, 66, 0, -31, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ImageElement backgroundElement = new RiftLibUIElement.ImageElement();
+                backgroundElement.setImage(background, 400, 360, 105, 66, 57, 249);
+                toReturn.add(backgroundElement);
 
                 return toReturn;
             }
@@ -313,6 +330,9 @@ public class RiftPartyScreen extends RiftLibUI {
 
         this.setUISectionVisibility("moveDescriptionBGSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement && this.selectedMovePos >= 0);
         this.setUISectionVisibility("moveDescriptionSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement && this.selectedMovePos >= 0);
+
+        this.setUISectionVisibility("deathBGSelectedCreatureSection", this.selectedCreature != null && this.selectedCreature.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0);
+
         switch (section.id) {
             case "partyLabelSection": {
                 int xOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -124 : 0;

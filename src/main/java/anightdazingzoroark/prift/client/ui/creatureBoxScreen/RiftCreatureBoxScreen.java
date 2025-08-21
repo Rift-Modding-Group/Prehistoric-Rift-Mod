@@ -63,6 +63,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 this.createLeftButtonHeaderSection(),
                 this.createRightButtonHeaderSection(),
                 this.createShuffleCreaturesButtonSection(),
+                this.createDeathBGSelectedCreature(),
                 this.createCreatureToDrawSection(),
                 this.createSelectedCreatureInfoSection()
         );
@@ -110,7 +111,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 boxHeaderElement.setSize(96, 13);
                 boxHeaderElement.setTextContent("");
                 boxHeaderElement.setTextOffsets(0, 1);
-                boxHeaderElement.setImage(background, 400, 300, 96, 13, 100, 255, 196, 255);
+                boxHeaderElement.setImage(background, 400, 360, 96, 13, 100, 255, 196, 255);
                 toReturn.add(boxHeaderElement);
 
                 return toReturn;
@@ -127,7 +128,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 RiftLibUIElement.ClickableSectionElement leftButtonElement = new RiftLibUIElement.ClickableSectionElement();
                 leftButtonElement.setID("leftButton");
                 leftButtonElement.setSize(13, 13);
-                leftButtonElement.setImage(background, 400, 300, 13, 13, 173, 268, 199, 268);
+                leftButtonElement.setImage(background, 400, 360, 13, 13, 173, 268, 199, 268);
                 toReturn.add(leftButtonElement);
 
                 return toReturn;
@@ -144,7 +145,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 RiftLibUIElement.ClickableSectionElement rightButtonElement = new RiftLibUIElement.ClickableSectionElement();
                 rightButtonElement.setID("rightButton");
                 rightButtonElement.setSize(13, 13);
-                rightButtonElement.setImage(background, 400, 300, 13, 13, 160, 268, 186, 268);
+                rightButtonElement.setImage(background, 400, 360, 13, 13, 160, 268, 186, 268);
                 toReturn.add(rightButtonElement);
 
                 return toReturn;
@@ -161,7 +162,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 RiftLibUIElement.ClickableSectionElement shuffleButtonElement = new RiftLibUIElement.ClickableSectionElement();
                 shuffleButtonElement.setID("shuffleCreaturesButton");
                 shuffleButtonElement.setSize(20, 18);
-                shuffleButtonElement.setImage(background, 400, 300, 20, 18, 160, 282, 180, 282);
+                shuffleButtonElement.setImage(background, 400, 360, 20, 18, 160, 282, 180, 282);
                 shuffleButtonElement.setImageScale(0.75f);
                 toReturn.add(shuffleButtonElement);
 
@@ -187,6 +188,21 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                     creatureElement.setRotationAngle(150);
                     toReturn.add(creatureElement);
                 }
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection createDeathBGSelectedCreature() {
+        return new RiftLibUISection("deathBGSelectedCreatureSection", this.width, this.height, 105, 66, 113, -62, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ImageElement backgroundElement = new RiftLibUIElement.ImageElement();
+                backgroundElement.setImage(background, 400, 360, 105, 66, 220, 282);
+                toReturn.add(backgroundElement);
 
                 return toReturn;
             }
@@ -300,7 +316,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
     @Override
     public int[] backgroundTextureSize() {
-        return new int[]{400, 300};
+        return new int[]{400, 360};
     }
 
     @Override
@@ -330,6 +346,8 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
     @Override
     public RiftLibUISection modifyUISection(RiftLibUISection riftLibUISection) {
+        this.setUISectionVisibility("deathBGSelectedCreatureSection", this.selectedCreatureInfo != null && this.selectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0);
+
         switch (riftLibUISection.id) {
             case "partyMembersSection": {
                 //update party members

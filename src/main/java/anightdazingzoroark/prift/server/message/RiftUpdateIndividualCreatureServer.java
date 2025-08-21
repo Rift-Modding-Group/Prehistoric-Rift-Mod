@@ -1,16 +1,13 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -20,52 +17,37 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.UUID;
 
-public class RiftUpdateIndividualCreature implements IMessage {
+public class RiftUpdateIndividualCreatureServer implements IMessage {
     private int playerId;
     private int creatureId;
-    private int pos;
-    private CreatureNBT tagCompound;
 
-    public RiftUpdateIndividualCreature() {}
+    public RiftUpdateIndividualCreatureServer() {}
 
-    public RiftUpdateIndividualCreature(EntityPlayer player, RiftCreature creature) {
+    public RiftUpdateIndividualCreatureServer(EntityPlayer player, RiftCreature creature) {
         this.playerId = player.getEntityId();
         this.creatureId = creature.getEntityId();
-        this.pos = -1;
-        this.tagCompound = new CreatureNBT();
-    }
-
-    public RiftUpdateIndividualCreature(EntityPlayer player, int pos, CreatureNBT tagCompound) {
-        this.playerId = player.getEntityId();
-        this.creatureId = -1;
-        this.pos = pos;
-        this.tagCompound = tagCompound;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.playerId = buf.readInt();
         this.creatureId = buf.readInt();
-        this.pos = buf.readInt();
-        this.tagCompound = new CreatureNBT(ByteBufUtils.readTag(buf));
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.playerId);
         buf.writeInt(this.creatureId);
-        buf.writeInt(this.pos);
-        ByteBufUtils.writeTag(buf, this.tagCompound.getCreatureNBT());
     }
 
-    public static class Handler implements IMessageHandler<RiftUpdateIndividualCreature, IMessage> {
+    public static class Handler implements IMessageHandler<RiftUpdateIndividualCreatureServer, IMessage> {
         @Override
-        public IMessage onMessage(RiftUpdateIndividualCreature message, MessageContext ctx) {
+        public IMessage onMessage(RiftUpdateIndividualCreatureServer message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handle(RiftUpdateIndividualCreature message, MessageContext ctx) {
+        private void handle(RiftUpdateIndividualCreatureServer message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
@@ -89,16 +71,7 @@ public class RiftUpdateIndividualCreature implements IMessage {
 
                     //if creature is in the party, go on and update
                     CreatureNBT creatureNBT = new CreatureNBT(creature);
-                    RiftMessages.WRAPPER.sendTo(new RiftUpdateIndividualCreature(player, pos, creatureNBT), (EntityPlayerMP) player);
-                }
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                if (playerTamedCreatures != null) {
-                    playerTamedCreatures.setPartyMemNBT(message.pos, message.tagCompound);
+                    playerTamedCreatures.setPartyMemNBT(pos, creatureNBT);
                 }
             }
         }

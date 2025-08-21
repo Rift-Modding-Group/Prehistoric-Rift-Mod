@@ -74,7 +74,6 @@ import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -479,21 +478,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         int currentHealthBucket = (int)((this.getHealth() / this.getMaxHealth()) * 10);
         if (currentHealthBucket != this.cachedHealthBucket) {
             this.cachedHealthBucket = currentHealthBucket;
-            NewPlayerTamedCreaturesHelper.updateIndividualPartyMem((EntityPlayer) this.getOwner(), this);
+            NewPlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
         }
 
         //energy
         int energyBucket = (int)(((float) this.getEnergy() / this.getMaxEnergy()) * 10);
         if (energyBucket != this.cachedEnergyBucket) {
             this.cachedEnergyBucket = energyBucket;
-            NewPlayerTamedCreaturesHelper.updateIndividualPartyMem((EntityPlayer) this.getOwner(), this);
+            NewPlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
         }
 
         //xp
         int xpBucket = (int)(((float) this.getXP() / this.getMaxXP()) * 10);
         if (xpBucket != this.cachedXPBucket) {
             this.cachedXPBucket = xpBucket;
-            NewPlayerTamedCreaturesHelper.updateIndividualPartyMem((EntityPlayer) this.getOwner(), this);
+            NewPlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
         }
     }
 
@@ -3129,6 +3128,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.getActivePotionEffects().clear();
         this.setBoxReviveTime(GeneralConfig.creatureBoxReviveTime);
         //todo: go back here and redo death related stuff
+        NewPlayerTamedCreaturesHelper.updateIndividualPartyMemServer((EntityPlayer) this.getOwner(), this);
+        NewPlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
 
         super.onDeath(cause);
     }

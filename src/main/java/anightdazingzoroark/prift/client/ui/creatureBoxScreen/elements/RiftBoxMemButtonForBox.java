@@ -21,7 +21,7 @@ public class RiftBoxMemButtonForBox extends RiftLibClickableSection {
         this.uvWidth = 32;
         this.uvHeight = 32;
         this.textureWidth = 400;
-        this.textureHeight = 300;
+        this.textureHeight = 360;
         this.xUV = 0;
         this.yUV = 268;
     }

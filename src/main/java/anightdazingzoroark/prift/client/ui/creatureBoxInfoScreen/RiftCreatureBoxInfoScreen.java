@@ -48,6 +48,7 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
     @Override
     public List<RiftLibUISection> uiSections() {
         return Arrays.asList(
+                this.createDeathBGSelectedCreature(),
                 this.createSelectedCreatureOptionsSection(),
                 CommonUISections.partyMemberInfoSection(this.width, this.height, 64, -17, this.fontRenderer, this.mc),
                 CommonUISections.partyMemberMovesSection(background, 400, 300,
@@ -67,6 +68,21 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
     //get party member moves section once its created
     private RiftUISectionCreatureNBTUser getPartyMemberMovesSection() {
         return (RiftUISectionCreatureNBTUser) this.getSectionByID("partyMemberMovesSection");
+    }
+
+    private RiftLibUISection createDeathBGSelectedCreature() {
+        return new RiftLibUISection("deathBGSelectedCreatureSection", this.width, this.height, 108, 66, -62, -38, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ImageElement backgroundElement = new RiftLibUIElement.ImageElement();
+                backgroundElement.setImage(background, 400, 300, 108, 66, 252, 94);
+                toReturn.add(backgroundElement);
+
+                return toReturn;
+            }
+        };
     }
 
     private RiftLibUISection createCreatureToDrawSection() {
