@@ -1,12 +1,15 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
+import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUserWithIntSelector;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
@@ -103,6 +106,127 @@ public class CommonUISections {
                     acquisitionText.setBottomSpace(6);
                     toReturn.add(acquisitionText);
                 }
+
+                return toReturn;
+            }
+        };
+    }
+
+    public static RiftLibUISection partyMemberMovesSection(ResourceLocation background,
+                                                           int textureWidth, int textureHeight,
+                                                           int shuffleButtonXUV, int shuffleButtonYUV, int shuffleButtonHoveredXUV, int shuffleButtonHoveredYUV, int shuffleButtonSelectedXUV, int shuffleButtonSelectedYUV,
+                                                           int moveButtonXUV, int moveButtonYUV, int moveButtonHoveredXUV, int moveButtonHoveredYUV, int moveButtonSelectedXUV, int moveButtonSelectedYUV,
+                                                           int guiWidth, int guiHeight, int xPos, int yPos, FontRenderer fontRenderer, Minecraft minecraft) {
+        return new RiftUISectionCreatureNBTUser("partyMemberMovesSection", new CreatureNBT(), guiWidth, guiHeight, 115, 65, xPos, yPos, fontRenderer, minecraft) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //shuffle moves button
+                RiftLibUIElement.ClickableSectionElement shuffleMoves = new RiftLibUIElement.ClickableSectionElement();
+                shuffleMoves.setID("shuffleMoves");
+                shuffleMoves.setAlignment(RiftLibUIElement.ALIGN_RIGHT);
+                shuffleMoves.setImage(background, textureWidth, textureHeight, 20, 18, shuffleButtonXUV, shuffleButtonYUV, shuffleButtonHoveredXUV, shuffleButtonHoveredYUV);
+                shuffleMoves.setImageSelectedUV(shuffleButtonSelectedXUV, shuffleButtonSelectedYUV);
+                shuffleMoves.setSize(19, 17);
+                shuffleMoves.setImageScale(0.75f);
+                shuffleMoves.setBottomSpace(0);
+                toReturn.add(shuffleMoves);
+
+                //for moves
+                for (int i = 0; i < this.nbtTagCompound.getMovesListNBT().tagCount(); i++) {
+                    CreatureMove move = this.nbtTagCompound.getMovesList().get(i);
+                    RiftLibUIElement.ClickableSectionElement moveClickableSection = new RiftLibUIElement.ClickableSectionElement();
+                    moveClickableSection.setID("move:"+i);
+                    moveClickableSection.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+                    moveClickableSection.setImage(background, textureWidth, textureHeight, 105, 13, moveButtonXUV, moveButtonYUV, moveButtonHoveredXUV, moveButtonHoveredYUV);
+                    moveClickableSection.setImageSelectedUV(moveButtonSelectedXUV, moveButtonSelectedYUV);
+                    moveClickableSection.setTextContent(move.getTranslatedName());
+                    moveClickableSection.setTextScale(0.75f);
+                    moveClickableSection.setTextOffsets(0, 1);
+                    moveClickableSection.setSize(105, 13);
+                    moveClickableSection.setBottomSpace(3);
+                    toReturn.add(moveClickableSection);
+                }
+
+                return toReturn;
+            }
+        };
+    }
+
+    public static RiftLibUISection moveDescriptionBackgroundSection(ResourceLocation background,
+                                                                    int textureWidth, int textureHeight,
+                                                                    int uvX, int uvY,
+                                                                    int guiWidth, int guiHeight, int xPos, int yPos, FontRenderer fontRenderer, Minecraft minecraft) {
+        return new RiftLibUISection("moveDescriptionBGSection", guiWidth, guiHeight, 113, 55, xPos, yPos, fontRenderer, minecraft) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //the background image
+                RiftLibUIElement.ImageElement backgroundElement = new RiftLibUIElement.ImageElement();
+                backgroundElement.setImage(background, textureWidth, textureHeight, 113, 55, uvX, uvY);
+                toReturn.add(backgroundElement);
+
+                return toReturn;
+            }
+        };
+    }
+
+    public static RiftUISectionCreatureNBTUserWithIntSelector moveDescriptionSection(int guiWidth, int guiHeight, int xPos, int yPos, FontRenderer fontRenderer, Minecraft minecraft) {
+        return new RiftUISectionCreatureNBTUserWithIntSelector("moveDescriptionSection", new CreatureNBT(), guiWidth, guiHeight, 107, 49, xPos, yPos, fontRenderer, minecraft) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //move description of selected move
+                if (this.selector >= 0 && this.nbtTagCompound != null && !this.nbtTagCompound.getMovesList().isEmpty()) {
+                    RiftLibUIElement.TextElement moveDescription = new RiftLibUIElement.TextElement();
+                    moveDescription.setText(this.nbtTagCompound.getMovesList().get(this.selector).getTranslatedDescription());
+                    moveDescription.setScale(0.75f);
+                    moveDescription.setTextColor(0xFFFFFF);
+                    toReturn.add(moveDescription);
+                }
+
+                return toReturn;
+            }
+        };
+    }
+
+    public static RiftLibUISection informationClickableSection(int guiWidth, int guiHeight, int xPos, int yPos, FontRenderer fontRenderer, Minecraft minecraft) {
+        return new RiftLibUISection("informationSection", guiWidth, guiHeight, 54, 11, xPos, yPos, fontRenderer, minecraft) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //clickable section
+                RiftLibUIElement.ClickableSectionElement informationClickableSection = new RiftLibUIElement.ClickableSectionElement();
+                informationClickableSection.setID("informationClickableSection");
+                informationClickableSection.setTextContent(I18n.format("journal.party_member.info"));
+                informationClickableSection.setTextScale(0.75f);
+                informationClickableSection.setTextOffsets(0, 1);
+                informationClickableSection.setSize(55, 11);
+                toReturn.add(informationClickableSection);
+
+                return toReturn;
+            }
+        };
+    }
+
+    public static RiftLibUISection movesClickableSection(int guiWidth, int guiHeight, int xPos, int yPos, FontRenderer fontRenderer, Minecraft minecraft) {
+        return new RiftLibUISection("movesSection", guiWidth, guiHeight, 54, 11, xPos, yPos, fontRenderer, minecraft) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                //clickable section
+                RiftLibUIElement.ClickableSectionElement movesClickableSection = new RiftLibUIElement.ClickableSectionElement();
+                movesClickableSection.setID("movesClickableSection");
+                movesClickableSection.setTextContent(I18n.format("journal.party_member.moves"));
+                movesClickableSection.setTextScale(0.75f);
+                movesClickableSection.setTextOffsets(0, 1);
+                movesClickableSection.setSize(55, 11);
+                toReturn.add(movesClickableSection);
 
                 return toReturn;
             }

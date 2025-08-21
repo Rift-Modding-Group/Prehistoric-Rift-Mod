@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.CommonUISections;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
+import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUserWithIntSelector;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
 import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMembersSection;
@@ -64,11 +65,17 @@ public class RiftPartyScreen extends RiftLibUI {
                 this.partyMemberManagementSection(),
                 this.partyMembersSection(),
                 CommonUISections.partyMemberInfoSection(this.width, this.height, 124, -16, this.fontRenderer, this.mc),
-                this.informationSection(),
-                this.movesSection(),
-                this.partyMemberMovesSection(),
-                this.moveDescriptionBackgroundSection(),
-                this.moveDescriptionSection()
+                CommonUISections.informationClickableSection(this.width, this.height, 94, -85, this.fontRenderer, this.mc),
+                CommonUISections.movesClickableSection(this.width, this.height, 152, -85, this.fontRenderer, this.mc),
+                CommonUISections.partyMemberMovesSection(background, 400, 360,
+                        75, 203, 95, 203, 115, 203,
+                        287, 237, 287, 250, 287, 263,
+                        this.width, this.height, 124, -46, this.fontRenderer, this.mc
+                ),
+                CommonUISections.moveDescriptionBackgroundSection(background, 400, 360,
+                        287, 182, this.width, this.height, 124, 15, this.fontRenderer, this.mc
+                ),
+                CommonUISections.moveDescriptionSection(this.width, this.height, 124, 15, this.fontRenderer, this.mc)
         );
     }
 
@@ -214,130 +221,14 @@ public class RiftPartyScreen extends RiftLibUI {
         return (RiftUISectionCreatureNBTUser) this.getSectionByID("partyMemberInfoSection");
     }
 
-    //create the party member moves section
-    private RiftUISectionCreatureNBTUser partyMemberMovesSection() {
-        return new RiftUISectionCreatureNBTUser("partyMemberMovesSection", this.getMemberNBT(), this.width, this.height, 115, 65, 124, -46, this.fontRenderer, this.mc) {
-            @Override
-            public List<RiftLibUIElement.Element> defineSectionContents() {
-                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
-
-                //shuffle moves button
-                RiftLibUIElement.ClickableSectionElement shuffleMoves = new RiftLibUIElement.ClickableSectionElement();
-                shuffleMoves.setID("shuffleMoves");
-                shuffleMoves.setAlignment(RiftLibUIElement.ALIGN_RIGHT);
-                shuffleMoves.setImage(background, 400, 360, 20, 18, 75, 203, 95, 203);
-                shuffleMoves.setImageSelectedUV(115, 203);
-                shuffleMoves.setSize(19, 17);
-                shuffleMoves.setImageScale(0.75f);
-                shuffleMoves.setBottomSpace(0);
-                toReturn.add(shuffleMoves);
-
-                //for moves
-                for (int i = 0; i < this.nbtTagCompound.getMovesListNBT().tagCount(); i++) {
-                    CreatureMove move = this.nbtTagCompound.getMovesList().get(i);
-                    RiftLibUIElement.ClickableSectionElement moveClickableSection = new RiftLibUIElement.ClickableSectionElement();
-                    moveClickableSection.setID("move:"+i);
-                    moveClickableSection.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-                    moveClickableSection.setImage(background, 400, 360, 105, 13, 287, 237, 287, 250);
-                    moveClickableSection.setImageSelectedUV(287, 263);
-                    moveClickableSection.setTextContent(move.getTranslatedName());
-                    moveClickableSection.setTextScale(0.75f);
-                    moveClickableSection.setTextOffsets(0, 1);
-                    moveClickableSection.setSize(105, 13);
-                    moveClickableSection.setBottomSpace(3);
-                    toReturn.add(moveClickableSection);
-                }
-
-                return toReturn;
-            }
-        };
-    }
-
     //get party member moves section once its created
     private RiftUISectionCreatureNBTUser getPartyMemberMovesSection() {
         return (RiftUISectionCreatureNBTUser) this.getSectionByID("partyMemberMovesSection");
     }
 
-    private RiftLibUISection informationSection() {
-        return new RiftLibUISection("informationSection", this.width, this.height, 54, 11, 94, -85, this.fontRenderer, this.mc) {
-            @Override
-            public List<RiftLibUIElement.Element> defineSectionContents() {
-                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
-
-                //clickable section
-                RiftLibUIElement.ClickableSectionElement informationClickableSection = new RiftLibUIElement.ClickableSectionElement();
-                informationClickableSection.setID("informationClickableSection");
-                informationClickableSection.setTextContent(I18n.format("journal.party_member.info"));
-                informationClickableSection.setTextScale(0.75f);
-                informationClickableSection.setTextOffsets(0, 1);
-                informationClickableSection.setSize(55, 11);
-                toReturn.add(informationClickableSection);
-
-                return toReturn;
-            }
-        };
-    }
-
-    private RiftLibUISection movesSection() {
-        return new RiftLibUISection("movesSection", this.width, this.height, 54, 11, 152, -85, this.fontRenderer, this.mc) {
-            @Override
-            public List<RiftLibUIElement.Element> defineSectionContents() {
-                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
-
-                //clickable section
-                RiftLibUIElement.ClickableSectionElement movesClickableSection = new RiftLibUIElement.ClickableSectionElement();
-                movesClickableSection.setID("movesClickableSection");
-                movesClickableSection.setTextContent(I18n.format("journal.party_member.moves"));
-                movesClickableSection.setTextScale(0.75f);
-                movesClickableSection.setTextOffsets(0, 1);
-                movesClickableSection.setSize(55, 11);
-                toReturn.add(movesClickableSection);
-
-                return toReturn;
-            }
-        };
-    }
-
-    private RiftLibUISection moveDescriptionBackgroundSection() {
-        return new RiftLibUISection("moveDescriptionBGSection", this.width, this.height, 113, 55, 124, 15, this.fontRenderer, this.mc) {
-            @Override
-            public List<RiftLibUIElement.Element> defineSectionContents() {
-                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
-
-                //the background image
-                RiftLibUIElement.ImageElement backgroundElement = new RiftLibUIElement.ImageElement();
-                backgroundElement.setImage(background, 400, 360, 113, 55, 287, 182);
-                toReturn.add(backgroundElement);
-
-                return toReturn;
-            }
-        };
-    }
-
-    //create move description section
-    private RiftUISectionCreatureNBTUser moveDescriptionSection() {
-        return new RiftUISectionCreatureNBTUser("moveDescriptionSection", this.getMemberNBT(), this.width, this.height, 107, 49, 124, 15, this.fontRenderer, this.mc) {
-            @Override
-            public List<RiftLibUIElement.Element> defineSectionContents() {
-                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
-
-                //move description of selected move
-                if (selectedMovePos >= 0 && !this.nbtTagCompound.getMovesList().isEmpty()) {
-                    RiftLibUIElement.TextElement moveDescription = new RiftLibUIElement.TextElement();
-                    moveDescription.setText(this.nbtTagCompound.getMovesList().get(selectedMovePos).getTranslatedDescription());
-                    moveDescription.setScale(0.75f);
-                    moveDescription.setTextColor(0xFFFFFF);
-                    toReturn.add(moveDescription);
-                }
-
-                return toReturn;
-            }
-        };
-    }
-
     //get move description section after its created
-    private RiftUISectionCreatureNBTUser getMoveDescription() {
-        return (RiftUISectionCreatureNBTUser) this.getSectionByID("moveDescriptionSection");
+    private RiftUISectionCreatureNBTUserWithIntSelector getMoveDescription() {
+        return (RiftUISectionCreatureNBTUserWithIntSelector) this.getSectionByID("moveDescriptionSection");
     }
 
     @Override
@@ -467,6 +358,7 @@ public class RiftPartyScreen extends RiftLibUI {
             }
             case "moveDescriptionSection": {
                 this.getMoveDescription().setNBTTagCompound(this.getMemberNBT());
+                this.getMoveDescription().setSelector(this.selectedMovePos);
                 break;
             }
         }
