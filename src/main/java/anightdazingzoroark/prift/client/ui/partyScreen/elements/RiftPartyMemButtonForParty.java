@@ -127,7 +127,7 @@ public class RiftPartyMemButtonForParty extends RiftLibClickableSection {
             //render creature energy
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
-            int energyBarLength = MathHelper.clamp((int) ((this.creatureNBT.getCreatureEnergy()[0] / this.creatureNBT.getCreatureEnergy()[1]) * 51),0,51);
+            int energyBarLength = MathHelper.clamp((int) ((this.creatureNBT.getCreatureEnergy()[0] / (float) this.creatureNBT.getCreatureEnergy()[1]) * 51),0,51);
             int energyBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 25;
             int energyBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 15;
             drawModalRectWithCustomSizedTexture(energyBarX, energyBarY, 0, 302, energyBarLength, 1, this.textureWidth, this.textureHeight);
@@ -135,7 +135,7 @@ public class RiftPartyMemButtonForParty extends RiftLibClickableSection {
             //render creature xp
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.minecraft.getTextureManager().bindTexture(this.textureLocation);
-            int xpBarLength = MathHelper.clamp((int) ((this.creatureNBT.getCreatureXP()[0] / this.creatureNBT.getCreatureXP()[1]) * 51),0,51);
+            int xpBarLength = MathHelper.clamp((int) ((this.creatureNBT.getCreatureXP()[0] / (float) this.creatureNBT.getCreatureXP()[1]) * 51),0,51);
             int xpBarX = this.guiWidth / 2 + this.xOffset + this.xAddOffset - 25;
             int xpBarY = (this.guiHeight - 1) / 2 + this.yOffset + this.yAddOffset + 17;
             drawModalRectWithCustomSizedTexture(xpBarX, xpBarY, 0, 303, xpBarLength, 1, this.textureWidth, this.textureHeight);
