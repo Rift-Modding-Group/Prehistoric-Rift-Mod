@@ -433,7 +433,13 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             SelectedCreatureInfo selectionToTest = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{clickedPosition});
 
             //swap something with a creature from the party
-            if (this.shufflePartyMemsMode) {}
+            if (this.shufflePartyMemsMode) {
+                if (this.selectedCreatureInfo != null) {
+                    NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                    this.selectNewCreature(null);
+                }
+                else this.selectNewCreature(selectionToTest);
+            }
             //when not shuffling creatures, just select creature from party
             else {
                 if (this.selectedCreatureInfo != null) {
@@ -459,7 +465,13 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             SelectedCreatureInfo selectionToTest = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.BOX, new int[]{this.currentBox, clickedPosition});
 
             //swap something with a creature from the box
-            if (this.shufflePartyMemsMode) {}
+            if (this.shufflePartyMemsMode) {
+                if (this.selectedCreatureInfo != null) {
+                    NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                    this.selectNewCreature(null);
+                }
+                else this.selectNewCreature(selectionToTest);
+            }
             //when not shuffling creatures, just select creature from box
             else {
                 if (this.selectedCreatureInfo != null) {

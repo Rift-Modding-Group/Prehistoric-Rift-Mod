@@ -471,15 +471,16 @@ public class RiftPartyScreen extends RiftLibUI {
             int clickedPosition = Integer.parseInt(riftLibClickableSection.getStringID().substring(
                     riftLibClickableSection.getStringID().indexOf(":") + 1
             ));
+            SelectedCreatureInfo newSelected = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{clickedPosition});
 
             //for swapping party members, stuff here works as expected
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreature == null && partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().nbtIsEmpty()) {
-                    this.selectedCreature = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{clickedPosition});
+                    this.selectedCreature = newSelected;
                     this.setSelectClickableSectionByID("partyMember:"+clickedPosition, true);
                 }
                 else if (this.selectedCreature != null) {
-                    NewPlayerTamedCreaturesHelper.rearrangePartyCreatures(this.mc.player, this.selectedCreature.pos[0], clickedPosition);
+                    NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreature, newSelected);
                     this.setSelectClickableSectionByID("partyMember:"+this.selectedCreature.pos[0], false);
                     this.selectedCreature = null;
                 }
@@ -488,7 +489,7 @@ public class RiftPartyScreen extends RiftLibUI {
             else {
                 if (this.selectedCreature == null || clickedPosition != this.selectedCreature.pos[0]) {
                     if (this.selectedCreature != null) this.setSelectClickableSectionByID("partyMember:"+this.selectedCreature.pos[0], false);
-                    this.selectedCreature = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{clickedPosition});
+                    this.selectedCreature = newSelected;
                     if (partyMemButtonForParty.getCreatureNBT() != null && !partyMemButtonForParty.getCreatureNBT().nbtIsEmpty()) this.setSelectClickableSectionByID("partyMember:"+this.selectedCreature.pos[0], true);
                     this.creatureToDraw = partyMemButtonForParty.getCreatureFromNBT();
                 }
@@ -544,41 +545,4 @@ public class RiftPartyScreen extends RiftLibUI {
 
     @Override
     public void onElementHovered(RiftLibUISection section, RiftLibUIElement.Element element) {}
-
-    private List<RiftLibUIElement.Element> changeNamePopup() {
-        List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
-
-        RiftLibUIElement.TextBoxElement textBox = new RiftLibUIElement.TextBoxElement();
-        textBox.setID("newName");
-        textBox.setWidth(100);
-        textBox.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-        if (!this.getMemberNBT().getCustomName().isEmpty()) {
-            textBox.setDefaultText(this.getMemberNBT().getCustomName());
-        }
-        toReturn.add(textBox);
-
-        //table for buttons
-        RiftLibUIElement.TableContainerElement buttonContainer = new RiftLibUIElement.TableContainerElement();
-        buttonContainer.setCellSize(70, 20);
-        buttonContainer.setRowCount(2);
-        buttonContainer.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-
-        //confirm button
-        RiftLibUIElement.ButtonElement confirmButton = new RiftLibUIElement.ButtonElement();
-        confirmButton.setSize(60, 20);
-        confirmButton.setText(I18n.format("radial.popup_button.confirm"));
-        confirmButton.setID("setNewName");
-        buttonContainer.addElement(confirmButton);
-
-        //cancel button
-        RiftLibUIElement.ButtonElement cancelButton = new RiftLibUIElement.ButtonElement();
-        cancelButton.setSize(60, 20);
-        cancelButton.setText(I18n.format("radial.popup_button.cancel"));
-        cancelButton.setID("exitPopup");
-        buttonContainer.addElement(cancelButton);
-
-        toReturn.add(buttonContainer);
-
-        return toReturn;
-    }
 }

@@ -226,6 +226,11 @@ public class NewPlayerTamedCreaturesHelper {
         if (player == null || selectedCreatureInfo == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftReleaseSelectedCreature(player, selectedCreatureInfo));
     }
+
+    public static void swapCreatures(EntityPlayer player, SelectedCreatureInfo selectedPos, SelectedCreatureInfo posToSwap) {
+        if (player == null || selectedPos == null || posToSwap == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftSwapCreaturePositions(player, selectedPos, posToSwap));
+    }
     //getter stuff for SelectedCreatureInfo class ends here
 
     //swapping related stuff starts here
