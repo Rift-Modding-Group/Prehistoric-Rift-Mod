@@ -127,7 +127,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.Handler.class, RiftForceSyncLastOpenedBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetLastOpenedBox.Handler.class, RiftSetLastOpenedBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftNewAddToBox.Handler.class, RiftNewAddToBox.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftNewChangePartyOrBoxOrder.Handler.class, RiftNewChangePartyOrBoxOrder.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSwapCreatureMoves.Handler.class, RiftSwapCreatureMoves.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeCreatureBoxName.Handler.class, RiftChangeCreatureBoxName.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeSelectedCreatureName.Handler.class, RiftChangeSelectedCreatureName.class, id++, Side.SERVER);
