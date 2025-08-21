@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RiftCreatureBoxScreen extends RiftLibUI {
-    private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/new_creature_box_background.png");
+    private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png");
     private SelectedCreatureInfo selectedCreatureInfo;
     private int currentBox;
     private RiftCreature creatureToDraw;

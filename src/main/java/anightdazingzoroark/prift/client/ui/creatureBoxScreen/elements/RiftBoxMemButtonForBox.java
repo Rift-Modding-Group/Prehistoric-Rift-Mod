@@ -17,7 +17,7 @@ public class RiftBoxMemButtonForBox extends RiftLibClickableSection {
         this.creatureNBT = creatureNBT;
 
         //deal with uv textures
-        this.textureLocation = new ResourceLocation(RiftInitialize.MODID, "textures/ui/new_creature_box_background.png");
+        this.textureLocation = new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png");
         this.uvWidth = 32;
         this.uvHeight = 32;
         this.textureWidth = 400;
