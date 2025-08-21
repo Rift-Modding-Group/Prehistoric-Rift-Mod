@@ -74,6 +74,17 @@ public class RiftSwapCreatureMoves implements IMessage {
                                 moveToSwapInfo
                         ));
                     }
+                    else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                        playerTamedCreatures.getBoxNBT().setBoxCreature(
+                                selectedCreatureInfo.pos[0],
+                                selectedCreatureInfo.pos[1],
+                                this.swapCreatureMoves(
+                                        selectedCreatureNBT,
+                                        moveSelectedInfo,
+                                        moveToSwapInfo
+                                )
+                        );
+                    }
                 }
             }
         }
