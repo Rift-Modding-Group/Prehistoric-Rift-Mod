@@ -201,10 +201,10 @@ public class RiftMovesScreen extends RiftLibUI {
         this.setUISectionVisibility("moveDescriptionSection", (this.hoveredMoveInfo != null || this.selectedMoveInfo != null));
 
         if (riftLibUISection.id.equals("learntMovesSection")) {
-            this.getLearntMovesSection().setNBTTagCompound(NewPlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.mc.player, this.selectedCreature));
+            this.getLearntMovesSection().setNBTTagCompound(this.selectedCreature.getCreatureNBT(this.mc.player));
         }
         if (riftLibUISection.id.equals("learnableMovesSection")) {
-            this.getLearnableMovesSection().setNBTTagCompound(NewPlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.mc.player, this.selectedCreature));
+            this.getLearnableMovesSection().setNBTTagCompound(this.selectedCreature.getCreatureNBT(this.mc.player));
         }
 
         return riftLibUISection;

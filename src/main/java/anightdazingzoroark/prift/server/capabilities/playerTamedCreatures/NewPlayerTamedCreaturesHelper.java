@@ -234,11 +234,6 @@ public class NewPlayerTamedCreaturesHelper {
     //getter stuff for SelectedCreatureInfo class ends here
 
     //move swapping related stuff starts here
-    public static void partyMemSwapLearntMoveWithLearnableMove(EntityPlayer player, int partyMemPos, int learntMovePos, String learnableMove) {
-        if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftChangeLearntMoveWithLearnableMove(player, partyMemPos, learntMovePos, learnableMove));
-    }
-
     public static void swapCreatureMoves(EntityPlayer player, SelectedCreatureInfo selectedCreature, SelectedMoveInfo moveSelected, SelectedMoveInfo moveToSwap) {
         if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftSwapCreatureMoves(player, selectedCreature, moveSelected, moveToSwap));
