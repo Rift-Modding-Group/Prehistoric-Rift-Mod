@@ -200,7 +200,7 @@ public class NewPlayerTamedCreaturesHelper {
     }
     //box stuff ends here
 
-    //getter stuff for SelectedCreatureInfo class starts here
+    //helper stuff for SelectedCreatureInfo class starts here
     public static CreatureNBT getCreatureNBTFromSelected(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
         if (player == null || selectedCreatureInfo == null) return new CreatureNBT();
         if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
@@ -210,6 +210,16 @@ public class NewPlayerTamedCreaturesHelper {
             return getCreatureBoxStorage(player).getBoxContents(selectedCreatureInfo.pos[0]).get(selectedCreatureInfo.pos[1]);
         }
         return new CreatureNBT();
+    }
+
+    public static void setSelectedCreatureName(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, String newName) {
+        if (player == null || selectedCreatureInfo == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftChangeSelectedCreatureName(player, selectedCreatureInfo, newName));
+    }
+
+    public static void releaseSelectedCreature(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
+        if (player == null || selectedCreatureInfo == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftReleaseSelectedCreature(player, selectedCreatureInfo));
     }
     //getter stuff for SelectedCreatureInfo class ends here
 

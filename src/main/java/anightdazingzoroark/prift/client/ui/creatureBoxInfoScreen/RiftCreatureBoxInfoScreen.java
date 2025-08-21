@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
@@ -40,6 +41,8 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
         return Arrays.asList(
                 this.createSelectedCreatureOptionsSection(),
                 CommonUISections.partyMemberInfoSection(this.width, this.height, 64, -17, this.fontRenderer, this.mc),
+                CommonUISections.informationClickableSection(this.width, this.height, 34, -86, this.fontRenderer, this.mc),
+                CommonUISections.movesClickableSection(this.width, this.height, 92, -86, this.fontRenderer, this.mc),
                 this.createCreatureToDrawSection()
         );
     }
@@ -90,7 +93,7 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
                     RiftLibUIElement.ButtonElement changeNameButton = new RiftLibUIElement.ButtonElement();
                     changeNameButton.setSize(100, 20);
                     changeNameButton.setText(I18n.format("creature_box.change_name"));
-                    changeNameButton.setID("changeName");
+                    changeNameButton.setID("openChangeNamePopup");
                     changeNameButton.setBottomSpace(6);
                     toReturn.add(changeNameButton);
 
@@ -98,7 +101,7 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
                     RiftLibUIElement.ButtonElement releaseButton = new RiftLibUIElement.ButtonElement();
                     releaseButton.setSize(100, 20);
                     releaseButton.setText(I18n.format("creature_box.release"));
-                    releaseButton.setID("release");
+                    releaseButton.setID("openReleaseConfirmPopup");
                     releaseButton.setBottomSpace(6);
                     toReturn.add(releaseButton);
                 }
@@ -160,7 +163,23 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
 
     @Override
     public void onButtonClicked(RiftLibButton riftLibButton) {
-
+        if (riftLibButton.buttonId.equals("backToBox")) {
+            RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+        }
+        else if (riftLibButton.buttonId.equals("openChangeNamePopup")) this.createPopup(CommonUISections.changeNamePopup(this.selectedCreatureInfo.getCreatureNBT(this.mc.player)));
+        else if (riftLibButton.buttonId.equals("openReleaseConfirmPopup")) this.createPopup(this.releaseConfirmPopup());
+        //for setting the name of a tamed creature
+        else if (riftLibButton.buttonId.equals("setNewName")) {
+            NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreatureInfo, this.getTextFieldTextByID("newName"));
+            this.clearPopup();
+        }
+        //for releasing creature
+        else if (riftLibButton.buttonId.equals("releaseCreature")) {
+            NewPlayerTamedCreaturesHelper.releaseSelectedCreature(this.mc.player, this.selectedCreatureInfo);
+            RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z)));
+        }
+        //universal, for exiting popup
+        else if (riftLibButton.buttonId.equals("exitPopup")) this.clearPopup();
     }
 
     @Override
@@ -176,5 +195,40 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
     @Override
     protected void onPressEscape() {
         RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+    }
+
+
+
+    private List<RiftLibUIElement.Element> releaseConfirmPopup() {
+        List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+        RiftLibUIElement.TextElement confirmHeaderElement = new RiftLibUIElement.TextElement();
+        confirmHeaderElement.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+        confirmHeaderElement.setText(I18n.format("creature_box.popup_choice.release"));
+        toReturn.add(confirmHeaderElement);
+
+        //table for buttons
+        RiftLibUIElement.TableContainerElement buttonContainer = new RiftLibUIElement.TableContainerElement();
+        buttonContainer.setCellSize(70, 20);
+        buttonContainer.setRowCount(2);
+        buttonContainer.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+
+        //confirm button
+        RiftLibUIElement.ButtonElement confirmButton = new RiftLibUIElement.ButtonElement();
+        confirmButton.setSize(60, 20);
+        confirmButton.setText(I18n.format("radial.popup_button.confirm"));
+        confirmButton.setID("releaseCreature");
+        buttonContainer.addElement(confirmButton);
+
+        //cancel button
+        RiftLibUIElement.ButtonElement cancelButton = new RiftLibUIElement.ButtonElement();
+        cancelButton.setSize(60, 20);
+        cancelButton.setText(I18n.format("radial.popup_button.cancel"));
+        cancelButton.setID("exitPopup");
+        buttonContainer.addElement(cancelButton);
+
+        toReturn.add(buttonContainer);
+
+        return toReturn;
     }
 }

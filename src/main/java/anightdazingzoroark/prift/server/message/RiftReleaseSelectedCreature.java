@@ -1,11 +1,10 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -16,43 +15,37 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.UUID;
-
-public class RiftChangePartyMemName implements IMessage {
+public class RiftReleaseSelectedCreature implements IMessage {
     private int playerId;
-    private int partyMemPos;
-    private String newName;
+    private NBTTagCompound selectedCreatureInfoNBT;
 
-    public RiftChangePartyMemName() {}
+    public RiftReleaseSelectedCreature() {}
 
-    public RiftChangePartyMemName(EntityPlayer player, int partyMemPos, String newName) {
+    public RiftReleaseSelectedCreature(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
         this.playerId = player.getEntityId();
-        this.partyMemPos = partyMemPos;
-        this.newName = newName;
+        this.selectedCreatureInfoNBT = selectedCreatureInfo.getNBT();
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.playerId = buf.readInt();
-        this.partyMemPos = buf.readInt();
-        this.newName = ByteBufUtils.readUTF8String(buf);
+        this.selectedCreatureInfoNBT = ByteBufUtils.readTag(buf);
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.playerId);
-        buf.writeInt(this.partyMemPos);
-        ByteBufUtils.writeUTF8String(buf, this.newName);
+        ByteBufUtils.writeTag(buf, this.selectedCreatureInfoNBT);
     }
 
-    public static class Handler implements IMessageHandler<RiftChangePartyMemName, IMessage> {
+    public static class Handler implements IMessageHandler<RiftReleaseSelectedCreature, IMessage> {
         @Override
-        public IMessage onMessage(RiftChangePartyMemName message, MessageContext ctx) {
+        public IMessage onMessage(RiftReleaseSelectedCreature message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handle(RiftChangePartyMemName message, MessageContext ctx) {
+        private void handle(RiftReleaseSelectedCreature message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
@@ -60,17 +53,17 @@ public class RiftChangePartyMemName implements IMessage {
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
 
                 if (playerTamedCreatures != null) {
-                    CreatureNBT partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.partyMemPos);
+                    SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
 
-                    //test if creature is deployed
-                    if (partyMemNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
-                        UUID creatureUUID = partyMemNBT.getUniqueID();
-                        RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, creatureUUID);
-                        if (creature != null) creature.setCustomNameTag(message.newName);
+                    if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                        //automatically undeploy creature first
+                        NewPlayerTamedCreaturesHelper.deployCreatureFromParty(player, selectedCreatureInfo.pos[0], false);
+
+                        //now remove creature
+                        playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], new CreatureNBT());
                     }
-                    else {
-                        partyMemNBT.setCustomName(message.newName);
-                        playerTamedCreatures.setPartyMemNBT(message.partyMemPos, partyMemNBT);
+                    else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                        playerTamedCreatures.getBoxNBT().setBoxCreature(selectedCreatureInfo.pos[0], selectedCreatureInfo.pos[1], new CreatureNBT());
                     }
                 }
             }

@@ -116,7 +116,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSyncJournal.Handler.class, RiftSyncJournal.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftJournalEditOne.Handler.class, RiftJournalEditOne.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftJournalEditAll.Handler.class, RiftJournalEditAll.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftChangePartyMemName.Handler.class, RiftChangePartyMemName.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpdatePartyAfterOpenPartyScreen.Handler.class, RiftUpdatePartyAfterOpenPartyScreen.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncSelectedPartyPosFromOverlay.Handler.class, RiftForceSyncSelectedPartyPosFromOverlay.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncSelectedPartyPosFromOverlay.Handler.class, RiftForceSyncSelectedPartyPosFromOverlay.class, id++, Side.CLIENT);
@@ -130,5 +129,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftNewChangePartyOrBoxOrder.Handler.class, RiftNewChangePartyOrBoxOrder.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSwapCreatureMoves.Handler.class, RiftSwapCreatureMoves.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeCreatureBoxName.Handler.class, RiftChangeCreatureBoxName.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftChangeSelectedCreatureName.Handler.class, RiftChangeSelectedCreatureName.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftReleaseSelectedCreature.Handler.class, RiftReleaseSelectedCreature.class, id++, Side.SERVER);
     }
 }

@@ -227,6 +227,7 @@ journal.levelup_rate=Levelup Rate: %s
 journal.party_member.info=Info
 journal.party_member.moves=Moves
 journal.moves_label.available_moves=Available Moves
+journal.change_creature_name=Change creature name
 
 key.prift.open_party=Open Party
 key.prift.toggle_block_break=Toggle Block Break

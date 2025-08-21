@@ -13,8 +13,6 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Creatu
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.message.RiftChangePartyMemName;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
@@ -25,7 +23,6 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -424,10 +421,10 @@ public class RiftPartyScreen extends RiftLibUI {
                 RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(this.mc.player, this.selectedCreature.pos[0]));
             }
         }
-        else if (riftLibButton.buttonId.equals("openChangeNamePopup")) this.createPopup(this.changeNamePopup());
+        else if (riftLibButton.buttonId.equals("openChangeNamePopup")) this.createPopup(CommonUISections.changeNamePopup(this.selectedCreature.getCreatureNBT(this.mc.player)));
         //for setting the name of a tamed creature
         else if (riftLibButton.buttonId.equals("setNewName")) {
-            RiftMessages.WRAPPER.sendToServer(new RiftChangePartyMemName(this.mc.player, this.selectedCreature.pos[0], this.getTextFieldTextByID("newName")));
+            NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreature, this.getTextFieldTextByID("newName"));
             this.clearPopup();
         }
         //universal, for exiting popup

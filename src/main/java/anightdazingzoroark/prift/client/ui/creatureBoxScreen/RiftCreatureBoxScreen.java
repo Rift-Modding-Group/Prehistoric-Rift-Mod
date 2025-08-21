@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui.creatureBoxScreen;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.CommonUISections;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
@@ -276,10 +277,10 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
                     //release button
                     RiftLibUIElement.ButtonElement releaseButtonElement = new RiftLibUIElement.ButtonElement();
-                    releaseButtonElement.setID("releaseButton");
+                    releaseButtonElement.setID("openChangeNamePopup");
                     releaseButtonElement.setSize(100, 20);
                     releaseButtonElement.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-                    releaseButtonElement.setText(I18n.format("creature_box.release"));
+                    releaseButtonElement.setText(I18n.format("creature_box.change_name"));
                     toReturn.add(releaseButtonElement);
                 }
 
@@ -388,8 +389,15 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         if (riftLibButton.buttonId.equals("moreInfoButton")) {
             RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxInfoScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
         }
+        if (riftLibButton.buttonId.equals("openChangeNamePopup")) {
+            this.createPopup(CommonUISections.changeNamePopup(this.selectedCreatureInfo.getCreatureNBT(this.mc.player)));
+        }
         if (riftLibButton.buttonId.equals("setNewBoxName")) {
             NewPlayerTamedCreaturesHelper.changeBoxName(this.mc.player, this.currentBox, this.getTextFieldTextByID("newBoxName"));
+            this.clearPopup();
+        }
+        if (riftLibButton.buttonId.equals("setNewName")) {
+            NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreatureInfo, this.getTextFieldTextByID("newName"));
             this.clearPopup();
         }
         if (riftLibButton.buttonId.equals("exitPopup")) this.clearPopup();

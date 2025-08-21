@@ -232,4 +232,48 @@ public class CommonUISections {
             }
         };
     }
+
+    public static List<RiftLibUIElement.Element> changeNamePopup(CreatureNBT memberNBT) {
+        List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+        //header
+        RiftLibUIElement.TextElement headerTextElement = new RiftLibUIElement.TextElement();
+        headerTextElement.setText(I18n.format("journal.change_creature_name"));
+        headerTextElement.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+        toReturn.add(headerTextElement);
+
+        //text box for items
+        RiftLibUIElement.TextBoxElement textBox = new RiftLibUIElement.TextBoxElement();
+        textBox.setID("newName");
+        textBox.setWidth(100);
+        textBox.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+        if (!memberNBT.getCustomName().isEmpty()) {
+            textBox.setDefaultText(memberNBT.getCustomName());
+        }
+        toReturn.add(textBox);
+
+        //table for buttons
+        RiftLibUIElement.TableContainerElement buttonContainer = new RiftLibUIElement.TableContainerElement();
+        buttonContainer.setCellSize(70, 20);
+        buttonContainer.setRowCount(2);
+        buttonContainer.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+
+        //confirm button
+        RiftLibUIElement.ButtonElement confirmButton = new RiftLibUIElement.ButtonElement();
+        confirmButton.setSize(60, 20);
+        confirmButton.setText(I18n.format("radial.popup_button.confirm"));
+        confirmButton.setID("setNewName");
+        buttonContainer.addElement(confirmButton);
+
+        //cancel button
+        RiftLibUIElement.ButtonElement cancelButton = new RiftLibUIElement.ButtonElement();
+        cancelButton.setSize(60, 20);
+        cancelButton.setText(I18n.format("radial.popup_button.cancel"));
+        cancelButton.setID("exitPopup");
+        buttonContainer.addElement(cancelButton);
+
+        toReturn.add(buttonContainer);
+
+        return toReturn;
+    }
 }
