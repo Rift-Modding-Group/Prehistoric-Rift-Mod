@@ -1,20 +1,13 @@
 package anightdazingzoroark.prift.client.ui.partyScreen.elements;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.elements.RiftClickableSection;
-import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 

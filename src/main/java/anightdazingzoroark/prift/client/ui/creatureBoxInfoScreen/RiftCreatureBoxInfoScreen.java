@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.CommonUISections;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
-import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUserWithIntSelector;

@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.client.ui.journalScreen.elements;
 
-import anightdazingzoroark.prift.client.ui.elements.RiftGuiScrollableSectionContents;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
