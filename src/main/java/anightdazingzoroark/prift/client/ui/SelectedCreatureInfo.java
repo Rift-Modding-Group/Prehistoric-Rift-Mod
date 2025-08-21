@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
+import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
@@ -7,6 +9,7 @@ import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.Arrays;
 
@@ -15,6 +18,7 @@ public class SelectedCreatureInfo {
     public final SelectedPosType selectedPosType;
     public final int[] pos;
     private MenuOpenedFrom menuOpenedFrom;
+    private BlockPos creatureBoxOpenedFrom = new BlockPos(0, 0, 0);
 
     public SelectedCreatureInfo(SelectedPosType selectedPosType, int[] pos) {
         this.selectedPosType = selectedPosType;
@@ -30,6 +34,10 @@ public class SelectedCreatureInfo {
         this.menuOpenedFrom = value;
     }
 
+    public void setCreatureBoxOpenedFrom(BlockPos pos) {
+        this.creatureBoxOpenedFrom = pos;
+    }
+
     public MenuOpenedFrom getMenuOpenedFrom() {
         return this.menuOpenedFrom;
     }
@@ -37,6 +45,9 @@ public class SelectedCreatureInfo {
     public void exitToLastMenu(Minecraft minecraft) {
         if (this.menuOpenedFrom == MenuOpenedFrom.PARTY) {
             RiftLibUIHelper.showUI(minecraft.player, new RiftPartyScreen(this, true));
+        }
+        else if (this.menuOpenedFrom == MenuOpenedFrom.BOX) {
+            RiftLibUIHelper.showUI(minecraft.player, new RiftCreatureBoxInfoScreen(this.creatureBoxOpenedFrom, this, true));
         }
     }
 

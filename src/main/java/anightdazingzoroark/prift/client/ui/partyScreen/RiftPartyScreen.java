@@ -406,29 +406,39 @@ public class RiftPartyScreen extends RiftLibUI {
 
     @Override
     public void onButtonClicked(RiftLibButton riftLibButton) {
-        if (riftLibButton.buttonId.equals("summonDismiss")) {
-            if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
-                if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedCreature.pos[0])) {
-                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedCreature.pos[0], false);
+        switch (riftLibButton.buttonId) {
+            case "summonDismiss": {
+                if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                    if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedCreature.pos[0])) {
+                        NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedCreature.pos[0], false);
+                    }
+                } else if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedCreature.pos[0], true);
                 }
+                break;
             }
-            else if (this.getPartyMemDeployment() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
-                NewPlayerTamedCreaturesHelper.deployCreatureFromParty(this.mc.player, this.selectedCreature.pos[0], true);
+            case "teleport": {
+                if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedCreature.pos[0])) {
+                    RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(this.mc.player, this.selectedCreature.pos[0]));
+                }
+                break;
+            }
+            case "openChangeNamePopup": {
+                this.createPopup(CommonUISections.changeNamePopup(this.selectedCreature.getCreatureNBT(this.mc.player)));
+                break;
+            }
+            //for setting the name of a tamed creature
+            case "setNewName": {
+                NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreature, this.getTextFieldTextByID("newName"));
+                this.clearPopup();
+                break;
+            }
+            //universal, for exiting popup
+            case "exitPopup": {
+                this.clearPopup();
+                break;
             }
         }
-        else if (riftLibButton.buttonId.equals("teleport")) {
-            if (NewPlayerTamedCreaturesHelper.canBeDeployed(this.mc.player, this.selectedCreature.pos[0])) {
-                RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(this.mc.player, this.selectedCreature.pos[0]));
-            }
-        }
-        else if (riftLibButton.buttonId.equals("openChangeNamePopup")) this.createPopup(CommonUISections.changeNamePopup(this.selectedCreature.getCreatureNBT(this.mc.player)));
-        //for setting the name of a tamed creature
-        else if (riftLibButton.buttonId.equals("setNewName")) {
-            NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreature, this.getTextFieldTextByID("newName"));
-            this.clearPopup();
-        }
-        //universal, for exiting popup
-        else if (riftLibButton.buttonId.equals("exitPopup")) this.clearPopup();
     }
 
     @Override

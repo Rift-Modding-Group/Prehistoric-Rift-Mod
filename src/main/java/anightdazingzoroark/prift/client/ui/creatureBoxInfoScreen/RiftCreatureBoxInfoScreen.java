@@ -3,8 +3,11 @@ package anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.CommonUISections;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
+import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUserWithIntSelector;
+import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -25,6 +28,8 @@ import java.util.List;
 public class RiftCreatureBoxInfoScreen extends RiftLibUI {
     private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/info_from_creature_box_background.png");
     private final SelectedCreatureInfo selectedCreatureInfo;
+    private int selectedMovePos = -1;
+    private boolean moveManagement;
 
     public RiftCreatureBoxInfoScreen(int x, int y, int z) {
         super(x, y, z);
@@ -32,8 +37,13 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
     }
 
     public RiftCreatureBoxInfoScreen(BlockPos pos, SelectedCreatureInfo selectedCreatureInfo) {
+        this(pos, selectedCreatureInfo, false);
+    }
+
+    public RiftCreatureBoxInfoScreen(BlockPos pos, SelectedCreatureInfo selectedCreatureInfo, boolean openedFromMoves) {
         super(pos.getX(), pos.getY(), pos.getZ());
         this.selectedCreatureInfo = selectedCreatureInfo;
+        this.moveManagement = openedFromMoves;
     }
 
     @Override
@@ -41,10 +51,23 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
         return Arrays.asList(
                 this.createSelectedCreatureOptionsSection(),
                 CommonUISections.partyMemberInfoSection(this.width, this.height, 64, -17, this.fontRenderer, this.mc),
+                CommonUISections.partyMemberMovesSection(background, 400, 300,
+                        365, 0, 365, 18, 365, 36,
+                        252, 55, 252, 68, 252, 81,
+                        this.width, this.height, 64, -47, this.fontRenderer, this.mc),
                 CommonUISections.informationClickableSection(this.width, this.height, 34, -86, this.fontRenderer, this.mc),
                 CommonUISections.movesClickableSection(this.width, this.height, 92, -86, this.fontRenderer, this.mc),
+                CommonUISections.moveDescriptionBackgroundSection(background, 400, 300,
+                        252, 0, this.width, this.height, 64, 14, this.fontRenderer, this.mc
+                ),
+                CommonUISections.moveDescriptionSection(this.width, this.height, 64, 14, this.fontRenderer, this.mc),
                 this.createCreatureToDrawSection()
         );
+    }
+
+    //get party member moves section once its created
+    private RiftUISectionCreatureNBTUser getPartyMemberMovesSection() {
+        return (RiftUISectionCreatureNBTUser) this.getSectionByID("partyMemberMovesSection");
     }
 
     private RiftLibUISection createCreatureToDrawSection() {
@@ -120,6 +143,11 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
         return (RiftUISectionCreatureNBTUser) this.getSectionByID("partyMemberInfoSection");
     }
 
+    //get move description section after its created
+    private RiftUISectionCreatureNBTUserWithIntSelector getMoveDescription() {
+        return (RiftUISectionCreatureNBTUserWithIntSelector) this.getSectionByID("moveDescriptionSection");
+    }
+
     @Override
     public ResourceLocation drawBackground() {
         return this.background;
@@ -142,6 +170,9 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
 
     @Override
     public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {
+        this.setSelectClickableSectionByID("informationClickableSection", !this.moveManagement);
+        this.setSelectClickableSectionByID("movesClickableSection", this.moveManagement);
+
         if (riftLibUISection.id.equals("creatureToDrawSection") && element.getID().equals("creatureToDraw")) {
             RiftCreature creatureToDraw = this.selectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureAsNBT(this.mc.world);
             RiftLibUIElement.RenderedEntityElement creatureElement = (RiftLibUIElement.RenderedEntityElement) element;
@@ -152,39 +183,91 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
 
     @Override
     public RiftLibUISection modifyUISection(RiftLibUISection riftLibUISection) {
+        this.setUISectionVisibility("partyMemberInfoSection", !this.moveManagement);
+        this.setUISectionVisibility("partyMemberMovesSection", this.moveManagement);
+        this.setUISectionVisibility("moveDescriptionBGSection", this.moveManagement && this.selectedMovePos >= 0);
+        this.setUISectionVisibility("moveDescriptionSection", this.moveManagement && this.selectedMovePos >= 0);
+
         if (riftLibUISection.id.equals("selectedCreatureOptionsSection")) {
             this.getSelectedCreatureOptionsSection().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
         }
         if (riftLibUISection.id.equals("partyMemberInfoSection")) {
             this.getPartyMemberInfoSection().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
         }
+        if (riftLibUISection.id.equals("partyMemberMovesSection")) {
+            this.getPartyMemberMovesSection().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
+        }
+        if (riftLibUISection.id.equals("moveDescriptionSection")) {
+            this.getMoveDescription().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
+            this.getMoveDescription().setSelector(this.selectedMovePos);
+        }
         return riftLibUISection;
     }
 
     @Override
     public void onButtonClicked(RiftLibButton riftLibButton) {
-        if (riftLibButton.buttonId.equals("backToBox")) {
-            RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+        switch (riftLibButton.buttonId) {
+            case "backToBox": {
+                RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+                break;
+            }
+            case "openChangeNamePopup": {
+                this.createPopup(CommonUISections.changeNamePopup(this.selectedCreatureInfo.getCreatureNBT(this.mc.player)));
+                break;
+            }
+            case "openReleaseConfirmPopup": {
+                this.createPopup(this.releaseConfirmPopup());
+                break;
+            }
+            //for setting the name of a tamed creature
+            case "setNewName": {
+                NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreatureInfo, this.getTextFieldTextByID("newName"));
+                this.clearPopup();
+                break;
+            }
+            //for releasing creature
+            case "releaseCreature": {
+                NewPlayerTamedCreaturesHelper.releaseSelectedCreature(this.mc.player, this.selectedCreatureInfo);
+                RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z)));
+                break;
+            }
+            //universal, for exiting popup
+            case "exitPopup": {
+                this.clearPopup();
+                break;
+            }
         }
-        else if (riftLibButton.buttonId.equals("openChangeNamePopup")) this.createPopup(CommonUISections.changeNamePopup(this.selectedCreatureInfo.getCreatureNBT(this.mc.player)));
-        else if (riftLibButton.buttonId.equals("openReleaseConfirmPopup")) this.createPopup(this.releaseConfirmPopup());
-        //for setting the name of a tamed creature
-        else if (riftLibButton.buttonId.equals("setNewName")) {
-            NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreatureInfo, this.getTextFieldTextByID("newName"));
-            this.clearPopup();
-        }
-        //for releasing creature
-        else if (riftLibButton.buttonId.equals("releaseCreature")) {
-            NewPlayerTamedCreaturesHelper.releaseSelectedCreature(this.mc.player, this.selectedCreatureInfo);
-            RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z)));
-        }
-        //universal, for exiting popup
-        else if (riftLibButton.buttonId.equals("exitPopup")) this.clearPopup();
     }
 
     @Override
     public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
-
+        if (riftLibClickableSection.getStringID().equals("informationClickableSection") && this.moveManagement) {
+            this.moveManagement = false;
+            this.selectedMovePos = -1;
+        }
+        if (riftLibClickableSection.getStringID().equals("movesClickableSection") && !this.moveManagement) {
+            this.moveManagement = true;
+        }
+        if (riftLibClickableSection.getStringID().startsWith("move:")) {
+            int clickedPosition = Integer.parseInt(riftLibClickableSection.getStringID().substring(
+                    riftLibClickableSection.getStringID().indexOf(":") + 1
+            ));
+            if (clickedPosition != this.selectedMovePos) {
+                this.setSelectClickableSectionByID("move:"+clickedPosition, true);
+                if (this.selectedMovePos >= 0) this.setSelectClickableSectionByID("move:"+this.selectedMovePos, false);
+                this.selectedMovePos = clickedPosition;
+            }
+            else {
+                this.setSelectClickableSectionByID("move:"+clickedPosition, false);
+                this.selectedMovePos = -1;
+            }
+        }
+        //open moves ui
+        if (riftLibClickableSection.getStringID().equals("shuffleMoves")) {
+            this.selectedCreatureInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.BOX);
+            this.selectedCreatureInfo.setCreatureBoxOpenedFrom(new BlockPos(this.x, this.y, this.z));
+            RiftLibUIHelper.showUI(this.mc.player, new RiftMovesScreen(this.selectedCreatureInfo));
+        }
     }
 
     @Override
