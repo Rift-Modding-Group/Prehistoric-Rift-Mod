@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
-import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
@@ -28,6 +27,11 @@ public class SelectedCreatureInfo {
     public SelectedCreatureInfo(NBTTagCompound nbtTagCompound) {
         this.selectedPosType = SelectedPosType.values()[nbtTagCompound.getByte("SelectedPosType")];
         this.pos = nbtTagCompound.getIntArray("Position");
+        this.creatureBoxOpenedFrom = new BlockPos(
+                nbtTagCompound.getInteger("OpenedFromX"),
+                nbtTagCompound.getInteger("OpenedFromY"),
+                nbtTagCompound.getInteger("OpenedFromZ")
+        );
     }
 
     public void setMenuOpenedFrom(MenuOpenedFrom value) {
@@ -62,6 +66,9 @@ public class SelectedCreatureInfo {
         NBTTagCompound toReturn = new NBTTagCompound();
         toReturn.setByte("SelectedPosType", (byte) this.selectedPosType.ordinal());
         toReturn.setIntArray("Position", this.pos);
+        toReturn.setInteger("OpenedFromX", this.creatureBoxOpenedFrom.getX());
+        toReturn.setInteger("OpenedFromY", this.creatureBoxOpenedFrom.getY());
+        toReturn.setInteger("OpenedFromZ", this.creatureBoxOpenedFrom.getZ());
         return toReturn;
     }
 

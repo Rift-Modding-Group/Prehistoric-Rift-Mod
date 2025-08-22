@@ -12,6 +12,7 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,11 @@ public class RiftMovesScreen extends RiftLibUI {
 
     public RiftMovesScreen(SelectedCreatureInfo selectedCreature) {
         super(0, 0, 0);
+        this.selectedCreature = selectedCreature;
+    }
+
+    public RiftMovesScreen(BlockPos pos, SelectedCreatureInfo selectedCreature) {
+        super(pos.getX(), pos.getY(), pos.getZ());
         this.selectedCreature = selectedCreature;
     }
 
