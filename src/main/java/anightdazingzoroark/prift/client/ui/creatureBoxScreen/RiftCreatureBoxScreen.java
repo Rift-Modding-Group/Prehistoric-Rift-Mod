@@ -14,6 +14,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Creatu
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
@@ -472,6 +473,9 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                    if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                        RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
+                    }
                     this.selectNewCreature(null);
                 }
                 else this.selectNewCreature(selectionToTest);
@@ -504,6 +508,9 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                    if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                        RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
+                    }
                     this.selectNewCreature(null);
                 }
                 else this.selectNewCreature(selectionToTest);
@@ -529,16 +536,18 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                     riftLibClickableSection.getStringID().indexOf(":") + 1
             ));
             SelectedCreatureInfo selectionToTest = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED, new int[]{clickedPosition});
+            selectionToTest.setCreatureBoxOpenedFrom(new BlockPos(this.x, this.y, this.z));
 
-            //swap something with a creature from the party
+            //swap something with selected creature
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                    RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, selectionToTest.getCreatureBoxOpenedFrom());
                     this.selectNewCreature(null);
                 }
                 else this.selectNewCreature(selectionToTest);
             }
-            //when not shuffling creatures, just select creature from party
+            //when not shuffling creatures, just select the creature
             else {
                 if (this.selectedCreatureInfo != null) {
                     if (selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
@@ -586,10 +595,8 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 this.setSelectClickableSectionByID(false, "boxMember:"+i+":"+j, false);
             }
         }
-        for (int i = 0; i < RiftCreatureBox.maxDeployableCreatures; i++) {
-            for (int j = 0; j < CreatureBoxStorage.maxBoxStorableCreatures; j++) {
-                this.setSelectClickableSectionByID(false, "boxDeployedMember:"+i, false);
-            }
+        for (int i = 0; i < CreatureBoxStorage.maxBoxStorableCreatures; i++) {
+            this.setSelectClickableSectionByID(false, "boxDeployedMember:"+i, false);
         }
 
         //select new creature

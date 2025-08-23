@@ -105,6 +105,9 @@ public class RiftSwapCreatureMoves implements IMessage {
                                 )
                         );
                     }
+                    else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                        
+                    }
                 }
             }
         }

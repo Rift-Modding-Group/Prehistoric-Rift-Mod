@@ -3,14 +3,23 @@ package anightdazingzoroark.prift.server.tileentities;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.message.RiftForceUpdateCreatureBoxDeployed;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftUpdateBoxDeployed;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class RiftTileEntityCreatureBoxHelper {
+    public static void forceUpdateCreatureBoxDeployed(EntityPlayer player, BlockPos pos) {
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceUpdateCreatureBoxDeployed(player, pos));
+    }
+
+    //EVERYTHING BELOW IS NOW DEPRECATED
+    @Deprecated
     public static void updateAllDeployedCreatures(World world, BlockPos pos) {
         RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
 
@@ -19,12 +28,14 @@ public class RiftTileEntityCreatureBoxHelper {
         for (RiftCreature creature : creatureBox.getCreatures()) updateDeployedCreature(pos, creature);
     }
 
+    @Deprecated
     public static void updateDeployedCreature(BlockPos pos, RiftCreature creature) {
         if (pos == null) return;
 
         RiftMessages.WRAPPER.sendToServer(new RiftUpdateBoxDeployed(pos, creature));
     }
 
+    @Deprecated
     public static BlockPos creatureCreatureSpawnPoint(BlockPos creatureBoxPos, World world, RiftCreature creature) {
         for (int i = 0; i < 10; i++) {
             int xSpawnPos = RiftUtil.randomInRange(creatureBoxPos.getX() - 16, creatureBoxPos.getX() + 16);
@@ -58,6 +69,7 @@ public class RiftTileEntityCreatureBoxHelper {
         return null;
     }
 
+    @Deprecated
     private static boolean canFitInArea(World world, RiftCreature creature, BlockPos pos) {
         int xMin = (int)Math.floor(creature.width / 2);
         for (int x = -xMin; x <= xMin; x++) {
@@ -72,6 +84,7 @@ public class RiftTileEntityCreatureBoxHelper {
         return true;
     }
 
+    @Deprecated
     private static boolean entireAreaWater(World world, RiftCreature creature, BlockPos pos) {
         int xMin = (int)Math.floor(creature.width / 2);
         for (int x = -xMin; x <= xMin; x++) {

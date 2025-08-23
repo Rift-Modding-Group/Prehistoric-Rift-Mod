@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import io.netty.buffer.ByteBuf;
@@ -72,6 +71,14 @@ public class RiftSwapCreaturePositions implements IMessage {
                                     selectedPos.pos[0]
                             );
                         }
+                        else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                            playerTamedCreatures.boxDeployedPartySwap(
+                                    messagePlayer.world,
+                                    posToSwap.getCreatureBoxOpenedFrom(),
+                                    posToSwap.pos[0],
+                                    selectedPos.pos[0]
+                            );
+                        }
                     }
                     else if (selectedPos.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
                         if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
@@ -87,6 +94,42 @@ public class RiftSwapCreaturePositions implements IMessage {
                                     posToSwap.pos[1],
                                     selectedPos.pos[0],
                                     selectedPos.pos[1]
+                            );
+                        }
+                        else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                            playerTamedCreatures.boxDeployedBoxSwap(
+                                    messagePlayer.world,
+                                    posToSwap.getCreatureBoxOpenedFrom(),
+                                    posToSwap.pos[0],
+                                    selectedPos.pos[0],
+                                    selectedPos.pos[1]
+                            );
+                        }
+                    }
+                    else if (selectedPos.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                        if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                            playerTamedCreatures.boxDeployedPartySwap(
+                                    messagePlayer.world,
+                                    selectedPos.getCreatureBoxOpenedFrom(),
+                                    selectedPos.pos[0],
+                                    posToSwap.pos[0]
+                            );
+                        }
+                        else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                            playerTamedCreatures.boxDeployedBoxSwap(
+                                    messagePlayer.world,
+                                    selectedPos.getCreatureBoxOpenedFrom(),
+                                    selectedPos.pos[0],
+                                    posToSwap.pos[0],
+                                    posToSwap.pos[1]
+                            );
+                        }
+                        else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                            playerTamedCreatures.rearrangeDeployedBoxCreatures(
+                                    messagePlayer.world,
+                                    selectedPos.getCreatureBoxOpenedFrom(),
+                                    selectedPos.pos[0],
+                                    posToSwap.pos[0]
                             );
                         }
                     }

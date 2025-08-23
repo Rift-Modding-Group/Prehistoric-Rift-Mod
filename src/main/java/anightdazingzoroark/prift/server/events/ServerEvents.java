@@ -19,6 +19,7 @@ import anightdazingzoroark.prift.server.entity.projectile.VenomBomb;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftCanUseMoveTriggerButton;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
@@ -80,8 +81,8 @@ public class ServerEvents {
             }
         }
         //prevent even creative players from breaking full creature boxes
-        if (event.getWorld().getTileEntity(event.getPos()) instanceof RiftTileEntityCreatureBox) {
-            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox)event.getWorld().getTileEntity(event.getPos());
+        if (event.getWorld().getTileEntity(event.getPos()) instanceof RiftNewTileEntityCreatureBox) {
+            RiftNewTileEntityCreatureBox creatureBox = (RiftNewTileEntityCreatureBox)event.getWorld().getTileEntity(event.getPos());
             if (creatureBox != null && creatureBox.isUnbreakable()) event.setCanceled(true);
         }
     }

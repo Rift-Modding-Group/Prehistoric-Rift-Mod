@@ -3,12 +3,14 @@ package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -110,18 +112,17 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         this.boxCreatures.setBoxCreature(selectedBox, posSelected, compoundToSwap);
     }
 
-    public void rearrangeDeployedBoxCreatures(World world, BlockPos pos, int posSelected, int posToSwap) {
+    public void rearrangeDeployedBoxCreatures(World world, BlockPos creatureBoxPos, int posSelected, int posToSwap) {
         if (posSelected == posToSwap) return;
-        if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
-            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
-            if (creatureBox != null) {
-                NBTTagCompound compoundSelected = creatureBox.getCreatureList().get(posSelected);
-                NBTTagCompound compoundToSwap = creatureBox.getCreatureList().get(posToSwap);
+        TileEntity tileEntity = world.getTileEntity(creatureBoxPos);
+        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
+        RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
 
-                creatureBox.replaceInCreatureList(posSelected, compoundToSwap);
-                creatureBox.replaceInCreatureList(posToSwap, compoundSelected);
-            }
-        }
+        CreatureNBT compoundSelected = teCreatureBox.getDeployedCreatures().get(posSelected);
+        CreatureNBT compoundToSwap = teCreatureBox.getDeployedCreatures().get(posToSwap);
+
+        teCreatureBox.setCreatureInPos(posSelected, compoundToSwap);
+        teCreatureBox.setCreatureInPos(posToSwap, compoundSelected);
     }
 
     public void boxPartySwap(int selectedBox, int boxPosSelected, int partyPosToSwap) {
@@ -131,9 +132,29 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         this.partyCreatures.set(partyPosToSwap, selectedBoxCreature);
     }
 
-    public void boxDeployedPartySwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int partyPosToSwap) {}
+    public void boxDeployedPartySwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int partyPosToSwap) {
+        TileEntity tileEntity = world.getTileEntity(creatureBoxPos);
+        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
+        RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
 
-    public void boxDeployedBoxSwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int boxToSwapWith, int boxPosToSwap) {}
+        CreatureNBT compoundSelected = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
+        CreatureNBT compoundToSwap = this.partyCreatures.get(partyPosToSwap);
+
+        teCreatureBox.setCreatureInPos(boxDepPosSelected, compoundToSwap);
+        this.partyCreatures.set(partyPosToSwap, compoundSelected);
+    }
+
+    public void boxDeployedBoxSwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int boxToSwapWith, int boxPosToSwap) {
+        TileEntity tileEntity = world.getTileEntity(creatureBoxPos);
+        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
+        RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+
+        CreatureNBT compoundSelected = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
+        CreatureNBT compoundToSwap = this.boxCreatures.getBoxContents(boxToSwapWith).get(boxPosToSwap);
+
+        teCreatureBox.setCreatureInPos(boxDepPosSelected, compoundToSwap);
+        this.boxCreatures.setBoxCreature(boxToSwapWith, boxPosToSwap, compoundSelected);
+    }
 
     @Deprecated
     public void partyCreatureToBoxCreature(int partyPosSelected, int boxPosSelected) {

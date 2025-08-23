@@ -27,17 +27,22 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
         return this.creatureListNBT;
     }
 
-    public void addCreature(CreatureNBT creatureNBT) {
-        this.creatureListNBT.add(creatureNBT);
-    }
-
     public void setCreatureInPos(int pos, CreatureNBT creatureNBT) {
         this.creatureListNBT.set(pos, creatureNBT);
-        this.updateData();
+        this.updateServerData();
+    }
+
+    public void setCreatureListNBT(FixedSizeList<CreatureNBT> value) {
+        int maxSize = Math.min(RiftCreatureBox.maxDeployableCreatures, value.size());
+        for (int i = 0; i < maxSize; i++) {
+            CreatureNBT valueFromInput = value.get(i);
+            this.creatureListNBT.set(i, valueFromInput);
+        }
+        this.updateServerData();
     }
 
     //saving and updating nbt starts here
-    private void updateData() {
+    private void updateServerData() {
         if (!this.world.isRemote) {
             this.markDirty();
             IBlockState state = this.world.getBlockState(this.pos);
@@ -88,14 +93,7 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
 
     @Override
     public void handleUpdateTag(NBTTagCompound compound) {
-        if (compound.hasKey("BoxDeployedCreatures")) {
-            NBTTagList boxDeployedCreaturesList = compound.getTagList("BoxDeployedCreatures", 10);
-            if (!boxDeployedCreaturesList.isEmpty()) {
-                for (int i = 0; i < boxDeployedCreaturesList.tagCount(); i++) {
-                    this.creatureListNBT.set(i, new CreatureNBT(boxDeployedCreaturesList.getCompoundTagAt(i)));
-                }
-            }
-        }
+        this.readFromNBT(compound);
     }
     //saving and updating nbt ends here
 }

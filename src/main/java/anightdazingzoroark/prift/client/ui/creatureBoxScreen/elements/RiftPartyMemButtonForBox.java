@@ -105,7 +105,7 @@ public class RiftPartyMemButtonForBox extends RiftLibClickableSection {
         if (!this.doHoverEffects) return false;
         int x = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
         int y = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
-        return mouseX >= x && mouseX <= x + 57 * this.scale && mouseY >= y && mouseY <= y + 38 * this.scale;
+        return mouseX >= x && mouseX <= x + this.width * this.scale && mouseY >= y && mouseY <= y + this.height * this.scale;
     }
 
     public void setCreatureNBT(CreatureNBT nbtTagCompound) {

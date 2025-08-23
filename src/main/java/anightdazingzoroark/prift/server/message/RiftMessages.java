@@ -132,5 +132,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftChangeSelectedCreatureName.Handler.class, RiftChangeSelectedCreatureName.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftReleaseSelectedCreature.Handler.class, RiftReleaseSelectedCreature.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSwapCreaturePositions.Handler.class, RiftSwapCreaturePositions.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftForceUpdateCreatureBoxDeployed.Handler.class, RiftForceUpdateCreatureBoxDeployed.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftForceUpdateCreatureBoxDeployed.Handler.class, RiftForceUpdateCreatureBoxDeployed.class, id++, Side.CLIENT);
     }
 }
