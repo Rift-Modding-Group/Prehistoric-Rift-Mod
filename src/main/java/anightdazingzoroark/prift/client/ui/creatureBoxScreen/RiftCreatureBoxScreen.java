@@ -4,13 +4,16 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.CommonUISections;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxDeployedMembersSection;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMembersSection;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMembersSection;
+import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
@@ -18,12 +21,13 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RiftCreatureBoxScreen extends RiftLibUI {
@@ -32,10 +36,6 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     private int currentBox;
     private RiftCreature creatureToDraw;
     private boolean shufflePartyMemsMode;
-
-    public RiftCreatureBoxScreen(int x, int y, int z) {
-        super(x, y, z);
-    }
 
     public RiftCreatureBoxScreen(BlockPos pos) {
         this(pos, null);
@@ -66,7 +66,9 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 this.createShuffleCreaturesButtonSection(),
                 this.createDeathBGSelectedCreature(),
                 this.createCreatureToDrawSection(),
-                this.createSelectedCreatureInfoSection()
+                this.createSelectedCreatureInfoSection(),
+                this.createCreatureBoxDeployedHeaderSection(),
+                this.createCreatureBoxDeployedSection()
         );
     }
 
@@ -311,6 +313,29 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         return (RiftUISectionCreatureNBTUser) this.getSectionByID("selectedCreatureInfoSection");
     }
 
+    private RiftLibUISection createCreatureBoxDeployedHeaderSection() {
+        return new RiftLibUISection("creatureBoxDeployedHeaderSection", this.width, this.height, 172, 9, 23, 43, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.TextElement headerElement = new RiftLibUIElement.TextElement();
+                headerElement.setText(I18n.format("creature_box.deployed_creatures"));
+                toReturn.add(headerElement);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftBoxDeployedMembersSection createCreatureBoxDeployedSection() {
+        return new RiftBoxDeployedMembersSection(this.width, this.height, 172, 70, 21, 87, this.fontRenderer, this.mc);
+    }
+
+    private RiftBoxDeployedMembersSection getCreatureBoxDeployedSection() {
+        return (RiftBoxDeployedMembersSection) this.getSectionByID("creatureBoxDeployedSection");
+    }
+
     @Override
     public ResourceLocation drawBackground() {
         return this.background;
@@ -371,6 +396,12 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 this.getBoxMembersSection().repositionSection(xOffset, -35);
                 break;
             }
+            case "creatureBoxDeployedSection": {
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -41 : 21;
+                this.getCreatureBoxDeployedSection().repositionSection(xOffset, 87);
+                this.getCreatureBoxDeployedSection().setBoxDeployedMembersNBT(this.getCreatureBox().getDeployedCreatures());
+                break;
+            }
             case "selectedCreatureInfoSection": {
                 if (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) this.getSelectedCreatureInfoSection().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
                 else this.getSelectedCreatureInfoSection().setNBTTagCompound(new CreatureNBT());
@@ -384,6 +415,11 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             case "boxHeaderSection": {
                 int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -39 : 23;
                 this.getSectionByID("boxHeaderSection").repositionSection(xOffset, -114);
+                break;
+            }
+            case "creatureBoxDeployedHeaderSection": {
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -39 : 23;
+                this.getSectionByID("creatureBoxDeployedHeaderSection").repositionSection(xOffset, 43);
                 break;
             }
             case "leftButtonHeaderSection": {
@@ -488,6 +524,36 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 }
             }
         }
+        else if (riftLibClickableSection.getStringID().startsWith("boxDeployedMember:")) {
+            int clickedPosition = Integer.parseInt(riftLibClickableSection.getStringID().substring(
+                    riftLibClickableSection.getStringID().indexOf(":") + 1
+            ));
+            SelectedCreatureInfo selectionToTest = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED, new int[]{clickedPosition});
+
+            //swap something with a creature from the party
+            if (this.shufflePartyMemsMode) {
+                if (this.selectedCreatureInfo != null) {
+                    NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                    this.selectNewCreature(null);
+                }
+                else this.selectNewCreature(selectionToTest);
+            }
+            //when not shuffling creatures, just select creature from party
+            else {
+                if (this.selectedCreatureInfo != null) {
+                    if (selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
+                        this.selectNewCreature(null);
+                    }
+                    else if (this.selectedCreatureInfo.equals(selectionToTest)) {
+                        this.selectNewCreature(null);
+                    }
+                    else this.selectNewCreature(selectionToTest);
+                }
+                else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
+                    this.selectNewCreature(selectionToTest);
+                }
+            }
+        }
 
         switch (riftLibClickableSection.getStringID()) {
             case "shuffleCreaturesButton": {
@@ -520,6 +586,11 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 this.setSelectClickableSectionByID(false, "boxMember:"+i+":"+j, false);
             }
         }
+        for (int i = 0; i < RiftCreatureBox.maxDeployableCreatures; i++) {
+            for (int j = 0; j < CreatureBoxStorage.maxBoxStorableCreatures; j++) {
+                this.setSelectClickableSectionByID(false, "boxDeployedMember:"+i, false);
+            }
+        }
 
         //select new creature
         if (newSelectedCreatureInfo != null) {
@@ -528,6 +599,9 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             }
             else if (newSelectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
                 this.setSelectClickableSectionByID(false, "boxMember:"+newSelectedCreatureInfo.pos[0]+":"+newSelectedCreatureInfo.pos[1], true);
+            }
+            else if (newSelectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                this.setSelectClickableSectionByID(false, "boxDeployedMember:"+newSelectedCreatureInfo.pos[0], true);
             }
             this.selectedCreatureInfo = newSelectedCreatureInfo;
             this.creatureToDraw = newSelectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureAsNBT(this.mc.world);
@@ -540,6 +614,13 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
     @Override
     public void onElementHovered(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {}
+
+    //creature box interfacing
+    public RiftNewTileEntityCreatureBox getCreatureBox() {
+        TileEntity tileEntity = this.mc.world.getTileEntity(new BlockPos(this.x, this.y, this.z));
+        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return null;
+        return (RiftNewTileEntityCreatureBox) tileEntity;
+    }
 
     //popups start here
     private List<RiftLibUIElement.Element> changeBoxNamePopup() {

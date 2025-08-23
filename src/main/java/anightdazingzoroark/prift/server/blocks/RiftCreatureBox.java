@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPla
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenCreatureBoxNoCreaturesMenu;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.block.Block;
@@ -30,6 +31,7 @@ import javax.annotation.Nullable;
 
 public class RiftCreatureBox extends Block implements ITileEntityProvider {
     public static final PropertyDirection FACING = BlockHorizontal.FACING;
+    public static final int maxDeployableCreatures = 10;
 
     public RiftCreatureBox() {
         super(Material.ROCK);
@@ -68,17 +70,21 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
     @Nullable
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
-        return new RiftTileEntityCreatureBox();
+        return new RiftNewTileEntityCreatureBox();
     }
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
-            RiftTileEntityCreatureBox tileEntity = (RiftTileEntityCreatureBox) worldIn.getTileEntity(pos);
+            RiftNewTileEntityCreatureBox tileEntity = (RiftNewTileEntityCreatureBox) worldIn.getTileEntity(pos);
 
             if (tileEntity == null) return false;
 
+            RiftLibUIHelper.showUI(playerIn, new RiftCreatureBoxScreen(pos));
+
+            /*
             if (playerIn.isSneaking()) {
+                /*
                 //highlight all creatures deployed
                 for (RiftCreature creature : tileEntity.getCreatures()) {
                     if (creature == null) continue;
@@ -95,6 +101,7 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
                 }
                 else RiftLibUIHelper.showUI(playerIn, new RiftCreatureBoxScreen(pos));
             }
+            */
         }
         return true;
     }
