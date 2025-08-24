@@ -8,7 +8,6 @@ import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxDep
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMembersSection;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMembersSection;
-import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
@@ -28,7 +27,6 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class RiftCreatureBoxScreen extends RiftLibUI {
@@ -65,6 +63,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 this.createLeftButtonHeaderSection(),
                 this.createRightButtonHeaderSection(),
                 this.createShuffleCreaturesButtonSection(),
+                this.createShowCreatureBoxInfoSection(),
                 this.createDeathBGSelectedCreature(),
                 this.createCreatureToDrawSection(),
                 this.createSelectedCreatureInfoSection(),
@@ -167,6 +166,25 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 shuffleButtonElement.setID("shuffleCreaturesButton");
                 shuffleButtonElement.setSize(20, 18);
                 shuffleButtonElement.setImage(background, 400, 360, 20, 18, 160, 282, 180, 282);
+                shuffleButtonElement.setImageSelectedUV(200, 282);
+                shuffleButtonElement.setImageScale(0.75f);
+                toReturn.add(shuffleButtonElement);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection createShowCreatureBoxInfoSection() {
+        return new RiftLibUISection("showCreatureBoxInfoButtonSection", this.width, this.height, 20, 18, -54, -113, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ClickableSectionElement shuffleButtonElement = new RiftLibUIElement.ClickableSectionElement();
+                shuffleButtonElement.setID("creatureBoxInfoButton");
+                shuffleButtonElement.setSize(20, 18);
+                shuffleButtonElement.setImage(background, 400, 360, 20, 18, 160, 300, 180, 300);
                 shuffleButtonElement.setImageSelectedUV(200, 282);
                 shuffleButtonElement.setImageScale(0.75f);
                 toReturn.add(shuffleButtonElement);
@@ -438,6 +456,11 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 this.getSectionByID("shuffleCreaturesButtonSection").repositionSection(xOffset, -113);
                 break;
             }
+            case "showCreatureBoxInfoButtonSection": {
+                int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -116 : -54;
+                this.getSectionByID("showCreatureBoxInfoButtonSection").repositionSection(xOffset, -113);
+                break;
+            }
         }
         return riftLibUISection;
     }
@@ -582,6 +605,10 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 this.createPopup(this.changeBoxNamePopup());
                 break;
             }
+            case "creatureBoxInfoButton": {
+                this.createPopup(this.creatureBoxInfoPopup());
+                break;
+            }
         }
     }
 
@@ -667,6 +694,36 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         buttonContainer.addElement(cancelButton);
 
         toReturn.add(buttonContainer);
+
+        return toReturn;
+    }
+
+    private List<RiftLibUIElement.Element> creatureBoxInfoPopup() {
+        List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+        //header
+        RiftLibUIElement.TextElement headerElement = new RiftLibUIElement.TextElement();
+        headerElement.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+        headerElement.setText(I18n.format("creature_box.info_header"));
+        toReturn.add(headerElement);
+
+        //owner
+        RiftLibUIElement.TextElement ownerTextElement = new RiftLibUIElement.TextElement();
+        ownerTextElement.setText(I18n.format("creature_box.owner", this.getCreatureBox().getOwnerName()));
+        toReturn.add(ownerTextElement);
+
+        //range
+        RiftLibUIElement.TextElement rangeElement = new RiftLibUIElement.TextElement();
+        rangeElement.setText(I18n.format("creature_box.range", this.getCreatureBox().getDeploymentRangeWidth(), this.getCreatureBox().getDeploymentRangeWidth(), this.getCreatureBox().getDeploymentRangeWidth()));
+        toReturn.add(rangeElement);
+
+        //ok button
+        RiftLibUIElement.ButtonElement okButton = new RiftLibUIElement.ButtonElement();
+        okButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+        okButton.setSize(60, 20);
+        okButton.setText(I18n.format("radial.popup_button.ok"));
+        okButton.setID("exitPopup");
+        toReturn.add(okButton);
 
         return toReturn;
     }

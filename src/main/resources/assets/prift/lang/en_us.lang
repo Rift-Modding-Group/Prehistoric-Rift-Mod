@@ -34,6 +34,10 @@ creature_box.stop_rearrange_creatures=Finished
 creature_box.deployed_creatures=Deployed Creatures
 creature_box.back_to_box=Return to Box
 creature_box.change_box_name=Change name for current box
+creature_box.no_owner_name=Unknown
+creature_box.owner=Owner: %s
+creature_box.info_header=Creature Box Information
+creature_box.range=Range: %s x %s x %s chunks
 
 death.attack.prift_bleed=%s bled to death
 

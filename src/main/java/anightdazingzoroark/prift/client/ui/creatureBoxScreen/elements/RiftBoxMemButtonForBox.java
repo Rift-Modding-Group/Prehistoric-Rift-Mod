@@ -86,6 +86,7 @@ public class RiftBoxMemButtonForBox extends RiftLibClickableSection {
     }
 
     private boolean isHoveredNoNBT(int mouseX, int mouseY) {
+        if (!this.doHoverEffects) return false;
         int x = (this.guiWidth - this.width) / 2 + this.xOffset + this.xAddOffset;
         int y = (this.guiHeight - this.height) / 2 + this.yOffset + this.yAddOffset;
         return mouseX >= x && mouseX <= x + this.width * this.scale && mouseY >= y && mouseY <= y + this.height * this.scale;

@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Creatu
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -44,7 +45,7 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
     }
 
     public String getOwnerName() {
-        return this.ownerName;
+        return this.ownerName.isEmpty() ? I18n.format("creature_box.no_owner_name") : this.ownerName;
     }
 
     public UUID getOwnerID() {
@@ -67,6 +68,10 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
 
     public int getDeploymentRange() {
         return this.deploymentRange;
+    }
+
+    public int getDeploymentRangeWidth() {
+        return 2 * this.deploymentRange + 1;
     }
 
     //this creates the creatures that wander around the box
