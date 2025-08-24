@@ -17,8 +17,12 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +40,9 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
         RiftCreatureBox creatureBox = (RiftCreatureBox)this.world.getBlockState(this.pos).getBlock();
         if (this.isUnbreakable()) creatureBox.setHardness(-1.0f);
         else creatureBox.setHardness(0f);
+
+        //create creatures
+        if (!this.world.isRemote) this.createCreaturesForWandering();
     }
 
     public void setOwner(EntityPlayer player) {
@@ -74,10 +81,36 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
         return 2 * this.deploymentRange + 1;
     }
 
+    public boolean posWithinDeploymentRange(BlockPos testPos) {
+        int chunkX = testPos.getX() >> 4;
+        int chunkZ = testPos.getZ() >> 4;
+
+        ChunkPos blockChunk = new ChunkPos(chunkX, chunkZ);
+        return this.chunksWithinDeploymentRange().contains(blockChunk);
+    }
+
+    private List<ChunkPos> chunksWithinDeploymentRange() {
+        List<ChunkPos> toReturn = new ArrayList<>();
+        int chunkX = this.pos.getX() >> 4;
+        int chunkZ = this.pos.getZ() >> 4;
+
+        for (int x = -this.deploymentRange; x <= this.deploymentRange; x++) {
+            for (int z = -this.deploymentRange; z <= this.deploymentRange; z++) {
+                toReturn.add(new ChunkPos(chunkX + x, chunkZ + z));
+            }
+        }
+
+        return toReturn;
+    }
+
     //this creates the creatures that wander around the box
     private void createCreaturesForWandering() {
-        this.world.getChunk(this.pos);
         for (CreatureNBT tagCompound : this.creatureListNBT.getList()) {
+            if (tagCompound.nbtIsEmpty()) continue;
+
+            UUID uuid = tagCompound.getUniqueID();
+            if (this.creatureWithUUIDExists(uuid)) continue;
+
             RiftCreature creature = tagCompound.getCreatureAsNBT(this.world);
 
             //check for validity and if creature already exists, then continue
@@ -93,11 +126,16 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
         }
     }
 
+    private boolean creatureWithUUIDExists(UUID uuid) {
+        if (uuid == null || uuid.equals(RiftUtil.nilUUID)) return false;
+        if (!(this.world instanceof WorldServer)) return false;
+        return ((WorldServer) this.world).getEntityFromUuid(uuid) != null;
+    }
+
     private boolean creatureExistsInWorld(RiftCreature creature) {
-        List<UUID> worldEntityListUUID = this.world.getLoadedEntityList().stream()
-                .map(Entity::getUniqueID)
-                .collect(Collectors.toList());
-        return worldEntityListUUID.contains(creature.getUniqueID());
+        if (creature == null) return false;
+        if (!(this.world instanceof WorldServer)) return false;
+        return ((WorldServer) this.world).getEntityFromUuid(creature.getUniqueID()) != null;
     }
 
     public boolean isUnbreakable() {

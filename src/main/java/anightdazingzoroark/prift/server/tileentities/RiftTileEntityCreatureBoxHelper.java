@@ -18,24 +18,6 @@ public class RiftTileEntityCreatureBoxHelper {
         if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceUpdateCreatureBoxDeployed(player, pos));
     }
 
-    //EVERYTHING BELOW IS NOW DEPRECATED
-    @Deprecated
-    public static void updateAllDeployedCreatures(World world, BlockPos pos) {
-        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
-
-        if (creatureBox == null) return;
-
-        for (RiftCreature creature : creatureBox.getCreatures()) updateDeployedCreature(pos, creature);
-    }
-
-    @Deprecated
-    public static void updateDeployedCreature(BlockPos pos, RiftCreature creature) {
-        if (pos == null) return;
-
-        RiftMessages.WRAPPER.sendToServer(new RiftUpdateBoxDeployed(pos, creature));
-    }
-
-    @Deprecated
     public static BlockPos creatureCreatureSpawnPoint(BlockPos creatureBoxPos, World world, RiftCreature creature) {
         for (int i = 0; i < 10; i++) {
             int xSpawnPos = RiftUtil.randomInRange(creatureBoxPos.getX() - 16, creatureBoxPos.getX() + 16);
@@ -67,6 +49,23 @@ public class RiftTileEntityCreatureBoxHelper {
             }
         }
         return null;
+    }
+
+    //EVERYTHING BELOW IS NOW DEPRECATED
+    @Deprecated
+    public static void updateAllDeployedCreatures(World world, BlockPos pos) {
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
+
+        if (creatureBox == null) return;
+
+        for (RiftCreature creature : creatureBox.getCreatures()) updateDeployedCreature(pos, creature);
+    }
+
+    @Deprecated
+    public static void updateDeployedCreature(BlockPos pos, RiftCreature creature) {
+        if (pos == null) return;
+
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdateBoxDeployed(pos, creature));
     }
 
     @Deprecated

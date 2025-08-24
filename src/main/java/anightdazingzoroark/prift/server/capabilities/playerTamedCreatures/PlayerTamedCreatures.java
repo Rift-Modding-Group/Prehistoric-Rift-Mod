@@ -5,9 +5,6 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
@@ -127,7 +124,10 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
 
     public void boxPartySwap(int selectedBox, int boxPosSelected, int partyPosToSwap) {
         CreatureNBT selectedBoxCreature = this.boxCreatures.getBoxContents(selectedBox).get(boxPosSelected);
+        selectedBoxCreature.setDeploymentType(DeploymentType.PARTY_INACTIVE);
         CreatureNBT partyMemToSwap = this.partyCreatures.get(partyPosToSwap);
+        partyMemToSwap.setDeploymentType(DeploymentType.BASE_INACTIVE);
+
         this.boxCreatures.setBoxCreature(selectedBox, boxPosSelected, partyMemToSwap);
         this.partyCreatures.set(partyPosToSwap, selectedBoxCreature);
     }
@@ -137,11 +137,13 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
         RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
 
-        CreatureNBT compoundSelected = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
-        CreatureNBT compoundToSwap = this.partyCreatures.get(partyPosToSwap);
+        CreatureNBT selectedBoxDepCreature = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
+        selectedBoxDepCreature.setDeploymentType(DeploymentType.PARTY_INACTIVE);
+        CreatureNBT partyMemToSwap = this.partyCreatures.get(partyPosToSwap);
+        partyMemToSwap.setDeploymentType(DeploymentType.BASE);
 
-        teCreatureBox.setCreatureInPos(boxDepPosSelected, compoundToSwap);
-        this.partyCreatures.set(partyPosToSwap, compoundSelected);
+        teCreatureBox.setCreatureInPos(boxDepPosSelected, partyMemToSwap);
+        this.partyCreatures.set(partyPosToSwap, selectedBoxDepCreature);
     }
 
     public void boxDeployedBoxSwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int boxToSwapWith, int boxPosToSwap) {
@@ -149,11 +151,13 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
         RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
 
-        CreatureNBT compoundSelected = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
-        CreatureNBT compoundToSwap = this.boxCreatures.getBoxContents(boxToSwapWith).get(boxPosToSwap);
+        CreatureNBT selectedBoxDepCreature = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
+        selectedBoxDepCreature.setDeploymentType(DeploymentType.BASE_INACTIVE);
+        CreatureNBT boxMemToSwap = this.boxCreatures.getBoxContents(boxToSwapWith).get(boxPosToSwap);
+        boxMemToSwap.setDeploymentType(DeploymentType.BASE);
 
-        teCreatureBox.setCreatureInPos(boxDepPosSelected, compoundToSwap);
-        this.boxCreatures.setBoxCreature(boxToSwapWith, boxPosToSwap, compoundSelected);
+        teCreatureBox.setCreatureInPos(boxDepPosSelected, boxMemToSwap);
+        this.boxCreatures.setBoxCreature(boxToSwapWith, boxPosToSwap, selectedBoxDepCreature);
     }
 
     @Deprecated

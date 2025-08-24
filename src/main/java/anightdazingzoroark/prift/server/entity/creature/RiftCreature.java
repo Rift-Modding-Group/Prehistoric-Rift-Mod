@@ -24,6 +24,7 @@ import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
@@ -2761,12 +2762,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean creatureBoxWithinReach() {
         if (this.getHomePos() == null) return false;
 
-        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.world.getTileEntity(this.getHomePos());
+        RiftNewTileEntityCreatureBox creatureBox = (RiftNewTileEntityCreatureBox) this.world.getTileEntity(this.getHomePos());
 
         if (creatureBox == null) return false;
 
-        int dist = creatureBox.getWanderRange();
-        return creatureBox.getDistanceSq(this.posX, this.posY, this.posZ) <= dist * dist;
+        return creatureBox.posWithinDeploymentRange(this.getPosition());
     }
 
     public boolean canNaturalRegen() {

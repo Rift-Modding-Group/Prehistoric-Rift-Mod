@@ -48,6 +48,10 @@ public class SelectedCreatureInfo {
         return this.creatureBoxOpenedFrom;
     }
 
+    public boolean cbNotOpenedFromZero() {
+        return !this.creatureBoxOpenedFrom.equals(new BlockPos(0, 0, 0));
+    }
+
     public MenuOpenedFrom getMenuOpenedFrom() {
         return this.menuOpenedFrom;
     }

@@ -111,26 +111,6 @@ public class NewPlayerTamedCreaturesHelper {
         return false;
     }
 
-    public static RiftCreature createCreatureFromNBT(World world, NBTTagCompound compound) {
-        if (!compound.hasKey("CreatureType")) return null;
-        RiftCreatureType creatureType = RiftCreatureType.values()[compound.getByte("CreatureType")];
-        UUID uniqueID = compound.getUniqueId("UniqueID");
-        String customName = compound.getString("CustomName");
-
-        RiftCreature creature = creatureType.invokeClass(world);
-
-        //attributes and creature health dont carry over on client side, this should be a workaround
-        if (world.isRemote) {
-            creature.setHealth(compound.getFloat("Health"));
-            SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), compound.getTagList("Attributes", 10));
-        }
-
-        creature.readEntityFromNBT(compound);
-        creature.setUniqueId(uniqueID);
-        creature.setCustomNameTag(customName);
-        return creature;
-    }
-
     public static NBTTagCompound createNBTFromCreature(RiftCreature creature) {
         NBTTagCompound compound = new NBTTagCompound();
         //get data that doesnt get saved into nbt properly for some reason

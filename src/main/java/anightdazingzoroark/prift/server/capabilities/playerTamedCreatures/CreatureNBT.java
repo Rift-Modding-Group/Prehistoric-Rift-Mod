@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -37,8 +38,19 @@ public class CreatureNBT {
     }
 
     public RiftCreature getCreatureAsNBT(World world) {
-        if (this.creatureNBT.isEmpty()) return null;
-        return NewPlayerTamedCreaturesHelper.createCreatureFromNBT(world, this.creatureNBT);
+        if (this.creatureNBT == null || this.creatureNBT.isEmpty()) return null;
+        RiftCreature creature = this.getCreatureType().invokeClass(world);
+
+        //attributes and creature health dont carry over on client side, this should be a workaround
+        if (world.isRemote) {
+            creature.setHealth(this.getCreatureHealth()[0]);
+            SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), this.creatureNBT.getTagList("Attributes", 10));
+        }
+
+        creature.readEntityFromNBT(this.creatureNBT);
+        creature.setUniqueId(this.getUniqueID());
+        creature.setCustomNameTag(this.getCustomName());
+        return creature;
     }
 
     public NBTTagCompound getCreatureNBT() {
@@ -231,5 +243,10 @@ public class CreatureNBT {
     public NBTTagList getItemListNBT() {
         if (this.creatureNBT.isEmpty()) return new NBTTagList();
         return this.creatureNBT.getTagList("Items", 10);
+    }
+
+    @Override
+    public String toString() {
+        return this.creatureNBT.toString();
     }
 }

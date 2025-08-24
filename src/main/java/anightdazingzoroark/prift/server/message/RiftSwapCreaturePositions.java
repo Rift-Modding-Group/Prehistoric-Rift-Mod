@@ -1,11 +1,16 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -65,6 +70,7 @@ public class RiftSwapCreaturePositions implements IMessage {
                             );
                         }
                         else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                            //this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                             playerTamedCreatures.boxPartySwap(
                                     posToSwap.pos[0],
                                     posToSwap.pos[1],
@@ -72,6 +78,8 @@ public class RiftSwapCreaturePositions implements IMessage {
                             );
                         }
                         else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                            //this.attachCreatureToCreatureBox(player, posToSwap.getCreatureBoxOpenedFrom(), selectedPos);
+                            //this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
                             playerTamedCreatures.boxDeployedPartySwap(
                                     messagePlayer.world,
                                     posToSwap.getCreatureBoxOpenedFrom(),
@@ -79,9 +87,11 @@ public class RiftSwapCreaturePositions implements IMessage {
                                     selectedPos.pos[0]
                             );
                         }
+                        NewPlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
                     }
                     else if (selectedPos.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
                         if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                            //this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                             playerTamedCreatures.boxPartySwap(
                                     selectedPos.pos[0],
                                     selectedPos.pos[1],
@@ -97,6 +107,7 @@ public class RiftSwapCreaturePositions implements IMessage {
                             );
                         }
                         else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                            //this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                             playerTamedCreatures.boxDeployedBoxSwap(
                                     messagePlayer.world,
                                     posToSwap.getCreatureBoxOpenedFrom(),
@@ -108,6 +119,8 @@ public class RiftSwapCreaturePositions implements IMessage {
                     }
                     else if (selectedPos.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
                         if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                            //this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                            //this.attachCreatureToCreatureBox(player, selectedPos.getCreatureBoxOpenedFrom(), posToSwap);
                             playerTamedCreatures.boxDeployedPartySwap(
                                     messagePlayer.world,
                                     selectedPos.getCreatureBoxOpenedFrom(),
@@ -116,6 +129,7 @@ public class RiftSwapCreaturePositions implements IMessage {
                             );
                         }
                         else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                            //this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                             playerTamedCreatures.boxDeployedBoxSwap(
                                     messagePlayer.world,
                                     selectedPos.getCreatureBoxOpenedFrom(),
@@ -135,6 +149,20 @@ public class RiftSwapCreaturePositions implements IMessage {
                     }
                 }
             }
+        }
+
+        private void setSpawnedCreatureDeployment(EntityPlayer player, SelectedCreatureInfo posToDespawn, PlayerTamedCreatures.DeploymentType deploymentType) {
+            RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, posToDespawn.getCreatureNBT(player).getUniqueID());
+            if (creature == null) return;
+            creature.clearHomePos();
+            creature.setDeploymentType(deploymentType);
+        }
+
+        private void attachCreatureToCreatureBox(EntityPlayer player, BlockPos creatureBlockPos, SelectedCreatureInfo creatureInfo) {
+            RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, creatureInfo.getCreatureNBT(player).getUniqueID());
+            if (creature == null) return;
+            creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE);
+            creature.setHomePos(creatureBlockPos.getX(), creatureBlockPos.getY(), creatureBlockPos.getZ());
         }
     }
 }

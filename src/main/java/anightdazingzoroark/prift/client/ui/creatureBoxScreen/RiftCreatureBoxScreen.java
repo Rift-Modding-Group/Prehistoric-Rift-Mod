@@ -727,4 +727,8 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
         return toReturn;
     }
+
+    private List<RiftLibUIElement.Element> dropInventoryPopup() {
+        return new ArrayList<>();
+    }
 }
