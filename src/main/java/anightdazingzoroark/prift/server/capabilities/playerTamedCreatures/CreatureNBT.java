@@ -246,6 +246,15 @@ public class CreatureNBT {
     }
 
     @Override
+    public boolean equals(Object object) {
+        if (object == null || this.creatureNBT == null) return false;
+        if (!(object instanceof CreatureNBT)) return false;
+        CreatureNBT nbtToTest = (CreatureNBT) object;
+        if (nbtToTest.creatureNBT == null) return false;
+        return this.creatureNBT.equals(nbtToTest.creatureNBT);
+    }
+
+    @Override
     public String toString() {
         return this.creatureNBT.toString();
     }

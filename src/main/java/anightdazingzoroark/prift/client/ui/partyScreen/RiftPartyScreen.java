@@ -331,7 +331,7 @@ public class RiftPartyScreen extends RiftLibUI {
         this.setUISectionVisibility("moveDescriptionBGSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement && this.selectedMovePos >= 0);
         this.setUISectionVisibility("moveDescriptionSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.moveManagement && this.selectedMovePos >= 0);
 
-        this.setUISectionVisibility("deathBGSelectedCreatureSection", this.selectedCreature != null && this.selectedCreature.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0);
+        this.setUISectionVisibility("deathBGSelectedCreatureSection", this.hasSelectedCreature() && this.selectedCreature.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0);
 
         switch (section.id) {
             case "partyLabelSection": {

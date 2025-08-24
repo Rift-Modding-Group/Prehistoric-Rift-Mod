@@ -70,7 +70,7 @@ public class RiftSwapCreaturePositions implements IMessage {
                             );
                         }
                         else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
-                            //this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                            this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                             playerTamedCreatures.boxPartySwap(
                                     posToSwap.pos[0],
                                     posToSwap.pos[1],
@@ -78,8 +78,8 @@ public class RiftSwapCreaturePositions implements IMessage {
                             );
                         }
                         else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                            //this.attachCreatureToCreatureBox(player, posToSwap.getCreatureBoxOpenedFrom(), selectedPos);
-                            //this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                            this.attachCreatureToCreatureBox(player, posToSwap.getCreatureBoxOpenedFrom(), selectedPos);
+                            this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
                             playerTamedCreatures.boxDeployedPartySwap(
                                     messagePlayer.world,
                                     posToSwap.getCreatureBoxOpenedFrom(),
@@ -87,11 +87,10 @@ public class RiftSwapCreaturePositions implements IMessage {
                                     selectedPos.pos[0]
                             );
                         }
-                        NewPlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
                     }
                     else if (selectedPos.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
                         if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-                            //this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                            this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                             playerTamedCreatures.boxPartySwap(
                                     selectedPos.pos[0],
                                     selectedPos.pos[1],
@@ -107,7 +106,7 @@ public class RiftSwapCreaturePositions implements IMessage {
                             );
                         }
                         else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                            //this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                            this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                             playerTamedCreatures.boxDeployedBoxSwap(
                                     messagePlayer.world,
                                     posToSwap.getCreatureBoxOpenedFrom(),
@@ -119,8 +118,8 @@ public class RiftSwapCreaturePositions implements IMessage {
                     }
                     else if (selectedPos.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
                         if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-                            //this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                            //this.attachCreatureToCreatureBox(player, selectedPos.getCreatureBoxOpenedFrom(), posToSwap);
+                            this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                            this.attachCreatureToCreatureBox(player, selectedPos.getCreatureBoxOpenedFrom(), posToSwap);
                             playerTamedCreatures.boxDeployedPartySwap(
                                     messagePlayer.world,
                                     selectedPos.getCreatureBoxOpenedFrom(),
@@ -129,7 +128,7 @@ public class RiftSwapCreaturePositions implements IMessage {
                             );
                         }
                         else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
-                            //this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                            this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                             playerTamedCreatures.boxDeployedBoxSwap(
                                     messagePlayer.world,
                                     selectedPos.getCreatureBoxOpenedFrom(),
