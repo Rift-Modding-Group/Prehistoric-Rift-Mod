@@ -121,7 +121,7 @@ public class RiftMovesScreen extends RiftLibUI {
     }
 
     private RiftLibUISection createMoveDescriptionSection() {
-        return new RiftUISectionCreatureNBTUser("moveDescriptionSection", NewPlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.mc.player, this.selectedCreature), this.width, this.height, 107, 49, -62, 34, this.fontRenderer, this.mc) {
+        return new RiftUISectionCreatureNBTUser("moveDescriptionSection", this.selectedCreature.getCreatureNBT(this.mc.player), this.width, this.height, 107, 49, -62, 34, this.fontRenderer, this.mc) {
             @Override
             public List<RiftLibUIElement.Element> defineSectionContents() {
                 List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
@@ -165,7 +165,7 @@ public class RiftMovesScreen extends RiftLibUI {
 
     //for creating section for learnable moves
     private RiftUISectionCreatureNBTUser createLearnableMovesSection() {
-        return new RiftUISectionCreatureNBTUser("learnableMovesSection", NewPlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.mc.player, this.selectedCreature), this.width, this.height, 107,97, 62, 11, this.fontRenderer, this.mc) {
+        return new RiftUISectionCreatureNBTUser("learnableMovesSection", this.selectedCreature.getCreatureNBT(this.mc.player), this.width, this.height, 107,97, 62, 11, this.fontRenderer, this.mc) {
             @Override
             public List<RiftLibUIElement.Element> defineSectionContents() {
                 List<RiftLibUIElement.Element> toReturn = new ArrayList<>();

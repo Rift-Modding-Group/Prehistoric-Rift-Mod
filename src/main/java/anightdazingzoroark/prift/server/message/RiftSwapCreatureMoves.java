@@ -6,10 +6,12 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -106,7 +108,30 @@ public class RiftSwapCreatureMoves implements IMessage {
                         );
                     }
                     else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                        
+                        TileEntity tileEntity = messagePlayer.world.getTileEntity(selectedCreatureInfo.getCreatureBoxOpenedFrom());
+                        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
+                        RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+                        CreatureNBT creatureNBT = teCreatureBox.getDeployedCreatures().get(selectedCreatureInfo.pos[0]);
+
+                        //if creature exists in the world, edit the creature itself
+                        //otherwise, edit its nbt
+                        UUID selectedCreatureUUID = creatureNBT.getUniqueID();
+                        RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, selectedCreatureUUID);
+                        if (creature != null) {
+                            this.swapCreatureMoves(creature, moveSelectedInfo, moveToSwapInfo);
+                            teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
+                                    selectedCreatureNBT,
+                                    moveSelectedInfo,
+                                    moveToSwapInfo
+                            ));
+                        }
+                        else {
+                            teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
+                                    selectedCreatureNBT,
+                                    moveSelectedInfo,
+                                    moveToSwapInfo
+                            ));
+                        }
                     }
                 }
             }

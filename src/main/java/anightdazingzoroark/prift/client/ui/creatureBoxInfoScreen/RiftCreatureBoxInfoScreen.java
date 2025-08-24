@@ -71,6 +71,8 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
     }
 
     private RiftLibUISection createDeathBGSelectedCreature() {
+        //gets hidden by default
+        this.setUISectionVisibility("deathBGSelectedCreatureSection", false);
         return new RiftLibUISection("deathBGSelectedCreatureSection", this.width, this.height, 108, 66, -62, -38, this.fontRenderer, this.mc) {
             @Override
             public List<RiftLibUIElement.Element> defineSectionContents() {
@@ -202,6 +204,7 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
         this.setUISectionVisibility("partyMemberMovesSection", this.moveManagement);
         this.setUISectionVisibility("moveDescriptionBGSection", this.moveManagement && this.selectedMovePos >= 0);
         this.setUISectionVisibility("moveDescriptionSection", this.moveManagement && this.selectedMovePos >= 0);
+        this.setUISectionVisibility("deathBGSelectedCreatureSection", this.selectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0);
 
         if (riftLibUISection.id.equals("selectedCreatureOptionsSection")) {
             this.getSelectedCreatureOptionsSection().setNBTTagCompound(this.selectedCreatureInfo.getCreatureNBT(this.mc.player));
