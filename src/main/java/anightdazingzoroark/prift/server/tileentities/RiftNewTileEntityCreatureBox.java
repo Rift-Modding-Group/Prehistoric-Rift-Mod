@@ -1,12 +1,14 @@
 package anightdazingzoroark.prift.server.tileentities;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
@@ -22,6 +24,10 @@ import java.util.stream.Collectors;
 
 public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickable {
     private final FixedSizeList<CreatureNBT> creatureListNBT = new FixedSizeList<>(RiftCreatureBox.maxDeployableCreatures, new CreatureNBT());
+    private UUID uniqueID;
+    private UUID ownerID;
+    private String ownerName = "";
+    private int deploymentRange = 1;
 
     @Override
     public void update() {
@@ -29,6 +35,38 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
         RiftCreatureBox creatureBox = (RiftCreatureBox)this.world.getBlockState(this.pos).getBlock();
         if (this.isUnbreakable()) creatureBox.setHardness(-1.0f);
         else creatureBox.setHardness(0f);
+    }
+
+    public void setOwner(EntityPlayer player) {
+        this.ownerID = player.getUniqueID();
+        this.ownerName = player.getName();
+        this.updateServerData();
+    }
+
+    public String getOwnerName() {
+        return this.ownerName;
+    }
+
+    public UUID getOwnerID() {
+        return this.ownerID;
+    }
+
+    public void setUniqueID(UUID uuid) {
+        this.uniqueID = uuid;
+        this.updateServerData();
+    }
+
+    public UUID getUniqueID() {
+        return this.uniqueID;
+    }
+
+    public void setDeploymentRange(int value) {
+        this.deploymentRange = value;
+        this.updateServerData();
+    }
+
+    public int getDeploymentRange() {
+        return this.deploymentRange;
     }
 
     //this creates the creatures that wander around the box
@@ -99,6 +137,10 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
                 }
             }
         }
+        if (compound.hasKey("UniqueID")) this.uniqueID = compound.getUniqueId("UniqueID");
+        this.deploymentRange = compound.getInteger("DeploymentRange");
+        if (compound.hasKey("OwnerID")) this.ownerID = compound.getUniqueId("OwnerID");
+        this.ownerName = compound.getString("OwnerName");
     }
 
     @Override
@@ -107,6 +149,11 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
         NBTTagList boxDeployedCreaturesList = new NBTTagList();
         for (CreatureNBT boxNBT : this.creatureListNBT.getList()) boxDeployedCreaturesList.appendTag(boxNBT.getCreatureNBT());
         compound.setTag("BoxDeployedCreatures", boxDeployedCreaturesList);
+
+        if (this.uniqueID != null && !this.uniqueID.equals(RiftUtil.nilUUID)) compound.setUniqueId("UniqueID", this.uniqueID);
+        compound.setInteger("DeploymentRange", this.deploymentRange);
+        if (this.ownerID != null && !this.ownerID.equals(RiftUtil.nilUUID)) compound.setUniqueId("OwnerID", this.ownerID);
+        compound.setString("OwnerName", this.ownerName);
 
         return compound;
     }

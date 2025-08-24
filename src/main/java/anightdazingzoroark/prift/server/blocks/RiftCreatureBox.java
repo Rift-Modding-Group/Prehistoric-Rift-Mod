@@ -20,6 +20,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -28,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class RiftCreatureBox extends Block implements ITileEntityProvider {
     public static final PropertyDirection FACING = BlockHorizontal.FACING;
@@ -71,6 +73,17 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
         return new RiftNewTileEntityCreatureBox();
+    }
+
+    @Override
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+        if (!world.isRemote && placer instanceof EntityPlayer) {
+            TileEntity tileEntity = world.getTileEntity(pos);
+            if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
+            RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+            teCreatureBox.setOwner((EntityPlayer) placer);
+            teCreatureBox.setUniqueID(UUID.randomUUID());
+        }
     }
 
     @Override

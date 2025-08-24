@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.capabilities;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataProvider;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
@@ -13,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -23,9 +25,10 @@ public class CapabilityHandler {
     public static final ResourceLocation PLAYER_TAMED_CREATURES_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playertamedcreatures");
     public static final ResourceLocation PLAYER_JOURNAL_PROGRESS_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playerjournalprogress");
     public static final ResourceLocation NON_POTION_EFFECTS = new ResourceLocation(RiftInitialize.MODID, "nonpotioneffects");
+    public static final ResourceLocation CREATURE_BOX_DATA = new ResourceLocation(RiftInitialize.MODID, "creatureboxdata");
 
     @SubscribeEvent
-    public void attachCapability(AttachCapabilitiesEvent<Entity> event) {
+    public void attachCapabilityToEntity(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof EntityPlayer) {
             event.addCapability(PLAYER_TAMED_CREATURES_CAPABILITY, new PlayerTamedCreaturesProvider());
             event.addCapability(PLAYER_JOURNAL_PROGRESS_CAPABILITY, new PlayerJournalProgressProvider());
@@ -33,6 +36,11 @@ public class CapabilityHandler {
         else if (event.getObject() instanceof EntityLivingBase) {
             event.addCapability(NON_POTION_EFFECTS, new NonPotionEffectsProvider());
         }
+    }
+
+    @SubscribeEvent
+    public void attachCapabilityToWorld(AttachCapabilitiesEvent<World> event) {
+        event.addCapability(CREATURE_BOX_DATA, new CreatureBoxDataProvider());
     }
 
     @SubscribeEvent
