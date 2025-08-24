@@ -225,7 +225,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                 posToSelect = this.valTwo;
 
                 //change creature name in the world
-                RiftMessages.WRAPPER.sendToServer(new RiftChangeNameFromBox(ClientProxy.creatureUUID, this.textField.getText()));
+                //RiftMessages.WRAPPER.sendToServer(new RiftChangeNameFromBox(ClientProxy.creatureUUID, this.textField.getText()));
                 ClientProxy.creatureUUID = null;
             }
         }

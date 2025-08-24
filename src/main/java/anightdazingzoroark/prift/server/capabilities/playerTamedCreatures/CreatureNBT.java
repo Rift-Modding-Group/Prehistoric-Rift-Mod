@@ -146,12 +146,12 @@ public class CreatureNBT {
 
     public PlayerTamedCreatures.DeploymentType getDeploymentType() {
         if (this.creatureNBT.isEmpty()) return null;
-        return PlayerTamedCreatures.DeploymentType.values()[this.creatureNBT.getByte("DeploymentType")];
+        return PlayerTamedCreatures.DeploymentType.values()[this.creatureNBT.getInteger("DeploymentType")];
     }
 
     public void setDeploymentType(PlayerTamedCreatures.DeploymentType deploymentType) {
         if (this.creatureNBT.isEmpty()) return;
-        this.creatureNBT.setByte("DeploymentType", (byte) deploymentType.ordinal());
+        this.creatureNBT.setInteger("DeploymentType", deploymentType.ordinal());
     }
 
     public NBTTagList getMovesListNBT() {

@@ -98,25 +98,6 @@ public class PlayerTamedCreaturesHelper {
         else RiftMessages.WRAPPER.sendToAll(new RiftForceSyncBoxLastOpenedTime(player));
     }
 
-    //update creatures
-    public static void updateAllPartyMems(EntityPlayer player) {
-        if (player.world.isRemote) {
-            for (RiftCreature creature : getPlayerParty(player))
-                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) updatePartyMem(creature);
-        }
-        else {
-            for (RiftCreature creature : getPlayerParty(player))
-                if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) updatePartyMem(creature);
-        }
-    }
-
-    @Deprecated
-    public static void updatePartyMem(RiftCreature creature) {
-        if (creature.getOwner() == null) return;
-        if (creature.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyDeployed((EntityPlayer) creature.getOwner(), creature));
-        else RiftMessages.WRAPPER.sendToAll(new RiftUpdatePartyDeployed((EntityPlayer) creature.getOwner(), creature));
-    }
-
     //getting and changing other variables
     public static int getMaxPartySize(EntityPlayer player) {
         return getPlayerTamedCreatures(player).getMaxPartySize();

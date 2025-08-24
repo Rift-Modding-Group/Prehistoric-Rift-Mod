@@ -1298,7 +1298,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             compound.setInteger("HomePosY", this.homePosition.getY());
             compound.setInteger("HomePosZ", this.homePosition.getZ());
         }
-        compound.setByte("DeploymentType", (byte) this.getDeploymentType().ordinal());
+        compound.setInteger("DeploymentType", this.getDeploymentType().ordinal());
         compound.setInteger("BoxReviveTime", this.boxReviveTime);
 
         //for moves
@@ -1370,7 +1370,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setJustSpawned(compound.getBoolean("JustSpawned"));
         this.setTameProgress(compound.getInteger("TameProgress"));
         if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
-        this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getByte("DeploymentType")]);
+        this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getInteger("DeploymentType")]);
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
 
         //for learned moves

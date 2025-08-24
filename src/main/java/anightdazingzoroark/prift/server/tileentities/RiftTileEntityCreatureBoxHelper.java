@@ -5,8 +5,6 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.message.RiftForceUpdateCreatureBoxDeployed;
 import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftUpdateBoxDeployed;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -52,22 +50,6 @@ public class RiftTileEntityCreatureBoxHelper {
     }
 
     //EVERYTHING BELOW IS NOW DEPRECATED
-    @Deprecated
-    public static void updateAllDeployedCreatures(World world, BlockPos pos) {
-        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
-
-        if (creatureBox == null) return;
-
-        for (RiftCreature creature : creatureBox.getCreatures()) updateDeployedCreature(pos, creature);
-    }
-
-    @Deprecated
-    public static void updateDeployedCreature(BlockPos pos, RiftCreature creature) {
-        if (pos == null) return;
-
-        RiftMessages.WRAPPER.sendToServer(new RiftUpdateBoxDeployed(pos, creature));
-    }
-
     @Deprecated
     private static boolean canFitInArea(World world, RiftCreature creature, BlockPos pos) {
         int xMin = (int)Math.floor(creature.width / 2);

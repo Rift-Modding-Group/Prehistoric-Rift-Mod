@@ -40,7 +40,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftStartRiding.Handler.class, RiftStartRiding.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetWorkstation.Handler.class, RiftSetWorkstation.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftTeleportPartyMemToPlayer.Handler.class, RiftTeleportPartyMemToPlayer.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftChangeNameFromBox.Handler.class, RiftChangeNameFromBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftRemoveCreatureFromBox.Handler.class, RiftRemoveCreatureFromBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftRemoveCreatureFromBox.Handler.class, RiftRemoveCreatureFromBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftRemoveAfterSendToBox.Handler.class, RiftRemoveAfterSendToBox.class, id++, Side.SERVER);
@@ -70,12 +69,8 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftModifyPlayerCreature.Handler.class, RiftModifyPlayerCreature.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftCreatureBoxSetLastOpenedTime.Handler.class, RiftCreatureBoxSetLastOpenedTime.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftCreatureBoxSetLastOpenedTime.Handler.class, RiftCreatureBoxSetLastOpenedTime.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftUpdatePartyDeployed.Handler.class, RiftUpdatePartyDeployed.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftUpdatePartyDeployed.Handler.class, RiftUpdatePartyDeployed.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftRemoveCreature.Handler.class, RiftRemoveCreature.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftRemoveCreature.Handler.class, RiftRemoveCreature.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftUpdateBoxDeployed.Handler.class, RiftUpdateBoxDeployed.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftUpdateBoxDeployed.Handler.class, RiftUpdateBoxDeployed.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftPartySetLastOpenedTime.Handler.class, RiftPartySetLastOpenedTime.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftPartySetLastOpenedTime.Handler.class, RiftPartySetLastOpenedTime.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftForceSyncPartyNBT.Handler.class, RiftForceSyncPartyNBT.class, id++, Side.SERVER);
