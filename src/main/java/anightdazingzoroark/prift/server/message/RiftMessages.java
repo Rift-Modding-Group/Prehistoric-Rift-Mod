@@ -14,8 +14,6 @@ public class RiftMessages {
         int id = 0;
         WRAPPER.registerMessage(RiftApatosaurusManagePassengers.Handler.class, RiftApatosaurusManagePassengers.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeCreatureFromMenu.Handler.class, RiftChangeCreatureFromMenu.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftChangePartyOrBoxOrder.Handler.class, RiftChangePartyOrBoxOrder.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftChangePartyOrBoxOrder.Handler.class, RiftChangePartyOrBoxOrder.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftChangeInventoryFromMenu.Handler.class, RiftChangeInventoryFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeInventoryFromMenu.Handler.class, RiftChangeInventoryFromMenu.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftChangeWeaponInvFromMenu.Handler.class, RiftChangeWeaponInvFromMenu.class, id++, Side.SERVER);
@@ -48,8 +46,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftRemoveAfterSendToBox.Handler.class, RiftRemoveAfterSendToBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftRemoveAfterSendToBox.Handler.class, RiftRemoveAfterSendToBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftUpdatePlayerTamedCreatures.Handler.class, RiftUpdatePlayerTamedCreatures.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftChangeBoxDeployedOrder.Handler.class, RiftChangeBoxDeployedOrder.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftChangeBoxDeployedOrder.Handler.class, RiftChangeBoxDeployedOrder.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftDropPartyMemberInventory.Handler.class, RiftDropPartyMemberInventory.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftDropCreatureBoxDeployedMemberInventory.Handler.class, RiftDropCreatureBoxDeployedMemberInventory.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetTurretMode.Handler.class, RiftSetTurretMode.class, id++, Side.SERVER);

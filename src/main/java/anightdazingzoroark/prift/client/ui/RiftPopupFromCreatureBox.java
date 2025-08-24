@@ -121,7 +121,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
         int selectType = -1;
         int posToSelect = -1;
         int toChangeCreaturesMode = 0;
-        if (this.popupType == PopupFromCreatureBox.REMOVE_INVENTORY) {
+        /*if (this.popupType == PopupFromCreatureBox.REMOVE_INVENTORY) {
             if (button.id == 0) {
                 RiftChangePartyOrBoxOrder.SwapType swapType = (RiftChangePartyOrBoxOrder.SwapType) ClientProxy.swapTypeForPopup;
                 switch (swapType) {
@@ -215,7 +215,7 @@ public class RiftPopupFromCreatureBox extends GuiScreen {
                 }
             }
         }
-        else if (this.popupType == PopupFromCreatureBox.CHANGE_NAME) {
+        else*/ if (this.popupType == PopupFromCreatureBox.CHANGE_NAME) {
             if (button.id == 0) {
                 //change creature name in the box ui
                 NBTTagCompound compound = new NBTTagCompound();
