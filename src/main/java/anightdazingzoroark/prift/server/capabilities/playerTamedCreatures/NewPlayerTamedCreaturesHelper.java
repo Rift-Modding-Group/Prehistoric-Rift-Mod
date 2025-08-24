@@ -3,21 +3,17 @@ package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /*
 only server side gets truly edited
@@ -36,7 +32,7 @@ public class NewPlayerTamedCreaturesHelper {
 
     public static void updateAllPartyMems(EntityPlayer player) {
         if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftNewUpdatePartyDeployed(player));
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyDeployed(player));
     }
 
     public static void forceSyncPartyNBT(EntityPlayer player) {
@@ -82,7 +78,7 @@ public class NewPlayerTamedCreaturesHelper {
 
     public static void addCreatureToParty(EntityPlayer player, RiftCreature creature) {
         if (player == null || creature == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftNewAddToParty(player, creature));
+        RiftMessages.WRAPPER.sendToServer(new RiftAddToParty(player, creature));
     }
 
     public static int getMaxPartySize(EntityPlayer player) {
@@ -150,7 +146,7 @@ public class NewPlayerTamedCreaturesHelper {
 
     public static void addCreatureToBox(EntityPlayer player, RiftCreature creature) {
         if (player == null || creature == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftNewAddToBox(player, creature));
+        RiftMessages.WRAPPER.sendToServer(new RiftAddToBox(player, creature));
     }
 
     public static boolean canAddCreatureToBox(EntityPlayer player) {

@@ -6,31 +6,28 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-import org.lwjgl.Sys;
 
 import java.util.List;
 import java.util.UUID;
 
-public class RiftNewUpdatePartyDeployed implements IMessage {
+public class RiftUpdatePartyDeployed implements IMessage {
     private int playerId;
     private int index;
     private CreatureNBT tagCompound;
 
-    public RiftNewUpdatePartyDeployed() {}
+    public RiftUpdatePartyDeployed() {}
 
-    public RiftNewUpdatePartyDeployed(EntityPlayer player) {
+    public RiftUpdatePartyDeployed(EntityPlayer player) {
         this(player, -1, new CreatureNBT());
     }
 
-    public RiftNewUpdatePartyDeployed(EntityPlayer player, int index, CreatureNBT tagCompound) {
+    public RiftUpdatePartyDeployed(EntityPlayer player, int index, CreatureNBT tagCompound) {
         this.playerId = player.getEntityId();
         this.index = index;
         this.tagCompound = tagCompound;
@@ -50,14 +47,14 @@ public class RiftNewUpdatePartyDeployed implements IMessage {
         ByteBufUtils.writeTag(buf, this.tagCompound.getCreatureNBT());
     }
 
-    public static class Handler implements IMessageHandler<RiftNewUpdatePartyDeployed, IMessage> {
+    public static class Handler implements IMessageHandler<RiftUpdatePartyDeployed, IMessage> {
         @Override
-        public IMessage onMessage(RiftNewUpdatePartyDeployed message, MessageContext ctx) {
+        public IMessage onMessage(RiftUpdatePartyDeployed message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handle(RiftNewUpdatePartyDeployed message, MessageContext ctx) {
+        private void handle(RiftUpdatePartyDeployed message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 

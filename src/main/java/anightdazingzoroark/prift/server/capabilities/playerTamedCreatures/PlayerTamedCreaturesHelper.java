@@ -40,18 +40,6 @@ public class PlayerTamedCreaturesHelper {
     }
 
     @Deprecated
-    public static void addToPlayerBox(EntityPlayer player, RiftCreature creature) {
-        if (player.world.isRemote) {
-            getPlayerTamedCreatures(player).addToBoxCreatures(creature);
-            RiftMessages.WRAPPER.sendToServer(new RiftAddToBox(player, creature));
-        }
-        else {
-            getPlayerTamedCreatures(player).addToBoxCreatures(creature);
-            RiftMessages.WRAPPER.sendToAll(new RiftAddToBox(player, creature));
-        }
-    }
-
-    @Deprecated
     public static List<NBTTagCompound> getPlayerBoxNBT(EntityPlayer player) {
         return new ArrayList<>();
     }

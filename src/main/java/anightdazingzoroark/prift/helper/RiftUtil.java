@@ -6,7 +6,6 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftNewRemoveCreature;
 import anightdazingzoroark.prift.server.message.RiftRemoveCreature;
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
@@ -46,7 +45,6 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
