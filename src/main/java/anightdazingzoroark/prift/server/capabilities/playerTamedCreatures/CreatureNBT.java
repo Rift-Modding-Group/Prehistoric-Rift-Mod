@@ -8,9 +8,13 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -243,6 +247,57 @@ public class CreatureNBT {
     public NBTTagList getItemListNBT() {
         if (this.creatureNBT.isEmpty()) return new NBTTagList();
         return this.creatureNBT.getTagList("Items", 10);
+    }
+
+    public boolean inventoryIsEmpty() {
+        if (this.creatureNBT.isEmpty()) return true;
+        NBTTagList inventoryTagList = this.creatureNBT.getTagList("Items", 10);
+        for (int i = 0; i < inventoryTagList.tagCount(); i++) {
+            NBTTagCompound itemNBT = inventoryTagList.getCompoundTagAt(i);
+            int j = itemNBT.getByte("Slot") & 255;
+            //gear is exempted from the check
+            if (j == getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)
+                    || j == getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) continue;
+            ItemStack stackToTest = new ItemStack(itemNBT);
+            if (!stackToTest.equals(ItemStack.EMPTY)) return false;
+        }
+        return true;
+    }
+
+    public void dropInventory(World world) {
+        if (this.creatureNBT.isEmpty()) return;
+
+        //step 1: get all the items
+        NBTTagList inventoryTagList = this.creatureNBT.getTagList("Items", 10);
+        List<ItemStack> itemsToDrop = new ArrayList<>();
+        List<Integer> positionsToRemove = new ArrayList<>();
+        for (int i = 0; i < inventoryTagList.tagCount(); i++) {
+            NBTTagCompound itemNBT = inventoryTagList.getCompoundTagAt(i);
+            int j = itemNBT.getByte("Slot") & 255;
+            //gear is exempted from the check
+            if (j == getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)
+                    || j == getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) continue;
+            ItemStack stackToTest = new ItemStack(itemNBT);
+            if (!stackToTest.equals(ItemStack.EMPTY)) {
+                itemsToDrop.add(stackToTest);
+                positionsToRemove.add(i);
+            }
+        }
+        if (itemsToDrop.isEmpty()) return;
+
+        //step 2: remove items
+        for (Integer posToRemove : positionsToRemove) inventoryTagList.removeTag(posToRemove);
+        this.creatureNBT.setTag("Items", inventoryTagList);
+
+        //step 3: drop all the items at the location of the owner
+        UUID ownerUUID = UUID.fromString(this.creatureNBT.getString("OwnerUUID"));
+        EntityPlayer player = (EntityPlayer) RiftUtil.getEntityFromUUID(world, ownerUUID);
+        if (player == null) return;
+        for (ItemStack item : itemsToDrop) {
+            EntityItem droppedItem = new EntityItem(world, player.posX, player.posY + 0.5, player.posZ);
+            droppedItem.setItem(item);
+            world.spawnEntity(droppedItem);
+        }
     }
 
     @Override

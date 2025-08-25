@@ -32,6 +32,7 @@ import java.util.List;
 public class RiftCreatureBoxScreen extends RiftLibUI {
     private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/creature_box_background.png");
     private SelectedCreatureInfo selectedCreatureInfo;
+    private SelectedCreatureInfo selectedDropInvTest;
     private int currentBox;
     private RiftCreature creatureToDraw;
     private boolean shufflePartyMemsMode;
@@ -481,6 +482,21 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreatureInfo, this.getTextFieldTextByID("newName"));
             this.clearPopup();
         }
+        if (riftLibButton.buttonId.equals("confirmInventoryDrop")) {
+            if (!this.selectedCreatureInfo.getCreatureNBT(this.mc.player).inventoryIsEmpty())
+                NewPlayerTamedCreaturesHelper.dropSelectedInventory(this.mc.player, this.selectedCreatureInfo);
+            if (!this.selectedDropInvTest.getCreatureNBT(this.mc.player).inventoryIsEmpty())
+                NewPlayerTamedCreaturesHelper.dropSelectedInventory(this.mc.player, this.selectedDropInvTest);
+
+
+            NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, this.selectedDropInvTest);
+            if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
+            }
+            this.selectNewCreature(null);
+            this.selectedDropInvTest = null;
+            this.clearPopup();
+        }
         if (riftLibButton.buttonId.equals("exitPopup")) this.clearPopup();
     }
 
@@ -495,11 +511,17 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             //swap something with a creature from the party
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
-                    NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
-                    if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                        RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
+                    if (this.posCanSwapBasedOnInventory(selectionToTest)) {
+                        NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                        if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                            RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
+                        }
+                        this.selectNewCreature(null);
                     }
-                    this.selectNewCreature(null);
+                    else {
+                        this.selectedDropInvTest = selectionToTest;
+                        this.createPopup(this.dropInventoryPopup());
+                    }
                 }
                 else this.selectNewCreature(selectionToTest);
             }
@@ -530,11 +552,17 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             //swap something with a creature from the box
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
-                    NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
-                    if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                        RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
+                    if (this.posCanSwapBasedOnInventory(selectionToTest)) {
+                        NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                        if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                            RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
+                        }
+                        this.selectNewCreature(null);
                     }
-                    this.selectNewCreature(null);
+                    else {
+                        this.selectedDropInvTest = selectionToTest;
+                        this.createPopup(this.dropInventoryPopup());
+                    }
                 }
                 else this.selectNewCreature(selectionToTest);
             }
@@ -564,9 +592,17 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             //swap something with selected creature
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
-                    NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
-                    RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, selectionToTest.getCreatureBoxOpenedFrom());
-                    this.selectNewCreature(null);
+                    if (this.posCanSwapBasedOnInventory(selectionToTest)) {
+                        NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                        if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                            RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
+                        }
+                        this.selectNewCreature(null);
+                    }
+                    else {
+                        this.selectedDropInvTest = selectionToTest;
+                        this.createPopup(this.dropInventoryPopup());
+                    }
                 }
                 else this.selectNewCreature(selectionToTest);
             }
@@ -644,6 +680,21 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             this.selectedCreatureInfo = null;
             this.creatureToDraw = null;
         }
+    }
+
+    private boolean posCanSwapBasedOnInventory(SelectedCreatureInfo selectedToTest) {
+        CreatureNBT selectedCreatureNBT = this.selectedCreatureInfo.getCreatureNBT(this.mc.player);
+        CreatureNBT selectedToTestNBT = selectedToTest.getCreatureNBT(this.mc.player);
+
+        boolean selectedCanHaveInventory = this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY
+                || this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED;
+        boolean toTestCanHaveInventory = selectedToTest.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY
+                || selectedToTest.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED;
+
+        if (selectedCanHaveInventory && toTestCanHaveInventory) return true;
+        else if (selectedCanHaveInventory && !toTestCanHaveInventory) return selectedCreatureNBT.inventoryIsEmpty();
+        else if (!selectedCanHaveInventory && toTestCanHaveInventory) return selectedToTestNBT.inventoryIsEmpty();
+        else return true;
     }
 
     @Override
@@ -729,6 +780,35 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     }
 
     private List<RiftLibUIElement.Element> dropInventoryPopup() {
-        return new ArrayList<>();
+        List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+        //text
+        RiftLibUIElement.TextElement textElement = new RiftLibUIElement.TextElement();
+        textElement.setText(I18n.format("creature_box.popup_choice.remove_inventory"));
+        toReturn.add(textElement);
+
+        //table for buttons
+        RiftLibUIElement.TableContainerElement buttonContainer = new RiftLibUIElement.TableContainerElement();
+        buttonContainer.setCellSize(70, 20);
+        buttonContainer.setRowCount(2);
+        buttonContainer.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+
+        //confirm button
+        RiftLibUIElement.ButtonElement confirmButton = new RiftLibUIElement.ButtonElement();
+        confirmButton.setSize(60, 20);
+        confirmButton.setText(I18n.format("radial.popup_button.confirm"));
+        confirmButton.setID("confirmInventoryDrop");
+        buttonContainer.addElement(confirmButton);
+
+        //cancel button
+        RiftLibUIElement.ButtonElement cancelButton = new RiftLibUIElement.ButtonElement();
+        cancelButton.setSize(60, 20);
+        cancelButton.setText(I18n.format("radial.popup_button.cancel"));
+        cancelButton.setID("exitPopup");
+        buttonContainer.addElement(cancelButton);
+
+        toReturn.add(buttonContainer);
+
+        return toReturn;
     }
 }

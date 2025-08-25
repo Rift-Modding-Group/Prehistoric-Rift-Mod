@@ -121,5 +121,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSwapCreaturePositions.Handler.class, RiftSwapCreaturePositions.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceUpdateCreatureBoxDeployed.Handler.class, RiftForceUpdateCreatureBoxDeployed.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceUpdateCreatureBoxDeployed.Handler.class, RiftForceUpdateCreatureBoxDeployed.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftDropSelectedInventory.Handler.class, RiftDropSelectedInventory.class, id++, Side.SERVER);
     }
 }

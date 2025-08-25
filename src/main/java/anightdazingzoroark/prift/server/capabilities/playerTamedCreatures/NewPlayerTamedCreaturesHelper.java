@@ -207,6 +207,11 @@ public class NewPlayerTamedCreaturesHelper {
         if (player == null || selectedPos == null || posToSwap == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftSwapCreaturePositions(player, selectedPos, posToSwap));
     }
+
+    public static void dropSelectedInventory(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
+        if (player == null || selectedCreatureInfo == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftDropSelectedInventory(player, selectedCreatureInfo));
+    }
     //getter stuff for SelectedCreatureInfo class ends here
 
     //move swapping related stuff starts here
