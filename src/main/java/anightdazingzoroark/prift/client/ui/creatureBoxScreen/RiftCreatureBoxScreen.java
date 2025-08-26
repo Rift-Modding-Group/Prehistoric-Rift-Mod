@@ -785,6 +785,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         //text
         RiftLibUIElement.TextElement textElement = new RiftLibUIElement.TextElement();
         textElement.setText(I18n.format("creature_box.popup_choice.remove_inventory"));
+        textElement.setAlignment(RiftLibUIElement.ALIGN_CENTER);
         toReturn.add(textElement);
 
         //table for buttons

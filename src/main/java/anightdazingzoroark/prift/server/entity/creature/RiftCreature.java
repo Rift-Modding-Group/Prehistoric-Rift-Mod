@@ -25,7 +25,6 @@ import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
@@ -3122,14 +3121,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.getAttackTarget() != null) NonPotionEffectsHelper.setGrabbed(this.getAttackTarget(), false);
 
         //for undeploying a creature
-        if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-        if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
         this.setSitting(false);
         this.getActivePotionEffects().clear();
         this.setBoxReviveTime(GeneralConfig.creatureBoxReviveTime);
-        //todo: go back here and redo death related stuff
-        NewPlayerTamedCreaturesHelper.updateIndividualPartyMemServer((EntityPlayer) this.getOwner(), this);
-        NewPlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
+        if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+            this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+            NewPlayerTamedCreaturesHelper.updateIndividualPartyMemServer((EntityPlayer) this.getOwner(), this);
+            NewPlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
+        }
+        if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {
+            NewPlayerTamedCreaturesHelper.updateIndividualBoxDeployedCreatureServer((EntityPlayer) this.getOwner(), this);
+            NewPlayerTamedCreaturesHelper.updateIndividualBoxDeployedCreatureClient((EntityPlayer) this.getOwner(), this);
+        }
 
         super.onDeath(cause);
     }

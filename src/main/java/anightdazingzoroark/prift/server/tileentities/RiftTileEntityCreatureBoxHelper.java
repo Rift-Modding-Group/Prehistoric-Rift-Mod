@@ -49,8 +49,6 @@ public class RiftTileEntityCreatureBoxHelper {
         return null;
     }
 
-    //EVERYTHING BELOW IS NOW DEPRECATED
-    @Deprecated
     private static boolean canFitInArea(World world, RiftCreature creature, BlockPos pos) {
         int xMin = (int)Math.floor(creature.width / 2);
         for (int x = -xMin; x <= xMin; x++) {
@@ -65,7 +63,6 @@ public class RiftTileEntityCreatureBoxHelper {
         return true;
     }
 
-    @Deprecated
     private static boolean entireAreaWater(World world, RiftCreature creature, BlockPos pos) {
         int xMin = (int)Math.floor(creature.width / 2);
         for (int x = -xMin; x <= xMin; x++) {
@@ -78,4 +75,6 @@ public class RiftTileEntityCreatureBoxHelper {
         }
         return true;
     }
+
+    public static void updateIndividualDeployedCreature(RiftCreature creature) {}
 }

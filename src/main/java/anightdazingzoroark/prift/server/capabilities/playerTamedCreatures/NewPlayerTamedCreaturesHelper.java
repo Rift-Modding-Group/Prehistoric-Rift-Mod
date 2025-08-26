@@ -68,12 +68,22 @@ public class NewPlayerTamedCreaturesHelper {
 
     public static void updateIndividualPartyMemClient(EntityPlayer player, RiftCreature creature) {
         if (player == null || creature == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualCreatureClient(player, creature));
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualPartyCreatureClient(player, creature));
     }
 
     public static void updateIndividualPartyMemServer(EntityPlayer player, RiftCreature creature) {
         if (player == null || creature == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualCreatureServer(player, creature));
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualPartyCreatureServer(player, creature));
+    }
+
+    public static void updateIndividualBoxDeployedCreatureServer(EntityPlayer player, RiftCreature creature) {
+        if (player == null || creature == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualBoxDeployedCreatureServer(player, creature));
+    }
+
+    public static void updateIndividualBoxDeployedCreatureClient(EntityPlayer player, RiftCreature creature) {
+        if (player == null || creature == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdateIndividualBoxDeployedCreatureClient(player, creature));
     }
 
     public static void addCreatureToParty(EntityPlayer player, RiftCreature creature) {

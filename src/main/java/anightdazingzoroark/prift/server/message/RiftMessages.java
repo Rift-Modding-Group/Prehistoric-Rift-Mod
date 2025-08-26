@@ -107,9 +107,9 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftForceSyncSelectedPartyPosFromOverlay.Handler.class, RiftForceSyncSelectedPartyPosFromOverlay.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncSelectedPartyPosFromOverlay.Handler.class, RiftForceSyncSelectedPartyPosFromOverlay.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetSelectedPartyPosFromOverlay.Handler.class, RiftSetSelectedPartyPosFromOverlay.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftUpdateIndividualCreatureClient.Handler.class, RiftUpdateIndividualCreatureClient.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftUpdateIndividualCreatureClient.Handler.class, RiftUpdateIndividualCreatureClient.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftUpdateIndividualCreatureServer.Handler.class, RiftUpdateIndividualCreatureServer.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureClient.Handler.class, RiftUpdateIndividualPartyCreatureClient.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureClient.Handler.class, RiftUpdateIndividualPartyCreatureClient.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureServer.Handler.class, RiftUpdateIndividualPartyCreatureServer.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.Handler.class, RiftForceSyncLastOpenedBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.Handler.class, RiftForceSyncLastOpenedBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetLastOpenedBox.Handler.class, RiftSetLastOpenedBox.class, id++, Side.SERVER);
@@ -121,6 +121,9 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSwapCreaturePositions.Handler.class, RiftSwapCreaturePositions.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceUpdateCreatureBoxDeployed.Handler.class, RiftForceUpdateCreatureBoxDeployed.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceUpdateCreatureBoxDeployed.Handler.class, RiftForceUpdateCreatureBoxDeployed.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftUpdateIndividualBoxDeployedCreatureClient.Handler.class, RiftUpdateIndividualBoxDeployedCreatureClient.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftUpdateIndividualBoxDeployedCreatureClient.Handler.class, RiftUpdateIndividualBoxDeployedCreatureClient.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftUpdateIndividualBoxDeployedCreatureServer.Handler.class, RiftUpdateIndividualBoxDeployedCreatureServer.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftDropSelectedInventory.Handler.class, RiftDropSelectedInventory.class, id++, Side.SERVER);
     }
 }

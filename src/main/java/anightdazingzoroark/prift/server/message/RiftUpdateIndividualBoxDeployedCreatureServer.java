@@ -1,13 +1,13 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -17,13 +17,13 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.UUID;
 
-public class RiftUpdateIndividualCreatureServer implements IMessage {
+public class RiftUpdateIndividualBoxDeployedCreatureServer implements IMessage {
     private int playerId;
     private int creatureId;
 
-    public RiftUpdateIndividualCreatureServer() {}
+    public RiftUpdateIndividualBoxDeployedCreatureServer() {}
 
-    public RiftUpdateIndividualCreatureServer(EntityPlayer player, RiftCreature creature) {
+    public RiftUpdateIndividualBoxDeployedCreatureServer(EntityPlayer player, RiftCreature creature) {
         this.playerId = player.getEntityId();
         this.creatureId = creature.getEntityId();
     }
@@ -40,29 +40,33 @@ public class RiftUpdateIndividualCreatureServer implements IMessage {
         buf.writeInt(this.creatureId);
     }
 
-    public static class Handler implements IMessageHandler<RiftUpdateIndividualCreatureServer, IMessage> {
+    public static class Handler implements IMessageHandler<RiftUpdateIndividualBoxDeployedCreatureServer, IMessage> {
         @Override
-        public IMessage onMessage(RiftUpdateIndividualCreatureServer message, MessageContext ctx) {
+        public IMessage onMessage(RiftUpdateIndividualBoxDeployedCreatureServer message, MessageContext ctx) {
             FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handle(RiftUpdateIndividualCreatureServer message, MessageContext ctx) {
+        private void handle(RiftUpdateIndividualBoxDeployedCreatureServer message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
                 EntityPlayer messagePlayer = ctx.getServerHandler().player;
 
                 EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
                 RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                if (playerTamedCreatures != null && creature != null) {
-                    //first of all, check if creature is in the party
+                if (player != null && creature != null) {
+                    //find creature box
+                    TileEntity te = messagePlayer.world.getTileEntity(creature.getHomePos());
+                    if (!(te instanceof RiftNewTileEntityCreatureBox)) return;
+                    RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) te;
+
+                    //first of all, check if creature is deployed from the box
                     int pos = -1;
                     UUID creatureUUID = creature.getUniqueID();
-                    for (int x = 0; x < playerTamedCreatures.getPartyNBT().size(); x++) {
-                        CreatureNBT partyMemNBT = playerTamedCreatures.getPartyNBT().get(x);
-                        if (!partyMemNBT.nbtIsEmpty()
-                                && partyMemNBT.getUniqueID() != null
-                                && partyMemNBT.getUniqueID().equals(creatureUUID)) {
+                    for (int x = 0; x < teCreatureBox.getDeployedCreatures().size(); x++) {
+                        CreatureNBT deployedMemNBT = teCreatureBox.getDeployedCreatures().get(x);
+                        if (!deployedMemNBT.nbtIsEmpty()
+                                && deployedMemNBT.getUniqueID() != null
+                                && deployedMemNBT.getUniqueID().equals(creatureUUID)) {
                             pos = x;
                             break;
                         }
@@ -71,7 +75,7 @@ public class RiftUpdateIndividualCreatureServer implements IMessage {
 
                     //if creature is in the party, go on and update
                     CreatureNBT creatureNBT = new CreatureNBT(creature);
-                    playerTamedCreatures.setPartyMemNBT(pos, creatureNBT);
+                    teCreatureBox.setCreatureInPos(pos, creatureNBT);
                 }
             }
         }
