@@ -300,6 +300,32 @@ public class CreatureNBT {
         }
     }
 
+    public int getReviveTimeTicks() {
+        if (this.creatureNBT.isEmpty()) return 0;
+        return this.creatureNBT.getInteger("BoxReviveTime");
+    }
+
+    public int[] getReviveTime() {
+        if (this.creatureNBT.isEmpty()) return new int[]{0, 0};
+        int minutesInt = (int)((float) this.getReviveTimeTicks() / 1200F);
+        int secondsInt = (int)((float) this.getReviveTimeTicks() / 20F);
+        secondsInt = secondsInt - (minutesInt * 60);
+
+        return new int[]{minutesInt, secondsInt};
+    }
+
+    public String getReviveTimeString() {
+        if (this.creatureNBT.isEmpty()) return "00:00";
+
+        int minutes = this.getReviveTime()[0];
+        int seconds = this.getReviveTime()[1];
+
+        String minutesString = (minutes < 10 ? "0" : "")+minutes;
+        String secondsString = (seconds < 10 ? "0" : "")+seconds;
+
+        return minutesString+":"+secondsString;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object == null || this.creatureNBT == null) return false;

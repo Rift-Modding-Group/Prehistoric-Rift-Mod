@@ -59,6 +59,7 @@ public class RiftBoxMemButtonForBox extends RiftLibClickableSection {
             }
 
             //create creature icon overlay
+            //if creature is dead, put some gray alpha on it
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             ResourceLocation iconLocation = new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+this.creatureNBT.getCreatureType().name().toLowerCase()+"_icon.png");
             this.minecraft.getTextureManager().bindTexture(iconLocation);
@@ -67,8 +68,25 @@ public class RiftBoxMemButtonForBox extends RiftLibClickableSection {
             int l = (int) ((this.guiHeight - 24) / (2 * iconScale) + (this.yOffset + this.yAddOffset + 4) / iconScale);
             GlStateManager.pushMatrix();
             GlStateManager.scale(iconScale, iconScale, iconScale);
+            if (this.creatureNBT.getCreatureHealth()[0] <= 0) {
+                GlStateManager.enableBlend();
+                GlStateManager.color(1f, 1f, 1f, 0.25f);
+            }
             Gui.drawModalRectWithCustomSizedTexture(k, l, 0, 0, 24, 24, 24, 24);
+            if (this.creatureNBT.getCreatureHealth()[0] <= 0) GlStateManager.disableBlend();
             GlStateManager.popMatrix();
+
+            //if creature is dead, put a timer showing how long it gonna take until it gets revived
+            if (this.creatureNBT.getCreatureHealth()[0] <= 0) {
+                //translucent bar for countdown
+                Gui.drawRect(this.xOffset + 1, this.yOffset + 12, this.xOffset + 31, this.yOffset + 18, 0x80262626);
+
+                //time
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(0.5f, 0.5f, 0.5f);
+                this.fontRenderer.drawString(this.creatureNBT.getReviveTimeString(), (int)((this.xOffset + 8) / 0.5), (int)((this.yOffset + 13) / 0.5), 0);
+                GlStateManager.popMatrix();
+            }
         }
         //blank contents, means slot is empty
         else {
