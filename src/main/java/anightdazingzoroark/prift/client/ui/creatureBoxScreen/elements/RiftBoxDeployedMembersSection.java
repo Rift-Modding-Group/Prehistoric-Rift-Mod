@@ -30,7 +30,7 @@ public class RiftBoxDeployedMembersSection extends RiftLibUISection {
 
         for (int i = 0; i < this.boxDeployedMembersNBT.size(); i++) {
             CreatureNBT partyMember = this.boxDeployedMembersNBT.get(i);
-            RiftBoxMembersSection.BoxMemberElement boxMemberElement = new RiftBoxMembersSection.BoxMemberElement();
+            BoxMemberElement boxMemberElement = new BoxMemberElement();
             boxMemberElement.setPartyMemNBT(partyMember);
             boxMemberElement.setID("boxDeployedMember:"+i);
             table.addElement(boxMemberElement);
@@ -46,8 +46,8 @@ public class RiftBoxDeployedMembersSection extends RiftLibUISection {
         int sectionTop = (this.guiHeight - this.height) / 2 + this.yPos;
         int sectionBottom = sectionTop + this.height;
 
-        if (element instanceof RiftBoxMembersSection.BoxMemberElement) {
-            RiftBoxMembersSection.BoxMemberElement boxMemberElement = (RiftBoxMembersSection.BoxMemberElement) element;
+        if (element instanceof BoxMemberElement) {
+            BoxMemberElement boxMemberElement = (BoxMemberElement) element;
 
             int partyMemButtonWidth = boxMemberElement.getSize()[0];
             int partyMemButtonHeight = boxMemberElement.getSize()[1];
@@ -55,7 +55,7 @@ public class RiftBoxDeployedMembersSection extends RiftLibUISection {
             if (draw) {
                 int partyMemberPosX = boxMemberElement.xOffsetFromAlignment(sectionWidth, partyMemButtonWidth, x);
 
-                RiftBoxMemButtonForBox drawnPartyMemButton = new RiftBoxMemButtonForBox(
+                RiftBoxDeployedMemButton drawnPartyMemButton = new RiftBoxDeployedMemButton(
                         boxMemberElement.getPartyMemNBT(),
                         partyMemButtonWidth,
                         partyMemButtonHeight,
