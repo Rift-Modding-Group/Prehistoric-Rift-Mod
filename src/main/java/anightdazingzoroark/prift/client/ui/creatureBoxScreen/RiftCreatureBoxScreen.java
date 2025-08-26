@@ -523,7 +523,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                         this.createPopup(this.dropInventoryPopup());
                     }
                 }
-                else this.selectNewCreature(selectionToTest);
+                else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) this.selectNewCreature(selectionToTest);
             }
             //when not shuffling creatures, just select creature from party
             else {
@@ -564,7 +564,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                         this.createPopup(this.dropInventoryPopup());
                     }
                 }
-                else this.selectNewCreature(selectionToTest);
+                else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) this.selectNewCreature(selectionToTest);
             }
             //when not shuffling creatures, just select creature from box
             else {
@@ -604,7 +604,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                         this.createPopup(this.dropInventoryPopup());
                     }
                 }
-                else this.selectNewCreature(selectionToTest);
+                else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) this.selectNewCreature(selectionToTest);
             }
             //when not shuffling creatures, just select the creature
             else {
