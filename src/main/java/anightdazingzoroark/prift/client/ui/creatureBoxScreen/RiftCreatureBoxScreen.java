@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyM
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
@@ -511,11 +512,14 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             //swap something with a creature from the party
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
-                    if (this.posCanSwapBasedOnInventory(selectionToTest)) {
+                    //cannot swap with creatures that are still reviving in creature box
+                    if (this.posCanSwapBasedOnReviving(selectionToTest)) {
+                        this.createPopup(this.cannotTakeFromBoxRevivingPopup());
+                    }
+                    //open popup asking to confirm inventory drop if either creature to swap with has inventory
+                    else if (this.posCanSwapBasedOnInventory(selectionToTest)) {
                         NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
-                        if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                            RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
-                        }
+                        this.updateBoxBetweenTwoCreatures(selectionToTest);
                         this.selectNewCreature(null);
                     }
                     else {
@@ -552,11 +556,14 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             //swap something with a creature from the box
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
-                    if (this.posCanSwapBasedOnInventory(selectionToTest)) {
+                    //cannot swap with creatures that are still reviving in creature box
+                    if (this.posCanSwapBasedOnReviving(selectionToTest)) {
+                        this.createPopup(this.cannotTakeFromBoxRevivingPopup());
+                    }
+                    //open popup asking to confirm inventory drop if either creature to swap with has inventory
+                    else if (this.posCanSwapBasedOnInventory(selectionToTest)) {
                         NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
-                        if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                            RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
-                        }
+                        this.updateBoxBetweenTwoCreatures(selectionToTest);
                         this.selectNewCreature(null);
                     }
                     else {
@@ -564,7 +571,13 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                         this.createPopup(this.dropInventoryPopup());
                     }
                 }
-                else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) this.selectNewCreature(selectionToTest);
+                else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
+                    //exclusively here, do not swap if creature at position is still reviving
+                    if (selectionToTest.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0
+                            && selectionToTest.getCreatureNBT(this.mc.player).getReviveTimeTicks() > 0)
+                        this.createPopup(this.cannotTakeFromBoxRevivingPopup());
+                    else this.selectNewCreature(selectionToTest);
+                }
             }
             //when not shuffling creatures, just select creature from box
             else {
@@ -592,11 +605,14 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             //swap something with selected creature
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
-                    if (this.posCanSwapBasedOnInventory(selectionToTest)) {
+                    //cannot swap with creatures that are still reviving in creature box
+                    if (this.posCanSwapBasedOnReviving(selectionToTest)) {
+                        this.createPopup(this.cannotTakeFromBoxRevivingPopup());
+                    }
+                    //open popup asking to confirm inventory drop if either creature to swap with has inventory
+                    else if (this.posCanSwapBasedOnInventory(selectionToTest)) {
                         NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
-                        if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                            RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
-                        }
+                        this.updateBoxBetweenTwoCreatures(selectionToTest);
                         this.selectNewCreature(null);
                     }
                     else {
@@ -625,8 +641,20 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
         switch (riftLibClickableSection.getStringID()) {
             case "shuffleCreaturesButton": {
-                this.shufflePartyMemsMode = !this.shufflePartyMemsMode;
-                this.setSelectClickableSectionByID("shuffleCreaturesButton", this.shufflePartyMemsMode);
+                if (this.shufflePartyMemsMode) {
+                    this.shufflePartyMemsMode = false;
+                    this.setSelectClickableSectionByID("shuffleCreaturesButton", false);
+                }
+                else {
+                    if (this.selectedCreatureInfo != null
+                            && this.selectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0
+                            && this.selectedCreatureInfo.getCreatureNBT(this.mc.player).getReviveTimeTicks() > 0) {
+                        //unselect the selected box creature if it is still reviving
+                        this.selectNewCreature(null);
+                    }
+                    this.shufflePartyMemsMode = true;
+                    this.setSelectClickableSectionByID("shuffleCreaturesButton", true);
+                }
                 break;
             }
             case "leftButton": {
@@ -682,6 +710,17 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         }
     }
 
+    private void updateBoxBetweenTwoCreatures(SelectedCreatureInfo selectedToTest) {
+        if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED
+            && selectedToTest.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) return;
+        else if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+            RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
+        }
+        else if (selectedToTest.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+            RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, selectedToTest.getCreatureBoxOpenedFrom());
+        }
+    }
+
     private boolean posCanSwapBasedOnInventory(SelectedCreatureInfo selectedToTest) {
         CreatureNBT selectedCreatureNBT = this.selectedCreatureInfo.getCreatureNBT(this.mc.player);
         CreatureNBT selectedToTestNBT = selectedToTest.getCreatureNBT(this.mc.player);
@@ -695,6 +734,21 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         else if (selectedCanHaveInventory && !toTestCanHaveInventory) return selectedCreatureNBT.inventoryIsEmpty();
         else if (!selectedCanHaveInventory && toTestCanHaveInventory) return selectedToTestNBT.inventoryIsEmpty();
         else return true;
+    }
+
+    private boolean posCanSwapBasedOnReviving(SelectedCreatureInfo selectedToTest) {
+        CreatureNBT selectedCreatureNBT = this.selectedCreatureInfo.getCreatureNBT(this.mc.player);
+        CreatureNBT selectedToTestNBT = selectedToTest.getCreatureNBT(this.mc.player);
+
+        if (selectedCreatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) {
+            return selectedCreatureNBT.getCreatureHealth()[0] <= 0
+                    && selectedCreatureNBT.getReviveTimeTicks() > 0;
+        }
+        else if (selectedToTestNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) {
+            return selectedToTestNBT.getCreatureHealth()[0] <= 0
+                    && selectedToTestNBT.getReviveTimeTicks() > 0;
+        }
+        return true;
     }
 
     @Override
@@ -809,6 +863,25 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         buttonContainer.addElement(cancelButton);
 
         toReturn.add(buttonContainer);
+
+        return toReturn;
+    }
+
+    private List<RiftLibUIElement.Element> cannotTakeFromBoxRevivingPopup() {
+        List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+        //text
+        RiftLibUIElement.TextElement textElement = new RiftLibUIElement.TextElement();
+        textElement.setText(I18n.format("creature_box.popup_choice.creature_reviving"));
+        toReturn.add(textElement);
+
+        //ok button
+        RiftLibUIElement.ButtonElement okButton = new RiftLibUIElement.ButtonElement();
+        okButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+        okButton.setSize(60, 20);
+        okButton.setText(I18n.format("radial.popup_button.ok"));
+        okButton.setID("exitPopup");
+        toReturn.add(okButton);
 
         return toReturn;
     }
