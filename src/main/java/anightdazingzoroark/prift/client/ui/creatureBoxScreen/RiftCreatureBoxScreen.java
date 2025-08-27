@@ -513,7 +513,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     //cannot swap with creatures that are still reviving in creature box
-                    if (this.posCanSwapBasedOnReviving(selectionToTest)) {
+                    if (!this.posCanSwapBasedOnReviving(selectionToTest)) {
                         this.createPopup(this.cannotTakeFromBoxRevivingPopup());
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
@@ -557,7 +557,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     //cannot swap with creatures that are still reviving in creature box
-                    if (this.posCanSwapBasedOnReviving(selectionToTest)) {
+                    if (!this.posCanSwapBasedOnReviving(selectionToTest)) {
                         this.createPopup(this.cannotTakeFromBoxRevivingPopup());
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
@@ -606,7 +606,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     //cannot swap with creatures that are still reviving in creature box
-                    if (this.posCanSwapBasedOnReviving(selectionToTest)) {
+                    if (!this.posCanSwapBasedOnReviving(selectionToTest)) {
                         this.createPopup(this.cannotTakeFromBoxRevivingPopup());
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
