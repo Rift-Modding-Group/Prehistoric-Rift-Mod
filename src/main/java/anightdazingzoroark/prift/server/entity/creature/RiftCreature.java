@@ -159,6 +159,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LEAP_Z_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
 
+    private static final DataParameter<BlockPos> HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BLOCK_POS);
+
     private int herdSize = 1;
     private RiftCreature herdLeader;
     private int boxReviveTime;
@@ -181,7 +183,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected double speed;
     protected double waterSpeed = 1.5D;
     protected int herdCheckCountdown;
-    private BlockPos homePosition;
     public double yFloatPos;
     public List<RiftCreatureConfig.Food> favoriteFood;
     public List<RiftCreatureConfig.Meal> tamingFood;
@@ -326,6 +327,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(LEAP_X_VELOCITY, 0.0f);
         this.dataManager.register(LEAP_Y_VELOCITY, 0.0f);
         this.dataManager.register(LEAP_Z_VELOCITY, 0.0f);
+
+        this.dataManager.register(HOME_POS, new BlockPos(0, 0, 0));
     }
 
     @Override
@@ -1293,9 +1296,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setInteger("TameProgress", this.getTameProgress());
         compound.setBoolean("HasHomePos", this.getHasHomePos());
         if (this.getHasHomePos()) {
-            compound.setInteger("HomePosX", this.homePosition.getX());
-            compound.setInteger("HomePosY", this.homePosition.getY());
-            compound.setInteger("HomePosZ", this.homePosition.getZ());
+            compound.setInteger("HomePosX", this.getHomePos().getX());
+            compound.setInteger("HomePosY", this.getHomePos().getY());
+            compound.setInteger("HomePosZ", this.getHomePos().getZ());
         }
         compound.setInteger("DeploymentType", this.getDeploymentType().ordinal());
         compound.setInteger("BoxReviveTime", this.boxReviveTime);
@@ -2700,17 +2703,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setHomePos() {
         this.dataManager.set(HAS_HOME_POS, true);
-        this.homePosition = new BlockPos(this);
+        this.dataManager.set(HOME_POS, new BlockPos(this));
     }
 
     public void setHomePos(int x, int y, int z) {
         this.dataManager.set(HAS_HOME_POS, true);
-        this.homePosition = new BlockPos(x, y, z);
+        this.dataManager.set(HOME_POS, new BlockPos(x, y, z));
     }
 
     public void clearHomePos() {
         this.dataManager.set(HAS_HOME_POS, false);
-        this.homePosition = null;
+        this.dataManager.set(HOME_POS, new BlockPos(0, 0, 0));
     }
 
     public boolean getHasHomePos() {
@@ -2718,7 +2721,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public BlockPos getHomePos() {
-        return this.homePosition;
+        return this.dataManager.get(HOME_POS);
     }
 
     public boolean busyAtWork() {

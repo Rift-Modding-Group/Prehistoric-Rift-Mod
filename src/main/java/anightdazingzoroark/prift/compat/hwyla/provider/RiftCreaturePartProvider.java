@@ -55,7 +55,13 @@ public class RiftCreaturePartProvider implements IWailaEntityProvider {
                     currenttip.add(I18n.format("deployment_info.party", creature.getOwner().getName()));
                 }
                 else if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {
-                    currenttip.add(I18n.format("deployment_info.box", creature.getOwner().getName(), creature.getHomePos()));
+                    currenttip.add(I18n.format(
+                            "deployment_info.box",
+                            creature.getOwner().getName(),
+                            creature.getHomePos().getX(),
+                            creature.getHomePos().getY(),
+                            creature.getHomePos().getZ()
+                    ));
                 }
             }
         }
