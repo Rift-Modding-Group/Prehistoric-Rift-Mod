@@ -5,6 +5,8 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
@@ -13,6 +15,7 @@ import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -326,6 +329,14 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         PARTY_INACTIVE,
         PARTY, //with player in party
         BASE, //wandering around box
-        BASE_INACTIVE //sitting in box
+        BASE_INACTIVE; //sitting in box
+
+        public String getDeploymentInfo(EntityPlayer player) {
+            if (this == PARTY)
+                return I18n.format("deployment_info.party", player.getName());
+            else if (this == BASE)
+                return I18n.format("deployment_info.box", player.getName());
+            return "";
+        }
     }
 }

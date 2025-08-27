@@ -41,6 +41,9 @@ creature_box.range=Range: %s x %s x %s chunks
 
 death.attack.prift_bleed=%s bled to death
 
+deployment_info.party=Deployed from %s's party
+deployment_info.box=Deployed from %s's box at %s
+
 diet.creature.herbivore=Herbivore
 diet.creature.fungivore=Fungivore
 diet.creature.carnivore=Carnivore
