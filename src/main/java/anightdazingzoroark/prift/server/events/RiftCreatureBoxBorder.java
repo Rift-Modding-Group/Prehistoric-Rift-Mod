@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.events;
 
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -93,8 +94,9 @@ public class RiftCreatureBoxBorder {
             IBlockState iblockstate = event.getWorld().getBlockState(event.getPos());
 
             if (iblockstate.getBlock() instanceof RiftCreatureBox && player.isSneaking() && event.getWorld().isRemote) {
-                RiftTileEntityCreatureBox tileEntity = (RiftTileEntityCreatureBox) event.getWorld().getTileEntity(event.getPos());
-                RiftCreatureBoxBorder renderer = new RiftCreatureBoxBorder(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), tileEntity.getWanderRange(),  100);
+                RiftNewTileEntityCreatureBox tileEntity = (RiftNewTileEntityCreatureBox) event.getWorld().getTileEntity(event.getPos());
+                if (tileEntity == null) return;
+                RiftCreatureBoxBorder renderer = new RiftCreatureBoxBorder(event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), tileEntity.getDeploymentRange() * 16,  100);
                 MinecraftForge.EVENT_BUS.register(renderer);
             }
         }

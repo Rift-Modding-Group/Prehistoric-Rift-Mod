@@ -61,6 +61,11 @@ public class CreatureNBT {
         return this.creatureNBT;
     }
 
+    public RiftCreature findCorrespondingCreature(World world) {
+        if (this.creatureNBT.isEmpty()) return null;
+        return (RiftCreature) RiftUtil.getEntityFromUUID(world, this.getUniqueID());
+    }
+
     public RiftCreatureType getCreatureType() {
         if (this.creatureNBT.isEmpty()) return null;
         return RiftCreatureType.values()[this.creatureNBT.getByte("CreatureType")];

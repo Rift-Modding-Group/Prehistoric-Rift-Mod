@@ -50,6 +50,8 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     @Override
     public void initGui() {
         super.initGui();
+        RiftTileEntityCreatureBoxHelper.updateAllDeployedCreatures(new BlockPos(this.x, this.y, this.z));
+        RiftTileEntityCreatureBoxHelper.forceSyncCreatureBoxDeployed(this.mc.player, new BlockPos(this.x, this.y, this.z));
         if (this.creatureToDraw == null && this.selectedCreatureInfo != null) {
             this.selectNewCreature(this.selectedCreatureInfo);
         }

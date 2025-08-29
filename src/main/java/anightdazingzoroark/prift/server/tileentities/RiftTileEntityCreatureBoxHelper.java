@@ -3,11 +3,14 @@ package anightdazingzoroark.prift.server.tileentities;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.message.RiftForceSyncBoxDeployedNBT;
 import anightdazingzoroark.prift.server.message.RiftForceUpdateCreatureBoxDeployed;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftUpdateAllCreatureBoxDeployedMems;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -76,5 +79,13 @@ public class RiftTileEntityCreatureBoxHelper {
         return true;
     }
 
-    public static void updateIndividualDeployedCreature(RiftCreature creature) {}
+    public static void updateAllDeployedCreatures(BlockPos creatureBoxPos) {
+        if (creatureBoxPos == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftUpdateAllCreatureBoxDeployedMems(creatureBoxPos));
+    }
+
+    public static void forceSyncCreatureBoxDeployed(EntityPlayer player, BlockPos creatureBoxPos) {
+        if (player == null || creatureBoxPos == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxDeployedNBT(creatureBoxPos, player));
+    }
 }
