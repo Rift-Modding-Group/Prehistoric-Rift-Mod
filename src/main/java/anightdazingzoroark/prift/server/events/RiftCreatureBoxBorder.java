@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.server.events;
 
 import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -207,7 +207,7 @@ public class RiftCreatureBoxBorder {
             IBlockState iblockstate = event.getWorld().getBlockState(event.getPos());
 
             if (iblockstate.getBlock() instanceof RiftCreatureBox && player.isSneaking() && event.getWorld().isRemote) {
-                RiftNewTileEntityCreatureBox tileEntity = (RiftNewTileEntityCreatureBox) event.getWorld().getTileEntity(event.getPos());
+                RiftTileEntityCreatureBox tileEntity = (RiftTileEntityCreatureBox) event.getWorld().getTileEntity(event.getPos());
                 if (tileEntity == null) return;
                 RiftCreatureBoxBorder renderer = new RiftCreatureBoxBorder(
                         tileEntity.chunksWithinDeploymentRange(),

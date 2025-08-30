@@ -145,8 +145,7 @@ public class RiftUseLeadPoweredCrank extends EntityAIBase {
                 for (double z = -xzBound; z <= xzBound; z++) {
                     BlockPos spacePos = this.leadWorkstationUser.getLeadWorkPos().add(x, y, z);
                     if (x == 0 && z == 0) continue;
-                    if (spacePos.distanceSqToCenter(this.creature.getHomePos().getX(), this.creature.getHomePos().getY(), this.creature.getHomePos().getZ()) >=
-                            Math.pow(creatureBox.getWanderRange(), 2)) return true;
+                    if (!creatureBox.posWithinDeploymentRange(spacePos)) return true;
                 }
             }
         }

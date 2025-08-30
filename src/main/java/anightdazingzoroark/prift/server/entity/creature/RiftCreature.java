@@ -24,7 +24,7 @@ import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
@@ -2764,7 +2764,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public boolean creatureBoxWithinReach() {
         if (this.getHomePos() == null) return false;
 
-        RiftNewTileEntityCreatureBox creatureBox = (RiftNewTileEntityCreatureBox) this.world.getTileEntity(this.getHomePos());
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.world.getTileEntity(this.getHomePos());
 
         if (creatureBox == null) return false;
 

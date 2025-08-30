@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -96,10 +96,10 @@ public class RiftForceUpdateCreatureBoxDeployed implements IMessage {
 
                 //check if block pos has creature box tile entity
                 TileEntity tileEntity = messagePlayer.world.getTileEntity(new BlockPos(message.posX, message.posY, message.posZ));
-                if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
+                if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
 
                 //get creature box tile entity
-                RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+                RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
 
                 RiftMessages.WRAPPER.sendTo(
                         new RiftForceUpdateCreatureBoxDeployed(
@@ -118,10 +118,10 @@ public class RiftForceUpdateCreatureBoxDeployed implements IMessage {
 
                 //check if block pos has creature box tile entity
                 TileEntity tileEntity = messagePlayer.world.getTileEntity(new BlockPos(message.posX, message.posY, message.posZ));
-                if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
+                if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
 
                 //get creature box tile entity
-                RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+                RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
 
                 //now set the transmitted data
                 teCreatureBox.setCreatureListNBT(message.tagCompounds);

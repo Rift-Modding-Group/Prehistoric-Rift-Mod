@@ -1,38 +1,34 @@
 package anightdazingzoroark.prift.server.tileentities;
 
+import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftEgg;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
-import com.google.common.base.Predicate;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.passive.EntityTameable;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
-    private List<NBTTagCompound> creatureListNBT = new ArrayList<>();
-    private int creatureAmntLevel = 0;
-    private int wanderRangeLevel = 0;
+    private final FixedSizeList<CreatureNBT> creatureListNBT = new FixedSizeList<>(RiftCreatureBox.maxDeployableCreatures, new CreatureNBT());
+    private UUID uniqueID;
+    private UUID ownerID;
+    private String ownerName = "";
+    private int deploymentRange = 1;
 
     @Override
     public void update() {
@@ -41,36 +37,102 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         if (this.isUnbreakable()) creatureBox.setHardness(-1.0f);
         else creatureBox.setHardness(0f);
 
-        //spawn creatures from box
+        //create creatures
         if (!this.world.isRemote) this.createCreaturesForWandering();
-
-        //remove creatures that are not recently spawned from the wander range of the creature box
-        if (GeneralConfig.creatureBoxPreventMobSpawn) {
-            AxisAlignedBB removeAABB = new AxisAlignedBB(this.getPos().getX() - this.getWanderRange(), this.getPos().getY() - this.getWanderRange(), this.getPos().getZ() - this.getWanderRange(), this.getPos().getX() + this.getWanderRange(), this.getPos().getY() + this.getWanderRange(), this.getPos().getZ() + this.getWanderRange());
-            for (EntityLiving creature : this.world.getEntitiesWithinAABB(EntityLiving.class, removeAABB, new Predicate<EntityLiving>() {
-                @Override
-                public boolean apply(@Nullable EntityLiving entityLiving) {
-                    if (entityLiving == null) return false;
-                    else if (entityLiving instanceof RiftEgg) return false;
-                    else if (entityLiving instanceof RiftLargeWeapon) return false;
-                    else if (entityLiving instanceof EntityTameable) return !((EntityTameable) entityLiving).isTamed() && entityLiving.ticksExisted <= 100;
-                    else return entityLiving.ticksExisted <= 100;
-                }
-            })) {
-                if (creature instanceof RiftCreature) RiftUtil.removeCreature((RiftCreature) creature);
-                else this.world.removeEntity(creature);
-            }
-        }
     }
 
-    public boolean isUnbreakable() {
-        return !this.creatureListNBT.isEmpty();
+    public void setOwner(EntityPlayer player) {
+        this.ownerID = player.getUniqueID();
+        this.ownerName = player.getName();
+        this.updateServerData();
+    }
+
+    public String getOwnerName() {
+        return this.ownerName.isEmpty() ? I18n.format("creature_box.no_owner_name") : this.ownerName;
+    }
+
+    public UUID getOwnerID() {
+        return this.ownerID;
+    }
+
+    public void setUniqueID(UUID uuid) {
+        this.uniqueID = uuid;
+        this.updateServerData();
+    }
+
+    public UUID getUniqueID() {
+        return this.uniqueID;
+    }
+
+    public void setDeploymentRange(int value) {
+        this.deploymentRange = value;
+        this.updateServerData();
+    }
+
+    public int getDeploymentRange() {
+        return this.deploymentRange;
+    }
+
+    public int getDeploymentRangeWidth() {
+        return 2 * this.deploymentRange + 1;
+    }
+
+    public boolean posWithinDeploymentRange(BlockPos testPos) {
+        int chunkX = testPos.getX() >> 4;
+        int chunkY = testPos.getY() >> 4;
+        int chunkZ = testPos.getZ() >> 4;
+
+        ChunkPosWithVerticality blockChunk = new ChunkPosWithVerticality(chunkX, chunkY, chunkZ);
+        return this.chunksWithinDeploymentRange().contains(blockChunk);
+    }
+
+    public List<ChunkPosWithVerticality> chunksWithinDeploymentRange() {
+        List<ChunkPosWithVerticality> toReturn = new ArrayList<>();
+        int chunkX = this.pos.getX() >> 4;
+        int chunkY = this.pos.getY() >> 4;
+        int chunkZ = this.pos.getZ() >> 4;
+
+        for (int x = -this.deploymentRange; x <= this.deploymentRange; x++) {
+            for (int y = -this.deploymentRange; y <= this.deploymentRange; y++) {
+                for (int z = -this.deploymentRange; z <= this.deploymentRange; z++) {
+                    toReturn.add(new ChunkPosWithVerticality(chunkX + x, chunkY + y, chunkZ + z));
+                }
+            }
+        }
+
+        return toReturn;
+    }
+
+    public int[] getXBounds() {
+        List<ChunkPosWithVerticality> list = this.chunksWithinDeploymentRange();
+        int minX = list.get(0).getXStart();
+        int maxX = list.get(list.size() - 1).getXEnd() + 1;
+        return new int[]{minX, maxX};
+    }
+
+    public int[] getYBounds() {
+        List<ChunkPosWithVerticality> list = this.chunksWithinDeploymentRange();
+        int minY = Math.max(0, list.get(0).getYStart());
+        int maxY = list.get(list.size() - 1).getYEnd() + 1;
+        return new int[]{minY, maxY};
+    }
+
+    public int[] getZBounds() {
+        List<ChunkPosWithVerticality> list = this.chunksWithinDeploymentRange();
+        int minZ = list.get(0).getZStart();
+        int maxZ = list.get(list.size() - 1).getZEnd() + 1;
+        return new int[]{minZ, maxZ};
     }
 
     //this creates the creatures that wander around the box
     private void createCreaturesForWandering() {
-        for (NBTTagCompound tagCompound : this.creatureListNBT) {
-            RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.world, tagCompound);
+        for (CreatureNBT tagCompound : this.creatureListNBT.getList()) {
+            if (tagCompound.nbtIsEmpty()) continue;
+
+            UUID uuid = tagCompound.getUniqueID();
+            if (this.creatureWithUUIDExists(uuid)) continue;
+
+            RiftCreature creature = tagCompound.getCreatureAsNBT(this.world);
 
             //check for validity and if creature already exists, then continue
             if (creature == null || this.creatureExistsInWorld(creature) || !creature.isEntityAlive()) continue;
@@ -85,138 +147,42 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         }
     }
 
-    private boolean canFitInArea(RiftCreature creature, BlockPos pos) {
-        int xMin = (int)Math.floor(creature.width / 2);
-        for (int x = -xMin; x <= xMin; x++) {
-            for (int y = 0; y < (int)Math.ceil(creature.height); y++) {
-                for (int z = -xMin; z <= xMin; z++) {
-                    BlockPos newPos = pos.add(x, y, z);
-                    IBlockState state = this.world.getBlockState(newPos);
-                    if (state.getMaterial() != Material.AIR) return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private boolean entireAreaWater(RiftCreature creature, BlockPos pos) {
-        int xMin = (int)Math.floor(creature.width / 2);
-        for (int x = -xMin; x <= xMin; x++) {
-            for (int y = 0; y < (int)Math.ceil(creature.height); y++) {
-                for (int z = -xMin; z <= xMin; z++) {
-                    IBlockState state = this.world.getBlockState(pos.add(x, y, z));
-                    if (state.getMaterial() != Material.WATER) return false;
-                }
-            }
-        }
-        return true;
+    private boolean creatureWithUUIDExists(UUID uuid) {
+        if (uuid == null || uuid.equals(RiftUtil.nilUUID)) return false;
+        if (!(this.world instanceof WorldServer)) return false;
+        return ((WorldServer) this.world).getEntityFromUuid(uuid) != null;
     }
 
     private boolean creatureExistsInWorld(RiftCreature creature) {
-        List<UUID> worldEntityListUUID = this.world.getLoadedEntityList().stream()
-                .map(c -> c.getUniqueID())
-                .collect(Collectors.toList());
-        return worldEntityListUUID.contains(creature.getUniqueID());
+        if (creature == null) return false;
+        if (!(this.world instanceof WorldServer)) return false;
+        return ((WorldServer) this.world).getEntityFromUuid(creature.getUniqueID()) != null;
     }
 
-    public void addToCreatureList(NBTTagCompound tagCompound) {
-        this.creatureListNBT.add(tagCompound);
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
+    public boolean isUnbreakable() {
+        return !this.creatureListNBT.isEmpty();
     }
 
-    public void replaceInCreatureList(int pos, NBTTagCompound tagCompound) {
-        this.creatureListNBT.set(pos, tagCompound);
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
-    }
-
-    public void replaceInCreatureList(UUID uuid, NBTTagCompound tagCompound) {
-        for (NBTTagCompound deployedCompound : this.creatureListNBT) {
-            if (deployedCompound.getUniqueId("UniqueID").equals(uuid)) {
-                for (String key : tagCompound.getKeySet()) {
-                    NBTBase value = tagCompound.getTag(key);
-                    deployedCompound.setTag(key, value);
-                }
-                break;
-            }
-        }
-
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
-    }
-
-    public void removeFromCreatureList(int pos) {
-        this.creatureListNBT.remove(pos);
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
-    }
-
-    public List<NBTTagCompound> getCreatureList() {
+    public FixedSizeList<CreatureNBT> getDeployedCreatures() {
         return this.creatureListNBT;
     }
 
-    //this is only for rendering and making obtaining creature data from this box
-    //easier to deal with
-    public List<RiftCreature> getCreatures() {
-        List<RiftCreature> creatureList = new ArrayList<>();
-        for (NBTTagCompound compound : this.creatureListNBT) {
-            RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(this.world, compound);
-            if (creature != null) creatureList.add(creature);
+    public void setCreatureInPos(int pos, CreatureNBT creatureNBT) {
+        this.creatureListNBT.set(pos, creatureNBT);
+        this.updateServerData();
+    }
+
+    public void setCreatureListNBT(FixedSizeList<CreatureNBT> value) {
+        int maxSize = Math.min(RiftCreatureBox.maxDeployableCreatures, value.size());
+        for (int i = 0; i < maxSize; i++) {
+            CreatureNBT valueFromInput = value.get(i);
+            this.creatureListNBT.set(i, valueFromInput);
         }
-        return creatureList;
+        this.updateServerData();
     }
 
-    public void setCreatureList(List<NBTTagCompound> value) {
-        this.creatureListNBT = value;
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
-    }
-
-    public int getMaxWanderingCreatures() {
-        return 10 + this.creatureAmntLevel * 5;
-    }
-
-    public int getCreatureAmntLevel() {
-        return this.creatureAmntLevel;
-    }
-
-    public void setCreatureAmntLevel(int value) {
-        if (value > 4) return;
-        this.creatureAmntLevel = value;
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
-    }
-
-    public int getWanderRange() {
-        return 16 + this.wanderRangeLevel * 8;
-    }
-
-    public int getWanderRangeLevel() {
-        return this.wanderRangeLevel;
-    }
-
-    public void setWanderRangeLevel(int value) {
-        if (value > 4) return;
-        this.wanderRangeLevel = value;
+    //saving and updating nbt starts here
+    private void updateServerData() {
         if (!this.world.isRemote) {
             this.markDirty();
             IBlockState state = this.world.getBlockState(this.pos);
@@ -227,33 +193,31 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        this.creatureAmntLevel = compound.getInteger("CreatureAmountLevel");
-        this.wanderRangeLevel = compound.getInteger("WanderRangeLevel");
-
         if (compound.hasKey("BoxDeployedCreatures")) {
             NBTTagList boxDeployedCreaturesList = compound.getTagList("BoxDeployedCreatures", 10);
             if (!boxDeployedCreaturesList.isEmpty()) {
-                List<NBTTagCompound> finalPartyCreatures = new ArrayList<>();
                 for (int i = 0; i < boxDeployedCreaturesList.tagCount(); i++) {
-                    finalPartyCreatures.add(boxDeployedCreaturesList.getCompoundTagAt(i));
+                    this.creatureListNBT.set(i, new CreatureNBT(boxDeployedCreaturesList.getCompoundTagAt(i)));
                 }
-                this.creatureListNBT = finalPartyCreatures;
             }
         }
+        if (compound.hasKey("UniqueID")) this.uniqueID = compound.getUniqueId("UniqueID");
+        this.deploymentRange = compound.getInteger("DeploymentRange");
+        if (compound.hasKey("OwnerID")) this.ownerID = compound.getUniqueId("OwnerID");
+        this.ownerName = compound.getString("OwnerName");
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
-        compound.setInteger("CreatureAmountLevel", this.creatureAmntLevel);
-        compound.setInteger("WanderRangeLevel", this.wanderRangeLevel);
-
         NBTTagList boxDeployedCreaturesList = new NBTTagList();
-        if (!this.creatureListNBT.isEmpty()) {
-            for (NBTTagCompound boxNBT : this.creatureListNBT) boxDeployedCreaturesList.appendTag(boxNBT);
-            compound.setTag("BoxDeployedCreatures", boxDeployedCreaturesList);
-        }
-        else compound.setTag("BoxDeployedCreatures", boxDeployedCreaturesList);
+        for (CreatureNBT boxNBT : this.creatureListNBT.getList()) boxDeployedCreaturesList.appendTag(boxNBT.getCreatureNBT());
+        compound.setTag("BoxDeployedCreatures", boxDeployedCreaturesList);
+
+        if (this.uniqueID != null && !this.uniqueID.equals(RiftUtil.nilUUID)) compound.setUniqueId("UniqueID", this.uniqueID);
+        compound.setInteger("DeploymentRange", this.deploymentRange);
+        if (this.ownerID != null && !this.ownerID.equals(RiftUtil.nilUUID)) compound.setUniqueId("OwnerID", this.ownerID);
+        compound.setString("OwnerName", this.ownerName);
 
         return compound;
     }
@@ -277,31 +241,8 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     @Override
-    public void handleUpdateTag(NBTTagCompound tag) {
-        this.creatureAmntLevel = tag.getInteger("CreatureAmountLevel");
-        this.wanderRangeLevel = tag.getInteger("WanderRangeLevel");
-
-        if (tag.hasKey("BoxDeployedCreatures")) {
-            NBTTagList boxDeployedCreaturesList = tag.getTagList("BoxDeployedCreatures", 10);
-            if (!boxDeployedCreaturesList.isEmpty()) {
-                List<NBTTagCompound> finalPartyCreatures = new ArrayList<>();
-                for (int i = 0; i < boxDeployedCreaturesList.tagCount(); i++) {
-                    finalPartyCreatures.add(boxDeployedCreaturesList.getCompoundTagAt(i));
-                }
-                this.creatureListNBT = finalPartyCreatures;
-            }
-        }
+    public void handleUpdateTag(NBTTagCompound compound) {
+        this.readFromNBT(compound);
     }
-
-
-    //for testing only
-    public List<String> creatureListNBTSimple() {
-        List<String> list = new ArrayList<>();
-        for (NBTTagCompound tagCompound : this.creatureListNBT){
-            RiftCreatureType creatureType = RiftCreatureType.values()[tagCompound.getByte("CreatureType")];
-            int level = tagCompound.getInteger("Level");
-            list.add(creatureType.friendlyName+" (Level "+level+")");
-        }
-        return list;
-    }
+    //saving and updating nbt ends here
 }

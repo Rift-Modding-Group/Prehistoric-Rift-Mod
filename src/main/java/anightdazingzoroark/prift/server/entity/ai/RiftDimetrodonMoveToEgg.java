@@ -3,10 +3,9 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.util.math.AxisAlignedBB;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -30,7 +29,7 @@ public class RiftDimetrodonMoveToEgg extends EntityAIBase {
                 && !this.dimetrodon.isTakingCareOfEgg()
                 && this.dimetrodon.getHomePos() != null
                 && this.dimetrodon.getEnergy() > 6) {
-            RiftNewTileEntityCreatureBox creatureBox = (RiftNewTileEntityCreatureBox) this.dimetrodon.world.getTileEntity(this.dimetrodon.getHomePos());
+            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.dimetrodon.world.getTileEntity(this.dimetrodon.getHomePos());
 
             if (creatureBox == null) return false;
 
@@ -72,7 +71,7 @@ public class RiftDimetrodonMoveToEgg extends EntityAIBase {
         boolean initTest = this.dimetrodon.eggTarget != null && this.dimetrodon.eggTarget.isEntityAlive() && this.dimetrodon.getEnergy() > 0 && this.dimetrodon.eggTarget.getDistance(this.dimetrodon) >= 4f;
 
         //for checking if egg is within range of creature box
-        RiftNewTileEntityCreatureBox creatureBox = (RiftNewTileEntityCreatureBox) this.dimetrodon.world.getTileEntity(this.dimetrodon.getHomePos());
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.dimetrodon.world.getTileEntity(this.dimetrodon.getHomePos());
 
         if (creatureBox == null) return initTest;
 

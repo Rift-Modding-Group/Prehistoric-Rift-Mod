@@ -13,7 +13,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Creatu
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
@@ -757,10 +757,10 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     public void onElementHovered(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {}
 
     //creature box interfacing
-    public RiftNewTileEntityCreatureBox getCreatureBox() {
+    public RiftTileEntityCreatureBox getCreatureBox() {
         TileEntity tileEntity = this.mc.world.getTileEntity(new BlockPos(this.x, this.y, this.z));
-        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return null;
-        return (RiftNewTileEntityCreatureBox) tileEntity;
+        if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return null;
+        return (RiftTileEntityCreatureBox) tileEntity;
     }
 
     //popups start here

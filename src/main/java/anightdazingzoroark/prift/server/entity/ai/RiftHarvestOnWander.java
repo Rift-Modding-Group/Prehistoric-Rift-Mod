@@ -105,12 +105,15 @@ public class RiftHarvestOnWander extends EntityAIBase {
         if (creatureBox == null) return null;
 
         List<BlockPos> posList = new ArrayList<>();
-        int homePosMinX = this.creature.getHomePos().getX() - creatureBox.getWanderRange();
-        int homePosMinY = this.creature.getHomePos().getY() - creatureBox.getWanderRange();
-        int homePosMinZ = this.creature.getHomePos().getZ() - creatureBox.getWanderRange();
-        for (int x = homePosMinX; x <= homePosMinX + creatureBox.getWanderRange() * 2; x++) {
-            for (int y = homePosMinY; y <= homePosMinY + creatureBox.getWanderRange() * 2; y++) {
-                for (int z = homePosMinZ; z <= homePosMinZ + creatureBox.getWanderRange() * 2; z++) {
+        int homePosMinX = creatureBox.getXBounds()[0];
+        int homePosMinY = creatureBox.getYBounds()[0];
+        int homePosMinZ = creatureBox.getZBounds()[0];
+        int homePosMaxX = creatureBox.getXBounds()[1];
+        int homePosMaxY = creatureBox.getYBounds()[1];
+        int homePosMaxZ = creatureBox.getZBounds()[1];
+        for (int x = homePosMinX; x <= homePosMaxX; x++) {
+            for (int y = homePosMinY; y <= homePosMaxY; y++) {
+                for (int z = homePosMinZ; z <= homePosMaxZ; z++) {
                     BlockPos newPos = new BlockPos(x, y, z);
                     if (this.creatureHarvester.isValidBlockToHarvest(this.creature.world, newPos) && this.blockExposedToAir(this.creature.world, newPos)) {
                         Path testPath = this.creature.getNavigator().getPathToPos(newPos);
@@ -119,6 +122,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
                             if (this.blockPosClose(finalTestPos, newPos)) posList.add(newPos);
                         }
                     }
+
                 }
             }
         }

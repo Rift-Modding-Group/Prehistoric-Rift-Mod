@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.blocks;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -21,7 +21,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
@@ -69,15 +68,15 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
     @Nullable
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
-        return new RiftNewTileEntityCreatureBox();
+        return new RiftTileEntityCreatureBox();
     }
 
     @Override
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
         if (!world.isRemote && placer instanceof EntityPlayer) {
             TileEntity tileEntity = world.getTileEntity(pos);
-            if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
-            RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+            if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
+            RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
             teCreatureBox.setOwner((EntityPlayer) placer);
             teCreatureBox.setUniqueID(UUID.randomUUID());
         }
@@ -86,7 +85,7 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
-            RiftNewTileEntityCreatureBox tileEntity = (RiftNewTileEntityCreatureBox) worldIn.getTileEntity(pos);
+            RiftTileEntityCreatureBox tileEntity = (RiftTileEntityCreatureBox) worldIn.getTileEntity(pos);
 
             if (tileEntity == null) return false;
 

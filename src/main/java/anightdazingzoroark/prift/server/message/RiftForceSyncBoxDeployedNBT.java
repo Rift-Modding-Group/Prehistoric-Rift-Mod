@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -75,8 +75,8 @@ public class RiftForceSyncBoxDeployedNBT implements IMessage {
 
                 //find creature box
                 TileEntity te = messagePlayer.world.getTileEntity(creatureBoxPos);
-                if (!(te instanceof RiftNewTileEntityCreatureBox)) return;
-                RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) te;
+                if (!(te instanceof RiftTileEntityCreatureBox)) return;
+                RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) te;
 
                 //create an nbt list
                 NBTTagCompound tagCompound = new NBTTagCompound();
@@ -96,8 +96,8 @@ public class RiftForceSyncBoxDeployedNBT implements IMessage {
 
                 //find creature box
                 TileEntity te = messagePlayer.world.getTileEntity(creatureBoxPos);
-                if (!(te instanceof RiftNewTileEntityCreatureBox)) return;
-                RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) te;
+                if (!(te instanceof RiftTileEntityCreatureBox)) return;
+                RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) te;
 
                 //get new list
                 NBTTagList newCreatureNBTTagList = message.creatureNBTTagCompound.getTagList("NewTagList", 10);

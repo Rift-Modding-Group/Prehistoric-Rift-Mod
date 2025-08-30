@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class RiftTileEntities {
     public static void registerTileEntities() {
         GameRegistry.registerTileEntity(RiftTileEntityFeedingTrough.class, new ResourceLocation(RiftInitialize.MODID, "feeding_trough"));
-        GameRegistry.registerTileEntity(RiftNewTileEntityCreatureBox.class, new ResourceLocation(RiftInitialize.MODID, "creature_box"));
+        GameRegistry.registerTileEntity(RiftTileEntityCreatureBox.class, new ResourceLocation(RiftInitialize.MODID, "creature_box"));
         if (GeneralConfig.canUseMM()) RiftMMTileEntities.registerTileEntities();
     }
 }

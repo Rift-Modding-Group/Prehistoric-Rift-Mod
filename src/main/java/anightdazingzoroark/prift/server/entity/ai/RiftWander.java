@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.math.BlockPos;
@@ -91,7 +91,7 @@ public class RiftWander extends EntityAIWander {
     private boolean vectorWithinHomeDistance(Vec3d pos) {
         if (pos == null || this.creature.getHomePos() == null) return false;
 
-        RiftNewTileEntityCreatureBox creatureBox = (RiftNewTileEntityCreatureBox) this.creature.world.getTileEntity(this.creature.getHomePos());
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.creature.world.getTileEntity(this.creature.getHomePos());
 
         if (creatureBox == null) return false;
 

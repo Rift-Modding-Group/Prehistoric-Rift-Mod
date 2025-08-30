@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,9 +14,7 @@ import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private FixedSizeList<CreatureNBT> partyCreatures = new FixedSizeList(6, new CreatureNBT());
@@ -115,8 +112,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     public void rearrangeDeployedBoxCreatures(World world, BlockPos creatureBoxPos, int posSelected, int posToSwap) {
         if (posSelected == posToSwap) return;
         TileEntity tileEntity = world.getTileEntity(creatureBoxPos);
-        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
-        RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+        if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
+        RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
 
         CreatureNBT compoundSelected = teCreatureBox.getDeployedCreatures().get(posSelected);
         CreatureNBT compoundToSwap = teCreatureBox.getDeployedCreatures().get(posToSwap);
@@ -137,8 +134,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
 
     public void boxDeployedPartySwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int partyPosToSwap) {
         TileEntity tileEntity = world.getTileEntity(creatureBoxPos);
-        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
-        RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+        if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
+        RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
 
         CreatureNBT selectedBoxDepCreature = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
         selectedBoxDepCreature.setDeploymentType(DeploymentType.PARTY_INACTIVE);
@@ -151,8 +148,8 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
 
     public void boxDeployedBoxSwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int boxToSwapWith, int boxPosToSwap) {
         TileEntity tileEntity = world.getTileEntity(creatureBoxPos);
-        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
-        RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+        if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
+        RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
 
         CreatureNBT selectedBoxDepCreature = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
         selectedBoxDepCreature.setDeploymentType(DeploymentType.BASE_INACTIVE);

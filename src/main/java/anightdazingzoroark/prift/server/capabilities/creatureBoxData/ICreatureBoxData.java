@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.creatureBoxData;
 
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -9,6 +9,6 @@ import java.util.UUID;
 
 public interface ICreatureBoxData {
     List<BlockPos> getCreatureBoxPositions();
-    RiftNewTileEntityCreatureBox getTileEntityByUUID(World world, UUID uuid);
-    RiftNewTileEntityCreatureBox getTileEntityByPos(World world, BlockPos testPos);
+    RiftTileEntityCreatureBox getTileEntityByUUID(World world, UUID uuid);
+    RiftTileEntityCreatureBox getTileEntityByPos(World world, BlockPos testPos);
 }

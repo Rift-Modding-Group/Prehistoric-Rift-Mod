@@ -6,7 +6,7 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -109,8 +109,8 @@ public class RiftSwapCreatureMoves implements IMessage {
                     }
                     else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
                         TileEntity tileEntity = messagePlayer.world.getTileEntity(selectedCreatureInfo.getCreatureBoxOpenedFrom());
-                        if (!(tileEntity instanceof RiftNewTileEntityCreatureBox)) return;
-                        RiftNewTileEntityCreatureBox teCreatureBox = (RiftNewTileEntityCreatureBox) tileEntity;
+                        if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
+                        RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
                         CreatureNBT creatureNBT = teCreatureBox.getDeployedCreatures().get(selectedCreatureInfo.pos[0]);
 
                         //if creature exists in the world, edit the creature itself
