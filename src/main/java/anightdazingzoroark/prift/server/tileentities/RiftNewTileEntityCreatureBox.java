@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.tileentities;
 
+import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
@@ -83,20 +84,24 @@ public class RiftNewTileEntityCreatureBox extends TileEntity implements ITickabl
 
     public boolean posWithinDeploymentRange(BlockPos testPos) {
         int chunkX = testPos.getX() >> 4;
+        int chunkY = testPos.getY() >> 4;
         int chunkZ = testPos.getZ() >> 4;
 
-        ChunkPos blockChunk = new ChunkPos(chunkX, chunkZ);
+        ChunkPosWithVerticality blockChunk = new ChunkPosWithVerticality(chunkX, chunkY, chunkZ);
         return this.chunksWithinDeploymentRange().contains(blockChunk);
     }
 
-    private List<ChunkPos> chunksWithinDeploymentRange() {
-        List<ChunkPos> toReturn = new ArrayList<>();
+    public List<ChunkPosWithVerticality> chunksWithinDeploymentRange() {
+        List<ChunkPosWithVerticality> toReturn = new ArrayList<>();
         int chunkX = this.pos.getX() >> 4;
+        int chunkY = this.pos.getY() >> 4;
         int chunkZ = this.pos.getZ() >> 4;
 
         for (int x = -this.deploymentRange; x <= this.deploymentRange; x++) {
-            for (int z = -this.deploymentRange; z <= this.deploymentRange; z++) {
-                toReturn.add(new ChunkPos(chunkX + x, chunkZ + z));
+            for (int y = -this.deploymentRange; y <= this.deploymentRange; y++) {
+                for (int z = -this.deploymentRange; z <= this.deploymentRange; z++) {
+                    toReturn.add(new ChunkPosWithVerticality(chunkX + x, chunkY + y, chunkZ + z));
+                }
             }
         }
 

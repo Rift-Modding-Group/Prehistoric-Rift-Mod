@@ -1,13 +1,9 @@
 package anightdazingzoroark.prift.server.blocks;
 
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
-import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftOpenCreatureBoxNoCreaturesMenu;
 import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -18,7 +14,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
@@ -26,6 +21,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -93,28 +90,22 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
 
             if (tileEntity == null) return false;
 
-            RiftLibUIHelper.showUI(playerIn, new RiftCreatureBoxScreen(pos));
-
-            /*
+            //for sneaking, note that displaying the bounds is already dealt with in RiftCreatureBoxBorder
             if (playerIn.isSneaking()) {
-                /*
-                //highlight all creatures deployed
-                for (RiftCreature creature : tileEntity.getCreatures()) {
-                    if (creature == null) continue;
-                    RiftCreature actualCreature = (RiftCreature) RiftUtil.getEntityFromUUID(worldIn, creature.getUniqueID());
+                //send message to player
+                playerIn.sendStatusMessage(new TextComponentTranslation("reminder.show_creature_box_bounds_and_deployed"), false);
+
+                //apply glowing to deployed creatures
+                for (int x = 0; x < tileEntity.getDeployedCreatures().size(); x++) {
+                    CreatureNBT creatureNBT = tileEntity.getDeployedCreatures().get(x);
+                    RiftCreature actualCreature = creatureNBT.findCorrespondingCreature(worldIn);
                     if (actualCreature != null) {
                         actualCreature.addPotionEffect(new PotionEffect(MobEffects.GLOWING, 100));
                     }
                 }
             }
-            else {
-                if (NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(playerIn).isEmpty()
-                        && NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(playerIn).isEmpty() && tileEntity.getCreatures().isEmpty()) {
-                    RiftMessages.WRAPPER.sendTo(new RiftOpenCreatureBoxNoCreaturesMenu(playerIn), (EntityPlayerMP) playerIn);
-                }
-                else RiftLibUIHelper.showUI(playerIn, new RiftCreatureBoxScreen(pos));
-            }
-            */
+            //just open the ui
+            else RiftLibUIHelper.showUI(playerIn, new RiftCreatureBoxScreen(pos));
         }
         return true;
     }
