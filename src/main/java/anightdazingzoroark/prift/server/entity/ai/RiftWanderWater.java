@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.RandomPositionGenerator;
@@ -80,11 +80,10 @@ public class RiftWanderWater extends EntityAIWander {
     private boolean withinHomeDistance(Vec3d pos) {
         if (pos == null || this.waterCreature.getHomePos() == null) return false;
 
-        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.waterCreature.world.getTileEntity(this.waterCreature.getHomePos());
+        RiftNewTileEntityCreatureBox creatureBox = (RiftNewTileEntityCreatureBox) this.waterCreature.world.getTileEntity(this.waterCreature.getHomePos());
 
         if (creatureBox == null) return false;
 
-        return creatureBox.getDistanceSq(pos.x, pos.y, pos.z) < (creatureBox.getWanderRange() - 2) * (creatureBox.getWanderRange() - 2)
-                && creatureBox.getDistanceSq(pos.x, pos.y, pos.z) >= 9;
+        return creatureBox.posWithinDeploymentRange(new BlockPos(pos));
     }
 }

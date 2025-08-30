@@ -40,13 +40,10 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftStartRiding.Handler.class, RiftStartRiding.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetWorkstation.Handler.class, RiftSetWorkstation.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftTeleportPartyMemToPlayer.Handler.class, RiftTeleportPartyMemToPlayer.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftRemoveCreatureFromBox.Handler.class, RiftRemoveCreatureFromBox.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftRemoveCreatureFromBox.Handler.class, RiftRemoveCreatureFromBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftRemoveAfterSendToBox.Handler.class, RiftRemoveAfterSendToBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftRemoveAfterSendToBox.Handler.class, RiftRemoveAfterSendToBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftUpdatePlayerTamedCreatures.Handler.class, RiftUpdatePlayerTamedCreatures.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftDropPartyMemberInventory.Handler.class, RiftDropPartyMemberInventory.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftDropCreatureBoxDeployedMemberInventory.Handler.class, RiftDropCreatureBoxDeployedMemberInventory.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetTurretMode.Handler.class, RiftSetTurretMode.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftChangeTurretTargetingFromMenu.Handler.class, RiftChangeTurretTargetingFromMenu.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpdatePlayerJournalProgress.Handler.class, RiftUpdatePlayerJournalProgress.class, id++, Side.CLIENT);
@@ -64,7 +61,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftUpgradePlayerBox.Handler.class, RiftUpgradePlayerBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpgradePlayerBox.Handler.class, RiftUpgradePlayerBox.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftOpenCreatureBoxMenu.Handler.class, RiftOpenCreatureBoxMenu.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftOpenCreatureBoxNoCreaturesMenu.Handler.class, RiftOpenCreatureBoxNoCreaturesMenu.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftModifyPlayerCreature.Handler.class, RiftModifyPlayerCreature.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftModifyPlayerCreature.Handler.class, RiftModifyPlayerCreature.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftCreatureBoxSetLastOpenedTime.Handler.class, RiftCreatureBoxSetLastOpenedTime.class, id++, Side.SERVER);

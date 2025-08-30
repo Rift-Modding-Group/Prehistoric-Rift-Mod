@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import anightdazingzoroark.prift.server.tileentities.RiftNewTileEntityCreatureBox;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -30,22 +30,16 @@ public class RiftDimetrodonMoveToEgg extends EntityAIBase {
                 && !this.dimetrodon.isTakingCareOfEgg()
                 && this.dimetrodon.getHomePos() != null
                 && this.dimetrodon.getEnergy() > 6) {
-            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.dimetrodon.world.getTileEntity(this.dimetrodon.getHomePos());
+            RiftNewTileEntityCreatureBox creatureBox = (RiftNewTileEntityCreatureBox) this.dimetrodon.world.getTileEntity(this.dimetrodon.getHomePos());
 
             if (creatureBox == null) return false;
 
             //get all eggs in range of creature box
-            AxisAlignedBB creatureBoxAABB = new AxisAlignedBB(creatureBox.getPos().getX() - creatureBox.getWanderRange(),
-                    creatureBox.getPos().getY() - creatureBox.getWanderRange(),
-                    creatureBox.getPos().getZ() - creatureBox.getWanderRange(),
-                    creatureBox.getPos().getX() + creatureBox.getWanderRange(),
-                    creatureBox.getPos().getY() + creatureBox.getWanderRange(),
-                    creatureBox.getPos().getZ() + creatureBox.getWanderRange());
-            List<RiftEgg> availableEggs = this.dimetrodon.world.getEntitiesWithinAABB(RiftEgg.class, creatureBoxAABB, new Predicate<RiftEgg>() {
+            List<RiftEgg> availableEggs = this.dimetrodon.world.getEntities(RiftEgg.class, new Predicate<RiftEgg>() {
                 @Override
                 public boolean apply(@Nullable RiftEgg egg) {
                     //ensures that its obtained circularly
-                    return egg != null && egg.getDistanceSq(dimetrodon.getHomePos()) <= creatureBox.getWanderRange() * creatureBox.getWanderRange();
+                    return egg != null && creatureBox.posWithinDeploymentRange(egg.getPosition());
                 }
             });
 
@@ -78,11 +72,11 @@ public class RiftDimetrodonMoveToEgg extends EntityAIBase {
         boolean initTest = this.dimetrodon.eggTarget != null && this.dimetrodon.eggTarget.isEntityAlive() && this.dimetrodon.getEnergy() > 0 && this.dimetrodon.eggTarget.getDistance(this.dimetrodon) >= 4f;
 
         //for checking if egg is within range of creature box
-        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.dimetrodon.world.getTileEntity(this.dimetrodon.getHomePos());
+        RiftNewTileEntityCreatureBox creatureBox = (RiftNewTileEntityCreatureBox) this.dimetrodon.world.getTileEntity(this.dimetrodon.getHomePos());
 
         if (creatureBox == null) return initTest;
 
-        boolean eggInRange = this.dimetrodon.eggTarget.getDistanceSq(dimetrodon.getHomePos()) <= creatureBox.getWanderRange() * creatureBox.getWanderRange();;
+        boolean eggInRange = creatureBox.posWithinDeploymentRange(this.dimetrodon.eggTarget.getPosition());
 
         return initTest && eggInRange;
     }

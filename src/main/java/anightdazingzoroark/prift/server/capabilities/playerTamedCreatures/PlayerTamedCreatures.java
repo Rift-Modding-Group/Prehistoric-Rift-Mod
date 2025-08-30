@@ -276,54 +276,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         }
     }
 
-    @Override
-    public void removeBoxCreatureDeployedInventory(World world, BlockPos pos, int partyPos) {
-        if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
-            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
-            if (creatureBox != null) {
-                NBTTagCompound creature = creatureBox.getCreatureList().get(partyPos);
-                NBTTagList nbtItemList = creature.getTagList("Items", 10);
-                RiftCreatureType creatureType = RiftCreatureType.values()[creature.getByte("CreatureType")];
-                for (int x = 0; x < nbtItemList.tagCount(); x++) {
-                    NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
-                    int j = nbttagcompound.getByte("Slot") & 255;
-                    boolean unremovableSlot = (creatureType.canBeSaddled && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE))
-                            || (creatureType.canHoldLargeWeapon && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON));
-                    if (!unremovableSlot) nbtItemList.removeTag(x);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void removeCreature(UUID uuid) {
-        /*
-        this.partyCreatures = this.partyCreatures..stream()
-                .filter(compound -> {
-                    return compound.getUniqueId("UniqueID") != null && !compound.getUniqueId("UniqueID").equals(uuid);
-                }).collect(Collectors.toList());
-         */
-        /*
-        this.boxCreatures = this.boxCreatures.stream()
-                .filter(compound -> {
-                    return compound.getUniqueId("UniqueID") != null && !compound.getUniqueId("UniqueID").equals(uuid);
-                }).collect(Collectors.toList());
-         */
-    }
-
-    public void removeCreatureFromBoxDeployed(World world, BlockPos pos, UUID uuid) {
-        if (world.getTileEntity(pos) instanceof RiftTileEntityCreatureBox) {
-            RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(pos);
-            if (creatureBox != null) {
-                List<NBTTagCompound> newCreatureBoxDeployedList = creatureBox.getCreatureList().stream()
-                                .filter(compound -> {
-                                    return compound.getUniqueId("UniqueID") != null && !compound.getUniqueId("UniqueID").equals(uuid);
-                                }).collect(Collectors.toList());
-                creatureBox.setCreatureList(newCreatureBoxDeployedList);
-            }
-        }
-    }
-
     public enum DeploymentType {
         NONE, //default
         PARTY_INACTIVE,

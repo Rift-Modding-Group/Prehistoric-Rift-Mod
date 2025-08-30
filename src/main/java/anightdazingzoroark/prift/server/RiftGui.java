@@ -37,7 +37,6 @@ public class RiftGui implements IGuiHandler {
     public static final int GUI_MILLSTONE = 10;
     public static final int GUI_MECHANICAL_FILTER = 11;
     public static final int GUI_CREATURE_BOX = 12;
-    public static final int GUI_MENU_FROM_CREATURE_BOX = 13;
 
     @Nullable
     @Override
@@ -145,9 +144,6 @@ public class RiftGui implements IGuiHandler {
             if (tileEntity instanceof TileEntityMechanicalFilter) {
                 return new RiftMechanicalFilterMenu((TileEntityMechanicalFilter) tileEntity, player.inventory);
             }
-        }
-        else if (id == GUI_MENU_FROM_CREATURE_BOX) {
-            return new RiftPopupFromCreatureBox(y, z);
         }
         return null;
     }
