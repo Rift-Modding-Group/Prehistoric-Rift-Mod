@@ -515,7 +515,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     //cannot swap with creatures that are still reviving in creature box
-                    if (!this.posCanSwapBasedOnReviving(selectionToTest)) {
+                    if (this.posBlockSwapBasedOnReviving(selectionToTest)) {
                         this.createPopup(this.cannotTakeFromBoxRevivingPopup());
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
@@ -559,7 +559,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     //cannot swap with creatures that are still reviving in creature box
-                    if (!this.posCanSwapBasedOnReviving(selectionToTest)) {
+                    if (this.posBlockSwapBasedOnReviving(selectionToTest)) {
                         this.createPopup(this.cannotTakeFromBoxRevivingPopup());
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
@@ -608,7 +608,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     //cannot swap with creatures that are still reviving in creature box
-                    if (!this.posCanSwapBasedOnReviving(selectionToTest)) {
+                    if (this.posBlockSwapBasedOnReviving(selectionToTest)) {
                         this.createPopup(this.cannotTakeFromBoxRevivingPopup());
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
@@ -738,19 +738,19 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         else return true;
     }
 
-    private boolean posCanSwapBasedOnReviving(SelectedCreatureInfo selectedToTest) {
+    private boolean posBlockSwapBasedOnReviving(SelectedCreatureInfo selectedToTest) {
         CreatureNBT selectedCreatureNBT = this.selectedCreatureInfo.getCreatureNBT(this.mc.player);
         CreatureNBT selectedToTestNBT = selectedToTest.getCreatureNBT(this.mc.player);
 
-        if (selectedCreatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) {
-            return selectedCreatureNBT.getCreatureHealth()[0] <= 0
-                    && selectedCreatureNBT.getReviveTimeTicks() > 0;
-        }
-        else if (selectedToTestNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) {
-            return selectedToTestNBT.getCreatureHealth()[0] <= 0
-                    && selectedToTestNBT.getReviveTimeTicks() > 0;
-        }
-        return true;
+        boolean selectedReviving = selectedCreatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE
+                && !selectedCreatureNBT.nbtIsEmpty()
+                && selectedCreatureNBT.getCreatureHealth()[0] <= 0
+                && selectedCreatureNBT.getReviveTimeTicks() > 0;
+        boolean selectedToTestReviving = selectedToTestNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE
+                && !selectedToTestNBT.nbtIsEmpty()
+                && selectedToTestNBT.getCreatureHealth()[0] <= 0
+                && selectedToTestNBT.getReviveTimeTicks() > 0;
+        return selectedReviving || selectedToTestReviving;
     }
 
     @Override
