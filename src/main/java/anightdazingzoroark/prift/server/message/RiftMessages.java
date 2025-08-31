@@ -62,8 +62,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftForceSyncPartyNBT.Handler.class, RiftForceSyncPartyNBT.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftForceSyncBoxNBT.Handler.class, RiftForceSyncBoxNBT.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncBoxNBT.Handler.class, RiftForceSyncBoxNBT.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftForceSyncPartySizeLevel.Handler.class, RiftForceSyncPartySizeLevel.class, id++, Side.SERVER);
-        WRAPPER.registerMessage(RiftForceSyncPartySizeLevel.Handler.class, RiftForceSyncPartySizeLevel.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftForceSyncLastSelected.Handler.class, RiftForceSyncLastSelected.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncLastSelected.Handler.class, RiftForceSyncLastSelected.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftForceSyncPartyLastOpenedTime.Handler.class, RiftForceSyncPartyLastOpenedTime.class, id++, Side.SERVER);
