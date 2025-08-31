@@ -310,6 +310,22 @@ public class CreatureNBT {
         return this.creatureNBT.getInteger("BoxReviveTime");
     }
 
+    private void countDownReviveTime() {
+        this.countDownReviveTime(1);
+    }
+
+    private void countDownReviveTime(int countdownTime) {
+        if (this.creatureNBT.isEmpty()) return;
+
+        int oldReviveTime = this.getReviveTimeTicks();
+        if (oldReviveTime > 0) this.creatureNBT.setInteger("BoxReviveTime", oldReviveTime - countdownTime);
+
+        if (this.getReviveTimeTicks() <= 0) {
+            this.creatureNBT.setFloat("Health", this.getCreatureHealth()[1]);
+            this.creatureNBT.setInteger("BoxReviveTime", 0);
+        }
+    }
+
     public int[] getReviveTime() {
         if (this.creatureNBT.isEmpty()) return new int[]{0, 0};
         int minutesInt = (int)((float) this.getReviveTimeTicks() / 1200F);
