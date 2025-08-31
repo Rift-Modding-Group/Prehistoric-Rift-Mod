@@ -170,8 +170,12 @@ public class NewPlayerTamedCreaturesHelper {
     }
 
     public static CreatureBoxStorage getCreatureBoxStorage(EntityPlayer player) {
+        return getCreatureBoxStorage(player, false);
+    }
+
+    public static CreatureBoxStorage getCreatureBoxStorage(EntityPlayer player, boolean canCountdownRevival) {
         if (player == null) return new CreatureBoxStorage();
-        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player));
+        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player, canCountdownRevival));
         return getPlayerTamedCreatures(player).getBoxNBT();
     }
 
@@ -230,6 +234,11 @@ public class NewPlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftSwapCreatureMoves(player, selectedCreature, moveSelected, moveToSwap));
     }
     //move swapping related stuff ends here
+
+    public static void setCreatureBoxLastOpenedTime(EntityPlayer player, int time) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftNewCreatureBoxSetLastOpenedTime(player, time));
+    }
 
     //helper functions for debugging
     public static List<CreatureMove> getMoveListFromNBT(NBTTagList moveListNBT) {

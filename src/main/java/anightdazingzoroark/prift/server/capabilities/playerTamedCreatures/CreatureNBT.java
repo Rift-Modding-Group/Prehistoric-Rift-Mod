@@ -24,6 +24,7 @@ import java.util.UUID;
 //a helper class where creature nbt is stored and various aspects of said nbt is taken
 public class CreatureNBT {
     private final NBTTagCompound creatureNBT;
+    private int countdownCarry;
 
     public CreatureNBT() {
         this.creatureNBT = new NBTTagCompound();
@@ -310,15 +311,21 @@ public class CreatureNBT {
         return this.creatureNBT.getInteger("BoxReviveTime");
     }
 
-    private void countDownReviveTime() {
-        this.countDownReviveTime(1);
-    }
-
-    private void countDownReviveTime(int countdownTime) {
+    public void countDownReviveTime(int countdownTime) {
         if (this.creatureNBT.isEmpty()) return;
 
+        int trueCountdownTime = 0;
+        if (this.countdownCarry == 1) {
+            trueCountdownTime = countdownTime / 2 + this.countdownCarry;
+            this.countdownCarry = 0;
+        }
+        else {
+            this.countdownCarry = countdownTime % 2;
+            trueCountdownTime = countdownTime / 2;
+        }
+
         int oldReviveTime = this.getReviveTimeTicks();
-        if (oldReviveTime > 0) this.creatureNBT.setInteger("BoxReviveTime", oldReviveTime - countdownTime);
+        if (oldReviveTime > 0) this.creatureNBT.setInteger("BoxReviveTime", oldReviveTime - trueCountdownTime);
 
         if (this.getReviveTimeTicks() <= 0) {
             this.creatureNBT.setFloat("Health", this.getCreatureHealth()[1]);

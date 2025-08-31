@@ -99,6 +99,17 @@ public class CreatureBoxStorage {
         return true;
     }
 
+    public void countdownCreatureRevival(int time) {
+        for (int x = 0; x < maxBoxAmnt; x++) {
+            for (int y = 0; y < maxBoxStorableCreatures; y++) {
+                CreatureNBT creatureNBT = this.creatureBoxContents.get(x).get(y);
+                if (creatureNBT.getCreatureHealth()[0] <= 0 && creatureNBT.getReviveTimeTicks() > 0) {
+                    creatureNBT.countDownReviveTime(time);
+                }
+            }
+        }
+    }
+
     public NBTTagList writeNBTList() {
         NBTTagList toReturn = new NBTTagList();
 

@@ -20,22 +20,30 @@ import net.minecraftforge.fml.relauncher.Side;
 
 public class RiftForceSyncBoxNBT implements IMessage {
     private int playerId;
+    private boolean canCountdownRevival;
     private CreatureBoxStorage creatureBoxStorage;
 
     public RiftForceSyncBoxNBT() {}
 
     public RiftForceSyncBoxNBT(EntityPlayer player) {
-        this(player, new CreatureBoxStorage());
+        this(player, false, new CreatureBoxStorage());
     }
 
-    public RiftForceSyncBoxNBT(EntityPlayer player, CreatureBoxStorage creatureBoxStorage) {
+
+    public RiftForceSyncBoxNBT(EntityPlayer player, boolean canCountdownRevival) {
+        this(player, canCountdownRevival, new CreatureBoxStorage());
+    }
+
+    public RiftForceSyncBoxNBT(EntityPlayer player, boolean canCountdownRevival, CreatureBoxStorage creatureBoxStorage) {
         this.playerId = player.getEntityId();
+        this.canCountdownRevival = canCountdownRevival;
         this.creatureBoxStorage = creatureBoxStorage;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.playerId = buf.readInt();
+        this.canCountdownRevival = buf.readBoolean();
 
         NBTTagCompound compound = ByteBufUtils.readTag(buf);
         this.creatureBoxStorage = new CreatureBoxStorage(compound.getTagList("CreatureBoxStorage", 10));
@@ -44,6 +52,7 @@ public class RiftForceSyncBoxNBT implements IMessage {
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.playerId);
+        buf.writeBoolean(this.canCountdownRevival);
         NBTTagCompound compound = new NBTTagCompound();
         if (this.creatureBoxStorage != null) {
             compound.setTag("CreatureBoxStorage", this.creatureBoxStorage.writeNBTList());
@@ -73,7 +82,9 @@ public class RiftForceSyncBoxNBT implements IMessage {
 
                 IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
                 if (playerTamedCreatures != null) {
-                    RiftMessages.WRAPPER.sendTo(new RiftForceSyncBoxNBT(player, playerTamedCreatures.getBoxNBT()), (EntityPlayerMP) player);
+                    //counting down for revival also happens here
+                    if (message.canCountdownRevival) playerTamedCreatures.getBoxNBT().countdownCreatureRevival(1);
+                    RiftMessages.WRAPPER.sendTo(new RiftForceSyncBoxNBT(player, false, playerTamedCreatures.getBoxNBT()), (EntityPlayerMP) player);
                 }
             }
             if (ctx.side == Side.CLIENT) {

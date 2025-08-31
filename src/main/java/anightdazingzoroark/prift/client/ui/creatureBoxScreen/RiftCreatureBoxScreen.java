@@ -50,6 +50,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     @Override
     public void initGui() {
         super.initGui();
+        NewPlayerTamedCreaturesHelper.setCreatureBoxLastOpenedTime(this.mc.player, (int) this.mc.world.getTotalWorldTime());
         RiftTileEntityCreatureBoxHelper.updateAllDeployedCreatures(new BlockPos(this.x, this.y, this.z));
         RiftTileEntityCreatureBoxHelper.forceSyncCreatureBoxDeployed(this.mc.player, new BlockPos(this.x, this.y, this.z));
         if (this.creatureToDraw == null && this.selectedCreatureInfo != null) {
@@ -411,7 +412,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             }
             case "boxMembersSection": {
                 this.getBoxMembersSection().setBoxMembersNBT(
-                        NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxContents(this.currentBox),
+                        NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player, true).getBoxContents(this.currentBox),
                         this.currentBox
                 );
 
