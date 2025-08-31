@@ -5,9 +5,6 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftRemoveCreature;
-import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -482,44 +479,6 @@ public class RiftUtil {
             if (world.getBiome(pos).equals(biomeToSpawn)) return true;
         }
         return false;
-    }
-
-    public static void removeCreature(RiftCreature creature) {
-        if (creature == null) return;
-        if (creature.getParts() == null) return;
-        RiftCreature subCreature = creature;
-        World world = creature.world;
-
-        if (world.isRemote) {
-            //remove creature
-            world.removeEntityDangerously(creature);
-            RiftMessages.WRAPPER.sendToServer(new RiftRemoveCreature(creature, true));
-
-            //remove hitboxes
-            for (Entity part : subCreature.getParts()) {
-                EntityHitbox creaturePart = (EntityHitbox) part;
-
-                if (creaturePart != null) {
-                    world.removeEntityDangerously(creaturePart);
-                    RiftMessages.WRAPPER.sendToServer(new RiftRemoveCreature(creaturePart, false));
-                }
-            }
-        }
-        else {
-            //remove creature
-            world.removeEntityDangerously(creature);
-            RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreature(creature, true));
-
-            //remove hitboxes
-            for (Entity part : subCreature.getParts()) {
-                EntityHitbox creaturePart = (EntityHitbox) part;
-
-                if (creaturePart != null) {
-                    RiftMessages.WRAPPER.sendToAll(new RiftRemoveCreature(creaturePart, false));
-                    world.removeEntityDangerously(creaturePart);
-                }
-            }
-        }
     }
 
     public static <K, V> List<K> getKeysByValue(Map<K, V> map, V targetValue) {

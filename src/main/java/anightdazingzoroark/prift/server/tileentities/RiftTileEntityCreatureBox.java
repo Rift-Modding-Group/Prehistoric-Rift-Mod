@@ -1,13 +1,20 @@
 package anightdazingzoroark.prift.server.tileentities;
 
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -15,6 +22,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 
@@ -39,6 +47,24 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
 
         //create creatures
         if (!this.world.isRemote) this.createCreaturesForWandering();
+
+        //remove creatures that are not recently spawned from the wander range of the creature box
+        if (GeneralConfig.creatureBoxPreventMobSpawn) {
+            AxisAlignedBB removeAABB = this.chunkAsAABB();
+            for (EntityLiving creature : this.world.getEntitiesWithinAABB(EntityLiving.class, removeAABB, new Predicate<EntityLiving>() {
+                @Override
+                public boolean apply(@Nullable EntityLiving entityLiving) {
+                    if (entityLiving == null) return false;
+                    else if (entityLiving instanceof RiftEgg) return false;
+                    else if (entityLiving instanceof RiftLargeWeapon) return false;
+                    else if (entityLiving instanceof EntityTameable) return !((EntityTameable) entityLiving).isTamed() && entityLiving.ticksExisted <= 100;
+                    else return entityLiving.ticksExisted <= 100;
+                }
+            })) {
+                if (creature instanceof RiftCreature) ((RiftCreature) creature).setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                else this.world.removeEntity(creature);
+            }
+        }
     }
 
     public void setOwner(EntityPlayer player) {
@@ -101,6 +127,17 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         }
 
         return toReturn;
+    }
+
+    public AxisAlignedBB chunkAsAABB() {
+        return new AxisAlignedBB(
+                this.getXBounds()[0],
+                this.getYBounds()[0],
+                this.getZBounds()[0],
+                this.getXBounds()[1],
+                this.getYBounds()[1],
+                this.getZBounds()[1]
+        );
     }
 
     public int[] getXBounds() {
