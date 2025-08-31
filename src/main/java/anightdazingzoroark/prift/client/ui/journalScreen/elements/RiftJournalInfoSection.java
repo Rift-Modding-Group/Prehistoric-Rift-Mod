@@ -87,20 +87,26 @@ public class RiftJournalInfoSection extends RiftLibUISection {
     public List<RiftLibUIElement.Element> defineInfoTab() {
         List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
 
+        boolean isUnlocked = PlayerJournalProgressHelper.getUnlockedCreatures(this.minecraft.player).get(this.entryType);
+
         //get diet
-        RiftLibUIElement.TextElement dietElement = new RiftLibUIElement.TextElement();
-        String dietText = this.entryType.getCreatureDiet() == null ? null : I18n.format("journal.diet", this.entryType.getCreatureDiet().getTranslatedName());
-        if (dietText != null) {
-            dietElement.setText(dietText);
-            toReturn.add(dietElement);
+        if (isUnlocked) {
+            RiftLibUIElement.TextElement dietElement = new RiftLibUIElement.TextElement();
+            String dietText = this.entryType.getCreatureDiet() == null ? null : I18n.format("journal.diet", this.entryType.getCreatureDiet().getTranslatedName());
+            if (dietText != null) {
+                dietElement.setText(dietText);
+                toReturn.add(dietElement);
+            }
         }
 
         //get levelup rate
-        RiftLibUIElement.TextElement levelupRateElement = new RiftLibUIElement.TextElement();
-        String levelupRateText = this.entryType.getLevelupRate() == null ? null : I18n.format("journal.levelup_rate", this.entryType.getLevelupRate().getTranslatedName());
-        if (levelupRateText != null) {
-            levelupRateElement.setText(levelupRateText);
-            toReturn.add(levelupRateElement);
+        if (isUnlocked) {
+            RiftLibUIElement.TextElement levelupRateElement = new RiftLibUIElement.TextElement();
+            String levelupRateText = this.entryType.getLevelupRate() == null ? null : I18n.format("journal.levelup_rate", this.entryType.getLevelupRate().getTranslatedName());
+            if (levelupRateText != null) {
+                levelupRateElement.setText(levelupRateText);
+                toReturn.add(levelupRateElement);
+            }
         }
 
         //get favorite meals
@@ -162,33 +168,35 @@ public class RiftJournalInfoSection extends RiftLibUISection {
         }
 
         //get mining levels
-        boolean hasMiningLevels = RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels != null && !RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels.isEmpty();
-        if (hasMiningLevels) {
-            //label first
-            RiftLibUIElement.TextElement miningLevelsLabelElement = new RiftLibUIElement.TextElement();
-            miningLevelsLabelElement.setText(I18n.format("journal.mining_levels"));
-            miningLevelsLabelElement.setBottomSpace(0);
-            toReturn.add(miningLevelsLabelElement);
+        if (isUnlocked) {
+            boolean hasMiningLevels = RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels != null && !RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels.isEmpty();
+            if (hasMiningLevels) {
+                //label first
+                RiftLibUIElement.TextElement miningLevelsLabelElement = new RiftLibUIElement.TextElement();
+                miningLevelsLabelElement.setText(I18n.format("journal.mining_levels"));
+                miningLevelsLabelElement.setBottomSpace(0);
+                toReturn.add(miningLevelsLabelElement);
 
-            //mining levels
-            RiftLibUIElement.TableContainerElement miningLevelsTableElement = new RiftLibUIElement.TableContainerElement();
-            miningLevelsTableElement.setCellSize(16, 16);
-            miningLevelsTableElement.setRowCount(8);
-            List<String> miningLevels = RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels;
-            for (String miningLevel : miningLevels) {
-                RiftLibUIElement.ToolElement toolElement = new RiftLibUIElement.ToolElement();
+                //mining levels
+                RiftLibUIElement.TableContainerElement miningLevelsTableElement = new RiftLibUIElement.TableContainerElement();
+                miningLevelsTableElement.setCellSize(16, 16);
+                miningLevelsTableElement.setRowCount(8);
+                List<String> miningLevels = RiftConfigHandler.getConfig(this.entryType).general.blockBreakLevels;
+                for (String miningLevel : miningLevels) {
+                    RiftLibUIElement.ToolElement toolElement = new RiftLibUIElement.ToolElement();
 
-                //get tool
-                String tool = miningLevel.substring(0, miningLevel.indexOf(":"));
-                toolElement.setToolType(tool);
+                    //get tool
+                    String tool = miningLevel.substring(0, miningLevel.indexOf(":"));
+                    toolElement.setToolType(tool);
 
-                //get mining level
-                int level = Integer.parseInt(miningLevel.substring(miningLevel.indexOf(":")+1));
-                toolElement.setMiningLevel(level);
+                    //get mining level
+                    int level = Integer.parseInt(miningLevel.substring(miningLevel.indexOf(":") + 1));
+                    toolElement.setMiningLevel(level);
 
-                miningLevelsTableElement.addElement(toolElement);
+                    miningLevelsTableElement.addElement(toolElement);
+                }
+                toReturn.add(miningLevelsTableElement);
             }
-            toReturn.add(miningLevelsTableElement);
         }
 
         return toReturn;
