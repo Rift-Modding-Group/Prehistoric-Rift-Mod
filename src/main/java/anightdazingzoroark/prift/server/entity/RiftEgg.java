@@ -8,9 +8,8 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
@@ -114,15 +113,15 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
 
                 if (this.getCreatureType() != RiftCreatureType.DODO) {
                     //update party of owner
-                    if (NewPlayerTamedCreaturesHelper.canAddToParty(owner)) {
+                    if (PlayerTamedCreaturesHelper.canAddToParty(owner)) {
                         creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                        NewPlayerTamedCreaturesHelper.addCreatureToParty(owner, creature);
+                        PlayerTamedCreaturesHelper.addCreatureToParty(owner, creature);
                         owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
                     }
                     //update box of owner
-                    else if (NewPlayerTamedCreaturesHelper.canAddCreatureToBox(owner)) {
+                    else if (PlayerTamedCreaturesHelper.canAddCreatureToBox(owner)) {
                         creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                        NewPlayerTamedCreaturesHelper.addCreatureToBox(owner, creature);
+                        PlayerTamedCreaturesHelper.addCreatureToBox(owner, creature);
                         owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
                     }
                 }

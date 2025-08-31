@@ -25,12 +25,6 @@ public interface IPlayerTamedCreatures {
     default int getMaxPartySize() {
         return 6;
     }
-    @Deprecated
-    int getMaxBoxSize();
-    @Deprecated
-    void setBoxSizeLevel(int value);
-    @Deprecated
-    int getBoxSizeLevel();
     //party extra info
     void setPartyLastOpenedTime(int value);
     int getPartyLastOpenedTime();
@@ -44,14 +38,6 @@ public interface IPlayerTamedCreatures {
     int getSelectedPosInOverlay();
     void setSelectedPosInOverlay(int value);
 
-    //for indirect values
-    @Deprecated
-    List<RiftCreature> getPartyCreatures(World world);
-    @Deprecated
-    void addToBoxCreatures(RiftCreature creature);
-    @Deprecated
-    List<RiftCreature> getBoxCreatures(World world);
-
     //swapping related stuff
     void rearrangePartyCreatures(int posSelected, int posToSwap);
     void rearrangeBoxCreatures(int selectedBox, int posSelected, int boxToSwapWith, int posToSwap);
@@ -59,9 +45,4 @@ public interface IPlayerTamedCreatures {
     void boxPartySwap(int selectedBox, int boxPosSelected, int partyPosToSwap);
     void boxDeployedPartySwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int partyPosToSwap);
     void boxDeployedBoxSwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int boxToSwapWith, int boxPosToSwap);
-
-    @Deprecated
-    void modifyCreature(UUID uuid, NBTTagCompound compound);
-
-    void removePartyCreatureInventory(int partyPos);
 }

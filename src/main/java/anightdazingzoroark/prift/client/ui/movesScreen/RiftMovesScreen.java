@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
@@ -197,7 +197,7 @@ public class RiftMovesScreen extends RiftLibUI {
 
     @Override
     public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {
-        NewPlayerTamedCreaturesHelper.forceSyncPartyNBT(this.mc.player);
+        PlayerTamedCreaturesHelper.forceSyncPartyNBT(this.mc.player);
         return element;
     }
 
@@ -251,7 +251,7 @@ public class RiftMovesScreen extends RiftLibUI {
                     if (clickedPosition != this.selectedMoveInfo.movePos) {
                         SelectedMoveInfo newSelectedMoveInfo = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, clickedPosition);
 
-                        NewPlayerTamedCreaturesHelper.swapCreatureMoves(
+                        PlayerTamedCreaturesHelper.swapCreatureMoves(
                                 this.mc.player,
                                 this.selectedCreature,
                                 this.selectedMoveInfo,
@@ -264,7 +264,7 @@ public class RiftMovesScreen extends RiftLibUI {
                 }
                 else if (this.selectedMoveInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
                     SelectedMoveInfo moveToSwap = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, clickedPosition);
-                    NewPlayerTamedCreaturesHelper.swapCreatureMoves(
+                    PlayerTamedCreaturesHelper.swapCreatureMoves(
                             this.mc.player,
                             this.selectedCreature,
                             this.selectedMoveInfo,
@@ -287,7 +287,7 @@ public class RiftMovesScreen extends RiftLibUI {
             if (this.selectedMoveInfo != null) {
                 if (this.selectedMoveInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
                     SelectedMoveInfo moveToSwap = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, clickedPosition);
-                    NewPlayerTamedCreaturesHelper.swapCreatureMoves(
+                    PlayerTamedCreaturesHelper.swapCreatureMoves(
                             this.mc.player,
                             this.selectedCreature,
                             this.selectedMoveInfo,
@@ -300,7 +300,7 @@ public class RiftMovesScreen extends RiftLibUI {
                     if (clickedPosition != this.selectedMoveInfo.movePos) {
                         SelectedMoveInfo newSelectedMoveInfo = new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, clickedPosition);
 
-                        NewPlayerTamedCreaturesHelper.swapCreatureMoves(
+                        PlayerTamedCreaturesHelper.swapCreatureMoves(
                                 this.mc.player,
                                 this.selectedCreature,
                                 this.selectedMoveInfo,

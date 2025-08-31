@@ -38,8 +38,7 @@ public class RiftEggItem extends Item {
     }
 
     protected boolean spawnEgg(World world, EntityPlayer player, RiftCreatureType creature, double x, double y, double z) {
-        if (PlayerTamedCreaturesHelper.getPlayerParty(player).size() < PlayerTamedCreaturesHelper.getMaxPartySize(player)
-                || PlayerTamedCreaturesHelper.getPlayerBox(player).size() < PlayerTamedCreaturesHelper.getMaxBoxSize(player)) {
+        if (PlayerTamedCreaturesHelper.canAddToParty(player) || PlayerTamedCreaturesHelper.canAddCreatureToBox(player)) {
             RiftEgg egg = new RiftEgg(world);
             egg.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
             egg.setCreatureType(creature);
@@ -48,9 +47,7 @@ public class RiftEggItem extends Item {
             egg.enablePersistence();
             egg.setHatchTime(creature.getHatchTime() * 20);
 
-            if (!world.isRemote) {
-                world.spawnEntity(egg);
-            }
+            if (!world.isRemote) world.spawnEntity(egg);
             return true;
         }
         else {

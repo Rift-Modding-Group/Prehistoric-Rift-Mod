@@ -8,7 +8,7 @@ import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUserWithIntSelector;
 import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
@@ -239,13 +239,13 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
             }
             //for setting the name of a tamed creature
             case "setNewName": {
-                NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreatureInfo, this.getTextFieldTextByID("newName"));
+                PlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreatureInfo, this.getTextFieldTextByID("newName"));
                 this.clearPopup();
                 break;
             }
             //for releasing creature
             case "releaseCreature": {
-                NewPlayerTamedCreaturesHelper.releaseSelectedCreature(this.mc.player, this.selectedCreatureInfo);
+                PlayerTamedCreaturesHelper.releaseSelectedCreature(this.mc.player, this.selectedCreatureInfo);
                 RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z)));
                 break;
             }

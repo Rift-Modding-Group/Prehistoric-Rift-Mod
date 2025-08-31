@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.client.Minecraft;
@@ -66,8 +66,8 @@ public class SelectedCreatureInfo {
     }
 
     public CreatureNBT getCreatureNBT(EntityPlayer player) {
-        if (this.selectedPosType == SelectedPosType.PARTY) return NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.pos[0]);
-        else if (this.selectedPosType == SelectedPosType.BOX) return NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(player).getBoxContents(this.pos[0]).get(this.pos[1]);
+        if (this.selectedPosType == SelectedPosType.PARTY) return PlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.pos[0]);
+        else if (this.selectedPosType == SelectedPosType.BOX) return PlayerTamedCreaturesHelper.getCreatureBoxStorage(player).getBoxContents(this.pos[0]).get(this.pos[1]);
         else if (this.selectedPosType == SelectedPosType.BOX_DEPLOYED) {
             TileEntity tileEntity = player.world.getTileEntity(this.getCreatureBoxOpenedFrom());
             if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return new CreatureNBT();

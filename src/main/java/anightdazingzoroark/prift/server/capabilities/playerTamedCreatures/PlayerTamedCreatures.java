@@ -1,26 +1,15 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private FixedSizeList<CreatureNBT> partyCreatures = new FixedSizeList(6, new CreatureNBT());
     private CreatureBoxStorage boxCreatures = new CreatureBoxStorage();
     private int lastSelected = 0;
-    private int boxSizeLevel = 0;
     private int partyLastOpenedTime = 0;
     private int boxLastOpenedTime = 0;
     private int lastOpenedBox = 0;
@@ -34,21 +23,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public int getLastSelected() {
         return this.lastSelected;
-    }
-
-    @Override
-    public int getMaxBoxSize() {
-        return 80 + this.boxSizeLevel * 20;
-    }
-
-    @Override
-    public void setBoxSizeLevel(int value) {
-        if (value <= 4) this.boxSizeLevel = value;
-    }
-
-    @Override
-    public int getBoxSizeLevel() {
-        return this.boxSizeLevel;
     }
 
     @Override
@@ -161,16 +135,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
-    public List<RiftCreature> getPartyCreatures(World world) {
-        List<RiftCreature> creatures = new ArrayList<>();
-        for (CreatureNBT compound : this.partyCreatures.getList()) {
-            RiftCreature creature = compound.getCreatureAsNBT(world);
-            if (creature != null) creatures.add(creature);
-        }
-        return creatures;
-    }
-
-    @Override
     public void setPartyNBT(FixedSizeList<CreatureNBT> compound) {
         this.partyCreatures = compound;
     }
@@ -190,31 +154,6 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         this.partyCreatures.add(compound);
     }
 
-    @Deprecated
-    @Override
-    public void addToBoxCreatures(RiftCreature creature) {
-        /*
-        if (this.boxCreatures.size() < this.getMaxBoxSize()) {
-            NBTTagCompound compound = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
-            this.boxCreatures.add(compound);
-        }
-         */
-    }
-
-    @Deprecated
-    @Override
-    public List<RiftCreature> getBoxCreatures(World world) {
-        /*
-        List<RiftCreature> creatures = new ArrayList<>();
-        for (NBTTagCompound compound : this.boxCreatures) {
-            RiftCreature creature = PlayerTamedCreaturesHelper.createCreatureFromNBT(world, compound);
-            if (creature != null) creatures.add(creature);
-        }
-        return creatures;
-         */
-        return new ArrayList<>();
-    }
-
     @Override
     public void setBoxNBT(CreatureBoxStorage compound) {
         this.boxCreatures = compound;
@@ -230,62 +169,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         this.boxCreatures.addCreatureToBox(compound);
     }
 
-    @Deprecated
-    @Override
-    public void modifyCreature(UUID uuid, NBTTagCompound compound) {
-        //find in party first
-        /*
-        for (CreatureNBT partyMemCompound : this.partyCreatures.getList()) {
-            if (partyMemCompound.getUniqueID().equals(uuid)) {
-                //replace each nbt tag
-                for (String key : compound.getKeySet()) {
-                    NBTBase value = compound.getTag(key);
-                    partyMemCompound.setTag(key, value);
-                }
-                return;
-            }
-        }
-        //find in creature box
-        for (NBTTagCompound partyMemCompound : this.boxCreatures) {
-            if (partyMemCompound.getUniqueId("UniqueID").equals(uuid)) {
-                //replace each nbt tag
-                for (String key : compound.getKeySet()) {
-                    NBTBase value = compound.getTag(key);
-                    partyMemCompound.setTag(key, value);
-                }
-                return;
-            }
-        }
-         */
-    }
-
-    @Override
-    public void removePartyCreatureInventory(int partyPos) {
-        CreatureNBT partyMember = this.partyCreatures.get(partyPos);
-        NBTTagList nbtItemList = partyMember.getCreatureNBT().getTagList("Items", 10);
-        RiftCreatureType creatureType = partyMember.getCreatureType();
-        for (int x = 0; x < nbtItemList.tagCount(); x++) {
-            NBTTagCompound nbttagcompound = nbtItemList.getCompoundTagAt(x);
-            int j = nbttagcompound.getByte("Slot") & 255;
-            boolean unremovableSlot = (creatureType.canBeSaddled && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE))
-                    || (creatureType.canHoldLargeWeapon && j == creatureType.slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON));
-            if (!unremovableSlot) nbtItemList.removeTag(x);
-        }
-    }
-
     public enum DeploymentType {
         NONE, //default
         PARTY_INACTIVE,
         PARTY, //with player in party
         BASE, //wandering around box
         BASE_INACTIVE; //sitting in box
-
-        public String getDeploymentInfo(EntityPlayer player) {
-            if (this == PARTY)
-                return I18n.format("deployment_info.party", player.getName());
-            else if (this == BASE)
-                return I18n.format("deployment_info.box", player.getName());
-            return "";
-        }
     }
 }

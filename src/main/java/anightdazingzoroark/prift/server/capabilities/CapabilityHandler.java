@@ -82,7 +82,6 @@ public class CapabilityHandler {
 
         tamedCreatures.setPartyNBT(oldTamedCreatures.getPartyNBT());
         tamedCreatures.setBoxNBT(oldTamedCreatures.getBoxNBT());
-        tamedCreatures.setBoxSizeLevel(oldTamedCreatures.getBoxSizeLevel());
         tamedCreatures.setLastSelected(oldTamedCreatures.getLastSelected());
         tamedCreatures.setPartyLastOpenedTime(oldTamedCreatures.getPartyLastOpenedTime());
         tamedCreatures.setBoxLastOpenedTime(oldTamedCreatures.getBoxLastOpenedTime());

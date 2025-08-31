@@ -10,7 +10,7 @@ import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMem
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMembersSection;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -50,7 +50,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     @Override
     public void initGui() {
         super.initGui();
-        NewPlayerTamedCreaturesHelper.setCreatureBoxLastOpenedTime(this.mc.player, (int) this.mc.world.getTotalWorldTime());
+        PlayerTamedCreaturesHelper.setCreatureBoxLastOpenedTime(this.mc.player, (int) this.mc.world.getTotalWorldTime());
         RiftTileEntityCreatureBoxHelper.updateAllDeployedCreatures(new BlockPos(this.x, this.y, this.z));
         RiftTileEntityCreatureBoxHelper.forceSyncCreatureBoxDeployed(this.mc.player, new BlockPos(this.x, this.y, this.z));
         if (this.creatureToDraw == null && this.selectedCreatureInfo != null) {
@@ -386,7 +386,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     public RiftLibUIElement.Element modifyUISectionElement(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {
         if (riftLibUISection.id.equals("boxHeaderSection") && element.getID().equals("boxHeader")) {
             RiftLibUIElement.ClickableSectionElement boxHeaderElement = (RiftLibUIElement.ClickableSectionElement) element;
-            boxHeaderElement.setTextContent(NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxName(this.currentBox));
+            boxHeaderElement.setTextContent(PlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxName(this.currentBox));
         }
         else if (riftLibUISection.id.equals("creatureToDrawSection") && element.getID().equals("creatureToDraw")) {
             RiftLibUIElement.RenderedEntityElement creatureElement = (RiftLibUIElement.RenderedEntityElement) element;
@@ -403,8 +403,8 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         switch (riftLibUISection.id) {
             case "partyMembersSection": {
                 //update party members
-                NewPlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
-                this.getPartyMembersSection().setPartyMembersNBT(NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
+                PlayerTamedCreaturesHelper.updateAllPartyMems(this.mc.player);
+                this.getPartyMembersSection().setPartyMembersNBT(PlayerTamedCreaturesHelper.getPlayerPartyNBT(this.mc.player));
 
                 int xOffset = (!this.shufflePartyMemsMode && this.selectedCreatureInfo != null) ? -152 : -90;
                 this.getPartyMembersSection().repositionSection(xOffset, -55);
@@ -412,7 +412,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             }
             case "boxMembersSection": {
                 this.getBoxMembersSection().setBoxMembersNBT(
-                        NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player, true).getBoxContents(this.currentBox),
+                        PlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player, true).getBoxContents(this.currentBox),
                         this.currentBox
                 );
 
@@ -479,21 +479,21 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             this.createPopup(CommonUISections.changeNamePopup(this.selectedCreatureInfo.getCreatureNBT(this.mc.player)));
         }
         if (riftLibButton.buttonId.equals("setNewBoxName")) {
-            NewPlayerTamedCreaturesHelper.changeBoxName(this.mc.player, this.currentBox, this.getTextFieldTextByID("newBoxName"));
+            PlayerTamedCreaturesHelper.changeBoxName(this.mc.player, this.currentBox, this.getTextFieldTextByID("newBoxName"));
             this.clearPopup();
         }
         if (riftLibButton.buttonId.equals("setNewName")) {
-            NewPlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreatureInfo, this.getTextFieldTextByID("newName"));
+            PlayerTamedCreaturesHelper.setSelectedCreatureName(this.mc.player, this.selectedCreatureInfo, this.getTextFieldTextByID("newName"));
             this.clearPopup();
         }
         if (riftLibButton.buttonId.equals("confirmInventoryDrop")) {
             if (!this.selectedCreatureInfo.getCreatureNBT(this.mc.player).inventoryIsEmpty())
-                NewPlayerTamedCreaturesHelper.dropSelectedInventory(this.mc.player, this.selectedCreatureInfo);
+                PlayerTamedCreaturesHelper.dropSelectedInventory(this.mc.player, this.selectedCreatureInfo);
             if (!this.selectedDropInvTest.getCreatureNBT(this.mc.player).inventoryIsEmpty())
-                NewPlayerTamedCreaturesHelper.dropSelectedInventory(this.mc.player, this.selectedDropInvTest);
+                PlayerTamedCreaturesHelper.dropSelectedInventory(this.mc.player, this.selectedDropInvTest);
 
 
-            NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, this.selectedDropInvTest);
+            PlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, this.selectedDropInvTest);
             if (this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
                 RiftTileEntityCreatureBoxHelper.forceUpdateCreatureBoxDeployed(this.mc.player, this.selectedCreatureInfo.getCreatureBoxOpenedFrom());
             }
@@ -521,7 +521,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
                     else if (this.posCanSwapBasedOnInventory(selectionToTest)) {
-                        NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                        PlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
                         this.updateBoxBetweenTwoCreatures(selectionToTest);
                         this.selectNewCreature(null);
                     }
@@ -565,7 +565,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
                     else if (this.posCanSwapBasedOnInventory(selectionToTest)) {
-                        NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                        PlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
                         this.updateBoxBetweenTwoCreatures(selectionToTest);
                         this.selectNewCreature(null);
                     }
@@ -614,7 +614,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
                     else if (this.posCanSwapBasedOnInventory(selectionToTest)) {
-                        NewPlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
+                        PlayerTamedCreaturesHelper.swapCreatures(this.mc.player, this.selectedCreatureInfo, selectionToTest);
                         this.updateBoxBetweenTwoCreatures(selectionToTest);
                         this.selectNewCreature(null);
                     }
@@ -681,7 +681,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
 
     private void selectNewCreature(SelectedCreatureInfo newSelectedCreatureInfo) {
         //unselect all old creatures first
-        for (int i = 0; i < NewPlayerTamedCreaturesHelper.maxPartySize; i++) {
+        for (int i = 0; i < PlayerTamedCreaturesHelper.maxPartySize; i++) {
             this.setSelectClickableSectionByID(false,"partyMember:"+i, false);
         }
         for (int i = 0; i < CreatureBoxStorage.maxBoxAmnt; i++) {
@@ -778,7 +778,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         textBox.setID("newBoxName");
         textBox.setWidth(100);
         textBox.setAlignment(RiftLibUIElement.ALIGN_CENTER);
-        textBox.setDefaultText(NewPlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxName(this.currentBox));
+        textBox.setDefaultText(PlayerTamedCreaturesHelper.getCreatureBoxStorage(this.mc.player).getBoxName(this.currentBox));
         toReturn.add(textBox);
 
         //table for buttons

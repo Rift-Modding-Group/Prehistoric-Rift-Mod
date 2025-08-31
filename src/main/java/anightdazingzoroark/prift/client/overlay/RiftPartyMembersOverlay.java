@@ -2,11 +2,10 @@ package anightdazingzoroark.prift.client.overlay;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
-import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.Minecraft;
@@ -16,7 +15,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTBase;
@@ -37,7 +35,7 @@ public class RiftPartyMembersOverlay {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPreRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
-        IPlayerTamedCreatures playerTamedCreatures = NewPlayerTamedCreaturesHelper.getPlayerTamedCreatures(player);
+        IPlayerTamedCreatures playerTamedCreatures = PlayerTamedCreaturesHelper.getPlayerTamedCreatures(player);
 
         if (playerTamedCreatures == null) return;
 
@@ -45,7 +43,7 @@ public class RiftPartyMembersOverlay {
         //from repeatedly sending in packets for selected pos for overlay
         //this is here
         if (this.selectedPos < 0) {
-            this.selectedPos = NewPlayerTamedCreaturesHelper.getSelectedPartyPosFromOverlay(player);
+            this.selectedPos = PlayerTamedCreaturesHelper.getSelectedPartyPosFromOverlay(player);
         }
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
@@ -65,7 +63,7 @@ public class RiftPartyMembersOverlay {
         this.drawArrow(xSize, ySize, true);
 
         //render up
-        int upPos = this.selectedPos - 1 < 0 ? NewPlayerTamedCreaturesHelper.maxPartySize - 1 : this.selectedPos - 1;
+        int upPos = this.selectedPos - 1 < 0 ? PlayerTamedCreaturesHelper.maxPartySize - 1 : this.selectedPos - 1;
         CreatureNBT leftPartyMemNBT = partyNBT.get(upPos);
         this.renderPartySlot(leftPartyMemNBT, xSize, ySize, 0.5f, 0.5f, -30);
 
@@ -73,7 +71,7 @@ public class RiftPartyMembersOverlay {
         this.renderPartySlot(middlePartyMemNBT, xSize, ySize, 0.75f, 0.75f, 0);
 
         //render down
-        int downPos = this.selectedPos + 1 >= NewPlayerTamedCreaturesHelper.maxPartySize ? 0 : this.selectedPos + 1;
+        int downPos = this.selectedPos + 1 >= PlayerTamedCreaturesHelper.maxPartySize ? 0 : this.selectedPos + 1;
         CreatureNBT rightPartyMemNBT = partyNBT.get(downPos);
         this.renderPartySlot(rightPartyMemNBT, xSize, ySize, 0.5f, 0.5f, 30);
 
@@ -243,22 +241,22 @@ public class RiftPartyMembersOverlay {
     public void changeSelectedPartyPos(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (RiftControls.switchUpwards.isKeyDown()) {
-            this.selectedPos = this.selectedPos - 1 < 0 ? NewPlayerTamedCreaturesHelper.maxPartySize - 1 : this.selectedPos - 1;
-            NewPlayerTamedCreaturesHelper.setSelectedPartyPosFromOverlay(player, this.selectedPos);
+            this.selectedPos = this.selectedPos - 1 < 0 ? PlayerTamedCreaturesHelper.maxPartySize - 1 : this.selectedPos - 1;
+            PlayerTamedCreaturesHelper.setSelectedPartyPosFromOverlay(player, this.selectedPos);
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
         if (RiftControls.switchDownwards.isKeyDown()) {
-            this.selectedPos = this.selectedPos + 1 >= NewPlayerTamedCreaturesHelper.maxPartySize ? 0 : this.selectedPos + 1;
-            NewPlayerTamedCreaturesHelper.setSelectedPartyPosFromOverlay(player, this.selectedPos);
+            this.selectedPos = this.selectedPos + 1 >= PlayerTamedCreaturesHelper.maxPartySize ? 0 : this.selectedPos + 1;
+            PlayerTamedCreaturesHelper.setSelectedPartyPosFromOverlay(player, this.selectedPos);
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
         if (RiftControls.quickSummonAndDismiss.isKeyDown() && this.selectedPos >= 0) {
-            CreatureNBT partyMemNBT = NewPlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.selectedPos);
+            CreatureNBT partyMemNBT = PlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.selectedPos);
             PlayerTamedCreatures.DeploymentType deploymentType = partyMemNBT.getDeploymentType();
 
             //for dismissing, when creature is deployed
             if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
-                NewPlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, false);
+                PlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, false);
                 //NewPlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
                 player.sendStatusMessage(new TextComponentTranslation("journal.warning.dismiss_success"), false);
             }
@@ -270,11 +268,11 @@ public class RiftPartyMembersOverlay {
                     player.sendStatusMessage(new TextComponentTranslation("journal.warning.cannot_summon_dead"), false);
                 }
                 //dont summon when player not in apt position
-                else if (!NewPlayerTamedCreaturesHelper.canBeDeployed(player, this.selectedPos)) {
+                else if (!PlayerTamedCreaturesHelper.canBeDeployed(player, this.selectedPos)) {
                     player.sendStatusMessage(new TextComponentTranslation("journal.warning.cannot_summon"), false);
                 }
                 else {
-                    NewPlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, true);
+                    PlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, true);
                     player.sendStatusMessage(new TextComponentTranslation("journal.warning.summon_success"), false);
                 }
             }

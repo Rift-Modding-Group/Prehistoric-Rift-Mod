@@ -14,7 +14,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class CreatureNBT {
     }
 
     public CreatureNBT(RiftCreature creature) {
-        this.creatureNBT = NewPlayerTamedCreaturesHelper.createNBTFromCreature(creature);
+        this.creatureNBT = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
     }
 
     public boolean nbtIsEmpty() {

@@ -17,7 +17,6 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
 
         NBTTagCompound compound = new NBTTagCompound();
         compound.setInteger("LastSelected", instance.getLastSelected());
-        compound.setInteger("BoxSizeLevel", instance.getBoxSizeLevel());
 
         //for party creatures
         NBTTagList partyCreaturesList = new NBTTagList();
@@ -45,13 +44,12 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
             NBTTagCompound compound = (NBTTagCompound)nbt;
 
             instance.setLastSelected(compound.getInteger("LastSelected"));
-            instance.setBoxSizeLevel(compound.getInteger("BoxSizeLevel"));
 
             //for party creatures
             if (compound.hasKey("PartyCreatures")) {
                 NBTTagList partyCreaturesList = compound.getTagList("PartyCreatures", 10);
                 if (!partyCreaturesList.isEmpty()) {
-                    FixedSizeList<CreatureNBT> finalPartyCreatures = new FixedSizeList<>(NewPlayerTamedCreaturesHelper.maxPartySize, new CreatureNBT());
+                    FixedSizeList<CreatureNBT> finalPartyCreatures = new FixedSizeList<>(PlayerTamedCreaturesHelper.maxPartySize, new CreatureNBT());
                     for (int i = 0; i < partyCreaturesList.tagCount(); i++) {
                         finalPartyCreatures.set(i, new CreatureNBT(partyCreaturesList.getCompoundTagAt(i)));
                     }

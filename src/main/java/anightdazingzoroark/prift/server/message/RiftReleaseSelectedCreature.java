@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.NewPlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -57,7 +57,7 @@ public class RiftReleaseSelectedCreature implements IMessage {
 
                     if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
                         //automatically undeploy creature first
-                        NewPlayerTamedCreaturesHelper.deployCreatureFromParty(player, selectedCreatureInfo.pos[0], false);
+                        PlayerTamedCreaturesHelper.deployCreatureFromParty(player, selectedCreatureInfo.pos[0], false);
 
                         //now remove creature
                         playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], new CreatureNBT());

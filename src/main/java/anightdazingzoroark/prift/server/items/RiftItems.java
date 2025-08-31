@@ -82,10 +82,6 @@ public class RiftItems {
     public static Item CHITIN;
 
     public static Item RIFT_SHARD;
-    public static Item PLAYER_PARTY_UPGRADE;
-    public static Item PLAYER_BOX_UPGRADE;
-    public static Item BOX_WANDERER_UPGRADE;
-    public static Item BOX_RANGE_UPGRADE;
 
     public static Item APATOSAURUS_PLATFORM;
     public static Item CANNON;
@@ -164,10 +160,6 @@ public class RiftItems {
         CHITIN = riftGenericItem("chitin", true);
 
         RIFT_SHARD = riftGenericItem("rift_shard", true);
-        PLAYER_PARTY_UPGRADE = riftPlayerCreatureUpgrade("player_party_upgrade");
-        PLAYER_BOX_UPGRADE = riftPlayerCreatureUpgrade("player_box_upgrade");
-        BOX_WANDERER_UPGRADE = riftPlayerCreatureUpgrade("box_wanderer_upgrade");
-        BOX_RANGE_UPGRADE = riftPlayerCreatureUpgrade("box_range_upgrade");
 
         APATOSAURUS_PLATFORM = riftGenericItem("apatosaurus_platform", false);
         CANNON = riftLargeWeaponItem("cannon", RiftLargeWeaponType.CANNON);
@@ -220,11 +212,6 @@ public class RiftItems {
         OreDictionary.registerOre("listAllmeat", RiftItems.COOKED_HADROSAUR_MEAT);
 
         if (GeneralConfig.canUseMM()) RiftMMItems.registerOreDicTags();
-    }
-
-    public static Item riftPlayerCreatureUpgrade(String registryName) {
-        final RiftPlayerCreatureUpgradeItem upgradeItem = new RiftPlayerCreatureUpgradeItem(registryName);
-        return registerItem(upgradeItem, registryName, true);
     }
 
     public static Item riftFoodItem(String registryName, int amount, float saturation, boolean isWolfFood) {
