@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.items;
 
 import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
+import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxData;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataHelper;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.state.IBlockState;
@@ -28,7 +29,13 @@ public class RiftCreatureBoxPlacer extends ItemBlock {
         List<ChunkPosWithVerticality> potentialChunkPositions = this.getPotentialChunkPositions(pos);
 
         //get already existing positions
-        List<BlockPos> creatureBoxPositions = CreatureBoxDataHelper.getCreatureBoxData(world).getCreatureBoxPositions();
+        List<BlockPos> creatureBoxPositions = CreatureBoxDataHelper.getCreatureBoxData(world).getCreatureBoxPositionsByPlayer(player);
+
+        //do not continue if the player has already reached the limit of how many boxes they can place
+        if (creatureBoxPositions.size() >= CreatureBoxData.maximumCreatureBoxesPerPlayer) {
+            player.sendStatusMessage(new TextComponentTranslation("reminder.cannot_place_more_creature_boxes", CreatureBoxData.maximumCreatureBoxesPerPlayer), false);
+            return false;
+        }
 
         //check for overlap in chunk positions
         boolean noOverlap = true;

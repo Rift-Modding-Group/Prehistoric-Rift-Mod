@@ -80,7 +80,7 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
             RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
             teCreatureBox.setOwner((EntityPlayer) placer);
             teCreatureBox.setUniqueID(UUID.randomUUID());
-            CreatureBoxDataHelper.addCreatureBoxPos(pos);
+            CreatureBoxDataHelper.addCreatureBoxPos(pos, (EntityPlayer) placer);
         }
     }
 

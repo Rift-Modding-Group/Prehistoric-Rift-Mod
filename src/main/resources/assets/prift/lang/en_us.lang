@@ -338,6 +338,7 @@ reminder.cannot_hatch_more_eggs=Your party and creature box are full! You cannot
 reminder.cannot_hatch_more_sacs=Your party and creature box are full! You cannot hatch any more sacs!
 reminder.show_creature_box_bounds_and_deployed=Highlighting this Creature Box's boundaries and deployed creatures...
 reminder.too_close_to_other_creature_box=Too close to or within deployment range of another creature box! Place the creature box further away! (Hint: Sneak and right-click on a creature box to see its deployment range)
+reminder.cannot_place_more_creature_boxes=Maximum amount of placed Creature Boxes per player reached. You can only have up to %s creature boxes at a time!
 
 prift.pregnancy.name=%s pregnancy
 prift.egg.time=Time
