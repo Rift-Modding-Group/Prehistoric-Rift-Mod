@@ -473,10 +473,16 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     @Override
     public void onButtonClicked(RiftLibButton riftLibButton) {
         if (riftLibButton.buttonId.equals("moreInfoButton")) {
-            RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxInfoScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+            //if ui user is owner, go on
+            if (this.deployedSelectedIsOwned(this.selectedCreatureInfo)) RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxInfoScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+            //else, tell them they cant do anything
+            else this.createPopup(this.notOwnerOfDeployedCreature());
         }
         if (riftLibButton.buttonId.equals("openChangeNamePopup")) {
-            this.createPopup(CommonUISections.changeNamePopup(this.selectedCreatureInfo.getCreatureNBT(this.mc.player)));
+            //if ui user is owner, go on
+            if (this.deployedSelectedIsOwned(this.selectedCreatureInfo)) this.createPopup(CommonUISections.changeNamePopup(this.selectedCreatureInfo.getCreatureNBT(this.mc.player)));
+            //else, tell them they cant do anything
+            else this.createPopup(this.notOwnerOfDeployedCreature());
         }
         if (riftLibButton.buttonId.equals("setNewBoxName")) {
             PlayerTamedCreaturesHelper.changeBoxName(this.mc.player, this.currentBox, this.getTextFieldTextByID("newBoxName"));
@@ -608,8 +614,12 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             //swap something with selected creature
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
+                    //if not owner, block the swap and tell them that the creature is owned by someone else
+                    if (!this.deployedSelectedIsOwned(selectionToTest)) {
+                        this.createPopup(this.notOwnerOfDeployedCreature());
+                    }
                     //cannot swap with creatures that are still reviving in creature box
-                    if (this.posBlockSwapBasedOnReviving(selectionToTest)) {
+                    else if (this.posBlockSwapBasedOnReviving(selectionToTest)) {
                         this.createPopup(this.cannotTakeFromBoxRevivingPopup());
                     }
                     //open popup asking to confirm inventory drop if either creature to swap with has inventory
@@ -623,7 +633,15 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                         this.createPopup(this.dropInventoryPopup());
                     }
                 }
-                else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) this.selectNewCreature(selectionToTest);
+                else {
+                    //if not owner, block the swap and tell them that the creature is owned by someone else
+                    if (!this.deployedSelectedIsOwned(selectionToTest)) {
+                        this.createPopup(this.notOwnerOfDeployedCreature());
+                    }
+                    else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
+                        this.selectNewCreature(selectionToTest);
+                    }
+                }
             }
             //when not shuffling creatures, just select the creature
             else {
@@ -711,6 +729,11 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             this.selectedCreatureInfo = null;
             this.creatureToDraw = null;
         }
+    }
+
+    private boolean deployedSelectedIsOwned(SelectedCreatureInfo selectedToTest) {
+        CreatureNBT selectedToTestNBT = selectedToTest.getCreatureNBT(this.mc.player);
+        return selectedToTestNBT.isOwner(this.mc.player);
     }
 
     private void updateBoxBetweenTwoCreatures(SelectedCreatureInfo selectedToTest) {
@@ -876,6 +899,25 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         //text
         RiftLibUIElement.TextElement textElement = new RiftLibUIElement.TextElement();
         textElement.setText(I18n.format("creature_box.popup_choice.creature_reviving"));
+        toReturn.add(textElement);
+
+        //ok button
+        RiftLibUIElement.ButtonElement okButton = new RiftLibUIElement.ButtonElement();
+        okButton.setAlignment(RiftLibUIElement.ALIGN_CENTER);
+        okButton.setSize(60, 20);
+        okButton.setText(I18n.format("radial.popup_button.ok"));
+        okButton.setID("exitPopup");
+        toReturn.add(okButton);
+
+        return toReturn;
+    }
+
+    private List<RiftLibUIElement.Element> notOwnerOfDeployedCreature() {
+        List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+        //text
+        RiftLibUIElement.TextElement textElement = new RiftLibUIElement.TextElement();
+        textElement.setText(I18n.format("creature_box.popup_choice.owned_by_other"));
         toReturn.add(textElement);
 
         //ok button
