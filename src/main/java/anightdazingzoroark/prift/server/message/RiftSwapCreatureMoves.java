@@ -74,7 +74,7 @@ public class RiftSwapCreatureMoves implements IMessage {
                 if (playerTamedCreatures != null) {
                     if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
                         //now here's where things get tricky
-                        //if creature is deployed, edit the creature itself
+                        //if creature is deployed, edit the creature itself and its nbt
                         //otherwise, edit its nbt
                         if (selectedCreatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                             UUID selectedCreatureUUID = selectedCreatureNBT.getUniqueID();
@@ -115,9 +115,9 @@ public class RiftSwapCreatureMoves implements IMessage {
 
                         //if creature exists in the world, edit the creature itself
                         //otherwise, edit its nbt
-                        UUID selectedCreatureUUID = creatureNBT.getUniqueID();
-                        RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, selectedCreatureUUID);
+                        RiftCreature creature = creatureNBT.findCorrespondingCreature(messagePlayer.world);
                         if (creature != null) {
+                            System.out.println("creature not null");
                             this.swapCreatureMoves(creature, moveSelectedInfo, moveToSwapInfo);
                             teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
                                     selectedCreatureNBT,
@@ -126,6 +126,7 @@ public class RiftSwapCreatureMoves implements IMessage {
                             ));
                         }
                         else {
+                            System.out.println("creature null");
                             teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
                                     selectedCreatureNBT,
                                     moveSelectedInfo,
