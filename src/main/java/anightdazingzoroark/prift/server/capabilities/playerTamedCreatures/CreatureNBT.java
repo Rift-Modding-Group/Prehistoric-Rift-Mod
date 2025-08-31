@@ -354,7 +354,7 @@ public class CreatureNBT {
     }
 
     public boolean isOwner(EntityPlayer playerToTest) {
-        if (playerToTest == null) return false;
+        if (this.nbtIsEmpty() || playerToTest == null) return false;
         UUID ownerUUID = UUID.fromString(this.creatureNBT.getString("OwnerUUID"));
         return playerToTest.getUniqueID().equals(ownerUUID);
     }

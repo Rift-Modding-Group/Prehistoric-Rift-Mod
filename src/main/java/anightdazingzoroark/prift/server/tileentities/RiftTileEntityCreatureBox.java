@@ -25,8 +25,8 @@ import java.util.UUID;
 
 public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     private final FixedSizeList<CreatureNBT> creatureListNBT = new FixedSizeList<>(RiftCreatureBox.maxDeployableCreatures, new CreatureNBT());
-    private UUID uniqueID;
-    private UUID ownerID;
+    private UUID uniqueID = RiftUtil.nilUUID;
+    private UUID ownerID = RiftUtil.nilUUID;
     private String ownerName = "";
     private int deploymentRange = 1;
 
@@ -201,9 +201,9 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
                 }
             }
         }
-        if (compound.hasKey("UniqueID")) this.uniqueID = compound.getUniqueId("UniqueID");
+        if (compound.hasUniqueId("UniqueID")) this.uniqueID = compound.getUniqueId("UniqueID");
         this.deploymentRange = compound.getInteger("DeploymentRange");
-        if (compound.hasKey("OwnerID")) this.ownerID = compound.getUniqueId("OwnerID");
+        if (compound.hasUniqueId("OwnerID")) this.ownerID = compound.getUniqueId("OwnerID");
         this.ownerName = compound.getString("OwnerName");
     }
 
@@ -214,9 +214,9 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
         for (CreatureNBT boxNBT : this.creatureListNBT.getList()) boxDeployedCreaturesList.appendTag(boxNBT.getCreatureNBT());
         compound.setTag("BoxDeployedCreatures", boxDeployedCreaturesList);
 
-        if (this.uniqueID != null && !this.uniqueID.equals(RiftUtil.nilUUID)) compound.setUniqueId("UniqueID", this.uniqueID);
+        compound.setUniqueId("UniqueID", this.uniqueID);
         compound.setInteger("DeploymentRange", this.deploymentRange);
-        if (this.ownerID != null && !this.ownerID.equals(RiftUtil.nilUUID)) compound.setUniqueId("OwnerID", this.ownerID);
+        compound.setUniqueId("OwnerID", this.ownerID);
         compound.setString("OwnerName", this.ownerName);
 
         return compound;

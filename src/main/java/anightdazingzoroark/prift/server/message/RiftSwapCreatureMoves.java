@@ -117,7 +117,6 @@ public class RiftSwapCreatureMoves implements IMessage {
                         //otherwise, edit its nbt
                         RiftCreature creature = creatureNBT.findCorrespondingCreature(messagePlayer.world);
                         if (creature != null) {
-                            System.out.println("creature not null");
                             this.swapCreatureMoves(creature, moveSelectedInfo, moveToSwapInfo);
                             teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
                                     selectedCreatureNBT,
@@ -126,7 +125,6 @@ public class RiftSwapCreatureMoves implements IMessage {
                             ));
                         }
                         else {
-                            System.out.println("creature null");
                             teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
                                     selectedCreatureNBT,
                                     moveSelectedInfo,

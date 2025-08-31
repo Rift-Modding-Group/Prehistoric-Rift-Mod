@@ -474,13 +474,13 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     public void onButtonClicked(RiftLibButton riftLibButton) {
         if (riftLibButton.buttonId.equals("moreInfoButton")) {
             //if ui user is owner, go on
-            if (this.deployedSelectedIsOwned(this.selectedCreatureInfo)) RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxInfoScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+            if (this.canDeployBasedOnOwnership(this.selectedCreatureInfo)) RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxInfoScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
             //else, tell them they cant do anything
             else this.createPopup(this.notOwnerOfDeployedCreature());
         }
         if (riftLibButton.buttonId.equals("openChangeNamePopup")) {
             //if ui user is owner, go on
-            if (this.deployedSelectedIsOwned(this.selectedCreatureInfo)) this.createPopup(CommonUISections.changeNamePopup(this.selectedCreatureInfo.getCreatureNBT(this.mc.player)));
+            if (this.canDeployBasedOnOwnership(this.selectedCreatureInfo)) this.createPopup(CommonUISections.changeNamePopup(this.selectedCreatureInfo.getCreatureNBT(this.mc.player)));
             //else, tell them they cant do anything
             else this.createPopup(this.notOwnerOfDeployedCreature());
         }
@@ -615,7 +615,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
             if (this.shufflePartyMemsMode) {
                 if (this.selectedCreatureInfo != null) {
                     //if not owner, block the swap and tell them that the creature is owned by someone else
-                    if (!this.deployedSelectedIsOwned(selectionToTest)) {
+                    if (!this.canDeployBasedOnOwnership(selectionToTest)) {
                         this.createPopup(this.notOwnerOfDeployedCreature());
                     }
                     //cannot swap with creatures that are still reviving in creature box
@@ -635,7 +635,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 }
                 else {
                     //if not owner, block the swap and tell them that the creature is owned by someone else
-                    if (!this.deployedSelectedIsOwned(selectionToTest)) {
+                    if (!this.canDeployBasedOnOwnership(selectionToTest)) {
                         this.createPopup(this.notOwnerOfDeployedCreature());
                     }
                     else if (!selectionToTest.getCreatureNBT(this.mc.player).nbtIsEmpty()) {
@@ -731,9 +731,10 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         }
     }
 
-    private boolean deployedSelectedIsOwned(SelectedCreatureInfo selectedToTest) {
+    private boolean canDeployBasedOnOwnership(SelectedCreatureInfo selectedToTest) {
         CreatureNBT selectedToTestNBT = selectedToTest.getCreatureNBT(this.mc.player);
-        return selectedToTestNBT.isOwner(this.mc.player);
+        if (selectedToTestNBT.nbtIsEmpty()) return this.getCreatureBox().getOwnerID().equals(this.mc.player.getUniqueID());
+        else return selectedToTestNBT.isOwner(this.mc.player);
     }
 
     private void updateBoxBetweenTwoCreatures(SelectedCreatureInfo selectedToTest) {
