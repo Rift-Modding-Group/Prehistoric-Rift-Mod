@@ -91,10 +91,6 @@ public class PlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftAddToParty(player, creature));
     }
 
-    public static int getMaxPartySize(EntityPlayer player) {
-        return getPlayerTamedCreatures(player).getMaxPartySize();
-    }
-
     public static void deployCreatureFromParty(EntityPlayer player, int position, boolean deploy) {
         if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftDeployPartyMem(player, position, deploy));

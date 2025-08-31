@@ -22,9 +22,6 @@ public interface IPlayerTamedCreatures {
     void addToBoxNBT(CreatureNBT compound);
     void setLastSelected(int value);
     int getLastSelected();
-    default int getMaxPartySize() {
-        return 6;
-    }
     //party extra info
     void setPartyLastOpenedTime(int value);
     int getPartyLastOpenedTime();
