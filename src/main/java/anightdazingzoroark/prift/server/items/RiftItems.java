@@ -25,6 +25,8 @@ public class RiftItems {
     public static final List<Item> ITEMS = new ArrayList<>();
     public static final HashMap<String, Item> items = new HashMap<String, Item>();
 
+    public static Item CREATURE_BOX_PLACER;
+
     public static Item RAW_EXOTIC_MEAT;
     public static Item COOKED_EXOTIC_MEAT;
     public static Item RAW_FIBROUS_MEAT;
@@ -101,6 +103,7 @@ public class RiftItems {
     public static Item CHEST_DETECT_ALERT;
 
     public static void registerItems() {
+        CREATURE_BOX_PLACER = registerItem(new RiftCreatureBoxPlacer(), "creature_box_placer", true);
         RAW_EXOTIC_MEAT = riftFoodItem("raw_exotic_meat", 4, 0.3f, true);
         COOKED_EXOTIC_MEAT = riftFoodItem("cooked_exotic_meat", 8, 0.6f, true);
         RAW_FIBROUS_MEAT = riftFoodItem("raw_fibrous_meat", 1, 0.45f, true);

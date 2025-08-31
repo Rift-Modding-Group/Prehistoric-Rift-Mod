@@ -116,5 +116,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftForceSyncBoxDeployedNBT.Handler.class, RiftForceSyncBoxDeployedNBT.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncBoxDeployedNBT.Handler.class, RiftForceSyncBoxDeployedNBT.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftNewCreatureBoxSetLastOpenedTime.Handler.class, RiftNewCreatureBoxSetLastOpenedTime.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftAddOrRemoveCreatureBoxPosFromData.Handler.class, RiftAddOrRemoveCreatureBoxPosFromData.class, id++, Side.SERVER);
     }
 }

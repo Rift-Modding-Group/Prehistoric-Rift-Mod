@@ -52,7 +52,7 @@ public class RiftBlocks {
         PYROBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.PYROBERRY_JUICE, Material.WATER), "pyroberry_juice", true, true, false);
         CRYOBERRY_JUICE_FLUID = registerBlock(new RiftFluidBlock(RiftFluids.CRYOBERRY_JUICE, Material.WATER), "cryoberry_juice", true, true, false);
 
-        CREATURE_BOX = registerBlock(new RiftCreatureBox(), "creature_box", true, false);
+        CREATURE_BOX = registerBlock(new RiftCreatureBox(), "creature_box", false, false);
 
         if (GeneralConfig.canUseMM()) RiftMMBlocks.registerMMBlocks();
     }

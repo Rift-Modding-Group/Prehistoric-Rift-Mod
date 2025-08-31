@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.blocks;
 
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
+import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -79,7 +80,14 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
             RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
             teCreatureBox.setOwner((EntityPlayer) placer);
             teCreatureBox.setUniqueID(UUID.randomUUID());
+            CreatureBoxDataHelper.addCreatureBoxPos(pos);
         }
+    }
+
+    @Override
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+        if (!worldIn.isRemote) CreatureBoxDataHelper.removeCreatureBoxPos(pos);
+        super.breakBlock(worldIn, pos, state);
     }
 
     @Override

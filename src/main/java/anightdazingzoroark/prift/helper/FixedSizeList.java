@@ -77,7 +77,7 @@ public class FixedSizeList<T> {
                 if (value != null) return false;
             }
             else {
-                if (value.equals(this.defaultValue)) return false;
+                if (!value.equals(this.defaultValue)) return false;
             }
         }
         return true;
