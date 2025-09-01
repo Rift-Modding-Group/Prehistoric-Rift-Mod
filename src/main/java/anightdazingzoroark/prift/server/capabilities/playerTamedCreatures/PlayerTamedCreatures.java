@@ -112,7 +112,12 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
 
         CreatureNBT selectedBoxDepCreature = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
+        //reset some deployment exclusive stuff
+        this.boxCreatureDeployedModified(selectedBoxDepCreature);
+
+        //change deployment of box deployed creature
         selectedBoxDepCreature.setDeploymentType(DeploymentType.PARTY_INACTIVE);
+
         CreatureNBT partyMemToSwap = this.partyCreatures.get(partyPosToSwap);
         partyMemToSwap.setDeploymentType(DeploymentType.BASE);
 
@@ -126,12 +131,32 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
 
         CreatureNBT selectedBoxDepCreature = teCreatureBox.getDeployedCreatures().get(boxDepPosSelected);
+        //reset some deployment exclusive stuff
+        this.boxCreatureDeployedModified(selectedBoxDepCreature);
+
+        //change deployment of box deployed creature
         selectedBoxDepCreature.setDeploymentType(DeploymentType.BASE_INACTIVE);
+
         CreatureNBT boxMemToSwap = this.boxCreatures.getBoxContents(boxToSwapWith).get(boxPosToSwap);
         boxMemToSwap.setDeploymentType(DeploymentType.BASE);
 
         teCreatureBox.setCreatureInPos(boxDepPosSelected, boxMemToSwap);
         this.boxCreatures.setBoxCreature(boxToSwapWith, boxPosToSwap, selectedBoxDepCreature);
+    }
+
+    private void boxCreatureDeployedModified(CreatureNBT compoundBoxDepSelected) {
+        compoundBoxDepSelected.resetHomePos();
+        compoundBoxDepSelected.setSitting(false);
+        //for dimetrodons
+        compoundBoxDepSelected.resetTakingCareOfEgg();
+        //for creatures with workstations
+        compoundBoxDepSelected.resetWorkstation();
+        //for creatures with lead based workstations
+        compoundBoxDepSelected.resetLeadWorkstation();
+        //for turret mode users
+        compoundBoxDepSelected.setTurretMode(false);
+        //for harvest on wander users
+        compoundBoxDepSelected.resetHarvestOnWander();
     }
 
     @Override

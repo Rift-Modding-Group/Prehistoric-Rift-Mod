@@ -359,6 +359,62 @@ public class CreatureNBT {
         return playerToTest.getUniqueID().equals(ownerUUID);
     }
 
+    public void resetTakingCareOfEgg() {
+        if (this.nbtIsEmpty() || this.getCreatureType() != RiftCreatureType.DIMETRODON) return;
+        this.creatureNBT.setBoolean("TakingCareOfEgg", false);
+    }
+
+    public void resetHomePos() {
+        if (this.nbtIsEmpty()) return;
+        this.creatureNBT.setBoolean("HasHomePos", false);
+        this.creatureNBT.removeTag("HomePosX");
+        this.creatureNBT.removeTag("HomePosY");
+        this.creatureNBT.removeTag("HomePosZ");
+    }
+
+    public boolean hasWorkstationData() {
+        return !this.nbtIsEmpty() && this.creatureNBT.hasKey("HasWorkstation");
+    }
+
+    public void resetWorkstation() {
+        if (this.nbtIsEmpty() || !this.hasWorkstationData()) return;
+        this.creatureNBT.setBoolean("HasWorkstation", false);
+        this.creatureNBT.removeTag("WorkstationX");
+        this.creatureNBT.removeTag("WorkstationY");
+        this.creatureNBT.removeTag("WorkstationZ");
+    }
+
+    public boolean hasLeadWorkstationData() {
+        return !this.nbtIsEmpty() && this.creatureNBT.hasKey("UsingLeadForWork");
+    }
+
+    public void resetLeadWorkstation() {
+        if (this.nbtIsEmpty() || !this.hasLeadWorkstationData()) return;
+        this.creatureNBT.setBoolean("UsingLeadForWork", false);
+        this.creatureNBT.removeTag("LeadWorkPosX");
+        this.creatureNBT.removeTag("LeadWorkPosY");
+        this.creatureNBT.removeTag("LeadWorkPosZ");
+    }
+
+    public void setTurretMode(boolean value) {
+        if (this.nbtIsEmpty()) return;
+        this.creatureNBT.setBoolean("TurretMode", value);
+    }
+
+    public boolean hasHarvestOnWanderData() {
+        return !this.nbtIsEmpty() && this.creatureNBT.hasKey("CanHarvest");
+    }
+
+    public void resetHarvestOnWander() {
+        if (this.nbtIsEmpty() || !this.hasHarvestOnWanderData()) return;
+        this.creatureNBT.setBoolean("CanHarvest", false);
+    }
+
+    public void setSitting(boolean value) {
+        if (this.nbtIsEmpty()) return;
+        this.creatureNBT.setBoolean("Sitting", value);
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object == null || this.creatureNBT == null) return false;
