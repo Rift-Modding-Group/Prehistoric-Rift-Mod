@@ -397,10 +397,10 @@ public enum RiftCreatureType {
             300,
             0.5f,
             EggTemperature.COLD
-    )/*,
+    ),
     TENONTOSAURUS(
             Tenontosaurus.class,
-            null,
+            TenontosaurusConfig.class,
             true,
             true,
             true,
@@ -411,12 +411,12 @@ public enum RiftCreatureType {
             CreatureDiet.HERBIVORE,
             LevelupRate.SLOW,
             new Behavior[]{Behavior.DOCILE, Behavior.BLOCK_BREAKER},
-            0,
-            0,
+            0x8f6f42,
+            0x0f0f0f,
             180,
             1f,
             EggTemperature.WARM
-    )*/;
+    );
 
     private final Class<? extends RiftCreature> creature;
     private final Class<? extends RiftCreatureConfig> config;
