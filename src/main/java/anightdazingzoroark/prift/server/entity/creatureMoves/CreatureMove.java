@@ -43,7 +43,13 @@ public enum CreatureMove {
     BURROW(RiftBurrowMove.class, MoveAnimType.BURROW, ChargeType.GRADIENT_WHILE_USE, 40, new int[]{4, 8}, 100, 200, false, true, true, new CreatureMoveCondition().setCheckForTarget()), //burrow into the ground
     PLATE_SCATTER(RiftPlateScatterMove.class, MoveAnimType.SCATTER, ChargeType.COOLDOWN_ONLY, 50, new int[]{20}, 0, 150, false, false, false, new CreatureMoveCondition().setCheckForTarget()), //scatter plates
     GNASH(RiftGnashMove.class, MoveAnimType.GNASH, ChargeType.GRADIENT_WHILE_USE, 60, new int[]{20, 40}, 100, 300, false, true, true, new CreatureMoveCondition().setCheckForTarget()), //user picks up and damages a target by thrashing them around, then throws them
-    MUDBALL(RiftMudballMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 30, new int[]{0}, 0, 100, false, false, false, new CreatureMoveCondition().setCheckForTarget()); //user throws mud to blind target
+    MUDBALL(RiftMudballMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 30, new int[]{0}, 0, 100, false, false, false, new CreatureMoveCondition().setCheckForTarget()), //user throws mud to blind target
+    HYPNOSIS_POWDER(RiftHypnosisPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, new CreatureMoveCondition()),
+    POISON_POWDER(RiftPoisonPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, new CreatureMoveCondition()),
+    ITCHING_POWDER(RiftItchingPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, new CreatureMoveCondition()),
+    PARALYZING_POWDER(RiftParalyzingPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, new CreatureMoveCondition()),
+    RAGE_POWDER(RiftRagePowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, new CreatureMoveCondition()),
+    SLEEP_POWDER(RiftSleepPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, new CreatureMoveCondition());
 
     public final Class<? extends RiftCreatureMove> creatureMove;
     public final MoveAnimType moveAnimType;
