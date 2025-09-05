@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -7,10 +8,7 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.world.World;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Tenontosaurus extends RiftCreature {
     public Tenontosaurus(World worldIn) {
@@ -54,7 +52,20 @@ public class Tenontosaurus extends RiftCreature {
 
     @Override
     public Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType() {
-        return Collections.emptyMap();
+        Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> toReturn = new HashMap<>();
+        toReturn.put(CreatureMove.MoveAnimType.TAIL, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(7.5D)
+                .defineChargeUpToUseLength(2.5D)
+                .defineRecoverFromUseLength(10D)
+                .setChargeUpToUseSound(RiftSounds.GENERIC_TAIL_MOVE)
+                .finalizePoints());
+        toReturn.put(CreatureMove.MoveAnimType.STATUS, new RiftCreatureMoveAnimator(this)
+                .defineChargeUpLength(5D)
+                .defineChargeUpToUseLength(20D)
+                //.defineUseDurationLength(15D)
+                .defineRecoverFromUseLength(5D)
+                .finalizePoints());
+        return toReturn;
     }
 
     @Override

@@ -18,6 +18,7 @@ public class CreatureMoveCondition {
     private boolean targetTooClose;
     private boolean breakBlocks;
     private boolean restrictBySize; //if target is strictly of larger size than user, dont use
+    private boolean hasNoEffect; //if target does not have this effect, use
 
     //rng has no Condition attached to it
     //it is meant to be attached to other conditions
@@ -129,6 +130,7 @@ public class CreatureMoveCondition {
         LEAP_OVER_LEDGE,
         TARGET_TOO_CLOSE,
         BREAK_BLOCKS,
+        HAS_NO_EFFECT,
         CHECK_TARGET,
         INTERVAL
     }
