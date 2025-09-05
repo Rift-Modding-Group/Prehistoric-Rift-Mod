@@ -6,6 +6,9 @@ import java.util.List;
 //the canBeExecutedUnmounted method within each CreatureMove and this are completely different
 //CreatureMoveCondition checks go first and determine whether or not the creature uses a move
 //canBeExecutedUnmounted checks for which among the available moves are to be selected when in move use mode
+
+
+//THIS WILL BE DEPRECATED SOON AND BE REPLACED WITH SOMETHING BETTER
 public class CreatureMoveCondition {
     public final List<Condition> conditions = new ArrayList<>();
     private int rngChance; //how likely move will be used, move has 1 / rngChance to be used
