@@ -16,8 +16,6 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCondition;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveConditionStack;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
@@ -141,7 +139,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
     private static final DataParameter<List<CreatureMove>> LEARNABLE_MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
-    private static final DataParameter<CreatureMoveConditionStack> MOVE_CONDITION_STACK = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.MOVE_CONDITION_STACK);
 
     private static final DataParameter<Boolean> BREAK_BLOCK_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> CAN_SET_BLOCK_BREAK_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -310,7 +307,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         this.dataManager.register(MOVE_LIST, new ArrayList<>());
         this.dataManager.register(LEARNABLE_MOVE_LIST, new ArrayList<>());
-        this.dataManager.register(MOVE_CONDITION_STACK, new CreatureMoveConditionStack());
 
         this.dataManager.register(BREAK_BLOCK_MODE, false);
         this.dataManager.register(CAN_SET_BLOCK_BREAK_MODE, true);
@@ -407,6 +403,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.canBePregnant()) this.createBabyWhenPregnant();
 
             //move conditions ticking
+            /*
             if (this.getAttackTarget() != null && this.getAttackTarget().isEntityAlive()) {
                 this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_TARGET);
 
@@ -426,6 +423,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.getLearnedMoves().contains(CreatureMove.CLOAK) && !this.isCloaked()) this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_UNCLOAKED);
             this.checkMovesWithHealthBelowValue();
             this.checkMovesWithIntervals();
+             */
 
             if (this.isTamed()) {
                 this.updateEnergyMove();
@@ -1703,92 +1701,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public abstract Map<CreatureMove.MoveAnimType, RiftCreatureMoveAnimator> animatorsForMoveType();
 
-    public boolean checkIfHasMovesWithCondition(CreatureMoveCondition.Condition condition) {
-        for (CreatureMove creatureMove : this.getLearnedMoves()) {
-            if (creatureMove.moveCondition.conditions.contains(condition)) return true;
-        }
-        return false;
-    }
-    //move related stuff ends here
-
-    //move condition stuff starts here
-    public CreatureMoveConditionStack getMoveConditionStack() {
-        return this.dataManager.get(MOVE_CONDITION_STACK);
-    }
-
-    private void setMoveConditionStack(CreatureMoveConditionStack value) {
-        this.dataManager.set(MOVE_CONDITION_STACK, value);
-    }
-
-    public void addToConditionStack(CreatureMoveCondition.Condition value) {
-        //a condition can only be applied if its moveset has a move that requires it
-        if (!this.checkIfHasMovesWithCondition(value)) return;
-        CreatureMoveConditionStack toModify = this.getMoveConditionStack();
-        toModify.addCondition(value);
-        this.setMoveConditionStack(toModify);
-    }
-
-    public void removeFromConditionStack(CreatureMoveCondition.Condition value) {
-        CreatureMoveConditionStack toModify = this.getMoveConditionStack();
-        toModify.removeCondition(value);
-        this.setMoveConditionStack(toModify);
-    }
-
-    public void removeConditionStackHead() {
-        CreatureMoveConditionStack toModify = this.getMoveConditionStack();
-        toModify.removeHead();
-        this.setMoveConditionStack(toModify);
-    }
-
-    public void clearConditionStack() {
-        CreatureMoveConditionStack toModify = this.getMoveConditionStack();
-        toModify.getConditions().clear();
-        this.setMoveConditionStack(toModify);
-    }
-
-    public List<CreatureMove> getUsableMovesFromConditionInStack(CreatureMoveCondition.Condition condition) {
-        if (this.getMoveConditionStack() == null || this.getMoveConditionStack().getConditions().isEmpty()) return Collections.EMPTY_LIST;
-        return this.getLearnedMoves().stream()
-                .filter(m -> m.moveCondition.conditions.contains(condition))
-                .collect(Collectors.toList());
-    }
-
-    private void checkMovesWithHealthBelowValue() {
-        if (this.getMoveConditionStack().getConditions().contains(CreatureMoveCondition.Condition.HEALTH_BELOW_VALUE)) return;
-        double highestBelowHPPercentage = 0D;
-        for (CreatureMove move : this.getLearnedMoves()) {
-            if (move.moveCondition.conditions.contains(CreatureMoveCondition.Condition.HEALTH_BELOW_VALUE)) {
-                if (move.moveCondition.getBelowHealthPercentage() >= highestBelowHPPercentage) {
-                    highestBelowHPPercentage = move.moveCondition.getBelowHealthPercentage();
-                }
-            }
-        }
-        if (this.getHealth() <= this.getMaxHealth() * highestBelowHPPercentage)
-            this.addToConditionStack(CreatureMoveCondition.Condition.HEALTH_BELOW_VALUE);
-    }
-
-    //check intervals for each move that has an interval condition
-    private void checkMovesWithIntervals() {
-        if (this.getMoveConditionStack().getConditions().contains(CreatureMoveCondition.Condition.INTERVAL)) return;
-        for (CreatureMove move : this.getLearnedMoves()) {
-            if (move.moveCondition.conditions.contains(CreatureMoveCondition.Condition.INTERVAL)) {
-                if (this.getAgeInTicks() % move.moveCondition.getTickInterval() == 0 && this.getAgeInTicks() > 24000) {
-                    this.lastIntervalForMoveCall = move.moveCondition.getTickInterval(); //this will be called up again in RiftCreatureUseUnmounted, its server only there too so all will be fine :tm:
-                    this.addToConditionStack(CreatureMoveCondition.Condition.INTERVAL);
-                    break;
-                }
-            }
-        }
-    }
-
-    private boolean hasMovesWithSizeRestrictions() {
-        for (CreatureMove move : this.getLearnedMoves()) {
-            if (move.moveCondition.isRestrictedBySize()) return true;
-        }
-        return false;
-    }
-    //move condition stuff ends here
-
     public boolean inBlockBreakMode() {
         return this.dataManager.get(BREAK_BLOCK_MODE);
     }
@@ -2431,9 +2343,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.recentlyHitDamage = amount;
 
         //apply check hit condition if it has move with said condition
+        /*
         if ((RiftUtil.checkForNoAssociations(this, source.getImmediateSource()) || RiftUtil.checkForNoAssociations(this, source.getTrueSource()))
                 && (RiftUtil.checkForNoHerdAssociations(this, source.getImmediateSource()) || RiftUtil.checkForNoHerdAssociations(this, source.getTrueSource())))
             this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_HIT);
+         */
 
         //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
         if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {

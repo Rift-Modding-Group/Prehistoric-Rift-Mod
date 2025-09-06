@@ -4,8 +4,6 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCondition;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveConditionStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializer;
@@ -37,35 +35,6 @@ public class RiftDataSerializers {
         }
 
         public List<CreatureMove> copyValue(List<CreatureMove> value) {
-            return value;
-        }
-    };
-
-    public static final DataSerializer<CreatureMoveConditionStack> MOVE_CONDITION_STACK = new DataSerializer<CreatureMoveConditionStack>() {
-        @Override
-        public void write(PacketBuffer buf, CreatureMoveConditionStack value) {
-            buf.writeInt(value.getConditions().size());
-            for (CreatureMoveCondition.Condition c : value.getConditions())
-                buf.writeInt(c.ordinal());
-        }
-
-        @Override
-        public CreatureMoveConditionStack read(PacketBuffer buf) throws IOException {
-            CreatureMoveConditionStack toReturn = new CreatureMoveConditionStack();
-            int size = buf.readInt();
-            for (int i = 0; i < size; i++) {
-                toReturn.addCondition(CreatureMoveCondition.Condition.values()[buf.readInt()]);
-            }
-            return toReturn;
-        }
-
-        @Override
-        public DataParameter<CreatureMoveConditionStack> createKey(int id) {
-            return new DataParameter<>(id, this);
-        }
-
-        @Override
-        public CreatureMoveConditionStack copyValue(CreatureMoveConditionStack value) {
             return value;
         }
     };
@@ -107,7 +76,6 @@ public class RiftDataSerializers {
 
     public static void registerSerializers() {
         ServerProxy.registryPrimer.register(new DataSerializerEntry(LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "move_list"));
-        ServerProxy.registryPrimer.register(new DataSerializerEntry(MOVE_CONDITION_STACK).setRegistryName(RiftInitialize.MODID, "move_condition_stack"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(ACQUISITION_INFO).setRegistryName(RiftInitialize.MODID, "acquisition_info"));
     }
 }

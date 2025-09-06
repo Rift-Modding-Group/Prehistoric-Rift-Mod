@@ -25,7 +25,8 @@ public abstract class RiftCreatureMove {
         this.creatureMove = creatureMove;
     }
 
-    //this section is for moves when used in battle
+    //if the move requires the user to have a target, this is checked in the RiftCreatureUseMoveUnmounted AI goal
+    //if not, this is checked every tick within the creatures class
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
         return true;
     }
