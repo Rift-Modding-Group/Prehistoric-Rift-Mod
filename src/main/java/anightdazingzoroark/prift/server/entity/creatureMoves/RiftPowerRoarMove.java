@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -54,7 +55,7 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
         for (EntityLivingBase entity : roarUser.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getRoarArea(roarUser, strength * 6d), this.generalEntityPredicate(roarUser))) {
             if (entity != roarUser) {
                 entity.attackEntityFrom(DamageSource.causeMobDamage(roarUser), 2);
-                if (RiftUtil.isAppropriateSizeNotEqual(entity, RiftUtil.getMobSize(roarUser))) this.roarKnockback(roarUser, entity, strength);
+                if (MobSize.getMobSize(roarUser).isAppropriateSizeNotEqual(entity)) this.roarKnockback(roarUser, entity, strength);
             }
         }
         this.roarBreakBlocks(roarUser, strength);

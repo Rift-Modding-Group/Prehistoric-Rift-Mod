@@ -238,69 +238,6 @@ public class RiftUtil {
         return finalTargets;
     }
 
-    public static MobSize getMobSize(Entity entity) {
-        List<String> verySmallSize = Arrays.asList(GeneralConfig.verySmallMobs);
-        List<String> smallSize = Arrays.asList(GeneralConfig.smallMobs);
-        List<String> mediumSize = Arrays.asList(GeneralConfig.mediumMobs);
-        List<String> largeSize = Arrays.asList(GeneralConfig.largeMobs);
-        List<String> veryLargeSize = Arrays.asList(GeneralConfig.veryLargeMobs);
-
-        if (entity instanceof EntityPlayer) {
-            if (verySmallSize.contains("minecraft:player")) return MobSize.VERY_SMALL;
-            else if (smallSize.contains("minecraft:player")) return MobSize.SMALL;
-            else if (mediumSize.contains("minecraft:player")) return MobSize.MEDIUM;
-            else if (largeSize.contains("minecraft:player")) return MobSize.LARGE;
-            else if (veryLargeSize.contains("minecraft:player")) return MobSize.VERY_LARGE;
-        }
-        else {
-            String mobString = EntityList.getKey(entity).toString();
-            if (verySmallSize.contains(mobString)) return MobSize.VERY_SMALL;
-            else if (smallSize.contains(mobString)) return MobSize.SMALL;
-            else if (mediumSize.contains(mobString)) return MobSize.MEDIUM;
-            else if (largeSize.contains(mobString)) return MobSize.LARGE;
-            else if (veryLargeSize.contains(mobString)) return MobSize.VERY_LARGE;
-        }
-
-        return MobSize.MEDIUM;
-    }
-
-    public static boolean isAppropriateSize(Entity entity, MobSize size) {
-        //if hitbox is hit, perform recursion involving the parent
-        if (entity instanceof MultiPartEntityPart) {
-            Entity parent = (Entity) ((MultiPartEntityPart) entity).parent;
-            return isAppropriateSize(parent, size);
-        }
-        if (size != null) return getMobSize(entity).ordinal() <= size.ordinal();
-        else return true;
-    }
-
-    public static boolean isAppropriateSizeNotEqual(Entity entity, MobSize size) {
-        //if hitbox is hit, perform recursion involving the parent
-        if (entity instanceof MultiPartEntityPart) {
-            Entity parent = (Entity) ((MultiPartEntityPart) entity).parent;
-            return isAppropriateSize(parent, size);
-        }
-        if (size != null) return getMobSize(entity).ordinal() < size.ordinal();
-        else return true;
-    }
-
-    public static void drawCenteredString(FontRenderer fontRenderer, String string, int guiWidth, int guiHeight, int xOff, int yOff, int textColor) {
-        int wrapWidth = fontRenderer.getStringWidth(string);
-        fontRenderer.drawString(string, (guiWidth - wrapWidth)/2 + xOff, (guiHeight - fontRenderer.FONT_HEIGHT)/2 - yOff, textColor);
-    }
-
-    public static void drawMultiLineString(FontRenderer fontRenderer, String string, int xPos, int yPos, int wrapWidth, int textColor) {
-        List<String> lines = fontRenderer.listFormattedStringToWidth(string, wrapWidth);
-        int currentY = yPos;
-
-        for (String line : lines) {
-            int lineWidth = fontRenderer.getStringWidth(line);
-            int lineX = xPos + (wrapWidth - lineWidth) / 2;
-            fontRenderer.drawString(line, lineX, currentY, textColor);
-            currentY += fontRenderer.FONT_HEIGHT;
-        }
-    }
-
     public static boolean entityIsUnderwater(EntityLivingBase entityLivingBase) {
         BlockPos highestWaterPos = entityLivingBase.getPosition().add(0, Math.ceil(entityLivingBase.height), 0);
         return entityLivingBase.world.getBlockState(highestWaterPos).getMaterial() == Material.WATER;

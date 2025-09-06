@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -204,7 +205,7 @@ public abstract class RiftCreatureMove {
                 if (entity instanceof EntityLivingBase || entity instanceof MultiPartEntityPart)
                     return RiftUtil.checkForNoAssociations(user, entity)
                             && RiftUtil.checkForNoHerdAssociations(user, entity)
-                            && (considerSize ? RiftUtil.isAppropriateSizeNotEqual(entity, RiftUtil.getMobSize(user)) : true);
+                            && (considerSize ? MobSize.getMobSize(user).isAppropriateSizeNotEqual(entity) : true);
                 else return false;
             }
         };

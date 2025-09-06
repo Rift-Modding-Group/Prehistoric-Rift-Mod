@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
@@ -39,7 +40,7 @@ public class RiftPowerBlowMove extends RiftCreatureMove {
     }
 
     public void knockback(RiftCreature user, EntityLivingBase entity, float strength) {
-        if (RiftUtil.isAppropriateSize(entity, RiftUtil.getMobSize(user))) {
+        if (MobSize.getMobSize(user).isAppropriateSize(entity)) {
             double d0 = user.posX - entity.posX;
             double d1 = user.posZ - entity.posZ;
             double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);

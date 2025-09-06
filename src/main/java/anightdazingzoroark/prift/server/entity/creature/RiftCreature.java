@@ -17,6 +17,7 @@ import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
+import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
@@ -2095,7 +2096,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             return this.targetIsGrabbable(partParent);
         }
         else return RiftUtil.checkForNoAssociations(this, target)
-                && RiftUtil.isAppropriateSize(target, RiftUtil.getMobSize(this));
+                && MobSize.getMobSize(this).isAppropriateSize(target);
     }
 
     public Entity getGrabVictim() {

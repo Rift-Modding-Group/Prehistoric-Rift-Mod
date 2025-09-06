@@ -48,7 +48,7 @@ public class ThrownBola extends RiftLibProjectile {
 
     @Override
     public void projectileEntityEffects(EntityLivingBase entityLivingBase) {
-        if (entityLivingBase != null && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.MEDIUM)) {
+        if (entityLivingBase != null && MobSize.MEDIUM.isAppropriateSize(entityLivingBase)) {
             NonPotionEffectsHelper.setBolaCaptured(entityLivingBase, 300);
         }
     }

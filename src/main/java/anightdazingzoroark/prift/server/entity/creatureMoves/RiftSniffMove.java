@@ -53,7 +53,7 @@ public class RiftSniffMove extends RiftCreatureMove {
         int mobSniffRange = RiftConfigHandler.getConfig(user.creatureType).general.mobSniffRange;
         AxisAlignedBB mobDetectAABB = new AxisAlignedBB(user.posX - mobSniffRange, user.posY - mobSniffRange, user.posZ - mobSniffRange, user.posX + mobSniffRange, user.posY + mobSniffRange, user.posZ + mobSniffRange);
         for (EntityLivingBase entityLivingBase : user.world.getEntitiesWithinAABB(EntityLivingBase.class, mobDetectAABB, null)) {
-            if (entityLivingBase != user && entityLivingBase != user.getOwner() && !RiftUtil.entityIsUnderwater(entityLivingBase) && RiftUtil.isAppropriateSize(entityLivingBase, MobSize.safeValueOf(RiftConfigHandler.getConfig(user.creatureType).general.maximumMobSniffSize))) {
+            if (entityLivingBase != user && entityLivingBase != user.getOwner() && !RiftUtil.entityIsUnderwater(entityLivingBase) && MobSize.valueOf(RiftConfigHandler.getConfig(user.creatureType).general.maximumMobSniffSize).isAppropriateSize(entityLivingBase)) {
                 //spawn particle for owner
                 if (user.getOwner() != null) RiftMessages.WRAPPER.sendTo(
                         new RiftSpawnDetectParticle((int)entityLivingBase.posX, (int)entityLivingBase.posY, (int)entityLivingBase.posZ),

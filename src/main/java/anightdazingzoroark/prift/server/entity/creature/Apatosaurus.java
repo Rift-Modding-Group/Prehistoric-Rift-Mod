@@ -243,7 +243,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
                 }
             })) {
                 for (int i = 0; i < 3 - passengerSize; i++) {
-                    boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumPassengerSize ));
+                    boolean canAccept = MobSize.valueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumPassengerSize).isAppropriateSize(entity);
                     if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
                         entity.startRiding(this, true);
                         this.dismount = true;
@@ -270,7 +270,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
                     }
                 })) {
                     for (int i = 0; i < 3 - passengerSize; i++) {
-                        boolean canAccept = RiftUtil.isAppropriateSize(entity, MobSize.safeValueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumPassengerSize));
+                        boolean canAccept = MobSize.valueOf(RiftConfigHandler.getConfig(this.creatureType).general.maximumPassengerSize).isAppropriateSize(entity);
                         if (entity != null && !entity.equals(this) && !(entity instanceof EntityPlayer) && canAccept) {
                             entity.startRiding(this, true);
                             this.dismount = true;
