@@ -20,6 +20,7 @@ import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemPotion;
@@ -484,18 +485,37 @@ public class RiftUtil {
         return slope * (x - xMin) + yMin;
     }
 
-    public static boolean hasPotionEffect(EntityLivingBase entity, Potion potion) {
-        if (entity == null || potion == null) {
-            return false;
-        }
+    public static boolean hasPotionEffect(Entity entity, Potion potion) {
+        if (entity == null || potion == null) return false;
 
-        for (PotionEffect effect : entity.getActivePotionEffects()) {
-            if (effect.getPotion() == potion) {
-                return true;
+        if (entity instanceof MultiPartEntityPart) {
+            MultiPartEntityPart multiPartEntityPart = (MultiPartEntityPart) entity;
+            Entity parent = (Entity) multiPartEntityPart.parent;
+            if (parent instanceof EntityLivingBase) return hasPotionEffect(parent, potion);
+        }
+        else if (entity instanceof EntityLivingBase) {
+            EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
+            for (PotionEffect effect : entityLivingBase.getActivePotionEffects()) {
+                if (effect.getPotion() == potion) {
+                    return true;
+                }
             }
         }
-
         return false;
+    }
+
+    public static void addPotionEffect(Entity entity, PotionEffect potionEffect) {
+        if (entity == null || potionEffect == null) return;
+
+        if (entity instanceof MultiPartEntityPart) {
+            MultiPartEntityPart multiPartEntityPart = (MultiPartEntityPart) entity;
+            Entity parent = (Entity) multiPartEntityPart.parent;
+            if (parent instanceof EntityLivingBase) addPotionEffect(parent, potionEffect);
+        }
+        else if (entity instanceof EntityLivingBase) {
+            EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
+            entityLivingBase.addPotionEffect(potionEffect);
+        }
     }
 
     public static <T> T getRandomFromList(List<T> list, Predicate<T> predicate) {

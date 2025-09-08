@@ -18,7 +18,9 @@ public class RiftSnarlMove extends RiftCreatureMove {
     }
 
     @Override
-    public void onStartExecuting(RiftCreature user, Entity target) {}
+    public void onStartExecuting(RiftCreature user, Entity target) {
+        user.setCanMove(false);
+    }
 
     @Override
     public void whileChargingUp(RiftCreature user) {}
@@ -33,6 +35,6 @@ public class RiftSnarlMove extends RiftCreatureMove {
 
     @Override
     public void onStopExecuting(RiftCreature user) {
-
+        user.setCanMove(true);
     }
 }
