@@ -21,6 +21,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesStorage;
 import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawning;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
+import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.RiftCreatureHitboxLinker;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -72,10 +73,12 @@ public class ServerProxy {
         RiftItems.registerOreDicTags();
         RiftBlocks.registerOreDicTags();
         RiftRecipes.registerSmelting();
+        RiftEffects.registerEffects();
         if (GeneralConfig.canUseMM()) RiftMMRecipes.registerRecipes();
         RiftCrafttweaker.loadCrafttweakerCompat();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
         MinecraftForge.EVENT_BUS.register(new RiftBlocks());
+        MinecraftForge.EVENT_BUS.register(new RiftEffects());
         RiftEntities.registerEntities();
         if (GeneralConfig.canUseSimpleDiff()) loadTemperatureRegistry();
 
