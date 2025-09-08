@@ -27,8 +27,8 @@ public class RiftLungeMove extends RiftCreatureMove {
 
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.isInWater()) return true;
-        else return user.onGround && user.posY >= target.posY - 1 && user.posY <= target.posY + 1;
+        if (user.isInWater()) return super.canBeExecutedUnmounted(user, target);
+        else return super.canBeExecutedUnmounted(user, target) && user.onGround && user.posY >= target.posY - 1 && user.posY <= target.posY + 1;
     }
 
     @Override

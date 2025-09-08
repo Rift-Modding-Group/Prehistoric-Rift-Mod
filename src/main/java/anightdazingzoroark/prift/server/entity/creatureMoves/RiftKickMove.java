@@ -10,6 +10,11 @@ public class RiftKickMove extends RiftCreatureMove {
     }
 
     @Override
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return super.canBeExecutedUnmounted(user, target) && this.targetNearEntity(user, target, false);
+    }
+
+    @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setCanMove(false);
     }

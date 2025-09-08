@@ -16,6 +16,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
@@ -118,6 +119,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<CreatureAcquisitionInfo> ACQUISITION_INFO = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.ACQUISITION_INFO);
 
+    private static final DataParameter<Integer> PROPOSED_TARGETLESS_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> CURRENT_MOVE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     private static final DataParameter<Boolean> CAN_USE_MOVE_ONE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -286,6 +288,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         this.dataManager.register(ACQUISITION_INFO, new CreatureAcquisitionInfo(null, 0L));
 
+        this.dataManager.register(PROPOSED_TARGETLESS_MOVE, -1);
         this.dataManager.register(CURRENT_MOVE, -1);
 
         this.dataManager.register(CAN_USE_MOVE_ONE, true);
@@ -403,28 +406,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.isNocturnal()) this.manageSleepSchedule();
             if (this.canBePregnant()) this.createBabyWhenPregnant();
 
-            //move conditions ticking
-            /*
-            if (this.getAttackTarget() != null && this.getAttackTarget().isEntityAlive()) {
-                this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_TARGET);
-
-                //if target is too close, add target too close condition
-                AxisAlignedBB aabb = this.getEntityBoundingBox().grow(0.5D);
-                if (this.checkIfHasMovesWithCondition(CreatureMoveCondition.Condition.TARGET_TOO_CLOSE)) {
-                    List<EntityLivingBase> nearbyEntities = this.world.getEntitiesWithinAABB(EntityLivingBase.class, aabb, null);
-
-                    if (nearbyEntities.contains(this.getAttackTarget())) this.addToConditionStack(CreatureMoveCondition.Condition.TARGET_TOO_CLOSE);
-                    else this.removeFromConditionStack(CreatureMoveCondition.Condition.TARGET_TOO_CLOSE);
-                }
-            }
-            else {
-                this.removeFromConditionStack(CreatureMoveCondition.Condition.CHECK_TARGET);
-                this.removeFromConditionStack(CreatureMoveCondition.Condition.TARGET_TOO_CLOSE);
-            }
-            if (this.getLearnedMoves().contains(CreatureMove.CLOAK) && !this.isCloaked()) this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_UNCLOAKED);
-            this.checkMovesWithHealthBelowValue();
-            this.checkMovesWithIntervals();
-             */
+            //move conditions ticking, mainly for moves that dont require target to use
+            this.manageMovesThatDontNeedTarget();
 
             if (this.isTamed()) {
                 this.updateEnergyMove();
@@ -1424,6 +1407,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //move related stuff starts here
+    private void manageMovesThatDontNeedTarget() {
+        if (this.proposedTargetlessMove() != null || this.currentCreatureMove() != null) return;
+        for (CreatureMove move : this.getLearnedMovesNoNeedForTarget()) {
+            if (this.getAttackTarget() != null && move.targetRequirement == CreatureMove.TargetRequirement.HAS_NO_TARGET) continue;
+
+            RiftCreatureMove invokedMove = move.invokeMove();
+            if (invokedMove.canBeExecutedUnmounted(this, null)) {
+                this.setProposedTargetlessMove(move);
+                break;
+            }
+        }
+    }
+
     public abstract WeightedList<List<CreatureMove>> possibleStartingMoves();
 
     public List<CreatureMove> initialLearnableMoves() {
@@ -1441,6 +1437,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.dataManager.get(MOVE_LIST);
     }
 
+    public List<CreatureMove> getLearnedMovesNoNeedForTarget() {
+        return this.getLearnedMoves().stream()
+                .filter(m -> m.targetRequirement != CreatureMove.TargetRequirement.HAS_TARGET)
+                .collect(Collectors.toList());
+    }
+
+    public List<CreatureMove> getLearnedMovesRequireTarget() {
+        return this.getLearnedMoves().stream()
+                .filter(m -> m.targetRequirement == CreatureMove.TargetRequirement.HAS_TARGET
+                        || m.targetRequirement == CreatureMove.TargetRequirement.TARGET_DOESNT_MATTER)
+                .collect(Collectors.toList());
+    }
+
     public void changeLearnedMove(int pos, CreatureMove move) {
         List<CreatureMove> moveList = this.dataManager.get(MOVE_LIST);
         moveList.set(pos, move);
@@ -1449,6 +1458,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setLearnedMoves(List<CreatureMove> values) {
         this.dataManager.set(MOVE_LIST, values);
+    }
+
+    public CreatureMove proposedTargetlessMove() {
+        if (this.dataManager.get(PROPOSED_TARGETLESS_MOVE) >= 0) return CreatureMove.values()[this.dataManager.get(PROPOSED_TARGETLESS_MOVE)];
+        else return null;
+    }
+
+    public void setProposedTargetlessMove(CreatureMove value) {
+        if (value != null) this.dataManager.set(PROPOSED_TARGETLESS_MOVE, value.ordinal());
+        else this.dataManager.set(PROPOSED_TARGETLESS_MOVE, -1);
     }
 
     public CreatureMove currentCreatureMove() {

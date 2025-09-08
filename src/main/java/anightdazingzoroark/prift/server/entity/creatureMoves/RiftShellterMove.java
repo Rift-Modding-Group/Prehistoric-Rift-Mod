@@ -13,7 +13,7 @@ public class RiftShellterMove extends RiftCreatureMove {
 
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return user.getHealth()/user.getMaxHealth() <= 0.25f || user.getEnergy() <= user.getWeaknessEnergy();
+        return super.canBeExecutedUnmounted(user, target) && (user.getHealth()/user.getMaxHealth() <= 0.25f || user.getEnergy() <= user.getWeaknessEnergy());
     }
 
     @Override

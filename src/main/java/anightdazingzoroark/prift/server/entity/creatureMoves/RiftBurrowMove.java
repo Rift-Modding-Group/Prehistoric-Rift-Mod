@@ -16,7 +16,7 @@ public class RiftBurrowMove extends RiftCreatureMove {
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
         BlockPos userBlockPos = user.getPosition().down();
-        return user.checkIfCanBreakBlock(userBlockPos);
+        return super.canBeExecutedUnmounted(user, target) && user.checkIfCanBreakBlock(userBlockPos);
     }
 
     @Override

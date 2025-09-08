@@ -14,6 +14,10 @@ public class RiftLeapMove extends RiftCreatureMove {
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
         return false;
+        /*
+        if (target == null) return super.canBeExecutedUnmounted(user, null) && user.onGround && !user.isInWater();
+        else return false;
+         */
     }
 
     @Override

@@ -10,6 +10,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -29,7 +30,17 @@ public abstract class RiftCreatureMove {
     //if the move requires the user to have a target, this is checked in the RiftCreatureUseMoveUnmounted AI goal
     //if not, this is checked every tick within the creatures class
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return true;
+        //check if theres animators available for move
+        if (user.animatorsForMoveType().get(this.creatureMove.moveAnimType) == null) return false;
+
+        //get pos associated with move
+        int pos = user.getLearnedMoves().indexOf(this.creatureMove);
+        if (pos == -1) return false;
+
+        boolean energyCheck = this.creatureMove.chargeType.requiresCharge() ?
+                (user.getEnergy() - this.creatureMove.energyUse[0] >= user.getWeaknessEnergy()) : (user.getEnergy() - this.creatureMove.energyUse[0] >= 0);
+
+        return user.getMoveCooldown(pos) == 0 && energyCheck;
     }
 
     public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
@@ -192,6 +203,12 @@ public abstract class RiftCreatureMove {
                 user.world.destroyBlock(posToBreak, !user.isTamed());
             }
         }
+    }
+
+    protected boolean targetNearEntity(RiftCreature user, Entity target, boolean considerSize) {
+        AxisAlignedBB area = user.getEntityBoundingBox().grow(3D, 3D, 3D);
+        List<Entity> nearbyEntities = user.world.getEntitiesWithinAABB(Entity.class, area, this.generalEntityPredicate(user, considerSize));
+        return nearbyEntities.contains(target);
     }
 
     protected Predicate<Entity> generalEntityPredicate(RiftCreature user) {

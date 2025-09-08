@@ -13,7 +13,7 @@ public class RiftClimateBlastMove extends RiftCreatureMove {
     }
 
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return user instanceof Dimetrodon && ((Dimetrodon)user).getTemperature() != EggTemperature.NEUTRAL;
+        return super.canBeExecutedUnmounted(user, target) && (user instanceof Dimetrodon) && ((Dimetrodon)user).getTemperature() != EggTemperature.NEUTRAL;
     }
 
     public boolean canBeExecutedMounted(RiftCreature user, Entity target) {

@@ -30,7 +30,7 @@ public class RiftPackCallMove extends RiftCreatureMove {
                         && !entity.isBaby();
             }
         });
-        return !this.packMembers.isEmpty();
+        return super.canBeExecutedUnmounted(user, target) && !this.packMembers.isEmpty();
     }
 
     @Override

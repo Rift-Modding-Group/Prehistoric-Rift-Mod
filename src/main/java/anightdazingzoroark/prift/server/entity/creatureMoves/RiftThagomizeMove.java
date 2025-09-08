@@ -12,7 +12,7 @@ public class RiftThagomizeMove extends RiftCreatureMove {
 
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return user.world.rand.nextInt(4) == 0;
+        return super.canBeExecutedUnmounted(user, target) && user.world.rand.nextInt(4) == 0;
     }
 
     @Override

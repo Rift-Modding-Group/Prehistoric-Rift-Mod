@@ -28,12 +28,14 @@ public class RiftSniffMove extends RiftCreatureMove {
 
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
         if (user.isTamed()) {
-                return user.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                return super.canBeExecutedUnmounted(user, target)
+                        && user.getAgeInTicks() % 3000 == 0
+                        && user.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                         && !user.busyAtWork()
                         && !user.busyAtTurretMode()
                         && user.getTameBehavior().equals(TameBehaviorType.AGGRESSIVE);
         }
-        return true;
+        return super.canBeExecutedUnmounted(user, target) && user.getAgeInTicks() % 3000 == 0;
     }
 
     @Override

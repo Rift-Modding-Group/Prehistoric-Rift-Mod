@@ -18,7 +18,7 @@ public class RiftLightBlastMove extends RiftCreatureMove {
 
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return user.getMoveUse(this.creatureMove) >= this.creatureMove.maxUse;
+        return super.canBeExecutedUnmounted(user, target) && user.getMoveUse(this.creatureMove) >= this.creatureMove.maxUse;
     }
 
     @Override
