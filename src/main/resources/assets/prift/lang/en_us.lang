@@ -52,6 +52,8 @@ diet.creature.insectivore=Insectivore
 diet.creature.omnivore=Omnivore
 diet.creature.saxumavore=Saxumavore
 
+effect.paralysis=Paralysis
+
 entity.tyrannosaurus.name=Tyrannosaurus
 entity.stegosaurus.name=Stegosaurus
 entity.dodo.name=Dodo

@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
@@ -38,7 +39,7 @@ public class RiftShockBlastMove extends RiftCreatureMove {
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         for (EntityLivingBase entity : user.world.getEntitiesWithinAABB(EntityLivingBase.class, user.getEntityBoundingBox().grow(8D), this.generalEntityPredicate(user, true))) {
-            entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 255));
+            entity.addPotionEffect(new PotionEffect(RiftEffects.PARALYSIS, 100, 255));
         }
     }
 

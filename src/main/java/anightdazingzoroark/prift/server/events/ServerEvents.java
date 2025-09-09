@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManual
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
+import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
@@ -38,16 +39,17 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.*;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.*;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
+@Mod.EventBusSubscriber
 public class ServerEvents {
     //make people join le discord
     @SubscribeEvent
@@ -556,6 +558,31 @@ public class ServerEvents {
                     ((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.POISON, 100, 4));
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public void onBreakSpeed(net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed event) {
+        EntityPlayer player = event.getEntityPlayer();
+
+        if (player.isPotionActive(RiftEffects.PARALYSIS)) {
+            event.setNewSpeed(0);
+        }
+        else if (player.isPotionActive(RiftEffects.DROWSINESS)) {
+            //all this stuff here emulates how dig speed is reduced by mining fatigue
+            float newSpeed = 0f;
+            switch (player.getActivePotionEffect(RiftEffects.PARALYSIS).getAmplifier()) {
+                case 0:
+                    newSpeed = 0.3f;
+                    break;
+                case 1:
+                    newSpeed = 0.09f;
+                    break;
+                case 2:
+                    newSpeed = 0.0027f;
+                    break;
+            }
+            event.setNewSpeed(newSpeed * event.getOriginalSpeed());
         }
     }
 }
