@@ -21,8 +21,10 @@ import java.util.List;
 public class RiftCreatureBoxPlacer extends ItemBlock {
     public RiftCreatureBoxPlacer() {
         super(RiftBlocks.CREATURE_BOX);
+        this.maxStackSize = 1;
     }
 
+    @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
         //check for placeability based on whether or not resulting range will be within the
         //range of an already existing one
