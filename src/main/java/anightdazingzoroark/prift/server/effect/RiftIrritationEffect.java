@@ -1,10 +1,19 @@
 package anightdazingzoroark.prift.server.effect;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 
 public class RiftIrritationEffect extends RiftEffectBase {
     public RiftIrritationEffect() {
         super(true, 0xc0c0c0);
+
+        //reduce mining speed
+        this.registerPotionAttributeModifier(
+                SharedMonsterAttributes.ATTACK_SPEED,
+                "2c161099-fa51-4ea3-88d6-2c1e04fb2ee6",
+                -0.5D,
+                1
+        );
     }
 
     @Override

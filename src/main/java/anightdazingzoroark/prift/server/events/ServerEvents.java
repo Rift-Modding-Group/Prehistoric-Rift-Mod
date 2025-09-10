@@ -594,5 +594,21 @@ public class ServerEvents {
             }
             event.setNewSpeed(newSpeed * event.getOriginalSpeed());
         }
+        else if (player.isPotionActive(RiftEffects.IRRITATION)) {
+            //all this stuff here emulates how dig speed is reduced by mining fatigue
+            float newSpeed = 0f;
+            switch (player.getActivePotionEffect(RiftEffects.IRRITATION).getAmplifier()) {
+                case 0:
+                    newSpeed = 0.3f;
+                    break;
+                case 1:
+                    newSpeed = 0.09f;
+                    break;
+                case 2:
+                    newSpeed = 0.0027f;
+                    break;
+            }
+            event.setNewSpeed(newSpeed * event.getOriginalSpeed());
+        }
     }
 }
