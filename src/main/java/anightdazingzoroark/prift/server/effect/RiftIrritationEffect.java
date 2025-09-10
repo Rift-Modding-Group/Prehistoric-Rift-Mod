@@ -18,7 +18,5 @@ public class RiftIrritationEffect extends RiftEffectBase {
     }
 
     @Override
-    public void performEffect(EntityLivingBase entityLivingBaseIn, int amplifier) {
-
-    }
+    public void performEffect(EntityLivingBase entityLivingBaseIn, int amplifier) {}
 }

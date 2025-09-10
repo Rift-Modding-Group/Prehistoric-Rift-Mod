@@ -53,6 +53,8 @@ diet.creature.omnivore=Omnivore
 diet.creature.saxumavore=Saxumavore
 
 effect.paralysis=Paralysis
+effect.drowsiness=Drowsiness
+effect.irritation=Irritation
 
 entity.tyrannosaurus.name=Tyrannosaurus
 entity.stegosaurus.name=Stegosaurus
@@ -74,6 +76,7 @@ entity.palaeocastor.name=Palaeocastor
 entity.ankylosaurus.name=Ankylosaurus
 entity.dilophosaurus.name=Dilophosaurus
 entity.gallimimus.name=Gallimimus
+entity.tenontosaurus.name=Tenontosaurus
 entity.egg.name=Egg
 
 entity.cannon_entity.name=Cannon

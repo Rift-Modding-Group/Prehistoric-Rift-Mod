@@ -30,6 +30,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.BlockPos;
@@ -98,11 +100,19 @@ public class ServerEvents {
         }
     }
 
-    //prevent players from placin blocks while ridin
     @SubscribeEvent
-    public void noBlockPlaceWhileRiding(BlockEvent.PlaceEvent event) {
-        if (event.getPlayer().isRiding()) {
-            if (event.getPlayer().getRidingEntity() instanceof RiftCreature || event.getPlayer().getRidingEntity() instanceof RiftLargeWeapon) {
+    public void blockInteractionManagement(PlayerInteractEvent.RightClickBlock event) {
+        Item heldItem = event.getItemStack().getItem();
+        if (heldItem instanceof ItemBlock) {
+            //prevent players from placin blocks while ridin
+            if (event.getEntityPlayer().isRiding()) {
+                if (event.getEntityPlayer().getRidingEntity() instanceof RiftCreature || event.getEntityPlayer().getRidingEntity() instanceof RiftLargeWeapon) {
+                    event.setCanceled(true);
+                }
+            }
+
+            //prevent players with irritation from placing blocks
+            if (event.getEntityPlayer().isPotionActive(RiftEffects.IRRITATION)) {
                 event.setCanceled(true);
             }
         }
@@ -571,7 +581,7 @@ public class ServerEvents {
         else if (player.isPotionActive(RiftEffects.DROWSINESS)) {
             //all this stuff here emulates how dig speed is reduced by mining fatigue
             float newSpeed = 0f;
-            switch (player.getActivePotionEffect(RiftEffects.PARALYSIS).getAmplifier()) {
+            switch (player.getActivePotionEffect(RiftEffects.DROWSINESS).getAmplifier()) {
                 case 0:
                     newSpeed = 0.3f;
                     break;
