@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.effect;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 
+//todo: make it so that players with this effect have shaky vision which gets stronger per level
 public class RiftParalysisEffect extends RiftEffectBase {
     protected RiftParalysisEffect() {
         super(true, 0xFFFF00);
@@ -33,4 +34,10 @@ public class RiftParalysisEffect extends RiftEffectBase {
     }
 
     public void performEffect(EntityLivingBase entityLivingBaseIn, int amplifier) {}
+
+    @Override
+    public void onEffectAdded(EntityLivingBase entityLivingBase) {}
+
+    @Override
+    public void onEffectRemoved(EntityLivingBase entityLivingBase) {}
 }

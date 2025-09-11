@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
-import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 
 public class RiftParalyzingPowderMove extends RiftCreatureMove {

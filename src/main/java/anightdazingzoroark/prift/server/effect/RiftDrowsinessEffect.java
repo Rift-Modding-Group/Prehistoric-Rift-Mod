@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.effect;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 
+//todo: make it so that players with this effect have their vision blurred
 public class RiftDrowsinessEffect extends RiftEffectBase {
     public RiftDrowsinessEffect() {
         super(true, 0xdcdcdc);
@@ -41,7 +42,11 @@ public class RiftDrowsinessEffect extends RiftEffectBase {
     }
 
     @Override
-    public void performEffect(EntityLivingBase entityLivingBaseIn, int amplifier) {
+    public void performEffect(EntityLivingBase entityLivingBaseIn, int amplifier) {}
 
-    }
+    @Override
+    public void onEffectAdded(EntityLivingBase entityLivingBase) {}
+
+    @Override
+    public void onEffectRemoved(EntityLivingBase entityLivingBase) {}
 }

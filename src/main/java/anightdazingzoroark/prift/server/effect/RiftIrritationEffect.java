@@ -28,4 +28,10 @@ public class RiftIrritationEffect extends RiftEffectBase {
 
     @Override
     public void performEffect(EntityLivingBase entityLivingBaseIn, int amplifier) {}
+
+    @Override
+    public void onEffectAdded(EntityLivingBase entityLivingBase) {}
+
+    @Override
+    public void onEffectRemoved(EntityLivingBase entityLivingBase) {}
 }

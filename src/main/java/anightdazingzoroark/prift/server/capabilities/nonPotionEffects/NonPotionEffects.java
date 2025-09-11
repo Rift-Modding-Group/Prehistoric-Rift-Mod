@@ -10,6 +10,7 @@ public class NonPotionEffects implements INonPotionEffects {
 
     private boolean isGrabbed;
 
+    //todo: deprecate, replace in favor of dismounting causing rider to tp instead of fall down from ride pos
     private boolean isRiding;
 
     @Override
