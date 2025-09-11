@@ -31,7 +31,7 @@ public class RiftBleedCommand extends CommandBase {
         else if (args.length == 2) {
             Entity target = getEntity(server, sender, args[0]);
             if (target instanceof EntityLivingBase) {
-                NonPotionEffectsHelper.setBleeding((EntityLivingBase)target, 0, Integer.parseInt(args[1]) * 20);
+                NonPotionEffectsHelper.setBleeding(target, 0, Integer.parseInt(args[1]) * 20);
                 notifyCommandListener(sender, this, "priftcommands.bleed.successful", new Object[] {target.getDisplayName()});
             }
             else throw new WrongUsageException("priftcommands.bleed.cannot_bleed", new Object[0]);

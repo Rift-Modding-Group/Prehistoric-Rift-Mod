@@ -21,6 +21,13 @@ public class NonPotionEffects implements INonPotionEffects {
     }
 
     @Override
+    public void stopBleeding() {
+        this.isBleeding = false;
+        this.bleedStrength = 0;
+        this.bleedTick = 0;
+    }
+
+    @Override
     public void reduceBleedTick() {
         if (this.bleedTick-- <= 0) this.isBleeding = false;
     }
@@ -44,6 +51,12 @@ public class NonPotionEffects implements INonPotionEffects {
     public void setBolaCaptured(int ticks) {
         this.isBolaCaptured = true;
         this.bolaCapturedTick = ticks;
+    }
+
+    @Override
+    public void resetBolaCaptured() {
+        this.isBolaCaptured = false;
+        this.bolaCapturedTick = 0;
     }
 
     @Override

@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.capabilities;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.RiftDamage;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataProvider;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
@@ -13,6 +14,8 @@ import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -108,17 +111,13 @@ public class CapabilityHandler {
     @SubscribeEvent
     public void forEachEntityTick(LivingEvent.LivingUpdateEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
+
         if (entity.world.isRemote) {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
             if (nonPotionEffects == null) return;
 
-            //manage bleeding
-            double fallMotion = !entity.onGround ? entity.motionY : 0;
-            boolean isMoving =  Math.sqrt((entity.motionX * entity.motionX) + (fallMotion * fallMotion) + (entity.motionZ * entity.motionZ)) > 0;
+            //manage bleed particles
             if (nonPotionEffects.isBleeding()) {
-                nonPotionEffects.reduceBleedTick();
-                RiftMessages.WRAPPER.sendToServer(new RiftManageBleeding(entity, isMoving));
-
                 double motionY = RiftUtil.randomInRange(1D, 1.5D);
                 double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
                 double f1 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) + entity.getEntityBoundingBox().minY;
@@ -127,11 +126,31 @@ public class CapabilityHandler {
             }
 
             //manage bola capture
+            //this is where force falling upon being captured happens
             if (nonPotionEffects.isBolaCaptured()) {
-                nonPotionEffects.reduceBolaCapturedTick();
-                RiftMessages.WRAPPER.sendToServer(new RiftManageBolaCaptured(entity));
                 entity.motionY -= 0.5;
                 entity.velocityChanged = true;
+            }
+        }
+        else {
+            INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+            if (nonPotionEffects == null) return;
+
+            //manage bleed
+            //this is where damage and tick down take place
+            if (nonPotionEffects.isBleeding()) {
+                nonPotionEffects.reduceBleedTick();
+                //stop bleed on client side
+                if (nonPotionEffects.getBleedTick() == 0) RiftMessages.WRAPPER.sendToAll(new RiftStopBleeding(entity));
+                if ((nonPotionEffects.getBleedTick() / 20) % 2 == 0) entity.attackEntityFrom(RiftDamage.RIFT_BLEED, nonPotionEffects.getBleedStrength() + 1F);
+            }
+
+            //manage bola capture
+            //this is where applying permanent slowness and tick down take place
+            if (nonPotionEffects.isBolaCaptured()) {
+                nonPotionEffects.reduceBolaCapturedTick();
+                if (nonPotionEffects.getBolaCapturedTick() == 0) RiftMessages.WRAPPER.sendToAll(new RiftResetBolaCaptured(entity));
+                entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 255));
             }
         }
     }

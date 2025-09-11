@@ -48,9 +48,13 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetBleeding.Handler.class, RiftSetBleeding.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetBleeding.Handler.class, RiftSetBleeding.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftManageBleeding.Handler.class, RiftManageBleeding.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftStopBleeding.Handler.class, RiftStopBleeding.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftStopBleeding.Handler.class, RiftStopBleeding.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetBolaCaptured.Handler.class, RiftSetBolaCaptured.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetBolaCaptured.Handler.class, RiftSetBolaCaptured.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftManageBolaCaptured.Handler.class, RiftManageBolaCaptured.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftResetBolaCaptured.Handler.class, RiftResetBolaCaptured.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftResetBolaCaptured.Handler.class, RiftResetBolaCaptured.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetRiding.Handler.class, RiftSetRiding.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetRiding.Handler.class, RiftSetRiding.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftOpenCreatureBoxMenu.Handler.class, RiftOpenCreatureBoxMenu.class, id++, Side.CLIENT);

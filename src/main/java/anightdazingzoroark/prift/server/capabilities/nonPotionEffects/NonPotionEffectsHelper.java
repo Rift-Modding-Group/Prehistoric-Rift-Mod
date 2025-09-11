@@ -4,36 +4,49 @@ import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
 
 public class NonPotionEffectsHelper {
+    public static INonPotionEffects nonPotionEffects(Entity entity) {
+        if (entity == null) return null;
+        return entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+    }
+
     public static void setBleeding(Entity entity, int strength, int ticks) {
+        if (entity == null) return;
+
+        //on server, send all info
+        //on client, only send the fact that it is bleeding
         if (entity.world.isRemote) {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
             if (nonPotionEffects != null) {
-                nonPotionEffects.setBleeding(strength, ticks);
                 RiftMessages.WRAPPER.sendToServer(new RiftSetBleeding(entity, strength, ticks));
+                nonPotionEffects.setBleeding(0, 0);
             }
         }
         else {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
             if (nonPotionEffects != null) {
                 nonPotionEffects.setBleeding(strength, ticks);
-                RiftMessages.WRAPPER.sendToAll(new RiftSetBleeding(entity, strength, ticks));
+                RiftMessages.WRAPPER.sendToAll(new RiftSetBleeding(entity, 0, 0));
             }
         }
     }
 
     public static void setBolaCaptured(Entity entity, int ticks) {
+        if (entity == null) return;
+
+        //on server, send all info
+        //on client, only send the fact that it has been ensnared by a bola
         if (entity.world.isRemote) {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
             if (nonPotionEffects != null) {
-                nonPotionEffects.setBolaCaptured(ticks);
                 RiftMessages.WRAPPER.sendToServer(new RiftSetBolaCaptured(entity, ticks));
+                nonPotionEffects.setBolaCaptured(0);
             }
         }
         else {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
             if (nonPotionEffects != null) {
                 nonPotionEffects.setBolaCaptured(ticks);
-                RiftMessages.WRAPPER.sendToAll(new RiftSetBolaCaptured(entity, ticks));
+                RiftMessages.WRAPPER.sendToAll(new RiftSetBolaCaptured(entity, 0));
             }
         }
     }
@@ -47,11 +60,13 @@ public class NonPotionEffectsHelper {
 
     public static void setGrabbed(Entity entity, boolean isGrabbed) {
         if (entity == null) return;
+
+        //well...
         if (entity.world.isRemote) {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
             if (nonPotionEffects != null) {
-                nonPotionEffects.setGrabbed(isGrabbed);
                 RiftMessages.WRAPPER.sendToServer(new RiftSetEntityGrabbed(entity, isGrabbed));
+                nonPotionEffects.setGrabbed(isGrabbed);
             }
         }
         else {
