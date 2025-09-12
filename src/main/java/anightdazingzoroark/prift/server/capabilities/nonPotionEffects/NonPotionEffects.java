@@ -1,5 +1,10 @@
 package anightdazingzoroark.prift.server.capabilities.nonPotionEffects;
 
+import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+
+import java.util.UUID;
+
 public class NonPotionEffects implements INonPotionEffects {
     private boolean isBleeding;
     private int bleedStrength;
@@ -9,6 +14,8 @@ public class NonPotionEffects implements INonPotionEffects {
     private int bolaCapturedTick;
 
     private boolean isGrabbed;
+
+    private UUID hypnotizerUUID = RiftUtil.nilUUID;
 
     //todo: deprecate, replace in favor of dismounting causing rider to tp instead of fall down from ride pos
     private boolean isRiding;
@@ -92,5 +99,25 @@ public class NonPotionEffects implements INonPotionEffects {
     @Override
     public boolean isRiding() {
         return this.isRiding;
+    }
+
+    @Override
+    public void hypnotize(RiftCreature hypnotizer) {
+        this.hypnotizerUUID = hypnotizer.getUniqueID();
+    }
+
+    @Override
+    public void setHypnotizerUUID(UUID uuid) {
+        this.hypnotizerUUID = uuid;
+    }
+
+    @Override
+    public UUID hypnotizerUUID() {
+        return this.hypnotizerUUID;
+    }
+
+    @Override
+    public void unhypnotize() {
+        this.hypnotizerUUID = RiftUtil.nilUUID;
     }
 }

@@ -1,5 +1,9 @@
 package anightdazingzoroark.prift.server.capabilities.nonPotionEffects;
 
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+
+import java.util.UUID;
+
 public interface INonPotionEffects {
     //for bleeding
     void setBleeding(int strength, int ticks);
@@ -20,7 +24,11 @@ public interface INonPotionEffects {
     void setGrabbed(boolean value);
     boolean isGrabbed();
 
-    //coming soon: for hypnosis
+    //for hypnosis
+    void hypnotize(RiftCreature hypnotizer);
+    void setHypnotizerUUID(UUID hypnotizer);
+    UUID hypnotizerUUID();
+    void unhypnotize();
 
     //i have no idea why i put this all here this isnt even a status lmao
     //its just to make sure that dismounting after riding something

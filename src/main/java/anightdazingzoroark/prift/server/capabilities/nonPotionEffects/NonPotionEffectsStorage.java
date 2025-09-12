@@ -21,6 +21,8 @@ public class NonPotionEffectsStorage implements Capability.IStorage<INonPotionEf
         compound.setBoolean("BolaCaptured", instance.isBleeding());
         compound.setInteger("BolaCapturedTick", instance.getBolaCapturedTick());
 
+        compound.setUniqueId("HypnotizerUUID", instance.hypnotizerUUID());
+
         compound.setBoolean("Riding", instance.isRiding());
 
         return compound;
@@ -39,6 +41,10 @@ public class NonPotionEffectsStorage implements Capability.IStorage<INonPotionEf
 
             if (compound.hasKey("BolaCaptured") && compound.getBoolean("BolaCaptured")) {
                 instance.setBolaCaptured(compound.getInteger("BolaCapturedTick"));
+            }
+
+            if (compound.hasUniqueId("HypnotizerUUID")) {
+                instance.setHypnotizerUUID(compound.getUniqueId("HypnotizerUUID"));
             }
 
             if (compound.hasKey("Riding")) {
