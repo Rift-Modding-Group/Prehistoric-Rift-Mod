@@ -15,7 +15,7 @@ public class RiftParalyzingPowderMove extends RiftCreatureMove {
     }
 
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return super.canBeExecutedUnmounted(user, target) && user.world.rand.nextInt(4) == 0 && !RiftUtil.hasPotionEffect(target, RiftEffects.PARALYSIS);
+        return super.canBeExecutedUnmounted(user, target) && user.world.rand.nextInt(4) == 0 && this.targetNearEntity(user, target, false);
     }
 
     @Override
