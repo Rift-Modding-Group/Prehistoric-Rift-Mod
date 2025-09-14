@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.capabilities.nonPotionEffects;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.world.World;
 
 import java.util.UUID;
 
@@ -25,8 +26,11 @@ public interface INonPotionEffects {
     boolean isGrabbed();
 
     //for hypnosis
+    void hypnotize(); //this is meant for use on client side only
     void hypnotize(RiftCreature hypnotizer);
     void setHypnotizerUUID(UUID hypnotizer);
+    boolean isHypnotized();
+    RiftCreature getHypnotizer(World world);
     UUID hypnotizerUUID();
     void unhypnotize();
 

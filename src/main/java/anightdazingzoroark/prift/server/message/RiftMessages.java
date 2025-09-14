@@ -116,5 +116,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftNewCreatureBoxSetLastOpenedTime.Handler.class, RiftNewCreatureBoxSetLastOpenedTime.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftAddCreatureBoxData.Handler.class, RiftAddCreatureBoxData.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftRemoveCreatureBoxData.Handler.class, RiftRemoveCreatureBoxData.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftSetHypnotized.Handler.class, RiftSetHypnotized.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftSetHypnotized.Handler.class, RiftSetHypnotized.class, id++, Side.CLIENT);
     }
 }

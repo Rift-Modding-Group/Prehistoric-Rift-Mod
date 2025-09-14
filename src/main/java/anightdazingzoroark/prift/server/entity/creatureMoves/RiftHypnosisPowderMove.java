@@ -1,11 +1,18 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCreature;
 
 public class RiftHypnosisPowderMove extends RiftCreatureMove {
     public RiftHypnosisPowderMove() {
         super(CreatureMove.HYPNOSIS_POWDER);
+    }
+
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        //return super.canBeExecutedUnmounted(user, target) && user.world.rand.nextInt(4) == 0;
+        return false;
     }
 
     @Override
@@ -25,7 +32,7 @@ public class RiftHypnosisPowderMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-
+        if (target instanceof EntityCreature) NonPotionEffectsHelper.setHypnotized((EntityCreature) target, user);
     }
 
     @Override

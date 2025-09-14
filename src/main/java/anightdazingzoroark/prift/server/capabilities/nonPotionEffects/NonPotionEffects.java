@@ -2,6 +2,8 @@ package anightdazingzoroark.prift.server.capabilities.nonPotionEffects;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.entity.Entity;
+import net.minecraft.world.World;
 
 import java.util.UUID;
 
@@ -15,6 +17,7 @@ public class NonPotionEffects implements INonPotionEffects {
 
     private boolean isGrabbed;
 
+    private boolean isHypnotized = false;
     private UUID hypnotizerUUID = RiftUtil.nilUUID;
 
     //todo: deprecate, replace in favor of dismounting causing rider to tp instead of fall down from ride pos
@@ -101,14 +104,34 @@ public class NonPotionEffects implements INonPotionEffects {
         return this.isRiding;
     }
 
+    //this is meant for use on client side only
+    @Override
+    public void hypnotize() {
+        this.isHypnotized = true;
+    }
+
     @Override
     public void hypnotize(RiftCreature hypnotizer) {
         this.hypnotizerUUID = hypnotizer.getUniqueID();
+        if (!this.hypnotizerUUID.equals(RiftUtil.nilUUID)) this.isHypnotized = true;
     }
 
     @Override
     public void setHypnotizerUUID(UUID uuid) {
         this.hypnotizerUUID = uuid;
+        if (!this.hypnotizerUUID.equals(RiftUtil.nilUUID)) this.isHypnotized = true;
+    }
+
+    @Override
+    public boolean isHypnotized() {
+        return this.isHypnotized;
+    }
+
+    @Override
+    public RiftCreature getHypnotizer(World world) {
+        Entity entityToTest = RiftUtil.getEntityFromUUID(world, this.hypnotizerUUID);
+        if (entityToTest instanceof RiftCreature) return (RiftCreature) entityToTest;
+        return null;
     }
 
     @Override

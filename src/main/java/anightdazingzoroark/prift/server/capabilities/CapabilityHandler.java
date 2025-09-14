@@ -10,8 +10,10 @@ import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlay
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
@@ -112,6 +114,7 @@ public class CapabilityHandler {
     public void forEachEntityTick(LivingEvent.LivingUpdateEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
 
+        //client side
         if (entity.world.isRemote) {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
             if (nonPotionEffects == null) return;
@@ -132,6 +135,7 @@ public class CapabilityHandler {
                 entity.velocityChanged = true;
             }
         }
+        //server side
         else {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
             if (nonPotionEffects == null) return;
@@ -151,6 +155,51 @@ public class CapabilityHandler {
                 nonPotionEffects.reduceBolaCapturedTick();
                 if (nonPotionEffects.getBolaCapturedTick() == 0) RiftMessages.WRAPPER.sendToAll(new RiftResetBolaCaptured(entity));
                 entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 100, 255));
+            }
+
+            //manage hypnosis effect
+            if (nonPotionEffects.isHypnotized()) {
+                //if entity is not EntityCreature, ignore everything
+                if (!(entity instanceof EntityCreature)) return;
+
+                EntityCreature entityCreature = (EntityCreature) entity;
+                RiftCreature hypnotizer = nonPotionEffects.getHypnotizer(entity.world);
+
+                //if the hypnotizer no longer exists in the world, go commit die
+                if (hypnotizer == null || !hypnotizer.isEntityAlive()) {
+                    entityCreature.onKillCommand();
+                    return;
+                }
+
+                //hypnosis logic management
+                //always make sure hypnotized mob is within 4 block radius of hypnotizer
+                //if not, move to the hypnotizer
+                //also, clear any paths if it generates one and is within range of hypnotizer
+                if (entityCreature.getDistance(hypnotizer) > 4f && entityCreature.getNavigator().noPath()) {
+                    entityCreature.getNavigator().tryMoveToXYZ(hypnotizer.posX, hypnotizer.posY, hypnotizer.posZ, 1D);
+                }
+                else if (entityCreature.getDistance(hypnotizer) <= 4f && !entityCreature.getNavigator().noPath()) {
+                    entityCreature.getNavigator().clearPath();
+                }
+
+                boolean hypnotizerHasTarget = hypnotizer.getAttackTarget() != null && hypnotizer.getAttackTarget().isEntityAlive();
+                boolean hypnotizedHasTarget = entityCreature.getAttackTarget() != null && entityCreature.getAttackTarget().isEntityAlive();
+                boolean hypnotizedTargeting = (hypnotizerHasTarget && hypnotizedHasTarget) && hypnotizer.getAttackTarget().equals(entityCreature.getAttackTarget());
+
+                //if hypnotizer has a target, this mob targets it too
+                if (hypnotizerHasTarget && !hypnotizedHasTarget) {
+                    entityCreature.setAttackTarget(hypnotizer.getAttackTarget());
+                }
+                //if hypnotizer and this mob have a target but are different
+                //set the mobs target to the hypnotizers target
+                else if (hypnotizerHasTarget && hypnotizedHasTarget && !hypnotizedTargeting) {
+                    entityCreature.setAttackTarget(hypnotizer.getAttackTarget());
+                }
+                //if hypnotizer has no target and this mob finds one
+                //clear this mobs target and pathing
+                else if (!hypnotizerHasTarget && hypnotizedHasTarget) {
+                    entityCreature.setAttackTarget(null);
+                }
             }
         }
     }

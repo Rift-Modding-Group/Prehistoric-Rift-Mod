@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.server.capabilities.nonPotionEffects;
 
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCreature;
 
 public class NonPotionEffectsHelper {
     public static INonPotionEffects nonPotionEffects(Entity entity) {
@@ -83,6 +85,27 @@ public class NonPotionEffectsHelper {
         INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
         if (nonPotionEffects != null) return nonPotionEffects.isGrabbed();
         else return false;
+    }
+
+    public static void setHypnotized(EntityCreature entityCreature, RiftCreature hypnotizer) {
+        if (entityCreature == null) return;
+
+        //on server, send all info
+        //on client, only send the fact that it has been hypnotized
+        if (entityCreature.world.isRemote) {
+            INonPotionEffects nonPotionEffects = entityCreature.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+            if (nonPotionEffects != null) {
+                RiftMessages.WRAPPER.sendToServer(new RiftSetHypnotized(entityCreature, hypnotizer));
+                nonPotionEffects.hypnotize();
+            }
+        }
+        else {
+            INonPotionEffects nonPotionEffects = entityCreature.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+            if (nonPotionEffects != null) {
+                nonPotionEffects.hypnotize(hypnotizer);
+                RiftMessages.WRAPPER.sendToAll(new RiftSetHypnotized(entityCreature, null));
+            }
+        }
     }
 
     public static void setRiding(Entity entity, boolean value) {
