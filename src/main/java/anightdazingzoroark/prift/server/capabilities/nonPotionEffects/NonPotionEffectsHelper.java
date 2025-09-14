@@ -108,6 +108,13 @@ public class NonPotionEffectsHelper {
         }
     }
 
+    public static boolean isHypnotized(Entity entity) {
+        if (entity == null) return false;
+        INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+        if (nonPotionEffects != null) return nonPotionEffects.isHypnotized();
+        else return false;
+    }
+
     public static void setRiding(Entity entity, boolean value) {
         if (entity.world.isRemote) {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);

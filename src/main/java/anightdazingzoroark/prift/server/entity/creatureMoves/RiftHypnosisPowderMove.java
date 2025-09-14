@@ -1,9 +1,15 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
+import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.math.AxisAlignedBB;
+
+import java.util.List;
 
 public class RiftHypnosisPowderMove extends RiftCreatureMove {
     public RiftHypnosisPowderMove() {
@@ -28,8 +34,13 @@ public class RiftHypnosisPowderMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        //todo: make it so it hypnotizes various monsters surrounding the user
-        if (target instanceof EntityCreature) NonPotionEffectsHelper.setHypnotized((EntityCreature) target, user);
+        AxisAlignedBB area = user.getEntityBoundingBox().grow(3D, 3D, 3D);
+        List<Entity> nearbyEntities = user.world.getEntitiesWithinAABB(Entity.class, area, this.generalEntityPredicate(user, false));
+        for (Entity entity : nearbyEntities) {
+            if (!(entity instanceof EntityCreature)) continue;
+            EntityCreature entityCreature = (EntityCreature) entity;
+            if (!NonPotionEffectsHelper.isHypnotized(entityCreature)) NonPotionEffectsHelper.setHypnotized(entityCreature, user);
+        }
     }
 
     @Override
