@@ -95,6 +95,9 @@ public class ClientProxy extends ServerProxy {
             case "bleed":
                 particle = new RiftBleedParticle(world, x, y, z, motX, motY, motZ);
                 break;
+            case "hypnosis":
+                particle = new RiftHypnosisParticle(world, x, y, z, motX, motY, motZ);
+                break;
             case "snow":
                 particle = new RiftSnowParticle(world, x, y, z, motX, motY, motZ);
                 break;

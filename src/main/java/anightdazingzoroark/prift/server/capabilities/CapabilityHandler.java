@@ -134,6 +134,19 @@ public class CapabilityHandler {
                 entity.motionY -= 0.5;
                 entity.velocityChanged = true;
             }
+
+            //manage hypnosis particles
+            if (nonPotionEffects.isHypnotized()) {
+                if (entity.ticksExisted % 20 == 0) {
+                    for (int i = 0; i < 5; i++) {
+                        double motionY = RiftUtil.randomInRange(1D, 1.5D);
+                        double f = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX) + entity.getEntityBoundingBox().minX;
+                        double f1 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) + entity.getEntityBoundingBox().minY;
+                        double f2 = entity.getRNG().nextFloat() * (entity.getEntityBoundingBox().maxZ - entity.getEntityBoundingBox().minZ) + entity.getEntityBoundingBox().minZ;
+                        RiftInitialize.PROXY.spawnParticle("hypnosis", f, f1, f2, 0D, motionY, 0D);
+                    }
+                }
+            }
         }
         //server side
         else {

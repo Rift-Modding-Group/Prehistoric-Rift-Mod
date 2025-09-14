@@ -32,6 +32,7 @@ public class RiftHypnosisPowderMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
+        //todo: make it so it hypnotizes various monsters surrounding the user
         if (target instanceof EntityCreature) NonPotionEffectsHelper.setHypnotized((EntityCreature) target, user);
     }
 
