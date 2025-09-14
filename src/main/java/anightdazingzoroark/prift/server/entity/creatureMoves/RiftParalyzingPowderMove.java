@@ -5,6 +5,9 @@ import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.math.AxisAlignedBB;
+
+import java.util.List;
 
 public class RiftParalyzingPowderMove extends RiftCreatureMove {
     public RiftParalyzingPowderMove() {
@@ -21,18 +24,15 @@ public class RiftParalyzingPowderMove extends RiftCreatureMove {
     }
 
     @Override
-    public void whileChargingUp(RiftCreature user) {
-
-    }
+    public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
+    public void whileExecuting(RiftCreature user) {}
 
-    }
-
-    @Override //todo: make it so it applies to all surrounding entities
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        RiftUtil.addPotionEffect(target, new PotionEffect(RiftEffects.PARALYSIS, 100));
+        AxisAlignedBB area = user.getEntityBoundingBox().grow(3D, 3D, 3D);
+        List<Entity> nearbyEntities = user.world.getEntitiesWithinAABB(Entity.class, area, this.generalEntityPredicate(user, false));
+        for (Entity entity : nearbyEntities) RiftUtil.addPotionEffect(entity, new PotionEffect(RiftEffects.PARALYSIS, 100));
     }
 
     @Override

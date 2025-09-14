@@ -3,9 +3,11 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.math.AxisAlignedBB;
+
+import java.util.List;
 
 public class RiftPoisonPowderMove extends RiftCreatureMove {
     public RiftPoisonPowderMove() {
@@ -22,18 +24,16 @@ public class RiftPoisonPowderMove extends RiftCreatureMove {
     }
 
     @Override
-    public void whileChargingUp(RiftCreature user) {
-
-    }
+    public void whileChargingUp(RiftCreature user) {}
 
     @Override
-    public void whileExecuting(RiftCreature user) {
-
-    }
+    public void whileExecuting(RiftCreature user) {}
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        RiftUtil.addPotionEffect(target, new PotionEffect(MobEffects.POISON, 200));
+        AxisAlignedBB area = user.getEntityBoundingBox().grow(3D, 3D, 3D);
+        List<Entity> nearbyEntities = user.world.getEntitiesWithinAABB(Entity.class, area, this.generalEntityPredicate(user, false));
+        for (Entity entity : nearbyEntities) RiftUtil.addPotionEffect(entity, new PotionEffect(MobEffects.POISON, 200));
     }
 
     @Override
