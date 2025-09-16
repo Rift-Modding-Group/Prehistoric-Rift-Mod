@@ -209,6 +209,7 @@ public class CapabilityHandler {
                 else if (hypnotizerHasTarget && hypnotizedHasTarget && !hypnotizedTargeting) {
                     entityCreature.setAttackTarget(hypnotizer.getAttackTarget());
                 }
+                //todo: replace this section w mixin
                 //if hypnotizer has no target and this mob finds one
                 //clear this mobs target and pathing
                 else if (!hypnotizerHasTarget && hypnotizedHasTarget) {

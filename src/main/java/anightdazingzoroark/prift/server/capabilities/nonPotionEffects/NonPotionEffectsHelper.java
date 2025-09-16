@@ -115,6 +115,27 @@ public class NonPotionEffectsHelper {
         else return false;
     }
 
+    public static RiftCreature getHypnotizer(EntityCreature entity) {
+        if (entity == null) return null;
+        INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+        if (nonPotionEffects != null) return nonPotionEffects.getHypnotizer(entity.world);
+        else return null;
+    }
+
+    public static boolean targetingBlockableForHypnotized(EntityCreature entity) {
+        if (entity == null) return false;
+        INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+        if (nonPotionEffects != null) {
+            RiftCreature hypnotizer = nonPotionEffects.getHypnotizer(entity.world);
+            if (hypnotizer != null && hypnotizer.isEntityAlive()) {
+                if (hypnotizer.getAttackTarget() == null || !hypnotizer.getAttackTarget().isEntityAlive()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static void setRiding(Entity entity, boolean value) {
         if (entity.world.isRemote) {
             INonPotionEffects nonPotionEffects = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);

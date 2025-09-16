@@ -16,6 +16,7 @@ public class RiftCoremod implements IEarlyMixinLoader, IFMLLoadingPlugin {
     public List<String> getMixinConfigs() {
         List<String> configs = new ArrayList<>();
         configs.add("mixin.prift.settargetafterhitboxhit.json");
+        configs.add("mixin.prift.hypnotizedtargeting.json");
         return configs;
     }
 
@@ -40,9 +41,7 @@ public class RiftCoremod implements IEarlyMixinLoader, IFMLLoadingPlugin {
     }
 
     @Override
-    public void injectData(Map<String, Object> data) {
-
-    }
+    public void injectData(Map<String, Object> data) {}
 
     @Override
     public String getAccessTransformerClass() {
