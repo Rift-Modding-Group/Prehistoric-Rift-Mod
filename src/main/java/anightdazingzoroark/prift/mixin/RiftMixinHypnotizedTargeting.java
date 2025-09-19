@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.mixin;
 
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;

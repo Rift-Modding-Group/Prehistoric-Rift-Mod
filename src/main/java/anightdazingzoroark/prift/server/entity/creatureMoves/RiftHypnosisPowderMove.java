@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.mobFamily.MobFamilyHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.potion.PotionEffect;
@@ -39,7 +40,11 @@ public class RiftHypnosisPowderMove extends RiftCreatureMove {
         for (Entity entity : nearbyEntities) {
             if (!(entity instanceof EntityCreature)) continue;
             EntityCreature entityCreature = (EntityCreature) entity;
-            if (!NonPotionEffectsHelper.isHypnotized(entityCreature)) NonPotionEffectsHelper.setHypnotized(entityCreature, user);
+            if (!NonPotionEffectsHelper.isHypnotized(entityCreature)
+                    && !MobFamilyHelper.entityInMobFamily(entityCreature, "human")
+                    && (MobFamilyHelper.entityInMobFamily(entityCreature, "monster") || MobFamilyHelper.entityInMobFamily(entityCreature, "arthropod"))) {
+                NonPotionEffectsHelper.setHypnotized(entityCreature, user);
+            }
         }
     }
 

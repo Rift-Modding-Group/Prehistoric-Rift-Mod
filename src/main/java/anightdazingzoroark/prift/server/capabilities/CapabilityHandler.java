@@ -186,19 +186,22 @@ public class CapabilityHandler {
                 }
 
                 //hypnosis logic management
-                //always make sure hypnotized mob is within 4 block radius of hypnotizer
-                //if not, move to the hypnotizer
-                //also, clear any paths if it generates one and is within range of hypnotizer
-                if (entityCreature.getDistance(hypnotizer) > 4f && entityCreature.getNavigator().noPath()) {
-                    entityCreature.getNavigator().tryMoveToXYZ(hypnotizer.posX, hypnotizer.posY, hypnotizer.posZ, 1D);
-                }
-                else if (entityCreature.getDistance(hypnotizer) <= 4f && !entityCreature.getNavigator().noPath()) {
-                    entityCreature.getNavigator().clearPath();
-                }
-
+                //some booleans involving targeting for both hypnotizer and hypnotized
                 boolean hypnotizerHasTarget = hypnotizer.getAttackTarget() != null && hypnotizer.getAttackTarget().isEntityAlive();
                 boolean hypnotizedHasTarget = entityCreature.getAttackTarget() != null && entityCreature.getAttackTarget().isEntityAlive();
                 boolean hypnotizedTargeting = (hypnotizerHasTarget && hypnotizedHasTarget) && hypnotizer.getAttackTarget().equals(entityCreature.getAttackTarget());
+
+                //always make sure hypnotized mob is within 4 block radius of hypnotizer
+                //if not, move to the hypnotizer
+                //also, clear any paths if it generates one and is within range of hypnotizer
+                if (!hypnotizedHasTarget) {
+                    if (entityCreature.getDistance(hypnotizer) > 4f && entityCreature.getNavigator().noPath()) {
+                        entityCreature.getNavigator().tryMoveToXYZ(hypnotizer.posX, hypnotizer.posY, hypnotizer.posZ, 1D);
+                    }
+                    else if (entityCreature.getDistance(hypnotizer) <= 4f && !entityCreature.getNavigator().noPath()) {
+                        entityCreature.getNavigator().clearPath();
+                    }
+                }
 
                 //if hypnotizer has a target, this mob targets it too
                 if (hypnotizerHasTarget && !hypnotizedHasTarget) {
@@ -208,12 +211,6 @@ public class CapabilityHandler {
                 //set the mobs target to the hypnotizers target
                 else if (hypnotizerHasTarget && hypnotizedHasTarget && !hypnotizedTargeting) {
                     entityCreature.setAttackTarget(hypnotizer.getAttackTarget());
-                }
-                //todo: replace this section w mixin
-                //if hypnotizer has no target and this mob finds one
-                //clear this mobs target and pathing
-                else if (!hypnotizerHasTarget && hypnotizedHasTarget) {
-                    entityCreature.setAttackTarget(null);
                 }
             }
         }
