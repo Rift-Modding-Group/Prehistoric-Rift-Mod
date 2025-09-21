@@ -36,6 +36,7 @@ public class Megapiranha extends RiftWaterCreature {
         this.setCanPickUpLoot(true);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
@@ -45,6 +46,7 @@ public class Megapiranha extends RiftWaterCreature {
         this.tasks.addTask(4, new RiftHerdMemberFollow(this));
         this.tasks.addTask(5, new RiftWanderWater(this, 1.0D));
     }
+     */
 
     @Override
     public double herdFollowRange() {

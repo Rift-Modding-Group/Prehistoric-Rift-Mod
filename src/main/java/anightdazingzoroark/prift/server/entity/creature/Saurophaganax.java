@@ -42,6 +42,7 @@ public class Saurophaganax extends RiftCreature {
         this.setCanPickUpLoot(true);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftGetTargets(this, false, true));
@@ -60,6 +61,7 @@ public class Saurophaganax extends RiftCreature {
         this.tasks.addTask(9, new RiftWander(this, 1.0D));
         this.tasks.addTask(10, new RiftLookAround(this));
     }
+     */
 
     @Override
     public float[] ageScaleParams() {
@@ -143,11 +145,6 @@ public class Saurophaganax extends RiftCreature {
             default:
                 return 0xff6300;
         }
-    }
-
-    @Override
-    public boolean isNocturnal() {
-        return true;
     }
 
     @Nullable

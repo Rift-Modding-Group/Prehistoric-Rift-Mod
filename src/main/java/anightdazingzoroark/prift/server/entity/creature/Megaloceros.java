@@ -54,6 +54,7 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
         this.dataManager.register(CAN_HARVEST, false);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, false));
@@ -74,6 +75,7 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
     }
+     */
 
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {

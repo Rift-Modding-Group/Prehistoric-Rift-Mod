@@ -40,6 +40,7 @@ public class Utahraptor extends RiftCreature {
         this.setCanPickUpLoot(true);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
@@ -60,6 +61,7 @@ public class Utahraptor extends RiftCreature {
         this.tasks.addTask(11, new RiftWander(this, 1.0D));
         this.tasks.addTask(12, new RiftLookAround(this));
     }
+     */
 
     public void fall(float distance, float damageMultiplier) {}
 

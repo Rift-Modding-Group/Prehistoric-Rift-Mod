@@ -38,6 +38,7 @@ public class Dodo extends RiftCreature {
         this.isRideable = false;
     }
 
+    /*
     protected void initEntityAI() {
         this.tasks.addTask(1, new RiftMate(this));
         this.tasks.addTask(2, new RiftLandDwellerSwim(this));
@@ -47,6 +48,7 @@ public class Dodo extends RiftCreature {
         this.tasks.addTask(6, new RiftWander(this, 1.0D));
         this.tasks.addTask(7, new RiftLookAround(this));
     }
+     */
 
     public void onLivingUpdate() {
         super.onLivingUpdate();

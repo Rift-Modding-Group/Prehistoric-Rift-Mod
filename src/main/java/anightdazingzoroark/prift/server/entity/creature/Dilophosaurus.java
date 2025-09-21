@@ -52,6 +52,7 @@ public class Dilophosaurus extends RiftCreature {
         if (this.getActivePotionEffect(MobEffects.POISON) != null) this.removePotionEffect(MobEffects.POISON);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTurretModeTargeting(this, true));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
@@ -69,6 +70,7 @@ public class Dilophosaurus extends RiftCreature {
         this.tasks.addTask(8, new RiftWander(this, 1.0D));
         this.tasks.addTask(9, new RiftLookAround(this));
     }
+     */
 
     @Override
     public float[] ageScaleParams() {

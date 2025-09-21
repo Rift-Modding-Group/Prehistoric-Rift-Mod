@@ -76,6 +76,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         this.dataManager.register(WORKSTATION_Z_POS, 0);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
@@ -96,6 +97,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         this.tasks.addTask(10, new RiftWander(this, 1.0D));
         this.tasks.addTask(11, new RiftLookAround(this));
     }
+     */
 
     @Override
     public void onLivingUpdate() {

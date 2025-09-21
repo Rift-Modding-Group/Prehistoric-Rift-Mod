@@ -39,6 +39,7 @@ public class Direwolf extends RiftCreature {
         this.setCanPickUpLoot(true);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftGetTargets(this, true, false));
@@ -60,6 +61,7 @@ public class Direwolf extends RiftCreature {
         this.tasks.addTask(11, new RiftWander(this, 1.0D));
         this.tasks.addTask(12, new RiftLookAround(this));
     }
+     */
 
     @Override
     public double herdFollowRange() {

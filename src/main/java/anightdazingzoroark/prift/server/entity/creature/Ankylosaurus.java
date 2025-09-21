@@ -71,6 +71,7 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
@@ -92,6 +93,7 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
     }
+     */
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {

@@ -72,6 +72,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTurretModeTargeting(this, true));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
@@ -96,6 +97,7 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
     }
+     */
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {

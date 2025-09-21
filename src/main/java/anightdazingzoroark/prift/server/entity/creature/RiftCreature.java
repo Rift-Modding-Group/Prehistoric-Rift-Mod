@@ -15,6 +15,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.*;
+import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
@@ -37,6 +38,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAITarget;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -341,6 +344,69 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @Override
+    protected void initEntityAI() {
+        List<EntityAITarget> targetBehaviors = this.createTargetBehaviors();
+        for (int x = 0; x < targetBehaviors.size(); x++) this.targetTasks.addTask(x, targetBehaviors.get(x));
+
+        List<EntityAIBase> behaviors = this.createBehaviors();
+        for (int x = 0; x < behaviors.size(); x++) this.tasks.addTask(x, behaviors.get(x));
+    }
+
+    //note to self: priority is based on when a behavior is being added
+    //if placed early it means its priority is high
+    //those placed later have lower priority
+    private List<EntityAITarget> createTargetBehaviors() {
+        List<EntityAITarget> toReturn = new ArrayList<>();
+
+        if (this.creatureType.isTameable) toReturn.add(new RiftTurretModeTargeting(this, true));
+        if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.DOCILE))
+            toReturn.add(new RiftHurtByTarget(this, true));
+        if (!(this instanceof RiftWaterCreature)
+                && (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE)
+                || this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE_TO_HUMANS)))
+            toReturn.add(new RiftGetTargets(this, false, true));
+        if (this instanceof RiftWaterCreature
+                && (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE)
+                || this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE_TO_HUMANS)))
+            toReturn.add(new RiftGetTargets.RiftGetTargetsWater(this, false, true));
+        if (this.creatureType.isTameable) toReturn.add(new RiftAggressiveModeGetTargets(this, true));
+        if (this.creatureType.isTameable) toReturn.add(new RiftProtectOwner(this));
+        if (this.creatureType.isTameable) toReturn.add(new RiftAttackForOwner(this));
+
+        return toReturn;
+    }
+
+    private List<EntityAIBase> createBehaviors() {
+        List<EntityAIBase> toReturn = new ArrayList<>();
+
+        if (this.creatureType.isTameable) toReturn.add(new RiftCreatureOperateWorkstation(this));
+        if (this.creatureType.isTameable) toReturn.add(new RiftUseLeadPoweredCrank(this));
+        if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftLandDwellerSwim(this));
+        if (this.creatureType.isTameable) toReturn.add(new RiftMate(this));
+        if (this.creatureType.isTameable) toReturn.add(new RiftCreatureUseMoveMounted(this));
+        //toReturn.add(new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
+        if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.BLOCK_BREAKER))
+            toReturn.add(new RiftBreakBlockWhilePursuingTarget(this));
+        toReturn.add(new RiftCreatureUseMoveUnmounted(this));
+        if (this.creatureType.isTameable && !(this instanceof RiftWaterCreature))
+            toReturn.add(new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
+        if (this.creatureType.isTameable && this instanceof RiftWaterCreature)
+            toReturn.add(new RiftWaterCreatureFollowOwner((RiftWaterCreature) this, 1.0D, 8.0F, 4.0F));
+        if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.HERDER))
+            toReturn.add(new RiftHerdDistanceFromOtherMembers(this, 1.5D));
+        if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.HERDER))
+            toReturn.add(new RiftHerdMemberFollow(this));
+        if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftGoToLandFromWater(this, 16, 1.0D));
+        if (this instanceof RiftWaterCreature && ((RiftWaterCreature) this).isAmphibious())
+            toReturn.add(new RiftGoToWater(this, 16, 1.0D));
+        if (!(this instanceof RiftWaterCreature)) new RiftWander(this, 1.0D);
+        if (this instanceof RiftWaterCreature) new RiftWanderWater((RiftWaterCreature) this, 1.0D);
+        toReturn.add(new RiftLookAround(this));
+
+        return toReturn;
+    }
+
+    @Override
     @Nullable
     public IEntityLivingData onInitialSpawn(@Nonnull DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
         super.onInitialSpawn(difficulty, livingdata);
@@ -403,7 +469,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.manageMoveAndWeaponCooldown();
             this.hasNoTargetManagement();
             this.manageCloaking();
-            if (this.isNocturnal()) this.manageSleepSchedule();
+            if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.NOCTURNAL)) this.manageSleepSchedule();
             if (this.canBePregnant()) this.createBabyWhenPregnant();
 
             //move conditions ticking, mainly for moves that dont require target to use
@@ -2522,10 +2588,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //this is for managing nocturnal creatures
-    public boolean isNocturnal() {
-        return false;
-    }
-
     private void manageSleepSchedule() {
         if (this.world.isDaytime() && !this.isInCave()) {
             //if the creature somehow ends up in water, it forcibly wakes up

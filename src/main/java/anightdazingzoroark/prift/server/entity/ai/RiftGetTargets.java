@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
@@ -58,7 +59,7 @@ public class RiftGetTargets extends EntityAITarget {
             List<EntityLivingBase> list = new ArrayList<>();
             for (EntityLivingBase entity : this.creature.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector)) {
                 if (entity instanceof EntityPlayer) {
-                    if (this.creature.getTargetList().contains("minecraft:player")) {
+                    if (this.creature.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE_TO_HUMANS) && this.creature.getTargetList().contains("minecraft:player")) {
                         EntityPlayer player = (EntityPlayer) entity;
                         if (!player.isSneaking() || !this.creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
                     }

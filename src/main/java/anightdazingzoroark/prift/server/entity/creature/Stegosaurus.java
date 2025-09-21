@@ -75,6 +75,7 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         this.dataManager.register(WORKSTATION_Z_POS, 0);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(0, new RiftTurretModeTargeting(this, true));
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
@@ -99,6 +100,7 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
         this.tasks.addTask(13, new RiftWander(this, 1.0D));
         this.tasks.addTask(14, new RiftLookAround(this));
     }
+     */
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {

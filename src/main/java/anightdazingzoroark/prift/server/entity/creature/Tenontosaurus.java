@@ -22,6 +22,7 @@ public class Tenontosaurus extends RiftCreature {
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
         this.targetTasks.addTask(2, new RiftProtectOwner(this));
@@ -38,6 +39,7 @@ public class Tenontosaurus extends RiftCreature {
         this.tasks.addTask(12, new RiftWander(this, 1.0D));
         this.tasks.addTask(13, new RiftLookAround(this));
     }
+     */
 
     @Override
     public WeightedList<List<CreatureMove>> possibleStartingMoves() {

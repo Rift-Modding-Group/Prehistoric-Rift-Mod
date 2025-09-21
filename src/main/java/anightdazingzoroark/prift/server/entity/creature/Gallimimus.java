@@ -33,6 +33,7 @@ public class Gallimimus extends RiftCreature {
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, false);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
         this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
@@ -52,6 +53,7 @@ public class Gallimimus extends RiftCreature {
         this.tasks.addTask(12, new RiftWander(this, 0.5D));
         this.tasks.addTask(13, new RiftLookAround(this));
     }
+     */
 
     @Override
     public double herdFollowRange() {

@@ -38,6 +38,7 @@ public class Anomalocaris extends RiftWaterCreature {
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
@@ -52,6 +53,7 @@ public class Anomalocaris extends RiftWaterCreature {
         this.tasks.addTask(6, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
         this.tasks.addTask(7, new RiftWanderWater(this, 1.0D));
     }
+     */
 
     @Override
     public float[] ageScaleParams() {

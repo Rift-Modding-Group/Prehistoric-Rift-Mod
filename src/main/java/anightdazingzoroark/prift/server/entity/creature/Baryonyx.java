@@ -51,6 +51,7 @@ public class Baryonyx extends RiftWaterCreature {
         if (this.getActivePotionEffect(MobEffects.POISON) != null) this.removePotionEffect(MobEffects.POISON);
     }
 
+    /*
     protected void initEntityAI() {
         this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
         this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
@@ -67,6 +68,7 @@ public class Baryonyx extends RiftWaterCreature {
         this.tasks.addTask(8, new RiftWanderWater(this, 1.0D));
         this.tasks.addTask(9, new RiftWander(this, 1.0D));
     }
+     */
 
     @Override
     public boolean isAmphibious() {

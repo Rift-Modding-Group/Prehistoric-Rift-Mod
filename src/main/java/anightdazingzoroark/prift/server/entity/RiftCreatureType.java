@@ -720,6 +720,7 @@ public enum RiftCreatureType {
         DOCILE, //will retaliate when attacked
         SKITTISH, //will run from targets
         AGGRESSIVE, //will attack targets
+        AGGRESSIVE_TO_HUMANS, //will attack humans
         BLOCK_BREAKER, //will break blocks in front when pursuing a target
         NOCTURNAL //will be active at night and sleep at day
     }
