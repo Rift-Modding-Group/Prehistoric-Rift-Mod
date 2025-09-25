@@ -18,7 +18,6 @@ public class StegosaurusConfig extends RiftCreatureConfig {
                 new Meal("prift:basic_herbivore_meal", 0.1),
                 new Meal("prift:advanced_herbivore_meal", 0.33)
         );
-        this.general.canInflictBleed = false;
         this.general.harvestableBlocks = Arrays.asList(
                 "minecraft:wheat:7",
                 "minecraft:carrots:7",

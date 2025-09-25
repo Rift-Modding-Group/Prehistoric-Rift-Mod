@@ -246,6 +246,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.initInventory();
         this.initializeHitboxes(this);
         this.initializeRiderPositions(this);
+
+        //ais are now initialized here
+        if (!worldIn.isRemote) this.initRiftCreatureAI();
     }
 
     @Override
@@ -343,8 +346,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.canBeKnockedBack()) this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
     }
 
-    @Override
-    protected void initEntityAI() {
+    protected void initRiftCreatureAI() {
         List<EntityAITarget> targetBehaviors = this.createTargetBehaviors();
         for (int x = 0; x < targetBehaviors.size(); x++) this.targetTasks.addTask(x, targetBehaviors.get(x));
 
@@ -357,6 +359,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //those placed later have lower priority
     private List<EntityAITarget> createTargetBehaviors() {
         List<EntityAITarget> toReturn = new ArrayList<>();
+        if (this.creatureType == null) return toReturn;
 
         if (this.creatureType.isTameable) toReturn.add(new RiftTurretModeTargeting(this, true));
         if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.DOCILE))
@@ -378,8 +381,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private List<EntityAIBase> createBehaviors() {
         List<EntityAIBase> toReturn = new ArrayList<>();
+        if (this.creatureType == null) return toReturn;
 
-        if (this.creatureType.isTameable) toReturn.add(new RiftCreatureOperateWorkstation(this));
+        if (this.creatureType.isTameable && this instanceof IWorkstationUser) toReturn.add(new RiftCreatureOperateWorkstation(this));
         if (this.creatureType.isTameable) toReturn.add(new RiftUseLeadPoweredCrank(this));
         if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftLandDwellerSwim(this));
         if (this.creatureType.isTameable) toReturn.add(new RiftMate(this));

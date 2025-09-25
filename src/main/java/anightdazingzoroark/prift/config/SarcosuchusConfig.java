@@ -20,7 +20,6 @@ public class SarcosuchusConfig extends RiftCreatureConfig {
                 "prift:megapiranha"
         );
         this.general.targetBlacklist = Arrays.asList();
-        this.general.maximumSpinAttackTargetSize = "MEDIUM";
         this.general.blockBreakLevels = Arrays.asList("axe:0", "shovel:0");
         this.general.breakBlocksInPursuit = true;
         this.spawnRules = Arrays.asList(

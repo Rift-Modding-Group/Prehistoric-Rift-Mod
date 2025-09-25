@@ -59,9 +59,8 @@ public abstract class RiftCreatureConfig {
         @SerializedName("breakBlocksInPursuit")
         public boolean breakBlocksInPursuit;
 
-        //anomalocaris only
-        @SerializedName("maximumGrabTargetSize")
-        public String maximumGrabTargetSize;
+        @SerializedName("mobsToRunFrom")
+        public List<String> mobsToRunFrom;
 
         //apatosaurus only
         @SerializedName("maximumPassengerSize")
@@ -83,21 +82,6 @@ public abstract class RiftCreatureConfig {
 
         @SerializedName("mobSniffRange")
         public Integer mobSniffRange;
-
-        //for sarcosuchus only
-        @SerializedName("maximumSpinAttackTargetSize")
-        public String maximumSpinAttackTargetSize;
-
-        //for stegosaurus only
-        @SerializedName("canInflictBleed")
-        public Boolean canInflictBleed;
-
-        //for tyrannosaurus only
-        @SerializedName("affectedByRoarBlacklist")
-        public List<String> affectedByRoarBlacklist;
-
-        @SerializedName("useRoarBlacklistAsWhitelist")
-        public Boolean useRoarBlacklistAsWhitelist;
     }
 
     public static class Food {

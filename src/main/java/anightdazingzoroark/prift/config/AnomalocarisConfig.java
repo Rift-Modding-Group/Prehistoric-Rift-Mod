@@ -23,7 +23,6 @@ public class AnomalocarisConfig extends RiftCreatureConfig {
                 "prift:megapiranha"
         );
         this.general.targetBlacklist = Arrays.asList();
-        this.general.maximumGrabTargetSize = "MEDIUM";
         this.general.blockBreakLevels = Arrays.asList("pickaxe:0", "shovel:0");
         this.general.breakBlocksInPursuit = true;
         this.spawnRules = Arrays.asList(

@@ -391,7 +391,7 @@ public enum RiftCreatureType {
             EnergyRechargeCategory.SLOW,
             CreatureDiet.OMNIVORE,
             LevelupRate.NORMAL,
-            new Behavior[]{Behavior.DOCILE, Behavior.HERDER, Behavior.SKITTISH},
+            new Behavior[]{Behavior.DOCILE, Behavior.HERDER},
             6045223,
             9403247,
             300,
@@ -718,7 +718,6 @@ public enum RiftCreatureType {
     public enum Behavior {
         HERDER, //will use herding or pack hunting behaviors
         DOCILE, //will retaliate when attacked
-        SKITTISH, //will run from targets
         AGGRESSIVE, //will attack targets
         AGGRESSIVE_TO_HUMANS, //will attack humans
         BLOCK_BREAKER, //will break blocks in front when pursuing a target

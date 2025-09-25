@@ -20,11 +20,6 @@ public class TyrannosaurusConfig extends RiftCreatureConfig {
         );
         this.general.targetWhitelist = Arrays.asList("prift:apatosaurus", "prift:ankylosaurus");
         this.general.targetBlacklist = Arrays.asList();
-        this.general.affectedByRoarBlacklist = Arrays.asList(
-                "prift:tyrannosaurus",
-                "prift:apatosaurus"
-        );
-        this.general.useRoarBlacklistAsWhitelist = false;
         this.general.blockBreakLevels = Arrays.asList("pickaxe:2", "axe:2", "shovel:2");
         this.general.breakBlocksInPursuit = true;
         this.spawnRules = Arrays.asList(
