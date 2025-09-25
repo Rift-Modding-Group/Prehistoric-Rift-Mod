@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
+import anightdazingzoroark.riftlib.mobFamily.MobFamilyHelper;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -230,7 +231,11 @@ public class RiftUtil {
 
     public static List<String> creatureTargets(List<String> whiteList, List<String> blackList, boolean useCUniversal) {
         List<String> finalTargets = new ArrayList<>();
-        List<String> baseTargetList = new ArrayList<>(Arrays.asList(GeneralConfig.universalCarnivoreTargets));
+
+        List<String> baseTargetList = new ArrayList<>(MobFamilyHelper.getMobFamily("animal").getFamilyMembers());
+        baseTargetList.addAll(MobFamilyHelper.getMobFamily("human").getFamilyMembers());
+        baseTargetList.addAll(MobFamilyHelper.getMobFamily("commonlyTargetedHerbivore").getFamilyMembers());
+
         if (useCUniversal) {
             baseTargetList.removeIf(blackList::contains);
             finalTargets = Stream.concat(whiteList.stream(), baseTargetList.stream()).collect(Collectors.toList());

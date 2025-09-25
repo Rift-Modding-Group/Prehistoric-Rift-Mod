@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
+import anightdazingzoroark.riftlib.mobFamily.MobFamilyHelper;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -53,7 +54,9 @@ public class RiftTurretModeTargeting extends EntityAITarget {
                     }
                 }
                 else if (this.creature.getTurretTargeting().equals(TurretModeTargeting.HOSTILES)) {
-                    List<String> targets = Arrays.asList(GeneralConfig.turretModeHostileTargets);
+                    List<String> targets = new ArrayList<>(MobFamilyHelper.getMobFamily("monster").getFamilyMembers());
+                    targets.addAll(MobFamilyHelper.getMobFamily("carnivoreHostileToHuman").getFamilyMembers());
+
                     if (entity instanceof EntityPlayer) {
                         if (targets.contains("minecraft:player")) {
                             EntityPlayer player = (EntityPlayer) entity;

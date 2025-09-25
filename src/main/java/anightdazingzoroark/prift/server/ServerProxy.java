@@ -55,8 +55,6 @@ public class ServerProxy {
     public static InternalRegistryPrimer registryPrimer;
 
     public void preInit(FMLPreInitializationEvent e) {
-        RiftMobFamilies.initMobFamilies();
-
         registryPrimer = new InternalRegistryPrimer();
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));
 

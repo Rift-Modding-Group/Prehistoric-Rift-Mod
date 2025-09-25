@@ -2,6 +2,7 @@ package anightdazingzoroark.prift;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.*;
+import anightdazingzoroark.prift.server.RiftMobFamilies;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
 import anightdazingzoroark.prift.server.commands.RiftCreatureHighlightCommand;
@@ -49,11 +50,17 @@ public class RiftInitialize {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        //init directory
+        File directory = event.getModConfigurationDirectory();
+
+        //init mod content
         logger = event.getModLog();
         PROXY.preInit(event);
 
+        //init mob families
+        RiftMobFamilies.initMobFamilies(directory);
+
         //for general config
-        File directory = event.getModConfigurationDirectory();
         configMain = new Configuration(new File(directory.getPath(), "prift/general.cfg"));
         GeneralConfig.readConfig();
 
