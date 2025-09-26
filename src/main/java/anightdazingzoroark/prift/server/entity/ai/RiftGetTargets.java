@@ -40,8 +40,7 @@ public class RiftGetTargets extends EntityAITarget {
         this.setMutexBits(1);
         this.alertOthers = alertOthers;
         this.targetEntitySelector = new Predicate<EntityLivingBase>() {
-            public boolean apply(@Nullable EntityLivingBase entity)
-            {
+            public boolean apply(@Nullable EntityLivingBase entity) {
                 if (entity == null) return false;
                 else if (targetSelector != null && !targetSelector.apply(entity)) return false;
                 else {
@@ -61,7 +60,7 @@ public class RiftGetTargets extends EntityAITarget {
                 if (entity instanceof EntityPlayer) {
                     if (this.creature.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE_TO_HUMANS) && this.creature.getTargetList().contains("minecraft:player")) {
                         EntityPlayer player = (EntityPlayer) entity;
-                        if (!player.isSneaking() || !this.creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
+                        if (!RiftUtil.playerIgnorableByCreature(this.creature, player)) list.add(entity);
                     }
                 }
                 else {
@@ -140,7 +139,7 @@ public class RiftGetTargets extends EntityAITarget {
                             if (entity instanceof EntityPlayer) {
                                 if (this.creature.getTargetList().contains("minecraft:player")) {
                                     EntityPlayer player = (EntityPlayer) entity;
-                                    if (!player.isSneaking() || !this.creature.isTamingFood(player.getHeldItemMainhand())) list.add(entity);
+                                    if (!RiftUtil.playerIgnorableByCreature(this.creature, player)) list.add(entity);
                                 }
                             }
                             else {

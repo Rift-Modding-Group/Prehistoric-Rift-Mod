@@ -32,10 +32,19 @@ public class RiftMobFamilies {
         for (String id : cTargetedHerbivoresToAdd) commonlyTargetedHerbivore.addToFamilyMembers(id);
         mobFamilyManager.addMobFamily(commonlyTargetedHerbivore);
 
+        //for carnivores in general
+        MobFamily carnivore = new MobFamily("carnivore");
+        List<String> carnivoreToAdd = Arrays.stream(RiftCreatureType.values())
+                .filter(c -> c.getCreatureDiet() == RiftCreatureType.CreatureDiet.CARNIVORE)
+                .map(RiftCreatureType::getIdentifier)
+                .collect(Collectors.toList());
+        for (String id : carnivoreToAdd) carnivore.addToFamilyMembers(id);
+        mobFamilyManager.addMobFamily(carnivore);
+
         //for carnivores that are hostile to humans
         MobFamily carnivoreHostileToHuman = new MobFamily("carnivoreHostileToHuman");
         List<String> carnivoreHostileToHumanToAdd = Arrays.stream(RiftCreatureType.values())
-                        .filter(c -> c.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE_TO_HUMANS))
+                        .filter(c -> c.getCreatureDiet() == RiftCreatureType.CreatureDiet.CARNIVORE && c.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE_TO_HUMANS))
                         .map(RiftCreatureType::getIdentifier)
                         .collect(Collectors.toList());
         for (String id : carnivoreHostileToHumanToAdd) carnivoreHostileToHuman.addToFamilyMembers(id);

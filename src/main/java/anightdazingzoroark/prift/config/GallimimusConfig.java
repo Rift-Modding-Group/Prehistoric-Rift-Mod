@@ -17,15 +17,9 @@ public class GallimimusConfig extends RiftCreatureConfig {
                 new Meal("prift:basic_carnivore_meal", 0.1),
                 new Meal("prift:advanced_carnivore_meal", 0.33)
         );
-        this.general.targetWhitelist = Arrays.asList(
-                "minecraft:player",
-                "prift:tyrannosaurus",
-                "prift:utahraptor",
-                "prift:dimetrodon",
-                "prift:megapiranha",
-                "prift:direwolf",
-                "prift:baryonyx",
-                "prift:dilophosaurus"
+        this.general.mobsToRunFrom = Arrays.asList(
+                "family:human",
+                "family:carnivore"
         );
         this.general.blockBreakLevels = Arrays.asList("shovel:0");
         this.spawnRules = Arrays.asList(

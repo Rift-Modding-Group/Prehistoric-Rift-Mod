@@ -386,6 +386,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.creatureType.isTameable && this instanceof IWorkstationUser) toReturn.add(new RiftCreatureOperateWorkstation(this));
         if (this.creatureType.isTameable) toReturn.add(new RiftUseLeadPoweredCrank(this));
         if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftLandDwellerSwim(this));
+        toReturn.add(new RiftFleeFromEntities(this, 1.5F));
         if (this.creatureType.isTameable) toReturn.add(new RiftMate(this));
         if (this.creatureType.isTameable) toReturn.add(new RiftCreatureUseMoveMounted(this));
         //toReturn.add(new RiftCreatureWarnTarget(this, 1.25f, 0.5f));

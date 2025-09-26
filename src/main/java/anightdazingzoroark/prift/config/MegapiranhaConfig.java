@@ -12,6 +12,9 @@ public class MegapiranhaConfig extends RiftCreatureConfig {
         this.stats.damageMultiplier = 0.2;
         this.stats.maxEnergy = 100;
         this.general.favoriteFood = RiftCreatureConfigDefaults.defaultPiscivoreFoods;
+        this.general.mobsToRunFrom = Arrays.asList(
+                "prift:sarcosuchus"
+        );
         this.general.targetWhitelist = Arrays.asList(
                 "prift:tyrannosaurus",
                 "prift:utahraptor",

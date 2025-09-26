@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
@@ -61,23 +62,8 @@ public class RiftAggressiveModeGetTargets extends EntityAITarget {
                         return !(input instanceof RiftEgg) && !(input instanceof RiftLargeWeapon);
                     }
                 })) {
-                    if (!entity.isRiding()) {
-                        if (entity instanceof EntityPlayer) {
-                            if (!entity.getUniqueID().equals(this.creature.getOwnerId())) {
-                                list.add(entity);
-                            }
-                        }
-                        else if (entity instanceof EntityTameable) {
-                            if ((((EntityTameable) entity).isTamed())) {
-                                if (this.creature.getOwner() != null) {
-                                    if (!((EntityTameable) entity).getOwner().equals(this.creature.getOwner())) {
-                                        list.add(entity);
-                                    }
-                                }
-                            }
-                            else list.add(entity);
-                        }
-                        else list.add(entity);
+                    if (!entity.isRiding() && RiftUtil.checkForNoAssociations(this.creature, entity)) {
+                        list.add(entity);
                     }
                 }
 

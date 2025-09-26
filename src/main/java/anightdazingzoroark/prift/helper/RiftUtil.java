@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
+import anightdazingzoroark.riftlib.mobFamily.MobFamily;
 import anightdazingzoroark.riftlib.mobFamily.MobFamilyHelper;
 import com.teamderpy.shouldersurfing.client.ShoulderInstance;
 import net.minecraft.block.Block;
@@ -432,46 +433,6 @@ public class RiftUtil {
         return matchingKeys;
     }
 
-    public static float getCreatureModelScale(RiftCreature creature) {
-        switch (creature.creatureType) {
-            case TYRANNOSAURUS:
-                return 20f;
-            case STEGOSAURUS:
-                return 20f;
-            case TRICERATOPS:
-                return 25f;
-            case UTAHRAPTOR:
-                return 30f;
-            case APATOSAURUS:
-                return 20f;
-            case PARASAUROLOPHUS:
-                return 25f;
-            case DIMETRODON:
-                return 30f;
-            case SARCOSUCHUS:
-                return 30f;
-            case ANOMALOCARIS:
-                return 30f;
-            case SAUROPHAGANAX:
-                return 25f;
-            case DIREWOLF:
-                return 30f;
-            case MEGALOCEROS:
-                return 25f;
-            case BARYONYX:
-                return 20f;
-            case PALAEOCASTOR:
-                return 50f;
-            case ANKYLOSAURUS:
-                return 20f;
-            case DILOPHOSAURUS:
-                return 30f;
-            case GALLIMIMUS:
-                return 30f;
-        }
-        return 1f;
-    }
-
     public static double slopeResult(int x, boolean clamped, double xMin, double xMax, double yMin, double yMax) {
         double slope = (yMax - yMin)/(xMax - xMin);
         if (clamped) {
@@ -533,5 +494,27 @@ public class RiftUtil {
 
         int listSize = list.size();
         return list.get(new Random().nextInt(listSize));
+    }
+
+    public static boolean isMobFamilyString(String string) {
+        String familyString = "family:";
+        return string.length() >= familyString.length() && string.startsWith(familyString);
+    }
+
+    public static MobFamily getMobFamilyFromString(String string) {
+        String familyString = "family:";
+        if (string.length() >= familyString.length() && string.startsWith(familyString)) {
+            int colonPos = string.indexOf(":");
+            String familyName = string.substring(colonPos + 1);
+            return MobFamilyHelper.getMobFamily(familyName);
+        }
+        return null;
+    }
+
+    public static boolean playerIgnorableByCreature(RiftCreature creature, EntityPlayer player) {
+        if (!checkForNoAssociations(creature, player)) return false;
+        if (player.isCreative() || player.isSpectator()) return true;
+        if (player.isSneaking() && creature.isTamingFood(player.getHeldItemMainhand())) return true;
+        return false;
     }
 }

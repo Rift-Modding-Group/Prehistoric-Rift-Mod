@@ -714,7 +714,7 @@ public enum RiftCreatureType {
         }
     }
 
-    //these influence wild only behaviors
+    //these mostly influence wild only behaviors
     public enum Behavior {
         HERDER, //will use herding or pack hunting behaviors
         DOCILE, //will retaliate when attacked
