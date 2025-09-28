@@ -80,6 +80,7 @@ public class RiftItems {
     public static Item ANKYLOSAURUS_CLUB;
     public static Item DILOPHOSAURUS_FRILL;
     public static Item GALLIMIMUS_FOOT;
+    public static Item TENONTOSAURUS_FEATHER;
 
     public static Item CHITIN;
 
@@ -159,6 +160,7 @@ public class RiftItems {
         ANKYLOSAURUS_CLUB = riftGenericItem("ankylosaurus_club", true);
         DILOPHOSAURUS_FRILL = riftGenericItem("dilophosaurus_frill", true);
         GALLIMIMUS_FOOT = riftGenericItem("gallimimus_foot", true);
+        TENONTOSAURUS_FEATHER = riftGenericItem("tenontosaurus_feather", true);
 
         CHITIN = riftGenericItem("chitin", true);
 

@@ -719,6 +719,28 @@
     "subtitle": "sounds.subtitle.gallimimus_warn"
   },
 
+  "prift.tenontosaurus.idle": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/tenontosaurus/tenontosaurus_idle"
+    ],
+    "subtitle": "sounds.subtitle.tenontosaurus_idle"
+  },
+  "prift.tenontosaurus.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/tenontosaurus/tenontosaurus_hurt"
+    ],
+    "subtitle": "sounds.subtitle.tenontosaurus_hurt"
+  },
+  "prift.tenontosaurus.death": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/tenontosaurus/tenontosaurus_death"
+    ],
+    "subtitle": "sounds.subtitle.tenontosaurus_death"
+  },
+
   "prift.generic_move.bite": {
     "category": "neutral",
     "sounds": [

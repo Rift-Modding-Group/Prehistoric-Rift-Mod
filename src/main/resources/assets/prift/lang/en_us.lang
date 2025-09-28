@@ -159,6 +159,7 @@ item.palaeocastor_tail.name=Palaeocastor Tail
 item.ankylosaurus_club.name=Ankylosaurus Club
 item.dilophosaurus_frill.name=Dilophosaurus Frill
 item.gallimimus_foot.name=Gallimimus Foot
+item.tenontosaurus_feather.name=Tenontosaurus Feather
 
 itemGroup.prift_items=Prehistoric Rift Items
 
@@ -177,6 +178,7 @@ item.baryonyx_egg.name=Baryonyx Egg
 item.ankylosaurus_egg.name=Ankylosaurus Egg
 item.dilophosaurus_egg.name=Dilophosaurus Egg
 item.gallimimus_egg.name=Gallimimus Egg
+item.tenontosaurus_egg.name=Tenontosaurus Egg
 
 item.apatosaurus_platform.name=Apatosaurus Platform
 item.cannon.name=Cannon

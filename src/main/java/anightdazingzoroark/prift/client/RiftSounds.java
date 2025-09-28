@@ -301,6 +301,15 @@ public class RiftSounds {
     @GameRegistry.ObjectHolder("prift.gallimimus.warn")
     public static final SoundEvent GALLIMIMUS_WARN = createSoundEvent("prift.gallimimus.warn");
 
+    @GameRegistry.ObjectHolder("prift.tenontosaurus.idle")
+    public static final SoundEvent TENONTOSAURUS_IDLE = createSoundEvent("prift.tenontosaurus.idle");
+
+    @GameRegistry.ObjectHolder("prift.tenontosaurus.hurt")
+    public static final SoundEvent TENONTOSAURUS_HURT = createSoundEvent("prift.tenontosaurus.hurt");
+
+    @GameRegistry.ObjectHolder("prift.tenontosaurus.death")
+    public static final SoundEvent TENONTOSAURUS_DEATH = createSoundEvent("prift.tenontosaurus.death");
+
     @GameRegistry.ObjectHolder("prift.generic_move.bite")
     public static final SoundEvent GENERIC_BITE_MOVE = createSoundEvent("prift.generic_move.bite");
 

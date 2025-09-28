@@ -1,16 +1,24 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class Tenontosaurus extends RiftCreature {
+    public static final ResourceLocation LOOT =  LootTableList.register(new ResourceLocation(RiftInitialize.MODID, "entities/tenontosaurus"));
+
     public Tenontosaurus(World worldIn) {
         super(worldIn, RiftCreatureType.TENONTOSAURUS);
         this.setSize(2f, 2f);
@@ -21,25 +29,6 @@ public class Tenontosaurus extends RiftCreature {
         this.isRideable = true;
         this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
     }
-
-    /*
-    protected void initEntityAI() {
-        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
-        this.targetTasks.addTask(2, new RiftProtectOwner(this));
-        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-
-        this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftCreatureWarnTarget(this, 2.25f, 0.5f));
-        this.tasks.addTask(5, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(8, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
-        this.tasks.addTask(11, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(12, new RiftWander(this, 1.0D));
-        this.tasks.addTask(13, new RiftLookAround(this));
-    }
-     */
 
     @Override
     public WeightedList<List<CreatureMove>> possibleStartingMoves() {
@@ -78,5 +67,28 @@ public class Tenontosaurus extends RiftCreature {
     @Override
     public float attackWidth() {
         return 3.5f;
+    }
+
+    @Override
+    public int slotCount() {
+        return 27;
+    }
+
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return LOOT;
+    }
+
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.TENONTOSAURUS_IDLE;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+        return RiftSounds.TENONTOSAURUS_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.TENONTOSAURUS_DEATH;
     }
 }

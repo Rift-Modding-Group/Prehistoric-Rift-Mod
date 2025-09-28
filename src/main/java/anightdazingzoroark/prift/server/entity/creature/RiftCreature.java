@@ -363,15 +363,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         if (this.creatureType.isTameable) toReturn.add(new RiftTurretModeTargeting(this, true));
         if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.DOCILE))
-            toReturn.add(new RiftHurtByTarget(this, true));
+            toReturn.add(new RiftHurtByTarget(this, this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.HERDER)));
         if (!(this instanceof RiftWaterCreature)
                 && (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE)
                 || this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE_TO_HUMANS)))
-            toReturn.add(new RiftGetTargets(this, false, true));
+            toReturn.add(new RiftGetTargets(this, this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.HERDER), true));
         if (this instanceof RiftWaterCreature
                 && (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE)
                 || this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.AGGRESSIVE_TO_HUMANS)))
-            toReturn.add(new RiftGetTargets.RiftGetTargetsWater(this, false, true));
+            toReturn.add(new RiftGetTargets.RiftGetTargetsWater(this, this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.HERDER), true));
         if (this.creatureType.isTameable) toReturn.add(new RiftAggressiveModeGetTargets(this, true));
         if (this.creatureType.isTameable) toReturn.add(new RiftProtectOwner(this));
         if (this.creatureType.isTameable) toReturn.add(new RiftAttackForOwner(this));
