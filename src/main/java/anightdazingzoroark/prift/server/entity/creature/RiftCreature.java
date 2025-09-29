@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.RiftEggMenu;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
@@ -30,6 +31,7 @@ import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHe
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -983,7 +985,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         if (this.canBePregnant()) {
-                            if (this.isPregnant() && player.isSneaking()) player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId() ,0, 0);
+                            if (this.isPregnant() && player.isSneaking()) RiftLibUIHelper.showUI(player, new RiftEggMenu(this));
                             else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId(), 0, 0);
                         }
                         else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
@@ -991,7 +993,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
                         if (this.canBePregnant()) {
                             if (!this.isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
-                            else player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId() ,0, 0);
+                            else RiftLibUIHelper.showUI(player, new RiftEggMenu(this));
                         }
                         else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {
                             boolean usingWorkstation = this instanceof IWorkstationUser && ((IWorkstationUser) this).hasWorkstation();

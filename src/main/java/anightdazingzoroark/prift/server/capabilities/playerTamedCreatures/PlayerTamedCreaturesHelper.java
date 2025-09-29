@@ -152,7 +152,8 @@ public class PlayerTamedCreaturesHelper {
 
     public static void addCreatureToBox(EntityPlayer player, RiftCreature creature) {
         if (player == null || creature == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftAddToBox(player, creature));
+        CreatureNBT creatureNBT = new CreatureNBT(creature);
+        RiftMessages.WRAPPER.sendToServer(new RiftAddToBox(player, creatureNBT));
     }
 
     public static boolean canAddCreatureToBox(EntityPlayer player) {

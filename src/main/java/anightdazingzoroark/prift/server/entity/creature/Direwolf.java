@@ -39,30 +39,6 @@ public class Direwolf extends RiftCreature {
         this.setCanPickUpLoot(true);
     }
 
-    /*
-    protected void initEntityAI() {
-        this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, true, false));
-        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, false));
-        this.targetTasks.addTask(2, new RiftProtectOwner(this));
-        this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this, true));
-        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-
-        this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftCreatureWarnTarget(this, 1.625f, 0f));
-        this.tasks.addTask(5, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 10.0F, 2.0F));
-        this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(9, new RiftHerdDistanceFromOtherMembers(this, 1D));
-        this.tasks.addTask(10, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(11, new RiftWander(this, 1.0D));
-        this.tasks.addTask(12, new RiftLookAround(this));
-    }
-     */
-
     @Override
     public double herdFollowRange() {
         return 4D;

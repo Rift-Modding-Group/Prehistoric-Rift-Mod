@@ -1,12 +1,11 @@
 package anightdazingzoroark.prift.server.entity;
 
-import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.RiftEggMenu;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -14,6 +13,7 @@ import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
 import com.charles445.simpledifficulty.api.config.json.JsonTemperature;
 import com.charles445.simpledifficulty.api.temperature.TemperatureEnum;
@@ -76,11 +76,6 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
     }
 
     @Override
-    protected boolean canDespawn() {
-        return false;
-    }
-
-    @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
 
@@ -93,6 +88,8 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
             RiftCreature creature = this.getCreatureType().invokeClass(this.world);
             creature.setHealth((float) (creature.minCreatureHealth + (0.1) * (creature.getLevel()) * (creature.minCreatureHealth)));
             creature.setAgeInDays(0);
+            creature.setHealth(creature.getMaxHealth());
+            creature.setEnergy(creature.getMaxEnergy());
 
             if (this.getOwnerId() != null && this.getCreatureType() != RiftCreatureType.DODO) {
                 creature.setTamed(true);
@@ -116,13 +113,13 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
                     if (PlayerTamedCreaturesHelper.canAddToParty(owner)) {
                         creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                         PlayerTamedCreaturesHelper.addCreatureToParty(owner, creature);
-                        owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
+                        owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_party", new TextComponentString(this.getName())), false);
                     }
                     //update box of owner
                     else if (PlayerTamedCreaturesHelper.canAddCreatureToBox(owner)) {
                         creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                         PlayerTamedCreaturesHelper.addCreatureToBox(owner, creature);
-                        owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
+                        owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_box", new TextComponentString(this.getName())), false);
                     }
                 }
                 else this.world.spawnEntity(creature);
@@ -371,7 +368,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         else {
             try {
                 if (this.getOwnerId().equals(player.getUniqueID())) {
-                    player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId(), (int) posY, (int) posZ);
+                    RiftLibUIHelper.showUI(player, new RiftEggMenu(this));
                     return true;
                 }
             }

@@ -349,9 +349,8 @@ reminder.too_close_to_other_creature_box=Too close to or within deployment range
 reminder.cannot_place_more_creature_boxes=Maximum amount of placed Creature Boxes per player reached. You can only have up to %s creature boxes at a time!
 
 prift.pregnancy.name=%s pregnancy
-prift.egg.time=Time
-prift.egg.minutes=minute(s)
-prift.egg.seconds=second(s)
+prift.egg.remaining_hatch_time=Remaining Hatch Time:
+prift.pregnancy.remaining_gestation_time=Remaining Gestation Time:
 prift.egg.too_cold=Too cold for hatching!
 prift.egg.too_warm=Too warm for hatching!
 

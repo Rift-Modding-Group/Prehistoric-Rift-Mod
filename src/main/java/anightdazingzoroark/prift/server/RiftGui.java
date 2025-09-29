@@ -24,7 +24,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 
 public class RiftGui implements IGuiHandler {
-    public static final int GUI_EGG = 0;
     public static final int GUI_DIAL = 1;
     public static final int GUI_CREATURE_INVENTORY = 2;
     public static final int GUI_MENU_FROM_RADIAL = 3;
@@ -96,12 +95,7 @@ public class RiftGui implements IGuiHandler {
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         Entity entity = world.getEntityByID(x);
         TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
-        if (id == GUI_EGG) {
-            if (entity instanceof RiftEgg) return new RiftEggMenu((RiftEgg)entity);
-            else if (entity instanceof RiftSac) return new RiftEggMenu((RiftSac)entity);
-            else if (entity instanceof RiftCreature && ((RiftCreature)entity).canBePregnant()) return new RiftEggMenu((RiftCreature)entity);
-        }
-        else if (id == GUI_DIAL) return new RiftDialMenu((RiftCreature) entity);
+        if (id == GUI_DIAL) return new RiftDialMenu((RiftCreature) entity);
         else if (id == GUI_CREATURE_INVENTORY) {
             IInventory playerInventory = player.inventory;
             return new RiftCreatureInvMenu(playerInventory, (RiftCreature) entity);

@@ -1,13 +1,13 @@
 package anightdazingzoroark.prift.server.entity;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
-import anightdazingzoroark.prift.server.RiftGui;
+import anightdazingzoroark.prift.client.ui.RiftEggMenu;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
@@ -47,11 +47,6 @@ public class RiftSac extends EntityTameable implements IAnimatable {
     }
 
     @Override
-    protected boolean canDespawn() {
-        return false;
-    }
-
-    @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
         if (this.isInWater() && this.getHatchTime() > 0) this.setHatchTime(this.getHatchTime() - 1);
@@ -59,6 +54,8 @@ public class RiftSac extends EntityTameable implements IAnimatable {
             RiftCreature creature = this.getCreatureType().invokeClass(this.world);
             creature.setHealth((float) (creature.minCreatureHealth + (0.1) * (creature.getLevel()) * (creature.minCreatureHealth)));
             creature.setAgeInDays(0);
+            creature.setHealth(creature.getMaxHealth());
+            creature.setEnergy(creature.getMaxEnergy());
 
             if (this.getOwnerId() != null) {
                 creature.setTamed(true);
@@ -81,13 +78,13 @@ public class RiftSac extends EntityTameable implements IAnimatable {
                 if (PlayerTamedCreaturesHelper.canAddToParty(owner)) {
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                     PlayerTamedCreaturesHelper.addCreatureToParty(owner, creature);
-                    owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
+                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_party", new TextComponentString(this.getName())), false);
                 }
                 //update box of owner
                 else if (PlayerTamedCreaturesHelper.canAddCreatureToBox(owner)) {
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
                     PlayerTamedCreaturesHelper.addCreatureToBox(owner, creature);
-                    owner.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
+                    owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_box", new TextComponentString(this.getName())), false);
                 }
             }
             this.setDead();
@@ -113,7 +110,7 @@ public class RiftSac extends EntityTameable implements IAnimatable {
         else {
             try {
                 if (this.getOwnerId().equals(player.getUniqueID())) {
-                    player.openGui(RiftInitialize.instance, RiftGui.GUI_EGG, world, this.getEntityId(), (int) posY, (int) posZ);
+                    RiftLibUIHelper.showUI(player, new RiftEggMenu(this));
                     return true;
                 }
             }
