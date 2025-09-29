@@ -1967,9 +1967,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 RiftCreature baby = this.creatureType.invokeClass(this.world);
                 baby.setHealth((float) (this.minCreatureHealth + (0.1) * (this.getLevel()) * (this.minCreatureHealth)));
                 baby.setAgeInDays(0);
+                baby.setHealth(baby.getMaxHealth());
+                baby.setEnergy(baby.getMaxEnergy());
                 baby.setTamed(true);
                 baby.setOwnerId(this.getOwnerId());
-                this.setAcquisitionInfo(CreatureAcquisitionInfo.AcquisitionMethod.BORN, System.currentTimeMillis() / 1000L);
+                baby.setAcquisitionInfo(CreatureAcquisitionInfo.AcquisitionMethod.BORN, System.currentTimeMillis() / 1000L);
                 baby.setTameBehavior(TameBehaviorType.PASSIVE);
                 baby.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
                 this.setPregnant(false, 0);

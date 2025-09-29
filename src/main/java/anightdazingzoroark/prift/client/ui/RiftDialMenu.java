@@ -26,7 +26,7 @@ import java.util.List;
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class RiftDialMenu extends GuiScreen {
     private int selectedItem = -1;
-    private RiftCreature creature;
+    private final RiftCreature creature;
     private List<RiftTameRadialChoice> choices;
     private int radialChoiceMenu; //0 is main, 1 is state, 2 is options, 3 is behaviors
 
