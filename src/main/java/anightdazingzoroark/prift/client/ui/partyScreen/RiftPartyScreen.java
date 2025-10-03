@@ -381,7 +381,7 @@ public class RiftPartyScreen extends RiftLibUI {
 
                 //change position based on if theres a selected creature or not
                 int xOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -125 : -1;
-                int yOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -13 : 3;
+                int yOffset = (this.hasSelectedCreature() && !this.shufflePartyMemsMode) ? -13 : 2;
                 partyMembersSection.repositionSection(xOffset, yOffset);
 
                 break;

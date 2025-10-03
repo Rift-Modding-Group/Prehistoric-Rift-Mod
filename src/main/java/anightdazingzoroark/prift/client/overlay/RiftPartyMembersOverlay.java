@@ -215,12 +215,12 @@ public class RiftPartyMembersOverlay {
             if (partyMemNBT.isBaby()) {
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
                 Minecraft.getMinecraft().getTextureManager().bindTexture(hud);
-                float pacifierScale = 0.25f;
+                float pacifierScale = (1 / 3f) * creatureIconScale;
                 int pacifierX = (int) ((xSize - 22) / (2 * pacifierScale) + (xPosOnScreen + 15) / pacifierScale);
-                int pacifierY = (int) ((ySize - 23) / (2 * pacifierScale) + (yPosOnScreen + 15) / pacifierScale);
+                int pacifierY = (int) ((ySize - 22) / (2 * pacifierScale) + (yPosOnScreen + yOffset + 15) / pacifierScale);
                 GlStateManager.pushMatrix();
                 GlStateManager.scale(pacifierScale, pacifierScale, pacifierScale);
-                drawModalRectWithCustomSizedTexture(pacifierX, pacifierY, 114, 29, 22, 23, 256, 256);
+                drawModalRectWithCustomSizedTexture(pacifierX, pacifierY, 114, 29, 22, 22, 256, 256);
                 GlStateManager.popMatrix();
             }
         }
