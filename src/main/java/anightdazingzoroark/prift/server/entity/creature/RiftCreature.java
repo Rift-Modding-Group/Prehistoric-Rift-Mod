@@ -1875,7 +1875,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public float scale() {
-        return RiftUtil.setModelScale(this, this.ageScaleParams()[0], this.ageScaleParams()[1]);
+        return RiftUtil.slopeResult(this.getAgeInTicks(), true, 0, 24000, this.ageScaleParams()[0], this.ageScaleParams()[1]);
     }
 
     public abstract float[] ageScaleParams();

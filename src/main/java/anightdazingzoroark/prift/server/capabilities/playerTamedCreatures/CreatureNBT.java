@@ -415,6 +415,11 @@ public class CreatureNBT {
         this.creatureNBT.setBoolean("Sitting", value);
     }
 
+    public boolean isBaby() {
+        if (this.nbtIsEmpty()) return false;
+        return this.getAgeInDays() < 1;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object == null || this.creatureNBT == null) return false;

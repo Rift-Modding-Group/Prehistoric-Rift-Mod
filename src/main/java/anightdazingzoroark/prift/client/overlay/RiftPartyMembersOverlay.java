@@ -26,6 +26,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
+import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 import static net.minecraft.client.gui.Gui.drawRect;
 
 public class RiftPartyMembersOverlay {
@@ -193,8 +194,8 @@ public class RiftPartyMembersOverlay {
         GlStateManager.popMatrix();
         GlStateManager.disableBlend();
 
-        //render creature icon
         if (!partyMemNBT.nbtIsEmpty()) {
+            //render creature icon
             RiftCreatureType creatureType = partyMemNBT.getCreatureType();
             ResourceLocation creatureIcon = new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+creatureType.name().toLowerCase()+"_icon.png");
             Minecraft.getMinecraft().getTextureManager().bindTexture(creatureIcon);
@@ -209,6 +210,19 @@ public class RiftPartyMembersOverlay {
             Gui.drawModalRectWithCustomSizedTexture(iconXPos, iconYPos, 0, 0, 24, 24, 24, 24);
             GlStateManager.popMatrix();
             GlStateManager.disableBlend();
+
+            //render the pacifier for babies
+            if (partyMemNBT.isBaby()) {
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                Minecraft.getMinecraft().getTextureManager().bindTexture(hud);
+                float pacifierScale = 0.25f;
+                int pacifierX = (int) ((xSize - 22) / (2 * pacifierScale) + (xPosOnScreen + 15) / pacifierScale);
+                int pacifierY = (int) ((ySize - 23) / (2 * pacifierScale) + (yPosOnScreen + 15) / pacifierScale);
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(pacifierScale, pacifierScale, pacifierScale);
+                drawModalRectWithCustomSizedTexture(pacifierX, pacifierY, 114, 29, 22, 23, 256, 256);
+                GlStateManager.popMatrix();
+            }
         }
     }
 

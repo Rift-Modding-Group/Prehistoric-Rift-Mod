@@ -28,6 +28,7 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RiftCreatureBoxScreen extends RiftLibUI {
@@ -71,6 +72,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                 this.createShowCreatureBoxInfoSection(),
                 this.createDeathBGSelectedCreature(),
                 this.createCreatureToDrawSection(),
+                this.createBabyIconSection(),
                 this.createSelectedCreatureInfoSection(),
                 this.createCreatureBoxDeployedHeaderSection(),
                 this.createCreatureBoxDeployedSection()
@@ -216,6 +218,22 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
                     creatureElement.setRotationAngle(150);
                     toReturn.add(creatureElement);
                 }
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection createBabyIconSection() {
+        return new RiftLibUISection("babyIconSection", this.width, this.height, 22, 22, 165, -30, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ImageElement imageElement = new RiftLibUIElement.ImageElement();
+                imageElement.setImage(background, 400, 360, 22, 22, 0, 300);
+                imageElement.setScale(0.375f);
+                toReturn.add(imageElement);
 
                 return toReturn;
             }
@@ -391,6 +409,8 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
         else if (riftLibUISection.id.equals("creatureToDrawSection") && element.getID().equals("creatureToDraw")) {
             RiftLibUIElement.RenderedEntityElement creatureElement = (RiftLibUIElement.RenderedEntityElement) element;
             creatureElement.setEntity(this.creatureToDraw);
+            if (this.creatureToDraw.isBaby()) creatureElement.setScale(20f / this.creatureToDraw.scale() * this.creatureToDraw.ageScaleParams()[1]);
+            else creatureElement.setScale(20f);
         }
         return element;
     }
@@ -399,6 +419,7 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     public RiftLibUISection modifyUISection(RiftLibUISection riftLibUISection) {
         this.setUISectionVisibility("deathBGSelectedCreatureSection", !this.shufflePartyMemsMode && this.selectedCreatureInfo != null && this.selectedCreatureInfo.getCreatureNBT(this.mc.player).getCreatureHealth()[0] <= 0);
         this.setUISectionVisibility("creatureToDrawSection", !this.shufflePartyMemsMode);
+        this.setUISectionVisibility("babyIconSection", !this.shufflePartyMemsMode && this.selectedCreatureInfo != null && this.selectedCreatureInfo.getCreatureNBT(this.mc.player).isBaby());
 
         switch (riftLibUISection.id) {
             case "partyMembersSection": {

@@ -94,6 +94,19 @@ public class RiftPartyMemButtonForParty extends RiftLibClickableSection {
             drawModalRectWithCustomSizedTexture(k, l, 0, 0, 24, 24, 24, 24);
             GlStateManager.popMatrix();
 
+            //create pacifier for baby creature
+            if (this.creatureNBT.isBaby()) {
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+                float pacifierScale = 0.25f;
+                int pacifierX = (int) ((this.guiWidth - 22) / (2 * pacifierScale) + (this.xOffset + this.xAddOffset) / pacifierScale);
+                int pacifierY = (int) ((this.guiHeight - 23) / (2 * pacifierScale) + (this.yOffset + this.yAddOffset + 5) / pacifierScale);
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(pacifierScale, pacifierScale, pacifierScale);
+                drawModalRectWithCustomSizedTexture(pacifierX, pacifierY, 112, 221, 22, 23, 400, 360);
+                GlStateManager.popMatrix();
+            }
+
             //render creature level
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             String levelString = this.creatureNBT.getCreatureLevelWithText();

@@ -9,6 +9,8 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
+import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
+
 public class RiftBoxMemButtonForBox extends RiftLibClickableSection {
     private CreatureNBT creatureNBT;
 
@@ -75,6 +77,19 @@ public class RiftBoxMemButtonForBox extends RiftLibClickableSection {
             Gui.drawModalRectWithCustomSizedTexture(k, l, 0, 0, 24, 24, 24, 24);
             if (this.creatureNBT.getCreatureHealth()[0] <= 0) GlStateManager.disableBlend();
             GlStateManager.popMatrix();
+
+            //create pacifier for baby creature
+            if (this.creatureNBT.isBaby()) {
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+                float pacifierScale = 0.25f;
+                int pacifierX = (int) ((this.guiWidth - 22) / (2 * pacifierScale) + (this.xOffset + this.xAddOffset + 15) / pacifierScale);
+                int pacifierY = (int) ((this.guiHeight - 22) / (2 * pacifierScale) + (this.yOffset + this.yAddOffset + 15) / pacifierScale);
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(pacifierScale, pacifierScale, pacifierScale);
+                drawModalRectWithCustomSizedTexture(pacifierX, pacifierY, 0, 300, 22, 22, 400, 360);
+                GlStateManager.popMatrix();
+            }
 
             //if creature is dead, put a timer showing how long it gonna take until it gets revived
             if (this.creatureNBT.getCreatureHealth()[0] <= 0) {

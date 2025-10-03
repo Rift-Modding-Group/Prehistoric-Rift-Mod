@@ -78,6 +78,19 @@ public class RiftPartyMemButtonForBox extends RiftLibClickableSection {
             GlStateManager.scale(iconScale, iconScale, iconScale);
             drawModalRectWithCustomSizedTexture(k, l, 0, 0, 24, 24, 24, 24);
             GlStateManager.popMatrix();
+
+            //create pacifier for baby creature
+            if (this.creatureNBT.isBaby()) {
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                this.minecraft.getTextureManager().bindTexture(this.textureLocation);
+                float pacifierScale = 0.175f;
+                int pacifierX = (int) ((this.guiWidth - 22) / (2 * pacifierScale) + (this.xOffset + this.xAddOffset + 15) / pacifierScale);
+                int pacifierY = (int) ((this.guiHeight - 22) / (2 * pacifierScale) + (this.yOffset + this.yAddOffset + 15) / pacifierScale);
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(pacifierScale, pacifierScale, pacifierScale);
+                drawModalRectWithCustomSizedTexture(pacifierX, pacifierY, 0, 300, 22, 22, 400, 360);
+                GlStateManager.popMatrix();
+            }
         }
         //blank contents, means slot is empty
         else {

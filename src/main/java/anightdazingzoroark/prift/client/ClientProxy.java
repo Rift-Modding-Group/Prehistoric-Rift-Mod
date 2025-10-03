@@ -35,11 +35,7 @@ import java.util.UUID;
 
 @Mod.EventBusSubscriber
 public class ClientProxy extends ServerProxy {
-    @Mod.Instance(RiftInitialize.MODID)
-    public static Object popupFromRadial;
-    public static Object swapTypeForPopup;
-    public static UUID creatureUUID;
-    public static BlockPos creatureBoxBlockPos;
+    //@Mod.Instance(RiftInitialize.MODID)
     public static int creatureIdForWorkstation = -1;
     public static boolean settingCreatureWorkstation = false;
     private int thirdPersonView = 0;

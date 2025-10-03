@@ -57,7 +57,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftResetBolaCaptured.Handler.class, RiftResetBolaCaptured.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftSetRiding.Handler.class, RiftSetRiding.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftSetRiding.Handler.class, RiftSetRiding.class, id++, Side.CLIENT);
-        WRAPPER.registerMessage(RiftOpenCreatureBoxMenu.Handler.class, RiftOpenCreatureBoxMenu.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftCreatureBoxSetLastOpenedTime.Handler.class, RiftCreatureBoxSetLastOpenedTime.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftCreatureBoxSetLastOpenedTime.Handler.class, RiftCreatureBoxSetLastOpenedTime.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftPartySetLastOpenedTime.Handler.class, RiftPartySetLastOpenedTime.class, id++, Side.SERVER);

@@ -26,6 +26,7 @@ import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RiftPartyScreen extends RiftLibUI {
@@ -59,6 +60,7 @@ public class RiftPartyScreen extends RiftLibUI {
                 this.shuffleCreaturesSection(),
                 this.deathBGSelectedCreature(),
                 this.selectedCreatureSection(),
+                this.babyIconSection(),
                 this.openJournalSection(),
                 this.partyMemberManagementSection(),
                 this.partyMembersSection(),
@@ -129,7 +131,7 @@ public class RiftPartyScreen extends RiftLibUI {
     }
 
     private RiftLibUISection selectedCreatureSection() {
-        return new RiftLibUISection("selectedCreatureSection", RiftPartyScreen.this.width, RiftPartyScreen.this.height, 99, 60, 0, -31, RiftPartyScreen.this.fontRenderer, RiftPartyScreen.this.mc) {
+        return new RiftLibUISection("selectedCreatureSection", this.width, this.height, 99, 60, 0, -31, this.fontRenderer, this.mc) {
             @Override
             public List<RiftLibUIElement.Element> defineSectionContents() {
                 List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
@@ -142,6 +144,22 @@ public class RiftPartyScreen extends RiftLibUI {
                 entityToRender.setAlignment(RiftLibUIElement.ALIGN_CENTER);
                 entityToRender.setRotationAngle(150);
                 toReturn.add(entityToRender);
+
+                return toReturn;
+            }
+        };
+    }
+
+    private RiftLibUISection babyIconSection() {
+        return new RiftLibUISection("babyIconSection", this.width, this.height, 22, 22, 50, 0, this.fontRenderer, this.mc) {
+            @Override
+            public List<RiftLibUIElement.Element> defineSectionContents() {
+                List<RiftLibUIElement.Element> toReturn = new ArrayList<>();
+
+                RiftLibUIElement.ImageElement imageElement = new RiftLibUIElement.ImageElement();
+                imageElement.setImage(background, 400, 360, 22, 22, 112, 222);
+                imageElement.setScale(0.5f);
+                toReturn.add(imageElement);
 
                 return toReturn;
             }
@@ -272,7 +290,10 @@ public class RiftPartyScreen extends RiftLibUI {
 
         if (section.id.equals("selectedCreatureSection") && element.getID().equals("selectedCreature")) {
             RiftLibUIElement.RenderedEntityElement renderedEntityElement = (RiftLibUIElement.RenderedEntityElement) element;
-            if (this.creatureToDraw != null) renderedEntityElement.setEntity(this.creatureToDraw);
+            if (this.creatureToDraw != null) {
+                renderedEntityElement.setEntity(this.creatureToDraw);
+                if (this.creatureToDraw.isBaby()) renderedEntityElement.setScale(20 / this.creatureToDraw.scale() * this.creatureToDraw.ageScaleParams()[1]);
+            }
         }
         if (section.id.equals("partyMemManagementSection")) {
             //change summon/dismiss button based on if creature is deployed or not
@@ -320,6 +341,7 @@ public class RiftPartyScreen extends RiftLibUI {
     public RiftLibUISection modifyUISection(RiftLibUISection section) {
         //some sections are visible only based on whether or not there's a selected creature and if its not shuffle party mems mode
         this.setUISectionVisibility("selectedCreatureSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
+        this.setUISectionVisibility("babyIconSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode && this.selectedCreature.getCreatureNBT(this.mc.player).isBaby());
         this.setUISectionVisibility("partyMemManagementSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
         this.setUISectionVisibility("informationSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
         this.setUISectionVisibility("movesSection", this.hasSelectedCreature() && !this.shufflePartyMemsMode);
