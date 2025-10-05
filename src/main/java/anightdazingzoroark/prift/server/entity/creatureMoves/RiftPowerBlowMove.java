@@ -2,13 +2,14 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.projectile.DilophosaurusSpit;
+import anightdazingzoroark.prift.server.entity.projectile.PowerBlow;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
-
-import java.util.List;
+import net.minecraft.util.math.MathHelper;
 
 public class RiftPowerBlowMove extends RiftCreatureMove {
     public RiftPowerBlowMove() {
@@ -29,30 +30,32 @@ public class RiftPowerBlowMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        List<Entity> targets = user.getAllTargetsInFront(true);
-        float blowStrength = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 2f, 8f);
-        for (Entity entity : targets) {
-            if (entity instanceof MultiPartEntityPart
-                    && ((MultiPartEntityPart)entity).parent instanceof EntityLivingBase)
-                this.knockback(user, (EntityLivingBase)((MultiPartEntityPart)entity).parent, blowStrength);
-            else if (entity instanceof EntityLivingBase) this.knockback(user, (EntityLivingBase) entity, blowStrength);
-        }
-    }
-
-    public void knockback(RiftCreature user, EntityLivingBase entity, float strength) {
-        if (MobSize.getMobSize(user).isAppropriateSize(entity)) {
-            double d0 = user.posX - entity.posX;
-            double d1 = user.posZ - entity.posZ;
-            double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
-            entity.knockBack(user, strength, d0 / d2 * 8.0D, d1 / d2 * 8.0D);
-        }
-        entity.attackEntityFrom(DamageSource.causeMobDamage(user), 0);
+        if (user.getControllingPassenger() == null) this.shootEntityUnmounted(user, target, useAmount);
+        else this.shootEntityMounted(user, useAmount);
     }
 
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.setCanMove(true);
         user.enableCanRotateMounted();
+    }
+
+    public void shootEntityUnmounted(RiftCreature user, Entity target, int useAmount) {
+        float blowStrength = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 2f, 8f);
+        PowerBlow powerBlow = new PowerBlow(user.world, user, blowStrength);
+        double d0 = target.posX - user.posX;
+        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 6.0F) - powerBlow.posY;
+        double d2 = target.posZ - user.posZ;
+        double d3 = (double) MathHelper.sqrt(d0 * d0 + d2 * d2);
+        powerBlow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.5F, 1.0F);
+        user.world.spawnEntity(powerBlow);
+    }
+
+    public void shootEntityMounted(RiftCreature user, int useAmount) {
+        float blowStrength = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 2f, 8f);
+        PowerBlow powerBlow = new PowerBlow(user.world, user, blowStrength);
+        powerBlow.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
+        user.world.spawnEntity(powerBlow);
     }
 
     @Override

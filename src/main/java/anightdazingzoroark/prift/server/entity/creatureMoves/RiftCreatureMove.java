@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.MobSize;
@@ -30,6 +31,9 @@ public abstract class RiftCreatureMove {
     //if the move requires the user to have a target, this is checked in the RiftCreatureUseMoveUnmounted AI goal
     //if not, this is checked every tick within the creatures class
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        //block if creature cannot do melee damage yet is a melee move
+        if (RiftConfigHandler.getConfig(user.creatureType).stats.baseDamage <= 0 && this.creatureMove.moveAnimType.moveType == CreatureMove.MoveType.MELEE) return false;
+
         //check if theres animators available for move
         if (user.animatorsForMoveType().get(this.creatureMove.moveAnimType) == null) return false;
 

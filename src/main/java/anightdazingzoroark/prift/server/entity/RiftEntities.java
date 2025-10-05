@@ -35,6 +35,7 @@ public class RiftEntities {
         registerEntity("venom_bomb", VenomBomb.class, miscId++, RiftInitialize.instance);
         registerEntity("mudball", Mudball.class, miscId++, RiftInitialize.instance);
         registerEntity("trap", RiftTrap.class, miscId++, RiftInitialize.instance);
+        registerEntity("power_blow", PowerBlow.class, miscId++, RiftInitialize.instance);
     }
 
     public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {
