@@ -1,14 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.projectile.DilophosaurusSpit;
-import anightdazingzoroark.prift.server.entity.projectile.PowerBlow;
-import anightdazingzoroark.prift.server.enums.MobSize;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectileEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 
 public class RiftPowerBlowMove extends RiftCreatureMove {
@@ -42,7 +38,8 @@ public class RiftPowerBlowMove extends RiftCreatureMove {
 
     public void shootEntityUnmounted(RiftCreature user, Entity target, int useAmount) {
         float blowStrength = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 2f, 8f);
-        PowerBlow powerBlow = new PowerBlow(user.world, user, blowStrength);
+        RiftCreatureProjectileEntity powerBlow = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.POWER_BLOW, user);
+        powerBlow.setPower(blowStrength);
         double d0 = target.posX - user.posX;
         double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 6.0F) - powerBlow.posY;
         double d2 = target.posZ - user.posZ;
@@ -53,7 +50,8 @@ public class RiftPowerBlowMove extends RiftCreatureMove {
 
     public void shootEntityMounted(RiftCreature user, int useAmount) {
         float blowStrength = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 2f, 8f);
-        PowerBlow powerBlow = new PowerBlow(user.world, user, blowStrength);
+        RiftCreatureProjectileEntity powerBlow = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.POWER_BLOW, user);
+        powerBlow.setPower(blowStrength);
         powerBlow.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
         user.world.spawnEntity(powerBlow);
     }

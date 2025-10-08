@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.projectile.DilophosaurusSpit;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectileEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
 
 public class RiftPoisonSpitMove extends RiftCreatureMove {
@@ -40,7 +40,7 @@ public class RiftPoisonSpitMove extends RiftCreatureMove {
     }
 
     public void shootEntityUnmounted(RiftCreature user, Entity target) {
-        DilophosaurusSpit dilophosaurusSpit = new DilophosaurusSpit(user.world, user);
+        RiftCreatureProjectileEntity dilophosaurusSpit = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.POISON_SPIT, user);
         double d0 = target.posX - user.posX;
         double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 6.0F) - dilophosaurusSpit.posY;
         double d2 = target.posZ - user.posZ;
@@ -50,7 +50,7 @@ public class RiftPoisonSpitMove extends RiftCreatureMove {
     }
 
     public void shootEntityMounted(RiftCreature user) {
-        DilophosaurusSpit dilophosaurusSpit = new DilophosaurusSpit(user.world, user, (EntityPlayer) user.getControllingPassenger());
+        RiftCreatureProjectileEntity dilophosaurusSpit = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.POISON_SPIT, user);
         dilophosaurusSpit.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
         user.world.spawnEntity(dilophosaurusSpit);
     }

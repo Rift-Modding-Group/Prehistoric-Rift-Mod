@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.client.renderer.entity;
 
 import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
-import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;

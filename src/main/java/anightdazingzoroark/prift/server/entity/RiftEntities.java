@@ -26,16 +26,12 @@ public class RiftEntities {
         registerEntity("egg", RiftEgg.class, miscId++, RiftInitialize.instance);
         registerEntity("sac", RiftSac.class, miscId++, RiftInitialize.instance);
         registerEntity("embryo", RiftSac.class, miscId++, RiftInitialize.instance);
-        registerEntity("thrown_stegosaurus_plate", ThrownStegoPlate.class, miscId++, RiftInitialize.instance);
         registerEntity("cannonball_projectile", RiftCannonball.class, miscId++, RiftInitialize.instance);
         registerEntity("mortar_shell_projectile", RiftMortarShell.class, miscId++, RiftInitialize.instance);
         registerEntity("catapult_boulder_projectile", RiftCatapultBoulder.class, miscId++, RiftInitialize.instance);
         registerEntity("thrown_bola", ThrownBola.class, miscId++, RiftInitialize.instance);
-        registerEntity("dilophosaurus_spit", DilophosaurusSpit.class, miscId++, RiftInitialize.instance);
-        registerEntity("venom_bomb", VenomBomb.class, miscId++, RiftInitialize.instance);
-        registerEntity("mudball", Mudball.class, miscId++, RiftInitialize.instance);
+        registerEntity("creature_projectile", RiftCreatureProjectileEntity.class, miscId++, RiftInitialize.instance);
         registerEntity("trap", RiftTrap.class, miscId++, RiftInitialize.instance);
-        registerEntity("power_blow", PowerBlow.class, miscId++, RiftInitialize.instance);
     }
 
     public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {

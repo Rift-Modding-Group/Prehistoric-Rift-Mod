@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
 import anightdazingzoroark.prift.compat.crafttweaker.RiftCrafttweaker;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
@@ -22,9 +23,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawning;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
-import anightdazingzoroark.prift.server.entity.RiftCreatureHitboxLinker;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.events.RiftCreatureBoxBorder;
 import anightdazingzoroark.prift.server.events.ServerEvents;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
@@ -35,7 +34,6 @@ import anightdazingzoroark.prift.server.tileentities.RiftTileEntities;
 import anightdazingzoroark.prift.server.world.RiftPlantGenerator;
 import anightdazingzoroark.prift.server.world.RiftStructureGenerator;
 import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
-import anightdazingzoroark.riftlib.RiftLibLinkerRegistry;
 import com.charles445.simpledifficulty.api.temperature.TemperatureRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -47,8 +45,6 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-
-import javax.annotation.Nullable;
 
 @Mod.EventBusSubscriber
 public class ServerProxy {
@@ -74,6 +70,7 @@ public class ServerProxy {
         RiftBlocks.registerOreDicTags();
         RiftRecipes.registerSmelting();
         RiftEffects.registerEffects();
+        RiftCreatureProjectile.initCreatureProjectileBuilders();
         if (GeneralConfig.canUseMM()) RiftMMRecipes.registerRecipes();
         RiftCrafttweaker.loadCrafttweakerCompat();
         MinecraftForge.EVENT_BUS.register(new RiftItems());

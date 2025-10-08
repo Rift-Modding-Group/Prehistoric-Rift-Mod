@@ -16,7 +16,8 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
-import anightdazingzoroark.prift.server.entity.projectile.VenomBomb;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectileEntity;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftCanUseMoveTriggerButton;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -558,14 +559,16 @@ public class ServerEvents {
             event.getAffectedEntities().removeAll(entitiesToRemove);
         }
         //poison mobs hit by explosion from venom bomb
-        if (event.getExplosion().exploder instanceof VenomBomb) {
-            VenomBomb venomBomb = (VenomBomb) event.getExplosion().exploder;
-            for (Entity entity : event.getAffectedEntities()) {
-                if (entity instanceof EntityLivingBase
-                        && RiftUtil.checkForNoAssociations(venomBomb.getShooter(), entity)
-                        && RiftUtil.checkForNoHerdAssociations(venomBomb.getShooter(), entity)
-                ) {
-                    ((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.POISON, 100, 4));
+        if (event.getExplosion().exploder instanceof RiftCreatureProjectileEntity) {
+            RiftCreatureProjectileEntity creatureProjectileEntity = (RiftCreatureProjectileEntity) event.getExplosion().exploder;
+            if (creatureProjectileEntity.getProjectileBuilder().projectileEnum == RiftCreatureProjectile.Enum.VENOM_BOMB) {
+                for (Entity entity : event.getAffectedEntities()) {
+                    if (entity instanceof EntityLivingBase
+                            && RiftUtil.checkForNoAssociations((RiftCreature) creatureProjectileEntity.shootingEntity, entity)
+                            && RiftUtil.checkForNoHerdAssociations((RiftCreature) creatureProjectileEntity.shootingEntity, entity)
+                    ) {
+                        ((EntityLivingBase) entity).addPotionEffect(new PotionEffect(MobEffects.POISON, 100, 4));
+                    }
                 }
             }
         }

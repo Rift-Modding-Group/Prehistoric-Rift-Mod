@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.projectile.ThrownStegoPlate;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectileEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 
@@ -38,7 +38,7 @@ public class RiftPlateScatterMove extends RiftCreatureMove {
 
     private void shootEntityUnmounted(RiftCreature creature, Entity target) {
         for (int angle = - 45; angle <= 45; angle += 15) {
-            ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(creature.world, creature);
+            RiftCreatureProjectileEntity thrownStegoPlate = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.THROWN_STEGOSAURUS_PLATE, creature);
             double velX = target.posX - creature.posX;
             double velY = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - thrownStegoPlate.posY;
             double velZ = target.posZ - creature.posZ;
@@ -48,7 +48,6 @@ public class RiftPlateScatterMove extends RiftCreatureMove {
             double newVelX = magnitude * Math.sin((targetAngle + Math.toRadians(angle)));
             double newVelZ = magnitude * Math.cos(-(targetAngle + Math.toRadians(angle)));
 
-            thrownStegoPlate.setVariant(creature.getVariant());
             thrownStegoPlate.shoot(newVelX, velY + magnitude * 0.20000000298023224D, newVelZ, 1.6F, 5F);
             thrownStegoPlate.setDamage(8D + (double)(creature.getLevel())/5D);
             creature.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (creature.getRNG().nextFloat() * 0.4F + 0.8F));
@@ -58,9 +57,7 @@ public class RiftPlateScatterMove extends RiftCreatureMove {
 
     private void shootEntityMounted(RiftCreature user) {
         for (int angle = - 45; angle <= 45; angle += 15) {
-            ThrownStegoPlate thrownStegoPlate = new ThrownStegoPlate(user.world, user, (EntityPlayer)user.getControllingPassenger());
-            thrownStegoPlate.setDamage(8D + (double)(user.getLevel())/5D);
-            thrownStegoPlate.setVariant(user.getVariant());
+            RiftCreatureProjectileEntity thrownStegoPlate = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.THROWN_STEGOSAURUS_PLATE, user);
             thrownStegoPlate.shoot(user, user.rotationPitch, user.rotationYaw + angle, 0.0F, 1.5F, 1.0F);
             user.world.spawnEntity(thrownStegoPlate);
         }

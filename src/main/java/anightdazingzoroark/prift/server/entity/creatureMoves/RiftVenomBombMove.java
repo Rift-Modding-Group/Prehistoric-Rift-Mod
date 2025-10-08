@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.projectile.VenomBomb;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectileEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
 
 public class RiftVenomBombMove extends RiftCreatureMove {
@@ -36,7 +36,7 @@ public class RiftVenomBombMove extends RiftCreatureMove {
     }
 
     public void shootEntityUnmounted(RiftCreature user, Entity target) {
-        VenomBomb venomBomb = new VenomBomb(user.world, user);
+        RiftCreatureProjectileEntity venomBomb = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.VENOM_BOMB, user);
         double d0 = target.posX - user.posX;
         double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 6.0F) - venomBomb.posY;
         double d2 = target.posZ - user.posZ;
@@ -46,8 +46,7 @@ public class RiftVenomBombMove extends RiftCreatureMove {
     }
 
     public void shootEntityMounted(RiftCreature user) {
-        VenomBomb venomBomb = new VenomBomb(user.world, user, (EntityPlayer)user.getControllingPassenger());
-        venomBomb.setDamage(2D + (double)(user.getLevel())/10D);
+        RiftCreatureProjectileEntity venomBomb = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.VENOM_BOMB, user);
         venomBomb.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
         user.world.spawnEntity(venomBomb);
     }

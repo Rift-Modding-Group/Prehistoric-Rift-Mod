@@ -36,14 +36,11 @@ public class EntityRenderer {
         RenderingRegistry.registerEntityRenderingHandler(RiftEmbryo.class, RiftEmbryoRenderer::new);
 
         //projectiles
-        RenderingRegistry.registerEntityRenderingHandler(ThrownStegoPlate.class, ThrownStegoPlateRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftCreatureProjectileEntity.class, RiftCreatureProjectileRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftCannonball.class, RiftCannonballRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftMortarShell.class, RiftMortarShellRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftCatapultBoulder.class, RiftCatapultBoulderRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ThrownBola.class, ThrownBolaRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(DilophosaurusSpit.class, DilophosaurusSpitRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(VenomBomb.class, VenomBombRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(Mudball.class, MudballRenderer::new);
 
         RenderingRegistry.registerEntityRenderingHandler(RiftTrap.class, new IRenderFactory<RiftTrap>() {
             @Override
