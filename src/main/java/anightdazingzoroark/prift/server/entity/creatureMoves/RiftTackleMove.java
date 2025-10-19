@@ -1,26 +1,20 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftSetEntityMotion;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.MoverType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RiftTackleMove extends RiftCreatureMove {
     private BlockPos targetPosForTackle;
-    private int chargeTime;
-    private int maxChargeTime;
-    private double chargeDirectionToPosX;
-    private double chargeDirectionToPosZ;
-    private final double tackleMaxDist = 4;
-    private final int chargeSpeed = 4;
 
     public RiftTackleMove() {
         super(CreatureMove.TACKLE);
@@ -31,34 +25,23 @@ public class RiftTackleMove extends RiftCreatureMove {
         user.setCanMove(false);
         user.disableCanRotateMounted();
 
-        //this is only relevant when unmounted
-        if (target != null) {
-            //get charge distance
-            double unnormalizedDirectionX = target.posX - user.posX;
-            double unnormalizedDirectionZ = target.posZ - user.posZ;
-            double angleToTarget = Math.atan2(unnormalizedDirectionZ, unnormalizedDirectionX);
-            double chargeDistX = this.tackleMaxDist * Math.cos(angleToTarget);
-            double chargeDistZ = this.tackleMaxDist * Math.sin(angleToTarget);
+        //only relevant if creature is ridden
+        //if the creature is being ridden, targets pos is where it charges to
+        if (target != null) this.targetPosForTackle = new BlockPos(target);
+    }
 
-            //get charge direction
-            double unnormalizedMagnitude = Math.sqrt(Math.pow(unnormalizedDirectionX, 2) + Math.pow(unnormalizedDirectionZ, 2));
-            this.chargeDirectionToPosX = unnormalizedDirectionX / unnormalizedMagnitude;
-            this.chargeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
-
-            //get charge time
-            //the point at which it stops when unmounted is doubled, so the max charge time here
-            //is to be halved to make it consistent with when mounted
-            this.maxChargeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) / (this.chargeSpeed * 2));
-        }
-        //this is only relevant when mounted
+    @Override
+    public void onEndChargeUp(RiftCreature user, int useAmount) {
+        user.setCanMove(true);
+        //if the creature is being ridden, targets pos is where it charges to
+        if (this.targetPosForTackle != null) user.chargeToPos(this.targetPosForTackle, 4D);
+        //otherwise, use position forward based on where it lookin at as charge pos
+        //distance to charge by is based on useAmount and the creatures ranged attack reach
         else {
-            //get charge direction
-            double unnormalizedMagnitude = Math.sqrt(Math.pow(user.getLookVec().x, 2) + Math.pow(user.getLookVec().z, 2));
-            this.chargeDirectionToPosX = user.getLookVec().x / unnormalizedMagnitude;
-            this.chargeDirectionToPosZ = user.getLookVec().z / unnormalizedMagnitude;
-
-            //get charge time
-            this.maxChargeTime = (int) Math.ceil(this.tackleMaxDist / this.chargeSpeed);
+            Vec3d lookVecNoY = new Vec3d(user.getLookVec().x, 0, user.getLookVec().z);
+            double chargeDirectionToPosX = lookVecNoY.normalize().x * 4;
+            double chargeDirectionToPosZ = lookVecNoY.normalize().z * 4;
+            this.targetPosForTackle = user.getPosition().add(chargeDirectionToPosX, 0, chargeDirectionToPosZ);
         }
     }
 
@@ -67,12 +50,11 @@ public class RiftTackleMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
-        user.setCanMove(true);
-        AxisAlignedBB tackleDetectHitbox = user.getEntityBoundingBox();
+        AxisAlignedBB tackleDetectHitbox = user.frontOfCreatureAABB();
         AxisAlignedBB tackleEffectHitbox = tackleDetectHitbox.grow(2D);
 
         //stop if it hits a mob
-        List<Entity> tackledEntities = user.world.getEntitiesWithinAABB(Entity.class, tackleDetectHitbox.grow(1D), this.generalEntityPredicate(user));
+        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, tackleDetectHitbox.grow(1D), this.generalEntityPredicate(user));
 
         //stop if it hits a block
         boolean hitBlocksFlag = false;
@@ -88,13 +70,9 @@ public class RiftTackleMove extends RiftCreatureMove {
             }
         }
 
-        if (hitBlocksFlag || !tackledEntities.isEmpty() || this.chargeTime >= this.maxChargeTime) {
-            user.motionX = 0;
-            user.motionZ = 0;
-            user.velocityChanged = true;
-
+        if (hitBlocksFlag || !chargedIntoEntities.isEmpty() || user.stopChargeFlag) {
             //damage all entities it charged into
-            if (!tackledEntities.isEmpty()) {
+            if (!chargedIntoEntities.isEmpty()) {
                 List<Entity> entitiesToDamage = user.world.getEntitiesWithinAABB(Entity.class, tackleEffectHitbox, this.generalEntityPredicate(user));
                 for (Entity entity : entitiesToDamage) {
                     user.attackEntityAsMob(entity);
@@ -105,15 +83,10 @@ public class RiftTackleMove extends RiftCreatureMove {
             this.forceStopFlag = true;
         }
         else {
-            //for some reason when being ridden and tryin to make a creature
-            //charge/lunge into a wall theres a good chance they'll stop prematurely
-            //so there's this shit instead
-            if (user.isBeingRidden() && user.getControllingPassenger() != null)
-                RiftMessages.WRAPPER.sendToAll(new RiftSetEntityMotion(user, this.chargeDirectionToPosX * this.chargeSpeed, this.chargeDirectionToPosZ * this.chargeSpeed));
-            else
-                user.move(MoverType.SELF, this.chargeDirectionToPosX * this.chargeSpeed, user.motionY, this.chargeDirectionToPosZ * this.chargeSpeed);
+            //now charge to final charge position
+            //note that it is meant to be executed every tick
+            if (this.targetPosForTackle != null) user.chargeToPos(this.targetPosForTackle, 4D);
 
-            this.chargeTime++;
             if (this.useValue > 0) this.useValue--; //this only matters when using while mounted
         }
     }
@@ -124,6 +97,7 @@ public class RiftTackleMove extends RiftCreatureMove {
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.setCanMove(true);
+        user.endCharge();
         user.enableCanRotateMounted();
     }
 }
