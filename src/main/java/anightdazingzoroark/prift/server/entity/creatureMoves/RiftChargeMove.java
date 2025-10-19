@@ -17,11 +17,6 @@ import java.util.List;
 public class RiftChargeMove extends RiftCreatureMove {
     private BlockPos lookAtPosition;
     private BlockPos targetPosForCharge;
-    private int chargeTime;
-    private int maxChargeTime;
-    private double chargeDirectionToPosX;
-    private double chargeDirectionToPosZ;
-    private final int chargeSpeed = 4;
 
     public RiftChargeMove() {
         super(CreatureMove.CHARGE);
@@ -32,42 +27,24 @@ public class RiftChargeMove extends RiftCreatureMove {
         user.setCanMove(false);
         user.disableCanRotateMounted();
 
-        //this is only relevant when unmounted
+        //only relevant if creature is ridden
+        //if the creature is being ridden, targets pos is where it charges to
         if (target != null) this.targetPosForCharge = new BlockPos(target);
     }
 
     @Override
     public void onEndChargeUp(RiftCreature user, int useAmount) {
         user.setCanMove(true);
-
-        //this is only relevant when unmounted
-        if (this.targetPosForCharge != null) {
-            //get charge distance
-            double unnormalizedDirectionX = this.targetPosForCharge.getX() - user.posX;
-            double unnormalizedDirectionZ = this.targetPosForCharge.getZ() - user.posZ;
-            double angleToTarget = Math.atan2(unnormalizedDirectionZ, unnormalizedDirectionX);
-            double chargeDistX = user.rangedWidth() * Math.cos(angleToTarget);
-            double chargeDistZ = user.rangedWidth() * Math.sin(angleToTarget);
-
-            //get charge direction
-            double unnormalizedMagnitude = Math.sqrt(Math.pow(unnormalizedDirectionX, 2) + Math.pow(unnormalizedDirectionZ, 2));
-            this.chargeDirectionToPosX = unnormalizedDirectionX / unnormalizedMagnitude;
-            this.chargeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
-
-            //get charge time
-            //the point at which it stops when unmounted is doubled, so the max charge time here
-            //is to be halved to make it consistent with when mounted
-            this.maxChargeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) / (this.chargeSpeed * 2));
-        }
-        //this is only relevant when mounted
+        //if the creature is being ridden, targets pos is where it charges to
+        if (this.targetPosForCharge != null) user.chargeToPos(this.targetPosForCharge, 8D);
+        //otherwise, use position forward based on where it lookin at as charge pos
+        //distance to charge by is based on useAmount and the creatures ranged attack reach
         else {
-            //get charge direction
-            double unnormalizedMagnitude = Math.sqrt(Math.pow(user.getLookVec().x, 2) + Math.pow(user.getLookVec().z, 2));
-            this.chargeDirectionToPosX = user.getLookVec().x / unnormalizedMagnitude;
-            this.chargeDirectionToPosZ = user.getLookVec().z / unnormalizedMagnitude;
-
-            //get charge time
-            this.maxChargeTime = (int) Math.ceil(RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth()) / this.chargeSpeed);
+            Vec3d lookVecNoY = new Vec3d(user.getLookVec().x, 0, user.getLookVec().z);
+            double slopeResForCharge = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, 0, user.rangedWidth());
+            double chargeDirectionToPosX = lookVecNoY.normalize().x * slopeResForCharge;
+            double chargeDirectionToPosZ = lookVecNoY.normalize().z * slopeResForCharge;
+            this.targetPosForCharge = user.getPosition().add(chargeDirectionToPosX, 0, chargeDirectionToPosZ);
         }
     }
 
@@ -96,11 +73,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             }
         }
 
-        if (hitBlocksFlag || !chargedIntoEntities.isEmpty() || this.chargeTime >= this.maxChargeTime) {
-            user.motionX = 0;
-            user.motionZ = 0;
-            user.velocityChanged = true;
-
+        if (hitBlocksFlag || !chargedIntoEntities.isEmpty() || user.stopChargeFlag) {
             //damage all entities it charged into
             if (!chargedIntoEntities.isEmpty()) {
                 List<Entity> entitiesToDamage = user.world.getEntitiesWithinAABB(Entity.class, chargerEffectHitbox, this.generalEntityPredicate(user));
@@ -110,7 +83,7 @@ public class RiftChargeMove extends RiftCreatureMove {
             }
 
             //destroy all breakable blocks it has hit
-            //this can skip the breakBlocksFlagw
+            //this can skip the breakBlocksFlag
             //first get blocks in the detection list
             List<BlockPos> blockBreakList = new ArrayList<>();
             for (int x = MathHelper.floor(chargerEffectHitbox.minX); x < MathHelper.ceil(chargerEffectHitbox.maxX); x++) {
@@ -143,15 +116,10 @@ public class RiftChargeMove extends RiftCreatureMove {
             this.forceStopFlag = true;
         }
         else {
-            //for some reason when being ridden and tryin to make a creature
-            //charge/lunge into a wall theres a good chance they'll stop prematurely
-            //so there's this shit instead
-            if (user.isBeingRidden() && user.getControllingPassenger() != null)
-                RiftMessages.WRAPPER.sendToAll(new RiftSetEntityMotion(user, this.chargeDirectionToPosX * this.chargeSpeed, this.chargeDirectionToPosZ * this.chargeSpeed));
-            else
-                user.move(MoverType.SELF, this.chargeDirectionToPosX * this.chargeSpeed, user.motionY, this.chargeDirectionToPosZ * this.chargeSpeed);
+            //now charge to final charge position
+            //note that it is meant to be executed every tick
+            if (this.targetPosForCharge != null) user.chargeToPos(this.targetPosForCharge, 8D);
 
-            this.chargeTime++;
             if (this.useValue > 0) this.useValue--; //this only matters when using while mounted
         }
     }
@@ -164,6 +132,7 @@ public class RiftChargeMove extends RiftCreatureMove {
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.setCanMove(true);
+        user.endCharge();
         user.enableCanRotateMounted();
     }
 

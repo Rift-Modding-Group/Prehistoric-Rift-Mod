@@ -17,6 +17,7 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
@@ -42,6 +43,7 @@ import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITarget;
+import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -166,6 +168,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private static final DataParameter<BlockPos> HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BLOCK_POS);
 
+    private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+
     private int herdSize = 1;
     private RiftCreature herdLeader;
     private int boxReviveTime;
@@ -182,7 +186,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public AnimationFactory factory = new AnimationFactory(this);
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
-    private boolean steerable = true;
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
     protected double speed;
@@ -210,12 +213,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private Entity grabVictim;
     private int chosenAnimFromMultiple = -1;
     private int resetEnergyTick;
-    public int lastIntervalForMoveCall;
     private int ticksSinceHitboxRemoval = 0;
     //for updating hud stuff when creature is deployed from party
     private int cachedHealthBucket = -1;
     private int cachedEnergyBucket = -1;
     private int cachedXPBucket = -1;
+    //for charge management, for server only
+    public boolean stopChargeFlag;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -226,6 +230,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.maxEnergy = RiftConfigHandler.getConfig(creatureType).stats.maxEnergy;
         this.healthLevelMultiplier = RiftConfigHandler.getConfig(creatureType).stats.healthMultiplier;
         this.damageLevelMultiplier = RiftConfigHandler.getConfig(creatureType).stats.damageMultiplier;
+        this.moveHelper = new RiftCreatureMoveHelper(this);
         this.ignoreFrustumCheck = true;
         this.setSpeed(0f);
         this.setWaterSpeed(1f);
@@ -337,6 +342,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(LEAP_Z_VELOCITY, 0.0f);
 
         this.dataManager.register(HOME_POS, new BlockPos(0, 0, 0));
+
+        this.dataManager.register(CHARGING, false);
     }
 
     @Override
@@ -2981,11 +2988,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public boolean canBeSteered() {
-        return this.steerable;
-    }
-
-    public void setCanBeSteered(boolean value) {
-        this.steerable = value;
+        return !this.getIsCharging();
     }
 
     @Override
@@ -3000,6 +3003,31 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         return null;
+    }
+
+    public void setIsCharging(boolean value) {
+        this.dataManager.set(CHARGING, value);
+    }
+
+    public boolean getIsCharging() {
+        return this.dataManager.get(CHARGING);
+    }
+
+    public void chargeToPos(BlockPos pos, double speed) {
+        if (this.moveHelper instanceof RiftCreatureMoveHelper) {
+            RiftCreatureMoveHelper creatureMoveHelper = (RiftCreatureMoveHelper) this.moveHelper;
+            creatureMoveHelper.setChargeTo(pos.getX(), pos.getY(), pos.getZ(), speed);
+            this.setIsCharging(true);
+        }
+    }
+
+    public void endCharge() {
+        this.setIsCharging(false);
+        this.stopChargeFlag = false;
+        if (this.moveHelper instanceof RiftCreatureMoveHelper) {
+            RiftCreatureMoveHelper creatureMoveHelper = (RiftCreatureMoveHelper) this.moveHelper;
+            creatureMoveHelper.oldDist = Double.MAX_VALUE;
+        }
     }
 
     @Override

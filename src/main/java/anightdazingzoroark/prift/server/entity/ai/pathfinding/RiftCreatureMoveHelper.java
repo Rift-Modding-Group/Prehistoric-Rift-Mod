@@ -1,0 +1,148 @@
+package anightdazingzoroark.prift.server.entity.ai.pathfinding;
+
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityMoveHelper;
+import net.minecraft.pathfinding.NodeProcessor;
+import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.util.math.MathHelper;
+
+public class RiftCreatureMoveHelper extends EntityMoveHelper {
+    private final RiftCreature creature;
+    private CreatureAction creatureAction = CreatureAction.WAIT;
+
+    //charge related stuff
+    public double oldDist = Double.MAX_VALUE;
+
+    public RiftCreatureMoveHelper(RiftCreature creature) {
+        super(creature);
+        this.creature = creature;
+    }
+
+    //reminder to self that this is meant to be executed every tick
+    @Override
+    public void setMoveTo(double x, double y, double z, double speedIn) {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        this.speed = speedIn;
+        this.creatureAction = CreatureAction.MOVE_TO;
+    }
+
+    @Override
+    public void strafe(float forward, float strafe) {
+        this.creatureAction = CreatureAction.STRAFE;
+        this.moveForward = forward;
+        this.moveStrafe = strafe;
+        this.speed = 0.25D;
+    }
+
+    //this is meant to be executed every tick too
+    public void setChargeTo(double x, double y, double z, double speedIn) {
+        if (this.creature.stopChargeFlag) return;
+
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        this.speed = speedIn;
+        this.creatureAction = CreatureAction.CHARGE;
+    }
+
+    @Override
+    public void onUpdateMoveHelper() {
+        if (this.creatureAction == CreatureAction.STRAFE) {
+            float creatureSpeed = (float)this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+            float finalSpeed = (float) this.speed * creatureSpeed;
+            float forwardMove = this.moveForward;
+            float strafeMove = this.moveStrafe;
+            float move = Math.max(MathHelper.sqrt(forwardMove * forwardMove + strafeMove * strafeMove), 1f);
+
+            move = finalSpeed / move;
+            forwardMove = forwardMove * move;
+            strafeMove = strafeMove * move;
+            float f5 = MathHelper.sin(this.creature.rotationYaw * 0.017453292F);
+            float f6 = MathHelper.cos(this.creature.rotationYaw * 0.017453292F);
+            float f7 = forwardMove * f6 - strafeMove * f5;
+            float f8 = strafeMove * f6 + forwardMove * f5;
+            PathNavigate pathnavigate = this.creature.getNavigator();
+
+            NodeProcessor nodeprocessor = pathnavigate.getNodeProcessor();
+
+            if (nodeprocessor.getPathNodeType(this.creature.world, MathHelper.floor(this.creature.posX + (double) f7), MathHelper.floor(this.creature.posY), MathHelper.floor(this.creature.posZ + (double) f8)) != PathNodeType.WALKABLE) {
+                this.moveForward = 1f;
+                this.moveStrafe = 0f;
+                finalSpeed = creatureSpeed;
+            }
+
+            this.creature.setAIMoveSpeed(finalSpeed);
+            this.creature.setMoveForward(this.moveForward);
+            this.creature.setMoveStrafing(this.moveStrafe);
+            this.creatureAction = CreatureAction.WAIT;
+        }
+        else if (this.creatureAction == CreatureAction.MOVE_TO) {
+            //the reason why setMoveTo is to be executed every tick
+            this.creatureAction = CreatureAction.WAIT;
+
+            //get dist from pos to move to
+            double distX = this.posX - this.creature.posX;
+            double distZ = this.posZ - this.creature.posZ;
+            double distY = this.posY - this.creature.posY;
+            double dist = Math.sqrt(distX * distX + distY * distY + distZ * distZ);
+            double distNoHeight = Math.sqrt(distX * distX + distZ * distZ);
+
+            //stop when creature reaches pos
+            if (dist <= 0) {
+                this.creature.setMoveForward(0f);
+                return;
+            }
+
+            //move in direction towards the pos to move to
+            float newRotationYaw = (float)(MathHelper.atan2(distZ, distX) * (180D / Math.PI)) - 90f;
+            this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, newRotationYaw, 90f);
+            this.creature.setAIMoveSpeed((float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
+
+            //jump
+            if (distY > (double)this.creature.stepHeight && distNoHeight < (double) Math.max(1f, this.creature.width)) {
+                this.creature.getJumpHelper().setJumping();
+                this.action = EntityMoveHelper.Action.JUMPING;
+            }
+        }
+        else if (this.creatureAction == CreatureAction.JUMP) {
+            this.creature.setAIMoveSpeed((float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
+
+            if (this.creature.onGround) this.creatureAction = CreatureAction.WAIT;
+        }
+        else if (this.creatureAction == CreatureAction.CHARGE) {
+            //the reason why setChargeTo is to be executed every tick
+            this.creatureAction = CreatureAction.WAIT;
+
+            //get dist from pos to move to, note that we don't care about y pos here
+            double distX = this.posX - this.creature.posX;
+            double distZ = this.posZ - this.creature.posZ;
+            double dist = Math.sqrt(distX * distX + distZ * distZ);
+
+            //stop when dist becomes bigger than oldDist
+            if (dist > this.oldDist) {
+                this.creature.stopChargeFlag = true;
+                this.creature.setIsCharging(false);
+                this.creature.setAIMoveSpeed(0f);
+                return;
+            }
+            else this.oldDist = dist;
+
+            //move in direction towards the pos to move to
+            this.creature.setAIMoveSpeed((float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
+        }
+        else this.creature.setMoveForward(0f);
+    }
+
+    public enum CreatureAction {
+        WAIT,
+        MOVE_TO,
+        STRAFE,
+        JUMP, //classic jump upwards to move upwards
+        CHARGE, //charge
+        LEAP;
+    }
+}

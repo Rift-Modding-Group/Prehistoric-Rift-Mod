@@ -166,11 +166,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     }
 
     @Override
-    public float rangedWidth() {
-        return 32f;
-    }
-
-    @Override
     public Map<String, Boolean> getWorkstations() {
         Map<String, Boolean> workstations = new HashMap<>();
         if (GeneralConfig.canUseMM()) {
