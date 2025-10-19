@@ -53,7 +53,7 @@ public class RiftChargeMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
-        AxisAlignedBB chargerDetectHitbox = user.getEntityBoundingBox();
+        AxisAlignedBB chargerDetectHitbox = user.frontOfCreatureAABB();
         AxisAlignedBB chargerEffectHitbox = chargerDetectHitbox.grow(2D);
 
         //stop if it hits a mob
