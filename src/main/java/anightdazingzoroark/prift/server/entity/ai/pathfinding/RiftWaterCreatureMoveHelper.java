@@ -40,21 +40,39 @@ public class RiftWaterCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             //the reason why setChargeTo is to be executed every tick
             this.creatureAction = CreatureAction.WAIT;
 
-            //get dist from pos to move to
+            //get distWithY from pos to move to
             Vec3d chargeVec = new Vec3d(this.posX - this.waterCreature.posX, this.posY - this.waterCreature.posY, this.posZ - this.waterCreature.posZ);
-            double dist = chargeVec.length();
+            double distWithY = chargeVec.length();
+            double distNoY = new Vec3d(chargeVec.x, 0, chargeVec.z).length();
 
-            //stop when dist becomes bigger than oldDist
-            if (dist > this.oldDist) {
+            //when in water, stop when distWithY becomes bigger than oldChargeDistWithY
+            if (this.waterCreature.isInWater() && distWithY > this.oldChargeDistWithY) {
                 this.waterCreature.stopChargeFlag = true;
                 this.waterCreature.setIsCharging(false);
                 this.waterCreature.setAIMoveSpeed(0f);
+                this.waterCreature.setMoveVertical(0f);
                 return;
             }
-            else this.oldDist = dist;
+            //when on land, stop when distNoY becomes bigger than oldChargeDistNoY
+            else if (!this.waterCreature.isInWater() && distNoY > this.oldChargeDistNoY) {
+                this.waterCreature.stopChargeFlag = true;
+                this.waterCreature.setIsCharging(false);
+                this.waterCreature.setAIMoveSpeed(0f);
+                this.waterCreature.setMoveVertical(0f);
+                return;
+            }
+            else {
+                this.oldChargeDistWithY = distWithY;
+                this.oldChargeDistNoY = distNoY;
+            }
+
+            //make speed from vector and waterCreature speed
+            double creatureSpeed = (float) (this.speed * this.waterCreature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
+            Vec3d finalVectors = chargeVec.normalize().scale(creatureSpeed);
 
             //move in direction towards the pos to move to
-            this.waterCreature.setAIMoveSpeed((float)(this.speed * this.waterCreature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
+            this.waterCreature.setAIMoveSpeed((float) Math.sqrt(finalVectors.x * finalVectors.x + finalVectors.z * finalVectors.z));
+            this.waterCreature.setMoveVertical((float) finalVectors.y);
         }
         else {
             this.waterCreature.setAIMoveSpeed(0);
@@ -65,7 +83,8 @@ public class RiftWaterCreatureMoveHelper extends RiftCreatureMoveHelperBase {
     public RiftCreatureMoveHelper convertToMoveHelper(RiftCreature creature) {
         RiftCreatureMoveHelper creatureMoveHelper = new RiftCreatureMoveHelper(creature);
         creatureMoveHelper.creatureAction = this.creatureAction;
-        creatureMoveHelper.oldDist = this.oldDist;
+        creatureMoveHelper.oldChargeDistNoY = this.oldChargeDistNoY;
+        creatureMoveHelper.oldChargeDistWithY = this.oldChargeDistWithY;
         return creatureMoveHelper;
     }
 }

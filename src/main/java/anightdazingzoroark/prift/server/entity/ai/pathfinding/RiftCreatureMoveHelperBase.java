@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityMoveHelper;
 
 public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
@@ -9,7 +8,8 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     protected CreatureAction creatureAction = CreatureAction.WAIT;
 
     //charge related stuff
-    public double oldDist = Double.MAX_VALUE;
+    public double oldChargeDistNoY = Double.MAX_VALUE;
+    public double oldChargeDistWithY = Double.MAX_VALUE;
 
     public RiftCreatureMoveHelperBase(RiftCreature creature) {
         super(creature);

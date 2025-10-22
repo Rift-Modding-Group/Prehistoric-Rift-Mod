@@ -18,6 +18,7 @@ import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
@@ -43,7 +44,6 @@ import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITarget;
-import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -3014,8 +3014,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void chargeToPos(BlockPos pos, double speed) {
-        if (this.moveHelper instanceof RiftCreatureMoveHelper) {
-            RiftCreatureMoveHelper creatureMoveHelper = (RiftCreatureMoveHelper) this.moveHelper;
+        if (this.moveHelper instanceof RiftCreatureMoveHelperBase) {
+            RiftCreatureMoveHelperBase creatureMoveHelper = (RiftCreatureMoveHelperBase) this.moveHelper;
             creatureMoveHelper.setChargeTo(pos.getX(), pos.getY(), pos.getZ(), speed);
             this.setIsCharging(true);
         }
@@ -3024,9 +3024,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void endCharge() {
         this.setIsCharging(false);
         this.stopChargeFlag = false;
-        if (this.moveHelper instanceof RiftCreatureMoveHelper) {
-            RiftCreatureMoveHelper creatureMoveHelper = (RiftCreatureMoveHelper) this.moveHelper;
-            creatureMoveHelper.oldDist = Double.MAX_VALUE;
+        if (this.moveHelper instanceof RiftCreatureMoveHelperBase) {
+            RiftCreatureMoveHelperBase creatureMoveHelper = (RiftCreatureMoveHelperBase) this.moveHelper;
+            creatureMoveHelper.oldChargeDistNoY = Double.MAX_VALUE;
+            creatureMoveHelper.oldChargeDistWithY = Double.MAX_VALUE;
         }
     }
 

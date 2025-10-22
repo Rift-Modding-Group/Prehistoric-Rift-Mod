@@ -82,18 +82,22 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             //the reason why setChargeTo is to be executed every tick
             this.creatureAction = CreatureAction.WAIT;
 
-            //get dist from pos to move to, note that we don't care about y pos here
-            Vec3d chargeVec = new Vec3d(this.posX - this.creature.posX, 0, this.posZ - this.creature.posZ);
-            double dist = chargeVec.length();
+            //get distNoY from pos to move to, note that we don't care about y pos here
+            Vec3d chargeVec = new Vec3d(this.posX - this.creature.posX, this.posY - this.creature.posY, this.posZ - this.creature.posZ);
+            double distWithY = chargeVec.length();
+            double distNoY = new Vec3d(chargeVec.x, 0, chargeVec.z).length();
 
-            //stop when dist becomes bigger than oldDist
-            if (dist > this.oldDist) {
+            //stop when distNoY becomes bigger than oldChargeDistNoY
+            if (distNoY > this.oldChargeDistNoY) {
                 this.creature.stopChargeFlag = true;
                 this.creature.setIsCharging(false);
                 this.creature.setAIMoveSpeed(0f);
                 return;
             }
-            else this.oldDist = dist;
+            else {
+                this.oldChargeDistWithY = distWithY;
+                this.oldChargeDistNoY = distNoY;
+            }
 
             //move in direction towards the pos to move to
             this.creature.setAIMoveSpeed((float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
@@ -104,7 +108,8 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
     public RiftWaterCreatureMoveHelper convertToWaterMoveHelper(RiftWaterCreature waterCreature) {
         RiftWaterCreatureMoveHelper waterCreatureMoveHelper = new RiftWaterCreatureMoveHelper(waterCreature);
         waterCreatureMoveHelper.creatureAction = this.creatureAction;
-        waterCreatureMoveHelper.oldDist = this.oldDist;
+        waterCreatureMoveHelper.oldChargeDistNoY = this.oldChargeDistNoY;
+        waterCreatureMoveHelper.oldChargeDistWithY = this.oldChargeDistWithY;
         return waterCreatureMoveHelper;
     }
 }

@@ -1,34 +1,21 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftSetEntityMotion;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
 
 public class RiftLungeMove extends RiftCreatureMove {
     private BlockPos targetPosForLunge;
-    private int lungeTime;
-    private int maxLungeTime;
-    private double lungeDirectionToPosX;
-    private double lungeDirectionToPosY;
-    private double lungeDirectionToPosZ;
-    private final double lungeVelocity = 8D;
 
     public RiftLungeMove() {
         super(CreatureMove.LUNGE);
-    }
-
-    @Override
-    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        if (user.isInWater()) return super.canBeExecutedUnmounted(user, target);
-        else return super.canBeExecutedUnmounted(user, target) && user.onGround && user.posY >= target.posY - 1 && user.posY <= target.posY + 1;
     }
 
     @Override
@@ -38,8 +25,23 @@ public class RiftLungeMove extends RiftCreatureMove {
 
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
+        user.setCanMove(false);
         user.disableCanRotateMounted();
         if (target != null) this.targetPosForLunge = new BlockPos(target.posX, user.posY, target.posZ);
+    }
+
+    @Override
+    public void onEndChargeUp(RiftCreature user, int useAmount) {
+        user.setCanMove(true);
+        //if the creature is being ridden, targets pos is where it charges to
+        if (this.targetPosForLunge != null) user.chargeToPos(this.targetPosForLunge, 8D);
+            //otherwise, use position forward based on where it lookin at as charge pos
+            //distance to charge by is based on useAmount and the creatures ranged attack reach
+        else {
+            Vec3d lookVec = user.getLookVec();
+            Vec3d lungeVec = lookVec.normalize().scale(user.rangedWidth());
+            this.targetPosForLunge = user.getPosition().add(lungeVec.x, lungeVec.y, lungeVec.z);
+        }
     }
 
     @Override
@@ -47,114 +49,71 @@ public class RiftLungeMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
+        AxisAlignedBB tackleDetectHitbox = user.frontOfCreatureAABB();
+        AxisAlignedBB tackleEffectHitbox = tackleDetectHitbox.grow(2D);
+
         //stop if it hits a mob
-        AxisAlignedBB lungeHitbox = user.getEntityBoundingBox().grow(3D);
-        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, lungeHitbox, this.generalEntityPredicate(user));
+        List<Entity> chargedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, tackleDetectHitbox.grow(1D), this.generalEntityPredicate(user));
 
         //stop if it hits a block
-        boolean hitBlocksFlag = false;
-        hitBlocksLoop: for (int x = MathHelper.floor(lungeHitbox.minX); x < MathHelper.ceil(lungeHitbox.maxX); x++) {
-            for (int z = MathHelper.floor(lungeHitbox.minZ); z < MathHelper.ceil(lungeHitbox.maxZ); z++) {
-                IBlockState state = user.world.getBlockState(new BlockPos(x, user.posY, z));
-                IBlockState stateUp = user.world.getBlockState(new BlockPos(x, user.posY + 1, z));
+        boolean hitBlocksFlag = user.isInWater() ? this.hitBlocksInWater(user, tackleDetectHitbox) : this.hitBlocksOutOfWater(user, tackleDetectHitbox);
 
-                if (state.getMaterial() != Material.AIR && stateUp.getMaterial() != Material.AIR
-                && state.getMaterial() != Material.WATER && stateUp.getMaterial() != Material.WATER) {
-                    hitBlocksFlag = true;
-                    break hitBlocksLoop;
-                }
-            }
-        }
-
-        if (hitBlocksFlag || !chargedIntoEntities.isEmpty() || this.lungeTime > this.maxLungeTime) {
-            //stop charging
-            user.velocityChanged = true;
-            user.motionX = 0;
-            user.motionY = 0;
-            user.motionZ = 0;
-
+        if (hitBlocksFlag || !chargedIntoEntities.isEmpty() || user.stopChargeFlag) {
             //damage all entities it charged into
-            if (!chargedIntoEntities.isEmpty()) for (Entity entity : chargedIntoEntities) {
-                user.attackEntityAsMob(entity);
+            if (!chargedIntoEntities.isEmpty()) {
+                List<Entity> entitiesToDamage = user.world.getEntitiesWithinAABB(Entity.class, tackleEffectHitbox, this.generalEntityPredicate(user));
+                for (Entity entity : entitiesToDamage) {
+                    user.attackEntityAsMob(entity);
+                }
             }
 
             //forcibly stop the move
             this.forceStopFlag = true;
         }
         else {
-            if (user.isBeingRidden() && user.getControllingPassenger() != null)
-                RiftMessages.WRAPPER.sendToAll(new RiftSetEntityMotion(
-                        user,
-                        this.lungeDirectionToPosX * this.lungeVelocity,
-                        this.lungeDirectionToPosY * this.lungeVelocity,
-                        this.lungeDirectionToPosZ * this.lungeVelocity
-                )
-            );
-            else {
-                user.motionX = this.lungeDirectionToPosX * this.lungeVelocity;
-                user.motionY = this.lungeDirectionToPosY * this.lungeVelocity;
-                user.motionZ = this.lungeDirectionToPosZ * this.lungeVelocity;
-                user.velocityChanged = true;
-            }
-            this.lungeTime++;
+            //now charge to final charge position
+            //note that it is meant to be executed every tick
+            if (this.targetPosForLunge != null) user.chargeToPos(this.targetPosForLunge, 8D);
         }
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        if (this.targetPosForLunge != null) {
-            //in water, lunging is 3-dimensional
-            if (user.isInWater()) {
-                //get charge distance
-                double unnormalizedDirectionX = this.targetPosForLunge.getX() - user.posX;
-                double unnormalizedDirectionY = this.targetPosForLunge.getY() - user.posY;
-                double unnormalizedDirectionZ = this.targetPosForLunge.getZ() - user.posZ;
-
-                double angleXZYToTarget = Math.atan2(unnormalizedDirectionY, Math.sqrt(unnormalizedDirectionX * unnormalizedDirectionX + unnormalizedDirectionZ * unnormalizedDirectionZ));
-
-                double chargeDistXZ = user.rangedWidth() * Math.cos(angleXZYToTarget);
-                double chargeDistY = user.rangedWidth() * Math.sin(angleXZYToTarget);
-
-                //get charge direction
-                double unnormalizedMagnitude = Math.sqrt(unnormalizedDirectionX * unnormalizedDirectionX + unnormalizedDirectionY * unnormalizedDirectionY + unnormalizedDirectionZ * unnormalizedDirectionZ);
-                this.lungeDirectionToPosX = unnormalizedDirectionX / unnormalizedMagnitude;
-                this.lungeDirectionToPosY = unnormalizedDirectionY / unnormalizedMagnitude;
-                this.lungeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
-
-                //get charge time
-                this.maxLungeTime = (int)Math.round(Math.sqrt(chargeDistXZ * chargeDistXZ + chargeDistY * chargeDistY) * 1.5D / (this.lungeVelocity * 2));
-            }
-            //on land it's 2-dimensional
-            else {
-                //get charge distance
-                double unnormalizedDirectionX = this.targetPosForLunge.getX() - user.posX;
-                double unnormalizedDirectionZ = this.targetPosForLunge.getZ() - user.posZ;
-                double angleToTarget = Math.atan2(unnormalizedDirectionZ, unnormalizedDirectionX);
-                double chargeDistX = user.rangedWidth() * Math.cos(angleToTarget);
-                double chargeDistZ = user.rangedWidth() * Math.sin(angleToTarget);
-
-                //get charge direction
-                double unnormalizedMagnitude = Math.sqrt(Math.pow(unnormalizedDirectionX, 2) + Math.pow(unnormalizedDirectionZ, 2));
-                this.lungeDirectionToPosX = unnormalizedDirectionX / unnormalizedMagnitude;
-                this.lungeDirectionToPosZ = unnormalizedDirectionZ / unnormalizedMagnitude;
-
-                //get charge time
-                this.maxLungeTime = (int)Math.round(Math.sqrt(chargeDistX * chargeDistX + chargeDistZ * chargeDistZ) * 1.5D / (this.lungeVelocity * 2));
-            }
-        }
-        else {
-            //get lunge direction
-            this.lungeDirectionToPosX = user.getLookVec().normalize().x;
-            if (user.isInWater()) this.lungeDirectionToPosY = user.getLookVec().normalize().y;
-            this.lungeDirectionToPosZ = user.getLookVec().normalize().z;
-
-            //get lunge time
-            this.maxLungeTime = (int) Math.ceil(user.rangedWidth() * 1.5D / this.lungeVelocity);
-        }
-    }
+    public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {}
 
     @Override
     public void onStopExecuting(RiftCreature user) {
+        this.targetPosForLunge = null;
+        user.endCharge();
         user.enableCanRotateMounted();
+    }
+
+    private boolean hitBlocksOutOfWater(RiftCreature user, AxisAlignedBB tackleDetectHitbox) {
+        for (int x = MathHelper.floor(tackleDetectHitbox.minX); x < MathHelper.ceil(tackleDetectHitbox.maxX); x++) {
+            for (int z = MathHelper.floor(tackleDetectHitbox.minZ); z < MathHelper.ceil(tackleDetectHitbox.maxZ); z++) {
+                IBlockState state = user.world.getBlockState(new BlockPos(x, user.posY, z));
+                IBlockState stateUp = user.world.getBlockState(new BlockPos(x, user.posY + 1, z));
+
+                if (state.getMaterial() != Material.AIR && stateUp.getMaterial() != Material.AIR
+                        && state.getMaterial() != Material.WATER && stateUp.getMaterial() != Material.WATER) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hitBlocksInWater(RiftCreature user, AxisAlignedBB tackleDetectHitbox) {
+        for (int x = MathHelper.floor(tackleDetectHitbox.minX); x < MathHelper.ceil(tackleDetectHitbox.maxX); x++) {
+            for (int y = MathHelper.floor(tackleDetectHitbox.minY - 1); y < MathHelper.ceil(tackleDetectHitbox.maxY + 1); y++) {
+                for (int z = MathHelper.floor(tackleDetectHitbox.minZ); z < MathHelper.ceil(tackleDetectHitbox.maxZ); z++) {
+                    IBlockState state = user.world.getBlockState(new BlockPos(x, y, z));
+
+                    if (state.getMaterial() != Material.AIR && state.getMaterial() != Material.WATER) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

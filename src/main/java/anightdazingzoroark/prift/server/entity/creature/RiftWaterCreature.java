@@ -204,9 +204,12 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
-        if (!this.canMove()) return;
+        if (!this.canMove() || this.isTurretMode()) {
+            super.travel(0, vertical, 0);
+            return;
+        }
 
-        if (this.isSaddled() && this.isBeingRidden()) {
+        if (this.isSaddled() && this.isBeingRidden() && this.canBeSteered()) {
             EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();
             if (controller != null && this.isInWater()) {
                 strafe = controller.moveStrafing * 0.5f;
@@ -265,7 +268,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
             else super.travel(strafe, vertical, forward);
         }
         else {
-            if (this.isInWater()) {
+            if (this.isInWater() && !this.getIsCharging()) {
                 this.moveRelative(strafe, vertical, forward, 0.01F);
                 this.motionX *= 0.9;
                 this.motionY *= 0.9;
