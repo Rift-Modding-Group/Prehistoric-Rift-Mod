@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.pathfinding.NodeProcessor;
@@ -9,45 +10,9 @@ import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-public class RiftCreatureMoveHelper extends EntityMoveHelper {
-    private final RiftCreature creature;
-    private CreatureAction creatureAction = CreatureAction.WAIT;
-
-    //charge related stuff
-    public double oldDist = Double.MAX_VALUE;
-
+public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
     public RiftCreatureMoveHelper(RiftCreature creature) {
         super(creature);
-        this.creature = creature;
-    }
-
-    //reminder to self that this is meant to be executed every tick
-    @Override
-    public void setMoveTo(double x, double y, double z, double speedIn) {
-        this.posX = x;
-        this.posY = y;
-        this.posZ = z;
-        this.speed = speedIn;
-        this.creatureAction = CreatureAction.MOVE_TO;
-    }
-
-    @Override
-    public void strafe(float forward, float strafe) {
-        this.creatureAction = CreatureAction.STRAFE;
-        this.moveForward = forward;
-        this.moveStrafe = strafe;
-        this.speed = 0.25D;
-    }
-
-    //this is meant to be executed every tick too
-    public void setChargeTo(double x, double y, double z, double speedIn) {
-        if (this.creature.stopChargeFlag) return;
-
-        this.posX = x;
-        this.posY = y;
-        this.posZ = z;
-        this.speed = speedIn;
-        this.creatureAction = CreatureAction.CHARGE;
     }
 
     @Override
@@ -136,12 +101,10 @@ public class RiftCreatureMoveHelper extends EntityMoveHelper {
         else this.creature.setMoveForward(0f);
     }
 
-    public enum CreatureAction {
-        WAIT,
-        MOVE_TO,
-        STRAFE,
-        JUMP, //classic jump upwards to move upwards
-        CHARGE, //charge
-        LEAP;
+    public RiftWaterCreatureMoveHelper convertToWaterMoveHelper(RiftWaterCreature waterCreature) {
+        RiftWaterCreatureMoveHelper waterCreatureMoveHelper = new RiftWaterCreatureMoveHelper(waterCreature);
+        waterCreatureMoveHelper.creatureAction = this.creatureAction;
+        waterCreatureMoveHelper.oldDist = this.oldDist;
+        return waterCreatureMoveHelper;
     }
 }

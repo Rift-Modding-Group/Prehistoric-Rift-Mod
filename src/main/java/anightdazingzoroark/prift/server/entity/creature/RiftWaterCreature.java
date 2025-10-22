@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.message.*;
@@ -11,7 +12,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -97,21 +97,41 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
         //for changing navigator on land for amphibious
         if (this.isAmphibious()) {
+            //land to water
             if (this.isInWater() && !this.amphibiousInWater) {
                 this.navigator = this.waterNavigate;
-                this.moveHelper = new RiftWaterCreatureMoveHelper(this);
+                this.moveHelper = this.moveHelperToWaterMoveHelper();
                 this.setPathPriority(PathNodeType.WATER, 0);
                 this.amphibiousInWater = true;
                 this.navigator.clearPath();
             }
+            //water to land
             else if (!this.isInWater() && this.amphibiousInWater) {
                 this.navigator = this.landNavigate;
-                this.moveHelper = new EntityMoveHelper(this);
+                this.moveHelper = this.waterMoveHelperToMoveHelper();
                 this.setPathPriority(PathNodeType.WATER, this.defaultWaterCost);
                 this.amphibiousInWater = false;
                 this.navigator.clearPath();
             }
         }
+    }
+
+    private RiftCreatureMoveHelper waterMoveHelperToMoveHelper() {
+        if (this.moveHelper instanceof RiftWaterCreatureMoveHelper) {
+            RiftWaterCreatureMoveHelper waterCreatureMoveHelper = (RiftWaterCreatureMoveHelper) this.moveHelper;
+            return waterCreatureMoveHelper.convertToMoveHelper(this);
+        }
+        else if (this.moveHelper instanceof RiftCreatureMoveHelper) return (RiftCreatureMoveHelper) this.moveHelper;
+        else return null;
+    }
+
+    private RiftWaterCreatureMoveHelper moveHelperToWaterMoveHelper() {
+        if (this.moveHelper instanceof RiftCreatureMoveHelper) {
+            RiftCreatureMoveHelper creatureMoveHelper = (RiftCreatureMoveHelper) this.moveHelper;
+            return creatureMoveHelper.convertToWaterMoveHelper(this);
+        }
+        else if (this.moveHelper instanceof RiftWaterCreatureMoveHelper) return (RiftWaterCreatureMoveHelper) this.moveHelper;
+        else return null;
     }
 
     @Override
