@@ -21,6 +21,11 @@ public class RiftTackleMove extends RiftCreatureMove {
     }
 
     @Override
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return super.canBeExecutedUnmounted(user, target) && user.onGround && !user.isInWater();
+    }
+
+    @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setCanMove(false);
         user.disableCanRotateMounted();
@@ -70,7 +75,7 @@ public class RiftTackleMove extends RiftCreatureMove {
             }
         }
 
-        if (hitBlocksFlag || !chargedIntoEntities.isEmpty() || user.stopChargeFlag) {
+        if (hitBlocksFlag || !chargedIntoEntities.isEmpty() || user.stopChargeFlag || user.isInWater()) {
             //damage all entities it charged into
             if (!chargedIntoEntities.isEmpty()) {
                 List<Entity> entitiesToDamage = user.world.getEntitiesWithinAABB(Entity.class, tackleEffectHitbox, this.generalEntityPredicate(user));
