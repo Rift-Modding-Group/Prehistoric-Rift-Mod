@@ -7,6 +7,7 @@ import net.minecraft.pathfinding.NodeProcessor;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public class RiftCreatureMoveHelper extends EntityMoveHelper {
     private final RiftCreature creature;
@@ -85,11 +86,10 @@ public class RiftCreatureMoveHelper extends EntityMoveHelper {
             this.creatureAction = CreatureAction.WAIT;
 
             //get dist from pos to move to
-            double distX = this.posX - this.creature.posX;
-            double distZ = this.posZ - this.creature.posZ;
-            double distY = this.posY - this.creature.posY;
-            double dist = Math.sqrt(distX * distX + distY * distY + distZ * distZ);
-            double distNoHeight = Math.sqrt(distX * distX + distZ * distZ);
+            Vec3d moveVector = new Vec3d(this.posX - this.creature.posX, this.posY - this.creature.posY, this.posZ - this.creature.posZ);
+            Vec3d moveVectorNoHeight = new Vec3d(moveVector.x, 0, moveVector.z);
+            double dist = moveVector.length();
+            double distNoHeight = moveVectorNoHeight.length();
 
             //stop when creature reaches pos
             if (dist <= 0) {
@@ -98,12 +98,12 @@ public class RiftCreatureMoveHelper extends EntityMoveHelper {
             }
 
             //move in direction towards the pos to move to
-            float newRotationYaw = (float)(MathHelper.atan2(distZ, distX) * (180D / Math.PI)) - 90f;
+            float newRotationYaw = (float)(MathHelper.atan2(moveVector.z, moveVector.x) * (180D / Math.PI)) - 90f;
             this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, newRotationYaw, 90f);
             this.creature.setAIMoveSpeed((float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
 
             //jump
-            if (distY > (double)this.creature.stepHeight && distNoHeight < (double) Math.max(1f, this.creature.width)) {
+            if (moveVector.y > (double)this.creature.stepHeight && distNoHeight < (double) Math.max(1f, this.creature.width)) {
                 this.creature.getJumpHelper().setJumping();
                 this.action = EntityMoveHelper.Action.JUMPING;
             }
@@ -118,9 +118,8 @@ public class RiftCreatureMoveHelper extends EntityMoveHelper {
             this.creatureAction = CreatureAction.WAIT;
 
             //get dist from pos to move to, note that we don't care about y pos here
-            double distX = this.posX - this.creature.posX;
-            double distZ = this.posZ - this.creature.posZ;
-            double dist = Math.sqrt(distX * distX + distZ * distZ);
+            Vec3d chargeVec = new Vec3d(this.posX - this.creature.posX, 0, this.posZ - this.creature.posZ);
+            double dist = chargeVec.length();
 
             //stop when dist becomes bigger than oldDist
             if (dist > this.oldDist) {
