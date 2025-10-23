@@ -28,6 +28,11 @@ public class RiftChargeMove extends RiftCreatureMove {
     }
 
     @Override
+    public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
+        return user.onGround && !user.isInWater();
+    }
+
+    @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setCanMove(false);
         user.disableCanRotateMounted();

@@ -109,7 +109,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
 
             if (this.leapStartPoint != null && this.leapMidPoint != null) {
                 //get horizontal speed direction
-                Vec3d horizontalDir = new Vec3d(
+                Vec3d horizontalLeapVec = new Vec3d(
                         this.posX - this.leapStartPoint.x,
                         0,
                         this.posZ - this.leapStartPoint.z
@@ -119,7 +119,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
                 double creatureSpeed = this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
 
                 //set horizontal velocity
-                Vec3d horizontalVelocity = horizontalDir.scale(creatureSpeed);
+                Vec3d horizontalVelocity = horizontalLeapVec.scale(creatureSpeed);
 
                 //get initial vertical velocity from desired max height
                 double initYSpeed = Math.sqrt(2 * RiftUtil.gravity * this.maxLeapHeight);
