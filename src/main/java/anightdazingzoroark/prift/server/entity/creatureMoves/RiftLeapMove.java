@@ -32,24 +32,16 @@ public class RiftLeapMove extends RiftCreatureMove {
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.disableCanRotateMounted();
-
-        //only relevant if creature is not ridden
-        //if the creature is not being ridden, targets pos is where it charges to
-        if (target != null) this.targetPosForLeap = new BlockPos(target);
     }
 
     @Override
     public void onEndChargeUp(RiftCreature user, int useAmount) {
-        //if the creature is not being ridden, targets pos is where it leaps to
-        if (this.targetPosForLeap != null) user.leapToPos(this.targetPosForLeap, 8D);
-        //otherwise, use position forward based on where it lookin at as leap pos
+        //use position forward based on where it lookin at as leap pos
         //distance to leap by is based on the creatures ranged attack reach
-        else {
-            Vec3d lookVecNoY = new Vec3d(user.getLookVec().x, 0, user.getLookVec().z);
-            double leapDirectionToPosX = lookVecNoY.normalize().x * user.rangedWidth();
-            double leapDirectionToPosZ = lookVecNoY.normalize().z * user.rangedWidth();
-            this.targetPosForLeap = user.getPosition().add(leapDirectionToPosX, 0, leapDirectionToPosZ);
-        }
+        Vec3d lookVecNoY = new Vec3d(user.getLookVec().x, 0, user.getLookVec().z);
+        double leapDirectionToPosX = lookVecNoY.normalize().x * user.rangedWidth();
+        double leapDirectionToPosZ = lookVecNoY.normalize().z * user.rangedWidth();
+        this.targetPosForLeap = user.getPosition().add(leapDirectionToPosX, 0, leapDirectionToPosZ);
     }
 
     @Override
@@ -78,7 +70,7 @@ public class RiftLeapMove extends RiftCreatureMove {
             this.forceStopFlag = true;
         }
         else {
-            //now leap to final charge position
+            //now leap to final leap position
             //note that it is meant to be executed every tick
             if (this.targetPosForLeap != null) user.leapToPos(this.targetPosForLeap, 8D);
         }

@@ -1,19 +1,26 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
-import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RiftPounceMove extends RiftCreatureMove {
-    private boolean notOnGroundFlag = false;
-    private Entity targetToLeapTo;
+    private BlockPos targetPosForPounce;
 
     public RiftPounceMove() {
         super(CreatureMove.POUNCE);
+    }
+
+    @Override
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return false;
     }
 
     @Override
@@ -24,7 +31,24 @@ public class RiftPounceMove extends RiftCreatureMove {
     @Override
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.disableCanRotateMounted();
-        if (!user.isBeingRidden()) this.targetToLeapTo = target;
+
+        //only relevant if creature is not ridden
+        //if the creature is not being ridden, targets pos is where it charges to
+        if (target != null) this.targetPosForPounce = new BlockPos(target);
+    }
+
+    @Override
+    public void onEndChargeUp(RiftCreature user, int useAmount) {
+        //if the creature is not being ridden, targets pos is where it leaps to
+        if (this.targetPosForPounce != null) user.leapToPos(this.targetPosForPounce, 8D);
+        //otherwise, use position forward based on where it lookin at as leap pos
+        //distance to leap by is based on the creatures ranged attack reach
+        else {
+            Vec3d lookVecNoY = new Vec3d(user.getLookVec().x, 0, user.getLookVec().z);
+            double leapDirectionToPosX = lookVecNoY.normalize().x * user.rangedWidth();
+            double leapDirectionToPosZ = lookVecNoY.normalize().z * user.rangedWidth();
+            this.targetPosForPounce = user.getPosition().add(leapDirectionToPosX, 0, leapDirectionToPosZ);
+        }
     }
 
     @Override
@@ -32,63 +56,52 @@ public class RiftPounceMove extends RiftCreatureMove {
 
     @Override
     public void whileExecuting(RiftCreature user) {
-        if ((!user.onGround || user.isInWater()) && !this.notOnGroundFlag) this.notOnGroundFlag = true;
+        AxisAlignedBB leapDetectEntityHitbox = user.getEntityBoundingBox();
+        AxisAlignedBB leapEffectEntityHitbox = leapDetectEntityHitbox.grow(2D);
+        AxisAlignedBB leapDetectBlockHitbox = user.frontOfCreatureAABB();
 
-        if (this.notOnGroundFlag) {
-            if (!user.onGround || user.isInWater()) {
-                //stop if it hits a mob
-                AxisAlignedBB leapHitbox = user.getEntityBoundingBox().grow(2D);
-                List<Entity> leapedIntoMobs = user.world.getEntitiesWithinAABB(Entity.class, leapHitbox, this.generalEntityPredicate(user));
-                //remove duplicates
-                leapedIntoMobs = leapedIntoMobs.stream().distinct().collect(Collectors.toList());
+        //stop if it hits a mob
+        List<Entity> leapedIntoEntities = user.world.getEntitiesWithinAABB(Entity.class, leapDetectEntityHitbox.grow(1D), this.generalEntityPredicate(user));
 
-                if (user.isBeingRidden()) {
-                    if (!leapedIntoMobs.isEmpty()) {
-                        for (Entity entity : leapedIntoMobs) user.attackEntityAsMob(entity);
-                        this.forceStopFlag = true;
-                    }
-                }
-                else {
-                    if (!leapedIntoMobs.isEmpty() && leapedIntoMobs.contains(this.targetToLeapTo)) {
-                        user.attackEntityAsMob(this.targetToLeapTo);
-                        this.forceStopFlag = true;
-                    }
+        //stop if it hits a block
+        boolean hitBlocksFlag = false;
+        breakBlocksLoop: for (int x = MathHelper.floor(leapDetectBlockHitbox.minX); x < MathHelper.ceil(leapDetectBlockHitbox.maxX); x++) {
+            for (int z = MathHelper.floor(leapDetectBlockHitbox.minZ); z < MathHelper.ceil(leapDetectBlockHitbox.maxZ); z++) {
+                IBlockState state = user.world.getBlockState(new BlockPos(x, user.posY, z));
+                IBlockState stateUp = user.world.getBlockState(new BlockPos(x, user.posY + 1, z));
+
+                if (state.getMaterial() != Material.AIR && stateUp.getMaterial() != Material.AIR) {
+                    hitBlocksFlag = true;
+                    break breakBlocksLoop;
                 }
             }
-            else this.forceStopFlag = true;
+        }
+
+        if (hitBlocksFlag || !leapedIntoEntities.isEmpty() || user.stopLeapFlag || user.isInWater()) {
+            //damage all entities it leaped into
+            if (!leapedIntoEntities.isEmpty()) {
+                List<Entity> entitiesToDamage = user.world.getEntitiesWithinAABB(Entity.class, leapEffectEntityHitbox, this.generalEntityPredicate(user));
+                for (Entity entity : entitiesToDamage) {
+                    user.attackEntityAsMob(entity);
+                }
+            }
+
+            //forcibly stop the move
+            this.forceStopFlag = true;
+        }
+        else {
+            //now leap to final leap position
+            //note that it is meant to be executed every tick
+            if (this.targetPosForPounce != null) user.leapToPos(this.targetPosForPounce, 8D);
         }
     }
 
     @Override
-    public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        if (target != null && user.getDistance(target) <= user.rangedWidth()) {
-            double dx = target.posX - user.posX;
-            double dz = target.posZ - user.posZ;
-            double dist = Math.sqrt(dx * dx + dz * dz);
-
-            double velY = Math.sqrt(2 * RiftUtil.gravity * 6);
-            double totalTime = velY / RiftUtil.gravity;
-            double velXZ = dist * 2 / totalTime;
-
-            double angleToTarget = Math.atan2(dz, dx);
-            user.setLeapDirection((float) (velXZ * Math.cos(angleToTarget)), (float) velY, (float) (velXZ * Math.sin(angleToTarget)));
-        }
-        else {
-            double dx = user.getLookVec().normalize().scale(user.rangedWidth()).x;
-            double dz = user.getLookVec().normalize().scale(user.rangedWidth()).z;
-            double dist = Math.sqrt(dx * dx + dz * dz);
-
-            double velY = Math.sqrt(2 * RiftUtil.gravity * 6);
-            double totalTime = velY / RiftUtil.gravity;
-            double velXZ = dist * 2 / totalTime;
-
-            double angleToTarget = Math.atan2(dz, dx);
-            user.setLeapDirection((float) (velXZ * Math.cos(angleToTarget)), (float) velY, (float) (velXZ * Math.sin(angleToTarget)));
-        }
-    }
+    public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {}
 
     @Override
     public void onStopExecuting(RiftCreature user) {
+        user.endLeap();
         user.enableCanRotateMounted();
     }
 }
