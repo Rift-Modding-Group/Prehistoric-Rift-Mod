@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.ai.EntityMoveHelper;
+import net.minecraft.util.math.Vec3d;
 
 public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     protected final RiftCreature creature;
@@ -10,6 +11,12 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     //charge related stuff
     public double oldChargeDistNoY = Double.MAX_VALUE;
     public double oldChargeDistWithY = Double.MAX_VALUE;
+
+    //leap related stuff
+    protected double maxLeapHeight;
+    protected Vec3d leapStartPoint;
+    protected Vec3d leapMidPoint; //this should contain the coordinates for the leap midpoint for the creature
+    protected int leapTime;
 
     public RiftCreatureMoveHelperBase(RiftCreature creature) {
         super(creature);
@@ -43,6 +50,35 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
         this.posZ = z;
         this.speed = speedIn;
         this.creatureAction = CreatureAction.CHARGE;
+    }
+
+    public void setLeapTo(double x, double y, double z, double maxLeapHeight) {
+        if (this.creature.stopLeapFlag) return;
+
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        this.speed = 8D; //leap speed is always gonna be fixed to 8,
+        this.maxLeapHeight = maxLeapHeight;
+        this.creatureAction = CreatureAction.LEAP;
+
+        //create leap startpoint if its null
+        if (this.leapStartPoint == null) this.leapStartPoint = this.creature.getPositionVector();
+
+        //create leap midpoint if its null
+        if (this.leapMidPoint == null) {
+            this.leapMidPoint = new Vec3d(
+                    (x - this.creature.posX) / 2 + this.creature.posX,
+                    this.creature.posY + maxLeapHeight,
+                    (z - this.creature.posZ) / 2 + this.creature.posZ
+            );
+        }
+    }
+
+    public void eraseLeapInformation() {
+        this.leapStartPoint = null;
+        this.leapMidPoint = null;
+        this.leapTime = 0;
     }
 
     public enum CreatureAction {

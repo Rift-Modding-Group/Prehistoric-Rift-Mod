@@ -169,6 +169,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<BlockPos> HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BLOCK_POS);
 
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private int herdSize = 1;
     private RiftCreature herdLeader;
@@ -220,6 +221,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int cachedXPBucket = -1;
     //for charge management, for server only
     public boolean stopChargeFlag;
+    //for leap management, for server only
+    public boolean stopLeapFlag;
 
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
@@ -344,6 +347,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(HOME_POS, new BlockPos(0, 0, 0));
 
         this.dataManager.register(CHARGING, false);
+        this.dataManager.register(LEAPING, false);
     }
 
     @Override
@@ -2988,7 +2992,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public boolean canBeSteered() {
-        return !this.getIsCharging();
+        return !this.getIsCharging() && !this.getIsLeaping();
     }
 
     @Override
@@ -3005,6 +3009,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return null;
     }
 
+    //charging related stuff starts here
     public void setIsCharging(boolean value) {
         this.dataManager.set(CHARGING, value);
     }
@@ -3030,6 +3035,34 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             creatureMoveHelper.oldChargeDistWithY = Double.MAX_VALUE;
         }
     }
+    //charging related stuff ends here
+
+    //leap related stuff starts here
+    public void setIsLeaping(boolean value) {
+        this.dataManager.set(LEAPING, value);
+    }
+
+    public boolean getIsLeaping() {
+        return this.dataManager.get(LEAPING);
+    }
+
+    public void leapToPos(BlockPos pos, double maxLeapHeight) {
+        if (this.moveHelper instanceof RiftCreatureMoveHelperBase) {
+            RiftCreatureMoveHelperBase creatureMoveHelper = (RiftCreatureMoveHelperBase) this.moveHelper;
+            creatureMoveHelper.setLeapTo(pos.getX(), pos.getY(), pos.getZ(), maxLeapHeight);
+            this.setIsLeaping(true);
+        }
+    }
+
+    public void endLeap() {
+        this.setIsLeaping(false);
+        this.stopLeapFlag = false;
+        if (this.moveHelper instanceof RiftCreatureMoveHelperBase) {
+            RiftCreatureMoveHelperBase creatureMoveHelper = (RiftCreatureMoveHelperBase) this.moveHelper;
+            creatureMoveHelper.eraseLeapInformation();
+        }
+    }
+    //leap related stuff starts here
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
@@ -3037,14 +3070,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             super.travel(0, vertical, 0);
             return;
         }
-
-        //for leaping
-        if (this.getLeapDirection().length() > 0f && this.onGround()) {
-            this.motionX = this.getLeapDirection().x;
-            this.motionY = this.getLeapDirection().y;
-            this.motionZ = this.getLeapDirection().z;
-        }
-        else this.setLeapDirection(0f, 0f, 0f);
 
         if (this.isSaddled() && this.isBeingRidden() && this.canBeSteered()) {
             EntityLivingBase controller = (EntityLivingBase)this.getControllingPassenger();

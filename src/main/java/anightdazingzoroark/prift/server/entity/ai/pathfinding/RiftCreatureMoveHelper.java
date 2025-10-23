@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -102,7 +103,45 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             //move in direction towards the pos to move to
             this.creature.setAIMoveSpeed((float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
         }
-        else this.creature.setMoveForward(0f);
+        else if (this.creatureAction == CreatureAction.LEAP) {
+            //the reason why setLeapTo is to be executed every tick
+            this.creatureAction = CreatureAction.WAIT;
+
+            if (this.leapStartPoint != null && this.leapMidPoint != null) {
+                //get horizontal speed direction
+                Vec3d horizontalDir = new Vec3d(
+                        this.posX - this.leapStartPoint.x,
+                        0,
+                        this.posZ - this.leapStartPoint.z
+                ).normalize();
+
+                //get creature speed
+                double creatureSpeed = this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+
+                //set horizontal velocity
+                Vec3d horizontalVelocity = horizontalDir.scale(creatureSpeed);
+
+                //get initial vertical velocity from desired max height
+                double initYSpeed = Math.sqrt(2 * RiftUtil.gravity * this.maxLeapHeight);
+
+                //set current y speed
+                double ySpeed = initYSpeed - RiftUtil.gravity * this.leapTime;
+
+                //apply motion
+                this.creature.setAIMoveSpeed((float)Math.sqrt(horizontalVelocity.x * horizontalVelocity.x + horizontalVelocity.z * horizontalVelocity.z));
+                this.creature.setMoveVertical((float)ySpeed);
+
+                this.leapTime++;
+
+                //stop on landing
+                if ((this.creature.onGround() || this.creature.isInWater()) && this.leapTime > 1)
+                    this.creature.stopLeapFlag = true;
+            }
+        }
+        else {
+            this.creature.setMoveForward(0f);
+            this.creature.setMoveVertical(0f);
+        }
     }
 
     public RiftWaterCreatureMoveHelper convertToWaterMoveHelper(RiftWaterCreature waterCreature) {
