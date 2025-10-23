@@ -162,10 +162,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> USED_MOVE_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> USED_MULTISTEP_MOVE_STEP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
-    private static final DataParameter<Float> LEAP_X_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
-    private static final DataParameter<Float> LEAP_Y_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
-    private static final DataParameter<Float> LEAP_Z_VELOCITY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
-
     private static final DataParameter<BlockPos> HOME_POS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BLOCK_POS);
 
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -339,10 +335,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         this.dataManager.register(USED_MOVE_TYPE, -1);
         this.dataManager.register(USED_MULTISTEP_MOVE_STEP, 0);
-
-        this.dataManager.register(LEAP_X_VELOCITY, 0.0f);
-        this.dataManager.register(LEAP_Y_VELOCITY, 0.0f);
-        this.dataManager.register(LEAP_Z_VELOCITY, 0.0f);
 
         this.dataManager.register(HOME_POS, new BlockPos(0, 0, 0));
 
@@ -2371,13 +2363,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void setLeapDirection(float velocityX, float velocityY, float velocityZ) {
+        /*
         this.dataManager.set(LEAP_X_VELOCITY, velocityX);
         this.dataManager.set(LEAP_Y_VELOCITY, velocityY);
         this.dataManager.set(LEAP_Z_VELOCITY, velocityZ);
-    }
-
-    public Vec3d getLeapDirection() {
-        return new Vec3d(this.dataManager.get(LEAP_X_VELOCITY), this.dataManager.get(LEAP_Y_VELOCITY), this.dataManager.get(LEAP_Z_VELOCITY));
+         */
     }
 
     //for multi hitbox stuff
@@ -3153,6 +3143,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
             super.travel(strafe, vertical, forward);
         }
+    }
+
+    public void fall(float distance, float damageMultiplier) {
+        if (!this.getIsLeaping()) super.fall(distance, damageMultiplier);
     }
 
     @Override
