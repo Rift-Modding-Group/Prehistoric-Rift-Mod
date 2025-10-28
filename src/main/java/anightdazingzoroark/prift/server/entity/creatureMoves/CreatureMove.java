@@ -17,7 +17,7 @@ public enum CreatureMove {
     CHARGE(RiftChargeMove.class, MoveAnimType.CHARGE, ChargeType.GRADIENT_THEN_USE, 75, new int[]{10, 20}, 100, 200, true, true, false, TargetRequirement.HAS_TARGET),
     BIDE(RiftBideMove.class, MoveAnimType.DEFENSE, ChargeType.GRADIENT_THEN_USE, 0, new int[]{20, 40}, 100, 200, false, false, true, TargetRequirement.HAS_TARGET), //basically like the since removed move from pokemon, absorb all damage you take, then reflect it all back to the opponent
     SELF_DESTRUCT(RiftSelfDestructMove.class, MoveAnimType.SELF_DESTRUCTION, ChargeType.NONE, 300, new int[]{0}, 0, 0, false, false, false, TargetRequirement.HAS_TARGET),
-    POUNCE(RiftPounceMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 50, new int[]{6}, 0, 100, false, true, false, TargetRequirement.TARGET_DOESNT_MATTER),
+    POUNCE(RiftPounceMove.class, MoveAnimType.LEAP, ChargeType.COOLDOWN_ONLY, 50, new int[]{6}, 0, 100, false, true, false, TargetRequirement.HAS_TARGET),
     PACK_CALL(RiftPackCallMove.class, MoveAnimType.ROAR, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 3600, false, false, false, TargetRequirement.HAS_TARGET),
     TAIL_WHIP(RiftTailWhipMove.class, MoveAnimType.TAIL, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false, TargetRequirement.HAS_TARGET),
     POWER_BLOW(RiftPowerBlowMove.class, MoveAnimType.BLOW, ChargeType.GRADIENT_THEN_USE, 0, new int[]{10, 20}, 100, 200, false, false, false, TargetRequirement.HAS_TARGET),

@@ -2873,10 +2873,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         );
     }
 
-    public List<Entity> getAllTargetsInFront() {
-        return this.getAllTargetsInFront(false);
-    }
-
     //create a series of aabbs based on creature width and attack width
     //entities that are inside will be considered as targets and will be attacked
     public List<Entity> getAllTargetsInFront(boolean useRanged) {

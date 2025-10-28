@@ -108,34 +108,51 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             this.creatureAction = CreatureAction.WAIT;
 
             if (this.leapStartPoint != null && this.leapMidPoint != null) {
-                //get horizontal speed direction
+                //deal with looking towards position to leap to
+                Vec3d lookVector = new Vec3d(
+                        this.leapMidPoint.x - this.leapStartPoint.x,
+                        0,
+                        this.leapMidPoint.z - this.leapStartPoint.z
+                ).normalize();
+                float newRotationYaw = (float)(MathHelper.atan2(lookVector.z, lookVector.x) * (180D / Math.PI)) - 90f;
+                this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, newRotationYaw, 90f);
+
+                //create horizontal leap vector
                 Vec3d horizontalLeapVec = new Vec3d(
                         this.posX - this.leapStartPoint.x,
                         0,
                         this.posZ - this.leapStartPoint.z
-                ).normalize();
+                );
+                double horizontalDistance = horizontalLeapVec.length();
 
-                //get creature speed
-                double creatureSpeed = this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+                if (horizontalDistance > 0) {
+                    //compute initial vertical velocity based on desired max height
+                    double initYSpeed = Math.sqrt(2 * RiftUtil.gravity * this.maxLeapHeight);
 
-                //set horizontal velocity
-                Vec3d horizontalVelocity = horizontalLeapVec.scale(creatureSpeed);
+                    //get total time in air for getting horizontal speed
+                    double totalTime = (2 * initYSpeed) / RiftUtil.gravity;
 
-                //get initial vertical velocity from desired max height
-                double initYSpeed = Math.sqrt(2 * RiftUtil.gravity * this.maxLeapHeight);
+                    //compute horizontal speed so we land exactly at the target
+                    double horizontalSpeed = horizontalDistance / totalTime;
 
-                //set current y speed
-                double ySpeed = initYSpeed - RiftUtil.gravity * this.leapTime;
+                    //compute current ySpeed at this tick
+                    double ySpeed = initYSpeed - RiftUtil.gravity * this.leapTime;
 
-                //apply motion
-                this.creature.setAIMoveSpeed((float)Math.sqrt(horizontalVelocity.x * horizontalVelocity.x + horizontalVelocity.z * horizontalVelocity.z));
-                this.creature.setMoveVertical((float)ySpeed);
+                    //create horizontal velocity vector
+                    Vec3d horizontalVelocity = horizontalLeapVec.normalize().scale(horizontalSpeed);
 
-                this.leapTime++;
+                    //apply movement
+                    this.creature.setAIMoveSpeed((float) horizontalVelocity.length() * 4f); //for some reason multiplying by 4 is the only way to get this workin
+                    this.creature.setMoveVertical((float) ySpeed * 1.5f); //and right here for some reason multiplying by 1.5 is also the only way to get it up to max jump height
 
-                //stop on landing
-                if ((this.creature.onGround() || this.creature.isInWater()) && this.leapTime > 1)
-                    this.creature.stopLeapFlag = true;
+                    //increment leap time
+                    this.leapTime++;
+
+                    // stop upon landing or entering water
+                    if ((this.creature.onGround() || this.creature.isInWater()) && this.leapTime > 1) {
+                        this.creature.stopLeapFlag = true;
+                    }
+                }
             }
         }
         else {
