@@ -129,7 +129,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
                     //compute initial vertical velocity based on desired max height
                     double initYSpeed = Math.sqrt(2 * RiftUtil.gravity * this.maxLeapHeight);
 
-                    //get total time in air for getting horizontal speed
+                    //get (ideal) total time in air for getting horizontal speed
                     double totalTime = (2 * initYSpeed) / RiftUtil.gravity;
 
                     //compute horizontal speed so we land exactly at the target

@@ -19,6 +19,11 @@ public class RiftPounceMove extends RiftCreatureMove {
     }
 
     @Override
+    public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
+        return super.canBeExecutedUnmounted(user, target) && user.getDistance(target) < user.rangedWidth() && user.getDistance(target) > user.rangedWidth() * 0.25;
+    }
+
+    @Override
     public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
         return user.onGround && !user.isInWater();
     }
