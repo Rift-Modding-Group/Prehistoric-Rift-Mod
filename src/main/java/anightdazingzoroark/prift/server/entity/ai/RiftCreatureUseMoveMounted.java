@@ -220,7 +220,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimInitDelayTime) {
                     this.creature.setPlayingChargedMoveAnim(1);
-                    this.currentInvokedMove.onStartExecuting(this.creature);
+                    this.currentInvokedMove.onStartExecuting(this.creature, this.getTargetForAttacking());
                     this.setChargedMoveBeingUsed(true);
 
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
@@ -327,7 +327,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimInitDelayTime) {
                     this.creature.setPlayingChargedMoveAnim(1);
-                    this.currentInvokedMove.onStartExecuting(this.creature);
+                    this.currentInvokedMove.onStartExecuting(this.creature, this.getTargetForAttacking());
                     this.setChargedMoveBeingUsed(true);
 
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
@@ -417,7 +417,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             //no gradients or whatever, so just clicking activates the move
             else {
                 if (this.animTime == 0) {
-                    this.currentInvokedMove.onStartExecuting(this.creature);
+                    this.currentInvokedMove.onStartExecuting(this.creature, this.getTargetForAttacking());
                     this.creature.setUsingUnchargedAnim(true);
 
                     if (this.creature.animatorsForMoveType().get(this.creature.currentCreatureMove().moveAnimType).getChargeUpSound() != null
@@ -558,5 +558,13 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         }
         //otherwise, just use the moves conditions
         return this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
+    }
+
+    private Entity getTargetForAttacking() {
+        if (this.currentInvokedMove.creatureMove.moveAnimType.moveType == CreatureMove.MoveType.RANGED
+            || (this.currentInvokedMove.creatureMove.moveAnimType.moveType == CreatureMove.MoveType.RANGED_SELDOM && this.currentInvokedMove.creatureMove.moveAnimType == CreatureMove.MoveAnimType.LEAP)) {
+            return this.creature.getClosestTargetInFront(true);
+        }
+        return this.creature.getClosestTargetInFront();
     }
 }

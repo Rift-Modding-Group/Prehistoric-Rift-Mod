@@ -101,17 +101,16 @@ public class RiftCreatureProjectile {
                 .setHasNoModel()
                 .setSelfDestruct()
                 .setUsePower(2f, 8f)
+                .setDamageCalculator((projectile) -> {
+                    return 2D;
+                })
                 .setOnHitEffect((projectile, hitEntity) -> {
                     if (hitEntity != null) {
-                        Entity knockBackFrom = projectile.shootingEntity != null ? projectile.shootingEntity : projectile;
-                        double xStartPos = projectile.shootingEntity != null ? projectile.shootingEntity.posX : projectile.posX;
-                        double zStartPos = projectile.shootingEntity != null ? projectile.shootingEntity.posZ : projectile.posZ;
-
                         //knock back the entity
-                        double d0 = xStartPos - hitEntity.posX;
-                        double d1 = zStartPos - hitEntity.posZ;
+                        double d0 = projectile.posX - hitEntity.posX;
+                        double d1 = projectile.posZ - hitEntity.posZ;
                         double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
-                        hitEntity.knockBack(knockBackFrom, projectile.getPower(), d0 / d2 * 8.0D, d1 / d2 * 8.0D);
+                        hitEntity.knockBack(projectile, projectile.getPower(), d0 / d2 * 8.0D, d1 / d2 * 8.0D);
                     }
                 })
         );

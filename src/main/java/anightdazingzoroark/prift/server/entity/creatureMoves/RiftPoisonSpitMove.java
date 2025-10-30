@@ -7,6 +7,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 
 public class RiftPoisonSpitMove extends RiftCreatureMove {
+    private Entity targetToSpitTo;
+
     public RiftPoisonSpitMove() {
         super(CreatureMove.POISON_SPIT);
     }
@@ -15,6 +17,7 @@ public class RiftPoisonSpitMove extends RiftCreatureMove {
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setCanMove(false);
         user.disableCanRotateMounted();
+        if (user.isBeingRidden()) this.targetToSpitTo = target;
     }
 
     @Override
@@ -51,7 +54,14 @@ public class RiftPoisonSpitMove extends RiftCreatureMove {
 
     public void shootEntityMounted(RiftCreature user) {
         RiftCreatureProjectileEntity dilophosaurusSpit = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.POISON_SPIT, user);
-        dilophosaurusSpit.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
+        if (this.targetToSpitTo != null) {
+            double velX = this.targetToSpitTo.posX - user.posX;
+            double velY = this.targetToSpitTo.getEntityBoundingBox().minY + (double)(this.targetToSpitTo.height / 6.0F) - dilophosaurusSpit.posY;
+            double velZ = this.targetToSpitTo.posZ - user.posZ;
+            double magnitude = (double) MathHelper.sqrt(velX * velX + velZ * velZ);
+            dilophosaurusSpit.shoot(velX, velY + magnitude * 0.20000000298023224D, velZ, 1.5F, 1.0F);
+        }
+        else dilophosaurusSpit.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
         user.world.spawnEntity(dilophosaurusSpit);
     }
 }

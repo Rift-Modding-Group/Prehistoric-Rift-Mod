@@ -7,6 +7,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 
 public class RiftVenomBombMove extends RiftCreatureMove {
+    private Entity targetToSpitTo;
+
     public RiftVenomBombMove() {
         super(CreatureMove.VENOM_BOMB);
     }
@@ -15,6 +17,7 @@ public class RiftVenomBombMove extends RiftCreatureMove {
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setCanMove(false);
         user.disableCanRotateMounted();
+        if (user.isBeingRidden()) this.targetToSpitTo = target;
     }
 
     @Override
@@ -47,7 +50,14 @@ public class RiftVenomBombMove extends RiftCreatureMove {
 
     public void shootEntityMounted(RiftCreature user) {
         RiftCreatureProjectileEntity venomBomb = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.VENOM_BOMB, user);
-        venomBomb.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
+        if (this.targetToSpitTo != null) {
+            double velX = this.targetToSpitTo.posX - user.posX;
+            double velY = this.targetToSpitTo.getEntityBoundingBox().minY + (double)(this.targetToSpitTo.height / 6.0F) - venomBomb.posY;
+            double velZ = this.targetToSpitTo.posZ - user.posZ;
+            double magnitude = (double) MathHelper.sqrt(velX * velX + velZ * velZ);
+            venomBomb.shoot(velX, velY + magnitude * 0.20000000298023224D, velZ, 1.5F, 1.0F);
+        }
+        else venomBomb.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
         user.world.spawnEntity(venomBomb);
     }
 }

@@ -8,6 +8,8 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 
 public class RiftPlateFlingMove extends RiftCreatureMove {
+    private Entity targetToFlingTo;
+
     public RiftPlateFlingMove() {
         super(CreatureMove.PLATE_FLING);
     }
@@ -16,6 +18,7 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
     public void onStartExecuting(RiftCreature user, Entity target) {
         user.setCanMove(false);
         user.disableCanRotateMounted();
+        if (user.isBeingRidden()) this.targetToFlingTo = target;
     }
 
     @Override
@@ -39,17 +42,24 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
     private void shootEntityUnmounted(RiftCreature creature, Entity target) {
         RiftCreatureProjectileEntity thrownStegoPlate = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.THROWN_STEGOSAURUS_PLATE, creature);
         double velX = target.posX - creature.posX;
-        double velY = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - thrownStegoPlate.posY;
+        double velY = (target.getEntityBoundingBox().minY + target.getEntityBoundingBox().maxY) / 2 - thrownStegoPlate.posY;
         double velZ = target.posZ - creature.posZ;
         double magnitude = MathHelper.sqrt(velX * velX + velZ * velZ);
-        thrownStegoPlate.shoot(velX, velY + magnitude * 0.20000000298023224D, velZ, 1.6F, 5F);
+        thrownStegoPlate.shoot(velX, velY + magnitude * 0.20000000298023224D, velZ, 1.4F, 5F);
         creature.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (creature.getRNG().nextFloat() * 0.4F + 0.8F));
         creature.world.spawnEntity(thrownStegoPlate);
     }
 
     private void shootEntityMounted(RiftCreature user) {
         RiftCreatureProjectileEntity thrownStegoPlate = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.THROWN_STEGOSAURUS_PLATE, user);
-        thrownStegoPlate.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5F, 1.0F);
+        if (this.targetToFlingTo != null) {
+            double velX = this.targetToFlingTo.posX - user.posX;
+            double velY = (this.targetToFlingTo.posY + this.targetToFlingTo.getEntityBoundingBox().maxY) / 2 - thrownStegoPlate.posY;
+            double velZ = this.targetToFlingTo.posZ - user.posZ;
+            double magnitude = MathHelper.sqrt(velX * velX + velZ * velZ);
+            thrownStegoPlate.shoot(velX, velY + magnitude * 0.20000000298023224D, velZ, 1.4F, 1f);
+        }
+        else thrownStegoPlate.shoot(user, user.rotationPitch, user.rotationYaw, 0f, 1.4F, 1f);
         user.world.spawnEntity(thrownStegoPlate);
     }
 }
