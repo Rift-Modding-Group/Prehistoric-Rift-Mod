@@ -2,12 +2,9 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftSetEntityMotion;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.MoverType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.*;
 
@@ -28,7 +25,7 @@ public class RiftChargeMove extends RiftCreatureMove {
     }
 
     @Override
-    public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
+    public boolean canBeExecutedMounted(RiftCreature user) {
         return user.onGround && !user.isInWater();
     }
 

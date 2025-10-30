@@ -34,7 +34,7 @@ public class RiftPackCallMove extends RiftCreatureMove {
     }
 
     @Override
-    public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
+    public boolean canBeExecutedMounted(RiftCreature user) {
         this.packMembers = user.world.getEntitiesWithinAABB(user.getClass(), user.getEntityBoundingBox().grow(12D), new Predicate<RiftCreature>() {
             @Override
             public boolean apply(@Nullable RiftCreature entity) {

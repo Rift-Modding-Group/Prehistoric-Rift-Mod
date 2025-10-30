@@ -2882,14 +2882,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         RiftCreature user = this;
         List<AxisAlignedBB> aabbList = new ArrayList<>();
         List<Entity> entityList = new ArrayList<>();
+
+        double yBottom = this.posY - (useRanged ? this.rangedWidth() : this.attackWidth());
+        double yTop = this.posY + this.height + (useRanged ? this.rangedWidth() : this.attackWidth());
+
         BlockPos firstAABBPos = new BlockPos(
                 this.posX + (this.width / 2) * Math.cos(Math.atan2(this.getLookVec().z, this.getLookVec().x)),
-                this.posY,
+                yBottom,
                 this.posZ + (this.width / 2) * Math.sin(Math.atan2(this.getLookVec().z, this.getLookVec().x))
         );
         BlockPos lastAABBPos = new BlockPos(
                 this.posX + ((useRanged ? (this.rangedWidth() + this.width) : (this.attackWidth() + this.width)) - (this.width / 2)) * Math.cos(Math.atan2(this.getLookVec().z, this.getLookVec().x)),
-                this.posY,
+                yTop,
                 this.posZ + ((useRanged ? (this.rangedWidth() + this.width) : (this.attackWidth() + this.width)) - (this.width / 2)) * Math.sin(Math.atan2(this.getLookVec().z, this.getLookVec().x))
         );
 
@@ -2904,8 +2908,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             double interpZ = firstAABBPos.getZ() + t * (lastAABBPos.getZ() - firstAABBPos.getZ());
 
             AxisAlignedBB aabb = new AxisAlignedBB(
-                    interpX - this.width / 2, this.posY, interpZ - this.width / 2,
-                    interpX + this.width / 2, this.posY + this.height, interpZ + this.width / 2
+                    interpX - this.width / 2, yBottom, interpZ - this.width / 2,
+                    interpX + this.width / 2, yTop, interpZ + this.width / 2
             );
             aabbList.add(aabb);
         }

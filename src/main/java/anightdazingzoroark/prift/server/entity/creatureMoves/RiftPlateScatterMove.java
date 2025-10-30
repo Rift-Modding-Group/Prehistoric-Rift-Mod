@@ -62,7 +62,7 @@ public class RiftPlateScatterMove extends RiftCreatureMove {
             RiftCreatureProjectileEntity thrownStegoPlate = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.THROWN_STEGOSAURUS_PLATE, user);
             if (this.targetToFlingTo != null) {
                 double velX = this.targetToFlingTo.posX - user.posX;
-                double velY = (this.targetToFlingTo.getEntityBoundingBox().minY + this.targetToFlingTo.getEntityBoundingBox().maxY) / 2 - thrownStegoPlate.posY;
+                double velY = user.getEntityBoundingBox().minY + (double)(user.height / 2f) - thrownStegoPlate.posY;
                 double velZ = this.targetToFlingTo.posZ - user.posZ;
                 double magnitude = MathHelper.sqrt(velX * velX + velZ * velZ);
                 double targetAngle = Math.atan2(velZ, velX);
@@ -70,7 +70,7 @@ public class RiftPlateScatterMove extends RiftCreatureMove {
                 double newVelX = magnitude * Math.cos(targetAngle + Math.toRadians(angle));
                 double newVelZ = magnitude * Math.sin(targetAngle + Math.toRadians(angle));
 
-                thrownStegoPlate.shoot(newVelX, velY + magnitude * 0.20000000298023224D, newVelZ, 1.4F, 1f);
+                thrownStegoPlate.shoot(newVelX, velY + magnitude * 0.20000000298023224D, newVelZ, 1.5F, 1f);
             }
             else thrownStegoPlate.shoot(user, user.rotationPitch, user.rotationYaw + angle, 0.0F, 1.4f, 1f);
             user.world.spawnEntity(thrownStegoPlate);

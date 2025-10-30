@@ -3,6 +3,8 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
+import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectileEntity;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
@@ -13,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nullable;
@@ -47,7 +50,7 @@ public abstract class RiftCreatureMove {
         return user.getMoveCooldown(pos) == 0 && energyCheck;
     }
 
-    public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
+    public boolean canBeExecutedMounted(RiftCreature user) {
         return true;
     }
 
@@ -230,5 +233,35 @@ public abstract class RiftCreatureMove {
                 else return false;
             }
         };
+    }
+
+    //general helper functions to remove repetitiveness of shooting projectiles
+    protected void shootProjectileUnmounted(RiftCreature user, Entity target, int useAmount, RiftCreatureProjectile.Enum projectileEnum) {
+        if (target == null) return;
+        RiftCreatureProjectileEntity projectile = RiftCreatureProjectile.createCreatureProjectile(projectileEnum, user);
+        if (projectile.getProjectileBuilder().getHasPower()) projectile.setPower(useAmount);
+        double velX = target.posX - user.posX;
+        double velY = target.getEntityBoundingBox().minY + (double)(target.height / 2f) - projectile.posY;
+        double velZ = target.posZ - user.posZ;
+        double xzMagnitude = MathHelper.sqrt(velX * velX + velZ * velZ);
+        projectile.shoot(velX, velY + xzMagnitude * 0.20000000298023224D, velZ, 1.5F, 1.0F);
+        user.world.spawnEntity(projectile);
+    }
+
+    protected void shootProjectileMounted(RiftCreature user, Entity target, int useAmount, RiftCreatureProjectile.Enum projectileEnum) {
+        RiftCreatureProjectileEntity projectile = RiftCreatureProjectile.createCreatureProjectile(projectileEnum, user);
+        if (projectile.getProjectileBuilder().getHasPower()) {
+            float powerStrength = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, projectile.getProjectileBuilder().getPowerParams()[0], projectile.getProjectileBuilder().getPowerParams()[1]);
+            projectile.setPower(powerStrength);
+        }
+        if (target != null) {
+            double velX = target.posX - user.posX;
+            double velY = target.getEntityBoundingBox().minY + (double)(target.height / 2f) - projectile.posY;
+            double velZ = target.posZ - user.posZ;
+            double xzMagnitude = MathHelper.sqrt(velX * velX + velZ * velZ);
+            projectile.shoot(velX, velY + xzMagnitude * 0.20000000298023224D, velZ, 1.5F, 1.0F);
+        }
+        else projectile.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
+        user.world.spawnEntity(projectile);
     }
 }

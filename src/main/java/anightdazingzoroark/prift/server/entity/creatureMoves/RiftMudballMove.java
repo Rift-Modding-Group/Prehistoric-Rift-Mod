@@ -25,29 +25,13 @@ public class RiftMudballMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        if (user.getControllingPassenger() == null) this.shootEntityUnmounted(user, target);
-        else this.shootEntityMounted(user);
+        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.Enum.MUDBALL);
+        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.Enum.MUDBALL);
     }
 
     @Override
     public void onStopExecuting(RiftCreature user) {
         user.setCanMove(true);
         user.enableCanRotateMounted();
-    }
-
-    public void shootEntityUnmounted(RiftCreature user, Entity target) {
-        RiftCreatureProjectileEntity mudball = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.MUDBALL, user);
-        double d0 = target.posX - user.posX;
-        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 6.0F) - mudball.posY;
-        double d2 = target.posZ - user.posZ;
-        double d3 = (double) MathHelper.sqrt(d0 * d0 + d2 * d2);
-        mudball.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.5F, 1.0F);
-        user.world.spawnEntity(mudball);
-    }
-
-    public void shootEntityMounted(RiftCreature user) {
-        RiftCreatureProjectileEntity mudball = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.MUDBALL, user);
-        mudball.shoot(user, user.rotationPitch, user.rotationYaw, 0.0F, 1.5f, 1.0F);
-        user.world.spawnEntity(mudball);
     }
 }

@@ -24,7 +24,7 @@ public class RiftPounceMove extends RiftCreatureMove {
     }
 
     @Override
-    public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
+    public boolean canBeExecutedMounted(RiftCreature user) {
         return user.onGround && !user.isInWater();
     }
 

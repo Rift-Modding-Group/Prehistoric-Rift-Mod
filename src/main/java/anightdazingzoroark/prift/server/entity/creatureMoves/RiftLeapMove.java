@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
-import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -9,8 +8,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-
-import java.util.List;
 
 public class RiftLeapMove extends RiftCreatureMove {
     private BlockPos targetPosForLeap;
@@ -25,7 +22,7 @@ public class RiftLeapMove extends RiftCreatureMove {
     }
 
     @Override
-    public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
+    public boolean canBeExecutedMounted(RiftCreature user) {
         return user.onGround && !user.isInWater();
     }
 

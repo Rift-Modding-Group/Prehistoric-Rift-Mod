@@ -22,7 +22,7 @@ public class RiftLightBlastMove extends RiftCreatureMove {
     }
 
     @Override
-    public boolean canBeExecutedMounted(RiftCreature user, Entity target) {
+    public boolean canBeExecutedMounted(RiftCreature user) {
         return user.getMoveUse(this.creatureMove) >= this.creatureMove.maxUse;
     }
 

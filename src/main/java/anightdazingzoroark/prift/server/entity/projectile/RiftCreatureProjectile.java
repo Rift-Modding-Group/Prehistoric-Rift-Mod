@@ -101,9 +101,6 @@ public class RiftCreatureProjectile {
                 .setHasNoModel()
                 .setSelfDestruct()
                 .setUsePower(2f, 8f)
-                .setDamageCalculator((projectile) -> {
-                    return 2D;
-                })
                 .setOnHitEffect((projectile, hitEntity) -> {
                     if (hitEntity != null) {
                         //knock back the entity

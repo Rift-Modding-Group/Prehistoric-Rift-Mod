@@ -27,8 +27,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     private RiftSoundLooper chargeUpSoundLooper;
     private RiftSoundLooper useSoundLooper;
 
-    private Entity target;
-
     public RiftCreatureUseMoveMounted(RiftCreature creature) {
         this.creature = creature;
         this.setMutexBits(3);
@@ -48,7 +46,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
     public void startExecuting() {
         if (this.creature.usingMoveOne()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(0).invokeMove();
-            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveAnimType);
             this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
             //execute the move when conditions while mounted are true and there's enough energy
@@ -79,19 +76,16 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             else if (!this.energySufficientForMove()) {
                 ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.creature.getName()), false);
                 this.currentInvokedMove = null;
-                this.target = null;
             }
             else {
                 if (this.currentInvokedMove.cannotExecuteMountedMessage() != null) {
                     ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage(), this.creature.getName()), false);
                 }
                 this.currentInvokedMove = null;
-                this.target = null;
             }
         }
         else if (this.creature.usingMoveTwo()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(1).invokeMove();
-            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveAnimType);
             this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
             //execute the move when conditions while mounted are true and there's enough energy
@@ -122,19 +116,16 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             else if (!this.energySufficientForMove()) {
                 ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.creature.getName()), false);
                 this.currentInvokedMove = null;
-                this.target = null;
             }
             else {
                 if (this.currentInvokedMove.cannotExecuteMountedMessage() != null) {
                     ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage(), this.creature.getName()), false);
                 }
                 this.currentInvokedMove = null;
-                this.target = null;
             }
         }
         else if (this.creature.usingMoveThree()) {
             this.currentInvokedMove = this.creature.getLearnedMoves().get(2).invokeMove();
-            this.target = this.getAttackTarget(this.currentInvokedMove.creatureMove.moveAnimType);
             this.canBeExecutedMountedResult = this.setCanBeExecutedMountedResult();
 
             //execute the move when conditions while mounted are true and there's enough energy
@@ -165,14 +156,12 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
             else if (!this.energySufficientForMove()) {
                 ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation("reminder.insufficient_energy", this.creature.getName()), false);
                 this.currentInvokedMove = null;
-                this.target = null;
             }
             else {
                 if (this.currentInvokedMove.cannotExecuteMountedMessage() != null) {
                     ((EntityPlayer) this.creature.getControllingPassenger()).sendStatusMessage(new TextComponentTranslation(this.currentInvokedMove.cannotExecuteMountedMessage(), this.creature.getName()), false);
                 }
                 this.currentInvokedMove = null;
-                this.target = null;
             }
         }
         if (this.currentInvokedMove != null && this.canBeExecutedMountedResult && this.energySufficientForMove()) {
@@ -251,7 +240,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
                     //do the move's general functions on use point
-                    this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    this.currentInvokedMove.onReachUsePoint(this.creature, this.getTargetForAttacking());
                     //when user is in block break mode and if the move is a melee move, allow for block break
                     if (this.creature.inBlockBreakMode() && this.creature.currentCreatureMove().moveAnimType.moveType == CreatureMove.MoveType.MELEE) {
                         this.currentInvokedMove.breakBlocksInFront(this.creature);
@@ -350,7 +339,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     this.creature.setPlayingChargedMoveAnim(3);
                     //do the move's general functions on use point
-                    this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    this.currentInvokedMove.onReachUsePoint(this.creature, this.getTargetForAttacking());
                     //when user is in block break mode and if the move is a melee move, allow for block break
                     if (this.creature.inBlockBreakMode() && this.creature.currentCreatureMove().moveAnimType.moveType == CreatureMove.MoveType.MELEE) {
                         this.currentInvokedMove.breakBlocksInFront(this.creature);
@@ -436,7 +425,7 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
                 }
                 if (this.animTime == this.moveAnimChargeToUseTime) {
                     //do the move's general functions on use point
-                    this.currentInvokedMove.onReachUsePoint(this.creature, this.target);
+                    this.currentInvokedMove.onReachUsePoint(this.creature, this.getTargetForAttacking());
                     //when user is in block break mode and if the move is a melee move, allow for block break
                     if (this.creature.inBlockBreakMode() && this.creature.currentCreatureMove().moveAnimType.moveType == CreatureMove.MoveType.MELEE) {
                         this.currentInvokedMove.breakBlocksInFront(this.creature);
@@ -526,13 +515,6 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         return false;
     }
 
-    private Entity getAttackTarget(CreatureMove.MoveAnimType creatureMoveType) {
-        if (creatureMoveType != CreatureMove.MoveAnimType.RANGED && creatureMoveType != CreatureMove.MoveAnimType.CHARGE) {
-            return this.creature.getClosestTargetInFront();
-        }
-        else return this.creature.getClosestTargetInFront(true);
-    }
-
     private boolean energySufficientForMove() {
         if (this.currentInvokedMove.creatureMove.chargeType.requiresCharge()) {
             return this.creature.getEnergy() - this.currentInvokedMove.creatureMove.energyUse[0] >= this.creature.getWeaknessEnergy();
@@ -554,10 +536,10 @@ public class RiftCreatureUseMoveMounted extends EntityAIBase {
         //the moves use bar is full
         if (this.currentInvokedMove.creatureMove.chargeType == CreatureMove.ChargeType.BUILDUP) {
             int movePos = this.creature.getLearnedMoves().indexOf(this.currentInvokedMove.creatureMove);
-            return this.creature.getMoveUse(movePos) == this.currentInvokedMove.creatureMove.maxUse && this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
+            return this.creature.getMoveUse(movePos) == this.currentInvokedMove.creatureMove.maxUse && this.currentInvokedMove.canBeExecutedMounted(this.creature);
         }
         //otherwise, just use the moves conditions
-        return this.currentInvokedMove.canBeExecutedMounted(this.creature, this.target);
+        return this.currentInvokedMove.canBeExecutedMounted(this.creature);
     }
 
     private Entity getTargetForAttacking() {
