@@ -54,12 +54,19 @@ public class RiftGoToWater extends EntityAIBase {
     private BlockPos nearestWaterBlock() {
         //get all valid positions
         List<BlockPos> blockPosList = new ArrayList<>();
-        for (int x = -this.detectRange/2; x <= this.detectRange/2; x++) {
-            for (int y = -this.detectRange/2; y <= this.detectRange/2; y++) {
-                for (int z = -this.detectRange/2; z <= this.detectRange/2; z++) {
-                    BlockPos tempPos = this.creature.getPosition().add(x, y, z);
+        int minXBound = -this.detectRange / 2 + (int) Math.floor(this.creature.getEntityBoundingBox().minX);
+        int maxXBound = this.detectRange / 2 + (int) Math.ceil(this.creature.getEntityBoundingBox().maxX);
+        int minYBound = -this.detectRange / 2 + (int) this.creature.posY;
+        int maxYBound = this.detectRange / 2 + (int) this.creature.posY + (int) this.creature.height;
+        int minZBound = -this.detectRange / 2 + (int) Math.floor(this.creature.getEntityBoundingBox().minZ);
+        int maxZBound = this.detectRange / 2 + (int) Math.ceil(this.creature.getEntityBoundingBox().maxZ);
+
+        for (int x = minXBound; x <= maxXBound; x++) {
+            for (int y = minYBound; y <= maxYBound; y++) {
+                for (int z = minZBound; z <= maxZBound; z++) {
+                    BlockPos tempPos = new BlockPos(x, y, z);
                     if (this.creature.world.getBlockState(tempPos).getMaterial() == Material.WATER) {
-                        if (canFitHitbox(tempPos)) blockPosList.add(tempPos);
+                        if (this.canFitHitbox(tempPos)) blockPosList.add(tempPos);
                     }
                 }
             }
@@ -83,9 +90,9 @@ public class RiftGoToWater extends EntityAIBase {
 
     private boolean canFitHitbox(BlockPos pos) {
         float width = Math.round(this.creature.width);
-        float height = Math.round(this.creature.height);
+        float height = (float) Math.floor(this.creature.height);
         for (int x = -Math.round(width/2f); x <= Math.round(width/2f); x++) {
-            for (int y = 0; y < height; y++) {
+            for (int y = 0; y <= height; y++) {
                 for (int z = -Math.round(width/2f); z <= Math.round(width/2f); z++) {
                     if (this.creature.world.getBlockState(pos.add(x, y, z)).getMaterial() != Material.WATER) return false;
                 }

@@ -409,8 +409,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftGoToLandFromWater(this, 16, 1.0D));
         if (this instanceof RiftWaterCreature && ((RiftWaterCreature) this).isAmphibious())
             toReturn.add(new RiftGoToWater(this, 16, 1.0D));
-        if (!(this instanceof RiftWaterCreature)) new RiftWander(this, 1.0D);
-        if (this instanceof RiftWaterCreature) new RiftWanderWater((RiftWaterCreature) this, 1.0D);
+        if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftWander(this, 1.0D));
+        if (this instanceof RiftWaterCreature) toReturn.add(new RiftWanderWater((RiftWaterCreature) this, 1.0D));
         toReturn.add(new RiftLookAround(this));
 
         return toReturn;

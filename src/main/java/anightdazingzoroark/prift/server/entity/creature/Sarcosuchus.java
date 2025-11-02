@@ -27,7 +27,7 @@ public class Sarcosuchus extends RiftWaterCreature {
 
     public Sarcosuchus(World worldIn) {
         super(worldIn, RiftCreatureType.SARCOSUCHUS);
-        this.setSize(1.25f, 1f);
+        this.setSize(1.25f, 0.9f);
         this.experienceValue = 10;
         this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
         this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
@@ -44,25 +44,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.setCanPickUpLoot(true);
         this.dataManager.register(SPINNING, false);
     }
-
-    /*
-    protected void initEntityAI() {
-        this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
-        this.targetTasks.addTask(2, new RiftGetTargets.RiftGetTargetsWater(this, true, true));
-        this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
-        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(3, new RiftCreatureWarnTarget(this, 1.25f, 0.25f));
-        this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(6, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
-        this.tasks.addTask(7, new RiftGoToWater(this, 16, 1.0D));
-        this.tasks.addTask(8, new RiftWanderWater(this, 1.0D));
-        this.tasks.addTask(9, new RiftWander(this, 1.0D));
-    }
-     */
 
     @Override
     public float[] ageScaleParams() {

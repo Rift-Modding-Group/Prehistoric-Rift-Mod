@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.PathNavigateRiftSwimmer;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftWaterCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -29,21 +30,17 @@ public abstract class RiftWaterCreature extends RiftCreature {
     protected final float defaultWaterCost;
     private final PathNavigateSwimmer waterNavigate;
     private final PathNavigateGround landNavigate;
-    private boolean amphibiousInWater;
 
     public RiftWaterCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn, creatureType);
         this.moveHelper = new RiftWaterCreatureMoveHelper(this);
-        this.waterNavigate = new PathNavigateSwimmer(this, this.world);
+        this.waterNavigate = new PathNavigateRiftSwimmer(this, this.world);
         this.landNavigate = new PathNavigateGround(this, this.world);
         if (!this.isAmphibious()) {
             this.setPathPriority(PathNodeType.WATER, 0f);
             this.defaultWaterCost = 0F;
         }
-        else {
-            this.amphibiousInWater = !this.isInWater();
-            this.defaultWaterCost = this.getPathPriority(PathNodeType.WATER);
-        }
+        else this.defaultWaterCost = this.getPathPriority(PathNodeType.WATER);
     }
 
     @Override
@@ -98,19 +95,17 @@ public abstract class RiftWaterCreature extends RiftCreature {
         //for changing navigator on land for amphibious
         if (this.isAmphibious()) {
             //land to water
-            if (this.isInWater() && !this.amphibiousInWater) {
+            if (this.isInWater()) {
                 this.navigator = this.waterNavigate;
                 this.moveHelper = this.moveHelperToWaterMoveHelper();
                 this.setPathPriority(PathNodeType.WATER, 0);
-                this.amphibiousInWater = true;
                 this.navigator.clearPath();
             }
             //water to land
-            else if (!this.isInWater() && this.amphibiousInWater) {
+            else if (!this.isInWater()) {
                 this.navigator = this.landNavigate;
                 this.moveHelper = this.waterMoveHelperToMoveHelper();
                 this.setPathPriority(PathNodeType.WATER, this.defaultWaterCost);
-                this.amphibiousInWater = false;
                 this.navigator.clearPath();
             }
         }

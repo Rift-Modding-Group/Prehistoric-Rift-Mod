@@ -45,28 +45,6 @@ public class RiftWanderWater extends EntityAIWander {
     }
 
     @Override
-    protected Vec3d getPosition() {
-        Vec3d pos = RandomPositionGenerator.findRandomTarget(this.waterCreature, 10, 7);
-
-        if (this.waterCreature.isTamed() && this.waterCreature.creatureBoxWithinReach()) {
-            for (int i = 0; i < 10; i++) {
-                if (this.isWaterDestination(pos) && this.withinHomeDistance(pos)) break;
-                else pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
-            }
-            if (!this.isWaterDestination(pos) || !this.withinHomeDistance(pos)) pos = this.getPosition();
-        }
-        else if (!this.waterCreature.isTamed()) {
-            for (int i = 0; i < 10; i++) {
-                if (this.isWaterDestination(pos)) break;
-                else pos = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
-            }
-            if (!this.isWaterDestination(pos)) pos = this.getPosition();
-        }
-
-        return pos;
-    }
-
-    @Override
     public void resetTask() {
         this.waterCreature.getNavigator().clearPath();
     }
