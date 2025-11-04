@@ -23,6 +23,7 @@ public class PathNavigateRiftSwimmer extends PathNavigateSwimmer {
         //this modified swim node processor ensures that when an aquatic creature is in a pit
         //of water that is less than their height, they can not only navigate properly, but
         //they can also navigate while not trying to breach too much
+        //it also prevents them from going too near to shore
         return new PathFinder(new SwimNodeProcessor() {
             //stops creature from pausing when in a 1 block pit
             @Override
@@ -39,13 +40,39 @@ public class PathNavigateRiftSwimmer extends PathNavigateSwimmer {
             public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance) {
                 int i = 0;
 
-                for (EnumFacing enumfacing : EnumFacing.values()) {
-                    //skip upward expansion unless there is actual water above
+                mainLoop: for (EnumFacing enumfacing : EnumFacing.values()) {
+                    //skip expansion above if within 4 blocks upward theres no water
                     if (enumfacing == EnumFacing.UP) {
                         BlockPos abovePos = new BlockPos(currentPoint.x, currentPoint.y + 1, currentPoint.z);
                         IBlockState aboveState = this.blockaccess.getBlockState(abovePos);
-                        if (aboveState.getMaterial() != Material.WATER) {
-                            continue; // dont path upward if the next block isn’t water
+                        // dont path upward if the next block isn’t water
+                        if (aboveState.getMaterial() != Material.WATER) continue;
+                    }
+                    //skip expansion in a cardinal direction if within 4 blocks theres no water
+                    else if (enumfacing == EnumFacing.NORTH || enumfacing == EnumFacing.SOUTH || enumfacing == EnumFacing.EAST || enumfacing == EnumFacing.WEST) {
+                        for (int j = 1; j <= 4; j++) {
+                            BlockPos displacedPos = null;
+
+                            switch (enumfacing) {
+                                case NORTH:
+                                    displacedPos = new BlockPos(currentPoint.x, currentPoint.y, currentPoint.z - j);
+                                    break;
+                                case SOUTH:
+                                    displacedPos = new BlockPos(currentPoint.x, currentPoint.y, currentPoint.z + j);
+                                    break;
+                                case EAST:
+                                    displacedPos = new BlockPos(currentPoint.x + j, currentPoint.y, currentPoint.z);
+                                    break;
+                                case WEST:
+                                    displacedPos = new BlockPos(currentPoint.x - j, currentPoint.y, currentPoint.z);
+                                    break;
+                            }
+
+                            if (displacedPos != null) {
+                                IBlockState stateAtPos = this.blockaccess.getBlockState(displacedPos);
+                                //dont path if theres no water in that direction
+                                if (stateAtPos.getMaterial() != Material.WATER) continue mainLoop;
+                            }
                         }
                     }
 

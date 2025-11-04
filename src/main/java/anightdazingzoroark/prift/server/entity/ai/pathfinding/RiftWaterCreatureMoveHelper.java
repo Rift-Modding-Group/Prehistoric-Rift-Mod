@@ -17,7 +17,10 @@ public class RiftWaterCreatureMoveHelper extends RiftCreatureMoveHelperBase {
     @Override
     public void onUpdateMoveHelper() {
         if (this.creatureAction == CreatureAction.MOVE_TO) {
-            if (!this.waterCreature.getNavigator().noPath() && this.waterCreature.isInWater()) {
+            //the reason why setChargeTo is to be executed every tick
+            this.creatureAction = CreatureAction.WAIT;
+
+            if (this.waterCreature.isInWater()) {
                 //make normalized vector based on diff between moveto pos and waterCreature pos
                 Vec3d moveVector = new Vec3d(this.posX - this.waterCreature.posX, this.posY - this.waterCreature.posY, this.posZ - this.waterCreature.posZ);
                 Vec3d mvNormalized = moveVector.normalize();

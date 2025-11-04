@@ -22,25 +22,34 @@ import net.minecraft.pathfinding.PathNavigateSwimmer;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class RiftWaterCreature extends RiftCreature {
     private static final DataParameter<Boolean> ASCENDING = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> DESCENDING = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
-    protected final float defaultWaterCost;
+    private static final DataParameter<Boolean> WANDERING_IN_WATER = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
+
     private final PathNavigateSwimmer waterNavigate;
     private final PathNavigateGround landNavigate;
+    private boolean amphibiousInWater;
 
     public RiftWaterCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn, creatureType);
-        this.moveHelper = new RiftWaterCreatureMoveHelper(this);
         this.waterNavigate = new PathNavigateRiftSwimmer(this, this.world);
         this.landNavigate = new PathNavigateGround(this, this.world);
+        //non-amphibious creatures are water only, and it is to be always presumed they will be spawned in an
+        //remain in water, hence this
         if (!this.isAmphibious()) {
-            this.setPathPriority(PathNodeType.WATER, 0f);
-            this.defaultWaterCost = 0F;
+            this.moveHelper = new RiftWaterCreatureMoveHelper(this);
+            this.navigator = this.waterNavigate;
         }
-        else this.defaultWaterCost = this.getPathPriority(PathNodeType.WATER);
+        //amphibious creatures are presumed to have been spawned on land, so here
+        else {
+            this.moveHelper = new RiftCreatureMoveHelper(this);
+            this.navigator = this.landNavigate;
+            this.setPathPriority(PathNodeType.WATER, 0f); //amphibious creatures can path to water like regular blocks
+        }
     }
 
     @Override
@@ -48,6 +57,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
         super.entityInit();
         this.dataManager.register(ASCENDING, false);
         this.dataManager.register(DESCENDING, false);
+        this.dataManager.register(WANDERING_IN_WATER, false);
     }
 
     @Override
@@ -95,17 +105,19 @@ public abstract class RiftWaterCreature extends RiftCreature {
         //for changing navigator on land for amphibious
         if (this.isAmphibious()) {
             //land to water
-            if (this.isInWater()) {
+            if (this.isInWater() && !this.amphibiousInWater) {
+                this.amphibiousInWater = true;
                 this.navigator = this.waterNavigate;
                 this.moveHelper = this.moveHelperToWaterMoveHelper();
-                this.setPathPriority(PathNodeType.WATER, 0);
+                //this.setPathPriority(PathNodeType.WATER, 0);
                 this.navigator.clearPath();
             }
             //water to land
-            else if (!this.isInWater()) {
+            else if (!this.isInWater() && this.amphibiousInWater) {
+                this.amphibiousInWater = false;
                 this.navigator = this.landNavigate;
                 this.moveHelper = this.waterMoveHelperToMoveHelper();
-                this.setPathPriority(PathNodeType.WATER, this.defaultWaterCost);
+                //this.setPathPriority(PathNodeType.WATER, this.defaultWaterCost);
                 this.navigator.clearPath();
             }
         }
@@ -191,6 +203,14 @@ public abstract class RiftWaterCreature extends RiftCreature {
         this.dataManager.set(DESCENDING, value);
     }
 
+    public boolean getIsWanderingInWater() {
+        return this.dataManager.get(WANDERING_IN_WATER);
+    }
+
+    public void setIsWanderingInWater(boolean value) {
+        this.dataManager.set(WANDERING_IN_WATER, value);
+    }
+
     //herding stuff starts here
     public boolean canDoHerding() {
         return super.canDoHerding() && this.isInWater();
@@ -200,7 +220,9 @@ public abstract class RiftWaterCreature extends RiftCreature {
     @Override
     public void travel(float strafe, float vertical, float forward) {
         if (!this.canMove() || this.isTurretMode()) {
-            super.travel(0, vertical, 0);
+            this.superTravel(0, this.isInWater() ? 0 : vertical, 0);
+            this.motionY = 0;
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
             return;
         }
 
@@ -260,18 +282,29 @@ public abstract class RiftWaterCreature extends RiftCreature {
                     }
                 }
             }
-            else super.travel(strafe, vertical, forward);
+            else this.superTravel(strafe, vertical, forward);
         }
         else {
+            this.stepHeight = 1f;
             if (this.isInWater() && !this.getIsCharging()) {
-                this.moveRelative(strafe, vertical, forward, 0.01F);
-                this.motionX *= 0.9;
-                this.motionY *= 0.9;
-                this.motionZ *= 0.9;
-                this.fallDistance = 0.0F;
-                this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+                this.fallDistance = 0;
+
+                if (this.getNavigator().noPath() && !this.getIsWanderingInWater()) {
+                    this.moveRelative(0, 0, 0, 0.02f);
+                    this.motionX = 0;
+                    this.motionY = 0;
+                    this.motionZ = 0;
+                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+                }
+                else {
+                    this.moveRelative(strafe, vertical, forward, 0.02f);
+                    this.motionX *= 0.8;
+                    this.motionY *= 0.8;
+                    this.motionZ *= 0.8;
+                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+                }
             }
-            else super.travel(strafe, vertical, forward);
+            else this.superTravel(strafe, vertical, forward);
         }
     }
 }

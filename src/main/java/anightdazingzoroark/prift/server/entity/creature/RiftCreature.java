@@ -63,6 +63,7 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -409,8 +410,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftGoToLandFromWater(this, 16, 1.0D));
         if (this instanceof RiftWaterCreature && ((RiftWaterCreature) this).isAmphibious())
             toReturn.add(new RiftGoToWater(this, 16, 1.0D));
-        if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftWander(this, 1.0D));
         if (this instanceof RiftWaterCreature) toReturn.add(new RiftWanderWater((RiftWaterCreature) this, 1.0D));
+        toReturn.add(new RiftWander(this, 1.0D));
         toReturn.add(new RiftLookAround(this));
 
         return toReturn;
@@ -3145,6 +3146,33 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    protected void superTravel(float strafe, float vertical, float forward) {
+        super.travel(strafe, vertical, forward);
+    }
+
+    //this is just vanilla moveRelative, except that vertical motion
+    //does not get affected by water speed of creature
+    @Override
+    public void moveRelative(float strafe, float up, float forward, float friction) {
+        float f = strafe * strafe + up * up + forward * forward;
+        if (f >= 1.0E-4F) {
+            f = friction / Math.max(1f, MathHelper.sqrt(f));
+            strafe = strafe * f;
+            up = up * f;
+            forward = forward * f;
+            if (this.isInWater() || this.isInLava()) {
+                strafe *= (float) this.getEntityAttribute(SWIM_SPEED).getAttributeValue();
+                up *= 2.5f;
+                forward *= (float) this.getEntityAttribute(SWIM_SPEED).getAttributeValue();
+            }
+            float f1 = MathHelper.sin(this.rotationYaw * 0.017453292F);
+            float f2 = MathHelper.cos(this.rotationYaw * 0.017453292F);
+            this.motionX += strafe * f2 - forward * f1;
+            this.motionY += up;
+            this.motionZ += forward * f2 + strafe * f1;
+        }
+    }
+
     public void fall(float distance, float damageMultiplier) {
         if (!this.getIsLeaping()) super.fall(distance, damageMultiplier);
     }
@@ -3281,36 +3309,30 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         data.addAnimationController(new AnimationController(this, "movement", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
-                if (currentCreatureMove() == null) {
-                    //for warning
-                    if (isWarning()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".warn", false));
-                        return PlayState.CONTINUE;
-                    }
-                    //sitting
-                    else if (isSitting() && !isBeingRidden() && !hasTarget() && !isInWater()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sitting", true));
-                        return PlayState.CONTINUE;
-                    }
-                    //swimming for water creatures
-                    else if (user instanceof RiftWaterCreature && user.isInWater()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".swim", true));
-                        return PlayState.CONTINUE;
-                    }
-                    //flopping for water creatures
-                    else if (user instanceof RiftWaterCreature && ((RiftWaterCreature)user).canFlop() && !user.isInWater()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".flop", true));
-                        return PlayState.CONTINUE;
-                    }
-                    //walking
-                    else if (event.isMoving() || (isSitting() && hasTarget())) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".walk", true));
-                        return PlayState.CONTINUE;
-                    }
-                    else {
-                        event.getController().clearAnimationCache();
-                        return PlayState.STOP;
-                    }
+                //for warning
+                if (isWarning()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".warn", false));
+                    return PlayState.CONTINUE;
+                }
+                //sitting
+                else if (isSitting() && !isBeingRidden() && !hasTarget() && !isInWater()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sitting", true));
+                    return PlayState.CONTINUE;
+                }
+                //swimming for water creatures
+                else if (user instanceof RiftWaterCreature && user.isInWater()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".swim", true));
+                    return PlayState.CONTINUE;
+                }
+                //flopping for water creatures
+                else if (user instanceof RiftWaterCreature && ((RiftWaterCreature)user).canFlop() && !user.isInWater()) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".flop", true));
+                    return PlayState.CONTINUE;
+                }
+                //walking
+                else if (event.isMoving() || (isSitting() && hasTarget())) {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".walk", true));
+                    return PlayState.CONTINUE;
                 }
                 else {
                     event.getController().clearAnimationCache();

@@ -1,67 +1,185 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.ai.EntityAIWander;
-import net.minecraft.entity.ai.RandomPositionGenerator;
+import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
-public class RiftWanderWater extends EntityAIWander {
+public class RiftWanderWater extends EntityAIBase {
     private final RiftWaterCreature waterCreature;
+    private final double speed;
 
-    public RiftWanderWater(RiftWaterCreature creatureIn, double speedIn) {
-        super(creatureIn, speedIn, 1);
+    private boolean moveToNewPos;
+    private BlockPos posToSwimTo;
+    private float rotationToRotateTo;
+
+    private boolean reverseAngle; //this is just for whether or not it should rotate left or right after completing a straight path
+    private int reverseAngleCount;
+    private int reverseAngleMaxCount;
+    private final int[] reverseAngleMaxCountRange = new int[]{1, 5};
+
+    private boolean swimUpwards;
+    private int swimUpwardsCount;
+    private int currentSwimUpwardsMaxCount;
+    private final int[] swimUpwardsMaxCountRange = new int[]{2, 4};
+
+    public RiftWanderWater(RiftWaterCreature creatureIn, double speed) {
         this.waterCreature = creatureIn;
+        this.speed = speed;
     }
 
     @Override
     public boolean shouldExecute() {
         if (this.waterCreature.isTamed()) {
-            if (this.waterCreature.getEnergy() > this.waterCreature.getWeaknessEnergy()
+            return this.waterCreature.getEnergy() > this.waterCreature.getWeaknessEnergy()
                     && this.waterCreature.creatureBoxWithinReach()
                     && !this.waterCreature.isSitting()
                     && this.waterCreature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
                     && !this.waterCreature.isBeingRidden()
-                    && this.waterCreature.isInWater()) return super.shouldExecute();
-            else return false;
+                    && this.waterCreature.isInWater();
         }
         else {
             boolean isHerdLeader = this.waterCreature.isHerdLeader();
             boolean isStrayFromHerd = !this.waterCreature.canDoHerding() || !this.waterCreature.isHerdLeader() && !this.waterCreature.hasHerdLeader();
 
-            if (isHerdLeader && this.waterCreature.isInWater()) return super.shouldExecute();
-            else if (isStrayFromHerd && this.waterCreature.isInWater()) return super.shouldExecute();
-            return false;
+            return (isHerdLeader && this.waterCreature.isInWater()) || (isStrayFromHerd && this.waterCreature.isInWater());
         }
     }
 
+    /*
     @Override
     public boolean shouldContinueExecuting() {
         boolean hasNoHerdLeader = !this.waterCreature.hasHerdLeader();
-        return this.waterCreature.getEnergy() > this.waterCreature.getWeaknessEnergy() && this.waterCreature.creatureBoxWithinReach() && hasNoHerdLeader && this.waterCreature.isInWater() && super.shouldContinueExecuting();
+        return this.waterCreature.getEnergy() > this.waterCreature.getWeaknessEnergy() && this.waterCreature.creatureBoxWithinReach() && hasNoHerdLeader && this.waterCreature.isInWater();
+    }
+     */
+
+    public void startExecuting() {
+        this.waterCreature.setIsWanderingInWater(true);
+
+        //reset position changers
+        this.resetPositionChangers();
     }
 
     @Override
     public void resetTask() {
-        this.waterCreature.getNavigator().clearPath();
+        this.waterCreature.setIsWanderingInWater(false);
     }
 
-    private boolean isWaterDestination(Vec3d pos) {
+    @Override
+    public void updateTask() {
+        //move the creature
+        if (this.moveToNewPos) {
+            System.out.println("move to new pos");
+            //go to new position
+            this.waterCreature.getMoveHelper().setMoveTo(this.posToSwimTo.getX(), this.posToSwimTo.getY(), this.posToSwimTo.getZ(), this.speed);
+
+            //check if at position
+            if (this.posToSwimTo.distanceSq(this.waterCreature.getPosition()) <= 4D) this.moveToNewPos = false;
+
+            //check up to 4 blocks in front of and 2 blocks above creature for if the path its going to remains valid
+            mainLoop: for (int xz = 0; xz <= 4; xz++) {
+                for (int y = 0; y < 2; y++) {
+                    int xDispToCheck = (int) ((xz + Math.ceil(this.waterCreature.width / 2)) * Math.cos(this.rotationToRotateTo));
+                    int zDispToCheck = (int) ((xz + Math.sin(this.waterCreature.width / 2)) * Math.sin(this.rotationToRotateTo));
+                    int yDispToCheck = (int) (this.swimUpwards ? Math.ceil(this.waterCreature.height) + y : -y);
+
+                    BlockPos posToCheck = this.waterCreature.getPosition().add(xDispToCheck, yDispToCheck, zDispToCheck);
+                    if (!this.isWaterDestination(posToCheck) && !this.withinHomeDistance(posToCheck)) {
+                        this.moveToNewPos = false;
+                        break mainLoop;
+                    }
+                }
+            }
+        }
+        //generate a new position to move to, as well as the speed to travel to reach that place
+        else {
+            System.out.println("look for new pos");
+            //position generator is gonna be pretty unique
+            //when position to swim to is null, create a completely random direction to go thats 16 blocks and 4 meters away
+            if (this.posToSwimTo == null) this.posToSwimTo = this.completelyRandomPos();
+            //otherwise, create a new position based on data
+            else this.posToSwimTo = this.newPosBasedOnCurrentInfo();
+            this.moveToNewPos = true;
+        }
+    }
+
+    private BlockPos completelyRandomPos() {
+        BlockPos initPosition = this.waterCreature.getPosition();
+
+        //generate x and z displacements and angle to rotate to
+        this.rotationToRotateTo = (float) (this.waterCreature.world.rand.nextDouble() * 2 * Math.PI);
+        double newX = 16 * Math.cos(this.rotationToRotateTo);
+        double newZ = 16 * Math.sin(this.rotationToRotateTo);
+
+        //generate y displacement
+        this.swimUpwards = this.waterCreature.world.rand.nextBoolean();
+        double newY = this.swimUpwards ? 4 : -4;
+
+        this.updatePositionChangers();
+
+        return initPosition.add(newX, newY, newZ);
+    }
+
+    private BlockPos newPosBasedOnCurrentInfo() {
+        BlockPos initPosition = this.waterCreature.getPosition();
+
+        //generate x and z displacements based on current data
+        this.rotationToRotateTo += 15 * (this.reverseAngle ? -1 : 1);
+        double newX = 16 * Math.cos(this.rotationToRotateTo);
+        double newZ = 16 * Math.sin(this.rotationToRotateTo);
+
+        //generate y displacement
+        double newY = this.swimUpwards ? 4 : -4;
+
+        this.updatePositionChangers();
+
+        return initPosition.add(newX, newY, newZ);
+    }
+
+    private void updatePositionChangers() {
+        //reverse angle displacement for horizontal movement randomly
+        if (this.reverseAngleCount < this.reverseAngleMaxCount) this.reverseAngleCount++;
+        else {
+            this.reverseAngle = !this.reverseAngle;
+            this.reverseAngleCount = 0;
+            this.reverseAngleMaxCount = RiftUtil.randomInRange(this.reverseAngleMaxCountRange[0], this.reverseAngleMaxCountRange[1]);
+        }
+
+        //change swim upwards randomly
+        if (this.swimUpwardsCount < this.currentSwimUpwardsMaxCount) this.swimUpwardsCount++;
+        else {
+            this.swimUpwards = !this.swimUpwards;
+            this.swimUpwardsCount = 0;
+            this.currentSwimUpwardsMaxCount = RiftUtil.randomInRange(this.swimUpwardsMaxCountRange[0], this.swimUpwardsMaxCountRange[1]);
+        }
+    }
+
+    private void resetPositionChangers() {
+        //reset reversion of angle displacement for horizontal movement randomly
+        this.reverseAngleCount = 0;
+        this.reverseAngleMaxCount = RiftUtil.randomInRange(this.reverseAngleMaxCountRange[0], this.reverseAngleMaxCountRange[1]);
+
+        //reset changing of upward swimming randomly
+        this.swimUpwardsCount = 0;
+        this.currentSwimUpwardsMaxCount = RiftUtil.randomInRange(this.swimUpwardsMaxCountRange[0], this.swimUpwardsMaxCountRange[1]);
+    }
+
+    private boolean isWaterDestination(BlockPos pos) {
         if (pos == null) return false;
-        BlockPos blockPos = new BlockPos(pos);
-        return this.waterCreature.world.getBlockState(blockPos).getMaterial() == Material.WATER;
+        return this.waterCreature.world.getBlockState(pos).getMaterial() == Material.WATER;
     }
 
-    private boolean withinHomeDistance(Vec3d pos) {
+    private boolean withinHomeDistance(BlockPos pos) {
         if (pos == null || this.waterCreature.getHomePos() == null) return false;
 
         RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.waterCreature.world.getTileEntity(this.waterCreature.getHomePos());
 
         if (creatureBox == null) return false;
 
-        return creatureBox.posWithinDeploymentRange(new BlockPos(pos));
+        return creatureBox.posWithinDeploymentRange(pos);
     }
 }
