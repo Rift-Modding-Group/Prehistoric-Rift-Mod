@@ -26,6 +26,8 @@ public class RiftWanderWater extends EntityAIBase {
     private int currentSwimUpwardsMaxCount;
     private final int[] swimUpwardsMaxCountRange = new int[]{2, 4};
 
+    private int lastVerticalDisplacement;
+
     public RiftWanderWater(RiftWaterCreature creatureIn, double speed) {
         this.waterCreature = creatureIn;
         this.speed = speed;
@@ -57,9 +59,8 @@ public class RiftWanderWater extends EntityAIBase {
     }
      */
 
+    @Override
     public void startExecuting() {
-        this.waterCreature.setIsWanderingInWater(true);
-
         //reset position changers
         this.resetPositionChangers();
     }
@@ -77,19 +78,29 @@ public class RiftWanderWater extends EntityAIBase {
             //go to new position
             this.waterCreature.getMoveHelper().setMoveTo(this.posToSwimTo.getX(), this.posToSwimTo.getY(), this.posToSwimTo.getZ(), this.speed);
 
-            //check if at position
-            if (this.posToSwimTo.distanceSq(this.waterCreature.getPosition()) <= 4D) this.moveToNewPos = false;
+            //check if at position or if current distance to target pos is way bigger than last distance
+            System.out.println("this.posToSwimTo.distanceSq(this.waterCreature.getPosition()): "+this.posToSwimTo.distanceSq(this.waterCreature.getPosition()));
+            if (this.posToSwimTo.distanceSq(this.waterCreature.getPosition()) <= 4D) {
+                this.waterCreature.setIsWanderingInWater(false);
+                this.moveToNewPos = false;
+                this.updatePositionChangers();
+            }
 
             //check up to 4 blocks in front of and 2 blocks above creature for if the path its going to remains valid
+            int modifiedLastVerticalDisplacement = (int) Math.abs(Math.ceil(this.lastVerticalDisplacement / 2D));
             mainLoop: for (int xz = 0; xz <= 4; xz++) {
-                for (int y = 0; y < 2; y++) {
+                for (int y = 0; y <= modifiedLastVerticalDisplacement; y++) {
+                    System.out.println("this.swimUpwards: "+this.swimUpwards);
+                    System.out.println("y: "+y);
                     int xDispToCheck = (int) ((xz + Math.ceil(this.waterCreature.width / 2)) * Math.cos(this.rotationToRotateTo));
-                    int zDispToCheck = (int) ((xz + Math.sin(this.waterCreature.width / 2)) * Math.sin(this.rotationToRotateTo));
+                    int zDispToCheck = (int) ((xz + Math.ceil(this.waterCreature.width / 2)) * Math.sin(this.rotationToRotateTo));
                     int yDispToCheck = (int) (this.swimUpwards ? Math.ceil(this.waterCreature.height) + y : -y);
 
                     BlockPos posToCheck = this.waterCreature.getPosition().add(xDispToCheck, yDispToCheck, zDispToCheck);
                     if (!this.isWaterDestination(posToCheck) && !this.withinHomeDistance(posToCheck)) {
+                        this.waterCreature.setIsWanderingInWater(false);
                         this.moveToNewPos = false;
+                        this.updatePositionChangers();
                         break mainLoop;
                     }
                 }
@@ -103,6 +114,8 @@ public class RiftWanderWater extends EntityAIBase {
             if (this.posToSwimTo == null) this.posToSwimTo = this.completelyRandomPos();
             //otherwise, create a new position based on data
             else this.posToSwimTo = this.newPosBasedOnCurrentInfo();
+            System.out.println("last waterCreature pos: "+this.waterCreature.getPosition());
+            this.waterCreature.setIsWanderingInWater(true);
             this.moveToNewPos = true;
         }
     }
@@ -117,11 +130,9 @@ public class RiftWanderWater extends EntityAIBase {
 
         //generate y displacement
         this.swimUpwards = this.waterCreature.world.rand.nextBoolean();
-        double newY = this.swimUpwards ? 4 : -4;
+        this.lastVerticalDisplacement = this.makeVerticalDisplacement();
 
-        this.updatePositionChangers();
-
-        return initPosition.add(newX, newY, newZ);
+        return initPosition.add(newX, this.lastVerticalDisplacement, newZ);
     }
 
     private BlockPos newPosBasedOnCurrentInfo() {
@@ -133,13 +144,25 @@ public class RiftWanderWater extends EntityAIBase {
         double newZ = 16 * Math.sin(this.rotationToRotateTo);
 
         //generate y displacement
-        double newY = this.swimUpwards ? 4 : -4;
+        this.lastVerticalDisplacement = this.makeVerticalDisplacement();
 
-        this.updatePositionChangers();
-
-        return initPosition.add(newX, newY, newZ);
+        return initPosition.add(newX, this.lastVerticalDisplacement, newZ);
     }
 
+    private int makeVerticalDisplacement() {
+        int toReturn = 0;
+
+        for (int i = 0; i <= 4; i++) {
+            int yDispToTest = this.swimUpwards ? i + (int) Math.ceil(this.waterCreature.height) : -i;
+            BlockPos posToTest = this.waterCreature.getPosition().add(0, yDispToTest, 0);
+            if (!this.isWaterDestination(posToTest) && !this.withinHomeDistance(posToTest)) break;
+            toReturn = this.swimUpwards ? i : -1;
+        }
+
+        return toReturn;
+    }
+
+    //in an ideal open water, these update to gradually change directions to swim to
     private void updatePositionChangers() {
         //reverse angle displacement for horizontal movement randomly
         if (this.reverseAngleCount < this.reverseAngleMaxCount) this.reverseAngleCount++;
@@ -154,6 +177,26 @@ public class RiftWanderWater extends EntityAIBase {
         else {
             this.swimUpwards = !this.swimUpwards;
             this.swimUpwardsCount = 0;
+            this.currentSwimUpwardsMaxCount = RiftUtil.randomInRange(this.swimUpwardsMaxCountRange[0], this.swimUpwardsMaxCountRange[1]);
+        }
+    }
+
+    //if the creature bumps into an unpathable point, update these to then inverse the direction they will go to
+    private void inversePositionChangers() {
+        //inverse rotation to rotate to without hard resetting
+        this.reverseAngle = !this.reverseAngle;
+        this.rotationToRotateTo += this.reverseAngle ? -165 : 165;
+        if (this.reverseAngleCount < this.reverseAngleMaxCount) this.reverseAngleCount++;
+        else {
+            this.reverseAngleCount = 0;
+            this.reverseAngleMaxCount = RiftUtil.randomInRange(this.reverseAngleMaxCountRange[0], this.reverseAngleMaxCountRange[1]);
+        }
+
+        //inverse vertical swim direction without hard resetting
+        this.swimUpwards = !this.swimUpwards;
+        if (this.swimUpwardsCount < this.currentSwimUpwardsMaxCount) this.swimUpwardsCount++;
+        else {
+            this.reverseAngleCount = 0;
             this.currentSwimUpwardsMaxCount = RiftUtil.randomInRange(this.swimUpwardsMaxCountRange[0], this.swimUpwardsMaxCountRange[1]);
         }
     }

@@ -2,6 +2,10 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import net.minecraft.client.resources.I18n;
 
+/*
+  TODO: this must be eventually changed to be more like what i did for creature projectiles
+   my pp gets so hard looking at it that it must be a standard for stuff like this
+ */
 public enum CreatureMove {
     BOUNCE(RiftBounceMove.class, MoveAnimType.STATUS, ChargeType.NONE, 0, new int[]{0}, 0, 0, false, false, false, TargetRequirement.HAS_TARGET),
     TACKLE(RiftTackleMove.class, MoveAnimType.CHARGE, ChargeType.NONE, 25, new int[]{0}, 0, 0, false, true, false, TargetRequirement.HAS_TARGET),

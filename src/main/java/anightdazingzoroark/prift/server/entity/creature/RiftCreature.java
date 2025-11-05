@@ -410,7 +410,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftGoToLandFromWater(this, 16, 1.0D));
         if (this instanceof RiftWaterCreature && ((RiftWaterCreature) this).isAmphibious())
             toReturn.add(new RiftGoToWater(this, 16, 1.0D));
-        if (this instanceof RiftWaterCreature) toReturn.add(new RiftWanderWater((RiftWaterCreature) this, 1.0D));
+        if (this instanceof RiftWaterCreature) toReturn.add(new RiftNewWanderWater((RiftWaterCreature) this, 1.0D));
         toReturn.add(new RiftWander(this, 1.0D));
         toReturn.add(new RiftLookAround(this));
 
@@ -3148,29 +3148,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     protected void superTravel(float strafe, float vertical, float forward) {
         super.travel(strafe, vertical, forward);
-    }
-
-    //this is just vanilla moveRelative, except that vertical motion
-    //does not get affected by water speed of creature
-    @Override
-    public void moveRelative(float strafe, float up, float forward, float friction) {
-        float f = strafe * strafe + up * up + forward * forward;
-        if (f >= 1.0E-4F) {
-            f = friction / Math.max(1f, MathHelper.sqrt(f));
-            strafe = strafe * f;
-            up = up * f;
-            forward = forward * f;
-            if (this.isInWater() || this.isInLava()) {
-                strafe *= (float) this.getEntityAttribute(SWIM_SPEED).getAttributeValue();
-                up *= 2.5f;
-                forward *= (float) this.getEntityAttribute(SWIM_SPEED).getAttributeValue();
-            }
-            float f1 = MathHelper.sin(this.rotationYaw * 0.017453292F);
-            float f2 = MathHelper.cos(this.rotationYaw * 0.017453292F);
-            this.motionX += strafe * f2 - forward * f1;
-            this.motionY += up;
-            this.motionZ += forward * f2 + strafe * f1;
-        }
     }
 
     public void fall(float distance, float damageMultiplier) {

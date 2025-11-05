@@ -8,6 +8,11 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     protected final RiftCreature creature;
     protected CreatureAction creatureAction = CreatureAction.WAIT;
 
+    //for angle based moveTo
+    protected Float angleToMoveTo; //class version of float is used for angle in angle-based moveTo
+    protected boolean moveUpwards;
+    protected VerticalMoveOption verticalMoveOption = VerticalMoveOption.NONE;
+
     //charge related stuff
     public double oldChargeDistNoY = Double.MAX_VALUE;
     public double oldChargeDistWithY = Double.MAX_VALUE;
@@ -26,10 +31,18 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     //reminder to self that this is meant to be executed every tick
     @Override
     public void setMoveTo(double x, double y, double z, double speedIn) {
+        this.angleToMoveTo = null;
         this.posX = x;
         this.posY = y;
         this.posZ = z;
         this.speed = speedIn;
+        this.creatureAction = CreatureAction.MOVE_TO;
+    }
+
+    public void setMoveTo(float angle, VerticalMoveOption verticalMoveOption, double speed) {
+        this.angleToMoveTo = angle;
+        this.verticalMoveOption = verticalMoveOption;
+        this.speed = speed;
         this.creatureAction = CreatureAction.MOVE_TO;
     }
 
@@ -88,5 +101,11 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
         JUMP, //classic jump upwards to move upwards
         CHARGE, //charge
         LEAP;
+    }
+
+    public enum VerticalMoveOption {
+        UPWARDS,
+        DOWNWARDS,
+        NONE
     }
 }
