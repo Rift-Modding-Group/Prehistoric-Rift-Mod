@@ -110,6 +110,23 @@ public class RiftNewWanderWater extends EntityAIBase {
             this.verticalMoveOption = RiftCreatureMoveHelperBase.VerticalMoveOption.values()[this.waterCreature.world.rand.nextInt(RiftCreatureMoveHelperBase.VerticalMoveOption.values().length)];
             this.resetVerticalMovementFlags();
         }
+
+        //when doing horizontal movement, if block in front is not solid, reverse direction
+        //must get blocks 4 blocks ahead
+        for (int i = 0; i <= 4; i++) {
+            int xDispToCheck = (int) ((i + Math.ceil(this.waterCreature.width / 2)) * Math.cos(Math.toRadians(this.angleDirection)));
+            int zDispToCheck = (int) ((i + Math.ceil(this.waterCreature.width / 2)) * Math.sin(Math.toRadians(this.angleDirection)));
+            BlockPos posToCheck = this.waterCreature.getPosition().add(xDispToCheck, 0, zDispToCheck);
+
+            if (!this.isWaterDestination(posToCheck) && !this.withinHomeDistance(posToCheck)) {
+                //reverse angle direction
+                int initAngleResult = this.angleDirection + 180;
+                if (initAngleResult >= 180) initAngleResult -= 360;
+                else if (initAngleResult <= -180) initAngleResult += 360;
+                this.angleDirection = initAngleResult;
+                break;
+            }
+        }
     }
 
     private void resetHorizontalMovementFlags() {
@@ -130,15 +147,6 @@ public class RiftNewWanderWater extends EntityAIBase {
     private float horizontalSwimSpeed() {
         return (float) (this.speed * this.waterCreature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
     }
-
-    /*
-    private RiftCreatureMoveHelperBase.VerticalMoveOption getVerticalMoveOptionFromEnv() {
-        List<RiftCreatureMoveHelperBase.VerticalMoveOption> initList = Arrays.asList(RiftCreatureMoveHelperBase.VerticalMoveOption.values());
-
-        //remove go to top as possible value if above is ineligible
-        BlockPos topPosToTest
-    }
-     */
 
     private boolean isWaterDestination(BlockPos pos) {
         if (pos == null) return false;

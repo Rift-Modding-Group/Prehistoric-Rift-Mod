@@ -2,7 +2,10 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
@@ -36,10 +39,18 @@ public class RiftWaterCreatureMoveHelper extends RiftCreatureMoveHelperBase {
                     //set vertical speed
                     switch (this.verticalMoveOption) {
                         case UPWARDS:
-                            this.waterCreature.setMoveVertical(creatureSpeed / 2f);
+                            //ensure that during upward movement, space above body is valid space
+                            BlockPos abovePos = this.getTopOfBodyYPos();
+                            if (this.isWaterDestination(abovePos) || this.withinHomeDistance(abovePos)) {
+                                this.waterCreature.setMoveVertical(creatureSpeed / 2f);
+                            }
                             break;
                         case DOWNWARDS:
-                            this.waterCreature.setMoveVertical(-creatureSpeed / 2f);
+                            //ensure that during downward movement, space below body is valid space
+                            BlockPos belowPos = this.getBodyPos().add(0, -1, 0);
+                            if (this.isWaterDestination(belowPos) || this.withinHomeDistance(belowPos)) {
+                                this.waterCreature.setMoveVertical(-creatureSpeed / 2f);
+                            }
                             break;
                         case NONE:
                             this.waterCreature.setMoveVertical(0);
@@ -117,5 +128,31 @@ public class RiftWaterCreatureMoveHelper extends RiftCreatureMoveHelperBase {
         creatureMoveHelper.oldChargeDistNoY = this.oldChargeDistNoY;
         creatureMoveHelper.oldChargeDistWithY = this.oldChargeDistWithY;
         return creatureMoveHelper;
+    }
+
+    private boolean isWaterDestination(BlockPos pos) {
+        if (pos == null) return false;
+        return this.waterCreature.world.getBlockState(pos).getMaterial() == Material.WATER;
+    }
+
+    private boolean withinHomeDistance(BlockPos pos) {
+        if (pos == null || this.waterCreature.getHomePos() == null) return false;
+
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) this.waterCreature.world.getTileEntity(this.waterCreature.getHomePos());
+
+        if (creatureBox == null) return false;
+
+        return creatureBox.posWithinDeploymentRange(pos);
+    }
+
+    private BlockPos getBodyPos() {
+        if (this.waterCreature.getBodyHitbox() == null) return this.waterCreature.getPosition();
+        return this.waterCreature.getBodyHitbox().getPosition();
+    }
+
+    private BlockPos getTopOfBodyYPos() {
+        int height = (int) Math.ceil(this.waterCreature.height);
+        if (this.waterCreature.getBodyHitbox() != null) height = (int) Math.ceil(this.waterCreature.getBodyHitbox().height);
+        return this.getBodyPos().add(0, height, 0);
     }
 }
