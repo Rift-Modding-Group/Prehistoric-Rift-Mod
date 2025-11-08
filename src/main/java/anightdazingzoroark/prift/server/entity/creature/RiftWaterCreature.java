@@ -28,7 +28,6 @@ import net.minecraft.world.World;
 public abstract class RiftWaterCreature extends RiftCreature {
     private static final DataParameter<Boolean> ASCENDING = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> DESCENDING = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> WANDERING_IN_WATER = EntityDataManager.createKey(RiftWaterCreature.class, DataSerializers.BOOLEAN);
 
     private final PathNavigateSwimmer waterNavigate;
     private final PathNavigateGround landNavigate;
@@ -57,7 +56,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         super.entityInit();
         this.dataManager.register(ASCENDING, false);
         this.dataManager.register(DESCENDING, false);
-        this.dataManager.register(WANDERING_IN_WATER, false);
     }
 
     @Override
@@ -203,14 +201,6 @@ public abstract class RiftWaterCreature extends RiftCreature {
         this.dataManager.set(DESCENDING, value);
     }
 
-    public boolean getIsWanderingInWater() {
-        return this.dataManager.get(WANDERING_IN_WATER);
-    }
-
-    public void setIsWanderingInWater(boolean value) {
-        this.dataManager.set(WANDERING_IN_WATER, value);
-    }
-
     //herding stuff starts here
     public boolean canDoHerding() {
         return super.canDoHerding() && this.isInWater();
@@ -289,7 +279,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
             if (this.isInWater() && !this.getIsCharging()) {
                 this.fallDistance = 0;
 
-                if (this.getNavigator().noPath() && !this.getIsWanderingInWater()) {
+                if (this.getNavigator().noPath()) {
                     this.moveRelative(0, 0, 0, 0.02f);
                     this.motionX = 0;
                     this.motionY = 0;

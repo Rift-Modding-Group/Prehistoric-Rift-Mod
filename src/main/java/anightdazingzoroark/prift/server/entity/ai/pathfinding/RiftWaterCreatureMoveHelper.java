@@ -24,58 +24,22 @@ public class RiftWaterCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             this.creatureAction = CreatureAction.WAIT;
 
             if (this.waterCreature.isInWater()) {
-                //angle based movement
-                if (this.angleToMoveTo != null) {
-                    //set look angle
-                    this.waterCreature.rotationYaw = this.limitAngle(this.waterCreature.rotationYaw, this.angleToMoveTo, 30f);
-                    this.waterCreature.setRenderYawOffset(this.waterCreature.rotationYaw);
+                //make normalized vector based on diff between moveto pos and waterCreature pos
+                Vec3d moveVector = new Vec3d(this.posX - this.waterCreature.posX, this.posY - this.waterCreature.posY, this.posZ - this.waterCreature.posZ);
+                Vec3d mvNormalized = moveVector.normalize();
 
-                    //set speed
-                    float creatureSpeed = (float) (this.speed * this.waterCreature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
+                //make speed from vector and waterCreature speed
+                double creatureSpeed = (float) (this.speed * this.waterCreature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
+                Vec3d finalVectors = mvNormalized.scale(creatureSpeed);
 
-                    //set horizontal speed
-                    this.waterCreature.setAIMoveSpeed(creatureSpeed);
+                //set look angle
+                float f = (float) (MathHelper.atan2(finalVectors.z, finalVectors.x) * 180 / Math.PI - 90);
+                this.waterCreature.rotationYaw = limitAngle(this.waterCreature.rotationYaw, f, 90);
+                this.waterCreature.setRenderYawOffset(this.waterCreature.rotationYaw);
 
-                    //set vertical speed
-                    switch (this.verticalMoveOption) {
-                        case UPWARDS:
-                            //ensure that during upward movement, space above body is valid space
-                            BlockPos abovePos = this.getTopOfBodyYPos();
-                            if (this.isWaterDestination(abovePos) || this.withinHomeDistance(abovePos)) {
-                                this.waterCreature.setMoveVertical(creatureSpeed / 2f);
-                            }
-                            break;
-                        case DOWNWARDS:
-                            //ensure that during downward movement, space below body is valid space
-                            BlockPos belowPos = this.getBodyPos().add(0, -1, 0);
-                            if (this.isWaterDestination(belowPos) || this.withinHomeDistance(belowPos)) {
-                                this.waterCreature.setMoveVertical(-creatureSpeed / 2f);
-                            }
-                            break;
-                        case NONE:
-                            this.waterCreature.setMoveVertical(0);
-                            break;
-                    }
-                }
-                //non angle based movement
-                else {
-                    //make normalized vector based on diff between moveto pos and waterCreature pos
-                    Vec3d moveVector = new Vec3d(this.posX - this.waterCreature.posX, this.posY - this.waterCreature.posY, this.posZ - this.waterCreature.posZ);
-                    Vec3d mvNormalized = moveVector.normalize();
-
-                    //make speed from vector and waterCreature speed
-                    double creatureSpeed = (float) (this.speed * this.waterCreature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
-                    Vec3d finalVectors = mvNormalized.scale(creatureSpeed);
-
-                    //set look angle
-                    float f = (float) (MathHelper.atan2(finalVectors.z, finalVectors.x) * 180 / Math.PI);
-                    this.waterCreature.rotationYaw = this.limitAngle(this.waterCreature.rotationYaw, f, 360);
-                    this.waterCreature.setRenderYawOffset(this.waterCreature.rotationYaw);
-
-                    //set speed
-                    this.waterCreature.setAIMoveSpeed((float) Math.sqrt(finalVectors.x * finalVectors.x + finalVectors.z * finalVectors.z));
-                    this.waterCreature.setMoveVertical((float) finalVectors.y);
-                }
+                //set speed
+                this.waterCreature.setAIMoveSpeed((float) Math.sqrt(finalVectors.x * finalVectors.x + finalVectors.z * finalVectors.z));
+                this.waterCreature.setMoveVertical((float) finalVectors.y);
             }
         }
         else if (this.creatureAction == CreatureAction.CHARGE) {

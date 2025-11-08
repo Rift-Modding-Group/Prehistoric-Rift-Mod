@@ -10,12 +10,34 @@ import net.minecraft.pathfinding.SwimNodeProcessor;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class PathNavigateRiftSwimmer extends PathNavigateSwimmer {
     public PathNavigateRiftSwimmer(EntityLiving entitylivingIn, World worldIn) {
         super(entitylivingIn, worldIn);
+    }
+
+    @Override
+    protected void pathFollow() {
+        Vec3d vec3d = this.getEntityPosition();
+        double widthExpanded = Math.pow(Math.ceil(this.entity.width) + 2, 2);
+
+        if (vec3d.squareDistanceTo(this.currentPath.getVectorFromIndex(this.entity, this.currentPath.getCurrentPathIndex())) < widthExpanded) {
+            this.currentPath.incrementPathIndex();
+        }
+
+        for (int j = Math.min(this.currentPath.getCurrentPathIndex() + 6, this.currentPath.getCurrentPathLength() - 1); j > this.currentPath.getCurrentPathIndex(); --j) {
+            Vec3d vec3d1 = this.currentPath.getVectorFromIndex(this.entity, j);
+
+            if (vec3d1.squareDistanceTo(vec3d) <= 36.0D && this.isDirectPathBetweenPoints(vec3d, vec3d1, 0, 0, 0)) {
+                this.currentPath.setCurrentPathIndex(j);
+                break;
+            }
+        }
+
+        this.checkForStuck(vec3d);
     }
 
     @Override
@@ -32,7 +54,7 @@ public class PathNavigateRiftSwimmer extends PathNavigateSwimmer {
                 this.entity = mob;
                 this.pointMap.clearMap();
                 this.entitySizeX = MathHelper.floor(mob.width + 1);
-                this.entitySizeY = MathHelper.floor(mob.height);
+                this.entitySizeY = 1;
                 this.entitySizeZ = MathHelper.floor(mob.width + 1);
             }
 
@@ -40,40 +62,13 @@ public class PathNavigateRiftSwimmer extends PathNavigateSwimmer {
             public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance) {
                 int i = 0;
 
-                mainLoop: for (EnumFacing enumfacing : EnumFacing.values()) {
+                for (EnumFacing enumfacing : EnumFacing.values()) {
                     //skip expansion above if within 4 blocks upward theres no water
                     if (enumfacing == EnumFacing.UP) {
                         BlockPos abovePos = new BlockPos(currentPoint.x, currentPoint.y + 1, currentPoint.z);
                         IBlockState aboveState = this.blockaccess.getBlockState(abovePos);
                         // dont path upward if the next block isn’t water
                         if (aboveState.getMaterial() != Material.WATER) continue;
-                    }
-                    //skip expansion in a cardinal direction if within 4 blocks theres no water
-                    else if (enumfacing == EnumFacing.NORTH || enumfacing == EnumFacing.SOUTH || enumfacing == EnumFacing.EAST || enumfacing == EnumFacing.WEST) {
-                        for (int j = 1; j <= 4; j++) {
-                            BlockPos displacedPos = null;
-
-                            switch (enumfacing) {
-                                case NORTH:
-                                    displacedPos = new BlockPos(currentPoint.x, currentPoint.y, currentPoint.z - j);
-                                    break;
-                                case SOUTH:
-                                    displacedPos = new BlockPos(currentPoint.x, currentPoint.y, currentPoint.z + j);
-                                    break;
-                                case EAST:
-                                    displacedPos = new BlockPos(currentPoint.x + j, currentPoint.y, currentPoint.z);
-                                    break;
-                                case WEST:
-                                    displacedPos = new BlockPos(currentPoint.x - j, currentPoint.y, currentPoint.z);
-                                    break;
-                            }
-
-                            if (displacedPos != null) {
-                                IBlockState stateAtPos = this.blockaccess.getBlockState(displacedPos);
-                                //dont path if theres no water in that direction
-                                if (stateAtPos.getMaterial() != Material.WATER) continue mainLoop;
-                            }
-                        }
                     }
 
                     PathPoint pathpoint = this.getWaterNode(

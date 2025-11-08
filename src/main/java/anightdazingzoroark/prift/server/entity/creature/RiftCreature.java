@@ -63,7 +63,6 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -410,7 +409,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftGoToLandFromWater(this, 16, 1.0D));
         if (this instanceof RiftWaterCreature && ((RiftWaterCreature) this).isAmphibious())
             toReturn.add(new RiftGoToWater(this, 16, 1.0D));
-        if (this instanceof RiftWaterCreature) toReturn.add(new RiftNewWanderWater((RiftWaterCreature) this, 1.0D));
+        if (this instanceof RiftWaterCreature) toReturn.add(new RiftWanderWater((RiftWaterCreature) this));
         toReturn.add(new RiftWander(this, 1.0D));
         toReturn.add(new RiftLookAround(this));
 
