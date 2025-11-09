@@ -267,11 +267,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     }
 
     @Override
-    public double herdFollowRange() {
-        return 4D;
-    }
-
-    @Override
     public int slotCount() {
         return 27;
     }

@@ -56,11 +56,6 @@ public class Gallimimus extends RiftCreature {
      */
 
     @Override
-    public double herdFollowRange() {
-        return 4D;
-    }
-
-    @Override
     public int slotCount() {
         return 9;
     }

@@ -106,11 +106,6 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
     }
 
     @Override
-    public double herdFollowRange() {
-        return 4D;
-    }
-
-    @Override
     public int slotCount() {
         return 18;
     }

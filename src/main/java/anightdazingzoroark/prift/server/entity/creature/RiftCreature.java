@@ -83,7 +83,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable, IMultiHitboxUser, IDynamicRideUser {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -167,8 +166,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> CHARGING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
-    private int herdSize = 1;
-    private RiftCreature herdLeader;
+    //herding stuff
+    private RiftCreature herdLeader = this;
+    private final Set<RiftCreature> herdMembers = new HashSet<>();
+
     private int boxReviveTime;
     private int energyMod;
     private int energyRegenMod;
@@ -402,8 +403,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             toReturn.add(new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
         if (this.creatureType.isTameable && this instanceof RiftWaterCreature)
             toReturn.add(new RiftWaterCreatureFollowOwner((RiftWaterCreature) this, 1.0D, 8.0F, 4.0F));
+
+        /*
         if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.HERDER))
             toReturn.add(new RiftHerdDistanceFromOtherMembers(this, 1.5D));
+         */
+
         if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.HERDER))
             toReturn.add(new RiftHerdMemberFollow(this));
         if (!(this instanceof RiftWaterCreature)) toReturn.add(new RiftGoToLandFromWater(this, 16, 1.0D));
@@ -426,11 +431,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         double distFromCenter = Math.sqrt(this.posX * this.posX + this.posZ * this.posZ);
         double level = Math.floor((distFromCenter / GeneralConfig.levelingRadius)) * GeneralConfig.levelingRadisIncrement + RiftUtil.randomInRange(1, 10) + this.levelAddFromDifficulty();
         this.setLevel(RiftUtil.clamp((int) level, 0, 100));
-        //manage herding
-        if (this.canDoHerding()) {
-            if (!(livingdata instanceof HerdData)) return new HerdData(this);
-            this.addToHerdLeader(((HerdData)livingdata).herdLeader);
-        }
         return livingdata;
     }
 
@@ -480,6 +480,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             this.hasNoTargetManagement();
             this.manageCloaking();
             if (this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.NOCTURNAL)) this.manageSleepSchedule();
+            if (this.canDoHerding()) {
+                this.lookForHerdLeader();
+                if (this.isHerdLeader() && this.ticksExisted % 1200 == 0) this.validateHerdMembers();
+            }
             if (this.canBePregnant()) this.createBabyWhenPregnant();
 
             //move conditions ticking, mainly for moves that dont require target to use
@@ -505,9 +509,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 //when creature is deployed from party and is visible on the quick summon/dismiss widget
                 //update when health, energy, or xp is at a certain percent threshold
                 this.updateForPartyHUD();
-            }
-            else {
-                if (this.canDoHerding()) this.manageHerding();
             }
         }
         else {
@@ -2013,8 +2014,61 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //pregnancy related stuff ends here
 
     //herding related stuff starts here
+    //note that anything related to herding must be server only
     public boolean canDoHerding() {
         return this.creatureType.getBehaviors().contains(RiftCreatureType.Behavior.HERDER) && !this.isTamed();
+    }
+
+    private void lookForHerdLeader() {
+        //only applies if the creature has no leader, is already leader, or if its leader is dead
+        if (this.herdLeader == null || this.herdLeader.equals(this) || !this.herdLeader.isEntityAlive()) {
+            for (RiftCreature creature : this.world.getEntitiesWithinAABB(RiftCreature.class, this.herdBoundingBox(), new Predicate<RiftCreature>() {
+                @Override
+                public boolean apply(@Nullable RiftCreature creature) {
+                    return creature != null && creature.canDoHerding() && creature.isEntityAlive();
+                }
+            })) {
+                if (creature.creatureType.equals(this.creatureType)) {
+                    RiftCreature eligibleLeader = this.getEligibleHerdLeader(creature);
+                    if (eligibleLeader != null) this.setHerdLeader(eligibleLeader);
+                }
+            }
+        }
+        //for cases of herd separation
+        else if (this.getDistanceSq(this.herdLeader) > 256) {
+            this.leaveHerd();
+        }
+    }
+
+    //periodically checked by herd leader to update the member list
+    private void validateHerdMembers() {
+        this.herdMembers.removeIf(creature -> !creature.isEntityAlive() || !creature.canDoHerding() || !this.equals(creature.getHerdLeader()));
+    }
+
+    //this is recursive cos we also wanna check the detected creatures leader too
+    private RiftCreature getEligibleHerdLeader(RiftCreature foundCreature) {
+        RiftCreature foundLeader = foundCreature.getHerdLeader();
+
+        if (foundLeader != null && foundLeader.isEntityAlive() && !foundLeader.equals(foundCreature)) {
+            foundLeader = this.getEligibleHerdLeader(foundLeader);
+        }
+
+        RiftCreature bestCandidate = this;
+
+        if (foundCreature.getLevel() > bestCandidate.getLevel()) {
+            bestCandidate = foundCreature;
+        }
+
+        if (foundLeader != null && foundLeader.getLevel() > bestCandidate.getLevel()) {
+            bestCandidate = foundLeader;
+        }
+
+        // skip if herd already full
+        if (bestCandidate.getHerdSize() >= bestCandidate.maxHerdSize()) {
+            return this;
+        }
+
+        return bestCandidate;
     }
 
     public RiftCreature getHerdLeader() {
@@ -2022,36 +2076,43 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void setHerdLeader(RiftCreature creature) {
+        //remove from old leader’s herd if applicable
+        if (this.herdLeader != null && !this.herdLeader.equals(this)) {
+            this.herdLeader.removeHerdMember(this);
+        }
+
+        //assign new leader
         this.herdLeader = creature;
+
+        //if leader is valid and not self, add to leader’s member set
+        if (this.herdLeader != null && !this.herdLeader.equals(this)) {
+            this.herdLeader.addHerdMember(this);
+        }
+    }
+
+    public void addHerdMember(RiftCreature member) {
+        if (this.isHerdLeader() && this.herdMembers.size() < this.maxHerdSize()) {
+            this.herdMembers.add(member);
+        }
+    }
+
+    public void removeHerdMember(RiftCreature member) {
+        if (this.isHerdLeader()) this.herdMembers.remove(member);
+    }
+
+    public void leaveHerd() {
+        if (this.herdLeader != null && !this.herdLeader.equals(this)) {
+            this.herdLeader.removeHerdMember(this);
+            this.herdLeader = this; //becomes its own leader
+        }
     }
 
     public int getHerdSize() {
-        return this.herdSize;
-    }
-
-    public void setHerdSize(int value) {
-        this.herdSize = value;
+        return this.herdMembers.size();
     }
 
     public boolean hasHerdLeader() {
-        return this.herdLeader != null && this.herdLeader.isEntityAlive() && this.canDoHerding();
-    }
-    public void addToHerdLeader(RiftCreature creature) {
-        this.setHerdLeader(creature);
-        this.herdLeader.setHerdSize(this.herdLeader.getHerdSize() + 1);
-    }
-
-    public void separateFromHerdLeader() {
-        this.herdLeader.setHerdSize(this.herdLeader.getHerdSize() - 1);
-        this.setHerdLeader(null);
-    }
-
-    public void manageHerding() {
-        if (this.isHerdLeader() && this.world.rand.nextInt(200) == 1) {
-            if (this.world.getEntitiesWithinAABB(this.getClass(), this.herdBoundingBox()).size() <= 1) {
-                this.setHerdSize(1);
-            }
-        }
+        return this.herdLeader != null && !this.herdLeader.equals(this) && this.herdLeader.isEntityAlive() && this.canDoHerding();
     }
 
     public AxisAlignedBB herdBoundingBox() {
@@ -2059,36 +2120,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public boolean isHerdLeader() {
-        return this.getHerdSize() > 1 && this.canDoHerding();
-    }
-
-    public boolean canAddToHerd() {
-        return this.isHerdLeader() && this.getHerdSize() < this.maxHerdSize() && this.canDoHerding();
-    }
-
-    public boolean isNearHerdLeader() {
-        return this.getDistanceSq(this.getHerdLeader()) <= 144;
-    }
-
-    public void addCreatureToHerd(@Nonnull Stream<RiftCreature> stream) {
-        try {
-            stream.limit(this.maxHerdSize() - this.getHerdSize())
-                    .filter(creature -> creature != this && creature.canDoHerding())
-                    .forEach(creature -> creature.addToHerdLeader(this));
-        }
-        catch (Exception e) {}
-    }
-
-    public double herdFollowRange() {
-        return 0.5D;
-    }
-
-    public void herderFollowLeader() {
-        if (this.hasHerdLeader()) {
-            if (!this.getEntityBoundingBox().intersects(this.getHerdLeader().getEntityBoundingBox().grow(this.herdFollowRange()))) {
-                this.getNavigator().tryMoveToEntityLiving(this.getHerdLeader(), 1D);
-            }
-        }
+        return this.herdLeader != null && this.herdLeader.equals(this) && this.canDoHerding();
     }
 
     public int maxHerdSize() {
@@ -3163,6 +3195,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public void onDeath(DamageSource cause) {
+        //for leaving herd
+        if (this.canDoHerding()) this.leaveHerd();
+
         //for dropping inventory of creature upon death
         if (!this.world.isRemote && this.creatureInventory != null) {
             for (int i = 0; i < this.creatureInventory.getSizeInventory(); i++) {
@@ -3591,15 +3626,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         @Override
         public void onInventoryChanged(IInventory invBasic) {
             this.creature.refreshInventory();
-        }
-    }
-
-
-    class HerdData implements IEntityLivingData {
-        public final RiftCreature herdLeader;
-
-        public HerdData(@Nonnull RiftCreature creature) {
-            this.herdLeader = creature;
         }
     }
 }

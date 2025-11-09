@@ -59,11 +59,6 @@ public class Dodo extends RiftCreature {
 
     public void fall(float distance, float damageMultiplier) {}
 
-    @Override
-    public double herdFollowRange() {
-        return 3D;
-    }
-
     public float attackWidth() {
         return 0;
     }

@@ -37,11 +37,6 @@ public class Coelacanth extends RiftWaterCreature {
         super.updateParts();
     }
 
-    @Override
-    public double herdFollowRange() {
-        return 2D;
-    }
-
     //move related stuff starts here
     @Override
     public WeightedList<List<CreatureMove>> possibleStartingMoves() {

@@ -117,11 +117,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
     }
 
     @Override
-    public double herdFollowRange() {
-        return 6D;
-    }
-
-    @Override
     public int slotCount() {
         return 27;
     }
