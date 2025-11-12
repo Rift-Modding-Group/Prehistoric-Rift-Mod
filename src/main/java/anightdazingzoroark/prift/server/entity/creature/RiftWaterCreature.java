@@ -272,7 +272,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
                     }
                 }
             }
-            else this.superTravel(strafe, vertical, forward);
+            else super.travel(strafe, vertical, forward);
         }
         else {
             this.stepHeight = 1f;
@@ -294,7 +294,7 @@ public abstract class RiftWaterCreature extends RiftCreature {
                     this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
                 }
             }
-            else this.superTravel(strafe, vertical, forward);
+            else super.travel(strafe, vertical, forward);
         }
     }
 }

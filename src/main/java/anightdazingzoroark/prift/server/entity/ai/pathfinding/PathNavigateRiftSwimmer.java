@@ -22,7 +22,7 @@ public class PathNavigateRiftSwimmer extends PathNavigateSwimmer {
     @Override
     protected void pathFollow() {
         Vec3d vec3d = this.getEntityPosition();
-        double widthExpanded = Math.pow(Math.ceil(this.entity.width) + 2, 2);
+        double widthExpanded = Math.pow(Math.ceil(this.entity.width), 2);
 
         if (vec3d.squareDistanceTo(this.currentPath.getVectorFromIndex(this.entity, this.currentPath.getCurrentPathIndex())) < widthExpanded) {
             this.currentPath.incrementPathIndex();

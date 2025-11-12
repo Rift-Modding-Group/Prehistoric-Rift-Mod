@@ -3,8 +3,8 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.ai.EntityAIBase;
 
-//todo: for water creatures, make it so that this goal makes them copy
-//their leaders velocities and rotation
+//todo: make version of this for aquatic creatures
+//that is more like fish schooling in post 1.13
 public class RiftHerdMemberFollow extends EntityAIBase {
     private final RiftCreature creature;
 
