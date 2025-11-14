@@ -3185,6 +3185,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (!this.getIsLeaping()) super.fall(distance, damageMultiplier);
     }
 
+    protected void collideWithEntity(Entity entityIn) {
+        if (this.canMove()) super.collideWithEntity(entityIn);
+    }
+
     @Override
     public boolean canBeLeashedTo(EntityPlayer player) {
         boolean leashOperatingFlag = true;

@@ -66,7 +66,6 @@ public class RiftWander extends EntityAIWander {
     public boolean shouldContinueExecuting() {
         boolean isNotInWater = !(this.creature instanceof RiftWaterCreature) || !this.creature.isInWater();
         boolean hasNoHerdLeader = !this.creature.hasHerdLeader();
-        System.out.println(this.creature.getName()+" hasNoHerdLeader: "+hasNoHerdLeader);
 
         return this.creature.creatureBoxWithinReach() && hasNoHerdLeader && isNotInWater && !this.creature.busyAtWork() && super.shouldContinueExecuting();
     }

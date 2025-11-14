@@ -211,7 +211,9 @@ public abstract class RiftWaterCreature extends RiftCreature {
     public void travel(float strafe, float vertical, float forward) {
         if (!this.canMove() || this.isTurretMode()) {
             this.superTravel(0, this.isInWater() ? 0 : vertical, 0);
+            this.motionX = 0;
             this.motionY = 0;
+            this.motionZ = 0;
             this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
             return;
         }
@@ -233,19 +235,11 @@ public abstract class RiftWaterCreature extends RiftCreature {
 
                 this.setAIMoveSpeed(this.onGround ? moveSpeed + (controller.isSprinting() && this.getEnergy() > this.getWeaknessEnergy() ? moveSpeed * 0.25f : 0) : 2);
 
-                this.moveRelative(strafe, this.isUsingSwimControls() ? vertical : 0, forward, 0.05F);
-                float f4 = 0.6F;
-                float d0 = (float) EnchantmentHelper.getDepthStriderModifier(this);
-                if (d0 > 3.0F) d0 = 3.0F;
-                if (!this.onGround) d0 *= 0.5F;
-                if (d0 > 0.0F) f4 += (0.54600006F - f4) * d0 / 3.0F;
+                this.moveRelative(strafe, this.isUsingSwimControls() ? vertical : 0, forward, 0.02f);
+                this.motionX *= 0.8D;
+                this.motionY *= 0.8D;
+                this.motionZ *= 0.8D;
                 this.move(MoverType.SELF, this.motionX, (this.isUsingSwimControls() || this.currentCreatureMove() != null && this.currentCreatureMove().moveAnimType == CreatureMove.MoveAnimType.CHARGE) ? this.motionY : 0, this.motionZ);
-                this.motionX *= f4;
-                this.motionX *= 0.900000011920929D;
-                this.motionY *= 0.900000011920929D;
-                this.motionY *= f4;
-                this.motionZ *= 0.900000011920929D;
-                this.motionZ *= f4;
 
                 if (this.isAmphibious() && forward > 0) {
                     if (this.getBodyHitbox() != null && this.getBodyHitbox().isInWater()) {
