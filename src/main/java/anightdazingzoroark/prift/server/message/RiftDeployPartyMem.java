@@ -17,19 +17,13 @@ public class RiftDeployPartyMem implements IMessage {
     private int playerId;
     private int position;
     private boolean deploy;
-    private boolean interMessage;
 
     public RiftDeployPartyMem() {}
 
     public RiftDeployPartyMem(EntityPlayer player, int position, boolean deploy) {
-        this(player, position, deploy, false);
-    }
-
-    public RiftDeployPartyMem(EntityPlayer player, int position, boolean deploy, boolean interMessage) {
         this.playerId = player.getEntityId();
         this.position = position;
         this.deploy = deploy;
-        this.interMessage = interMessage;
     }
 
     @Override
@@ -37,7 +31,6 @@ public class RiftDeployPartyMem implements IMessage {
         this.playerId = buf.readInt();
         this.position = buf.readInt();
         this.deploy = buf.readBoolean();
-        this.interMessage = buf.readBoolean();
     }
 
     @Override
@@ -45,7 +38,6 @@ public class RiftDeployPartyMem implements IMessage {
         buf.writeInt(this.playerId);
         buf.writeInt(this.position);
         buf.writeBoolean(this.deploy);
-        buf.writeBoolean(this.interMessage);
     }
 
     public static class Handler implements IMessageHandler<RiftDeployPartyMem, IMessage> {
@@ -77,6 +69,7 @@ public class RiftDeployPartyMem implements IMessage {
                     else {
                         partyMemNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                         playerTamedCreatures.setPartyMemNBT(message.position, partyMemNBT);
+                        PlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
 
                         //create creature
                         RiftCreature creature = partyMemNBT.getCreatureAsNBT(messagePlayer.world);
