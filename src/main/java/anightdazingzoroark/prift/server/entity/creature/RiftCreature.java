@@ -537,24 +537,24 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private void updateForPartyHUD() {
         //update health
-        int currentHealthBucket = (int)((this.getHealth() / this.getMaxHealth()) * 10);
+        int currentHealthBucket = Math.round((this.getHealth() / this.getMaxHealth()) * 10);
         if (currentHealthBucket != this.cachedHealthBucket) {
             this.cachedHealthBucket = currentHealthBucket;
-            PlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
+            PlayerTamedCreaturesHelper.updateIndividualPartyMemHealthClient((EntityPlayer) this.getOwner(), this);
         }
 
         //energy
-        int energyBucket = (int)(((float) this.getEnergy() / this.getMaxEnergy()) * 10);
+        int energyBucket = Math.round(((float) this.getEnergy() / this.getMaxEnergy()) * 10);
         if (energyBucket != this.cachedEnergyBucket) {
             this.cachedEnergyBucket = energyBucket;
-            PlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
+            PlayerTamedCreaturesHelper.updateIndividualPartyMemEnergyClient((EntityPlayer) this.getOwner(), this);
         }
 
         //xp
-        int xpBucket = (int)(((float) this.getXP() / this.getMaxXP()) * 10);
+        int xpBucket = Math.round(((float) this.getXP() / this.getMaxXP()) * 10);
         if (xpBucket != this.cachedXPBucket) {
             this.cachedXPBucket = xpBucket;
-            PlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
+            PlayerTamedCreaturesHelper.updateIndividualPartyMemXPClient((EntityPlayer) this.getOwner(), this);
         }
     }
 

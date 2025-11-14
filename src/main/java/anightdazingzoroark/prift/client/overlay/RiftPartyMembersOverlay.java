@@ -115,7 +115,7 @@ public class RiftPartyMembersOverlay {
             int barHeight = 1;
 
             //health bar
-            float healthPercentage = partyMemNBT.getCreatureHealth()[0] / partyMemNBT.getCreatureHealth()[1];
+            float healthPercentage = Math.round(partyMemNBT.getCreatureHealth()[0] / partyMemNBT.getCreatureHealth()[1] * 10) / 10f;
             int healthBarX = (int) (xSize / 2 + xPosOnScreen + 5);
             int healthBarY = (int) ((ySize - barHeight) / 2 + yPosOnScreen);
 
@@ -126,7 +126,7 @@ public class RiftPartyMembersOverlay {
                 this.drawRectOutline(healthBarX, healthBarY, (int) (barWidth * healthPercentage), barHeight, 0xFFFF0000);
 
             //render energy bar
-            float energyPercentage = (float) partyMemNBT.getCreatureEnergy()[0] / partyMemNBT.getCreatureEnergy()[1];
+            float energyPercentage = Math.round((float) partyMemNBT.getCreatureEnergy()[0] / partyMemNBT.getCreatureEnergy()[1] * 10) / 10f;
             int energyBarX = (int) (xSize / 2 + xPosOnScreen + 5);
             int energyBarY = (int) ((ySize - barHeight) / 2 + yPosOnScreen + 4);
 
@@ -137,7 +137,7 @@ public class RiftPartyMembersOverlay {
                 this.drawRectOutline(energyBarX, energyBarY, (int) (barWidth * energyPercentage), barHeight, 0xFFFFFF00);
 
             //xp bar
-            float experiencePercentage = (float) partyMemNBT.getCreatureXP()[0] / partyMemNBT.getCreatureXP()[1];
+            float experiencePercentage = Math.round((float) partyMemNBT.getCreatureXP()[0] / partyMemNBT.getCreatureXP()[1] * 10) / 10f;
             int experienceBarX = (int) (xSize / 2 + xPosOnScreen + 5);
             int experienceBarY = (int) ((ySize - barHeight) / 2 + yPosOnScreen + 8);
 
@@ -231,23 +231,6 @@ public class RiftPartyMembersOverlay {
         drawRect(x, y + h - 1, x + w, y + h, color);     // bottom
         drawRect(x, y, x + 1, y + h, color);             // left
         drawRect(x + w - 1, y, x + w, y + h, color);     // right
-    }
-
-    //0 is for health, 1 is for max health
-    private float[] getCreatureHealthFromNBT(NBTTagCompound creatureNBT) {
-        if (creatureNBT == null || creatureNBT.isEmpty()) return new float[]{0f, 0f};
-        float health = creatureNBT.getFloat("Health");
-        float maxHealth = health;
-        for (NBTBase nbtBase: creatureNBT.getTagList("Attributes", 10).tagList) {
-            if (nbtBase instanceof NBTTagCompound) {
-                NBTTagCompound tagCompound = (NBTTagCompound) nbtBase;
-
-                if (!tagCompound.hasKey("Name") || !tagCompound.getString("Name").equals("generic.maxHealth")) continue;
-
-                maxHealth = (float) tagCompound.getDouble("Base");
-            }
-        }
-        return new float[]{health, maxHealth};
     }
 
     //deal with changing overlay position from pressing left or right

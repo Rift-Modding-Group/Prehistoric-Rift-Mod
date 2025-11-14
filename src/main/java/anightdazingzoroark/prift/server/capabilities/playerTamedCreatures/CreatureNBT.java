@@ -97,6 +97,11 @@ public class CreatureNBT {
         return includeLevel ? I18n.format("journal.party_member.name", partyMemName, this.getCreatureLevel()) : partyMemName;
     }
 
+    public void setCreatureHealth(float value) {
+        if (this.creatureNBT.isEmpty()) return;
+        this.creatureNBT.setFloat("Health", value);
+    }
+
     //index 0 is current health
     //index 1 is max health
     public float[] getCreatureHealth() {
@@ -115,6 +120,11 @@ public class CreatureNBT {
         return new float[]{health, maxHealth};
     }
 
+    public void setCreatureEnergy(int value) {
+        if (this.creatureNBT.isEmpty()) return;
+        this.creatureNBT.setInteger("Energy", value);
+    }
+
     //index 0 is current energy
     //index 1 is max energy
     public int[] getCreatureEnergy() {
@@ -122,6 +132,11 @@ public class CreatureNBT {
         int energy = this.creatureNBT.getInteger("Energy");
         int maxEnergy = RiftConfigHandler.getConfig(this.getCreatureType()).stats.maxEnergy;
         return new int[]{energy, maxEnergy};
+    }
+
+    public void setCreatureXP(int xp) {
+        if (this.creatureNBT.isEmpty()) return;
+        this.creatureNBT.setInteger("XP", xp);
     }
 
     //index 0 is current xp

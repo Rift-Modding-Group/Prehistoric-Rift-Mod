@@ -93,6 +93,12 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetSelectedPartyPosFromOverlay.Handler.class, RiftSetSelectedPartyPosFromOverlay.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureClient.Handler.class, RiftUpdateIndividualPartyCreatureClient.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureClient.Handler.class, RiftUpdateIndividualPartyCreatureClient.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureHealthClient.Handler.class, RiftUpdateIndividualPartyCreatureHealthClient.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureHealthClient.Handler.class, RiftUpdateIndividualPartyCreatureHealthClient.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureEnergyClient.Handler.class, RiftUpdateIndividualPartyCreatureEnergyClient.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureEnergyClient.Handler.class, RiftUpdateIndividualPartyCreatureEnergyClient.class, id++, Side.CLIENT);
+        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureXPClient.Handler.class, RiftUpdateIndividualPartyCreatureXPClient.class, id++, Side.SERVER);
+        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureXPClient.Handler.class, RiftUpdateIndividualPartyCreatureXPClient.class, id++, Side.CLIENT);
         WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureServer.Handler.class, RiftUpdateIndividualPartyCreatureServer.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.Handler.class, RiftForceSyncLastOpenedBox.class, id++, Side.SERVER);
         WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.Handler.class, RiftForceSyncLastOpenedBox.class, id++, Side.CLIENT);
