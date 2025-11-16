@@ -22,6 +22,8 @@ public class RiftRageEffect extends RiftEffectBase {
     public RiftRageEffect() {
         super(true, 0xFF0000);
 
+        this.setIconUVs(0, 0);
+
         //increase damage
         this.registerPotionAttributeModifier(
                 SharedMonsterAttributes.ATTACK_DAMAGE,

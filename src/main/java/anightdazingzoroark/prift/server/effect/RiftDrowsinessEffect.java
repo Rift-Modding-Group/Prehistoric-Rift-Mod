@@ -8,6 +8,8 @@ public class RiftDrowsinessEffect extends RiftEffectBase {
     public RiftDrowsinessEffect() {
         super(true, 0xdcdcdc);
 
+        this.setIconUVs(18, 0);
+
         //reduce movement speed
         this.registerPotionAttributeModifier(
                 SharedMonsterAttributes.MOVEMENT_SPEED,

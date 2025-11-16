@@ -8,6 +8,8 @@ public class RiftParalysisEffect extends RiftEffectBase {
     protected RiftParalysisEffect() {
         super(true, 0xFFFF00);
 
+        this.setIconUVs(36, 0);
+
         //remove movement speed
         this.registerPotionAttributeModifier(
                 SharedMonsterAttributes.MOVEMENT_SPEED,
