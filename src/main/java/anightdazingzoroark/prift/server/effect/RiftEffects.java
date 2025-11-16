@@ -12,13 +12,11 @@ public class RiftEffects {
     public static final List<Potion> EFFECTS = new ArrayList<>();
 
     public static Potion PARALYSIS;
-    public static Potion IRRITATION;
     public static Potion DROWSINESS;
     public static Potion RAGE;
 
     public static void registerEffects() {
         PARALYSIS = registerEffect(new RiftParalysisEffect());
-        IRRITATION = registerEffect(new RiftIrritationEffect());
         DROWSINESS = registerEffect(new RiftDrowsinessEffect());
         RAGE = registerEffect(new RiftRageEffect());
     }

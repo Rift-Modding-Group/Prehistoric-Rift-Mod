@@ -1,10 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
-import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.List;
@@ -29,11 +28,18 @@ public class RiftItchingPowderMove extends RiftCreatureMove {
     @Override
     public void whileExecuting(RiftCreature user) {}
 
+    //itching powder should now damage all affected creatures by half their current hp
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
         AxisAlignedBB area = user.getEntityBoundingBox().grow(3D, 3D, 3D);
         List<Entity> nearbyEntities = user.world.getEntitiesWithinAABB(Entity.class, area, this.generalEntityPredicate(user, false));
-        for (Entity entity : nearbyEntities) RiftUtil.addPotionEffect(entity, new PotionEffect(RiftEffects.IRRITATION, 300));
+        for (Entity entity : nearbyEntities) {
+            if (entity instanceof EntityLivingBase) {
+                EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
+                float halfHealth = (float) Math.floor(entityLivingBase.getHealth() / 2f);
+                entityLivingBase.attackEntityFrom(DamageSource.causeMobDamage(user), halfHealth);
+            }
+        }
     }
 
     @Override

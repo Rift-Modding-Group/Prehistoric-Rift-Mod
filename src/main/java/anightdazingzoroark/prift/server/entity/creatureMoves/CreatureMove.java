@@ -50,7 +50,7 @@ public enum CreatureMove {
     MUDBALL(RiftMudballMove.class, MoveAnimType.RANGED, ChargeType.COOLDOWN_ONLY, 30, new int[]{0}, 0, 100, false, false, false, TargetRequirement.HAS_TARGET), //user throws mud to blind target
     HYPNOSIS_POWDER(RiftHypnosisPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, TargetRequirement.HAS_TARGET),
     POISON_POWDER(RiftPoisonPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, TargetRequirement.HAS_TARGET),
-    ITCHING_POWDER(RiftItchingPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, TargetRequirement.HAS_TARGET),
+    ITCHING_POWDER(RiftItchingPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 100, false, false, false, TargetRequirement.HAS_TARGET),
     PARALYZING_POWDER(RiftParalyzingPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, TargetRequirement.HAS_TARGET),
     RAGE_POWDER(RiftRagePowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, TargetRequirement.HAS_TARGET),
     SLEEP_POWDER(RiftSleepPowderMove.class, MoveAnimType.STATUS, ChargeType.COOLDOWN_ONLY, 0, new int[]{0}, 0, 300, false, false, false, TargetRequirement.HAS_TARGET);
