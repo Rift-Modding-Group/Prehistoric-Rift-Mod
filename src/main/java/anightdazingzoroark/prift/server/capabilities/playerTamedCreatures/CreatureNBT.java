@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
@@ -10,6 +12,8 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -17,6 +21,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +29,7 @@ import java.util.UUID;
 public class CreatureNBT {
     private final NBTTagCompound creatureNBT;
     private int countdownCarry;
+    private boolean canSendUpdateUndeployed; //this will be relevant for when updating undeployed creatures only, gets set to true when the undeployed creature gets changed, and set to false when its value is being get
 
     public CreatureNBT() {
         this.creatureNBT = new NBTTagCompound();
@@ -271,7 +277,7 @@ public class CreatureNBT {
 
     public boolean inventoryIsEmpty() {
         if (this.creatureNBT.isEmpty()) return true;
-        NBTTagList inventoryTagList = this.creatureNBT.getTagList("Items", 10);
+        NBTTagList inventoryTagList = this.getItemListNBT();
         for (int i = 0; i < inventoryTagList.tagCount(); i++) {
             NBTTagCompound itemNBT = inventoryTagList.getCompoundTagAt(i);
             int j = itemNBT.getByte("Slot") & 255;
@@ -288,7 +294,7 @@ public class CreatureNBT {
         if (this.creatureNBT.isEmpty()) return;
 
         //step 1: get all the items
-        NBTTagList inventoryTagList = this.creatureNBT.getTagList("Items", 10);
+        NBTTagList inventoryTagList = this.getItemListNBT();
         List<ItemStack> itemsToDrop = new ArrayList<>();
         List<Integer> positionsToRemove = new ArrayList<>();
         for (int i = 0; i < inventoryTagList.tagCount(); i++) {
@@ -433,6 +439,160 @@ public class CreatureNBT {
     public boolean isBaby() {
         if (this.nbtIsEmpty()) return false;
         return this.getAgeInDays() < 1;
+    }
+
+    //THIS IS TO BE RUN SERVER SIDE ONLY
+    public void regenNotDeployed() {
+        if (this.nbtIsEmpty()) return;
+
+        //update health
+        if ((GeneralConfig.naturalCreatureRegen || GeneralConfig.creatureEatFromInventory) && this.getCreatureHealth()[0] < this.getCreatureHealth()[1]) {
+            this.setCreatureHealth(this.healthToRegenerate());
+            this.canSendUpdateUndeployed = true;
+        }
+
+        //update energy
+        if (this.getCreatureEnergy()[0] < this.getCreatureEnergy()[1]) {
+            this.setCreatureEnergy(this.energyToRegenerate());
+            this.canSendUpdateUndeployed = true;
+        }
+    }
+
+    public boolean getCanSendUpdateUndeployed() {
+        boolean toReturn = this.canSendUpdateUndeployed;
+        if (this.canSendUpdateUndeployed) this.canSendUpdateUndeployed = false;
+        return toReturn;
+    }
+
+    private int healthToRegenerate() {
+        int toReturn = (int) this.getCreatureHealth()[0];
+
+        for (int i = 1; i <= 1200; i++) {
+            //corresponds to every 5 seconds, regen 2 health points
+            if (GeneralConfig.naturalCreatureRegen && i % 100 == 0) {
+                toReturn += 2;
+                if (toReturn > this.getCreatureHealth()[1]) return (int) this.getCreatureHealth()[1];
+            }
+
+            //corresponds to every 3 seconds, regen a variable no of health points
+            //based on last food item slot
+            if (GeneralConfig.creatureEatFromInventory && i % 60 == 0) {
+                for (int j = this.getItemListNBT().tagCount() - 1; j >= 0; j--) {
+                    NBTTagCompound itemNBT = (NBTTagCompound) this.getItemListNBT().get(j);
+
+                    //gear is exempted from the check
+                    if (j == this.getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)
+                            || j == this.getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) continue;
+
+                    ItemStack itemStack = new ItemStack(itemNBT);
+                    if (this.isFavoriteFood(itemStack) && !this.isEnergyRegenItem(itemStack)) {
+                        toReturn += this.getFavoriteFoodHeal(itemStack);
+                        itemNBT.setByte("Count", (byte) Math.max(0, itemNBT.getByte("Count") - 1));
+                        break;
+                    }
+                }
+                if (toReturn > this.getCreatureHealth()[1]) return (int) this.getCreatureHealth()[1];
+            }
+        }
+
+        return toReturn;
+    }
+
+    private int energyToRegenerate() {
+        int toReturn = this.getCreatureEnergy()[0];
+
+        for (int i = 1; i <= 1200; i++) {
+            if (i % this.getCreatureType().energyRechargeSpeed() == 0) {
+                toReturn += 1;
+                if (toReturn > this.getCreatureEnergy()[1]) return this.getCreatureEnergy()[1];
+            }
+
+            if (GeneralConfig.creatureEatFromInventory && i % 60 == 0) {
+                for (int j = this.getItemListNBT().tagCount() - 1; j >= 0; j--) {
+                    NBTTagCompound itemNBT = (NBTTagCompound) this.getItemListNBT().get(j);
+
+                    //gear is exempted from the check
+                    if (j == this.getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)
+                            || j == this.getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) continue;
+
+                    ItemStack itemStack = new ItemStack(itemNBT);
+                    if (this.isEnergyRegenItem(itemStack)) {
+                        toReturn += this.getEnergyRegenItemValue(itemStack);
+                        itemNBT.setByte("Count", (byte) Math.max(0, itemNBT.getByte("Count") - 1));
+                        break;
+                    }
+                }
+                if (toReturn > this.getCreatureEnergy()[1]) return this.getCreatureEnergy()[1];
+            }
+        }
+
+        return toReturn;
+    }
+
+    private boolean isFavoriteFood(ItemStack stack) {
+        boolean flag = false;
+        for (RiftCreatureConfig.Food food : RiftConfigHandler.getConfig(this.getCreatureType()).general.favoriteFood) {
+            if (!flag) flag = RiftUtil.itemStackEqualToString(stack, food.itemId);
+        }
+        return flag;
+    }
+
+    public int getFavoriteFoodHeal(ItemStack stack) {
+        RiftCreatureConfig.Food foodToHeal = new RiftCreatureConfig.Food("", 0);
+        boolean flag = false;
+        for (RiftCreatureConfig.Food food : RiftConfigHandler.getConfig(this.getCreatureType()).general.favoriteFood) {
+            if (!flag) {
+                flag = RiftUtil.itemStackEqualToString(stack, food.itemId);
+                foodToHeal = food;
+            }
+        }
+        if (flag) return (int) Math.ceil(this.getCreatureHealth()[1] * foodToHeal.percentageHeal);
+        return 0;
+    }
+
+    private boolean isEnergyRegenItem(ItemStack stack) {
+        RiftCreatureType.CreatureDiet diet = this.getCreatureType().getCreatureDiet();
+        List<String> itemList = new ArrayList<>();
+        if (diet == RiftCreatureType.CreatureDiet.HERBIVORE || diet == RiftCreatureType.CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (diet == RiftCreatureType.CreatureDiet.CARNIVORE || diet == RiftCreatureType.CreatureDiet.PISCIVORE || diet == RiftCreatureType.CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+        else if (diet == RiftCreatureType.CreatureDiet.OMNIVORE) {
+            itemList = new ArrayList<>(Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods));
+            itemList.addAll(Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods));
+        }
+
+        for (String foodItem : itemList) {
+            int first = foodItem.indexOf(":");
+            int second = foodItem.indexOf(":", first + 1);
+            int third = foodItem.indexOf(":", second + 1);
+            String itemId = foodItem.substring(0, second);
+            int itemData = Integer.parseInt(foodItem.substring(second + 1, third));
+            if (!stack.isEmpty() && stack.getItem().equals(Item.getByNameOrId(itemId)) && (itemData == -1 || itemData == stack.getMetadata())) return true;
+        }
+
+        return false;
+    }
+
+    private int getEnergyRegenItemValue(ItemStack stack) {
+        RiftCreatureType.CreatureDiet diet = this.getCreatureType().getCreatureDiet();
+        List<String> itemList = new ArrayList<>();
+        if (diet == RiftCreatureType.CreatureDiet.HERBIVORE || diet == RiftCreatureType.CreatureDiet.FUNGIVORE) itemList = Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods);
+        else if (diet == RiftCreatureType.CreatureDiet.CARNIVORE || diet == RiftCreatureType.CreatureDiet.PISCIVORE || diet == RiftCreatureType.CreatureDiet.INSECTIVORE) itemList = Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods);
+        else if (diet == RiftCreatureType.CreatureDiet.OMNIVORE) {
+            itemList = new ArrayList<>(Arrays.asList(GeneralConfig.herbivoreRegenEnergyFoods));
+            itemList.addAll(Arrays.asList(GeneralConfig.carnivoreRegenEnergyFoods));
+        }
+
+        for (String itemEntry : itemList) {
+            int first = itemEntry.indexOf(":");
+            int second = itemEntry.indexOf(":", first + 1);
+            int third = itemEntry.indexOf(":", second + 1);
+            String itemId = itemEntry.substring(0, second);
+            int itemData = Integer.parseInt(itemEntry.substring(second + 1, third));
+            if (stack.getItem().equals(Item.getByNameOrId(itemId)) && (itemData == -1 || itemData == stack.getMetadata())) {
+                return Integer.parseInt(itemEntry.substring(third + 1));
+            }
+        }
+        return 0;
     }
 
     @Override

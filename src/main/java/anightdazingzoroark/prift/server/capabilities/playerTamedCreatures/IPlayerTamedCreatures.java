@@ -25,6 +25,7 @@ public interface IPlayerTamedCreatures {
     //party extra info
     void setPartyLastOpenedTime(int value);
     int getPartyLastOpenedTime();
+    boolean partyHasNotDeployed();
     //box extra info
     void setLastOpenedBox(int value);
     int getLastOpenedBox();

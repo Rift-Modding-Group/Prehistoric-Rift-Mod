@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.capabilities;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.RiftDamage;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataProvider;
@@ -8,7 +9,9 @@ import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotion
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
@@ -16,6 +19,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
@@ -27,11 +31,20 @@ import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class CapabilityHandler {
     public static final ResourceLocation PLAYER_TAMED_CREATURES_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playertamedcreatures");
     public static final ResourceLocation PLAYER_JOURNAL_PROGRESS_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playerjournalprogress");
     public static final ResourceLocation NON_POTION_EFFECTS = new ResourceLocation(RiftInitialize.MODID, "nonpotioneffects");
     public static final ResourceLocation CREATURE_BOX_DATA = new ResourceLocation(RiftInitialize.MODID, "creatureboxdata");
+
+    //this is only for regenerating non-deployed creatures
+    private int nonDeployedUpdateCounter;
+    private final int nonDeployedMaxUpdateCounter = 1200; //60 seconds
 
     @SubscribeEvent
     public void attachCapabilityToEntity(AttachCapabilitiesEvent<Entity> event) {
@@ -112,7 +125,7 @@ public class CapabilityHandler {
 
     //manage effects
     @SubscribeEvent
-    public void forEachEntityTick(LivingEvent.LivingUpdateEvent event) {
+    public void nonPotionEffectsTicker(LivingEvent.LivingUpdateEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
 
         //client side
@@ -211,6 +224,60 @@ public class CapabilityHandler {
                 //set the mobs target to the hypnotizers target
                 else if (hypnotizerHasTarget && hypnotizedHasTarget && !hypnotizedTargeting) {
                     entityCreature.setAttackTarget(hypnotizer.getAttackTarget());
+                }
+            }
+        }
+    }
+
+    //managed regen when not deployed for player tamed creatures
+    @SubscribeEvent
+    public void playerTamedCreaturesTicker(LivingEvent.LivingUpdateEvent event) {
+        EntityLivingBase entity = event.getEntityLiving();
+
+        if (!(entity instanceof EntityPlayer)) return;
+        EntityPlayer player = (EntityPlayer) entity;
+
+        if (!player.world.isRemote) {
+            IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+            if (playerTamedCreatures == null) return;
+
+            //every minute, update all non-deployed creatures in the party
+            if (playerTamedCreatures.partyHasNotDeployed()) {
+                this.nonDeployedUpdateCounter++;
+
+                if (this.nonDeployedUpdateCounter >= this.nonDeployedMaxUpdateCounter) {
+                    //this will contain the creature NBTs to send updates to
+                    Map<Integer, CreatureNBT> nbtsToUpdate = new HashMap<>();
+
+                    //lets iterate over each creature
+                    for (int i = 0; i < playerTamedCreatures.getPartyNBT().size(); i++) {
+                        CreatureNBT creatureNBT = playerTamedCreatures.getPartyNBT().get(i);
+
+                        //skip empty slots
+                        if (creatureNBT.nbtIsEmpty()) continue;
+
+                        //skip those that are already deployed
+                        if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) continue;
+
+                        //on the server side, update timer and food related stuff that let it regen
+                        //health and energy
+                        //the strategy is to regenerate health and energy every 60 seconds (1200 ticks)
+                        creatureNBT.regenNotDeployed();
+                        if (creatureNBT.getCanSendUpdateUndeployed()) nbtsToUpdate.put(i, creatureNBT);
+                    }
+
+                    //send over updated NBTs to client to update them there
+                    if (!nbtsToUpdate.isEmpty()) {
+                        for (Map.Entry<Integer, CreatureNBT> nbtEntry : nbtsToUpdate.entrySet()) {
+                            RiftMessages.WRAPPER.sendTo(
+                                    new RiftUpdateIndividualPartyCreatureClient(player, nbtEntry.getKey(), nbtEntry.getValue()),
+                                    (EntityPlayerMP) player
+                            );
+                        }
+                    }
+
+                    //reset timer
+                    this.nonDeployedUpdateCounter = 0;
                 }
             }
         }

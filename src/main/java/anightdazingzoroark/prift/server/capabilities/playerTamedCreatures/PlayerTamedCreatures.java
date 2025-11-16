@@ -36,6 +36,18 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     }
 
     @Override
+    public boolean partyHasNotDeployed() {
+        if (this.getPartyNBT().isEmpty()) return false;
+
+        for (CreatureNBT creatureNBT : this.getPartyNBT().getList()) {
+            if (creatureNBT.nbtIsEmpty()) continue;
+
+            if (creatureNBT.getDeploymentType() == DeploymentType.PARTY_INACTIVE) return true;
+        }
+        return false;
+    }
+
+    @Override
     public void setBoxLastOpenedTime(int value) {
         this.boxLastOpenedTime = value;
     }
@@ -169,6 +181,7 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
         return this.partyCreatures;
     }
 
+    //there is potential for race conditions to fuck up a party creature
     @Override
     public void setPartyMemNBT(int index, CreatureNBT compound) {
         this.partyCreatures.set(index, compound);
