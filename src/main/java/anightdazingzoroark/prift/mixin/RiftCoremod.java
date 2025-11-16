@@ -17,6 +17,7 @@ public class RiftCoremod implements IEarlyMixinLoader, IFMLLoadingPlugin {
         List<String> configs = new ArrayList<>();
         configs.add("mixin.prift.settargetafterhitboxhit.json");
         configs.add("mixin.prift.hypnotizedtargeting.json");
+        configs.add("mixin.prift.polarbearaiattackplayer.json");
         return configs;
     }
 

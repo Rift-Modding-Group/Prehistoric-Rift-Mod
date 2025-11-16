@@ -52,7 +52,7 @@ public abstract class RiftEffectBase extends Potion {
     @SideOnly(Side.CLIENT)
     @Override
     public void renderInventoryEffect(PotionEffect effect, Gui gui, int x, int y, float z) {
-        renderInventoryEffect(x, y, effect, Minecraft.getMinecraft());
+        this.renderInventoryEffect(x, y, effect, Minecraft.getMinecraft());
     }
 
     @SideOnly(Side.CLIENT)
@@ -66,7 +66,7 @@ public abstract class RiftEffectBase extends Potion {
     @SideOnly(Side.CLIENT)
     @Override
     public void renderHUDEffect(PotionEffect effect, Gui gui, int x, int y, float z, float alpha) {
-        renderHUDEffect(x, y, effect, Minecraft.getMinecraft(), alpha);
+        this.renderHUDEffect(x, y, effect, Minecraft.getMinecraft(), alpha);
     }
 
     @Override
