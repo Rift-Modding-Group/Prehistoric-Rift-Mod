@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.ui.RiftEggMenu;
+import anightdazingzoroark.prift.client.ui.RiftEggScreen;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
@@ -989,7 +989,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         if (this.canBePregnant()) {
-                            if (this.isPregnant() && player.isSneaking()) RiftLibUIHelper.showUI(player, new RiftEggMenu(this));
+                            if (this.isPregnant() && player.isSneaking()) RiftLibUIHelper.showUI(player, new RiftEggScreen(this));
                             else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId(), 0, 0);
                         }
                         else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
@@ -997,7 +997,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
                         if (this.canBePregnant()) {
                             if (!this.isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
-                            else RiftLibUIHelper.showUI(player, new RiftEggMenu(this));
+                            else RiftLibUIHelper.showUI(player, new RiftEggScreen(this));
                         }
                         else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {
                             boolean usingWorkstation = this instanceof IWorkstationUser && ((IWorkstationUser) this).hasWorkstation();

@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
 import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMembersSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.elements.RiftPartyMemButtonForParty;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -22,6 +23,7 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
@@ -38,19 +40,10 @@ public class RiftPartyScreen extends RiftLibUI {
     private SelectedCreatureInfo selectedCreature;
     private int selectedMovePos = -1;
 
-    public RiftPartyScreen() {
-        super(0, 0, 0);
-    }
-
-    public RiftPartyScreen(SelectedCreatureInfo selectedCreatureInfo) {
-        this(selectedCreatureInfo, false);
-    }
-
-    public RiftPartyScreen(SelectedCreatureInfo selectedCreatureInfo, boolean openedFromMoves) {
-        super(0, 0, 0);
-        if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY)
-            this.selectedCreature = selectedCreatureInfo;
-        this.moveManagement = openedFromMoves;
+    public RiftPartyScreen(NBTTagCompound nbtTagCompound, int x, int y, int z) {
+        super(nbtTagCompound, x, y, z);
+        this.selectedCreature = SelectedCreatureInfo.nullableSelectedCreatureInfo(nbtTagCompound);
+        this.moveManagement = nbtTagCompound.hasKey("openedFromMoves") && nbtTagCompound.getBoolean("openedFromMoves");
     }
 
     @Override
@@ -485,7 +478,7 @@ public class RiftPartyScreen extends RiftLibUI {
     @Override
     public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
         if (riftLibClickableSection.getStringID().equals("openJournal")) {
-            RiftLibUIHelper.showUI(this.mc.player, new RiftJournalScreen());
+            RiftLibUIHelper.showUI(this.mc.player, RiftGui.JOURNAL_SCREEN, 0, 0, 0);
         }
         if (riftLibClickableSection.getStringID().startsWith("partyMember:")) {
             RiftPartyMemButtonForParty partyMemButtonForParty = (RiftPartyMemButtonForParty) riftLibClickableSection;
@@ -560,7 +553,7 @@ public class RiftPartyScreen extends RiftLibUI {
         //open moves ui
         if (riftLibClickableSection.getStringID().equals("shuffleMoves")) {
             this.selectedCreature.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
-            RiftLibUIHelper.showUI(this.mc.player, new RiftMovesScreen(this.selectedCreature));
+            RiftLibUIHelper.showUI(this.mc.player, RiftGui.MOVES_SCREEN, this.selectedCreature.getNBT(), 0, 0, 0);
         }
     }
 

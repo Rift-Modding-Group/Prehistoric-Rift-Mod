@@ -10,6 +10,8 @@ import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.renderer.FluidRenderer;
 import anightdazingzoroark.prift.client.renderer.ItemRenderer;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
@@ -17,6 +19,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureHitboxLinker;
 import anightdazingzoroark.prift.server.entity.RiftCreatureRidePosLinker;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.RiftLibLinkerRegistry;
+import anightdazingzoroark.riftlib.ui.RiftLibUIRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.util.math.BlockPos;
@@ -52,6 +55,7 @@ public class ClientProxy extends ServerProxy {
         }
         EntityRenderer.registerRenderers();
         BlockRenderer.registerRenderers();
+        RiftGui.registerUI();
         MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());
         MinecraftForge.EVENT_BUS.register(new RiftCreatureControls());
         MinecraftForge.EVENT_BUS.register(new RiftLargeWeaponControls());

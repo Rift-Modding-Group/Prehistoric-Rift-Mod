@@ -11,6 +11,7 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
@@ -24,14 +25,9 @@ public class RiftMovesScreen extends RiftLibUI {
     private SelectedMoveInfo hoveredMoveInfo;
     private SelectedMoveInfo selectedMoveInfo;
 
-    public RiftMovesScreen(SelectedCreatureInfo selectedCreature) {
-        super(0, 0, 0);
-        this.selectedCreature = selectedCreature;
-    }
-
-    public RiftMovesScreen(BlockPos pos, SelectedCreatureInfo selectedCreature) {
-        super(pos.getX(), pos.getY(), pos.getZ());
-        this.selectedCreature = selectedCreature;
+    public RiftMovesScreen(NBTTagCompound nbtTagCompound, int x, int y, int z) {
+        super(nbtTagCompound, x, y, z);
+        this.selectedCreature = SelectedCreatureInfo.nullableSelectedCreatureInfo(nbtTagCompound);
     }
 
     @Override

@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -21,6 +22,11 @@ public class SelectedCreatureInfo {
     public final int[] pos;
     private MenuOpenedFrom menuOpenedFrom;
     private BlockPos creatureBoxOpenedFrom = new BlockPos(0, 0, 0);
+
+    public static SelectedCreatureInfo nullableSelectedCreatureInfo(NBTTagCompound nbtTagCompound) {
+        if (nbtTagCompound.isEmpty()) return null;
+        return new SelectedCreatureInfo(nbtTagCompound);
+    }
 
     public SelectedCreatureInfo(SelectedPosType selectedPosType, int[] pos) {
         this.selectedPosType = selectedPosType;
@@ -59,10 +65,14 @@ public class SelectedCreatureInfo {
 
     public void exitToLastMenu(Minecraft minecraft) {
         if (this.menuOpenedFrom == MenuOpenedFrom.PARTY) {
-            RiftLibUIHelper.showUI(minecraft.player, new RiftPartyScreen(this, true));
+            NBTTagCompound toPass = this.getNBT();
+            toPass.setBoolean("openedFromMoves", true);
+            RiftLibUIHelper.showUI(minecraft.player, RiftGui.PARTY_SCREEN, toPass, 0, 0, 0);
         }
         else if (this.menuOpenedFrom == MenuOpenedFrom.BOX) {
-            RiftLibUIHelper.showUI(minecraft.player, new RiftCreatureBoxInfoScreen(this.creatureBoxOpenedFrom, this, true));
+            NBTTagCompound toPass = this.getNBT();
+            toPass.setBoolean("openedFromMoves", true);
+            RiftLibUIHelper.showUI(minecraft.player, RiftGui.CREATURE_BOX_INFO_SCREEN, toPass, 0, 0, 0);
         }
     }
 

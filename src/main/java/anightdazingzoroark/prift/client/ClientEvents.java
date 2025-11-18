@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -126,15 +127,13 @@ public class ClientEvents {
         }
     }
 
-    //open journal when pressing the journal button
+    //open party when pressing the party button
     //player.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_INVENTORY, world, message.creatureId, 0, 0);
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
     public void openParty(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (RiftControls.openParty.isKeyDown()) {
-            //RiftLibUIHelper.showUI(player, new RiftNewJournalScreen());
-            RiftLibUIHelper.showUI(player, new RiftPartyScreen());
-            //player.openGui(RiftInitialize.instance, RiftGui.GUI_PARTY, player.world, -1, -1, 0);
+            RiftLibUIHelper.showUI(player, RiftGui.PARTY_SCREEN, 0, 0, 0);
         }
     }
 }

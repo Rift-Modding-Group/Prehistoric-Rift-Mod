@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScre
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUserWithIntSelector;
 import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -17,6 +18,7 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
@@ -30,19 +32,10 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
     private int selectedMovePos = -1;
     private boolean moveManagement;
 
-    public RiftCreatureBoxInfoScreen(int x, int y, int z) {
-        super(x, y, z);
-        this.selectedCreatureInfo = null;
-    }
-
-    public RiftCreatureBoxInfoScreen(BlockPos pos, SelectedCreatureInfo selectedCreatureInfo) {
-        this(pos, selectedCreatureInfo, false);
-    }
-
-    public RiftCreatureBoxInfoScreen(BlockPos pos, SelectedCreatureInfo selectedCreatureInfo, boolean openedFromMoves) {
-        super(pos.getX(), pos.getY(), pos.getZ());
-        this.selectedCreatureInfo = selectedCreatureInfo;
-        this.moveManagement = openedFromMoves;
+    public RiftCreatureBoxInfoScreen(NBTTagCompound nbtTagCompound, int x, int y, int z) {
+        super(nbtTagCompound, x, y, z);
+        this.selectedCreatureInfo = SelectedCreatureInfo.nullableSelectedCreatureInfo(nbtTagCompound);
+        this.moveManagement = nbtTagCompound.hasKey("openedFromMoves") && nbtTagCompound.getBoolean("openedFromMoves");
     }
 
     @Override
@@ -226,7 +219,7 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
     public void onButtonClicked(RiftLibButton riftLibButton) {
         switch (riftLibButton.buttonId) {
             case "backToBox": {
-                RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+                RiftLibUIHelper.showUI(this.mc.player, RiftGui.CREATURE_BOX_SCREEN, this.selectedCreatureInfo.getNBT(), this.x, this.y, this.z);
                 break;
             }
             case "openChangeNamePopup": {
@@ -246,7 +239,7 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
             //for releasing creature
             case "releaseCreature": {
                 PlayerTamedCreaturesHelper.releaseSelectedCreature(this.mc.player, this.selectedCreatureInfo);
-                RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z)));
+                RiftLibUIHelper.showUI(this.mc.player, RiftGui.CREATURE_BOX_SCREEN, this.x, this.y, this.z);
                 break;
             }
             //universal, for exiting popup
@@ -284,7 +277,7 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
         if (riftLibClickableSection.getStringID().equals("shuffleMoves")) {
             this.selectedCreatureInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.BOX);
             this.selectedCreatureInfo.setCreatureBoxOpenedFrom(new BlockPos(this.x, this.y, this.z));
-            RiftLibUIHelper.showUI(this.mc.player, new RiftMovesScreen(this.selectedCreatureInfo));
+            RiftLibUIHelper.showUI(this.mc.player, RiftGui.MOVES_SCREEN, this.selectedCreatureInfo.getNBT(), 0, 0, 0);
         }
     }
 
@@ -295,7 +288,7 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
 
     @Override
     protected void onPressEscape() {
-        RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+        RiftLibUIHelper.showUI(this.mc.player, RiftGui.CREATURE_BOX_SCREEN, this.selectedCreatureInfo.getNBT(), this.x, this.y, this.z);
     }
 
 

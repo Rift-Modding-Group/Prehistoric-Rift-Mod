@@ -1,16 +1,20 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.client.ui.*;
+import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
+import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
+import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
+import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
+import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
-import anightdazingzoroark.prift.server.entity.RiftEgg;
-import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.inventory.CreatureContainer;
 import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
 import anightdazingzoroark.prift.server.inventory.WeaponContainer;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
+import anightdazingzoroark.riftlib.ui.RiftLibUIRegistry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -24,6 +28,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 
 public class RiftGui implements IGuiHandler {
+    //NOTE: soon all of this will be replaced with riftlibrary ui stuff
     public static final int GUI_DIAL = 1;
     public static final int GUI_CREATURE_INVENTORY = 2;
     public static final int GUI_MENU_FROM_RADIAL = 3;
@@ -35,7 +40,22 @@ public class RiftGui implements IGuiHandler {
     public static final int GUI_SEMI_MANUAL_HAMMERER = 9;
     public static final int GUI_MILLSTONE = 10;
     public static final int GUI_MECHANICAL_FILTER = 11;
-    public static final int GUI_CREATURE_BOX = 12;
+
+    public static final String CREATURE_BOX_SCREEN = "creatureBoxScreen";
+    public static final String JOURNAL_SCREEN = "journalScreen";
+    public static final String MOVES_SCREEN = "movesScreen";
+    public static final String PARTY_SCREEN = "partyScreen";
+    public static final String CREATURE_BOX_INFO_SCREEN = "creatureBoxInfoScreen";
+    public static final String EGG_SCREEN = "eggScreen";
+
+    public static void registerUI() {
+        RiftLibUIRegistry.registerUI(CREATURE_BOX_SCREEN, RiftCreatureBoxScreen.class);
+        RiftLibUIRegistry.registerUI(JOURNAL_SCREEN, RiftJournalScreen.class);
+        RiftLibUIRegistry.registerUI(MOVES_SCREEN, RiftMovesScreen.class);
+        RiftLibUIRegistry.registerUI(PARTY_SCREEN, RiftPartyScreen.class);
+        RiftLibUIRegistry.registerUI(CREATURE_BOX_INFO_SCREEN, RiftCreatureBoxInfoScreen.class);
+        RiftLibUIRegistry.registerUI(EGG_SCREEN, RiftEggScreen.class);
+    }
 
     @Nullable
     @Override

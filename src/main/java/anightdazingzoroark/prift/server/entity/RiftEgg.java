@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity;
 
-import anightdazingzoroark.prift.client.ui.RiftEggMenu;
+import anightdazingzoroark.prift.client.ui.RiftEggScreen;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
@@ -368,7 +368,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         else {
             try {
                 if (this.getOwnerId().equals(player.getUniqueID())) {
-                    RiftLibUIHelper.showUI(player, new RiftEggMenu(this));
+                    RiftLibUIHelper.showUI(player, new RiftEggScreen(this));
                     return true;
                 }
             }

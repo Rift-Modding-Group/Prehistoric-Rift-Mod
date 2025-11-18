@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.client.RiftControls;
-import anightdazingzoroark.prift.client.ui.RiftEggMenu;
+import anightdazingzoroark.prift.client.ui.RiftEggScreen;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -110,7 +110,7 @@ public class RiftSac extends EntityTameable implements IAnimatable {
         else {
             try {
                 if (this.getOwnerId().equals(player.getUniqueID())) {
-                    RiftLibUIHelper.showUI(player, new RiftEggMenu(this));
+                    RiftLibUIHelper.showUI(player, new RiftEggScreen(this));
                     return true;
                 }
             }

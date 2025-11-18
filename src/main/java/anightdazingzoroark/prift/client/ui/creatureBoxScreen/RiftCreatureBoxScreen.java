@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxDep
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMembersSection;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMembersSection;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
@@ -22,6 +23,7 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -39,13 +41,9 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     private RiftCreature creatureToDraw;
     private boolean shufflePartyMemsMode;
 
-    public RiftCreatureBoxScreen(BlockPos pos) {
-        this(pos, null);
-    }
-
-    public RiftCreatureBoxScreen(BlockPos pos, SelectedCreatureInfo selectedCreatureInfo) {
-        super(pos.getX(), pos.getY(), pos.getZ());
-        this.selectedCreatureInfo = selectedCreatureInfo;
+    public RiftCreatureBoxScreen(NBTTagCompound nbtTagCompound, int x, int y, int z) {
+        super(nbtTagCompound, x, y, z);
+        this.selectedCreatureInfo = SelectedCreatureInfo.nullableSelectedCreatureInfo(nbtTagCompound);
     }
 
     @Override
@@ -495,7 +493,9 @@ public class RiftCreatureBoxScreen extends RiftLibUI {
     public void onButtonClicked(RiftLibButton riftLibButton) {
         if (riftLibButton.buttonId.equals("moreInfoButton")) {
             //if ui user is owner, go on
-            if (this.canDeployBasedOnOwnership(this.selectedCreatureInfo)) RiftLibUIHelper.showUI(this.mc.player, new RiftCreatureBoxInfoScreen(new BlockPos(this.x, this.y, this.z), this.selectedCreatureInfo));
+            if (this.canDeployBasedOnOwnership(this.selectedCreatureInfo)) {
+                RiftLibUIHelper.showUI(this.mc.player, RiftGui.CREATURE_BOX_INFO_SCREEN, this.selectedCreatureInfo.getNBT(), this.x, this.y, this.z);
+            }
             //else, tell them they cant do anything
             else this.createPopup(this.notOwnerOfDeployedCreature());
         }

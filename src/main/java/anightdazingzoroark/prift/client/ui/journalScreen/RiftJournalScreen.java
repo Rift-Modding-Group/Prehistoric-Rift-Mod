@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalIndexSection;
 import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalInfoSection;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
@@ -12,6 +13,7 @@ import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
@@ -22,8 +24,8 @@ public class RiftJournalScreen extends RiftLibUI {
     private final ResourceLocation background = new ResourceLocation(RiftInitialize.MODID, "textures/ui/journal_background.png");
     private boolean searchMode;
 
-    public RiftJournalScreen() {
-        super(0, 0, 0);
+    public RiftJournalScreen(NBTTagCompound nbtTagCompound, int x, int y, int z) {
+        super(nbtTagCompound, x, y, z);
     }
 
     @Override
@@ -291,7 +293,7 @@ public class RiftJournalScreen extends RiftLibUI {
             if (this.getInfoSection() != null) this.getInfoSection().setEntryType(null);
         }
         //go back to party screen
-        if (riftLibClickableSection.getStringID().equals("backToParty")) RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen());
+        if (riftLibClickableSection.getStringID().equals("backToParty")) RiftLibUIHelper.showUI(this.mc.player, RiftGui.PARTY_SCREEN, 0, 0, 0);
     }
 
     @Override
@@ -299,6 +301,6 @@ public class RiftJournalScreen extends RiftLibUI {
 
     @Override
     protected void onPressEscape() {
-        RiftLibUIHelper.showUI(this.mc.player, new RiftPartyScreen());
+        RiftLibUIHelper.showUI(this.mc.player, RiftGui.PARTY_SCREEN, 0, 0, 0);
     }
 }

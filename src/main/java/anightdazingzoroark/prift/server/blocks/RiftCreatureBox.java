@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.blocks;
 
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -112,7 +113,7 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
                 }
             }
             //just open the ui
-            else RiftLibUIHelper.showUI(playerIn, new RiftCreatureBoxScreen(pos));
+            else RiftLibUIHelper.showUI(playerIn, RiftGui.CREATURE_BOX_SCREEN, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }

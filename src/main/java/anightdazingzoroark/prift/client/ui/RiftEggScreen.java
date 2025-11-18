@@ -18,21 +18,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class RiftEggMenu extends RiftLibUI {
+public class RiftEggScreen extends RiftLibUI {
     private final Entity entityToDisplay;
     private RiftCreature impregnable = null;
 
-    public RiftEggMenu(RiftEgg egg) {
+    public RiftEggScreen(RiftEgg egg) {
         super(0, 0, 0);
         this.entityToDisplay = egg;
     }
 
-    public RiftEggMenu(RiftSac sac) {
+    public RiftEggScreen(RiftSac sac) {
         super(0, 0, 0);
         this.entityToDisplay = sac;
     }
 
-    public RiftEggMenu(RiftCreature impregnable) {
+    public RiftEggScreen(RiftCreature impregnable) {
         super(0, 0, 0);
         this.entityToDisplay = new RiftEmbryo(impregnable.world);
         this.impregnable = impregnable;
