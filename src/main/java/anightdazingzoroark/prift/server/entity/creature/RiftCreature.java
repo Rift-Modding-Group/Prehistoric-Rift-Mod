@@ -12,6 +12,7 @@ import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
@@ -22,6 +23,7 @@ import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHe
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
+import anightdazingzoroark.prift.server.entity.other.RiftEmbryo;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
@@ -33,6 +35,7 @@ import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHe
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
+import anightdazingzoroark.riftlib.ui.RiftLibUIData;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
@@ -989,7 +992,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         if (this.canBePregnant()) {
-                            if (this.isPregnant() && player.isSneaking()) RiftLibUIHelper.showUI(player, new RiftEggScreen(this));
+                            if (this.isPregnant() && player.isSneaking()) {
+                                RiftLibUIHelper.showUI(
+                                        player,
+                                        RiftGui.EGG_SCREEN,
+                                        new RiftLibUIData()
+                                                .addInteger("EggType", RiftEggScreen.EggType.EMBRYO.ordinal())
+                                                .addInteger("ImpregnableID", this.getEntityId()),
+                                        0,
+                                        0,
+                                        0
+                                );
+                            }
                             else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId(), 0, 0);
                         }
                         else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
@@ -997,7 +1011,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
                         if (this.canBePregnant()) {
                             if (!this.isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
-                            else RiftLibUIHelper.showUI(player, new RiftEggScreen(this));
+                            else RiftLibUIHelper.showUI(
+                                    player,
+                                    RiftGui.EGG_SCREEN,
+                                    new RiftLibUIData()
+                                            .addInteger("EggType", RiftEggScreen.EggType.EMBRYO.ordinal())
+                                            .addInteger("ImpregnableID", this.getEntityId()),
+                                    0,
+                                    0,
+                                    0
+                            );
                         }
                         else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {
                             boolean usingWorkstation = this instanceof IWorkstationUser && ((IWorkstationUser) this).hasWorkstation();

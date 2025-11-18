@@ -41,6 +41,8 @@ public class SelectedCreatureInfo {
                 nbtTagCompound.getInteger("OpenedFromY"),
                 nbtTagCompound.getInteger("OpenedFromZ")
         );
+        this.menuOpenedFrom = (nbtTagCompound.hasKey("MenuOpenedFrom") && nbtTagCompound.getInteger("MenuOpenedFrom") >= 0) ?
+                MenuOpenedFrom.values()[nbtTagCompound.getInteger("MenuOpenedFrom")] : null;
     }
 
     public void setMenuOpenedFrom(MenuOpenedFrom value) {
@@ -97,6 +99,7 @@ public class SelectedCreatureInfo {
         toReturn.setInteger("OpenedFromX", this.creatureBoxOpenedFrom.getX());
         toReturn.setInteger("OpenedFromY", this.creatureBoxOpenedFrom.getY());
         toReturn.setInteger("OpenedFromZ", this.creatureBoxOpenedFrom.getZ());
+        toReturn.setInteger("MenuOpenedFrom", this.menuOpenedFrom != null ? this.menuOpenedFrom.ordinal() : -1);
         return toReturn;
     }
 

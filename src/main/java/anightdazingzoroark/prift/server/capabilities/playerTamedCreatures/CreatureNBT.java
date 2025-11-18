@@ -595,6 +595,15 @@ public class CreatureNBT {
         return 0;
     }
 
+    public int[] getBirthTimeMinutes() {
+        if (this.nbtIsEmpty()) return new int[]{};
+        int pregnancyTime = this.creatureNBT.getInteger("PregnancyTime");
+        int minutes = (int)(pregnancyTime / 1200f);
+        int seconds = (int)(pregnancyTime / 20f);
+        seconds = seconds - (minutes * 60);
+        return new int[]{minutes, seconds};
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object == null || this.creatureNBT == null) return false;

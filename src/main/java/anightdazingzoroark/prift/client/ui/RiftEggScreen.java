@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -10,8 +11,11 @@ import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibButton;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
@@ -19,23 +23,20 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RiftEggScreen extends RiftLibUI {
+    private final EggType eggType;
     private final Entity entityToDisplay;
-    private RiftCreature impregnable = null;
+    private final RiftCreature impregnable;
 
-    public RiftEggScreen(RiftEgg egg) {
-        super(0, 0, 0);
-        this.entityToDisplay = egg;
-    }
+    public RiftEggScreen(NBTTagCompound nbtTagCompound, int x, int y, int z) {
+        super(nbtTagCompound, x, y, z);
+        this.eggType = nbtTagCompound.hasKey("EggType") ? EggType.values()[nbtTagCompound.getInteger("EggType")] : EggType.EGG;
 
-    public RiftEggScreen(RiftSac sac) {
-        super(0, 0, 0);
-        this.entityToDisplay = sac;
-    }
+        this.entityToDisplay = nbtTagCompound.hasKey("HatchableID") ?
+                Minecraft.getMinecraft().world.getEntityByID(nbtTagCompound.getInteger("HatchableID")) :
+                this.eggType == EggType.EMBRYO ? new RiftEmbryo(Minecraft.getMinecraft().world) : null;
 
-    public RiftEggScreen(RiftCreature impregnable) {
-        super(0, 0, 0);
-        this.entityToDisplay = new RiftEmbryo(impregnable.world);
-        this.impregnable = impregnable;
+        this.impregnable = nbtTagCompound.hasKey("ImpregnableID") ?
+                (RiftCreature) Minecraft.getMinecraft().world.getEntityByID(nbtTagCompound.getInteger("ImpregnableID")) : null;
     }
 
     @Override
@@ -83,15 +84,15 @@ public class RiftEggScreen extends RiftLibUI {
     }
 
     private String headerText() {
-        if (this.entityToDisplay instanceof RiftEgg) {
+        if (this.eggType == EggType.EGG) {
             RiftEgg riftEgg = (RiftEgg) this.entityToDisplay;
             return I18n.format("item."+riftEgg.getCreatureType().name().toLowerCase()+"_egg.name");
         }
-        else if (this.entityToDisplay instanceof RiftSac) {
+        else if (this.eggType == EggType.SAC) {
             RiftSac riftSac = (RiftSac) this.entityToDisplay;
             return I18n.format("item."+riftSac.getCreatureType().name().toLowerCase()+"_sac.name");
         }
-        else if (this.entityToDisplay instanceof RiftEmbryo) {
+        else if (this.eggType == EggType.EMBRYO) {
             if (this.impregnable != null) {
                 return I18n.format("prift.pregnancy.name", this.impregnable.creatureType.friendlyName);
             }
@@ -100,7 +101,7 @@ public class RiftEggScreen extends RiftLibUI {
     }
 
     private String[] bottomTexts() {
-        if (this.entityToDisplay instanceof RiftEgg) {
+        if (this.eggType == EggType.EGG) {
             RiftEgg riftEgg = (RiftEgg) this.entityToDisplay;
 
             if (riftEgg.isInRightTemperature()) {
@@ -121,7 +122,7 @@ public class RiftEggScreen extends RiftLibUI {
                 }
             }
         }
-        else if (this.entityToDisplay instanceof RiftSac) {
+        else if (this.eggType == EggType.SAC) {
             RiftSac riftSac = (RiftSac) this.entityToDisplay;
 
             if (riftSac.isInWater()) {
@@ -135,7 +136,7 @@ public class RiftEggScreen extends RiftLibUI {
             }
             else return new String[]{I18n.format("prift.sac.not_wet")};
         }
-        else if (this.entityToDisplay instanceof RiftEmbryo) {
+        else if (this.eggType == EggType.EMBRYO) {
             if (this.impregnable != null) {
                 int minutes = this.impregnable.getBirthTimeMinutes()[0];
                 int seconds = this.impregnable.getBirthTimeMinutes()[1];
@@ -180,17 +181,17 @@ public class RiftEggScreen extends RiftLibUI {
     }
 
     @Override
-    public void onButtonClicked(RiftLibButton riftLibButton) {
-
-    }
+    public void onButtonClicked(RiftLibButton riftLibButton) {}
 
     @Override
-    public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {
-
-    }
+    public void onClickableSectionClicked(RiftLibClickableSection riftLibClickableSection) {}
 
     @Override
-    public void onElementHovered(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {
+    public void onElementHovered(RiftLibUISection riftLibUISection, RiftLibUIElement.Element element) {}
 
+    public enum EggType {
+        EGG,
+        SAC,
+        EMBRYO
     }
 }

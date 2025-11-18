@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.other.RiftEmbryo;
 import anightdazingzoroark.prift.server.entity.other.RiftTrap;
 import anightdazingzoroark.prift.server.entity.projectile.*;
 import net.minecraft.entity.Entity;
@@ -25,7 +26,7 @@ public class RiftEntities {
         int miscId = RiftLargeWeaponType.values().length + RiftCreatureType.values().length;
         registerEntity("egg", RiftEgg.class, miscId++, RiftInitialize.instance);
         registerEntity("sac", RiftSac.class, miscId++, RiftInitialize.instance);
-        registerEntity("embryo", RiftSac.class, miscId++, RiftInitialize.instance);
+        registerEntity("embryo", RiftEmbryo.class, miscId++, RiftInitialize.instance);
         registerEntity("cannonball_projectile", RiftCannonball.class, miscId++, RiftInitialize.instance);
         registerEntity("mortar_shell_projectile", RiftMortarShell.class, miscId++, RiftInitialize.instance);
         registerEntity("catapult_boulder_projectile", RiftCatapultBoulder.class, miscId++, RiftInitialize.instance);

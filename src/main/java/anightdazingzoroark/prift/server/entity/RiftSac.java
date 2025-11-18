@@ -2,11 +2,13 @@ package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.client.ui.RiftEggScreen;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.riftlib.ui.RiftLibUIData;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -108,13 +110,17 @@ public class RiftSac extends EntityTameable implements IAnimatable {
             return true;
         }
         else {
-            try {
-                if (this.getOwnerId().equals(player.getUniqueID())) {
-                    RiftLibUIHelper.showUI(player, new RiftEggScreen(this));
-                    return true;
-                }
-            }
-            catch (Exception e) {
+            if (this.getOwnerId() != null && this.getOwnerId().equals(player.getUniqueID())) {
+                RiftLibUIHelper.showUI(
+                        player,
+                        RiftGui.EGG_SCREEN,
+                        new RiftLibUIData()
+                                .addInteger("EggType", RiftEggScreen.EggType.SAC.ordinal())
+                                .addInteger("HatchableID", this.getEntityId()),
+                        0,
+                        0,
+                        0
+                );
                 return true;
             }
         }

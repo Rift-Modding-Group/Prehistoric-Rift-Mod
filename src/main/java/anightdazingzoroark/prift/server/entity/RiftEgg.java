@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -13,6 +14,7 @@ import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.riftlib.ui.RiftLibUIData;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
 import com.charles445.simpledifficulty.api.config.json.JsonTemperature;
@@ -366,13 +368,17 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
             return true;
         }
         else {
-            try {
-                if (this.getOwnerId().equals(player.getUniqueID())) {
-                    RiftLibUIHelper.showUI(player, new RiftEggScreen(this));
-                    return true;
-                }
-            }
-            catch (Exception e) {
+            if (this.getOwnerId() != null && this.getOwnerId().equals(player.getUniqueID())) {
+                RiftLibUIHelper.showUI(
+                        player,
+                        RiftGui.EGG_SCREEN,
+                        new RiftLibUIData()
+                                .addInteger("EggType", RiftEggScreen.EggType.EGG.ordinal())
+                                .addInteger("HatchableID", this.getEntityId()),
+                        0,
+                        0,
+                        0
+                );
                 return true;
             }
         }
