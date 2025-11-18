@@ -68,13 +68,13 @@ public class SelectedCreatureInfo {
     public void exitToLastMenu(Minecraft minecraft) {
         if (this.menuOpenedFrom == MenuOpenedFrom.PARTY) {
             NBTTagCompound toPass = this.getNBT();
-            toPass.setBoolean("openedFromMoves", true);
+            toPass.setBoolean("OpenedFromMoves", true);
             RiftLibUIHelper.showUI(minecraft.player, RiftGui.PARTY_SCREEN, toPass, 0, 0, 0);
         }
         else if (this.menuOpenedFrom == MenuOpenedFrom.BOX) {
             NBTTagCompound toPass = this.getNBT();
-            toPass.setBoolean("openedFromMoves", true);
-            RiftLibUIHelper.showUI(minecraft.player, RiftGui.CREATURE_BOX_INFO_SCREEN, toPass, 0, 0, 0);
+            toPass.setBoolean("OpenedFromMoves", true);
+            RiftLibUIHelper.showUI(minecraft.player, RiftGui.CREATURE_BOX_INFO_SCREEN, toPass, this.creatureBoxOpenedFrom.getX(), this.creatureBoxOpenedFrom.getY(), this.creatureBoxOpenedFrom.getZ());
         }
     }
 
