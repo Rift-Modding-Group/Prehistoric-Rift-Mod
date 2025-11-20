@@ -1,14 +1,14 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftManageBlockBreakControl implements IMessage {
+public class RiftManageBlockBreakControl extends RiftLibMessage<RiftManageBlockBreakControl> {
     private int creatureId;
     private boolean value;
 
@@ -31,24 +31,19 @@ public class RiftManageBlockBreakControl implements IMessage {
         buf.writeBoolean(this.value);
     }
 
-    public static class Handler implements IMessageHandler<RiftManageBlockBreakControl, IMessage> {
-        @Override
-        public IMessage onMessage(RiftManageBlockBreakControl message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftManageBlockBreakControl message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
 
-        private void handle(RiftManageBlockBreakControl message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            RiftCreature creature = (RiftCreature) playerEntity.world.getEntityByID(message.creatureId);
-
-            if (creature != null) {
-                if (message.value && creature.canSetBlockBreakMode()) {
-                    creature.setBlockBreakMode(!creature.inBlockBreakMode());
-                    creature.setCanSetBlockBreakMode(false);
-                }
-                else if (!message.value && !creature.canSetBlockBreakMode()) creature.setCanSetBlockBreakMode(true);
+        if (creature != null) {
+            if (message.value && creature.canSetBlockBreakMode()) {
+                creature.setBlockBreakMode(!creature.inBlockBreakMode());
+                creature.setCanSetBlockBreakMode(false);
             }
+            else if (!message.value && !creature.canSetBlockBreakMode()) creature.setCanSetBlockBreakMode(true);
         }
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftManageBlockBreakControl message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

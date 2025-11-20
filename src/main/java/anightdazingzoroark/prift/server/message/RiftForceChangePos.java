@@ -1,14 +1,18 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftForceChangePos implements IMessage {
+public class RiftForceChangePos extends RiftLibMessage<RiftForceChangePos> {
     private int creatureId;
     private double x;
     private double y;
@@ -39,17 +43,12 @@ public class RiftForceChangePos implements IMessage {
         buf.writeDouble(this.z);
     }
 
-    public static class Handler implements IMessageHandler<RiftForceChangePos, IMessage> {
-        @Override
-        public IMessage onMessage(RiftForceChangePos message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(RiftForceChangePos message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            RiftCreature creature = (RiftCreature)playerEntity.world.getEntityByID(message.creatureId);
-            creature.setPosition(message.x, message.y, message.z);
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftForceChangePos message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
+        if (creature != null) creature.setPosition(message.x, message.y, message.z);
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftForceChangePos riftForceChangePos, EntityPlayer entityPlayer, MessageContext messageContext) {}
 }

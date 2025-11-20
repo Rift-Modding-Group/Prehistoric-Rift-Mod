@@ -137,11 +137,6 @@ public class PlayerTamedCreaturesHelper {
         return compound;
     }
 
-    public static void updateAfterOpenPartyScreen(EntityPlayer player, int lastOpenedTime) {
-        if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyAfterOpenPartyScreen(player, lastOpenedTime));
-    }
-
     public static int getSelectedPartyPosFromOverlay(EntityPlayer player) {
         if (player == null) return -1;
         if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncSelectedPartyPosFromOverlay(player));
@@ -249,7 +244,7 @@ public class PlayerTamedCreaturesHelper {
 
     public static void setCreatureBoxLastOpenedTime(EntityPlayer player, int time) {
         if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftNewCreatureBoxSetLastOpenedTime(player, time));
+        RiftMessages.WRAPPER.sendToServer(new RiftCreatureBoxSetLastOpenedTime(player, time));
     }
 
     //helper functions for debugging

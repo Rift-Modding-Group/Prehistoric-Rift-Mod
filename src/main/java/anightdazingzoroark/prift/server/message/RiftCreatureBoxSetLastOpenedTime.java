@@ -2,16 +2,18 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftCreatureBoxSetLastOpenedTime implements IMessage {
+public class RiftCreatureBoxSetLastOpenedTime extends RiftLibMessage<RiftCreatureBoxSetLastOpenedTime> {
     private int playerId;
     private int lastOpenedTime;
 
@@ -34,28 +36,24 @@ public class RiftCreatureBoxSetLastOpenedTime implements IMessage {
         buf.writeInt(this.lastOpenedTime);
     }
 
-    public static class Handler implements IMessageHandler<RiftCreatureBoxSetLastOpenedTime, IMessage> {
-        @Override
-        public IMessage onMessage(RiftCreatureBoxSetLastOpenedTime message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftCreatureBoxSetLastOpenedTime message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
 
-        private void handle(RiftCreatureBoxSetLastOpenedTime message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
 
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                playerTamedCreatures.setBoxLastOpenedTime(message.lastOpenedTime);
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
+        if (playerTamedCreatures != null) {
+            int timeToSubtract = message.lastOpenedTime - playerTamedCreatures.getBoxLastOpenedTime();
 
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                playerTamedCreatures.setBoxLastOpenedTime(message.lastOpenedTime);
-            }
+            //deal with countdown for creatures
+            playerTamedCreatures.getBoxNBT().countdownCreatureRevival(timeToSubtract);
+
+            //now set the time
+            playerTamedCreatures.setBoxLastOpenedTime(message.lastOpenedTime);
         }
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftCreatureBoxSetLastOpenedTime message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

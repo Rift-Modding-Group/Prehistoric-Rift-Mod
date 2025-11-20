@@ -1,15 +1,17 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftShowParticlesOnClient implements IMessage {
+public class RiftShowParticlesOnClient extends RiftLibMessage<RiftShowParticlesOnClient> {
     private String particleName;
     private int color;
     private double posX, posY, posZ;
@@ -52,17 +54,21 @@ public class RiftShowParticlesOnClient implements IMessage {
         buf.writeDouble(this.motionZ);
     }
 
-    public static class Handler implements IMessageHandler<RiftShowParticlesOnClient, IMessage> {
-        @Override
-        public IMessage onMessage(RiftShowParticlesOnClient message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftShowParticlesOnClient message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 
-        private void handle(RiftShowParticlesOnClient message, MessageContext ctx) {
-            if (ctx.side == Side.CLIENT) {
-                RiftInitialize.PROXY.spawnParticle(message.particleName, message.color, message.posX, message.posY, message.posZ, message.motionX, message.motionY, message.motionZ);
-            }
-        }
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftShowParticlesOnClient message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        RiftInitialize.PROXY.spawnParticle(
+                message.particleName,
+                message.color,
+                message.posX,
+                message.posY,
+                message.posZ,
+                message.motionX,
+                message.motionY,
+                message.motionZ
+        );
     }
 }

@@ -2,14 +2,18 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftHoverChangeControl implements IMessage {
+public class RiftHoverChangeControl extends RiftLibMessage<RiftHoverChangeControl> {
     private int creatureId;
     private boolean ascend;
     private boolean descend;
@@ -36,30 +40,25 @@ public class RiftHoverChangeControl implements IMessage {
         buf.writeBoolean(this.descend);
     }
 
-    public static class Handler implements IMessageHandler<RiftHoverChangeControl, IMessage> {
-        @Override
-        public IMessage onMessage(RiftHoverChangeControl message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(RiftHoverChangeControl message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            RiftWaterCreature creature = (RiftWaterCreature)playerEntity.world.getEntityByID(message.creatureId);
-            if (creature != null && creature.isInWater()) {
-                if (message.ascend && !message.descend) {
-                    creature.setIsAscending(true);
-                    creature.setIsDescending(false);
-                }
-                else if (!message.ascend && message.descend) {
-                    creature.setIsAscending(false);
-                    creature.setIsDescending(true);
-                }
-                else {
-                    creature.setIsAscending(false);
-                    creature.setIsDescending(false);
-                }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftHoverChangeControl message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        RiftWaterCreature creature = (RiftWaterCreature) messagePlayer.world.getEntityByID(message.creatureId);
+        if (creature != null && creature.isInWater()) {
+            if (message.ascend && !message.descend) {
+                creature.setIsAscending(true);
+                creature.setIsDescending(false);
+            }
+            else if (!message.ascend && message.descend) {
+                creature.setIsAscending(false);
+                creature.setIsDescending(true);
+            }
+            else {
+                creature.setIsAscending(false);
+                creature.setIsDescending(false);
             }
         }
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftHoverChangeControl riftHoverChangeControl, EntityPlayer entityPlayer, MessageContext messageContext) {}
 }

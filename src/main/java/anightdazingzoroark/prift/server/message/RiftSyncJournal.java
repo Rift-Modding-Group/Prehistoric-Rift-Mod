@@ -3,20 +3,23 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class RiftSyncJournal implements IMessage {
+public class RiftSyncJournal extends RiftLibMessage<RiftSyncJournal> {
     private int playerId;
     private Map<RiftCreatureType, Boolean> encounteredCreatures;
 
@@ -53,34 +56,24 @@ public class RiftSyncJournal implements IMessage {
         }
     }
 
-    public static class Handler implements IMessageHandler<RiftSyncJournal, IMessage> {
-        @Override
-        public IMessage onMessage(RiftSyncJournal message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftSyncJournal message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
+        IPlayerJournalProgress playerJournalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
+
+        if (playerJournalProgress != null) {
+            RiftMessages.WRAPPER.sendTo(new RiftSyncJournal(player, playerJournalProgress.getEncounteredCreatures()), (EntityPlayerMP) player);
         }
+    }
 
-        private void handle(RiftSyncJournal message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftSyncJournal message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
+        IPlayerJournalProgress playerJournalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
 
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerJournalProgress playerJournalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-
-                if (playerJournalProgress != null) {
-                    RiftMessages.WRAPPER.sendTo(new RiftSyncJournal(player, playerJournalProgress.getEncounteredCreatures()), (EntityPlayerMP) player);
-                }
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerJournalProgress playerJournalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-
-                if (playerJournalProgress != null) {
-                    playerJournalProgress.setEncounteredCreatures(message.encounteredCreatures);
-                }
-            }
-        }
+        if (playerJournalProgress != null) playerJournalProgress.setEncounteredCreatures(message.encounteredCreatures);
     }
 }

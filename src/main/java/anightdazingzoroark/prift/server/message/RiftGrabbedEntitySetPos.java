@@ -3,16 +3,20 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftGrabbedEntitySetPos implements IMessage {
+public class RiftGrabbedEntitySetPos extends RiftLibMessage<RiftGrabbedEntitySetPos> {
     private int grabberCreatureId;
     private int grabbedEntityId;
 
@@ -35,24 +39,19 @@ public class RiftGrabbedEntitySetPos implements IMessage {
         buf.writeInt(this.grabbedEntityId);
     }
 
-    public static class Handler implements IMessageHandler<RiftGrabbedEntitySetPos, IMessage> {
-        @Override
-        public IMessage onMessage(RiftGrabbedEntitySetPos message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftGrabbedEntitySetPos message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        RiftCreature grabberCreature = (RiftCreature) messagePlayer.world.getEntityByID(message.grabberCreatureId);
+        Entity grabbedEntity = messagePlayer.world.getEntityByID(message.grabbedEntityId);
 
-        private void handle(RiftGrabbedEntitySetPos message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            RiftCreature grabberCreature = (RiftCreature) playerEntity.world.getEntityByID(message.grabberCreatureId);
-            Entity grabbedEntity = playerEntity.world.getEntityByID(message.grabbedEntityId);
-
-            if (grabbedEntity != null && grabberCreature != null) {
-                grabbedEntity.setPosition(grabberCreature.grabLocation().x, grabberCreature.grabLocation().y, grabberCreature.grabLocation().z);
-                grabbedEntity.motionX = 0;
-                grabbedEntity.motionY = 0;
-                grabbedEntity.motionZ = 0;
-            }
+        if (grabbedEntity != null && grabberCreature != null) {
+            grabbedEntity.setPosition(grabberCreature.grabLocation().x, grabberCreature.grabLocation().y, grabberCreature.grabLocation().z);
+            grabbedEntity.motionX = 0;
+            grabbedEntity.motionY = 0;
+            grabbedEntity.motionZ = 0;
         }
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftGrabbedEntitySetPos riftGrabbedEntitySetPos, EntityPlayer entityPlayer, MessageContext messageContext) {}
 }

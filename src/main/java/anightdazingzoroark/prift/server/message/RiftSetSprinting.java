@@ -1,17 +1,20 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftSetSprinting implements IMessage {
+public class RiftSetSprinting extends RiftLibMessage<RiftSetSprinting> {
     private int entityId;
     private boolean value;
 
@@ -34,24 +37,16 @@ public class RiftSetSprinting implements IMessage {
         buf.writeBoolean(this.value);
     }
 
-    public static class Handler implements IMessageHandler<RiftSetSprinting, IMessage> {
-        @Override
-        public IMessage onMessage(RiftSetSprinting message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftSetSprinting message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityLivingBase entityLivingBase = (EntityLivingBase) messagePlayer.world.getEntityByID(message.entityId);
+        if (entityLivingBase != null) entityLivingBase.setSprinting(message.value);
+    }
 
-        private void handle(RiftSetSprinting message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
-                EntityLivingBase entityLivingBase = (EntityLivingBase) messagePlayer.world.getEntityByID(message.entityId);
-                if (entityLivingBase != null) entityLivingBase.setSprinting(message.value);
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-                EntityLivingBase entityLivingBase = (EntityLivingBase) messagePlayer.world.getEntityByID(message.entityId);
-                if (entityLivingBase != null) entityLivingBase.setSprinting(message.value);
-            }
-        }
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftSetSprinting message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityLivingBase entityLivingBase = (EntityLivingBase) messagePlayer.world.getEntityByID(message.entityId);
+        if (entityLivingBase != null) entityLivingBase.setSprinting(message.value);
     }
 }

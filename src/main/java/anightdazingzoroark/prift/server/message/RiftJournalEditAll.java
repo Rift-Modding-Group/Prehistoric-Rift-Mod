@@ -2,15 +2,18 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftJournalEditAll implements IMessage {
+public class RiftJournalEditAll extends RiftLibMessage<RiftJournalEditAll> {
     private int playerId;
     private boolean add;
 
@@ -33,22 +36,16 @@ public class RiftJournalEditAll implements IMessage {
         buf.writeBoolean(this.add);
     }
 
-    public static class Handler implements IMessageHandler<RiftJournalEditAll, IMessage> {
-        @Override
-        public IMessage onMessage(RiftJournalEditAll message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(RiftJournalEditAll message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
-
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-                if (message.add) journalProgress.unlockAllEntries();
-                else journalProgress.resetEntries();
-            }
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftJournalEditAll message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
+        IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
+        if (journalProgress == null) return;
+        if (message.add) journalProgress.unlockAllEntries();
+        else journalProgress.resetEntries();
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftJournalEditAll message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

@@ -1,15 +1,19 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftSpawnDetectParticle implements IMessage {
+public class RiftSpawnDetectParticle extends RiftLibMessage<RiftSpawnDetectParticle> {
     private int xPos;
     private int yPos;
     private int zPos;
@@ -36,15 +40,12 @@ public class RiftSpawnDetectParticle implements IMessage {
         buf.writeInt(this.zPos);
     }
 
-    public static class Handler implements IMessageHandler<RiftSpawnDetectParticle, IMessage> {
-        @Override
-        public IMessage onMessage(RiftSpawnDetectParticle message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftSpawnDetectParticle message, EntityPlayer entityPlayer, MessageContext messageContext) {}
 
-        private void handle(RiftSpawnDetectParticle message, MessageContext ctx) {
-            RiftInitialize.PROXY.spawnParticle("detect", message.xPos + 0.5D, message.yPos + 1D, message.zPos + 0.5D, 0, 0,0);
-        }
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftSpawnDetectParticle message, EntityPlayer entityPlayer, MessageContext messageContext) {
+        RiftInitialize.PROXY.spawnParticle("detect", message.xPos + 0.5D, message.yPos + 1D, message.zPos + 0.5D, 0, 0,0);
     }
 }

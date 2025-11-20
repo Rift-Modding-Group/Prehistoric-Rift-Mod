@@ -2,18 +2,21 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftResetBolaCaptured implements IMessage {
+public class RiftResetBolaCaptured extends RiftLibMessage<RiftResetBolaCaptured> {
     private int entityId;
 
     public RiftResetBolaCaptured() {}
@@ -32,24 +35,20 @@ public class RiftResetBolaCaptured implements IMessage {
         buf.writeInt(this.entityId);
     }
 
-    public static class Handler implements IMessageHandler<RiftResetBolaCaptured, IMessage> {
-        @Override
-        public IMessage onMessage(RiftResetBolaCaptured message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftResetBolaCaptured message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        Entity entityToTarget = messagePlayer.world.getEntityByID(message.entityId);
+        if (entityToTarget == null) return;
+        INonPotionEffects nonPotionEffects = entityToTarget.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+        if (nonPotionEffects != null) nonPotionEffects.resetBolaCaptured();
+    }
 
-        private void handle(RiftResetBolaCaptured message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
-                INonPotionEffects nonPotionEffects = messagePlayer.world.getEntityByID(message.entityId).getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-                if (nonPotionEffects != null) nonPotionEffects.resetBolaCaptured();
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-                INonPotionEffects nonPotionEffects = messagePlayer.world.getEntityByID(message.entityId).getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-                if (nonPotionEffects != null) nonPotionEffects.resetBolaCaptured();
-            }
-        }
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftResetBolaCaptured message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        Entity entityToTarget = messagePlayer.world.getEntityByID(message.entityId);
+        if (entityToTarget == null) return;
+        INonPotionEffects nonPotionEffects = entityToTarget.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+        if (nonPotionEffects != null) nonPotionEffects.resetBolaCaptured();
     }
 }

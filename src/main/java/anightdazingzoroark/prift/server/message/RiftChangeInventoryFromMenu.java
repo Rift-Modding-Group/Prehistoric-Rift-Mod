@@ -1,19 +1,22 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftChangeInventoryFromMenu implements IMessage {
+public class RiftChangeInventoryFromMenu extends RiftLibMessage<RiftChangeInventoryFromMenu> {
     private int creatureId;
     private int playerId;
     private RiftCreatureInvData inventory;
@@ -44,33 +47,23 @@ public class RiftChangeInventoryFromMenu implements IMessage {
         PlayerInvData.writeToByteBuf(buf);
     }
 
-    public static class Handler implements IMessageHandler<RiftChangeInventoryFromMenu, IMessage> {
-        @Override
-        public IMessage onMessage(RiftChangeInventoryFromMenu message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> serverHandle(message, ctx));
-            if (ctx.side == Side.CLIENT) FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> clientHandle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftChangeInventoryFromMenu message, EntityPlayer entityPlayer, MessageContext messageContext) {
+        RiftCreature interacted = (RiftCreature) entityPlayer.world.getEntityByID(message.creatureId);
+        EntityPlayer player = (EntityPlayer) entityPlayer.world.getEntityByID(message.playerId);
 
-        private void serverHandle(RiftChangeInventoryFromMenu message, MessageContext ctx) {
-            EntityPlayer messagePlayer = ctx.getServerHandler().player;
+        if (interacted != null) interacted.creatureInventory.setInventoryFromData(message.inventory);
+        if (player != null) PlayerInvData.applyInventoryData(player, message.playerInventory);
+    }
 
-            RiftCreature interacted = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
-            EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftChangeInventoryFromMenu message, EntityPlayer entityPlayer, MessageContext messageContext) {
+        RiftCreature interacted = (RiftCreature) entityPlayer.world.getEntityByID(message.creatureId);
+        EntityPlayer player = (EntityPlayer) entityPlayer.world.getEntityByID(message.playerId);
 
-            if (interacted != null) interacted.creatureInventory.setInventoryFromData(message.inventory);
-            if (player != null) PlayerInvData.applyInventoryData(player, message.playerInventory);
-        }
-
-        private void clientHandle(RiftChangeInventoryFromMenu message, MessageContext ctx) {
-            EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-
-            RiftCreature interacted = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
-            EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-
-            if (interacted != null) interacted.creatureInventory.setInventoryFromData(message.inventory);
-            if (player != null) PlayerInvData.applyInventoryData(player, message.playerInventory);
-        }
+        if (interacted != null) interacted.creatureInventory.setInventoryFromData(message.inventory);
+        if (player != null) PlayerInvData.applyInventoryData(player, message.playerInventory);
     }
 
     public static class RiftCreatureInvData {

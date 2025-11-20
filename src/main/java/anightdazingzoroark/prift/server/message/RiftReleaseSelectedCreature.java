@@ -5,9 +5,12 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Creatu
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -15,7 +18,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftReleaseSelectedCreature implements IMessage {
+public class RiftReleaseSelectedCreature extends RiftLibMessage<RiftReleaseSelectedCreature> {
     private int playerId;
     private NBTTagCompound selectedCreatureInfoNBT;
 
@@ -38,35 +41,27 @@ public class RiftReleaseSelectedCreature implements IMessage {
         ByteBufUtils.writeTag(buf, this.selectedCreatureInfoNBT);
     }
 
-    public static class Handler implements IMessageHandler<RiftReleaseSelectedCreature, IMessage> {
-        @Override
-        public IMessage onMessage(RiftReleaseSelectedCreature message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftReleaseSelectedCreature message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
 
-        private void handle(RiftReleaseSelectedCreature message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+        if (playerTamedCreatures != null) {
+            SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
 
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+            if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                //automatically undeploy creature first
+                PlayerTamedCreaturesHelper.deployCreatureFromParty(player, selectedCreatureInfo.pos[0], false);
 
-                if (playerTamedCreatures != null) {
-                    SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
-
-                    if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-                        //automatically undeploy creature first
-                        PlayerTamedCreaturesHelper.deployCreatureFromParty(player, selectedCreatureInfo.pos[0], false);
-
-                        //now remove creature
-                        playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], new CreatureNBT());
-                    }
-                    else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
-                        playerTamedCreatures.getBoxNBT().setBoxCreature(selectedCreatureInfo.pos[0], selectedCreatureInfo.pos[1], new CreatureNBT());
-                    }
-                }
+                //now remove creature
+                playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], new CreatureNBT());
+            }
+            else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                playerTamedCreatures.getBoxNBT().setBoxCreature(selectedCreatureInfo.pos[0], selectedCreatureInfo.pos[1], new CreatureNBT());
             }
         }
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftReleaseSelectedCreature message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

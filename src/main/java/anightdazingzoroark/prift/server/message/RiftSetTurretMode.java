@@ -1,16 +1,19 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftSetTurretMode implements IMessage {
+public class RiftSetTurretMode extends RiftLibMessage<RiftSetTurretMode> {
     private int creatureId;
     private boolean value;
 
@@ -33,24 +36,18 @@ public class RiftSetTurretMode implements IMessage {
         buf.writeBoolean(this.value);
     }
 
-    public static class Handler implements IMessageHandler<RiftSetTurretMode, IMessage> {
-        @Override
-        public IMessage onMessage(RiftSetTurretMode message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftSetTurretMode message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
 
-        private void handle(RiftSetTurretMode message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
+        //send message
+        String messageToSend = message.value ? "action.creature_start_turret_mode" : "action.creature_stop_turret_mode";
+        ((EntityPlayer) creature.getOwner()).sendStatusMessage(new TextComponentTranslation(messageToSend), false);
 
-            RiftCreature creature = (RiftCreature)playerEntity.world.getEntityByID(message.creatureId);
-
-            //send message
-            String messageToSend = message.value ? "action.creature_start_turret_mode" : "action.creature_stop_turret_mode";
-            ((EntityPlayer) creature.getOwner()).sendStatusMessage(new TextComponentTranslation(messageToSend), false);
-
-            //set turret mode
-            creature.setTurretMode(message.value);
-        }
+        //set turret mode
+        creature.setTurretMode(message.value);
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftSetTurretMode riftSetTurretMode, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

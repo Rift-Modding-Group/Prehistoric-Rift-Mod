@@ -1,19 +1,22 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftChangeWeaponInvFromMenu implements IMessage {
+public class RiftChangeWeaponInvFromMenu extends RiftLibMessage<RiftChangeWeaponInvFromMenu> {
     private int creatureId;
     private RiftWeaponInvData inventory;
     private PlayerInvData playerInventory;
@@ -40,22 +43,17 @@ public class RiftChangeWeaponInvFromMenu implements IMessage {
         PlayerInvData.writeToByteBuf(buf);
     }
 
-    public static class Handler implements IMessageHandler<RiftChangeWeaponInvFromMenu, IMessage> {
-        @Override
-        public IMessage onMessage(RiftChangeWeaponInvFromMenu message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftChangeWeaponInvFromMenu message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        RiftLargeWeapon interacted = (RiftLargeWeapon) messagePlayer.world.getEntityByID(message.creatureId);
 
-        private void handle(RiftChangeWeaponInvFromMenu message, MessageContext ctx) {
-            EntityPlayer messagePlayer = ctx.getServerHandler().player;
-
-            RiftLargeWeapon interacted = (RiftLargeWeapon) messagePlayer.world.getEntityByID(message.creatureId);
-
-            interacted.weaponInventory.setInventoryFromData(message.inventory);
-            PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
-        }
+        interacted.weaponInventory.setInventoryFromData(message.inventory);
+        PlayerInvData.applyInventoryData(messagePlayer, message.playerInventory);
     }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftChangeWeaponInvFromMenu riftChangeWeaponInvFromMenu, EntityPlayer entityPlayer, MessageContext messageContext) {}
 
     public static class RiftWeaponInvData {
         private static ItemStack[] inventoryContents;

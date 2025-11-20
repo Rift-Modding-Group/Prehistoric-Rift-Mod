@@ -7,10 +7,13 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -22,7 +25,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.List;
 import java.util.UUID;
 
-public class RiftSwapCreatureMoves implements IMessage {
+public class RiftSwapCreatureMoves extends RiftLibMessage<RiftSwapCreatureMoves> {
     private int playerId;
     private NBTTagCompound selectedCreatureInfoNBT;
     private NBTTagCompound moveSelectedInfoNBT;
@@ -53,143 +56,137 @@ public class RiftSwapCreatureMoves implements IMessage {
         ByteBufUtils.writeTag(buf, this.moveToSwapInfoNBT);
     }
 
-    public static class Handler implements IMessageHandler<RiftSwapCreatureMoves, IMessage> {
-        @Override
-        public IMessage onMessage(RiftSwapCreatureMoves message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftSwapCreatureMoves message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
 
-        private void handle(RiftSwapCreatureMoves message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayerMP messagePlayer = ctx.getServerHandler().player;
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+        SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
+        CreatureNBT selectedCreatureNBT = selectedCreatureInfo.getCreatureNBT(player);
+        SelectedMoveInfo moveSelectedInfo = new SelectedMoveInfo(message.moveSelectedInfoNBT);
+        SelectedMoveInfo moveToSwapInfo = new SelectedMoveInfo(message.moveToSwapInfoNBT);
 
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
-                CreatureNBT selectedCreatureNBT = selectedCreatureInfo.getCreatureNBT(player);
-                SelectedMoveInfo moveSelectedInfo = new SelectedMoveInfo(message.moveSelectedInfoNBT);
-                SelectedMoveInfo moveToSwapInfo = new SelectedMoveInfo(message.moveToSwapInfoNBT);
-
-                if (playerTamedCreatures != null) {
-                    if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-                        //now here's where things get tricky
-                        //if creature is deployed, edit the creature itself and its nbt
-                        //otherwise, edit its nbt
-                        if (selectedCreatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
-                            UUID selectedCreatureUUID = selectedCreatureNBT.getUniqueID();
-                            RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, selectedCreatureUUID);
-                            if (creature != null) {
-                                this.swapCreatureMoves(creature, moveSelectedInfo, moveToSwapInfo);
-                                playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
-                                        selectedCreatureNBT,
-                                        moveSelectedInfo,
-                                        moveToSwapInfo
-                                ));
-                            }
-                        }
-                        else {
-                            playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
-                                    selectedCreatureNBT,
-                                    moveSelectedInfo,
-                                    moveToSwapInfo
-                            ));
-                        }
+        if (playerTamedCreatures != null) {
+            if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                //now here's where things get tricky
+                //if creature is deployed, edit the creature itself and its nbt
+                //otherwise, edit its nbt
+                if (selectedCreatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                    UUID selectedCreatureUUID = selectedCreatureNBT.getUniqueID();
+                    RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(messagePlayer.world, selectedCreatureUUID);
+                    if (creature != null) {
+                        this.swapCreatureMoves(creature, moveSelectedInfo, moveToSwapInfo);
+                        playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
+                                selectedCreatureNBT,
+                                moveSelectedInfo,
+                                moveToSwapInfo
+                        ));
                     }
-                    else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
-                        playerTamedCreatures.getBoxNBT().setBoxCreature(
-                                selectedCreatureInfo.pos[0],
-                                selectedCreatureInfo.pos[1],
-                                this.swapCreatureMoves(
-                                        selectedCreatureNBT,
-                                        moveSelectedInfo,
-                                        moveToSwapInfo
-                                )
-                        );
-                    }
-                    else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                        TileEntity tileEntity = messagePlayer.world.getTileEntity(selectedCreatureInfo.getCreatureBoxOpenedFrom());
-                        if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
-                        RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
-                        CreatureNBT creatureNBT = teCreatureBox.getDeployedCreatures().get(selectedCreatureInfo.pos[0]);
+                }
+                else {
+                    playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
+                            selectedCreatureNBT,
+                            moveSelectedInfo,
+                            moveToSwapInfo
+                    ));
+                }
+            }
+            else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                playerTamedCreatures.getBoxNBT().setBoxCreature(
+                        selectedCreatureInfo.pos[0],
+                        selectedCreatureInfo.pos[1],
+                        this.swapCreatureMoves(
+                                selectedCreatureNBT,
+                                moveSelectedInfo,
+                                moveToSwapInfo
+                        )
+                );
+            }
+            else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                TileEntity tileEntity = messagePlayer.world.getTileEntity(selectedCreatureInfo.getCreatureBoxOpenedFrom());
+                if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
+                RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
+                CreatureNBT creatureNBT = teCreatureBox.getDeployedCreatures().get(selectedCreatureInfo.pos[0]);
 
-                        //if creature exists in the world, edit the creature itself
-                        //otherwise, edit its nbt
-                        RiftCreature creature = creatureNBT.findCorrespondingCreature(messagePlayer.world);
-                        if (creature != null) {
-                            this.swapCreatureMoves(creature, moveSelectedInfo, moveToSwapInfo);
-                            teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
-                                    selectedCreatureNBT,
-                                    moveSelectedInfo,
-                                    moveToSwapInfo
-                            ));
-                        }
-                        else {
-                            teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
-                                    selectedCreatureNBT,
-                                    moveSelectedInfo,
-                                    moveToSwapInfo
-                            ));
-                        }
-                    }
+                //if creature exists in the world, edit the creature itself
+                //otherwise, edit its nbt
+                RiftCreature creature = creatureNBT.findCorrespondingCreature(messagePlayer.world);
+                if (creature != null) {
+                    this.swapCreatureMoves(creature, moveSelectedInfo, moveToSwapInfo);
+                    teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
+                            selectedCreatureNBT,
+                            moveSelectedInfo,
+                            moveToSwapInfo
+                    ));
+                }
+                else {
+                    teCreatureBox.setCreatureInPos(selectedCreatureInfo.pos[0], this.swapCreatureMoves(
+                            selectedCreatureNBT,
+                            moveSelectedInfo,
+                            moveToSwapInfo
+                    ));
                 }
             }
         }
+    }
 
-        private void swapCreatureMoves(RiftCreature creature, SelectedMoveInfo moveSelectedInfo, SelectedMoveInfo moveToSwapInfo) {
-            if (creature == null || moveSelectedInfo == null || moveToSwapInfo == null) return;
-            CreatureNBT creatureNBT = new CreatureNBT(creature);
-            CreatureMove moveSelected = moveSelectedInfo.getMoveUsingNBT(creatureNBT);
-            CreatureMove moveToSwap = moveToSwapInfo.getMoveUsingNBT(creatureNBT);
-            List<CreatureMove> newLearntMoves = creatureNBT.getMovesList();
-            List<CreatureMove> newLearnableMoves = creatureNBT.getLearnableMovesList();
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftSwapCreatureMoves message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 
-            if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
-                newLearntMoves.set(moveSelectedInfo.movePos, moveToSwap);
-                newLearntMoves.set(moveToSwapInfo.movePos, moveSelected);
-                creature.setLearnedMoves(newLearntMoves);
-            }
-            else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
-                newLearnableMoves.set(moveSelectedInfo.movePos, moveToSwap);
-                newLearntMoves.set(moveToSwapInfo.movePos, moveSelected);
-                creature.setLearnedMoves(newLearntMoves);
-                creature.setLearnableMoves(newLearnableMoves);
-            }
-            else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
-                newLearntMoves.set(moveSelectedInfo.movePos, moveToSwap);
-                newLearnableMoves.set(moveToSwapInfo.movePos, moveSelected);
-                creature.setLearnedMoves(newLearntMoves);
-                creature.setLearnableMoves(newLearnableMoves);
-            }
-            else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
-                newLearnableMoves.set(moveSelectedInfo.movePos, moveToSwap);
-                newLearnableMoves.set(moveToSwapInfo.movePos, moveSelected);
-                creature.setLearnableMoves(newLearnableMoves);
-            }
+    private void swapCreatureMoves(RiftCreature creature, SelectedMoveInfo moveSelectedInfo, SelectedMoveInfo moveToSwapInfo) {
+        if (creature == null || moveSelectedInfo == null || moveToSwapInfo == null) return;
+        CreatureNBT creatureNBT = new CreatureNBT(creature);
+        CreatureMove moveSelected = moveSelectedInfo.getMoveUsingNBT(creatureNBT);
+        CreatureMove moveToSwap = moveToSwapInfo.getMoveUsingNBT(creatureNBT);
+        List<CreatureMove> newLearntMoves = creatureNBT.getMovesList();
+        List<CreatureMove> newLearnableMoves = creatureNBT.getLearnableMovesList();
+
+        if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
+            newLearntMoves.set(moveSelectedInfo.movePos, moveToSwap);
+            newLearntMoves.set(moveToSwapInfo.movePos, moveSelected);
+            creature.setLearnedMoves(newLearntMoves);
         }
-
-        private CreatureNBT swapCreatureMoves(CreatureNBT creatureNBT, SelectedMoveInfo moveSelectedInfo, SelectedMoveInfo moveToSwapInfo) {
-            if (creatureNBT == null || moveSelectedInfo == null || moveToSwapInfo == null) return creatureNBT;
-            CreatureMove moveSelected = moveSelectedInfo.getMoveUsingNBT(creatureNBT);
-            CreatureMove moveToSwap = moveToSwapInfo.getMoveUsingNBT(creatureNBT);
-
-            if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
-                creatureNBT.setMove(moveSelectedInfo.movePos, moveToSwap);
-                creatureNBT.setMove(moveToSwapInfo.movePos, moveSelected);
-            }
-            else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
-                creatureNBT.setLearnableMove(moveSelectedInfo.movePos, moveToSwap);
-                creatureNBT.setMove(moveToSwapInfo.movePos, moveSelected);
-            }
-            else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
-                creatureNBT.setMove(moveSelectedInfo.movePos, moveToSwap);
-                creatureNBT.setLearnableMove(moveToSwapInfo.movePos, moveSelected);
-            }
-            else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
-                creatureNBT.setLearnableMove(moveSelectedInfo.movePos, moveToSwap);
-                creatureNBT.setLearnableMove(moveToSwapInfo.movePos, moveSelected);
-            }
-            return creatureNBT;
+        else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
+            newLearnableMoves.set(moveSelectedInfo.movePos, moveToSwap);
+            newLearntMoves.set(moveToSwapInfo.movePos, moveSelected);
+            creature.setLearnedMoves(newLearntMoves);
+            creature.setLearnableMoves(newLearnableMoves);
         }
+        else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
+            newLearntMoves.set(moveSelectedInfo.movePos, moveToSwap);
+            newLearnableMoves.set(moveToSwapInfo.movePos, moveSelected);
+            creature.setLearnedMoves(newLearntMoves);
+            creature.setLearnableMoves(newLearnableMoves);
+        }
+        else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
+            newLearnableMoves.set(moveSelectedInfo.movePos, moveToSwap);
+            newLearnableMoves.set(moveToSwapInfo.movePos, moveSelected);
+            creature.setLearnableMoves(newLearnableMoves);
+        }
+    }
+
+    private CreatureNBT swapCreatureMoves(CreatureNBT creatureNBT, SelectedMoveInfo moveSelectedInfo, SelectedMoveInfo moveToSwapInfo) {
+        if (creatureNBT == null || moveSelectedInfo == null || moveToSwapInfo == null) return creatureNBT;
+        CreatureMove moveSelected = moveSelectedInfo.getMoveUsingNBT(creatureNBT);
+        CreatureMove moveToSwap = moveToSwapInfo.getMoveUsingNBT(creatureNBT);
+
+        if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
+            creatureNBT.setMove(moveSelectedInfo.movePos, moveToSwap);
+            creatureNBT.setMove(moveToSwapInfo.movePos, moveSelected);
+        }
+        else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT) {
+            creatureNBT.setLearnableMove(moveSelectedInfo.movePos, moveToSwap);
+            creatureNBT.setMove(moveToSwapInfo.movePos, moveSelected);
+        }
+        else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNT && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
+            creatureNBT.setMove(moveSelectedInfo.movePos, moveToSwap);
+            creatureNBT.setLearnableMove(moveToSwapInfo.movePos, moveSelected);
+        }
+        else if (moveSelectedInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE && moveToSwapInfo.moveType == SelectedMoveInfo.SelectedMoveType.LEARNABLE) {
+            creatureNBT.setLearnableMove(moveSelectedInfo.movePos, moveToSwap);
+            creatureNBT.setLearnableMove(moveToSwapInfo.movePos, moveSelected);
+        }
+        return creatureNBT;
     }
 }

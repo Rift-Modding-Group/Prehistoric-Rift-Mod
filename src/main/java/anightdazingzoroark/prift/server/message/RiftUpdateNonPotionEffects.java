@@ -2,18 +2,21 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftUpdateNonPotionEffects implements IMessage {
+public class RiftUpdateNonPotionEffects extends RiftLibMessage<RiftUpdateNonPotionEffects> {
     private NBTTagCompound nbtTagCompound;
     private int entityId;
 
@@ -36,21 +39,14 @@ public class RiftUpdateNonPotionEffects implements IMessage {
         buf.writeInt(this.entityId);
     }
 
-    public static class Handler implements IMessageHandler<RiftUpdateNonPotionEffects, IMessage> {
-        @Override
-        public IMessage onMessage(RiftUpdateNonPotionEffects message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftUpdateNonPotionEffects message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 
-        private void handle(RiftUpdateNonPotionEffects message, MessageContext ctx) {
-            EntityLivingBase entity = (EntityLivingBase) Minecraft.getMinecraft().world.getEntityByID(message.entityId);
-            if (entity != null) {
-                Minecraft.getMinecraft().addScheduledTask(() -> {
-                    INonPotionEffects capability = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-                    if (capability != null) NonPotionEffectsProvider.readNBT(capability, null, message.nbtTagCompound);
-                });
-            }
-        }
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftUpdateNonPotionEffects message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityLivingBase entity = (EntityLivingBase) minecraft.world.getEntityByID(message.entityId);
+        if (entity == null) return;
+        INonPotionEffects capability = entity.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
+        if (capability != null) NonPotionEffectsProvider.readNBT(capability, null, message.nbtTagCompound);
     }
 }

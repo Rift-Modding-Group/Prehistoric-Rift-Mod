@@ -3,12 +3,14 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -17,8 +19,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftForceUpdateCreatureBoxDeployed implements IMessage {
+public class RiftForceUpdateCreatureBoxDeployed extends RiftLibMessage<RiftForceUpdateCreatureBoxDeployed> {
     private int playerId;
     private int posX, posY, posZ;
     private int listSize;
@@ -64,6 +67,46 @@ public class RiftForceUpdateCreatureBoxDeployed implements IMessage {
         ByteBufUtils.writeTag(buf, compound);
     }
 
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftForceUpdateCreatureBoxDeployed message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        //get player who opened the box
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
+
+        //check if block pos has creature box tile entity
+        TileEntity tileEntity = messagePlayer.world.getTileEntity(new BlockPos(message.posX, message.posY, message.posZ));
+        if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
+
+        //get creature box tile entity
+        RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
+
+        RiftMessages.WRAPPER.sendTo(
+                new RiftForceUpdateCreatureBoxDeployed(
+                        player,
+                        new BlockPos(message.posX, message.posY, message.posZ),
+                        teCreatureBox.getDeployedCreatures()
+                ),
+                (EntityPlayerMP) player
+        );
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftForceUpdateCreatureBoxDeployed message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
+
+        //check if block pos has creature box tile entity
+        TileEntity tileEntity = messagePlayer.world.getTileEntity(new BlockPos(message.posX, message.posY, message.posZ));
+        if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
+
+        //get creature box tile entity
+        RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
+
+        //now set the transmitted data
+        teCreatureBox.setCreatureListNBT(message.tagCompounds);
+    }
+
     private NBTTagList setNBTListToNBTTagList(FixedSizeList<CreatureNBT> tagCompounds) {
         NBTTagList tagList = new NBTTagList();
         for (CreatureNBT tagCompound : tagCompounds.getList()) tagList.appendTag(tagCompound.getCreatureNBT());
@@ -77,55 +120,5 @@ public class RiftForceUpdateCreatureBoxDeployed implements IMessage {
             compoundList.set(x, tagCompound);
         }
         return compoundList;
-    }
-
-    public static class Handler implements IMessageHandler<RiftForceUpdateCreatureBoxDeployed, IMessage> {
-        @Override
-        public IMessage onMessage(RiftForceUpdateCreatureBoxDeployed message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(RiftForceUpdateCreatureBoxDeployed message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
-
-                //get player who opened the box
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                if (player == null) return;
-
-                //check if block pos has creature box tile entity
-                TileEntity tileEntity = messagePlayer.world.getTileEntity(new BlockPos(message.posX, message.posY, message.posZ));
-                if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
-
-                //get creature box tile entity
-                RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
-
-                RiftMessages.WRAPPER.sendTo(
-                        new RiftForceUpdateCreatureBoxDeployed(
-                                player,
-                                new BlockPos(message.posX, message.posY, message.posZ),
-                                teCreatureBox.getDeployedCreatures()
-                        ),
-                        (EntityPlayerMP) player
-                );
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                if (player == null) return;
-
-                //check if block pos has creature box tile entity
-                TileEntity tileEntity = messagePlayer.world.getTileEntity(new BlockPos(message.posX, message.posY, message.posZ));
-                if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
-
-                //get creature box tile entity
-                RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
-
-                //now set the transmitted data
-                teCreatureBox.setCreatureListNBT(message.tagCompounds);
-            }
-        }
     }
 }

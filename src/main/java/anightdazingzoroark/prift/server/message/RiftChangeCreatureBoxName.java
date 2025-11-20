@@ -2,9 +2,12 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -12,7 +15,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftChangeCreatureBoxName implements IMessage {
+public class RiftChangeCreatureBoxName extends RiftLibMessage<RiftChangeCreatureBoxName> {
     private int playerId;
     private int boxPos;
     private String newName;
@@ -39,23 +42,15 @@ public class RiftChangeCreatureBoxName implements IMessage {
         ByteBufUtils.writeUTF8String(buf, this.newName);
     }
 
-    public static class Handler implements IMessageHandler<RiftChangeCreatureBoxName, IMessage> {
-        @Override
-        public IMessage onMessage(RiftChangeCreatureBoxName message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftChangeCreatureBoxName message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
 
-        private void handle(RiftChangeCreatureBoxName message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayerMP messagePlayer = ctx.getServerHandler().player;
-
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                if (playerTamedCreatures != null) {
-                    playerTamedCreatures.getBoxNBT().setBoxName(message.boxPos, message.newName);
-                }
-            }
-        }
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+        if (playerTamedCreatures != null) playerTamedCreatures.getBoxNBT().setBoxName(message.boxPos, message.newName);
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftChangeCreatureBoxName message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

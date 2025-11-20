@@ -2,8 +2,11 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -11,7 +14,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftAddToParty implements IMessage {
+public class RiftAddToParty extends RiftLibMessage<RiftAddToParty> {
     private int playerId;
     private CreatureNBT creatureNBT;
 
@@ -34,23 +37,14 @@ public class RiftAddToParty implements IMessage {
         ByteBufUtils.writeTag(buf, this.creatureNBT.getCreatureNBT());
     }
 
-    public static class Handler implements IMessageHandler<RiftAddToParty, IMessage> {
-        @Override
-        public IMessage onMessage(RiftAddToParty message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(RiftAddToParty message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
-
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-                if (playerTamedCreatures != null) {
-                    playerTamedCreatures.addToPartyNBT(message.creatureNBT);
-                }
-            }
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftAddToParty message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+        if (playerTamedCreatures != null) playerTamedCreatures.addToPartyNBT(message.creatureNBT);
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftAddToParty message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

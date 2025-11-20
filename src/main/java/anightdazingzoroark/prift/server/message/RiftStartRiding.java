@@ -1,15 +1,19 @@
 package anightdazingzoroark.prift.server.message;
 
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftStartRiding implements IMessage {
+public class RiftStartRiding extends RiftLibMessage<RiftStartRiding> {
     private int entityId;
 
     public RiftStartRiding() {}
@@ -28,21 +32,18 @@ public class RiftStartRiding implements IMessage {
         buf.writeInt(entityId);
     }
 
-    public static class Handler implements IMessageHandler<RiftStartRiding, IMessage> {
-        @Override
-        public IMessage onMessage(RiftStartRiding message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftStartRiding message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        World world = messagePlayer.getEntityWorld();
+        EntityLiving entity = (EntityLiving)world.getEntityByID(message.entityId);
 
-        private void handle(RiftStartRiding message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            World world = playerEntity.getEntityWorld();
-            EntityLiving entity = (EntityLiving)world.getEntityByID(message.entityId);
-
+        if (entity != null) {
             entity.getNavigator().clearPath();
             entity.setAttackTarget(null);
-            playerEntity.startRiding(entity, true);
+            messagePlayer.startRiding(entity, true);
         }
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftStartRiding message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

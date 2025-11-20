@@ -2,15 +2,19 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftIncrementControlUse implements IMessage {
+public class RiftIncrementControlUse extends RiftLibMessage<RiftIncrementControlUse> {
     private int entityId;
     private int control;
 
@@ -37,27 +41,22 @@ public class RiftIncrementControlUse implements IMessage {
         buf.writeInt(this.control);
     }
 
-    public static class Handler implements IMessageHandler<RiftIncrementControlUse, IMessage> {
-        @Override
-        public IMessage onMessage(RiftIncrementControlUse message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftIncrementControlUse message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityLivingBase entity = (EntityLivingBase) messagePlayer.world.getEntityByID(message.entityId);
 
-        private void handle(RiftIncrementControlUse message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            EntityLivingBase entity = (EntityLivingBase) playerEntity.world.getEntityByID(message.entityId);
-
-            if (!playerEntity.world.isRemote) {
-                if (entity instanceof RiftCatapult) {
-                    RiftCatapult catapult = (RiftCatapult) entity;
-                    catapult.setLeftClickUse(catapult.getLeftClickUse() + 1);
-                }
-                else if (entity instanceof RiftMortar) {
-                    RiftMortar mortar = (RiftMortar) entity;
-                    mortar.setLeftClickUse(mortar.getLeftClickUse() + 1);
-                }
+        if (!messagePlayer.world.isRemote) {
+            if (entity instanceof RiftCatapult) {
+                RiftCatapult catapult = (RiftCatapult) entity;
+                catapult.setLeftClickUse(catapult.getLeftClickUse() + 1);
+            }
+            else if (entity instanceof RiftMortar) {
+                RiftMortar mortar = (RiftMortar) entity;
+                mortar.setLeftClickUse(mortar.getLeftClickUse() + 1);
             }
         }
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftIncrementControlUse riftIncrementControlUse, EntityPlayer entityPlayer, MessageContext messageContext) {}
 }

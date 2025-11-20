@@ -2,9 +2,12 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -12,7 +15,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftDropSelectedInventory implements IMessage {
+public class RiftDropSelectedInventory extends RiftLibMessage<RiftDropSelectedInventory> {
     private int playerId;
     private NBTTagCompound selectedCreatureInfoNBT;
 
@@ -35,22 +38,14 @@ public class RiftDropSelectedInventory implements IMessage {
         ByteBufUtils.writeTag(buf, this.selectedCreatureInfoNBT);
     }
 
-    public static class Handler implements IMessageHandler<RiftDropSelectedInventory, IMessage> {
-        @Override
-        public IMessage onMessage(RiftDropSelectedInventory message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(RiftDropSelectedInventory message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
-
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
-                CreatureNBT creatureNBT = selectedCreatureInfo.getCreatureNBT(player);
-                creatureNBT.dropInventory(messagePlayer.world);
-            }
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftDropSelectedInventory message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
+        CreatureNBT creatureNBT = selectedCreatureInfo.getCreatureNBT(player);
+        creatureNBT.dropInventory(messagePlayer.world);
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftDropSelectedInventory message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

@@ -2,17 +2,19 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftForceSyncLastOpenedBox implements IMessage {
+public class RiftForceSyncLastOpenedBox extends RiftLibMessage<RiftForceSyncLastOpenedBox> {
     private int playerId;
     private int lastOpenedBox;
 
@@ -39,35 +41,24 @@ public class RiftForceSyncLastOpenedBox implements IMessage {
         buf.writeInt(this.lastOpenedBox);
     }
 
-    public static class Handler implements IMessageHandler<RiftForceSyncLastOpenedBox, IMessage> {
-        @Override
-        public IMessage onMessage(RiftForceSyncLastOpenedBox message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftForceSyncLastOpenedBox message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+
+        if (playerTamedCreatures != null) {
+            int value = playerTamedCreatures.getLastOpenedBox();
+            RiftMessages.WRAPPER.sendTo(new RiftForceSyncLastOpenedBox(player, value), (EntityPlayerMP) player);
         }
+    }
 
-        private void handle(RiftForceSyncLastOpenedBox message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftForceSyncLastOpenedBox message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player == null) return;
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
 
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-                if (playerTamedCreatures != null) {
-                    int value = playerTamedCreatures.getLastOpenedBox();
-                    RiftMessages.WRAPPER.sendTo(new RiftForceSyncLastOpenedBox(player, value), (EntityPlayerMP) player);
-                }
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-                if (playerTamedCreatures != null) {
-                    playerTamedCreatures.setLastOpenedBox(message.lastOpenedBox);
-                }
-            }
-        }
+        if (playerTamedCreatures != null) playerTamedCreatures.setLastOpenedBox(message.lastOpenedBox);
     }
 }

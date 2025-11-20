@@ -3,8 +3,11 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataProvider;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxInfo;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.ICreatureBoxData;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -12,7 +15,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftRemoveCreatureBoxData implements IMessage {
+public class RiftRemoveCreatureBoxData extends RiftLibMessage<RiftRemoveCreatureBoxData> {
     private int posX;
     private int posY;
     private int posZ;
@@ -39,22 +42,14 @@ public class RiftRemoveCreatureBoxData implements IMessage {
         buf.writeInt(this.posZ);
     }
 
-    public static class Handler implements IMessageHandler<RiftRemoveCreatureBoxData, IMessage> {
-        @Override
-        public IMessage onMessage(RiftRemoveCreatureBoxData message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftRemoveCreatureBoxData message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        ICreatureBoxData creatureBoxData = messagePlayer.world.getCapability(CreatureBoxDataProvider.CREATURE_BOX_DATA_CAPABILITY, null);
+        BlockPos blockPos = new BlockPos(message.posX, message.posY, message.posZ);
 
-        private void handle(RiftRemoveCreatureBoxData message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
-
-                ICreatureBoxData creatureBoxData = messagePlayer.world.getCapability(CreatureBoxDataProvider.CREATURE_BOX_DATA_CAPABILITY, null);
-                BlockPos blockPos = new BlockPos(message.posX, message.posY, message.posZ);
-
-                if (creatureBoxData != null) creatureBoxData.removeByPosition(blockPos);
-            }
-        }
+        if (creatureBoxData != null) creatureBoxData.removeByPosition(blockPos);
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftRemoveCreatureBoxData message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

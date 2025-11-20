@@ -1,15 +1,16 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.Apatosaurus;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftApatosaurusManagePassengers implements IMessage {
+public class RiftApatosaurusManagePassengers extends RiftLibMessage<RiftApatosaurusManagePassengers> {
     private int apatoId;
 
     public RiftApatosaurusManagePassengers() {}
@@ -28,18 +29,13 @@ public class RiftApatosaurusManagePassengers implements IMessage {
         buf.writeInt(this.apatoId);
     }
 
-    public static class Handler implements IMessageHandler<RiftApatosaurusManagePassengers, IMessage> {
-        @Override
-        public IMessage onMessage(RiftApatosaurusManagePassengers message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(RiftApatosaurusManagePassengers message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            World world = playerEntity.world;
-            Apatosaurus apatosaurus = (Apatosaurus) world.getEntityByID(message.apatoId);
-            apatosaurus.addPassengersManual();
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftApatosaurusManagePassengers message, EntityPlayer entityPlayer, MessageContext messageContext) {
+        World world = entityPlayer.world;
+        Apatosaurus apatosaurus = (Apatosaurus) world.getEntityByID(message.apatoId);
+        if (apatosaurus != null) apatosaurus.addPassengersManual();
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftApatosaurusManagePassengers message, EntityPlayer entityPlayer, MessageContext messageContext) {}
 }

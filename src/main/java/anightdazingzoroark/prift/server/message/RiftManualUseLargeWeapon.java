@@ -1,15 +1,18 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class RiftManualUseLargeWeapon implements IMessage {
+public class RiftManualUseLargeWeapon extends RiftLibMessage<RiftManualUseLargeWeapon> {
     private int creatureId;
     private boolean using;
 
@@ -32,27 +35,19 @@ public class RiftManualUseLargeWeapon implements IMessage {
         buf.writeBoolean(this.using);
     }
 
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftManualUseLargeWeapon message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
 
-    public static class Handler implements IMessageHandler<RiftManualUseLargeWeapon, IMessage> {
-        @Override
-        public IMessage onMessage(RiftManualUseLargeWeapon message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(RiftManualUseLargeWeapon message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
-                RiftCreature creature = (RiftCreature) messagePlayer.world.getEntityByID(message.creatureId);
-
-                if (creature != null) {
-                    if (message.using) {
-                        creature.setUsingLargeWeapon(true);
-                        if (creature.getLargeWeapon().maxCooldown > 0 && creature.canFireLargeWeapon()) creature.setLargeWeaponUse(Math.min(creature.getLargeWeaponUse() + 1, creature.getLargeWeapon().maxUse));
-                    }
-                    else creature.setUsingLargeWeapon(false);
-                }
+        if (creature != null) {
+            if (message.using) {
+                creature.setUsingLargeWeapon(true);
+                if (creature.getLargeWeapon().maxCooldown > 0 && creature.canFireLargeWeapon()) creature.setLargeWeaponUse(Math.min(creature.getLargeWeaponUse() + 1, creature.getLargeWeapon().maxUse));
             }
+            else creature.setUsingLargeWeapon(false);
         }
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftManualUseLargeWeapon message, EntityPlayer messagePlayer, MessageContext messageContext) {}
 }

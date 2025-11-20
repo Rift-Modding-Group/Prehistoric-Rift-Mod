@@ -2,12 +2,14 @@ package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -16,8 +18,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class RiftForceSyncBoxDeployedNBT implements IMessage {
+public class RiftForceSyncBoxDeployedNBT extends RiftLibMessage<RiftForceSyncBoxDeployedNBT> {
     private int creatureBoxPosX;
     private int creatureBoxPosY;
     private int creatureBoxPosZ;
@@ -60,54 +63,47 @@ public class RiftForceSyncBoxDeployedNBT implements IMessage {
         ByteBufUtils.writeTag(buf, this.creatureNBTTagCompound);
     }
 
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftForceSyncBoxDeployedNBT message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        BlockPos creatureBoxPos = new BlockPos(message.creatureBoxPosX, message.creatureBoxPosY, message.creatureBoxPosZ);
 
-    public static class Handler implements IMessageHandler<RiftForceSyncBoxDeployedNBT, IMessage> {
-        @Override
-        public IMessage onMessage(RiftForceSyncBoxDeployedNBT message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
+        //find creature box
+        TileEntity te = messagePlayer.world.getTileEntity(creatureBoxPos);
+        if (!(te instanceof RiftTileEntityCreatureBox)) return;
+        RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) te;
+
+        //create an nbt list
+        NBTTagCompound tagCompound = new NBTTagCompound();
+        NBTTagList creatureNBTTagList = new NBTTagList();
+        for (int i = 0; i < teCreatureBox.getDeployedCreatures().size(); i++) {
+            creatureNBTTagList.appendTag(teCreatureBox.getDeployedCreatures().get(i).getCreatureNBT());
         }
+        tagCompound.setTag("NewTagList", creatureNBTTagList);
 
-        private void handle(RiftForceSyncBoxDeployedNBT message, MessageContext ctx) {
-            if (ctx.side == Side.SERVER) {
-                EntityPlayer messagePlayer = ctx.getServerHandler().player;
-                BlockPos creatureBoxPos = new BlockPos(message.creatureBoxPosX, message.creatureBoxPosY, message.creatureBoxPosZ);
+        //now send to player
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        if (player != null) {
+            RiftMessages.WRAPPER.sendTo(new RiftForceSyncBoxDeployedNBT(creatureBoxPos, player, tagCompound), (EntityPlayerMP) player);
+        }
+    }
 
-                //find creature box
-                TileEntity te = messagePlayer.world.getTileEntity(creatureBoxPos);
-                if (!(te instanceof RiftTileEntityCreatureBox)) return;
-                RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) te;
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftForceSyncBoxDeployedNBT message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        BlockPos creatureBoxPos = new BlockPos(message.creatureBoxPosX, message.creatureBoxPosY, message.creatureBoxPosZ);
 
-                //create an nbt list
-                NBTTagCompound tagCompound = new NBTTagCompound();
-                NBTTagList creatureNBTTagList = new NBTTagList();
-                for (int i = 0; i < teCreatureBox.getDeployedCreatures().size(); i++) {
-                    creatureNBTTagList.appendTag(teCreatureBox.getDeployedCreatures().get(i).getCreatureNBT());
-                }
-                tagCompound.setTag("NewTagList", creatureNBTTagList);
+        //find creature box
+        TileEntity te = messagePlayer.world.getTileEntity(creatureBoxPos);
+        if (!(te instanceof RiftTileEntityCreatureBox)) return;
+        RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) te;
 
-                //now send to player
-                EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-                RiftMessages.WRAPPER.sendTo(new RiftForceSyncBoxDeployedNBT(creatureBoxPos, player, tagCompound), (EntityPlayerMP) player);
-            }
-            if (ctx.side == Side.CLIENT) {
-                EntityPlayer messagePlayer = Minecraft.getMinecraft().player;
-                BlockPos creatureBoxPos = new BlockPos(message.creatureBoxPosX, message.creatureBoxPosY, message.creatureBoxPosZ);
+        //get new list
+        NBTTagList newCreatureNBTTagList = message.creatureNBTTagCompound.getTagList("NewTagList", 10);
 
-                //find creature box
-                TileEntity te = messagePlayer.world.getTileEntity(creatureBoxPos);
-                if (!(te instanceof RiftTileEntityCreatureBox)) return;
-                RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) te;
-
-                //get new list
-                NBTTagList newCreatureNBTTagList = message.creatureNBTTagCompound.getTagList("NewTagList", 10);
-
-                //update nbt list
-                for (int i = 0; i < teCreatureBox.getDeployedCreatures().size(); i++) {
-                    CreatureNBT newCreatureNBT = new CreatureNBT(newCreatureNBTTagList.getCompoundTagAt(i));
-                    teCreatureBox.setCreatureInPos(i, newCreatureNBT);
-                }
-            }
+        //update nbt list
+        for (int i = 0; i < teCreatureBox.getDeployedCreatures().size(); i++) {
+            CreatureNBT newCreatureNBT = new CreatureNBT(newCreatureNBTTagList.getCompoundTagAt(i));
+            teCreatureBox.setCreatureInPos(i, newCreatureNBT);
         }
     }
 }

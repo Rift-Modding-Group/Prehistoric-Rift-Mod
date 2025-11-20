@@ -1,15 +1,19 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class RiftCanUseMoveTriggerButton implements IMessage {
+public class RiftCanUseMoveTriggerButton extends RiftLibMessage<RiftCanUseMoveTriggerButton> {
     private int creatureId;
     private int control; //0 is move 1 or left click, 1 is move 2 or right click, 2 is move 3 or middle click
     private boolean value;
@@ -36,32 +40,27 @@ public class RiftCanUseMoveTriggerButton implements IMessage {
         buf.writeBoolean(this.value);
     }
 
-    public static class Handler implements IMessageHandler<RiftCanUseMoveTriggerButton, IMessage> {
-        @Override
-        public IMessage onMessage(RiftCanUseMoveTriggerButton message, MessageContext ctx) {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
+    @Override
+    public void executeOnServer(MinecraftServer minecraftServer, RiftCanUseMoveTriggerButton message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        World world = messagePlayer.world;
+        RiftCreature interacted = (RiftCreature) world.getEntityByID(message.creatureId);
 
-        private void handle(RiftCanUseMoveTriggerButton message, MessageContext ctx) {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            World world = playerEntity.world;
-            RiftCreature interacted = (RiftCreature) world.getEntityByID(message.creatureId);
-
-            if (!world.isRemote) {
-                if (interacted == null) return;
-                switch (message.control) {
-                    case 0:
-                        interacted.setCanUseLeftClick(message.value);
-                        break;
-                    case 1:
-                        interacted.setCanUseRightClick(message.value);
-                        break;
-                    case 2:
-                        interacted.setCanUseMiddleClick(message.value);
-                        break;
-                }
+        if (!world.isRemote) {
+            if (interacted == null) return;
+            switch (message.control) {
+                case 0:
+                    interacted.setCanUseLeftClick(message.value);
+                    break;
+                case 1:
+                    interacted.setCanUseRightClick(message.value);
+                    break;
+                case 2:
+                    interacted.setCanUseMiddleClick(message.value);
+                    break;
             }
         }
     }
+
+    @Override
+    public void executeOnClient(Minecraft minecraft, RiftCanUseMoveTriggerButton riftCanUseMoveTriggerButton, EntityPlayer entityPlayer, MessageContext messageContext) {}
 }
