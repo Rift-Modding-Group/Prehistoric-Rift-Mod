@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.RiftLib;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import anightdazingzoroark.riftlib.message.RiftLibMessageSide;
@@ -12,7 +11,6 @@ public class RiftMessages {
     public static void registerMessages() {
         WRAPPER = new RiftLibMessageWrapper<>(RiftInitialize.MODID);
 
-        int id = 0;
         WRAPPER.registerMessage(RiftApatosaurusManagePassengers.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeCreatureFromMenu.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeInventoryFromMenu.class, RiftLibMessageSide.BOTH);

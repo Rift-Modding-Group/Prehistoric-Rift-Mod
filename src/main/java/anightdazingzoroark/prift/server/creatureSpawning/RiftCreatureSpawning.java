@@ -172,6 +172,8 @@ public class RiftCreatureSpawning {
     }
 
     private void spawnEntityOnMainThread(World world, List<RiftCreatureSpawnLists.BiomeSpawner> biomeSpawners, List<BlockPos> spawnPositions) {
+        if (world == null) return;
+
         MinecraftServer server = world.getMinecraftServer();
         if (server == null) return;
 
