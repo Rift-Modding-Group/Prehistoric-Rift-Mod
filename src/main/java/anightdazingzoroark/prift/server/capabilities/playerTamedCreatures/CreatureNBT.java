@@ -114,14 +114,13 @@ public class CreatureNBT {
         if (this.creatureNBT.isEmpty()) return new float[]{0, 0};
         float health = this.creatureNBT.getFloat("Health");
         float maxHealth = health;
-        for (NBTBase nbtBase: this.creatureNBT.getTagList("Attributes", 10).tagList) {
-            if (nbtBase instanceof NBTTagCompound) {
-                NBTTagCompound tagCompound = (NBTTagCompound) nbtBase;
+        NBTTagList attributeList = this.creatureNBT.getTagList("Attributes", 10);
+        for (int x = 0; x < attributeList.tagCount(); x++) {
+            NBTTagCompound tagCompound = attributeList.getCompoundTagAt(x);
 
-                if (!tagCompound.hasKey("Name") || !tagCompound.getString("Name").equals("generic.maxHealth")) continue;
+            if (!tagCompound.hasKey("Name") || !tagCompound.getString("Name").equals("generic.maxHealth")) continue;
 
-                maxHealth = (float) tagCompound.getDouble("Base");
-            }
+            maxHealth = (float) tagCompound.getDouble("Base");
         }
         return new float[]{health, maxHealth};
     }

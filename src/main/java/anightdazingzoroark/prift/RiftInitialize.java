@@ -9,7 +9,7 @@ import anightdazingzoroark.prift.server.commands.RiftCreatureHighlightCommand;
 import anightdazingzoroark.prift.server.commands.RiftJournalCommand;
 import anightdazingzoroark.prift.server.commands.RiftResetWildCreaturesCommand;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.RiftLib;
+import anightdazingzoroark.riftlib.RiftLib;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;

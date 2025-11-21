@@ -51,7 +51,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftShowParticlesOnClient.class, RiftLibMessageSide.CLIENT);
         WRAPPER.registerMessage(RiftManageBlockBreakControl.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftUpdatePartyDeployed.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftAddToParty.class, RiftLibMessageSide.SERVER);
+        WRAPPER.registerMessage(RiftAddToParty.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftSyncJournal.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftJournalEditOne.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftJournalEditAll.class, RiftLibMessageSide.SERVER);
