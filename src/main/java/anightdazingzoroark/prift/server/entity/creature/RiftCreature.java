@@ -2493,13 +2493,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //additionally, get the damage received for use later
         this.recentlyHitDamage = amount;
 
-        //apply check hit condition if it has move with said condition
-        /*
-        if ((RiftUtil.checkForNoAssociations(this, source.getImmediateSource()) || RiftUtil.checkForNoAssociations(this, source.getTrueSource()))
-                && (RiftUtil.checkForNoHerdAssociations(this, source.getImmediateSource()) || RiftUtil.checkForNoHerdAssociations(this, source.getTrueSource())))
-            this.addToConditionStack(CreatureMoveCondition.Condition.CHECK_HIT);
-         */
-
         //make it so that anything trying to attack the mobs main hitbox ends up attacking the nearest hitbox instead
         if (source.getImmediateSource() instanceof EntityLivingBase && !(source.getImmediateSource() instanceof EntityPlayer)) {
             Entity attacker = source.getImmediateSource();

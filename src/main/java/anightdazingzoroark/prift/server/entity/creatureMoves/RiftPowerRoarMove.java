@@ -25,7 +25,7 @@ public class RiftPowerRoarMove extends RiftCreatureMove {
 
     @Override
     public boolean canBeExecutedUnmounted(RiftCreature user, Entity target) {
-        return super.canBeExecutedUnmounted(user, target) && user.world.rand.nextInt(4) == 0;
+        return super.canBeExecutedUnmounted(user, target) && user.isRecentlyHit() && user.world.rand.nextInt(4) == 0;
     }
 
     @Override

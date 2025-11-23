@@ -168,15 +168,20 @@ public class RiftCreatureSpawnLists {
             //note that glass and leaves are considered the same as air blocks
             tempSpawnerList = tempSpawnerList.stream().filter(
                     spawner -> {
-                        boolean flag = true;
-                        for (int y = pos.getY(); y <= 256; y++) {
-                            if (flag) {
+                        if (spawner.getMustSeeSky()) {
+                            for (int y = pos.getY(); y <= 256; y++) {
                                 BlockPos newPos = new BlockPos(pos.getX(), y, pos.getZ());
-                                flag = world.getBlockState(newPos).getMaterial() == Material.AIR || world.getBlockState(newPos).getMaterial() == Material.LEAVES || world.getBlockState(newPos).getMaterial() == Material.PLANTS || world.getBlockState(newPos).getMaterial() == Material.VINE || world.getBlockState(newPos).getMaterial() == Material.GLASS || world.getBlockState(newPos).getMaterial() == Material.WATER;
+                                boolean flag = world.getBlockState(newPos).getMaterial() == Material.AIR
+                                        || world.getBlockState(newPos).getMaterial() == Material.LEAVES
+                                        || world.getBlockState(newPos).getMaterial() == Material.PLANTS
+                                        || world.getBlockState(newPos).getMaterial() == Material.VINE
+                                        || world.getBlockState(newPos).getMaterial() == Material.GLASS
+                                        || world.getBlockState(newPos).getMaterial() == Material.WATER;
+                                if (!flag) return false;
                             }
-                            else break;
+                            return true;
                         }
-                        return flag == spawner.getMustSeeSky();
+                        return true;
                     }
             ).collect(Collectors.toList());
 

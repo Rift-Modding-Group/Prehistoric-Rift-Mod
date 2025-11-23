@@ -21,7 +21,7 @@ public class TenontosaurusConfig extends RiftCreatureConfig {
         this.general.blockBreakLevels = Arrays.asList("shovel:1");
         this.general.breakBlocksInPursuit = true;
         this.spawnRules = Arrays.asList(
-                new SpawnRule().setCategory("LAND").setSpawnOnLand().setWeight(10).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("tag:spooky", "tag:forest")
+                new SpawnRule().setCategory("LAND").setSpawnOnLand().setWeight(10).setYLevelRange(64, 256).setSpawnAmntRange(1, 1).setDensityLimit(4).setBiomes("tag:spooky")
         );
     }
 }

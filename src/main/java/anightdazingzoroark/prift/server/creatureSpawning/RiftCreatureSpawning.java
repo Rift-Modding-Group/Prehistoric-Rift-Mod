@@ -150,13 +150,6 @@ public class RiftCreatureSpawning {
                 List<RiftCreatureSpawnLists.BiomeSpawner> caveBiomeSpawnerList = RiftCreatureSpawnLists.createSpawnerList(biomeList, world, "CAVE");
 
                 //finally spawn the creatures based on spawnPositions and biomeSpawnerList
-                /*
-                if (this.spawnFromBiomeSpawnerLists(world, landBiomeSpawnerList, spawnPositions) ||
-                        this.spawnFromBiomeSpawnerLists(world, waterBiomeSpawnerList, spawnPositions) ||
-                        this.spawnFromBiomeSpawnerLists(world, airBiomeSpawnerList, spawnPositions) ||
-                        this.spawnFromBiomeSpawnerLists(world, caveBiomeSpawnerList, spawnPositions)
-                ) RiftInitialize.logger.info("Creatures successfully generated");
-                */
                 this.spawnEntityOnMainThread(world, landBiomeSpawnerList, spawnPositions);
                 this.spawnEntityOnMainThread(world, waterBiomeSpawnerList, spawnPositions);
                 this.spawnEntityOnMainThread(world, airBiomeSpawnerList, spawnPositions);
@@ -242,8 +235,9 @@ public class RiftCreatureSpawning {
             for (int y = 0; y < (int)Math.ceil(creature.height); y++) {
                 for (int z = -xMin; z <= xMin; z++) {
                     IBlockState state = creature.world.getBlockState(creature.getPosition().add(x, y, z));
-                    boolean cantFitInWater = !spawner.getCanSpawnInWater() || state.getMaterial() != Material.WATER;
-                    boolean isValidSpot = state.getMaterial() == Material.AIR
+                    boolean isValidSpot;
+                    if (spawner.getCanSpawnInWater()) isValidSpot = state.getMaterial() == Material.WATER;
+                    else isValidSpot = state.getMaterial() == Material.AIR
                             || state.getMaterial() == Material.PLANTS
                             || state.getMaterial() == Material.VINE;
                     if (!isValidSpot) return false;
