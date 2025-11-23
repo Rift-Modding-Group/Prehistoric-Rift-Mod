@@ -236,9 +236,10 @@ public abstract class RiftCreatureMove {
     }
 
     //general helper functions to remove repetitiveness of shooting projectiles
-    protected void shootProjectileUnmounted(RiftCreature user, Entity target, int useAmount, RiftCreatureProjectile.Enum projectileEnum) {
+    protected void shootProjectileUnmounted(RiftCreature user, Entity target, int useAmount, String projectileName) {
         if (target == null) return;
-        RiftCreatureProjectileEntity projectile = RiftCreatureProjectile.createCreatureProjectile(projectileEnum, user);
+        RiftCreatureProjectileEntity projectile = RiftCreatureProjectile.createCreatureProjectile(projectileName, user);
+        if (projectile == null) return;
         if (projectile.getProjectileBuilder().getHasPower()) projectile.setPower(useAmount);
         double velX = target.posX - user.posX;
         double velY = target.getEntityBoundingBox().minY + (double)(target.height / 2f) - projectile.posY;
@@ -248,8 +249,9 @@ public abstract class RiftCreatureMove {
         user.world.spawnEntity(projectile);
     }
 
-    protected void shootProjectileMounted(RiftCreature user, Entity target, int useAmount, RiftCreatureProjectile.Enum projectileEnum) {
-        RiftCreatureProjectileEntity projectile = RiftCreatureProjectile.createCreatureProjectile(projectileEnum, user);
+    protected void shootProjectileMounted(RiftCreature user, Entity target, int useAmount, String projectileName) {
+        RiftCreatureProjectileEntity projectile = RiftCreatureProjectile.createCreatureProjectile(projectileName, user);
+        if (projectile == null) return;
         if (projectile.getProjectileBuilder().getHasPower()) {
             float powerStrength = RiftUtil.slopeResult(useAmount, true, 0, this.creatureMove.maxUse, projectile.getProjectileBuilder().getPowerParams()[0], projectile.getProjectileBuilder().getPowerParams()[1]);
             projectile.setPower(powerStrength);

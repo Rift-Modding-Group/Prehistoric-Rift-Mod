@@ -26,8 +26,8 @@ public class RiftPlateFlingMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.Enum.THROWN_STEGOSAURUS_PLATE);
-        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.Enum.THROWN_STEGOSAURUS_PLATE);
+        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.THROWN_STEGOSAURUS_PLATE);
+        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.THROWN_STEGOSAURUS_PLATE);
     }
 
     @Override

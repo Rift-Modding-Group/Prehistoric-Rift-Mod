@@ -25,8 +25,8 @@ public class RiftPoisonSpitMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.Enum.POISON_SPIT);
-        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.Enum.POISON_SPIT);
+        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.POISON_SPIT);
+        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.POISON_SPIT);
     }
 
     @Override

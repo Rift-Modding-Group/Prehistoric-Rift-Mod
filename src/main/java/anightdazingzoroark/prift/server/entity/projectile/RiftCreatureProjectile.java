@@ -16,20 +16,37 @@ import java.util.List;
 public class RiftCreatureProjectile {
     public static List<RiftCreatureProjectileBuilder> CREATURE_PROJECTILE_BUILDERS = new ArrayList<>();
 
-    public static RiftCreatureProjectileEntity createCreatureProjectile(Enum creatureProjectileEnum, RiftCreature creature) {
+    public static final String THROWN_STEGOSAURUS_PLATE = "thrown_stegosaurus_plate";
+    public static final String POISON_SPIT = "poison_spit";
+    public static final String VENOM_BOMB = "venom_bomb";
+    public static final String MUDBALL = "mudball";
+    public static final String POWER_BLOW = "power_blow";
+
+    public static RiftCreatureProjectileEntity createCreatureProjectile(String creatureProjectileName, RiftCreature creature) {
         //find name first
-        RiftCreatureProjectileBuilder builder = CREATURE_PROJECTILE_BUILDERS.stream()
-                .filter(b -> b.projectileEnum == creatureProjectileEnum)
+        RiftCreatureProjectileBuilder builder = getBuilderByName(creatureProjectileName);
+        if (builder != null) {
+            RiftCreatureProjectileEntity projectileEntity = new RiftCreatureProjectileEntity(creature);
+            projectileEntity.setProjectileBuilder(builder);
+            if (builder.getHasVariants()) projectileEntity.setVariant(creature.getVariant());
+            if (builder.getHasDelayedEffectOnImpact())
+                projectileEntity.setCountdown(builder.getDelayedEffectOnImpactCountdown());
+            return projectileEntity;
+        }
+        return null;
+    }
+
+    public static RiftCreatureProjectileBuilder getBuilderByName(String name) {
+        boolean builderIsPresent = CREATURE_PROJECTILE_BUILDERS.stream()
+                .anyMatch(b -> b.projectileName.equals(name));
+        if (builderIsPresent) return CREATURE_PROJECTILE_BUILDERS.stream()
+                .filter(b -> b.projectileName.equals(name))
                 .findFirst().get();
-        RiftCreatureProjectileEntity projectileEntity = new RiftCreatureProjectileEntity(creature);
-        projectileEntity.setProjectileBuilder(builder);
-        if (builder.getHasVariants()) projectileEntity.setVariant(creature.getVariant());
-        if (builder.getHasDelayedEffectOnImpact()) projectileEntity.setCountdown(builder.getDelayedEffectOnImpactCountdown());
-        return projectileEntity;
+        return null;
     }
 
     public static void initCreatureProjectileBuilders() {
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(Enum.THROWN_STEGOSAURUS_PLATE)
+        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(THROWN_STEGOSAURUS_PLATE)
                 .setHasVariants()
                 .setSelfDestruct()
                 .setImpactSoundEvent(SoundEvents.ENTITY_ARROW_HIT)
@@ -42,7 +59,7 @@ public class RiftCreatureProjectile {
                     return 4D + levelBasedIncrement;
                 })
         );
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(Enum.POISON_SPIT)
+        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(POISON_SPIT)
                 .setHasFlatModel()
                 .setSelfDestruct()
                 .setNoVerticalRotation()
@@ -62,7 +79,7 @@ public class RiftCreatureProjectile {
                     return 2D + levelBasedIncrement;
                 })
         );
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(Enum.VENOM_BOMB)
+        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(VENOM_BOMB)
                 .setImpactSoundEvent(SoundEvents.BLOCK_SLIME_HIT)
                 .setDelayedEffectOnImpact(100, (projectile, hitEntity) -> {
                     projectile.world.createExplosion(projectile, projectile.posX, projectile.posY, projectile.posZ, 2f, false);
@@ -78,7 +95,7 @@ public class RiftCreatureProjectile {
                     });
                 })
         );
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(Enum.MUDBALL)
+        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(MUDBALL)
                 .setHasFlatModel()
                 .setSelfDestruct()
                 .setNoVerticalRotation()
@@ -97,7 +114,7 @@ public class RiftCreatureProjectile {
                     return 4D + levelBasedIncrement;
                 })
         );
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(Enum.POWER_BLOW)
+        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(POWER_BLOW)
                 .setHasNoModel()
                 .setSelfDestruct()
                 .setUsePower(2f, 8f)
@@ -111,13 +128,5 @@ public class RiftCreatureProjectile {
                     }
                 })
         );
-    }
-
-    public enum Enum {
-        THROWN_STEGOSAURUS_PLATE,
-        POISON_SPIT,
-        VENOM_BOMB,
-        MUDBALL,
-        POWER_BLOW
     }
 }

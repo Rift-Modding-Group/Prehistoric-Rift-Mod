@@ -25,8 +25,8 @@ public class RiftMudballMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.Enum.MUDBALL);
-        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.Enum.MUDBALL);
+        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.MUDBALL);
+        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.MUDBALL);
     }
 
     @Override

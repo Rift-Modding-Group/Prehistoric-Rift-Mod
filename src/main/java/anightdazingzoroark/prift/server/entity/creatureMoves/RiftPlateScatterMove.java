@@ -41,7 +41,8 @@ public class RiftPlateScatterMove extends RiftCreatureMove {
 
     private void shootEntityUnmounted(RiftCreature creature, Entity target) {
         for (int angle = - 45; angle <= 45; angle += 15) {
-            RiftCreatureProjectileEntity thrownStegoPlate = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.THROWN_STEGOSAURUS_PLATE, creature);
+            RiftCreatureProjectileEntity thrownStegoPlate = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.THROWN_STEGOSAURUS_PLATE, creature);
+            if (thrownStegoPlate == null) return;
             double velX = target.posX - creature.posX;
             double velY = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - thrownStegoPlate.posY;
             double velZ = target.posZ - creature.posZ;
@@ -59,8 +60,8 @@ public class RiftPlateScatterMove extends RiftCreatureMove {
 
     private void shootEntityMounted(RiftCreature user) {
         for (int angle = - 45; angle <= 45; angle += 15) {
-            RiftCreatureProjectileEntity thrownStegoPlate = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.Enum.THROWN_STEGOSAURUS_PLATE, user);
-            if (this.targetToFlingTo != null) {
+            RiftCreatureProjectileEntity thrownStegoPlate = RiftCreatureProjectile.createCreatureProjectile(RiftCreatureProjectile.THROWN_STEGOSAURUS_PLATE, user);
+            if (this.targetToFlingTo != null && thrownStegoPlate != null) {
                 double velX = this.targetToFlingTo.posX - user.posX;
                 double velY = user.getEntityBoundingBox().minY + (double)(user.height / 2f) - thrownStegoPlate.posY;
                 double velZ = this.targetToFlingTo.posZ - user.posZ;

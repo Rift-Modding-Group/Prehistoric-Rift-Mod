@@ -18,7 +18,7 @@ public class RiftCreatureProjectileModel extends AnimatedGeoModel<RiftCreaturePr
             return new ResourceLocation(RiftInitialize.MODID, "geo/flat_projectile.model.json");
         }
         else {
-            String name = riftCreatureProjectile.getProjectileBuilder().projectileEnum.name().toLowerCase();
+            String name = riftCreatureProjectile.getProjectileBuilder().projectileName.toLowerCase();
             return new ResourceLocation(RiftInitialize.MODID, "geo/"+name+".model.json");
         }
     }
@@ -32,11 +32,11 @@ public class RiftCreatureProjectileModel extends AnimatedGeoModel<RiftCreaturePr
             return new ResourceLocation(RiftInitialize.MODID, "textures/entities/projectiles/mudball.png");
         }
         else if (riftCreatureProjectile.getHasVariants()) {
-            String name = riftCreatureProjectile.getProjectileBuilder().projectileEnum.name().toLowerCase();
+            String name = riftCreatureProjectile.getProjectileBuilder().projectileName.toLowerCase();
             return new ResourceLocation(RiftInitialize.MODID, "textures/entities/projectiles/"+name+"_"+(riftCreatureProjectile.getVariant() + 1)+".png");
         }
         else {
-            String name = riftCreatureProjectile.getProjectileBuilder().projectileEnum.name().toLowerCase();
+            String name = riftCreatureProjectile.getProjectileBuilder().projectileName.toLowerCase();
             return new ResourceLocation(RiftInitialize.MODID, "textures/entities/projectiles/"+name+".png");
         }
     }

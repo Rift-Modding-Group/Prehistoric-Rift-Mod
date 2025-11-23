@@ -25,8 +25,8 @@ public class RiftVenomBombMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.Enum.VENOM_BOMB);
-        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.Enum.VENOM_BOMB);
+        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.VENOM_BOMB);
+        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.VENOM_BOMB);
     }
 
     @Override

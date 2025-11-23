@@ -12,8 +12,8 @@ import net.minecraft.world.World;
 
 //this is for all projectiles launched by creatures
 public class RiftCreatureProjectileEntity extends RiftLibProjectile {
-    //enum gets saved here on the client too
-    private static final DataParameter<Integer> PROJECTILE_BUILDER = EntityDataManager.createKey(RiftCreatureProjectileEntity.class, DataSerializers.VARINT);
+    //builder gets saved here on the client too
+    private static final DataParameter<String> PROJECTILE_BUILDER = EntityDataManager.createKey(RiftCreatureProjectileEntity.class, DataSerializers.STRING);
 
     //some projectiles have variants based on the creature that launched them, so here
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(RiftCreatureProjectileEntity.class, DataSerializers.VARINT);
@@ -36,7 +36,7 @@ public class RiftCreatureProjectileEntity extends RiftLibProjectile {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(PROJECTILE_BUILDER, 0);
+        this.dataManager.register(PROJECTILE_BUILDER, "");
         this.dataManager.register(VARIANT, 0);
     }
 
@@ -45,7 +45,7 @@ public class RiftCreatureProjectileEntity extends RiftLibProjectile {
 
         //count down until, well
         if (!this.world.isRemote) {
-            if (this.getProjectileBuilder().getHasDelayedEffectOnImpact() && this.countingDown) {
+            if (this.getProjectileBuilder() != null && this.getProjectileBuilder().getHasDelayedEffectOnImpact() && this.countingDown) {
                 this.countdown--;
                 if (this.countdown <= 0) {
                     this.getProjectileBuilder().getDelayedEffectOnImpact().accept(this, null);
@@ -55,11 +55,11 @@ public class RiftCreatureProjectileEntity extends RiftLibProjectile {
     }
 
     public RiftCreatureProjectileBuilder getProjectileBuilder() {
-        return RiftCreatureProjectile.CREATURE_PROJECTILE_BUILDERS.get(this.dataManager.get(PROJECTILE_BUILDER));
+        return RiftCreatureProjectile.getBuilderByName(this.dataManager.get(PROJECTILE_BUILDER));
     }
 
     public void setProjectileBuilder(RiftCreatureProjectileBuilder projectileBuilder) {
-        this.dataManager.set(PROJECTILE_BUILDER, RiftCreatureProjectile.CREATURE_PROJECTILE_BUILDERS.indexOf(projectileBuilder));
+        this.dataManager.set(PROJECTILE_BUILDER, projectileBuilder.projectileName);
     }
 
     public boolean getHasVariants() {

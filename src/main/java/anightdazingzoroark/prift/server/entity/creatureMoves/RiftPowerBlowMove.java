@@ -23,8 +23,8 @@ public class RiftPowerBlowMove extends RiftCreatureMove {
 
     @Override
     public void onReachUsePoint(RiftCreature user, Entity target, int useAmount) {
-        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.Enum.POWER_BLOW);
-        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.Enum.POWER_BLOW);
+        if (user.getControllingPassenger() == null) this.shootProjectileUnmounted(user, target, useAmount, RiftCreatureProjectile.POWER_BLOW);
+        else this.shootProjectileMounted(user, target, useAmount, RiftCreatureProjectile.POWER_BLOW);
     }
 
     @Override

@@ -556,7 +556,7 @@ public class ServerEvents {
         //poison mobs hit by explosion from venom bomb
         if (event.getExplosion().exploder instanceof RiftCreatureProjectileEntity) {
             RiftCreatureProjectileEntity creatureProjectileEntity = (RiftCreatureProjectileEntity) event.getExplosion().exploder;
-            if (creatureProjectileEntity.getProjectileBuilder().projectileEnum == RiftCreatureProjectile.Enum.VENOM_BOMB) {
+            if (creatureProjectileEntity.getProjectileBuilder().projectileName.equals(RiftCreatureProjectile.VENOM_BOMB)) {
                 for (Entity entity : event.getAffectedEntities()) {
                     if (entity instanceof EntityLivingBase
                             && RiftUtil.checkForNoAssociations((RiftCreature) creatureProjectileEntity.shootingEntity, entity)

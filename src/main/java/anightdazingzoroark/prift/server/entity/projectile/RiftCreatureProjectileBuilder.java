@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public class RiftCreatureProjectileBuilder {
     //common to all
-    public final RiftCreatureProjectile.Enum projectileEnum;
+    public final String projectileName;
 
     //for damage to deal
     private Function<RiftCreatureProjectileEntity, Double> damageCalculator;
@@ -49,8 +49,8 @@ public class RiftCreatureProjectileBuilder {
     private boolean hasPower;
     private float[] powerParams; //array w 2 items, min and max power
 
-    public RiftCreatureProjectileBuilder(RiftCreatureProjectile.Enum projectileEnum) {
-        this.projectileEnum = projectileEnum;
+    public RiftCreatureProjectileBuilder(String projectileName) {
+        this.projectileName = projectileName;
     }
 
     public RiftCreatureProjectileBuilder setDamageCalculator(Function<RiftCreatureProjectileEntity, Double> damageCalculator) {
