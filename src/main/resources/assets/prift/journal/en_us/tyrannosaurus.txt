@@ -1,5 +1,3 @@
 Behavior: Hostile
 
-The Tyrannosaurus is a magnificent sight to behold. It possesses all the traits required to instill fear in even the most fearsome predators or the most fearless herbivores, with such a bite force that can crush through even diamond and a roar with enough force to break blocks and send mobs flying.
-
-And yet, in spite all the fear it can instill, its sheer awe is what makes it serve as an invaluable weapon for all those who seek power and dominance over the land. Only those who possess the bravery to face off against one, or multiple perhaps, can hope to obtain their young to gain control over one.
+The hunger of a Tyrannosaurus is never-ending. No matter how much it eats, it always remains hungry.

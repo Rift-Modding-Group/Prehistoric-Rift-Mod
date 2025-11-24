@@ -1,5 +1,3 @@
 Behavior: Hostile
 
-Though weak, Megapiranhas can be found anywhere except for oceans. Whether its in small innocuous ponds, aquifers underground, or riverbanks. Their large swarming numbers are what make them threatening, only balanced out by the fact that they tend to be a priority for the other river dwelling carnivores.
-
-Their meat, when cooked, grants regeneration upon consumption. Really unfitting given their fragile build.
+Megapiranha are extremely widespread, they even appear in lakes not connected to rivers. They reach these areas by swimming through underground aquifers.

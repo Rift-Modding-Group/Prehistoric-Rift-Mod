@@ -1,5 +1,3 @@
 Behavior: Neutral
 
-The true home of the Ankylosaurus is the impenetrable shell that covers its body. This shell protects it from nearly all kinds of damage, and in return, the spikes hurt all those who try to penetrate it. Only splash potions and explosions can bypass this protection. Upon reaching low health, it retreats into the shell to regenerate health rapidly, while passively hurting its attackers. In addition, its club is a powerful tool that smashes rocks and does heavy blows.
-
-While being too slow to be considered for mounting, the Ankylosaurus's tough club is perfect for destroying stone structures, and potentially, ores that are exposed at the surface. It's near indestructibility ensure that it would last long for its owner.
+The heavy and spiky shell of an Ankylosaurus is its only home. Supposedly it leads into a pocket dimension for itself only, yet no one has succeeding in entering it.

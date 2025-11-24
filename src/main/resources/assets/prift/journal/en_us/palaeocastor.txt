@@ -1,5 +1,3 @@
 Behavior: Neutral
 
-Scurrying beneath the surface lies the Palaeocastor, small creatures that feed off rocks and presumably metals and other minerals. They do not pose any threat whatsoever, though they do not take kindly to attackers. As the lowest on the food chain amongst the cavernous creatures, not much else is to be expected.
-
-As a burrowing creature, Palaeocastors excel in mining ores for their owners. A lone Palaeocastor may be utilized for clearing out various ores within an area.
+Palaeocastors burrow underground, feasting on ores and other minerals. Sometimes they hide in ores, and come out to bite unfortunate miners who mine their hiding spots.
