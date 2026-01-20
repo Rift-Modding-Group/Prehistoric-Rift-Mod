@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.client.RiftControls;
+import anightdazingzoroark.prift.client.newui.custom.EntityWidget;
 import anightdazingzoroark.prift.client.ui.RiftEggScreen;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
@@ -10,7 +11,17 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.riftlib.ui.RiftLibUIData;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
+import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.factory.EntityGuiData;
+import com.cleanroommc.modularui.factory.GuiFactories;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
+import com.cleanroommc.modularui.widgets.layout.Column;
+import com.cleanroommc.modularui.widgets.layout.Flow;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.passive.EntityTameable;
@@ -31,7 +42,7 @@ import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 
-public class RiftSac extends EntityTameable implements IAnimatable {
+public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<EntityGuiData> {
     private static final DataParameter<Integer> HATCH_TIME = EntityDataManager.<Integer>createKey(RiftSac.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> SAC_TYPE = EntityDataManager.createKey(RiftSac.class, DataSerializers.BYTE);
     public AnimationFactory factory = new AnimationFactory(this);
@@ -111,16 +122,7 @@ public class RiftSac extends EntityTameable implements IAnimatable {
         }
         else {
             if (this.getOwnerId() != null && this.getOwnerId().equals(player.getUniqueID())) {
-                RiftLibUIHelper.showUI(
-                        player,
-                        RiftGui.EGG_SCREEN,
-                        new RiftLibUIData()
-                                .addInteger("EggType", RiftEggScreen.EggType.SAC.ordinal())
-                                .addInteger("HatchableID", this.getEntityId()),
-                        0,
-                        0,
-                        0
-                );
+                if (!this.world.isRemote) GuiFactories.entity().open(player, this);
                 return true;
             }
         }
@@ -165,6 +167,19 @@ public class RiftSac extends EntityTameable implements IAnimatable {
         return new int[]{minutes, seconds};
     }
 
+    public String getHatchTimeString() {
+        if (this.isInWater()) {
+            int minutes = this.getHatchTimeMinutes()[0];
+            int seconds = this.getHatchTimeMinutes()[1];
+            String minutesString = (minutes < 10 ? "0" : "")+minutes;
+            String secondsString = (seconds < 10 ? "0" : "")+seconds;
+            String timeString = minutesString+":"+secondsString;
+
+            return I18n.format("prift.egg.remaining_hatch_time", timeString);
+        }
+        else return I18n.format("prift.sac.not_wet");
+    }
+
     public int getHatchTime() {
         return this.dataManager.get(HATCH_TIME).intValue();
     }
@@ -194,5 +209,29 @@ public class RiftSac extends EntityTameable implements IAnimatable {
     @Override
     public AnimationFactory getFactory() {
         return this.factory;
+    }
+
+    @Override
+    public ModularPanel buildUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        settings.getRecipeViewerSettings().disableRecipeViewer();
+
+        RiftSac sacData = (RiftSac) data.getGuiHolder();
+
+        //create ui
+        ModularPanel panel = ModularPanel.defaultPanel("eggScreen");
+        Flow column = new Column()
+                .child(IKey.str(I18n.format("item."+sacData.getCreatureType().name().toLowerCase()+"_sac.name"))
+                        .asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(new EntityWidget<>(sacData).size(60))
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.dynamic(this::getHatchTimeString).asWidget());
+        panel.child(column.top(10));
+
+        return panel;
     }
 }

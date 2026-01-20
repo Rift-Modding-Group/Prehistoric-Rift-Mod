@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.client.model.block.RiftHandCrankModel;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityHandCrank;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
-import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.geo.render.GeoModel;
 import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
 import anightdazingzoroark.riftlib.resource.RiftLibCache;
 

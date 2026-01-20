@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.client.model.entity.RiftEggModel;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
-import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.geo.render.GeoModel;
 import anightdazingzoroark.riftlib.renderers.geo.GeoEntityRenderer;
 
 public class RiftEggRenderer extends GeoEntityRenderer<RiftEgg> {

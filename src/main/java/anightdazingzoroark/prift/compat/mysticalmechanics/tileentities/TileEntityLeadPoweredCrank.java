@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
+import anightdazingzoroark.riftlib.core.builder.LoopType;
 import mysticalmechanics.api.DefaultMechCapability;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
@@ -278,7 +279,7 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
     }
 
     private <E extends IAnimatable> PlayState rotation(AnimationEvent<E> event) {
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.lead_powered_crank.rotate", true));
+        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.lead_powered_crank.rotate", LoopType.LOOP));
         return PlayState.CONTINUE;
     }
 

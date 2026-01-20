@@ -1,12 +1,11 @@
 package anightdazingzoroark.prift.server.entity;
 
-import anightdazingzoroark.prift.client.ui.RiftEggScreen;
+import anightdazingzoroark.prift.client.newui.custom.EntityWidget;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -14,18 +13,27 @@ import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
-import anightdazingzoroark.riftlib.ui.RiftLibUIData;
-import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
 import com.charles445.simpledifficulty.api.config.json.JsonTemperature;
 import com.charles445.simpledifficulty.api.temperature.TemperatureEnum;
 import com.charles445.simpledifficulty.config.ModConfig;
+import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.factory.EntityGuiData;
+import com.cleanroommc.modularui.factory.GuiFactories;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
+import com.cleanroommc.modularui.value.sync.StringSyncValue;
+import com.cleanroommc.modularui.widgets.layout.Column;
+import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
@@ -58,15 +66,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class RiftEgg extends EntityTameable implements IAnimatable {
+public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<EntityGuiData> {
     private static final DataParameter<Integer> HATCH_TIME = EntityDataManager.<Integer>createKey(RiftEgg.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> EGG_TYPE = EntityDataManager.createKey(RiftEgg.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> TEMPERATURE = EntityDataManager.createKey(RiftEgg.class, DataSerializers.BYTE);
+    private String hatchTimeString = "";
     public AnimationFactory factory = new AnimationFactory(this);
 
     public RiftEgg(World worldIn) {
         super(worldIn);
-        this.setSize(1F, 1F);
+        this.setSize(1f, 1.125f);
     }
 
     @Override
@@ -369,16 +378,10 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         }
         else {
             if (this.getOwnerId() != null && this.getOwnerId().equals(player.getUniqueID())) {
-                RiftLibUIHelper.showUI(
-                        player,
-                        RiftGui.EGG_SCREEN,
-                        new RiftLibUIData()
-                                .addInteger("EggType", RiftEggScreen.EggType.EGG.ordinal())
-                                .addInteger("HatchableID", this.getEntityId()),
-                        0,
-                        0,
-                        0
-                );
+                if (!this.world.isRemote) {
+                    System.out.println(this);
+                    GuiFactories.entity().open(player, this);
+                }
                 return true;
             }
         }
@@ -412,7 +415,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
     }
 
     public int getHatchTime() {
-        return this.dataManager.get(HATCH_TIME).intValue();
+        return this.dataManager.get(HATCH_TIME);
     }
 
     public void setHatchTime(int time) {
@@ -424,6 +427,24 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
         int seconds = (int)((float)this.getHatchTime() / 20F);
         seconds = seconds - (minutes * 60);
         return new int[]{minutes, seconds};
+    }
+
+    public String getHatchTimeString() {
+        if (this.isInRightTemperature()) {
+            int minutes = this.getHatchTimeMinutes()[0];
+            int seconds = this.getHatchTimeMinutes()[1];
+            String minutesString = (minutes < 10 ? "0" : "")+minutes;
+            String secondsString = (seconds < 10 ? "0" : "")+seconds;
+            String timeString = minutesString+":"+secondsString;
+
+            return I18n.format("prift.egg.remaining_hatch_time", timeString);
+        }
+        else {
+            if (this.getTemperature().getTempStrength() > this.getCreatureType().getEggTemperature().getTempStrength()) {
+                return I18n.format("prift.egg.too_warm");
+            }
+            else return I18n.format("prift.egg.too_cold");
+        }
     }
 
     public boolean isInRightTemperature() {
@@ -452,5 +473,29 @@ public class RiftEgg extends EntityTameable implements IAnimatable {
     @Override
     public AnimationFactory getFactory() {
         return this.factory;
+    }
+
+    @Override
+    public ModularPanel buildUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        settings.getRecipeViewerSettings().disableRecipeViewer();
+
+        RiftEgg eggData = (RiftEgg) data.getGuiHolder();
+
+        //create ui
+        ModularPanel panel = ModularPanel.defaultPanel("eggScreen");
+        Flow column = new Column()
+                .child(IKey.str(I18n.format("item."+eggData.getCreatureType().name().toLowerCase()+"_egg.name"))
+                        .asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(new EntityWidget<>(eggData).size(60))
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.EMPTY.asWidget())
+                .child(IKey.dynamic(this::getHatchTimeString).asWidget());
+        panel.child(column.top(10));
+
+        return panel;
     }
 }

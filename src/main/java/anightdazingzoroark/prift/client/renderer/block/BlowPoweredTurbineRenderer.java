@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.client.renderer.block;
 
 import anightdazingzoroark.prift.client.model.block.RiftBlowPoweredTurbineModel;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityBlowPoweredTurbine;
-import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.geo.render.GeoModel;
 import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
 import anightdazingzoroark.riftlib.resource.RiftLibCache;
 

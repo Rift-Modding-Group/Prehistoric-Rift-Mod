@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
+import anightdazingzoroark.riftlib.core.builder.LoopType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
@@ -272,7 +273,7 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
             @Override
             public PlayState test(AnimationEvent animationEvent) {
                 if (canDoResetAnim()) {
-                    animationEvent.getController().setAnimation(new AnimationBuilder().addAnimation("animation.semi_manual_extractor.release", false));
+                    animationEvent.getController().setAnimation(new AnimationBuilder().addAnimation("animation.semi_manual_extractor.release", LoopType.PLAY_ONCE));
                     return PlayState.CONTINUE;
                 }
                 animationEvent.getController().clearAnimationCache();

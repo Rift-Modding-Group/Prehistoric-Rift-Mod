@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.riftlib.core.builder.LoopType;
 import net.minecraft.init.MobEffects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -129,7 +130,7 @@ public class Dilophosaurus extends RiftCreature {
             @Override
             public PlayState test(AnimationEvent event) {
                 if ((currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) && !isWarning()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".frill_setup", true));
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".frill_setup", LoopType.LOOP));
                     return PlayState.CONTINUE;
                 }
                 else {
@@ -142,7 +143,7 @@ public class Dilophosaurus extends RiftCreature {
             @Override
             public PlayState test(AnimationEvent event) {
                 if ((currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) && !isWarning()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sac_setup", true));
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sac_setup", LoopType.LOOP));
                     return PlayState.CONTINUE;
                 }
                 else {

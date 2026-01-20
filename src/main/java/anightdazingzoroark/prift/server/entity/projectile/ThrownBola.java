@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionE
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
+import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
@@ -64,7 +65,7 @@ public class ThrownBola extends RiftLibProjectile {
         data.addAnimationController(new AnimationController(this, "rotation", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bola.spinning", true));
+                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bola.spinning", LoopType.LOOP));
                 return PlayState.CONTINUE;
             }
         }));

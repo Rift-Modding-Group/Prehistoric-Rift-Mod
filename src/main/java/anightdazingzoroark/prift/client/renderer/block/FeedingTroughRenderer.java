@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.client.renderer.block;
 
 import anightdazingzoroark.prift.client.model.block.RiftFeedingTroughModel;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
-import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.geo.render.GeoModel;
 import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
 
 public class FeedingTroughRenderer extends GeoBlockRenderer<RiftTileEntityFeedingTrough> {

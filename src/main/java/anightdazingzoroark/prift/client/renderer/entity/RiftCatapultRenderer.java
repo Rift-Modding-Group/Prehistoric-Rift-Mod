@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client.renderer.entity;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import net.minecraft.client.renderer.entity.RenderManager;
-import anightdazingzoroark.riftlib.geo.render.built.GeoModel;
+import anightdazingzoroark.riftlib.geo.render.GeoModel;
 
 public class RiftCatapultRenderer extends RiftLargeWeaponRenderer {
     public RiftCatapultRenderer(RenderManager renderManager) {

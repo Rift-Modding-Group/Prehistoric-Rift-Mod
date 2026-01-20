@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.riftlib.core.builder.LoopType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -100,11 +101,11 @@ public class Dodo extends RiftCreature {
 
     private <E extends IAnimatable> PlayState dodoMovement(AnimationEvent<E> event) {
         if (event.isMoving() && this.onGround) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.walk", true));
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.walk", LoopType.LOOP));
             return PlayState.CONTINUE;
         }
         else if (!this.onGround) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.fall", true));
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.fall", LoopType.LOOP));
             return PlayState.CONTINUE;
         }
         event.getController().clearAnimationCache();

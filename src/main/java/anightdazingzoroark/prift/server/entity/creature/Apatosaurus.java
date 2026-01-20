@@ -12,6 +12,7 @@ import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.MobSize;
+import anightdazingzoroark.riftlib.core.builder.LoopType;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -343,7 +344,7 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     private <E extends IAnimatable> PlayState apatosaurusWeaponSize(AnimationEvent<E> event) {
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.weapon_size_change", true));
+        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.weapon_size_change", LoopType.LOOP));
         return PlayState.CONTINUE;
     }
 

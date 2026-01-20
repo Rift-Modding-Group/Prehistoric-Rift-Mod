@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.server.message.RiftIncrementControlUse;
 import anightdazingzoroark.prift.server.message.RiftLaunchLWeaponProjectile;
 import anightdazingzoroark.prift.server.message.RiftManageUtilizingControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.riftlib.core.builder.LoopType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityAgeable;
@@ -178,7 +179,7 @@ public class RiftCatapult extends RiftLargeWeapon {
 
     private <E extends IAnimatable> PlayState catapultCharge(AnimationEvent<E> event) {
         if (this.isCharging()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.charging", true));
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.charging", LoopType.LOOP));
             return PlayState.CONTINUE;
         }
         event.getController().clearAnimationCache();
@@ -187,7 +188,7 @@ public class RiftCatapult extends RiftLargeWeapon {
 
     private <E extends IAnimatable> PlayState catapultLaunch(AnimationEvent<E> event) {
         if (this.isLaunching()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.launching", false));
+            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.launching", LoopType.PLAY_ONCE));
             return PlayState.CONTINUE;
         }
         event.getController().clearAnimationCache();

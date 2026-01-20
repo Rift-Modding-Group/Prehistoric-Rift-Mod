@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.projectile;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
+import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
 import net.minecraft.entity.Entity;
@@ -89,7 +90,7 @@ public class RiftCreatureProjectile {
                     return new AnimationController(projectile, "default", 0, new AnimationController.IAnimationPredicate() {
                         @Override
                         public PlayState test(AnimationEvent event) {
-                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.venom_bomb.default", true));
+                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.venom_bomb.default", LoopType.LOOP));
                             return PlayState.CONTINUE;
                         }
                     });
