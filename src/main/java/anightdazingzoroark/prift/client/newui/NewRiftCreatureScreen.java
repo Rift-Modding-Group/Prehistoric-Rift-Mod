@@ -27,6 +27,7 @@ public class NewRiftCreatureScreen {
         RiftCreature creature = (RiftCreature) data.getGuiHolder();
 
         //creature inventory syncing stuff
+        syncManager.registerSlotGroup("creatureGear", 9);
         syncManager.registerSlotGroup("creatureInventory", 9);
 
         //tab related stuff
@@ -51,39 +52,50 @@ public class NewRiftCreatureScreen {
                 .addPage(new ParentWidget<>())
                 .addPage(new ParentWidget<>());
 
-        return new ModularPanel("creatureScreen").size(180, 166)
+        return new ModularPanel("creatureScreen").size(180, 192)
                 .child(tabButtonRow)
                 .child(pagedWidget);
     }
 
     private static ParentWidget<?> creatureInventoryPage(RiftCreature creature) {
         String playerName = Minecraft.getMinecraft().player.getName();
+        String creatureGearName = I18n.format("inventory.gear", creature.getName(false));
         String creatureInvName = I18n.format("inventory.inventory", creature.getName(false));
+        ItemStackHandler creatureGear = creature.creatureGear;
         ItemStackHandler creatureInventory = creature.newCreatureInventory;
 
-        //deal with the slotgroupwidget
-        SlotGroupWidget.Builder slotGroupBuilder = SlotGroupWidget.builder();
-        slotGroupBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureInventory, index).slotGroup("creatureInventory")));
+        //build creature gear slots
+        SlotGroupWidget.Builder creatureGearBuilder = SlotGroupWidget.builder();
+        creatureGearBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureGear, index).slotGroup("creatureGear")));
+
+        //get gear slot count
+        String gearMatrixRow = "";
+        for (int i = 0; i < creatureGear.getSlots(); i++) gearMatrixRow = gearMatrixRow.concat("I");
+        creatureGearBuilder.matrix(gearMatrixRow);
+
+        //build creature inventory slots
+        SlotGroupWidget.Builder creatureInvBuilder = SlotGroupWidget.builder();
+        creatureInvBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureInventory, index).slotGroup("creatureInventory")));
 
         //get creature slot count, and use the info to deal with the matrix
         int matrixHeight = (int) Math.ceil(creatureInventory.getSlots() / 9D);
-        String[] matrix = new String[matrixHeight];
+        String[] invMatrix = new String[matrixHeight];
         int count = creatureInventory.getSlots();
         for (int i = 0; i < matrixHeight; i++) {
             String toAdd = "";
             int stringLength = Math.min(9, count);
             for (int j = 0; j < stringLength; j++) toAdd = toAdd.concat("I");
-            matrix[i] = toAdd;
+            invMatrix[i] = toAdd;
             count -= 9;
         }
-        slotGroupBuilder.matrix(matrix);
+        creatureInvBuilder.matrix(invMatrix);
 
         //make the widget for creature inventory based on height of inventory
-        IWidget creatureInv = slotGroupBuilder.build();
+        IWidget creatureInv = creatureInvBuilder.build();
         if (matrixHeight > 3) creatureInv = new ListWidget<>()
                 .size(168, 54)
                 .horizontalCenter()
-                .child(slotGroupBuilder.build());
+                .child(creatureInvBuilder.build());
 
         //continue w making the page
         ParentWidget<?> toReturn = new ParentWidget<>();
@@ -91,6 +103,8 @@ public class NewRiftCreatureScreen {
                 .padding(0, 7)
                 .child(new Column()
                         .coverChildrenHeight()
+                        .child(IKey.str(creatureGearName).asWidget())
+                        .child(creatureGearBuilder.build())
                         .child(IKey.str(creatureInvName).asWidget())
                         .child(creatureInv)
                         .child(IKey.str(playerName).asWidget())

@@ -194,6 +194,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public AnimationFactory factory = new AnimationFactory(this);
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
+    public final ItemStackHandler creatureGear;
     public final ItemStackHandler newCreatureInventory = new ItemStackHandler(this.slotCount());
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
@@ -235,6 +236,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
         this.creatureType = creatureType;
+        this.creatureGear = new CreatureGearHandler(creatureType);
         this.minCreatureHealth = ((double) RiftConfigHandler.getConfig(creatureType).stats.baseHealth)/8;
         this.maxCreatureHealth = RiftConfigHandler.getConfig(creatureType).stats.baseHealth;
         this.attackDamage = RiftConfigHandler.getConfig(creatureType).stats.baseDamage;
