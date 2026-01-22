@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.newui.NewRiftCreatureScreen;
 import anightdazingzoroark.prift.client.ui.RiftEggScreen;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
@@ -36,6 +37,12 @@ import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
 import anightdazingzoroark.riftlib.ui.RiftLibUIData;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
+import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.factory.EntityGuiData;
+import com.cleanroommc.modularui.factory.GuiFactories;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -80,13 +87,14 @@ import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
+import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class RiftCreature extends EntityTameable implements IAnimatable, IMultiHitboxUser, IDynamicRideUser {
+public abstract class RiftCreature extends EntityTameable implements IAnimatable, IMultiHitboxUser, IDynamicRideUser, IGuiHolder<EntityGuiData> {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LOVE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -186,6 +194,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public AnimationFactory factory = new AnimationFactory(this);
     public boolean isRideable;
     public RiftCreatureInventory creatureInventory;
+    public final ItemStackHandler newCreatureInventory = new ItemStackHandler(this.slotCount());
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
     protected double speed;
@@ -990,22 +999,19 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.BUCKET))) player.dropItem(new ItemStack(Items.BUCKET), false);
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
-                        if (this.canBePregnant()) {
-                            if (this.isPregnant() && player.isSneaking()) {
-                                RiftLibUIHelper.showUI(
-                                        player,
-                                        RiftGui.EGG_SCREEN,
-                                        new RiftLibUIData()
-                                                .addInteger("EggType", RiftEggScreen.EggType.EMBRYO.ordinal())
-                                                .addInteger("ImpregnableID", this.getEntityId()),
-                                        0,
-                                        0,
-                                        0
-                                );
-                            }
-                            else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId(), 0, 0);
+                        if (this.canBePregnant() && this.isPregnant() && player.isSneaking()) {
+                            RiftLibUIHelper.showUI(
+                                    player,
+                                    RiftGui.EGG_SCREEN,
+                                    new RiftLibUIData()
+                                            .addInteger("EggType", RiftEggScreen.EggType.EMBRYO.ordinal())
+                                            .addInteger("ImpregnableID", this.getEntityId()),
+                                    0,
+                                    0,
+                                    0
+                            );
                         }
-                        else player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
+                        else if (!this.world.isRemote) GuiFactories.entity().open(player, this);
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
                         if (this.canBePregnant()) {
@@ -3549,6 +3555,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public SoundEvent getWarnSound() {
         return null;
+    }
+
+    @Override
+    public ModularPanel buildUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        return NewRiftCreatureScreen.buildCreatureUI(data, syncManager, settings);
     }
 
     public class RiftCreatureInventory extends InventoryBasic {
