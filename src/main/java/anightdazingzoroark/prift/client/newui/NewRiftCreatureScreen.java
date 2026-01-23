@@ -1,20 +1,23 @@
 package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.factory.EntityGuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.utils.Alignment;
+import com.cleanroommc.modularui.value.BoolValue;
+import com.cleanroommc.modularui.value.sync.BooleanSyncValue;
+import com.cleanroommc.modularui.value.sync.IntSyncValue;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.value.sync.SyncHandlers;
 import com.cleanroommc.modularui.widget.ParentWidget;
-import com.cleanroommc.modularui.widgets.ListWidget;
-import com.cleanroommc.modularui.widgets.PageButton;
-import com.cleanroommc.modularui.widgets.PagedWidget;
-import com.cleanroommc.modularui.widgets.SlotGroupWidget;
+import com.cleanroommc.modularui.widgets.*;
 import com.cleanroommc.modularui.widgets.layout.Column;
+import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Row;
 import com.cleanroommc.modularui.widgets.slot.ItemSlot;
 import net.minecraft.client.Minecraft;
@@ -25,10 +28,6 @@ public class NewRiftCreatureScreen {
     public static ModularPanel buildCreatureUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disableRecipeViewer();
         RiftCreature creature = (RiftCreature) data.getGuiHolder();
-
-        //creature inventory syncing stuff
-        syncManager.registerSlotGroup("creatureGear", 9);
-        syncManager.registerSlotGroup("creatureInventory", 9);
 
         //tab related stuff
         PagedWidget.Controller tabController = new PagedWidget.Controller();
@@ -48,8 +47,8 @@ public class NewRiftCreatureScreen {
         PagedWidget<?> pagedWidget = new PagedWidget<>()
                 .sizeRel(1f)
                 .controller(tabController)
-                .addPage(creatureInventoryPage(creature))
-                .addPage(new ParentWidget<>())
+                .addPage(creatureInventoryPage(creature, syncManager))
+                .addPage(creatureSettingsPage(creature, syncManager))
                 .addPage(new ParentWidget<>());
 
         return new ModularPanel("creatureScreen").size(180, 192)
@@ -57,21 +56,31 @@ public class NewRiftCreatureScreen {
                 .child(pagedWidget);
     }
 
-    private static ParentWidget<?> creatureInventoryPage(RiftCreature creature) {
+    private static ParentWidget<?> creatureInventoryPage(RiftCreature creature, PanelSyncManager syncManager) {
+        //set up strings
         String playerName = Minecraft.getMinecraft().player.getName();
         String creatureGearName = I18n.format("inventory.gear", creature.getName(false));
         String creatureInvName = I18n.format("inventory.inventory", creature.getName(false));
+
+        //creature inventory syncing stuff
+        syncManager.registerSlotGroup("creatureGear", 9);
+        syncManager.registerSlotGroup("creatureInventory", 9);
         ItemStackHandler creatureGear = creature.creatureGear;
         ItemStackHandler creatureInventory = creature.newCreatureInventory;
 
+        //set if the creature has gear
+        boolean creatureHasGear = creature.creatureType.gearSlotCount() > 0;
+
         //build creature gear slots
         SlotGroupWidget.Builder creatureGearBuilder = SlotGroupWidget.builder();
-        creatureGearBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureGear, index).slotGroup("creatureGear")));
+        if (creatureHasGear) {
+            creatureGearBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureGear, index).slotGroup("creatureGear")));
 
-        //get gear slot count
-        String gearMatrixRow = "";
-        for (int i = 0; i < creatureGear.getSlots(); i++) gearMatrixRow = gearMatrixRow.concat("I");
-        creatureGearBuilder.matrix(gearMatrixRow);
+            //get gear slot count
+            String gearMatrixRow = "";
+            for (int i = 0; i < creatureGear.getSlots(); i++) gearMatrixRow = gearMatrixRow.concat("I");
+            creatureGearBuilder.matrix(gearMatrixRow);
+        }
 
         //build creature inventory slots
         SlotGroupWidget.Builder creatureInvBuilder = SlotGroupWidget.builder();
@@ -98,19 +107,103 @@ public class NewRiftCreatureScreen {
                 .child(creatureInvBuilder.build());
 
         //continue w making the page
-        ParentWidget<?> toReturn = new ParentWidget<>();
-        toReturn.sizeRel(1f, 1f)
-                .padding(0, 7)
-                .child(new Column()
+        Flow column = new Column().coverChildrenHeight();
+        if (creatureHasGear) column
+                .child(IKey.str(creatureGearName).asWidget())
+                .child(creatureGearBuilder.build());
+        column.child(IKey.str(creatureInvName).asWidget())
+                .child(creatureInv)
+                .child(IKey.str(playerName).asWidget())
+                .child(SlotGroupWidget.playerInventory(false))
+                .bottomRel(0.2f);
+        return new ParentWidget<>().sizeRel(1f, 1f)
+                .padding(7, 7)
+                .child(column);
+    }
+
+    private static ParentWidget<?> creatureSettingsPage(RiftCreature creature, PanelSyncManager syncManager) {
+        //creature sitting syncing
+        BooleanSyncValue sittingValue = new BooleanSyncValue(
+                creature::isSitting,
+                creature::setSitting
+        );
+        syncManager.syncValue("creatureSitting", sittingValue);
+
+        //set sitting
+        Flow sittingOptions = new Row()
+                .coverChildrenHeight()
+                .crossAxisAlignment(Alignment.CrossAxis.CENTER)
+                .childPadding(2)
+                .child(new CycleButtonWidget()
+                        .value(new BoolValue.Dynamic(
+                                sittingValue::getValue,
+                                sittingValue::setBoolValue
+                        ))
+                        .stateOverlay(GuiTextures.CHECK_BOX)
+                        .size(14, 14)
+                )
+                .child(IKey.str("Sitting").asWidget().verticalCenter());
+
+        //final return value
+        return new ParentWidget<>().sizeRel(1f, 1f)
+                .padding(7, 7)
+                .child(new ParentWidget<>()
+                        .debugName("top")
+                        .widthRel(1f)
                         .coverChildrenHeight()
-                        .child(IKey.str(creatureGearName).asWidget())
-                        .child(creatureGearBuilder.build())
-                        .child(IKey.str(creatureInvName).asWidget())
-                        .child(creatureInv)
-                        .child(IKey.str(playerName).asWidget())
-                        .child(SlotGroupWidget.playerInventory(false))
-                        .bottomRel(0.2f)
+                        .align(Alignment.TopCenter)
+                        .child(sittingOptions)
+                )
+                .child(new ParentWidget<>()
+                        .debugName("bottom")
+                        .widthRel(1f)
+                        .coverChildrenHeight()
+                        .align(Alignment.BottomCenter)
+                        .child(new Row()
+                                .coverChildren()
+                                .child(creatureBehaviorGroup(creature, syncManager))
+                                .child(creatureOptionsGroup(creature, syncManager))
+                        )
                 );
-        return toReturn;
+    }
+
+    private static ParentWidget<?> creatureBehaviorGroup(RiftCreature creature, PanelSyncManager syncManager) {
+        //creature tame behavior syncing
+        IntSyncValue creatureBehaviorValue = new IntSyncValue(
+                () -> creature.getTameBehavior().ordinal(),
+                val -> creature.setTameBehavior(TameBehaviorType.values()[val])
+        );
+        syncManager.syncValue("creatureBehavior", creatureBehaviorValue);
+
+        Flow behaviorOptions = new Column()
+                .coverChildren()
+                .childPadding(3)
+                .child(IKey.lang("radial.choice.behavior").asWidget());
+
+        //loop over all tame behavior types, to then make buttons associated with them
+        for (TameBehaviorType behavior : TameBehaviorType.values()) {
+            //skip turret mode if the creature cannot use it
+            if (!creature.canEnterTurretMode() && behavior == TameBehaviorType.TURRET) continue;
+
+            behaviorOptions.child(
+                    new ToggleButton().size(66, 20)
+                            .overlay(IKey.lang(behavior.getTranslatedName()))
+                            .value(new BoolValue.Dynamic(
+                                    () -> creatureBehaviorValue.getIntValue() == behavior.ordinal() && creature.getTameBehavior() == behavior,
+                                    value -> creatureBehaviorValue.setIntValue(behavior.ordinal())
+                            ))
+            );
+        }
+
+        return behaviorOptions;
+    }
+
+    private static ParentWidget<?> creatureOptionsGroup(RiftCreature creature, PanelSyncManager syncManager) {
+        Flow creatureOptions = new Column()
+                .coverChildrenHeight().width(66)
+                .childPadding(3)
+                .child(IKey.lang("radial.choice.options").asWidget());
+
+        return creatureOptions;
     }
 }

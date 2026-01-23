@@ -17,6 +17,13 @@ acquisition.born=Born on %s
 acquisition.purchased=Purchased on %s
 acquisition.received=Received on %s
 
+behavior_type.behavior=Behavior
+behavior_type.assist=Assist
+behavior_type.neutral=Neutral
+behavior_type.aggressive=Aggressive
+behavior_type.passive=Passive
+behavior_type.turret=Turret Mode
+
 creature_box.change_name=Change Name
 creature_box.open_inventory=Open Inventory
 creature_box.change_position=Change Position
