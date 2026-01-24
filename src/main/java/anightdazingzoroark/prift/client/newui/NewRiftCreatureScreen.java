@@ -36,27 +36,29 @@ public class NewRiftCreatureScreen {
 
         //tab related stuff
         PagedWidget.Controller tabController = new PagedWidget.Controller();
-        Row tabButtonRow = (Row) new Row()
-                .debugName("creatureScreenTabRow")
+        Flow tabButtonColumn = new Column()
+                .debugName("creatureScreenTabColumn")
                 .coverChildren()
-                .topRel(0f, 4, 1f)
+                .leftRel(0f, 4, 1f)
                 .child(new PageButton(0, tabController)
                         .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
-                        .tab(GuiTextures.TAB_TOP, -1))
+                        .tab(GuiTextures.TAB_LEFT, -1)
+                )
                 .child(new PageButton(1, tabController)
                         .overlay(GuiTextures.GEAR.asIcon().size(24))
-                        .tab(GuiTextures.TAB_TOP, 0));
+                        .tab(GuiTextures.TAB_LEFT, 0)
+                );
         PagedWidget<?> pagedWidget = new PagedWidget<>()
-                .debugName("pagedWidget").sizeRel(1f)
+                .debugName("pagedWidget")
                 .controller(tabController)
                 .addPage(creatureInventoryPage(creature, syncManager))
                 .addPage(creatureSettingsPage(creature, syncManager))
-                .addPage(new ParentWidget<>());
+                .widthRel(1f).coverChildrenHeight();
 
-        return new ModularPanel("creatureScreen").size(180, 192)
-                .child(tabButtonRow)
-                .child(pagedWidget);
-                //.coverChildrenHeight(); this is here until i figure out how to dynamically change height of a ModularPanel
+        return new ModularPanel(UIPanelNames.INTERACTED_CREATURE_SCREEN).width(180)
+                .child(tabButtonColumn)
+                .child(pagedWidget)
+                .coverChildrenHeight();
     }
 
     private static ParentWidget<?> creatureInventoryPage(RiftCreature creature, PanelSyncManager syncManager) {
@@ -113,23 +115,21 @@ public class NewRiftCreatureScreen {
         Flow column = new Column().coverChildrenHeight();
         if (creatureHasGear) column
                 .child(IKey.str(creatureGearName).asWidget())
-                .child(creatureGearBuilder.build());
+                .child(creatureGearBuilder.build())
+                .child(IKey.SPACE.asWidget());
         column.child(IKey.str(creatureInvName).asWidget())
                 .child(creatureInv)
+                .child(IKey.SPACE.asWidget())
                 .child(IKey.str(playerName).asWidget())
-                .child(SlotGroupWidget.playerInventory(false))
-                .bottomRel(0.2f);
-        return new ParentWidget<>().sizeRel(1f, 1f)
+                .child(SlotGroupWidget.playerInventory(false));
+        return new ParentWidget<>().debugName("inventoryPage")
                 .padding(7, 7)
-                .child(column);
+                .child(column).width(180).coverChildrenHeight();
     }
 
     private static ParentWidget<?> creatureSettingsPage(RiftCreature creature, PanelSyncManager syncManager) {
         //creature sitting syncing
-        BooleanSyncValue sittingValue = new BooleanSyncValue(
-                creature::isSitting,
-                creature::setSitting
-        );
+        BooleanSyncValue sittingValue = new BooleanSyncValue(creature::isSitting, creature::setSitting);
         syncManager.syncValue("creatureSitting", sittingValue);
 
         //creature information button
@@ -143,10 +143,7 @@ public class NewRiftCreatureScreen {
                 .crossAxisAlignment(Alignment.CrossAxis.CENTER)
                 .childPadding(2)
                 .child(new CycleButtonWidget()
-                        .value(new BoolValue.Dynamic(
-                                sittingValue::getValue,
-                                sittingValue::setBoolValue
-                        ))
+                        .value(new BoolValue.Dynamic(sittingValue::getValue, sittingValue::setBoolValue))
                         .stateOverlay(GuiTextures.CHECK_BOX)
                         .size(14, 14)
                 )
@@ -157,7 +154,7 @@ public class NewRiftCreatureScreen {
                 .debugName("top")
                 .widthRel(1f)
                 .coverChildrenHeight()
-                .align(Alignment.TopCenter)
+                //.align(Alignment.TopCenter)
                 .child(sittingOptions);
 
         //define bottom parentwidget
@@ -165,8 +162,8 @@ public class NewRiftCreatureScreen {
         ParentWidget<?> bottomParentWidget = new ParentWidget<>()
                 .debugName("bottom")
                 .widthRel(1f)
-                .coverChildrenHeight()
-                .align(Alignment.BottomCenter);
+                .coverChildrenHeight();
+                //.align(Alignment.BottomCenter);
         if (hasOptionsButtons) {
             bottomParentWidget.child(creatureBehaviorGroup(creature, syncManager, true).align(Alignment.TopLeft))
                     .child(creatureOptionsGroup(creature, syncManager).align(Alignment.TopRight));
@@ -174,11 +171,16 @@ public class NewRiftCreatureScreen {
         else bottomParentWidget.child(creatureBehaviorGroup(creature, syncManager, false).align(Alignment.TopCenter));
 
         //final return value
-        return new ParentWidget<>().sizeRel(1f, 1f)
+        return new ParentWidget<>()
+                .debugName("settingsPage")
                 .padding(7, 7)
                 .child(creatureInfoButton)
-                .child(topParentWidget)
-                .child(bottomParentWidget);
+                .child(new Column()
+                        .coverChildrenHeight()
+                        .child(topParentWidget)
+                        .child(bottomParentWidget)
+                )
+                .width(180);
     }
 
     private static ParentWidget<?> creatureBehaviorGroup(RiftCreature creature, PanelSyncManager syncManager, boolean hasOptionsButtons) {

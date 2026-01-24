@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity;
 
+import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.custom.EntityWidget;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
@@ -481,7 +482,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
         RiftEgg eggData = (RiftEgg) data.getGuiHolder();
 
         //create ui
-        ModularPanel panel = ModularPanel.defaultPanel("eggScreen");
+        ModularPanel panel = ModularPanel.defaultPanel(UIPanelNames.EGG_SCREEN);
         Flow column = new Column()
                 .child(IKey.str(I18n.format("item."+eggData.getCreatureType().name().toLowerCase()+"_egg.name"))
                         .asWidget())
