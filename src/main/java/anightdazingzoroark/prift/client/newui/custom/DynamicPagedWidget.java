@@ -1,9 +1,12 @@
 package anightdazingzoroark.prift.client.newui.custom;
 
 import com.cleanroommc.modularui.api.widget.IWidget;
+import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widget.Widget;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.IntConsumer;
 
@@ -11,6 +14,7 @@ import java.util.function.IntConsumer;
 //removes pages when switching instead of just hiding and showing
 public class DynamicPagedWidget<W extends DynamicPagedWidget<W>> extends Widget<W> {
     private final List<IWidget> pages = new ArrayList<>();
+    private final ParentWidget<?> parentWidget = new ParentWidget<>().coverChildren().debugName("dynamicPage");
     private IWidget currentPage;
     private int currentPageIndex = 0;
     private IntConsumer onPageChange;
@@ -20,16 +24,22 @@ public class DynamicPagedWidget<W extends DynamicPagedWidget<W>> extends Widget<
         this.setPage(this.currentPageIndex);
     }
 
+    public W onPageChange(@Nullable IntConsumer onPageChange) {
+        this.onPageChange = onPageChange;
+        return getThis();
+    }
+
     public void setPage(int page) {
         if (page < 0 || page >= this.pages.size()) {
             throw new IndexOutOfBoundsException("Setting page of " + this + " to " + page + " failed. Only values from 0 to " + (this.pages.size() - 1) + " are allowed.");
         }
         this.currentPageIndex = page;
         if (this.currentPage != null) {
-            this.currentPage.setEnabled(false);
+            this.parentWidget.remove(this.currentPage);
         }
         this.currentPage = this.pages.get(this.currentPageIndex);
-        this.currentPage.setEnabled(true);
+        this.parentWidget.child(this.currentPage);
+        this.parentWidget.scheduleResize();
 
         if (this.onPageChange != null) {
             this.onPageChange.accept(page);
@@ -64,7 +74,7 @@ public class DynamicPagedWidget<W extends DynamicPagedWidget<W>> extends Widget<
 
     @Override
     public List<IWidget> getChildren() {
-        return this.pages;
+        return Collections.singletonList(this.parentWidget);
     }
 
     public W initialPage(int page) {
@@ -76,7 +86,7 @@ public class DynamicPagedWidget<W extends DynamicPagedWidget<W>> extends Widget<
 
     public W addPage(IWidget widget) {
         this.pages.add(widget);
-        widget.setEnabled(false);
+        //widget.setEnabled(false);
         return getThis();
     }
 

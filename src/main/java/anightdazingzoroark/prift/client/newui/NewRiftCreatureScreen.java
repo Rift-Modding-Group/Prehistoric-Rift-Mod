@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.client.newui;
 
+import anightdazingzoroark.prift.client.newui.custom.DynamicPageButton;
+import anightdazingzoroark.prift.client.newui.custom.DynamicPagedWidget;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
@@ -35,20 +37,20 @@ public class NewRiftCreatureScreen {
         RiftCreature creature = (RiftCreature) data.getGuiHolder();
 
         //tab related stuff
-        PagedWidget.Controller tabController = new PagedWidget.Controller();
+        DynamicPagedWidget.Controller tabController = new DynamicPagedWidget.Controller();
         Flow tabButtonColumn = new Column()
                 .debugName("creatureScreenTabColumn")
                 .coverChildren()
                 .leftRel(0f, 4, 1f)
-                .child(new PageButton(0, tabController)
+                .child(new DynamicPageButton(0, tabController)
                         .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
                         .tab(GuiTextures.TAB_LEFT, -1)
                 )
-                .child(new PageButton(1, tabController)
+                .child(new DynamicPageButton(1, tabController)
                         .overlay(GuiTextures.GEAR.asIcon().size(24))
                         .tab(GuiTextures.TAB_LEFT, 0)
                 );
-        PagedWidget<?> pagedWidget = new PagedWidget<>()
+        DynamicPagedWidget<?> pagedWidget = new DynamicPagedWidget<>()
                 .debugName("pagedWidget")
                 .controller(tabController)
                 .addPage(creatureInventoryPage(creature, syncManager))
@@ -163,7 +165,6 @@ public class NewRiftCreatureScreen {
                 .debugName("bottom")
                 .widthRel(1f)
                 .coverChildrenHeight();
-                //.align(Alignment.BottomCenter);
         if (hasOptionsButtons) {
             bottomParentWidget.child(creatureBehaviorGroup(creature, syncManager, true).align(Alignment.TopLeft))
                     .child(creatureOptionsGroup(creature, syncManager).align(Alignment.TopRight));
@@ -176,11 +177,11 @@ public class NewRiftCreatureScreen {
                 .padding(7, 7)
                 .child(creatureInfoButton)
                 .child(new Column()
-                        .coverChildrenHeight()
                         .child(topParentWidget)
                         .child(bottomParentWidget)
+                        .coverChildrenHeight()
                 )
-                .width(180);
+                .width(180).coverChildrenHeight();
     }
 
     private static ParentWidget<?> creatureBehaviorGroup(RiftCreature creature, PanelSyncManager syncManager, boolean hasOptionsButtons) {
