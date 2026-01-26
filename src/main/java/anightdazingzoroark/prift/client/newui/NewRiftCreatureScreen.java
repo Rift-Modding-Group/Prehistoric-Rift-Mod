@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.client.newui;
 
+import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.client.newui.custom.DynamicPageButton;
 import anightdazingzoroark.prift.client.newui.custom.DynamicPagedWidget;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -16,10 +17,7 @@ import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.BoolValue;
-import com.cleanroommc.modularui.value.sync.BooleanSyncValue;
-import com.cleanroommc.modularui.value.sync.IntSyncValue;
-import com.cleanroommc.modularui.value.sync.PanelSyncManager;
-import com.cleanroommc.modularui.value.sync.SyncHandlers;
+import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widgets.*;
 import com.cleanroommc.modularui.widgets.layout.Column;
@@ -28,7 +26,9 @@ import com.cleanroommc.modularui.widgets.layout.Row;
 import com.cleanroommc.modularui.widgets.slot.ItemSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.items.ItemStackHandler;
 
 public class NewRiftCreatureScreen {
@@ -134,30 +134,49 @@ public class NewRiftCreatureScreen {
         BooleanSyncValue sittingValue = new BooleanSyncValue(creature::isSitting, creature::setSitting);
         syncManager.syncValue("creatureSitting", sittingValue);
 
+        //turret mode syncing
+        BooleanSyncValue turretModeValue = new BooleanSyncValue(creature::isTurretMode, creature::setTurretMode);
+        syncManager.syncValue("turretMode", turretModeValue);
+
         //creature information button
         ButtonWidget<?> creatureInfoButton = new ButtonWidget<>()
                 .overlay(GuiTextures.EXCLAMATION)
                 .size(12).align(Alignment.TopRight);
 
-        //set sitting
-        Flow sittingOptions = new Row()
-                .coverChildrenHeight()
-                .crossAxisAlignment(Alignment.CrossAxis.CENTER)
-                .childPadding(2)
-                .child(new CycleButtonWidget()
-                        .value(new BoolValue.Dynamic(sittingValue::getValue, sittingValue::setBoolValue))
-                        .stateOverlay(GuiTextures.CHECK_BOX)
-                        .size(14, 14)
-                )
-                .child(IKey.str("Sitting").asWidget().verticalCenter());
-
         //define top parentwidget
+        Flow topParentWidgetColumn = new Column().coverChildren()
+                .childPadding(2)
+                .child(new Row()
+                        .coverChildrenHeight()
+                        .crossAxisAlignment(Alignment.CrossAxis.CENTER)
+                        .childPadding(2)
+                        .child(new CycleButtonWidget()
+                                .value(new BoolValue.Dynamic(sittingValue::getValue, sittingValue::setBoolValue))
+                                .stateOverlay(GuiTextures.CHECK_BOX)
+                                .size(14, 14)
+                        )
+                        .child(IKey.str("Sitting").asWidget().verticalCenter())
+                );
+
+        //if creature has turret mode, add option
+        if (creature.canEnterTurretMode()) topParentWidgetColumn.child(
+                new Row()
+                        .coverChildrenHeight()
+                        .crossAxisAlignment(Alignment.CrossAxis.CENTER)
+                        .childPadding(2)
+                        .child(new CycleButtonWidget()
+                                .value(new BoolValue.Dynamic(turretModeValue::getValue, turretModeValue::setBoolValue))
+                                .stateOverlay(GuiTextures.CHECK_BOX)
+                                .size(14, 14)
+                        )
+                        .child(IKey.str("Turret Mode").asWidget().verticalCenter())
+        );
+
         ParentWidget<?> topParentWidget = new ParentWidget<>()
                 .debugName("top")
                 .widthRel(1f)
                 .coverChildrenHeight()
-                //.align(Alignment.TopCenter)
-                .child(sittingOptions);
+                .child(topParentWidgetColumn);
 
         //define bottom parentwidget
         boolean hasOptionsButtons = canHaveOptionsButtons(creature);
@@ -177,6 +196,7 @@ public class NewRiftCreatureScreen {
                 .padding(7, 7)
                 .child(creatureInfoButton)
                 .child(new Column()
+                        .childPadding(5)
                         .child(topParentWidget)
                         .child(bottomParentWidget)
                         .coverChildrenHeight()
@@ -201,9 +221,6 @@ public class NewRiftCreatureScreen {
 
         //loop over all tame behavior types, to then make buttons associated with them
         for (TameBehaviorType behavior : TameBehaviorType.values()) {
-            //skip turret mode if the creature cannot use it
-            if (!creature.canEnterTurretMode() && behavior == TameBehaviorType.TURRET) continue;
-
             behaviorOptions.child(
                     new ToggleButton().size(buttonWidth, 20)
                             .overlay(IKey.lang(behavior.getTranslatedName()))
@@ -230,17 +247,51 @@ public class NewRiftCreatureScreen {
 
         //workstation button
         if (creature instanceof IWorkstationUser) {
+            IWorkstationUser workstationUser = (IWorkstationUser) creature;
+
             creatureOptions.child(
                     new ButtonWidget<>().size(80, 20)
-                            .overlay(IKey.lang("radial.choice.set_workstation"))
+                            .overlay(IKey.dynamic(() -> {
+                                if (!workstationUser.hasWorkstation()) return I18n.format("radial.choice.set_workstation");
+                                else return I18n.format("radial.choice.clear_workstation");
+                            }))
+                            .onMousePressed(button -> {
+                                if (!workstationUser.hasWorkstation()) {
+                                    creature.setSitting(false);
+                                    ClientProxy.settingCreatureWorkstation = true;
+                                    ClientProxy.creatureIdForWorkstation = creature.getEntityId();
+
+                                    EntityPlayer player = Minecraft.getMinecraft().player;
+                                    player.sendStatusMessage(new TextComponentTranslation("action.set_creature_workstation_start"), false);
+
+                                    creatureOptions.getPanel().closeIfOpen();
+                                }
+                                else workstationUser.clearWorkstation(false);
+                                return true;
+                            })
             );
         }
 
         //harvest on wander button
         if (creature instanceof IHarvestWhenWandering) {
+            IHarvestWhenWandering harvestWhenWanderingUser = (IHarvestWhenWandering) creature;
+
+            BooleanSyncValue harvestWhenWanderingVal = new BooleanSyncValue(
+                    harvestWhenWanderingUser::canHarvest,
+                    harvestWhenWanderingUser::setCanHarvest
+            );
+            syncManager.syncValue("harvestWhenWandering", harvestWhenWanderingVal);
+
             creatureOptions.child(
-                    new ButtonWidget<>().size(80, 20)
-                            .overlay(IKey.lang("radial.choice.set_wander_harvest"))
+                    new ToggleButton().size(80, 20)
+                            .overlay(IKey.dynamic(() -> {
+                                if (harvestWhenWanderingUser.canHarvest()) return I18n.format("radial.choice.clear_wander_harvest");
+                                else return I18n.format("radial.choice.set_wander_harvest");
+                            }))
+                            .value(new BoolValue.Dynamic(
+                                    harvestWhenWanderingVal::getValue,
+                                    harvestWhenWanderingVal::setBoolValue
+                            ))
             );
         }
 

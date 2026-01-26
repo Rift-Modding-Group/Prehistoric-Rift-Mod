@@ -6,8 +6,7 @@ public enum TameBehaviorType {
     ASSIST,
     NEUTRAL,
     AGGRESSIVE,
-    PASSIVE,
-    TURRET;
+    PASSIVE;
 
     public String getTranslatedName() {
         return I18n.format("behavior_type."+this.name().toLowerCase());
