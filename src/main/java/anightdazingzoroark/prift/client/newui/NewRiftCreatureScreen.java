@@ -8,11 +8,14 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.api.value.IBoolValue;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
 import com.cleanroommc.modularui.factory.EntityGuiData;
+import com.cleanroommc.modularui.network.NetworkUtils;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
@@ -38,28 +41,28 @@ public class NewRiftCreatureScreen {
 
         //tab related stuff
         DynamicPagedWidget.Controller tabController = new DynamicPagedWidget.Controller();
-        Flow tabButtonColumn = new Column()
-                .debugName("creatureScreenTabColumn")
-                .coverChildren()
-                .leftRel(0f, 4, 1f)
-                .child(new DynamicPageButton(0, tabController)
-                        .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
-                        .tab(GuiTextures.TAB_LEFT, -1)
-                )
-                .child(new DynamicPageButton(1, tabController)
-                        .overlay(GuiTextures.GEAR.asIcon().size(24))
-                        .tab(GuiTextures.TAB_LEFT, 0)
-                );
-        DynamicPagedWidget<?> pagedWidget = new DynamicPagedWidget<>()
-                .debugName("pagedWidget")
-                .controller(tabController)
-                .addPage(creatureInventoryPage(creature, syncManager))
-                .addPage(creatureSettingsPage(creature, syncManager))
-                .widthRel(1f).coverChildrenHeight();
 
         return new ModularPanel(UIPanelNames.INTERACTED_CREATURE_SCREEN).width(180)
-                .child(tabButtonColumn)
-                .child(pagedWidget)
+                .child(new Column()
+                        .debugName("creatureScreenTabColumn")
+                        .coverChildren()
+                        .leftRel(0f, 4, 1f)
+                        .child(new DynamicPageButton(0, tabController)
+                                .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
+                                .tab(GuiTextures.TAB_LEFT, -1)
+                        )
+                        .child(new DynamicPageButton(1, tabController)
+                                .overlay(GuiTextures.GEAR.asIcon().size(24))
+                                .tab(GuiTextures.TAB_LEFT, 0)
+                        )
+                )
+                .child(new DynamicPagedWidget<>()
+                        .debugName("pagedWidget")
+                        .controller(tabController)
+                        .addPage(creatureInventoryPage(creature, syncManager))
+                        .addPage(creatureSettingsPage(creature, syncManager))
+                        .widthRel(1f).coverChildrenHeight()
+                )
                 .coverChildrenHeight();
     }
 
@@ -114,19 +117,28 @@ public class NewRiftCreatureScreen {
                 .child(creatureInvBuilder.build());
 
         //continue w making the page
-        Flow column = new Column().coverChildrenHeight();
-        if (creatureHasGear) column
-                .child(IKey.str(creatureGearName).asWidget())
-                .child(creatureGearBuilder.build())
-                .child(IKey.SPACE.asWidget());
-        column.child(IKey.str(creatureInvName).asWidget())
-                .child(creatureInv)
-                .child(IKey.SPACE.asWidget())
-                .child(IKey.str(playerName).asWidget())
-                .child(SlotGroupWidget.playerInventory(false));
         return new ParentWidget<>().debugName("inventoryPage")
                 .padding(7, 7)
-                .child(column).width(180).coverChildrenHeight();
+                .child(new Column().coverChildrenHeight().childPadding(5)
+                        //creature gear
+                        .childIf(creatureHasGear, new Column()
+                                .coverChildren()
+                                .child(IKey.str(creatureGearName).asWidget())
+                                .child(creatureGearBuilder.build())
+                        )
+                        //creature inventory
+                        .child(new Column()
+                                .coverChildren()
+                                .child(IKey.str(creatureInvName).asWidget())
+                                .child(creatureInv)
+                        )
+                        //player inventory
+                        .child(new Column()
+                                .coverChildren()
+                                .child(IKey.str(playerName).asWidget())
+                                .child(SlotGroupWidget.playerInventory(false))
+                        )
+                ).width(180).coverChildrenHeight();
     }
 
     private static ParentWidget<?> creatureSettingsPage(RiftCreature creature, PanelSyncManager syncManager) {
@@ -138,67 +150,92 @@ public class NewRiftCreatureScreen {
         BooleanSyncValue turretModeValue = new BooleanSyncValue(creature::isTurretMode, creature::setTurretMode);
         syncManager.syncValue("turretMode", turretModeValue);
 
-        //creature information button
-        ButtonWidget<?> creatureInfoButton = new ButtonWidget<>()
-                .overlay(GuiTextures.EXCLAMATION)
-                .size(12).align(Alignment.TopRight);
-
-        //define top parentwidget
-        Flow topParentWidgetColumn = new Column().coverChildren()
-                .childPadding(2)
-                .child(new Row()
-                        .coverChildrenHeight()
-                        .crossAxisAlignment(Alignment.CrossAxis.CENTER)
-                        .childPadding(2)
-                        .child(new CycleButtonWidget()
-                                .value(new BoolValue.Dynamic(sittingValue::getValue, sittingValue::setBoolValue))
-                                .stateOverlay(GuiTextures.CHECK_BOX)
-                                .size(14, 14)
-                        )
-                        .child(IKey.str("Sitting").asWidget().verticalCenter())
-                );
-
-        //if creature has turret mode, add option
-        if (creature.canEnterTurretMode()) topParentWidgetColumn.child(
-                new Row()
-                        .coverChildrenHeight()
-                        .crossAxisAlignment(Alignment.CrossAxis.CENTER)
-                        .childPadding(2)
-                        .child(new CycleButtonWidget()
-                                .value(new BoolValue.Dynamic(turretModeValue::getValue, turretModeValue::setBoolValue))
-                                .stateOverlay(GuiTextures.CHECK_BOX)
-                                .size(14, 14)
-                        )
-                        .child(IKey.str("Turret Mode").asWidget().verticalCenter())
-        );
-
-        ParentWidget<?> topParentWidget = new ParentWidget<>()
-                .debugName("top")
-                .widthRel(1f)
-                .coverChildrenHeight()
-                .child(topParentWidgetColumn);
-
         //define bottom parentwidget
         boolean hasOptionsButtons = canHaveOptionsButtons(creature);
-        ParentWidget<?> bottomParentWidget = new ParentWidget<>()
-                .debugName("bottom")
-                .widthRel(1f)
-                .coverChildrenHeight();
-        if (hasOptionsButtons) {
-            bottomParentWidget.child(creatureBehaviorGroup(creature, syncManager, true).align(Alignment.TopLeft))
-                    .child(creatureOptionsGroup(creature, syncManager).align(Alignment.TopRight));
-        }
-        else bottomParentWidget.child(creatureBehaviorGroup(creature, syncManager, false).align(Alignment.TopCenter));
+
+        //additional widgets that depend on value of turretModeValue
+        IWidget turretTargetingOptions = turretTargetingOptionGroup(creature, syncManager, hasOptionsButtons);
+        IWidget creatureBehavior = creatureBehaviorGroup(creature, syncManager, hasOptionsButtons);
 
         //final return value
         return new ParentWidget<>()
                 .debugName("settingsPage")
                 .padding(7, 7)
-                .child(creatureInfoButton)
+                .child(new ButtonWidget<>()
+                        .overlay(GuiTextures.EXCLAMATION)
+                        .size(12).align(Alignment.TopRight)
+                )
                 .child(new Column()
                         .childPadding(5)
-                        .child(topParentWidget)
-                        .child(bottomParentWidget)
+                        .child(new ParentWidget<>()
+                                .debugName("top")
+                                .widthRel(1f)
+                                .coverChildrenHeight()
+                                .child(new Column().coverChildren()
+                                        .childPadding(2)
+                                        .child(new Row()
+                                                .coverChildrenHeight()
+                                                .crossAxisAlignment(Alignment.CrossAxis.CENTER)
+                                                .childPadding(2)
+                                                .child(new CycleButtonWidget()
+                                                        .value(new BoolValue.Dynamic(sittingValue::getValue, sittingValue::setBoolValue))
+                                                        .stateOverlay(GuiTextures.CHECK_BOX)
+                                                        .size(14, 14)
+                                                )
+                                                .child(IKey.str("Sitting").asWidget().verticalCenter())
+                                        )
+                                        //if creature has turret mode, add option
+                                        .childIf(creature.canEnterTurretMode(), new Row()
+                                                .coverChildrenHeight()
+                                                .crossAxisAlignment(Alignment.CrossAxis.CENTER)
+                                                .childPadding(2)
+                                                .child(new CycleButtonWidget()
+                                                        .value(new BoolValue.Dynamic(turretModeValue::getValue, turretModeValue::setBoolValue))
+                                                        .stateOverlay(GuiTextures.CHECK_BOX)
+                                                        .size(14, 14)
+                                                )
+                                                .child(IKey.str("Turret Mode").asWidget().verticalCenter())
+                                        )
+                                )
+                        )
+                        .child(new ParentWidget<>()
+                                .debugName("bottom")
+                                .widthRel(1f)
+                                .coverChildrenHeight()
+                                //if there's an options button section, there's the widget with the options
+                                .childIf(hasOptionsButtons, new ParentWidget<>()
+                                        .onUpdateListener(widget -> {
+                                            if (turretModeValue.getBoolValue()) {
+                                                tryAddChild(widget, turretTargetingOptions);
+                                                tryRemoveChild(widget, creatureBehavior);
+                                            }
+                                            else {
+                                                tryAddChild(widget, creatureBehavior);
+                                                tryRemoveChild(widget, turretTargetingOptions);
+                                            }
+                                        })
+                                        .debugName("creatureBehaviorOrTurretTargeting")
+                                        .coverChildren()
+                                        .align(Alignment.TopLeft)
+                                )
+                                .childIf(hasOptionsButtons, creatureOptionsGroup(creature, syncManager).align(Alignment.TopRight))
+                                //if theres no options button section, its just the widget
+                                .childIf(!hasOptionsButtons, new ParentWidget<>()
+                                        .onUpdateListener(widget -> {
+                                            if (turretModeValue.getBoolValue()) {
+                                                tryAddChild(widget, turretTargetingOptions);
+                                                tryRemoveChild(widget, creatureBehavior);
+                                            }
+                                            else {
+                                                tryAddChild(widget, creatureBehavior);
+                                                tryRemoveChild(widget, turretTargetingOptions);
+                                            }
+                                        })
+                                        .debugName("creatureBehaviorOrTurretTargeting")
+                                        .coverChildren()
+                                        .align(Alignment.TopCenter)
+                                )
+                        )
                         .coverChildrenHeight()
                 )
                 .width(180).coverChildrenHeight();
@@ -232,6 +269,49 @@ public class NewRiftCreatureScreen {
         }
 
         return behaviorOptions;
+    }
+
+    private static ParentWidget<?> turretTargetingOptionGroup(RiftCreature creature, PanelSyncManager syncManager, boolean hasOptionsButtons) {
+        int buttonWidth = hasOptionsButtons ? 80 : 160;
+
+        //turret mode targeting syncing
+        IntSyncValue turretTargetingValue = new IntSyncValue(
+                () -> creature.getTurretTargeting().ordinal(),
+                value -> creature.setTurretModeTargeting(TurretModeTargeting.values()[value])
+        );
+        syncManager.syncValue("turretTargeting", turretTargetingValue);
+
+        Flow turretModeOptions = new Column()
+                .coverChildrenHeight().width(buttonWidth)
+                .childPadding(3)
+                .child(IKey.lang("radial.choice.behavior").asWidget());
+
+        for (TurretModeTargeting turretModeTargeting : TurretModeTargeting.values()) {
+            turretModeOptions.child(
+                    new ToggleButton().size(buttonWidth, 20)
+                            .overlay(IKey.lang(turretModeTargeting.getTranslatedName()))
+                            .value(new BoolValue.Dynamic(
+                                    () -> turretTargetingValue.getIntValue() == turretModeTargeting.ordinal() && creature.getTurretTargeting() == turretModeTargeting,
+                                    value -> turretTargetingValue.setIntValue(turretModeTargeting.ordinal())
+                            ))
+            );
+        }
+
+        return turretModeOptions;
+    }
+
+    private static void tryAddChild(ParentWidget<?> parentWidget, IWidget childToAdd) {
+        if (!parentWidget.getChildren().contains(childToAdd)) {
+            parentWidget.child(childToAdd);
+            parentWidget.scheduleResize();
+        }
+    }
+
+    private static void tryRemoveChild(ParentWidget<?> parentWidget, IWidget childToRemove) {
+        if (parentWidget.getChildren().contains(childToRemove)) {
+            parentWidget.remove(childToRemove);
+            parentWidget.scheduleResize();
+        }
     }
 
     private static boolean canHaveOptionsButtons(RiftCreature creature) {
