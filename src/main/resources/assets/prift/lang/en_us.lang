@@ -24,6 +24,12 @@ behavior_type.aggressive=Aggressive
 behavior_type.passive=Passive
 behavior_type.turret=Turret Mode
 
+creature_menu.sitting=Sitting
+creature_menu.turret_mode=Turret Mode
+creature_menu.header.creature_behavior=Behavior
+creature_menu.header.turret_mode_targeting=Turret Mode Targeting
+creature_menu.header.base_options=Base Options
+
 creature_box.change_name=Change Name
 creature_box.open_inventory=Open Inventory
 creature_box.change_position=Change Position

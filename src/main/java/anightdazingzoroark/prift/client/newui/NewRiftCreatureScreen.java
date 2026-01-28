@@ -10,12 +10,10 @@ import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import com.cleanroommc.modularui.api.drawable.IKey;
-import com.cleanroommc.modularui.api.value.IBoolValue;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
 import com.cleanroommc.modularui.factory.EntityGuiData;
-import com.cleanroommc.modularui.network.NetworkUtils;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
@@ -109,13 +107,6 @@ public class NewRiftCreatureScreen {
         }
         creatureInvBuilder.matrix(invMatrix);
 
-        //make the widget for creature inventory based on height of inventory
-        IWidget creatureInv = creatureInvBuilder.build();
-        if (matrixHeight > 3) creatureInv = new ListWidget<>()
-                .size(168, 54)
-                .horizontalCenter()
-                .child(creatureInvBuilder.build());
-
         //continue w making the page
         return new ParentWidget<>().debugName("inventoryPage")
                 .padding(7, 7)
@@ -130,7 +121,14 @@ public class NewRiftCreatureScreen {
                         .child(new Column()
                                 .coverChildren()
                                 .child(IKey.str(creatureInvName).asWidget())
-                                .child(creatureInv)
+                                //if inventory is bigger than 27 slots, the inventory widget is to be a scrollable list
+                                .childIf(matrixHeight > 3, new ListWidget<>()
+                                        .size(168, 54)
+                                        .horizontalCenter()
+                                        .child(creatureInvBuilder.build())
+                                )
+                                //otherwise, its just the inventory itself
+                                .childIf(matrixHeight <= 3, creatureInvBuilder.build())
                         )
                         //player inventory
                         .child(new Column()
@@ -178,11 +176,22 @@ public class NewRiftCreatureScreen {
                                                 .crossAxisAlignment(Alignment.CrossAxis.CENTER)
                                                 .childPadding(2)
                                                 .child(new CycleButtonWidget()
-                                                        .value(new BoolValue.Dynamic(sittingValue::getValue, sittingValue::setBoolValue))
+                                                        .value(new BoolValue.Dynamic(
+                                                                () -> {
+                                                                    return sittingValue.getValue() && !turretModeValue.getValue();
+                                                                },
+                                                                value -> {
+                                                                    sittingValue.setBoolValue(value && !turretModeValue.getValue());
+                                                                }
+                                                        ))
                                                         .stateOverlay(GuiTextures.CHECK_BOX)
                                                         .size(14, 14)
                                                 )
-                                                .child(IKey.str("Sitting").asWidget().verticalCenter())
+                                                .child(IKey.dynamic(() -> {
+                                                        if (turretModeValue.getBoolValue()) return IKey.STRIKETHROUGH.toString()+I18n.format("creature_menu.sitting");
+                                                        else return I18n.format("creature_menu.sitting");
+                                                    }).asWidget().verticalCenter()
+                                                )
                                         )
                                         //if creature has turret mode, add option
                                         .childIf(creature.canEnterTurretMode(), new Row()
@@ -190,11 +199,17 @@ public class NewRiftCreatureScreen {
                                                 .crossAxisAlignment(Alignment.CrossAxis.CENTER)
                                                 .childPadding(2)
                                                 .child(new CycleButtonWidget()
-                                                        .value(new BoolValue.Dynamic(turretModeValue::getValue, turretModeValue::setBoolValue))
+                                                        .value(new BoolValue.Dynamic(
+                                                                turretModeValue::getValue,
+                                                                value -> {
+                                                                    turretModeValue.setBoolValue(value);
+                                                                    sittingValue.setBoolValue(false);
+                                                                }
+                                                        ))
                                                         .stateOverlay(GuiTextures.CHECK_BOX)
                                                         .size(14, 14)
                                                 )
-                                                .child(IKey.str("Turret Mode").asWidget().verticalCenter())
+                                                .child(IKey.lang("creature_menu.turret_mode").asWidget().verticalCenter())
                                         )
                                 )
                         )
@@ -254,7 +269,7 @@ public class NewRiftCreatureScreen {
         Flow behaviorOptions = new Column()
                 .coverChildrenHeight().width(buttonWidth)
                 .childPadding(3)
-                .child(IKey.lang("radial.choice.behavior").asWidget());
+                .child(IKey.lang("creature_menu.header.creature_behavior").asWidget());
 
         //loop over all tame behavior types, to then make buttons associated with them
         for (TameBehaviorType behavior : TameBehaviorType.values()) {
@@ -284,7 +299,7 @@ public class NewRiftCreatureScreen {
         Flow turretModeOptions = new Column()
                 .coverChildrenHeight().width(buttonWidth)
                 .childPadding(3)
-                .child(IKey.lang("radial.choice.behavior").asWidget());
+                .child(IKey.lang("creature_menu.header.turret_mode_targeting").asWidget());
 
         for (TurretModeTargeting turretModeTargeting : TurretModeTargeting.values()) {
             turretModeOptions.child(
@@ -323,7 +338,7 @@ public class NewRiftCreatureScreen {
         Flow creatureOptions = new Column()
                 .coverChildrenHeight().width(80)
                 .childPadding(3)
-                .child(IKey.lang("radial.choice.options").asWidget());
+                .child(IKey.lang("creature_menu.header.base_options").asWidget());
 
         //workstation button
         if (creature instanceof IWorkstationUser) {
