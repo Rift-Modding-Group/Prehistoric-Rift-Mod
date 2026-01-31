@@ -24,6 +24,7 @@ import com.cleanroommc.modularui.factory.EntityGuiData;
 import com.cleanroommc.modularui.factory.GuiFactories;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.value.sync.StringSyncValue;
 import com.cleanroommc.modularui.widgets.layout.Column;
@@ -478,24 +479,15 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
     @Override
     public ModularPanel buildUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disableRecipeViewer();
-
         RiftEgg eggData = (RiftEgg) data.getGuiHolder();
 
-        //create ui
-        ModularPanel panel = ModularPanel.defaultPanel(UIPanelNames.EGG_SCREEN);
-        Flow column = new Column()
-                .child(IKey.str(I18n.format("item."+eggData.getCreatureType().name().toLowerCase()+"_egg.name"))
-                        .asWidget())
-                .child(IKey.EMPTY.asWidget())
-                .child(IKey.EMPTY.asWidget())
-                .child(IKey.EMPTY.asWidget())
-                .child(new EntityWidget<>(eggData).size(60))
-                .child(IKey.EMPTY.asWidget())
-                .child(IKey.EMPTY.asWidget())
-                .child(IKey.EMPTY.asWidget())
-                .child(IKey.dynamic(this::getHatchTimeString).asWidget());
-        panel.child(column.top(10));
-
-        return panel;
+        return ModularPanel.defaultPanel(UIPanelNames.EGG_SCREEN).size(176, 166)
+                .child(new Column()
+                        .coverChildrenHeight().align(Alignment.Center)
+                        .childPadding(15)
+                        .child(IKey.lang("item."+eggData.getCreatureType().name().toLowerCase()+"_egg.name").asWidget())
+                        .child(new EntityWidget<>(eggData, 60f).size(60))
+                        .child(IKey.dynamic(this::getHatchTimeString).asWidget())
+                );
     }
 }

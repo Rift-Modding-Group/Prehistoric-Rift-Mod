@@ -63,6 +63,22 @@ public class CreatureNBT {
         return creature;
     }
 
+    public RiftCreature recreateCreatureAsNBT(World world) {
+        if (this.creatureNBT == null || this.creatureNBT.isEmpty()) return null;
+        RiftCreature creature = this.getCreatureType().invokeClass(world);
+
+        //attributes and creature health dont carry over on client side, this should be a workaround
+        if (world.isRemote) {
+            creature.setHealth(this.getCreatureHealth()[0]);
+            SharedMonsterAttributes.setAttributeModifiers(creature.getAttributeMap(), this.creatureNBT.getTagList("Attributes", 10));
+        }
+
+        creature.readEntityFromNBT(this.creatureNBT);
+        creature.setUniqueId(UUID.randomUUID());
+        creature.setCustomNameTag(this.getCustomName());
+        return creature;
+    }
+
     public NBTTagCompound getCreatureNBT() {
         return this.creatureNBT;
     }

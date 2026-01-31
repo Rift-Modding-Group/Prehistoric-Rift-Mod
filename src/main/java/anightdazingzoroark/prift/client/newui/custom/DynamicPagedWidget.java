@@ -86,7 +86,6 @@ public class DynamicPagedWidget<W extends DynamicPagedWidget<W>> extends Widget<
 
     public W addPage(IWidget widget) {
         this.pages.add(widget);
-        //widget.setEnabled(false);
         return getThis();
     }
 

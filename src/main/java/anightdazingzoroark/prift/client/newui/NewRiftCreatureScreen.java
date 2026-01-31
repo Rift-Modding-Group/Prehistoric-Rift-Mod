@@ -20,6 +20,7 @@ import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widget.ParentWidget;
+import com.cleanroommc.modularui.widget.sizer.Unit;
 import com.cleanroommc.modularui.widgets.*;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
@@ -29,8 +30,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.items.ItemStackHandler;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 public class NewRiftCreatureScreen {
     public static ModularPanel buildCreatureUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
@@ -40,25 +45,75 @@ public class NewRiftCreatureScreen {
         //tab related stuff
         DynamicPagedWidget.Controller tabController = new DynamicPagedWidget.Controller();
 
-        return new ModularPanel(UIPanelNames.INTERACTED_CREATURE_SCREEN).width(180)
+        return new ModularPanel(UIPanelNames.INTERACTED_CREATURE_SCREEN)
+                .onUpdateListener(new Consumer<ModularPanel>() {
+                    @Override
+                    public void accept(ModularPanel modularPanel) {
+                        DynamicPagedWidget<?> dynamicPagedWidget = this.getDynamicPagedWidget(modularPanel);
+                        if (dynamicPagedWidget == null) {
+                            modularPanel.width(180);
+                            return;
+                        }
+
+                        //get index and change panel width depending on current page index
+                        switch (dynamicPagedWidget.getCurrentPageIndex()) {
+                            case 0:
+                            case 1:
+                                modularPanel.width(180);
+                                break;
+                            case 2:
+                                modularPanel.width(212);
+                                break;
+                            case 3:
+                                modularPanel.width(220);
+                                break;
+                        }
+                    }
+
+                    private DynamicPagedWidget<?> getDynamicPagedWidget(ModularPanel panel) {
+                        List<IWidget> widgetChildren = panel.getChildren();
+                        for (IWidget widget : widgetChildren) {
+                            if (widget instanceof DynamicPagedWidget) return (DynamicPagedWidget<?>) widget;
+                        }
+                        return null;
+                    }
+                })
                 .child(new Column()
                         .debugName("creatureScreenTabColumn")
                         .coverChildren()
                         .leftRel(0f, 4, 1f)
                         .child(new DynamicPageButton(0, tabController)
                                 .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
+                                .addTooltipElement(IKey.lang("tametab.inventory"))
                                 .tab(GuiTextures.TAB_LEFT, -1)
                         )
                         .child(new DynamicPageButton(1, tabController)
                                 .overlay(GuiTextures.GEAR.asIcon().size(24))
+                                .addTooltipElement(IKey.lang("tametab.manage"))
+                                .tab(GuiTextures.TAB_LEFT, 0)
+                        )
+                        .child(new DynamicPageButton(2, tabController)
+                                .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
+                                .addTooltipElement(IKey.lang("tametab.info"))
+                                .tab(GuiTextures.TAB_LEFT, 0)
+                        )
+                        .child(new DynamicPageButton(3, tabController)
+                                .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
+                                .addTooltipElement(IKey.lang("tametab.moves"))
                                 .tab(GuiTextures.TAB_LEFT, 0)
                         )
                 )
                 .child(new DynamicPagedWidget<>()
                         .debugName("pagedWidget")
                         .controller(tabController)
+                        //page for creature inventory
                         .addPage(creatureInventoryPage(creature, syncManager))
+                        //page for creature settings
                         .addPage(creatureSettingsPage(creature, syncManager))
+                        //page for creature info
+                        .addPage(creatureInfoPage(creature, syncManager, settings))
+                        //page for creature moves
+                        .addPage(creatureMovesPage(creature, syncManager, settings))
                         .widthRel(1f).coverChildrenHeight()
                 )
                 .coverChildrenHeight();
@@ -159,10 +214,6 @@ public class NewRiftCreatureScreen {
         return new ParentWidget<>()
                 .debugName("settingsPage")
                 .padding(7, 7)
-                .child(new ButtonWidget<>()
-                        .overlay(GuiTextures.EXCLAMATION)
-                        .size(12).align(Alignment.TopRight)
-                )
                 .child(new Column()
                         .childPadding(5)
                         .child(new ParentWidget<>()
@@ -172,6 +223,7 @@ public class NewRiftCreatureScreen {
                                 .child(new Column().coverChildren()
                                         .childPadding(2)
                                         .child(new Row()
+                                                .debugName("sittingRow")
                                                 .coverChildrenHeight()
                                                 .crossAxisAlignment(Alignment.CrossAxis.CENTER)
                                                 .childPadding(2)
@@ -188,13 +240,14 @@ public class NewRiftCreatureScreen {
                                                         .size(14, 14)
                                                 )
                                                 .child(IKey.dynamic(() -> {
-                                                        if (turretModeValue.getBoolValue()) return IKey.STRIKETHROUGH.toString()+I18n.format("creature_menu.sitting");
-                                                        else return I18n.format("creature_menu.sitting");
-                                                    }).asWidget().verticalCenter()
+                                                            if (turretModeValue.getBoolValue()) return IKey.STRIKETHROUGH.toString()+I18n.format("creature_menu.sitting");
+                                                            else return I18n.format("creature_menu.sitting");
+                                                        }).asWidget().verticalCenter()
                                                 )
                                         )
-                                        //if creature has turret mode, add option
-                                        .childIf(creature.canEnterTurretMode(), new Row()
+                                        //if creature has turret mode and is at base, add option
+                                        .childIf(creature.canEnterTurretMode()
+                                                && creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE, new Row()
                                                 .coverChildrenHeight()
                                                 .crossAxisAlignment(Alignment.CrossAxis.CENTER)
                                                 .childPadding(2)
@@ -315,20 +368,6 @@ public class NewRiftCreatureScreen {
         return turretModeOptions;
     }
 
-    private static void tryAddChild(ParentWidget<?> parentWidget, IWidget childToAdd) {
-        if (!parentWidget.getChildren().contains(childToAdd)) {
-            parentWidget.child(childToAdd);
-            parentWidget.scheduleResize();
-        }
-    }
-
-    private static void tryRemoveChild(ParentWidget<?> parentWidget, IWidget childToRemove) {
-        if (parentWidget.getChildren().contains(childToRemove)) {
-            parentWidget.remove(childToRemove);
-            parentWidget.scheduleResize();
-        }
-    }
-
     private static boolean canHaveOptionsButtons(RiftCreature creature) {
         return creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE &&
                 (creature instanceof IWorkstationUser || creature instanceof IHarvestWhenWandering);
@@ -391,5 +430,27 @@ public class NewRiftCreatureScreen {
         }
 
         return creatureOptions;
+    }
+
+    private static ParentWidget<?> creatureInfoPage(RiftCreature creature, PanelSyncManager syncManager, UISettings settings) {
+        return RiftCreatureInfoPanel.build(creature, syncManager, settings).debugName("infoPage");
+    }
+
+    private static ParentWidget<?> creatureMovesPage(RiftCreature creature, PanelSyncManager syncManager, UISettings settings) {
+        return RiftCreatureMovesPanel.build(creature, syncManager, settings).debugName("movesPage");
+    }
+
+    private static void tryAddChild(ParentWidget<?> parentWidget, IWidget childToAdd) {
+        if (!parentWidget.getChildren().contains(childToAdd)) {
+            parentWidget.child(childToAdd);
+            parentWidget.scheduleResize();
+        }
+    }
+
+    private static void tryRemoveChild(ParentWidget<?> parentWidget, IWidget childToRemove) {
+        if (parentWidget.getChildren().contains(childToRemove)) {
+            parentWidget.remove(childToRemove);
+            parentWidget.scheduleResize();
+        }
     }
 }

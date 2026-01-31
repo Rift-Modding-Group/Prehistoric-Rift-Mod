@@ -505,6 +505,7 @@ turrettargeting.players=%s will now target other players
 turrettargeting.players_and_other_tames=%s will now target other players and their tamed creatures
 turrettargeting.hostiles=%s will now target hostile mobs
 turrettargeting.all=%s will now target anything it deems unfriendly
+
 tametrait.level=Level %s
 tametrait.health=Health: %s/%s
 tametrait.energy=Energy: %s/%s
@@ -513,6 +514,13 @@ tametrait.xp=Experience: %s/%s
 tametrait.uuid=Unique ID: %s
 tametrait.species=Species: %s
 tametrait.age=Age: %s day(s) old
+tametab.inventory=Inventory
+tametab.manage=Management
+tametab.info=Info
+tametab.moves=Moves
+
+tamepanel.current_moves=%s Moves
+tamepanel.available_moves=Available Moves
 
 type.creature.back=Back
 type.creature.all=All
@@ -564,6 +572,8 @@ large_weapon_control.cannon=Fire Cannon
 large_weapon_control.mortar=Charge Mortar
 large_weapon_control.catapult=Charge Catapult
 
+creature_move.no_move=(empty)
+creature_move.none_selected.description=Click on a move for more info.
 creature_move.bounce.name=Bounce
 creature_move.bounce.description=The user bounces around, causing no effects
 creature_move.tackle.name=Tackle

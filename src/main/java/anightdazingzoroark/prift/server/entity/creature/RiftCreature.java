@@ -180,6 +180,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private RiftCreature herdLeader = this;
     private final Set<RiftCreature> herdMembers = new HashSet<>();
 
+    //modular ui stuff
+    public int currentSelectedMoveUI = -1;
+    public boolean selectedMoveFromRightUI = false;
+
+    //other stuff
     private int boxReviveTime;
     private int energyMod;
     private int energyRegenMod;
