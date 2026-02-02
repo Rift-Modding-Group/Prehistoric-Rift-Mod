@@ -574,6 +574,7 @@ large_weapon_control.catapult=Charge Catapult
 
 creature_move.no_move=(empty)
 creature_move.none_selected.description=Click on a move for more info.
+creature_move.none_selected_switch.description=Click on two moves to swap.
 creature_move.bounce.name=Bounce
 creature_move.bounce.description=The user bounces around, causing no effects
 creature_move.tackle.name=Tackle

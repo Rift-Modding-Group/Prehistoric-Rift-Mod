@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.NewRiftCreatureScreen;
 import anightdazingzoroark.prift.client.ui.RiftEggScreen;
+import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
@@ -183,6 +184,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //modular ui stuff
     public int currentSelectedMoveUI = -1;
     public boolean selectedMoveFromRightUI = false;
+    public boolean isMoveSwitchingUI = false;
+    public SelectedMoveInfo.SwapInfo moveSwapInfoUI = new SelectedMoveInfo.SwapInfo();
 
     //other stuff
     private int boxReviveTime;
