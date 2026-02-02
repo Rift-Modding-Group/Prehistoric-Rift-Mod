@@ -10,7 +10,9 @@ public class FixedSizeList<T> {
     private final T defaultValue;
 
     public FixedSizeList(int maxSize) {
-        this(maxSize, null);
+        this.maxSize = maxSize;
+        this.defaultValue = null;
+        this.list = new ArrayList<>(Collections.nCopies(this.maxSize, null));
     }
 
     public FixedSizeList(int maxSize, T defaultValue) {
@@ -19,13 +21,24 @@ public class FixedSizeList<T> {
         this.list = new ArrayList<>(Collections.nCopies(this.maxSize, this.defaultValue));
     }
 
+    public FixedSizeList(int maxSize, List<T> existingList) {
+        this.maxSize = maxSize;
+        this.defaultValue = null;
+        List<T> listToSet = new ArrayList<>();
+        for (int i = 0; i < maxSize; i++) {
+            if (i < existingList.size()) listToSet.add(i, existingList.get(i));
+            else listToSet.add(this.defaultValue);
+        }
+        this.list = listToSet;
+    }
+
     public void add(T value) {
         if (value == null && this.defaultValue != null) throw new UnsupportedOperationException("Cannot add null value to FixedSizeList");
         //find first null position to insert into
         int pos = -1;
 
         for (int x = 0; x < this.maxSize; x++) {
-            if (this.list.get(x).equals(this.defaultValue)) {
+            if (this.list.get(x) == null || this.list.get(x).equals(this.defaultValue)) {
                 pos = x;
                 break;
             }

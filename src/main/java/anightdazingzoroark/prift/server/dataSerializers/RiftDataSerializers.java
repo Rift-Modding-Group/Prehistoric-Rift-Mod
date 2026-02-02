@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.dataSerializers;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -35,6 +36,42 @@ public class RiftDataSerializers {
         }
 
         public List<CreatureMove> copyValue(List<CreatureMove> value) {
+            return value;
+        }
+    };
+
+    public static final DataSerializer<FixedSizeList<CreatureMove>> FIXED_SIZE_LIST_CREATURE_MOVE = new DataSerializer<FixedSizeList<CreatureMove>>() {
+        @Override
+        public void write(PacketBuffer buf, FixedSizeList<CreatureMove> value) {
+            //for size
+            buf.writeInt(value.size());
+            //for contents
+            for (CreatureMove i : value.getList()) {
+                if (i != null) buf.writeInt(i.ordinal());
+                else buf.writeInt(-1);
+            }
+        }
+
+        @Override
+        public FixedSizeList<CreatureMove> read(PacketBuffer buf) throws IOException {
+            int size = buf.readInt();
+            FixedSizeList<CreatureMove> toReturn = new FixedSizeList<>(size);
+            for (int i = 0; i < size; i++) {
+                int moveOrdinal = buf.readInt();
+                if (moveOrdinal >= 0) toReturn.add(CreatureMove.values()[moveOrdinal]);
+                else toReturn.add(null);
+            }
+
+            return toReturn;
+        }
+
+        @Override
+        public DataParameter<FixedSizeList<CreatureMove>> createKey(int id) {
+            return new DataParameter<>(id, this);
+        }
+
+        @Override
+        public FixedSizeList<CreatureMove> copyValue(FixedSizeList<CreatureMove> value) {
             return value;
         }
     };
@@ -76,6 +113,7 @@ public class RiftDataSerializers {
 
     public static void registerSerializers() {
         ServerProxy.registryPrimer.register(new DataSerializerEntry(LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "move_list"));
+        ServerProxy.registryPrimer.register(new DataSerializerEntry(FIXED_SIZE_LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "fixed_size_move_list"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(ACQUISITION_INFO).setRegistryName(RiftInitialize.MODID, "acquisition_info"));
     }
 }

@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.NewRiftCreatureScreen;
 import anightdazingzoroark.prift.client.ui.RiftEggScreen;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.GeneralConfig;
@@ -158,6 +159,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Boolean> PLAY_INFINITE_MOVE_ANIM = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
+    private static final DataParameter<FixedSizeList<CreatureMove>> FIXED_SIZE_MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.FIXED_SIZE_LIST_CREATURE_MOVE);
     private static final DataParameter<List<CreatureMove>> LEARNABLE_MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
 
     private static final DataParameter<Boolean> BREAK_BLOCK_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -344,6 +346,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(PLAY_INFINITE_MOVE_ANIM, false);
 
         this.dataManager.register(MOVE_LIST, new ArrayList<>());
+        this.dataManager.register(FIXED_SIZE_MOVE_LIST, new FixedSizeList<>(3));
         this.dataManager.register(LEARNABLE_MOVE_LIST, new ArrayList<>());
 
         this.dataManager.register(BREAK_BLOCK_MODE, false);
@@ -1157,6 +1160,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         if (this.justSpawned()) {
             this.setLearnedMoves(this.possibleStartingMoves().next());
+            this.newSetLearnedMoves(new FixedSizeList<>(3, this.possibleStartingMoves().next()));
 
             //initialize learnable moves
             List<CreatureMove> learnableMoves = this.initialLearnableMoves();
@@ -1400,7 +1404,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setInteger("DeploymentType", this.getDeploymentType().ordinal());
         compound.setInteger("BoxReviveTime", this.boxReviveTime);
 
-        //for moves
+        //(old) for learned moves
         NBTTagList nbttaglist = new NBTTagList();
         for (CreatureMove learnedMove : this.getLearnedMoves()) {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
@@ -1408,6 +1412,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             nbttaglist.appendTag(nbttagcompound);
         }
         compound.setTag("LearnedMoves", nbttaglist);
+
+        //for learned moves
+        NBTTagList learnedMovesTagList = new NBTTagList();
+        for (int i = 0; i < this.newGetLearnedMoves().getList().size(); i++) {
+            CreatureMove learnedMove = this.newGetLearnedMoves().get(i);
+            if (learnedMove == null) continue;
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            nbttagcompound.setInteger("Move", learnedMove.ordinal());
+            nbttagcompound.setInteger("Index", i);
+            learnedMovesTagList.appendTag(nbttagcompound);
+        }
+        compound.setTag("NewLearnedMoves", learnedMovesTagList);
 
         //for learnable moves
         NBTTagList learnableMovesTagList = new NBTTagList();
@@ -1472,7 +1488,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getInteger("DeploymentType")]);
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
 
-        //for learned moves
+        //(old) for learned moves
         NBTTagList nbtTagList = compound.getTagList("LearnedMoves", 10);
         List<CreatureMove> moveList = new ArrayList<>();
         for (int i = 0; i < nbtTagList.tagCount(); i++) {
@@ -1481,6 +1497,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (!this.getLearnedMoves().contains(moveToAdd)) moveList.add(moveToAdd);
         }
         this.setLearnedMoves(moveList);
+
+        //for learned moves
+        NBTTagList learnedMovesTagList = compound.getTagList("NewLearnedMoves", 10);
+        FixedSizeList<CreatureMove> learnedMovesList = new FixedSizeList<>(3);
+        for (int i = 0; i < learnedMovesTagList.tagCount(); i++) {
+            NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
+            CreatureMove moveToAdd = CreatureMove.values()[nbttagcompound.getInteger("Move")];
+            int indexToPutIn = nbttagcompound.getInteger("Index");
+            learnedMovesList.set(indexToPutIn, moveToAdd);
+        }
+        this.newSetLearnedMoves(learnedMovesList);
 
         //for learnable moves
         NBTTagList learnableMovesTagList = compound.getTagList("LearnableMoves", 10);
@@ -1535,6 +1562,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    @Deprecated
     public abstract WeightedList<List<CreatureMove>> possibleStartingMoves();
 
     public List<CreatureMove> initialLearnableMoves() {
@@ -1548,8 +1576,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return new ArrayList<>(toOutputNoDuplicates);
     }
 
+    @Deprecated
     public List<CreatureMove> getLearnedMoves() {
         return this.dataManager.get(MOVE_LIST);
+    }
+
+    public FixedSizeList<CreatureMove> newGetLearnedMoves() {
+        return this.dataManager.get(FIXED_SIZE_MOVE_LIST);
     }
 
     public List<CreatureMove> getLearnedMovesNoNeedForTarget() {
@@ -1565,14 +1598,34 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 .collect(Collectors.toList());
     }
 
+    @Deprecated
     public void changeLearnedMove(int pos, CreatureMove move) {
         List<CreatureMove> moveList = this.dataManager.get(MOVE_LIST);
         moveList.set(pos, move);
         this.setLearnedMoves(moveList);
     }
 
+    public void newChangeLearnedMove(int pos, CreatureMove move) {
+        FixedSizeList<CreatureMove> moveList = this.newGetLearnedMoves();
+        moveList.set(pos, move);
+        this.newSetLearnedMoves(moveList);
+    }
+
+    public void newRemoveLearnedMove(int pos) {
+        FixedSizeList<CreatureMove> moveList = this.newGetLearnedMoves();
+        CreatureMove moveToRemove = moveList.get(pos);
+        List<CreatureMove> filteredList = moveList.getList()
+                .stream().filter(move -> move != moveToRemove).collect(Collectors.toList());
+        this.newSetLearnedMoves(new FixedSizeList<>(3, filteredList));
+    }
+
+    @Deprecated
     public void setLearnedMoves(List<CreatureMove> values) {
         this.dataManager.set(MOVE_LIST, values);
+    }
+
+    public void newSetLearnedMoves(FixedSizeList<CreatureMove> values) {
+        this.dataManager.set(FIXED_SIZE_MOVE_LIST, values);
     }
 
     public CreatureMove proposedTargetlessMove() {
@@ -1593,6 +1646,25 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void setCurrentCreatureMove(CreatureMove value) {
         if (value != null) this.dataManager.set(CURRENT_MOVE, value.ordinal());
         else this.dataManager.set(CURRENT_MOVE, -1);
+    }
+
+    public void changeLearnableMove(int pos, CreatureMove move) {
+        List<CreatureMove> moveList = this.dataManager.get(LEARNABLE_MOVE_LIST);
+        moveList.set(pos, move);
+        this.setLearnableMoves(moveList);
+    }
+
+    public void addLearnableMove(CreatureMove move) {
+        List<CreatureMove> moveList = this.dataManager.get(LEARNABLE_MOVE_LIST);
+        moveList.add(move);
+        this.setLearnableMoves(moveList);
+    }
+
+    public void removeLearnableMove(int pos) {
+        List<CreatureMove> moveList = this.dataManager.get(LEARNABLE_MOVE_LIST);
+        CreatureMove moveToRemove = moveList.get(pos);
+        moveList = moveList.stream().filter(move -> move != moveToRemove).collect(Collectors.toList());
+        this.setLearnableMoves(moveList);
     }
 
     public void setLearnableMoves(List<CreatureMove> value) {

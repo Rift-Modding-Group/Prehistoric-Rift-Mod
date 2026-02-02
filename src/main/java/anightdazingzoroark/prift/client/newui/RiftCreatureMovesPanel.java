@@ -2,10 +2,10 @@ package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.newui.custom.MoveSwapInfoSyncValue;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import com.cleanroommc.modularui.api.drawable.IKey;
-import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.screen.UISettings;
@@ -15,7 +15,6 @@ import com.cleanroommc.modularui.value.sync.BooleanSyncValue;
 import com.cleanroommc.modularui.value.sync.IntSyncValue;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widget.ParentWidget;
-import com.cleanroommc.modularui.widget.sizer.Unit;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.ListWidget;
 import com.cleanroommc.modularui.widgets.ToggleButton;
@@ -65,7 +64,6 @@ public class RiftCreatureMovesPanel {
     private static Flow currentMovesSide(RiftCreature creature, IntSyncValue selectedMoveValue,
                                          BooleanSyncValue selectedMoveFromRight, BooleanSyncValue isMoveSwitching,
                                          MoveSwapInfoSyncValue moveSwapInfo) {
-        List<CreatureMove> creatureMoveList = creature.getLearnedMoves();
 
         return new Column().debugName("leftSide")
                 .childPadding(5).coverChildren()
@@ -76,27 +74,27 @@ public class RiftCreatureMovesPanel {
                                     widget.getChildren().clear();
 
                                     //add current creature moves
-                                    for (int i = 0; i < 3; i++) {
-                                        if (i < creatureMoveList.size()) {
-                                            CreatureMove creatureMove = creatureMoveList.get(i);
-                                            int finalI = i;
-                                            widget.child(new ButtonWidget<>().size(80, 20)
-                                                    .onMousePressed(button -> {
-                                                        selectedMoveValue.setIntValue(finalI);
-                                                        selectedMoveFromRight.setBoolValue(false);
+                                    FixedSizeList<CreatureMove> creatureMoveList = creature.newGetLearnedMoves();
+                                    for (int i = 0; i < creatureMoveList.size(); i++) {
+                                        CreatureMove creatureMove = creatureMoveList.get(i);
+                                        int finalI = i;
 
-                                                        if (moveSwapInfo.getValue() == null) return true;
-                                                        moveSwapInfo.getValue().setMove(
-                                                                new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, finalI)
-                                                        );
-                                                        moveSwapInfo.getValue().applySwap(creature);
-                                                        return true;
-                                                    })
-                                                    .overlay(IKey.str(creatureMove.getTranslatedName()))
-                                            );
-                                        }
-                                        else widget.child(new ButtonWidget<>().size(80, 20)
-                                                .overlay(IKey.lang("creature_move.no_move"))
+                                        widget.child(new ButtonWidget<>().size(80, 20)
+                                                .onMousePressed(button -> {
+                                                    selectedMoveValue.setIntValue(finalI);
+                                                    selectedMoveFromRight.setBoolValue(false);
+
+                                                    if (moveSwapInfo.getValue() == null) return true;
+                                                    moveSwapInfo.getValue().setMove(
+                                                            new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, finalI)
+                                                    );
+                                                    moveSwapInfo.getValue().applySwap(creature);
+                                                    return true;
+                                                })
+                                                .overlay(IKey.dynamic(() -> {
+                                                    if (creatureMove != null) return creatureMove.getTranslatedName();
+                                                    else return I18n.format("creature_move.no_move");
+                                                }))
                                         );
                                     }
                                 })
@@ -108,6 +106,8 @@ public class RiftCreatureMovesPanel {
                 .child(new Rectangle().setColor(0xFF808080).setCornerRadius(5).asWidget().size(94, 58).align(Alignment.Center))
                 .child(new ParentWidget<>().size(90, 54).align(Alignment.Center)
                         .child(IKey.dynamic(() -> {
+                            FixedSizeList<CreatureMove> creatureMoveList = creature.newGetLearnedMoves();
+
                             if (selectedMoveValue.getIntValue() < 0) {
                                 if (isMoveSwitching.getBoolValue()) {
                                     return I18n.format("creature_move.none_selected_switch.description");
@@ -143,6 +143,12 @@ public class RiftCreatureMovesPanel {
                                 .onMousePressed(button -> {
                                     selectedMoveValue.setIntValue(finalI);
                                     selectedMoveFromRight.setBoolValue(true);
+
+                                    if (moveSwapInfo.getValue() == null) return true;
+                                    moveSwapInfo.getValue().setMove(
+                                            new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, finalI)
+                                    );
+                                    moveSwapInfo.getValue().applySwap(creature);
                                     return true;
                                 })
                                 .overlay(IKey.str(creatureMove.getTranslatedName()))
@@ -152,6 +158,17 @@ public class RiftCreatureMovesPanel {
                     //add additional button that represents no move when in move swap mode
                     if (isMoveSwitching.getBoolValue()) {
                         widget.child(creatureMoveList.size(), new ButtonWidget<>().size(80, 20)
+                                .onMousePressed(button -> {
+                                    selectedMoveValue.setIntValue(-1);
+                                    selectedMoveFromRight.setBoolValue(true);
+
+                                    if (moveSwapInfo.getValue() == null) return true;
+                                    moveSwapInfo.getValue().setMove(
+                                            new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, -1)
+                                    );
+                                    moveSwapInfo.getValue().applySwap(creature);
+                                    return true;
+                                })
                                 .overlay(IKey.lang("creature_move.no_move"))
                         );
                     }
