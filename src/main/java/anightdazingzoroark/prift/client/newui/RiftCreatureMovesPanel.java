@@ -79,18 +79,26 @@ public class RiftCreatureMovesPanel {
                                         CreatureMove creatureMove = creatureMoveList.get(i);
                                         int finalI = i;
 
-                                        widget.child(new ButtonWidget<>().size(80, 20)
-                                                .onMousePressed(button -> {
-                                                    selectedMoveValue.setIntValue(finalI);
-                                                    selectedMoveFromRight.setBoolValue(false);
+                                        widget.child(new ToggleButton().size(80, 20)
+                                                .value(new BoolValue.Dynamic(
+                                                        () -> selectedMoveValue.getIntValue() == finalI && !selectedMoveFromRight.getBoolValue(),
+                                                        value -> {
+                                                            //set selected move
+                                                            if (creatureMove != null || (isMoveSwitching.getBoolValue() && moveSwapInfo.getValue().canChooseNextMove())) {
+                                                                selectedMoveValue.setIntValue(finalI);
+                                                                selectedMoveFromRight.setBoolValue(false);
+                                                            }
 
-                                                    if (moveSwapInfo.getValue() == null) return true;
-                                                    moveSwapInfo.getValue().setMove(
-                                                            new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, finalI)
-                                                    );
-                                                    moveSwapInfo.getValue().applySwap(creature);
-                                                    return true;
-                                                })
+                                                            if (isMoveSwitching.getBoolValue() && (creatureMove != null || moveSwapInfo.getValue().canChooseNextMove())) {
+                                                                moveSwapInfo.getValue().setMove(
+                                                                        new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, finalI)
+                                                                );
+                                                                if (!moveSwapInfo.getValue().canSwap()) return;
+                                                                moveSwapInfo.getValue().applySwap(creature);
+                                                                selectedMoveValue.setIntValue(-1);
+                                                            }
+                                                        })
+                                                )
                                                 .overlay(IKey.dynamic(() -> {
                                                     if (creatureMove != null) return creatureMove.getTranslatedName();
                                                     else return I18n.format("creature_move.no_move");
@@ -139,18 +147,23 @@ public class RiftCreatureMovesPanel {
                         CreatureMove creatureMove = creatureMoveList.get(i);
                         int finalI = i;
 
-                        widget.child(finalI, new ButtonWidget<>().size(80, 20)
-                                .onMousePressed(button -> {
-                                    selectedMoveValue.setIntValue(finalI);
-                                    selectedMoveFromRight.setBoolValue(true);
+                        widget.child(finalI, new ToggleButton().size(80, 20)
+                                .value(new BoolValue.Dynamic(
+                                        () -> selectedMoveValue.getIntValue() == finalI && selectedMoveFromRight.getBoolValue(),
+                                        value -> {
+                                            selectedMoveValue.setIntValue(finalI);
+                                            selectedMoveFromRight.setBoolValue(true);
 
-                                    if (moveSwapInfo.getValue() == null) return true;
-                                    moveSwapInfo.getValue().setMove(
-                                            new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, finalI)
-                                    );
-                                    moveSwapInfo.getValue().applySwap(creature);
-                                    return true;
-                                })
+                                            if (moveSwapInfo.getValue() == null || !isMoveSwitching.getBoolValue()) return;
+                                            moveSwapInfo.getValue().setMove(
+                                                    new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, finalI)
+                                            );
+                                            if (moveSwapInfo.getValue().canSwap()) {
+                                                SelectedMoveInfo.SwapResult swapResult = moveSwapInfo.getValue().applySwap(creature);
+                                                if (!swapResult.swapSuccessful && swapResult.selfSelect) selectedMoveValue.setIntValue(-1);
+                                            }
+                                        })
+                                )
                                 .overlay(IKey.str(creatureMove.getTranslatedName()))
                         );
                     }
@@ -190,6 +203,7 @@ public class RiftCreatureMovesPanel {
                                         value -> {
                                             isMoveSwitching.setBoolValue(value);
                                             selectedMoveValue.setIntValue(-1);
+                                            moveSwapInfo.getValue().clear();
                                         })
                                 ).align(Alignment.CenterRight)
                         )

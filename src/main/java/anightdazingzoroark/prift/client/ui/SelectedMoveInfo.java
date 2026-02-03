@@ -73,19 +73,20 @@ public class SelectedMoveInfo {
             }
             //second step of swap
             else if (this.moveOne != null && this.moveTwo == null) {
-                //if moveForSwap and moveOne are LEARNABLE, just override moveOne
-                if (this.moveOne.moveType == SelectedMoveType.LEARNABLE
-                        && moveForSwap.moveType == SelectedMoveType.LEARNABLE
-                ) this.moveOne = moveForSwap;
-                //otherwise, moveTwo is to be set
-                else this.moveTwo = moveForSwap;
+                this.moveTwo = moveForSwap;
             }
         }
 
-        public void applySwap(RiftCreature creature) {
-            if (!this.canSwap()) return;
+        public boolean canChooseNextMove() {
+            return this.moveOne != null && this.moveTwo == null;
+        }
+
+        public SwapResult applySwap(RiftCreature creature) {
+            if (!this.canSwap()) return new SwapResult(false, false);
 
             boolean swapSuccessful = false;
+            boolean selfSelect = false;
+
             //within learnt moves swap
             if (this.moveOne.moveType == SelectedMoveType.LEARNT && this.moveTwo.moveType == SelectedMoveType.LEARNT) {
                 CreatureMove moveToSwap = creature.newGetLearnedMoves().get(this.moveOne.movePos);
@@ -120,34 +121,28 @@ public class SelectedMoveInfo {
                 }
                 swapSuccessful = true;
             }
-
-            if (swapSuccessful) {
-                this.moveOne = null;
-                this.moveTwo = null;
+            //learnable move x learnable move, no swap will happen by this point, instead, moveTwo will be cleared
+            //at put in moveOne
+            else if (this.moveOne.moveType == SelectedMoveType.LEARNABLE && this.moveTwo.moveType == SelectedMoveType.LEARNABLE) {
+                if (this.moveOne.movePos == this.moveTwo.movePos) {
+                    this.clear();
+                    selfSelect = true;
+                }
+                else {
+                    this.moveOne = this.moveTwo;
+                    this.moveTwo = null;
+                }
             }
+
+            if (swapSuccessful) this.clear();
+            return new SwapResult(swapSuccessful, selfSelect);
         }
 
         public boolean canSwap() {
             return this.moveOne != null && this.moveTwo != null;
         }
 
-        public void setMoveOne(SelectedMoveInfo moveOne) {
-            this.moveOne = moveOne;
-        }
-
-        public SelectedMoveInfo getMoveOne() {
-            return this.moveOne;
-        }
-
-        public void setMoveTwo(SelectedMoveInfo moveTwo) {
-            this.moveTwo = moveTwo;
-        }
-
-        public SelectedMoveInfo getMoveTwo() {
-            return this.moveTwo;
-        }
-
-        public void reset() {
+        public void clear() {
             this.moveOne = null;
             this.moveTwo = null;
         }
@@ -163,6 +158,16 @@ public class SelectedMoveInfo {
             if (this.moveTwo != null) toReturn.setTag("MoveTwo", this.moveTwo.getNBT());
 
             return toReturn;
+        }
+    }
+
+    public static class SwapResult {
+        public final boolean swapSuccessful;
+        public final boolean selfSelect;
+
+        public SwapResult(boolean swapSuccessful, boolean selfSelect) {
+            this.swapSuccessful = swapSuccessful;
+            this.selfSelect = selfSelect;
         }
     }
 }

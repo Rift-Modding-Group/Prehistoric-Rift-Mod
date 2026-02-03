@@ -1414,25 +1414,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setTag("LearnedMoves", nbttaglist);
 
         //for learned moves
-        NBTTagList learnedMovesTagList = new NBTTagList();
-        for (int i = 0; i < this.newGetLearnedMoves().getList().size(); i++) {
-            CreatureMove learnedMove = this.newGetLearnedMoves().get(i);
-            if (learnedMove == null) continue;
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            nbttagcompound.setInteger("Move", learnedMove.ordinal());
-            nbttagcompound.setInteger("Index", i);
-            learnedMovesTagList.appendTag(nbttagcompound);
-        }
-        compound.setTag("NewLearnedMoves", learnedMovesTagList);
+        NBTTagCompound learnedMovesListNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(this.newGetLearnedMoves());
+        compound.setTag("NewLearnedMoves", learnedMovesListNBT);
 
         //for learnable moves
-        NBTTagList learnableMovesTagList = new NBTTagList();
-        for (CreatureMove learnableMove : this.getLearnableMoves()) {
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            nbttagcompound.setInteger("Move", learnableMove.ordinal());
-            learnableMovesTagList.appendTag(nbttagcompound);
-        }
-        compound.setTag("LearnableMoves", learnableMovesTagList);
+        NBTTagCompound learnableMovesListNBT = MoveListUtil.getNBTFromListCreatureMove(this.getLearnableMoves());
+        compound.setTag("LearnableMoves", learnableMovesListNBT);
 
         compound.setInteger("CooldownMoveOne", this.getMoveOneCooldown());
         compound.setInteger("CooldownMoveTwo", this.getMoveTwoCooldown());
@@ -1499,24 +1486,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setLearnedMoves(moveList);
 
         //for learned moves
-        NBTTagList learnedMovesTagList = compound.getTagList("NewLearnedMoves", 10);
-        FixedSizeList<CreatureMove> learnedMovesList = new FixedSizeList<>(3);
-        for (int i = 0; i < learnedMovesTagList.tagCount(); i++) {
-            NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
-            CreatureMove moveToAdd = CreatureMove.values()[nbttagcompound.getInteger("Move")];
-            int indexToPutIn = nbttagcompound.getInteger("Index");
-            learnedMovesList.set(indexToPutIn, moveToAdd);
-        }
+        NBTTagCompound learnedMovesListNBT = compound.getCompoundTag("NewLearnedMoves");
+        FixedSizeList<CreatureMove> learnedMovesList = MoveListUtil.getFixedSizeListCreatureMoveFromNBT(learnedMovesListNBT);
         this.newSetLearnedMoves(learnedMovesList);
 
         //for learnable moves
-        NBTTagList learnableMovesTagList = compound.getTagList("LearnableMoves", 10);
-        List<CreatureMove> learnableMoveList = new ArrayList<>();
-        for (int i = 0; i < learnableMovesTagList.tagCount(); i++) {
-            NBTTagCompound nbttagcompound = learnableMovesTagList.getCompoundTagAt(i);
-            CreatureMove moveToAdd = CreatureMove.values()[nbttagcompound.getInteger("Move")];
-            if (!this.getLearnedMoves().contains(moveToAdd)) learnableMoveList.add(moveToAdd);
-        }
+        NBTTagCompound learnableMovesListNBT = compound.getCompoundTag("LearnableMoves");
+        List<CreatureMove> learnableMoveList = MoveListUtil.getListCreatureMoveFromNBT(learnableMovesListNBT);
         this.setLearnableMoves(learnableMoveList);
 
         this.setMoveOneCooldown(compound.getInteger("CooldownMoveOne"));

@@ -2,12 +2,16 @@ package anightdazingzoroark.prift.server.dataSerializers;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
+import anightdazingzoroark.prift.server.entity.MoveListUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializer;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.registries.DataSerializerEntry;
 
 import java.io.IOException;
@@ -17,18 +21,14 @@ import java.util.List;
 public class RiftDataSerializers {
     public static final DataSerializer<List<CreatureMove>> LIST_CREATURE_MOVE = new DataSerializer<List<CreatureMove>>() {
         public void write(PacketBuffer buf, List<CreatureMove> value) {
-            buf.writeInt(value.size()); //for size
-            for (CreatureMove i : value) buf.writeInt(i.ordinal());
+            NBTTagCompound listNBT = MoveListUtil.getNBTFromListCreatureMove(value);
+            ByteBufUtils.writeTag(buf, listNBT);
         }
 
         public List<CreatureMove> read(PacketBuffer buf) throws IOException {
-            int size = buf.readInt();
-            List<CreatureMove> toReturn = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                toReturn.add(CreatureMove.values()[buf.readInt()]);
-            }
-
-            return toReturn;
+            NBTTagCompound listNBT = ByteBufUtils.readTag(buf);
+            if (listNBT == null) return new ArrayList<>();
+            return MoveListUtil.getListCreatureMoveFromNBT(listNBT);
         }
 
         public DataParameter<List<CreatureMove>> createKey(int id) {
@@ -43,26 +43,15 @@ public class RiftDataSerializers {
     public static final DataSerializer<FixedSizeList<CreatureMove>> FIXED_SIZE_LIST_CREATURE_MOVE = new DataSerializer<FixedSizeList<CreatureMove>>() {
         @Override
         public void write(PacketBuffer buf, FixedSizeList<CreatureMove> value) {
-            //for size
-            buf.writeInt(value.size());
-            //for contents
-            for (CreatureMove i : value.getList()) {
-                if (i != null) buf.writeInt(i.ordinal());
-                else buf.writeInt(-1);
-            }
+            NBTTagCompound fixedSizeListNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(value);
+            ByteBufUtils.writeTag(buf, fixedSizeListNBT);
         }
 
         @Override
         public FixedSizeList<CreatureMove> read(PacketBuffer buf) throws IOException {
-            int size = buf.readInt();
-            FixedSizeList<CreatureMove> toReturn = new FixedSizeList<>(size);
-            for (int i = 0; i < size; i++) {
-                int moveOrdinal = buf.readInt();
-                if (moveOrdinal >= 0) toReturn.add(CreatureMove.values()[moveOrdinal]);
-                else toReturn.add(null);
-            }
-
-            return toReturn;
+            NBTTagCompound fixedSizeListNBT = ByteBufUtils.readTag(buf);
+            if (fixedSizeListNBT == null) return new FixedSizeList<>(0);
+            return MoveListUtil.getFixedSizeListCreatureMoveFromNBT(fixedSizeListNBT);
         }
 
         @Override
