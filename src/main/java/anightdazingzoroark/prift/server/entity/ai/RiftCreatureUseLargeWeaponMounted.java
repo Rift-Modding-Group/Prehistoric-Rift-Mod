@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
@@ -102,7 +103,10 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
             RiftCannonball cannonball = new RiftCannonball(this.creature.world, this.creature, rider);
             cannonball.shoot(this.creature, RiftUtil.clamp(this.creature.rotationPitch, -180f, 0f), this.creature.rotationYaw, 0.0F, 2.4F, 1.0F);
             this.creature.world.spawnEntity(cannonball);
-            this.creature.creatureInventory.removeItemStackStartingFromLast(new ItemStack(RiftItems.CANNONBALL), 1);
+            this.creature.creatureInventory.removeItem(
+                    CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST,
+                    new ItemStack(RiftItems.CANNONBALL, 1)
+            );
             this.creature.setLargeWeaponCooldown(this.creature.getLargeWeapon().maxCooldown);
             this.creature.setLargeWeaponUse(0);
         }
@@ -117,7 +121,10 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
             RiftMortarShell mortarShell = new RiftMortarShell(this.creature.world, this.creature, rider);
             mortarShell.shoot(this.creature, launchDist);
             this.creature.world.spawnEntity(mortarShell);
-            this.creature.creatureInventory.removeItemStackStartingFromLast(new ItemStack(RiftItems.MORTAR_SHELL), 1);
+            this.creature.creatureInventory.removeItem(
+                    CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST,
+                    new ItemStack(RiftItems.MORTAR_SHELL, 1)
+            );
             this.creature.setLargeWeaponCooldown(Math.min(this.creature.getLargeWeaponUse() * 2, this.creature.getLargeWeapon().maxCooldown));
             this.creature.setLargeWeaponUse(0);
         }
@@ -135,7 +142,10 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
             boulder.setPower(power);
             boulder.shoot(this.creature, RiftUtil.clamp(this.creature.rotationPitch, -180f, 0f), this.creature.rotationYaw, 0.0F, velocity, 1.0F);
             this.creature.world.spawnEntity(boulder);
-            this.creature.creatureInventory.removeItemStackStartingFromLast(new ItemStack(RiftItems.CATAPULT_BOULDER), 1);
+            this.creature.creatureInventory.removeItem(
+                    CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST,
+                    new ItemStack(RiftItems.CATAPULT_BOULDER, 1)
+            );
         }
         if (this.pauseTime >= this.maxLaunchPauseTime) {
             this.creature.setLargeWeaponCooldown(Math.min(this.creature.getLargeWeaponUse() * 2, this.creature.getLargeWeapon().maxCooldown));

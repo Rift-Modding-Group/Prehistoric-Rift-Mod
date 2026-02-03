@@ -26,6 +26,8 @@ import net.minecraft.client.resources.I18n;
 import java.util.List;
 
 public class RiftCreatureMovesPanel {
+    public static final int[] size = {220, 161};
+
     public static ParentWidget<?> build(RiftCreature creature, PanelSyncManager syncManager, UISettings settings) {
         //selected move
         IntSyncValue selectedMoveValue = new IntSyncValue(() -> creature.currentSelectedMoveUI, value -> creature.currentSelectedMoveUI = value);

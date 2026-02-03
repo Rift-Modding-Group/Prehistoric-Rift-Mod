@@ -21,6 +21,8 @@ import java.util.function.DoubleSupplier;
 //this one class will be used to display information about a creature
 //in the form of a pop-up, and will be shared amongst various uis
 public class RiftCreatureInfoPanel {
+    public static final int[] size = {211, 122};
+
     public static ParentWidget<?> buildUsingSelectedCreatureInfo(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, PanelSyncManager syncManager, UISettings settings) {
         //get creature from selected creature info
         CreatureNBT selectedCreature = selectedCreatureInfo.getCreatureNBT(player);

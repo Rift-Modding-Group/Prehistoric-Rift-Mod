@@ -30,6 +30,8 @@ public class CreatureGearHandler extends ItemStackHandler {
     public void setSize(int size) {}
 
     //same with this xd
+    /*
     @Override
     public void setStackInSlot(int slot, @Nonnull ItemStack stack) {}
+     */
 }

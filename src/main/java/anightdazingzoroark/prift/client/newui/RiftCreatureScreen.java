@@ -1,8 +1,6 @@
 package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.ClientProxy;
-import anightdazingzoroark.prift.client.newui.custom.DynamicPageButton;
-import anightdazingzoroark.prift.client.newui.custom.DynamicPagedWidget;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
@@ -42,71 +40,68 @@ public class RiftCreatureScreen {
         RiftCreature creature = (RiftCreature) data.getGuiHolder();
 
         //tab related stuff
-        DynamicPagedWidget.Controller tabController = new DynamicPagedWidget.Controller();
+        PagedWidget.Controller tabController = new PagedWidget.Controller();
 
         return new ModularPanel(UIPanelNames.INTERACTED_CREATURE_SCREEN)
                 .onUpdateListener(new Consumer<ModularPanel>() {
                     @Override
                     public void accept(ModularPanel modularPanel) {
-                        DynamicPagedWidget<?> dynamicPagedWidget = this.getDynamicPagedWidget(modularPanel);
-                        if (dynamicPagedWidget == null) {
+                        PagedWidget<?> pagedWidget = this.pagedWidget(modularPanel);
+                        if (pagedWidget == null) {
                             modularPanel.width(180);
                             return;
                         }
 
-                        //get index and change panel width depending on current page index
-                        switch (dynamicPagedWidget.getCurrentPageIndex()) {
-                            case 0:
-                            case 1:
-                                modularPanel.width(180);
-                                break;
-                            case 2:
-                                modularPanel.width(212);
-                                break;
-                            case 3:
-                                modularPanel.width(220);
-                                break;
-                        }
+                        //set size of panel based on size of current page
+                        modularPanel.size(this.getPageContentSize(pagedWidget)[0], this.getPageContentSize(pagedWidget)[1]);
                     }
 
-                    private DynamicPagedWidget<?> getDynamicPagedWidget(ModularPanel panel) {
+                    private PagedWidget<?> pagedWidget(ModularPanel panel) {
                         List<IWidget> widgetChildren = panel.getChildren();
                         for (IWidget widget : widgetChildren) {
-                            if (widget instanceof DynamicPagedWidget) return (DynamicPagedWidget<?>) widget;
+                            if (widget instanceof PagedWidget) return (PagedWidget<?>) widget;
                         }
                         return null;
+                    }
+
+                    private int[] getPageContentSize(PagedWidget<?> pagedWidget) {
+                        if (pagedWidget == null) return new int[]{0, 0};
+                        return new int[]{
+                                pagedWidget.getCurrentPage().getArea().width,
+                                pagedWidget.getCurrentPage().getArea().height
+                        };
                     }
                 })
                 .child(new Column()
                         .debugName("creatureScreenTabColumn")
                         .coverChildren()
                         .leftRel(0f, 4, 1f)
-                        .child(new DynamicPageButton(0, tabController)
+                        .child(new PageButton(0, tabController)
                                 .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
                                 .addTooltipElement(IKey.lang("tametab.inventory"))
                                 .tab(GuiTextures.TAB_LEFT, -1)
                         )
-                        .child(new DynamicPageButton(1, tabController)
+                        .child(new PageButton(1, tabController)
                                 .overlay(GuiTextures.GEAR.asIcon().size(24))
                                 .addTooltipElement(IKey.lang("tametab.manage"))
                                 .tab(GuiTextures.TAB_LEFT, 0)
                         )
-                        .child(new DynamicPageButton(2, tabController)
+                        .child(new PageButton(2, tabController)
                                 .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
                                 .addTooltipElement(IKey.lang("tametab.info"))
                                 .tab(GuiTextures.TAB_LEFT, 0)
                         )
-                        .child(new DynamicPageButton(3, tabController)
+                        .child(new PageButton(3, tabController)
                                 .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
                                 .addTooltipElement(IKey.lang("tametab.moves"))
                                 .tab(GuiTextures.TAB_LEFT, 0)
                         )
                 )
-                .child(new DynamicPagedWidget<>()
+                .child(new PagedWidget<>()
                         .debugName("pagedWidget")
                         .controller(tabController)
                         //page for creature inventory
-                        .addPage(creatureInventoryPage(creature, syncManager))
+                        .addPage(creatureInventoryPage(creature, data.getPlayer(), syncManager))
                         //page for creature settings
                         .addPage(creatureSettingsPage(creature, syncManager))
                         //page for creature info
@@ -114,21 +109,21 @@ public class RiftCreatureScreen {
                         //page for creature moves
                         .addPage(creatureMovesPage(creature, syncManager, settings))
                         .widthRel(1f).coverChildrenHeight()
-                )
-                .coverChildrenHeight();
+                );
     }
 
-    private static ParentWidget<?> creatureInventoryPage(RiftCreature creature, PanelSyncManager syncManager) {
+    private static ParentWidget<?> creatureInventoryPage(RiftCreature creature, EntityPlayer player, PanelSyncManager syncManager) {
         //set up strings
-        String playerName = Minecraft.getMinecraft().player.getName();
+        String playerName = player.getName();
         String creatureGearName = I18n.format("inventory.gear", creature.getName(false));
         String creatureInvName = I18n.format("inventory.inventory", creature.getName(false));
 
         //creature inventory syncing stuff
-        syncManager.registerSlotGroup("creatureGear", 9);
+        syncManager.registerSlotGroup("creatureGear", Math.min(creature.creatureType.gearSlotCount(), 9));
         syncManager.registerSlotGroup("creatureInventory", 9);
         ItemStackHandler creatureGear = creature.creatureGear;
-        ItemStackHandler creatureInventory = creature.newCreatureInventory;
+        ItemStackHandler creatureInventory = creature.creatureInventory;
+        syncManager.bindPlayerInventory(player);
 
         //set if the creature has gear
         boolean creatureHasGear = creature.creatureType.gearSlotCount() > 0;
@@ -174,7 +169,7 @@ public class RiftCreatureScreen {
                                 )
                                 //gear contents
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
-                                        .child(creatureGearBuilder.build().align(Alignment.CenterLeft))
+                                        .child(creatureGearBuilder.build().align(Alignment.CenterLeft).debugName("creature_gear"))
                                 )
                         )
                         //creature inventory
@@ -188,10 +183,10 @@ public class RiftCreatureScreen {
                                 .childIf(matrixHeight > 3, new ListWidget<>()
                                         .size(168, 54)
                                         .horizontalCenter()
-                                        .child(creatureInvBuilder.build())
+                                        .child(creatureInvBuilder.build().debugName("creature_inventory"))
                                 )
                                 //otherwise, its just the inventory itself
-                                .childIf(matrixHeight <= 3, creatureInvBuilder.build())
+                                .childIf(matrixHeight <= 3, creatureInvBuilder.build().debugName("creature_inventory"))
                         )
                         //player inventory
                         .child(new Column()

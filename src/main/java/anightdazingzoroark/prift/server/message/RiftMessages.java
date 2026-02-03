@@ -13,7 +13,6 @@ public class RiftMessages {
 
         WRAPPER.registerMessage(RiftApatosaurusManagePassengers.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeCreatureFromMenu.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftChangeInventoryFromMenu.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftChangeWeaponInvFromMenu.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftForceChangePos.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetEntityGrabbed.class, RiftLibMessageSide.BOTH);
