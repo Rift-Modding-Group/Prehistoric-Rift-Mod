@@ -67,7 +67,11 @@ public class RiftCreatureMovesPanel {
 
         return new Column().debugName("leftSide")
                 .childPadding(5).coverChildren()
-                .child(IKey.lang("tamepanel.current_moves", creature.getName(false)).asWidget().scale(0.75f))
+                //header
+                .child(new ParentWidget<>().width(96).coverChildrenHeight()
+                        .child(IKey.lang("tamepanel.current_moves", creature.getName(false)).asWidget().scale(0.75f).align(Alignment.CenterLeft))
+                )
+                //current moves
                 .child(new ParentWidget<>().size(80, 70)
                         .child(new Column().coverChildren().childPadding(5)
                                 .onUpdateListener(widget -> {

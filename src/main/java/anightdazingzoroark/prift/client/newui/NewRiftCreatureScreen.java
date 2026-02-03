@@ -169,13 +169,22 @@ public class NewRiftCreatureScreen {
                         //creature gear
                         .childIf(creatureHasGear, new Column()
                                 .coverChildren()
-                                .child(IKey.str(creatureGearName).asWidget())
-                                .child(creatureGearBuilder.build())
+                                //header
+                                .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                        .child(IKey.str(creatureGearName).asWidget().align(Alignment.CenterLeft))
+                                )
+                                //gear contents
+                                .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                        .child(creatureGearBuilder.build().align(Alignment.CenterLeft))
+                                )
                         )
                         //creature inventory
                         .child(new Column()
                                 .coverChildren()
-                                .child(IKey.str(creatureInvName).asWidget())
+                                //header
+                                .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                        .child(IKey.str(creatureInvName).asWidget().align(Alignment.CenterLeft))
+                                )
                                 //if inventory is bigger than 27 slots, the inventory widget is to be a scrollable list
                                 .childIf(matrixHeight > 3, new ListWidget<>()
                                         .size(168, 54)
@@ -188,7 +197,9 @@ public class NewRiftCreatureScreen {
                         //player inventory
                         .child(new Column()
                                 .coverChildren()
-                                .child(IKey.str(playerName).asWidget())
+                                .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                        .child(IKey.str(playerName).asWidget().align(Alignment.CenterLeft))
+                                )
                                 .child(SlotGroupWidget.playerInventory(false))
                         )
                 ).width(180).coverChildrenHeight();
