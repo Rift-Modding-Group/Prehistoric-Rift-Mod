@@ -99,7 +99,7 @@ public class ClientEvents {
     public void openInvWhileRiding(GuiOpenEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (event.getGui() instanceof GuiInventory && player.isRiding() && player.getRidingEntity() instanceof RiftCreature) {
-            RiftMessages.WRAPPER.sendToServer(new RiftOpenInventoryFromMenu(player.getRidingEntity().getEntityId()));
+            RiftMessages.WRAPPER.sendToServer(new RiftOpenInventoryFromMenu(player, (RiftCreature) player.getRidingEntity()));
             player.closeScreen();
             event.setCanceled(true);
         }

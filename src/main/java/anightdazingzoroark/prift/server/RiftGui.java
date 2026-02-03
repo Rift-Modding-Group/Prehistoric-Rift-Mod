@@ -28,9 +28,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 
 public class RiftGui implements IGuiHandler {
-    //NOTE: soon all of this will be replaced with riftlibrary ui stuff
-    public static final int GUI_DIAL = 1;
-    public static final int GUI_CREATURE_INVENTORY = 2;
+    //NOTE: soon all of this will be replaced with modularui stuff
     public static final int GUI_MENU_FROM_RADIAL = 3;
     public static final int GUI_WEAPON_INVENTORY = 4;
     public static final int GUI_FEEDING_TROUGH = 5;
@@ -62,12 +60,7 @@ public class RiftGui implements IGuiHandler {
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         Entity entity = world.getEntityByID(x);
         TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
-        if (id == GUI_CREATURE_INVENTORY) {
-            if (entity instanceof RiftCreature) {
-                return new CreatureContainer((RiftCreature) entity, player);
-            }
-        }
-        else if (id == GUI_WEAPON_INVENTORY) {
+        if (id == GUI_WEAPON_INVENTORY) {
             if (entity instanceof RiftLargeWeapon) {
                 return new WeaponContainer((RiftLargeWeapon) entity, player);
             }
@@ -115,12 +108,7 @@ public class RiftGui implements IGuiHandler {
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         Entity entity = world.getEntityByID(x);
         TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
-        if (id == GUI_DIAL) return new RiftDialMenu((RiftCreature) entity);
-        else if (id == GUI_CREATURE_INVENTORY) {
-            IInventory playerInventory = player.inventory;
-            return new RiftCreatureInvMenu(playerInventory, (RiftCreature) entity);
-        }
-        else if (id == GUI_WEAPON_INVENTORY) {
+        if (id == GUI_WEAPON_INVENTORY) {
             IInventory playerInventory = player.inventory;
             return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);
         }

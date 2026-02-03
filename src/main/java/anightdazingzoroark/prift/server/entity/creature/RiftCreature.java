@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
-import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.newui.NewRiftCreatureScreen;
+import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.ui.RiftEggScreen;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
@@ -26,7 +25,6 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import anightdazingzoroark.prift.server.enums.MobSize;
-import anightdazingzoroark.prift.server.enums.RiftTameRadialChoice;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import anightdazingzoroark.prift.server.items.RiftItems;
@@ -1048,7 +1046,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
-                        player.openGui(RiftInitialize.instance, RiftGui.GUI_DIAL, world, this.getEntityId() ,0, 0);
+                        GuiFactories.entity().open(player, this);
                     }
                 }
                 else if (!this.isOwner(player)) {
@@ -3315,46 +3313,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super.onDeath(cause);
     }
 
-    //start of radial menu stuff
-    public List<RiftTameRadialChoice> mainRadialChoices() {
-        List<RiftTameRadialChoice> list = new ArrayList<>();
-        list.add(RiftTameRadialChoice.INVENTORY);
-        if (this.creatureType.canBeSaddled && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY && this.isRideable) list.add(RiftTameRadialChoice.RIDE);
-        if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) list.add(RiftTameRadialChoice.OPTIONS);
-        list.add(RiftTameRadialChoice.BEHAVIOR);
-        return list;
-    }
-
-    public List<RiftTameRadialChoice> behaviorRadialChoices() {
-        List<RiftTameRadialChoice> list = new ArrayList<>();
-        list.add(RiftTameRadialChoice.BACK);
-        list.add(RiftTameRadialChoice.ASSIST);
-        list.add(RiftTameRadialChoice.NEUTRAL);
-        list.add(RiftTameRadialChoice.AGGRESSIVE);
-        list.add(RiftTameRadialChoice.PASSIVE);
-        return list;
-    }
-
-    public List<RiftTameRadialChoice> optionsRadialChoices() {
-        List<RiftTameRadialChoice> list = new ArrayList<>();
-        list.add(RiftTameRadialChoice.BACK);
-        if (this instanceof IWorkstationUser && !((IWorkstationUser)this).getWorkstations().isEmpty()) list.add(RiftTameRadialChoice.SET_WORKSTATION);
-        if (this instanceof IHarvestWhenWandering) list.add(RiftTameRadialChoice.SET_WANDER_HARVEST);
-        if (this.canEnterTurretMode()) list.add(RiftTameRadialChoice.SET_TURRET_MODE);
-        return list;
-    }
-
-    public List<RiftTameRadialChoice> turretRadialChoices() {
-        List<RiftTameRadialChoice> list = new ArrayList<>();
-        list.add(RiftTameRadialChoice.BACK);
-        list.add(RiftTameRadialChoice.PLAYERS);
-        list.add(RiftTameRadialChoice.PLAYERS_AND_OTHER_TAMES);
-        list.add(RiftTameRadialChoice.HOSTILES);
-        list.add(RiftTameRadialChoice.ALL);
-        return list;
-    }
-    //end of radial menu stuff
-
     private void sendDeathMessage() {
         if (this.isTamed() && !this.world.isRemote && this.world.getGameRules().getBoolean("showDeathMessages") && this.getOwner() instanceof EntityPlayerMP) {
             this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage());
@@ -3617,7 +3575,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     @Override
     public ModularPanel buildUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
-        return NewRiftCreatureScreen.buildCreatureUI(data, syncManager, settings);
+        return RiftCreatureScreen.buildCreatureUI(data, syncManager, settings);
     }
 
     public class RiftCreatureInventory extends InventoryBasic {

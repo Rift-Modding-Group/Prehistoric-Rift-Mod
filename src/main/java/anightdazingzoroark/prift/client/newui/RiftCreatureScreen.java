@@ -20,7 +20,6 @@ import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widget.ParentWidget;
-import com.cleanroommc.modularui.widget.sizer.Unit;
 import com.cleanroommc.modularui.widgets.*;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
@@ -37,7 +36,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class NewRiftCreatureScreen {
+public class RiftCreatureScreen {
     public static ModularPanel buildCreatureUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disableRecipeViewer();
         RiftCreature creature = (RiftCreature) data.getGuiHolder();
