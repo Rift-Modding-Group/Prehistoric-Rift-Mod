@@ -64,7 +64,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftSetLastOpenedBox.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftAddToBox.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftSwapCreatureMoves.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeCreatureBoxName.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeSelectedCreatureName.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftReleaseSelectedCreature.class, RiftLibMessageSide.SERVER);

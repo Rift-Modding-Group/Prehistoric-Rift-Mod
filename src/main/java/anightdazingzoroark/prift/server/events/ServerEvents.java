@@ -138,7 +138,7 @@ public class ServerEvents {
             }
 
             //if source creature has a buildup type move, that moves use will be increased
-            if (creature.getLearnedMoves().stream().anyMatch(move -> move.chargeType == CreatureMove.ChargeType.BUILDUP)) {
+            if (creature.getLearnedMoves().getList().stream().anyMatch(move -> move.chargeType == CreatureMove.ChargeType.BUILDUP)) {
                 if (creature.getLearnedMoves().contains(CreatureMove.LIGHT_BLAST)
                 && Arrays.asList(GeneralConfig.monsterMobs).contains(EntityList.getKey(event.getEntityLiving()).toString())
                 && creature.currentCreatureMove() != CreatureMove.LIGHT_BLAST) { //using light blast requires you to kill monsters

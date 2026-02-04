@@ -156,8 +156,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<Integer> PLAY_CHARGED_MOVE_ANIM = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT); //0-4 will represent each stage in playing the charged move anim, -1 means its not being played
     private static final DataParameter<Boolean> PLAY_INFINITE_MOVE_ANIM = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
-    private static final DataParameter<List<CreatureMove>> MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
-    private static final DataParameter<FixedSizeList<CreatureMove>> FIXED_SIZE_MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.FIXED_SIZE_LIST_CREATURE_MOVE);
+    private static final DataParameter<FixedSizeList<CreatureMove>> LEARNED_MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.FIXED_SIZE_LIST_CREATURE_MOVE);
     private static final DataParameter<List<CreatureMove>> LEARNABLE_MOVE_LIST = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.LIST_CREATURE_MOVE);
 
     private static final DataParameter<Boolean> BREAK_BLOCK_MODE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
@@ -342,8 +341,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(PLAY_CHARGED_MOVE_ANIM, -1);
         this.dataManager.register(PLAY_INFINITE_MOVE_ANIM, false);
 
-        this.dataManager.register(MOVE_LIST, new ArrayList<>());
-        this.dataManager.register(FIXED_SIZE_MOVE_LIST, new FixedSizeList<>(3));
+        this.dataManager.register(LEARNED_MOVE_LIST, new FixedSizeList<>(3));
         this.dataManager.register(LEARNABLE_MOVE_LIST, new ArrayList<>());
 
         this.dataManager.register(BREAK_BLOCK_MODE, false);
@@ -635,20 +633,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private void playerUseMove(int control) {
         //check if move is available
         boolean canUse = false;
-        switch (control) {
-            case -1:
-                canUse = true;
-                break;
-            case 0:
-                canUse = !this.getLearnedMoves().isEmpty();
-                break;
-            case 1:
-                canUse = this.getLearnedMoves().size() >= 2;
-                break;
-            case 2:
-                canUse = this.getLearnedMoves().size() >= 3;
-                break;
-        }
+        if (control >= 0) canUse = this.getLearnedMoves().get(control) != null;
+        else canUse = true;
 
         //move usability based on move charge type
         if (canUse) {
@@ -1118,13 +1104,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(leveledDamageValue * this.damageMultiplier);
 
         if (this.justSpawned()) {
-            this.setLearnedMoves(this.possibleStartingMoves().next());
-            this.newSetLearnedMoves(new FixedSizeList<>(3, this.possibleStartingMoves().next()));
+            this.setLearnedMoves(new FixedSizeList<>(3, this.possibleStartingMoves().next()));
 
             //initialize learnable moves
             List<CreatureMove> learnableMoves = this.initialLearnableMoves();
             //remove learnable moves already learnt by user
-            learnableMoves.removeAll(this.getLearnedMoves());
+            learnableMoves.removeAll(this.getLearnedMoves().getList());
             this.setLearnableMoves(learnableMoves);
             this.heal((float) (this.maxCreatureHealth + (0.1D) * (this.getLevel() - 1) * this.maxCreatureHealth));
             this.setSpeed(this.speed);
@@ -1352,17 +1337,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setInteger("DeploymentType", this.getDeploymentType().ordinal());
         compound.setInteger("BoxReviveTime", this.boxReviveTime);
 
-        //(old) for learned moves
-        NBTTagList nbttaglist = new NBTTagList();
-        for (CreatureMove learnedMove : this.getLearnedMoves()) {
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
-            nbttagcompound.setInteger("Move", learnedMove.ordinal());
-            nbttaglist.appendTag(nbttagcompound);
-        }
-        compound.setTag("LearnedMoves", nbttaglist);
-
         //for learned moves
-        NBTTagCompound learnedMovesListNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(this.newGetLearnedMoves());
+        NBTTagCompound learnedMovesListNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(this.getLearnedMoves());
         compound.setTag("NewLearnedMoves", learnedMovesListNBT);
 
         //for learnable moves
@@ -1405,20 +1381,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getInteger("DeploymentType")]);
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
 
-        //(old) for learned moves
-        NBTTagList nbtTagList = compound.getTagList("LearnedMoves", 10);
-        List<CreatureMove> moveList = new ArrayList<>();
-        for (int i = 0; i < nbtTagList.tagCount(); i++) {
-            NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
-            CreatureMove moveToAdd = CreatureMove.values()[nbttagcompound.getInteger("Move")];
-            if (!this.getLearnedMoves().contains(moveToAdd)) moveList.add(moveToAdd);
-        }
-        this.setLearnedMoves(moveList);
-
         //for learned moves
         NBTTagCompound learnedMovesListNBT = compound.getCompoundTag("NewLearnedMoves");
         FixedSizeList<CreatureMove> learnedMovesList = MoveListUtil.getFixedSizeListCreatureMoveFromNBT(learnedMovesListNBT);
-        this.newSetLearnedMoves(learnedMovesList);
+        this.setLearnedMoves(learnedMovesList);
 
         //for learnable moves
         NBTTagCompound learnableMovesListNBT = compound.getCompoundTag("LearnableMoves");
@@ -1468,7 +1434,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
-    @Deprecated
     public abstract WeightedList<List<CreatureMove>> possibleStartingMoves();
 
     public List<CreatureMove> initialLearnableMoves() {
@@ -1482,56 +1447,43 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return new ArrayList<>(toOutputNoDuplicates);
     }
 
-    @Deprecated
-    public List<CreatureMove> getLearnedMoves() {
-        return this.dataManager.get(MOVE_LIST);
-    }
-
-    public FixedSizeList<CreatureMove> newGetLearnedMoves() {
-        return this.dataManager.get(FIXED_SIZE_MOVE_LIST);
+    public FixedSizeList<CreatureMove> getLearnedMoves() {
+        return this.dataManager.get(LEARNED_MOVE_LIST);
     }
 
     public List<CreatureMove> getLearnedMovesNoNeedForTarget() {
-        return this.getLearnedMoves().stream()
-                .filter(m -> m.targetRequirement != CreatureMove.TargetRequirement.HAS_TARGET)
+        List<CreatureMove> learnedMovesList = this.getLearnedMoves().getList();
+        return learnedMovesList.stream()
+                .filter(m -> m != null && m.targetRequirement != CreatureMove.TargetRequirement.HAS_TARGET)
                 .collect(Collectors.toList());
     }
 
     public List<CreatureMove> getLearnedMovesRequireTarget() {
-        return this.getLearnedMoves().stream()
-                .filter(m -> m.targetRequirement == CreatureMove.TargetRequirement.HAS_TARGET
-                        || m.targetRequirement == CreatureMove.TargetRequirement.TARGET_DOESNT_MATTER)
+        List<CreatureMove> learnedMovesList = this.getLearnedMoves().getList();
+        return learnedMovesList.stream()
+                .filter(m -> {
+                    return m != null && (m.targetRequirement == CreatureMove.TargetRequirement.HAS_TARGET
+                            || m.targetRequirement == CreatureMove.TargetRequirement.TARGET_DOESNT_MATTER);
+                })
                 .collect(Collectors.toList());
     }
 
-    @Deprecated
     public void changeLearnedMove(int pos, CreatureMove move) {
-        List<CreatureMove> moveList = this.dataManager.get(MOVE_LIST);
+        FixedSizeList<CreatureMove> moveList = this.getLearnedMoves();
         moveList.set(pos, move);
         this.setLearnedMoves(moveList);
     }
 
-    public void newChangeLearnedMove(int pos, CreatureMove move) {
-        FixedSizeList<CreatureMove> moveList = this.newGetLearnedMoves();
-        moveList.set(pos, move);
-        this.newSetLearnedMoves(moveList);
-    }
-
-    public void newRemoveLearnedMove(int pos) {
-        FixedSizeList<CreatureMove> moveList = this.newGetLearnedMoves();
+    public void removeLearnedMove(int pos) {
+        FixedSizeList<CreatureMove> moveList = this.getLearnedMoves();
         CreatureMove moveToRemove = moveList.get(pos);
         List<CreatureMove> filteredList = moveList.getList()
                 .stream().filter(move -> move != moveToRemove).collect(Collectors.toList());
-        this.newSetLearnedMoves(new FixedSizeList<>(3, filteredList));
+        this.setLearnedMoves(new FixedSizeList<>(3, filteredList));
     }
 
-    @Deprecated
-    public void setLearnedMoves(List<CreatureMove> values) {
-        this.dataManager.set(MOVE_LIST, values);
-    }
-
-    public void newSetLearnedMoves(FixedSizeList<CreatureMove> values) {
-        this.dataManager.set(FIXED_SIZE_MOVE_LIST, values);
+    public void setLearnedMoves(FixedSizeList<CreatureMove> values) {
+        this.dataManager.set(LEARNED_MOVE_LIST, values);
     }
 
     public CreatureMove proposedTargetlessMove() {
@@ -2118,7 +2070,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //turret mode stuff starts here
     public boolean canEnterTurretMode() {
-        return this.getLearnedMoves().stream().anyMatch(m -> m.moveAnimType.moveType == CreatureMove.MoveType.RANGED);
+        return this.getLearnedMoves().getList().stream()
+                .anyMatch(m -> {
+                    return m != null && m.moveAnimType.moveType == CreatureMove.MoveType.RANGED;
+                });
     }
 
     public boolean isTurretMode() {

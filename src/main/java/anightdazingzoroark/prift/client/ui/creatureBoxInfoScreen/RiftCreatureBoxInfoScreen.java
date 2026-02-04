@@ -3,10 +3,8 @@ package anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.CommonUISections;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
-import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUser;
 import anightdazingzoroark.prift.client.ui.elements.RiftUISectionCreatureNBTUserWithIntSelector;
-import anightdazingzoroark.prift.client.ui.movesScreen.RiftMovesScreen;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
@@ -277,7 +275,6 @@ public class RiftCreatureBoxInfoScreen extends RiftLibUI {
         if (riftLibClickableSection.getStringID().equals("shuffleMoves")) {
             this.selectedCreatureInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.BOX);
             this.selectedCreatureInfo.setCreatureBoxOpenedFrom(new BlockPos(this.x, this.y, this.z));
-            RiftLibUIHelper.showUI(this.mc.player, RiftGui.MOVES_SCREEN, this.selectedCreatureInfo.getNBT(), 0, 0, 0);
         }
     }
 

@@ -192,7 +192,8 @@ public class RiftBreakBlockWhilePursuingTarget extends EntityAIBase {
         CreatureMove moveToSelect = null;
 
         //select from available moves first
-        for (CreatureMove creatureMove : this.creature.getLearnedMoves()) {
+        for (CreatureMove creatureMove : this.creature.getLearnedMoves().getList()) {
+            if (creatureMove == null) continue;
             if (creatureMove.moveAnimType.moveType != CreatureMove.MoveType.MELEE
                     || creatureMove.chargeType.requiresCharge()
                     || creatureMove.creatureMove == null
@@ -227,7 +228,8 @@ public class RiftBreakBlockWhilePursuingTarget extends EntityAIBase {
     //a melee move will be used to cause block breaking, hence this
     //preferred melee move will be the one that doesn't require charging up
     private boolean hasAvailableMeleeMoves() {
-        for (CreatureMove creatureMove : this.creature.getLearnedMoves()) {
+        for (CreatureMove creatureMove : this.creature.getLearnedMoves().getList()) {
+            if (creatureMove == null) continue;
             if (creatureMove.moveAnimType.moveType != CreatureMove.MoveType.MELEE
                     || creatureMove.chargeType.requiresCharge()
                     || creatureMove.creatureMove == null

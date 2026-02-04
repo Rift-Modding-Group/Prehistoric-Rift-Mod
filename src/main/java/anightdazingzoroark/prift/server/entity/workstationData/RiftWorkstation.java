@@ -98,7 +98,8 @@ public enum RiftWorkstation {
     }
 
     public static CreatureMove getMoveForWorkstationUse(RiftWorkstation workstation, RiftCreature creature) {
-        for (CreatureMove creatureMove : creature.getLearnedMoves()) {
+        for (CreatureMove creatureMove : creature.getLearnedMoves().getList()) {
+            if (creatureMove == null) continue;
             if (Arrays.asList(workstation.moveAnimTypes).contains(creatureMove.moveAnimType))
                 return creatureMove;
         }

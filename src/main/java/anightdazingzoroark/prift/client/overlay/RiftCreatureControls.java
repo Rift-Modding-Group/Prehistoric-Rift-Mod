@@ -74,7 +74,8 @@ public class RiftCreatureControls {
 
         //show button icon
         float alpha = ((creature.getMoveOneCooldown() > 0) ||
-                (creature.getLearnedMoves().get(0).chargeType == CreatureMove.ChargeType.BUILDUP && creature.getMoveThreeUse() < creature.getLearnedMoves().get(0).maxUse))
+                (creature.getLearnedMoves().get(0).chargeType == CreatureMove.ChargeType.BUILDUP
+                        && creature.getMoveThreeUse() < creature.getLearnedMoves().get(0).maxUse))
                 ? 0.2f : 1f;
         RiftControlButtonDisplay.draw(
                 settings.keyBindAttack.getKeyCode(),

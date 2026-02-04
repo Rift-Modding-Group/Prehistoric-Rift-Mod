@@ -238,7 +238,6 @@ public class PlayerTamedCreaturesHelper {
     //move swapping related stuff starts here
     public static void swapCreatureMoves(EntityPlayer player, SelectedCreatureInfo selectedCreature, SelectedMoveInfo moveSelected, SelectedMoveInfo moveToSwap) {
         if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftSwapCreatureMoves(player, selectedCreature, moveSelected, moveToSwap));
     }
     //move swapping related stuff ends here
 

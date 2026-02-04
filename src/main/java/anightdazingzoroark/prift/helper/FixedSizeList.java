@@ -29,6 +29,17 @@ public class FixedSizeList<T> {
         List<T> listToSet = new ArrayList<>();
         for (int i = 0; i < maxSize; i++) {
             if (i < existingList.size()) listToSet.add(i, existingList.get(i));
+            else listToSet.add(null);
+        }
+        this.list = listToSet;
+    }
+
+    public FixedSizeList(int maxSize, List<T> existingList, T defaultValue) {
+        this.maxSize = maxSize;
+        this.defaultValue = defaultValue;
+        List<T> listToSet = new ArrayList<>();
+        for (int i = 0; i < maxSize; i++) {
+            if (i < existingList.size()) listToSet.add(i, existingList.get(i));
             else listToSet.add(this.defaultValue);
         }
         this.list = listToSet;
@@ -100,6 +111,10 @@ public class FixedSizeList<T> {
 
     public int size() {
         return this.maxSize;
+    }
+
+    public int indexOf(T value) {
+        return this.list.indexOf(value);
     }
 
     public List<T> getList() {

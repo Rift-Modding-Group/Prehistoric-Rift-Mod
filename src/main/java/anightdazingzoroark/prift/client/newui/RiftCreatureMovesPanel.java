@@ -80,7 +80,7 @@ public class RiftCreatureMovesPanel {
                                     widget.getChildren().clear();
 
                                     //add current creature moves
-                                    FixedSizeList<CreatureMove> creatureMoveList = creature.newGetLearnedMoves();
+                                    FixedSizeList<CreatureMove> creatureMoveList = creature.getLearnedMoves();
                                     for (int i = 0; i < creatureMoveList.size(); i++) {
                                         CreatureMove creatureMove = creatureMoveList.get(i);
                                         int finalI = i;
@@ -120,7 +120,7 @@ public class RiftCreatureMovesPanel {
                 .child(new Rectangle().setColor(0xFF808080).setCornerRadius(5).asWidget().size(94, 58).align(Alignment.Center))
                 .child(new ParentWidget<>().size(90, 54).align(Alignment.Center)
                         .child(IKey.dynamic(() -> {
-                            FixedSizeList<CreatureMove> creatureMoveList = creature.newGetLearnedMoves();
+                            FixedSizeList<CreatureMove> creatureMoveList = creature.getLearnedMoves();
 
                             if (selectedMoveValue.getIntValue() < 0) {
                                 if (isMoveSwitching.getBoolValue()) {
