@@ -134,6 +134,7 @@ public class RiftCreatureScreen {
         if (creatureHasGear) {
             creatureGearBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureGear, index)
                     .slotGroup("creatureGear").filter(creatureGear::itemStackUsableAsGear)
+                    .accessibility(creature.getPassengers().isEmpty(), creature.getPassengers().isEmpty())
                     .changeListener((newItem, onlyAmountChanged, client, init) -> {
                         if (!client) {
                             creature.setSaddled(creatureGear.hasSaddle());
