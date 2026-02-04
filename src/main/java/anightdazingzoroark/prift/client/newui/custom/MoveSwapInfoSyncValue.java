@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.client.newui.function.MoveSwapInfoConsumer;
 import anightdazingzoroark.prift.client.newui.function.MoveSwapInfoSupplier;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import com.cleanroommc.modularui.network.NetworkUtils;
-import com.cleanroommc.modularui.utils.BooleanConsumer;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;

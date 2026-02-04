@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.client.ui.elements.RiftControlButtonDisplay;
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
@@ -42,7 +43,7 @@ public class RiftCreatureControls {
         if (entity instanceof RiftCreature) {
             if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                 RiftCreature creature = (RiftCreature) entity;
-                if (creature.creatureType.canHoldLargeWeapon
+                if (creature.creatureType.canUseGearType(RiftCreatureType.InventoryGearType.LARGE_WEAPON)
                         && creature.getLargeWeapon() != RiftLargeWeaponType.NONE
                         && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
                     this.showMoveOneControls(creature, resolution.getScaledWidth(), resolution.getScaledHeight(), true);

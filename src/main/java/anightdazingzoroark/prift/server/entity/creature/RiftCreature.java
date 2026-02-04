@@ -201,6 +201,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public AnimationFactory factory = new AnimationFactory(this);
     public boolean isRideable;
     public final CreatureGearHandler creatureGear;
+    public final NewCreatureGearHandler newCreatureGear;
     public final CreatureInventoryHandler creatureInventory;
     public double minCreatureHealth = 20D;
     public double maxCreatureHealth = 20D;
@@ -242,7 +243,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public RiftCreature(World worldIn, RiftCreatureType creatureType) {
         super(worldIn);
         this.creatureType = creatureType;
-        this.creatureGear = new CreatureGearHandler(creatureType);
+        this.creatureGear = new CreatureGearHandler(this);
+        this.newCreatureGear = creatureType.usableGear.length > 0 ? new NewCreatureGearHandler(this) : null;
         this.creatureInventory = new CreatureInventoryHandler(this.slotCount());
         this.minCreatureHealth = ((double) RiftConfigHandler.getConfig(creatureType).stats.baseHealth)/8;
         this.maxCreatureHealth = RiftConfigHandler.getConfig(creatureType).stats.baseHealth;
@@ -590,8 +592,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     && this.currentCreatureMove() == null) RiftMessages.WRAPPER.sendToServer(new RiftCanUseMoveTriggerButton(this, 1, true));
 
             //for using large weapons
-            if (this.creatureType.canHoldLargeWeapon
-                    && this.getLargeWeapon() != RiftLargeWeaponType.NONE
+            if (/*this.creatureType.canHoldLargeWeapon
+                    &&*/ this.getLargeWeapon() != RiftLargeWeaponType.NONE
                     && player.getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE) {
                 RiftMessages.WRAPPER.sendToServer(new RiftManualUseLargeWeapon(this, settings.keyBindAttack.isKeyDown() && this.getLargeWeaponCooldown() == 0));
             }
@@ -1005,7 +1007,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
-                        GuiFactories.entity().open(player, this);
+                        if (!this.world.isRemote) GuiFactories.entity().open(player, this);
                     }
                 }
                 else if (!this.isOwner(player)) {

@@ -2,6 +2,8 @@ package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
+import anightdazingzoroark.prift.server.entity.NewCreatureGearHandler;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
@@ -121,17 +123,24 @@ public class RiftCreatureScreen {
         //creature inventory syncing stuff
         syncManager.registerSlotGroup("creatureGear", Math.min(creature.creatureType.gearSlotCount(), 9));
         syncManager.registerSlotGroup("creatureInventory", 9);
-        ItemStackHandler creatureGear = creature.creatureGear;
+        CreatureGearHandler creatureGear = creature.creatureGear;
         ItemStackHandler creatureInventory = creature.creatureInventory;
         syncManager.bindPlayerInventory(player);
 
         //set if the creature has gear
         boolean creatureHasGear = creature.creatureType.gearSlotCount() > 0;
-
         //build creature gear slots
         SlotGroupWidget.Builder creatureGearBuilder = SlotGroupWidget.builder();
         if (creatureHasGear) {
-            creatureGearBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureGear, index).slotGroup("creatureGear")));
+            creatureGearBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureGear, index)
+                    .slotGroup("creatureGear").filter(creatureGear::itemStackUsableAsGear)
+                    .changeListener((newItem, onlyAmountChanged, client, init) -> {
+                        if (!client) {
+                            creature.setSaddled(creatureGear.hasSaddle());
+                            creature.setLargeWeapon(creatureGear.getLargeWeapon());
+                        }
+                    })
+            ));
 
             //get gear slot count
             String gearMatrixRow = "";

@@ -516,4 +516,8 @@ public class RiftUtil {
         if (player.isSneaking() && creature.isTamingFood(player.getHeldItemMainhand())) return true;
         return false;
     }
+
+    public static boolean itemStacksEqual(ItemStack itemStackOne, ItemStack itemStackTwo) {
+        return itemStackOne.getItem() == itemStackTwo.getItem() && itemStackOne.getMetadata() == itemStackTwo.getMetadata();
+    }
 }

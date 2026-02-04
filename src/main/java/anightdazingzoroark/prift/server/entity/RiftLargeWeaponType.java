@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.items.RiftLargeWeaponItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 import java.util.function.Function;
@@ -35,5 +36,29 @@ public enum RiftLargeWeaponType {
 
     public Function<World, RiftLargeWeapon> getConstructor() {
         return this.weaponConstructor;
+    }
+
+    public Item getAssociatedItem() {
+        switch (this) {
+            case CANNON: return RiftItems.CANNON;
+            case MORTAR: return RiftItems.MORTAR;
+            case CATAPULT: return RiftItems.CATAPULT;
+        }
+        return null;
+    }
+
+    public static RiftLargeWeaponType getFromItem(Item item) {
+        if (item == RiftItems.CANNON) return CANNON;
+        else if (item == RiftItems.MORTAR) return MORTAR;
+        else if (item == RiftItems.CATAPULT) return CATAPULT;
+        return NONE;
+    }
+
+    public static boolean itemStackIsLargeWeapon(ItemStack itemStack) {
+        return itemIsLargeWeapon(itemStack.getItem());
+    }
+
+    public static boolean itemIsLargeWeapon(Item item) {
+        return item == RiftItems.CANNON || item == RiftItems.MORTAR || item == RiftItems.CATAPULT;
     }
 }

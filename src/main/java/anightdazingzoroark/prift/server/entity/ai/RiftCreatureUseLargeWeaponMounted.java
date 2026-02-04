@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
@@ -26,7 +27,7 @@ public class RiftCreatureUseLargeWeaponMounted extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        return this.creature.creatureType.canHoldLargeWeapon
+        return this.creature.creatureType.canUseGearType(RiftCreatureType.InventoryGearType.LARGE_WEAPON)
                 && this.creature.isBeingRidden()
                 && (this.creature.getControllingPassenger() instanceof EntityPlayer && ((EntityPlayer)this.creature.getControllingPassenger()).getHeldItemMainhand().getItem() == RiftItems.COMMAND_CONSOLE)
                 && this.creature.getLargeWeaponCooldown() == 0;

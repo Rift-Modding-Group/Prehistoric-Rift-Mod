@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity;
 
+import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
@@ -15,7 +16,7 @@ public class CreatureInventoryHandler extends ItemStackHandler {
 
     public ItemStack addItem(ItemStack itemStackToAdd) {
         ItemSearchResult similarItemResult = this.findItem(ItemSearchDirection.FIRST_TO_LAST, itemStack -> {
-            return itemStacksEqual(itemStack, itemStackToAdd) && itemStack.isStackable() && itemStack.getCount() < itemStackToAdd.getMaxStackSize();
+            return RiftUtil.itemStacksEqual(itemStack, itemStackToAdd) && itemStack.isStackable() && itemStack.getCount() < itemStackToAdd.getMaxStackSize();
         });
         ItemSearchResult emptySpaceResult = this.findItem(ItemSearchDirection.FIRST_TO_LAST, ItemStack.EMPTY);
 
@@ -56,7 +57,7 @@ public class CreatureInventoryHandler extends ItemStackHandler {
         if (searchDirection == ItemSearchDirection.FIRST_TO_LAST) {
             for (int i = 0; i < this.stacks.size(); i++) {
                 ItemStack itemStack = this.stacks.get(i);
-                if (itemStack.getItem() == itemToSearch.getItem() && itemStack.getMetadata() == itemToSearch.getMetadata()) {
+                if (RiftUtil.itemStacksEqual(itemToSearch, itemStack)) {
                     return new ItemSearchResult(true, itemStack, i);
                 }
             }
@@ -65,7 +66,7 @@ public class CreatureInventoryHandler extends ItemStackHandler {
         else if (searchDirection == ItemSearchDirection.LAST_TO_FIRST) {
             for (int i = this.stacks.size() - 1; i >= 0; i--) {
                 ItemStack itemStack = this.stacks.get(i);
-                if (this.itemStacksEqual(itemToSearch, itemStack)) {
+                if (RiftUtil.itemStacksEqual(itemToSearch, itemStack)) {
                     return new ItemSearchResult(true, itemStack, i);
                 }
             }
@@ -112,10 +113,6 @@ public class CreatureInventoryHandler extends ItemStackHandler {
             return this.noItemFound;
         }
         return this.noItemFound;
-    }
-
-    private boolean itemStacksEqual(ItemStack itemStackOne, ItemStack itemStackTwo) {
-        return itemStackOne.getItem() == itemStackTwo.getItem() && itemStackOne.getMetadata() == itemStackTwo.getMetadata();
     }
 
     public static class ItemSearchResult {
