@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.client.ui;
 
+import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -19,16 +20,6 @@ public class SelectedMoveInfo {
     public SelectedMoveInfo(NBTTagCompound nbtTagCompound) {
         this.moveType = SelectedMoveType.values()[nbtTagCompound.getByte("SelectedMoveType")];
         this.movePos = nbtTagCompound.getInteger("Position");
-    }
-
-    public CreatureMove getMoveUsingNBT(CreatureNBT creatureNBT) {
-        if (this.moveType == SelectedMoveType.LEARNT) {
-            return creatureNBT.getMovesList().get(this.movePos);
-        }
-        else if (this.moveType == SelectedMoveType.LEARNABLE) {
-            return creatureNBT.getLearnableMovesList().get(this.movePos);
-        }
-        return null;
     }
 
     //this is mainly for use in packets
@@ -80,7 +71,7 @@ public class SelectedMoveInfo {
             return this.moveOne != null && this.moveTwo == null;
         }
 
-        public SwapResult applySwap(RiftCreature creature) {
+        public SwapResult applySwap(CreatureGuiData data) {
             if (!this.canSwap()) return new SwapResult(false, false);
 
             boolean swapSuccessful = false;
@@ -88,35 +79,35 @@ public class SelectedMoveInfo {
 
             //within learnt moves swap
             if (this.moveOne.moveType == SelectedMoveType.LEARNT && this.moveTwo.moveType == SelectedMoveType.LEARNT) {
-                CreatureMove moveToSwap = creature.getLearnedMoves().get(this.moveOne.movePos);
-                creature.changeLearnedMove(this.moveOne.movePos, creature.getLearnedMoves().get(this.moveTwo.movePos));
-                creature.changeLearnedMove(this.moveTwo.movePos, moveToSwap);
+                CreatureMove moveToSwap = data.getLearnedMoves().get(this.moveOne.movePos);
+                data.changeLearnedMove(this.moveOne.movePos, data.getLearnedMoves().get(this.moveTwo.movePos));
+                data.changeLearnedMove(this.moveTwo.movePos, moveToSwap);
                 swapSuccessful = true;
             }
             //learnable move x learnt move swap
             else if (this.moveOne.moveType == SelectedMoveType.LEARNABLE && this.moveTwo.moveType == SelectedMoveType.LEARNT) {
-                CreatureMove moveToSwap = creature.getLearnableMoves().get(this.moveOne.movePos);
-                CreatureMove moveToReplace = creature.getLearnedMoves().get(this.moveTwo.movePos);
+                CreatureMove moveToSwap = data.getLearnableMoves().get(this.moveOne.movePos);
+                CreatureMove moveToReplace = data.getLearnedMoves().get(this.moveTwo.movePos);
                 if (moveToReplace != null) {
-                    creature.changeLearnableMove(this.moveOne.movePos, moveToReplace);
-                    creature.changeLearnedMove(this.moveTwo.movePos, moveToSwap);
+                    data.changeLearnableMove(this.moveOne.movePos, moveToReplace);
+                    data.changeLearnedMove(this.moveTwo.movePos, moveToSwap);
                 }
                 else {
-                    creature.removeLearnableMove(this.moveOne.movePos);
-                    creature.changeLearnedMove(this.moveTwo.movePos, moveToSwap);
+                    data.removeLearnableMove(this.moveOne.movePos);
+                    data.changeLearnedMove(this.moveTwo.movePos, moveToSwap);
                 }
                 swapSuccessful = true;
             }
             //learnt move x learnable move swap
             else if (this.moveOne.moveType == SelectedMoveType.LEARNT && this.moveTwo.moveType == SelectedMoveType.LEARNABLE) {
-                CreatureMove moveToSwap = creature.getLearnedMoves().get(this.moveOne.movePos);
+                CreatureMove moveToSwap = data.getLearnedMoves().get(this.moveOne.movePos);
                 if (this.moveTwo.movePos >= 0) {
-                    creature.changeLearnedMove(this.moveOne.movePos, creature.getLearnableMoves().get(this.moveTwo.movePos));
-                    creature.changeLearnableMove(this.moveTwo.movePos, moveToSwap);
+                    data.changeLearnedMove(this.moveOne.movePos, data.getLearnableMoves().get(this.moveTwo.movePos));
+                    data.changeLearnableMove(this.moveTwo.movePos, moveToSwap);
                 }
                 else {
-                    creature.removeLearnedMove(this.moveOne.movePos);
-                    creature.addLearnableMove(moveToSwap);
+                    data.removeLearnedMove(this.moveOne.movePos);
+                    data.addLearnableMove(moveToSwap);
                 }
                 swapSuccessful = true;
             }

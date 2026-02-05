@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
 import anightdazingzoroark.prift.server.entity.NewCreatureGearHandler;
@@ -37,9 +38,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class RiftCreatureScreen {
-    public static ModularPanel buildCreatureUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
+    public static ModularPanel buildCreatureUI(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disableRecipeViewer();
-        RiftCreature creature = (RiftCreature) data.getGuiHolder();
 
         //tab related stuff
         PagedWidget.Controller tabController = new PagedWidget.Controller();
@@ -103,18 +103,21 @@ public class RiftCreatureScreen {
                         .debugName("pagedWidget")
                         .controller(tabController)
                         //page for creature inventory
-                        .addPage(creatureInventoryPage(creature, data.getPlayer(), syncManager))
+                        .addPage(creatureInventoryPage(data, syncManager))
                         //page for creature settings
-                        .addPage(creatureSettingsPage(creature, syncManager))
+                        .addPage(creatureSettingsPage(data, syncManager))
                         //page for creature info
-                        .addPage(creatureInfoPage(creature, syncManager, settings))
+                        .addPage(creatureInfoPage(data, syncManager, settings))
                         //page for creature moves
-                        .addPage(creatureMovesPage(creature, syncManager, settings))
+                        .addPage(creatureMovesPage(data, syncManager, settings))
                         .widthRel(1f).coverChildrenHeight()
                 );
     }
 
-    private static ParentWidget<?> creatureInventoryPage(RiftCreature creature, EntityPlayer player, PanelSyncManager syncManager) {
+    private static ParentWidget<?> creatureInventoryPage(CreatureGuiData data, PanelSyncManager syncManager) {
+        RiftCreature creature = (RiftCreature) data.getGuiHolder();
+        EntityPlayer player = data.getPlayer();
+
         //set up strings
         String playerName = player.getName();
         String creatureGearName = I18n.format("inventory.gear", creature.getName(false));
@@ -209,7 +212,9 @@ public class RiftCreatureScreen {
                 ).width(180).coverChildrenHeight();
     }
 
-    private static ParentWidget<?> creatureSettingsPage(RiftCreature creature, PanelSyncManager syncManager) {
+    private static ParentWidget<?> creatureSettingsPage(CreatureGuiData data, PanelSyncManager syncManager) {
+        RiftCreature creature = (RiftCreature) data.getGuiHolder();
+
         //creature sitting syncing
         BooleanSyncValue sittingValue = new BooleanSyncValue(creature::isSitting, creature::setSitting);
         syncManager.syncValue("creatureSitting", sittingValue);
@@ -447,12 +452,12 @@ public class RiftCreatureScreen {
         return creatureOptions;
     }
 
-    private static ParentWidget<?> creatureInfoPage(RiftCreature creature, PanelSyncManager syncManager, UISettings settings) {
-        return RiftCreatureInfoPanel.build(creature, syncManager, settings).debugName("infoPage");
+    private static ParentWidget<?> creatureInfoPage(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        return RiftCreatureInfoPanel.build(data, syncManager, settings).debugName("infoPage");
     }
 
-    private static ParentWidget<?> creatureMovesPage(RiftCreature creature, PanelSyncManager syncManager, UISettings settings) {
-        return RiftCreatureMovesPanel.build(creature, syncManager, settings).debugName("movesPage");
+    private static ParentWidget<?> creatureMovesPage(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        return RiftCreatureMovesPanel.build(data, syncManager, settings).debugName("movesPage");
     }
 
     private static void tryAddChild(ParentWidget<?> parentWidget, IWidget childToAdd) {

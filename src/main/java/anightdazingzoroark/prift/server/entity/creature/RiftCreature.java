@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
+import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
+import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
 import anightdazingzoroark.prift.client.ui.RiftEggScreen;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
@@ -94,7 +96,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class RiftCreature extends EntityTameable implements IAnimatable, IMultiHitboxUser, IDynamicRideUser, IGuiHolder<EntityGuiData> {
+public abstract class RiftCreature extends EntityTameable implements IAnimatable, IMultiHitboxUser, IDynamicRideUser, IGuiHolder<CreatureGuiData> {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LOVE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -179,12 +181,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //herding stuff
     private RiftCreature herdLeader = this;
     private final Set<RiftCreature> herdMembers = new HashSet<>();
-
-    //modular ui stuff
-    public int currentSelectedMoveUI = -1;
-    public boolean selectedMoveFromRightUI = false;
-    public boolean isMoveSwitchingUI = false;
-    public SelectedMoveInfo.SwapInfo moveSwapInfoUI = new SelectedMoveInfo.SwapInfo();
 
     //other stuff
     private int boxReviveTime;
@@ -969,7 +965,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                                     0
                             );
                         }
-                        else if (!this.world.isRemote) GuiFactories.entity().open(player, this);
+                        else if (!this.world.isRemote) CreatureGuiFactory.INSTANCE.open(player, this);
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
                         if (this.canBePregnant()) {
@@ -993,7 +989,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         else RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && player.isSneaking()) {
-                        if (!this.world.isRemote) GuiFactories.entity().open(player, this);
+                        if (!this.world.isRemote) CreatureGuiFactory.INSTANCE.open(player, this);
                     }
                 }
                 else if (!this.isOwner(player)) {
@@ -1321,7 +1317,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
         compound.setBoolean("Saddled", this.isSaddled());
         compound.setByte("LargeWeapon", (byte) this.getLargeWeapon().ordinal());
-        compound.setTag("Items", this.creatureInventory.serializeNBT());
+        compound.setTag("Inventory", this.creatureInventory.serializeNBT());
         compound.setTag("Gear", this.creatureGear.serializeNBT());
         compound.setInteger("Energy", this.getEnergy());
         compound.setBoolean("HasTarget", this.hasTarget());
@@ -1339,7 +1335,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         //for learned moves
         NBTTagCompound learnedMovesListNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(this.getLearnedMoves());
-        compound.setTag("NewLearnedMoves", learnedMovesListNBT);
+        compound.setTag("LearnedMoves", learnedMovesListNBT);
 
         //for learnable moves
         NBTTagCompound learnableMovesListNBT = MoveListUtil.getNBTFromListCreatureMove(this.getLearnableMoves());
@@ -1370,7 +1366,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
         this.setSaddled(compound.getBoolean("Saddled"));
         this.setLargeWeapon(RiftLargeWeaponType.values()[compound.getByte("LargeWeapon")]);
-        this.creatureInventory.deserializeNBT(compound.getCompoundTag("Items"));
+        this.creatureInventory.deserializeNBT(compound.getCompoundTag("Inventory"));
         this.creatureGear.deserializeNBT(compound.getCompoundTag("Gear"));
         this.setEnergy(compound.getInteger("Energy"));
         this.setHasTarget(compound.getBoolean("HasTarget"));
@@ -1382,7 +1378,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
 
         //for learned moves
-        NBTTagCompound learnedMovesListNBT = compound.getCompoundTag("NewLearnedMoves");
+        NBTTagCompound learnedMovesListNBT = compound.getCompoundTag("LearnedMoves");
         FixedSizeList<CreatureMove> learnedMovesList = MoveListUtil.getFixedSizeListCreatureMoveFromNBT(learnedMovesListNBT);
         this.setLearnedMoves(learnedMovesList);
 
@@ -3431,7 +3427,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @Override
-    public ModularPanel buildUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
+    public ModularPanel buildUI(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         return RiftCreatureScreen.buildCreatureUI(data, syncManager, settings);
     }
 }

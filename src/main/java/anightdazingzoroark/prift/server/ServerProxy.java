@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
 import anightdazingzoroark.prift.compat.crafttweaker.RiftCrafttweaker;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
@@ -35,6 +36,7 @@ import anightdazingzoroark.prift.server.world.RiftPlantGenerator;
 import anightdazingzoroark.prift.server.world.RiftStructureGenerator;
 import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
 import com.charles445.simpledifficulty.api.temperature.TemperatureRegistry;
+import com.cleanroommc.modularui.factory.GuiManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Loader;
@@ -78,6 +80,8 @@ public class ServerProxy {
         MinecraftForge.EVENT_BUS.register(new RiftEffects());
         RiftEntities.registerEntities();
         if (GeneralConfig.canUseSimpleDiff()) loadTemperatureRegistry();
+
+        GuiManager.registerFactory(CreatureGuiFactory.INSTANCE);
 
         //load modded recipes
         if (GeneralConfig.canUseMM() && Loader.isModLoaded(RiftInitialize.HARVESTCRAFT_MOD_ID)) RiftMMRecipes.registerHarvestCraftRecipes();

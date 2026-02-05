@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.newui.custom.MoveSwapInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -28,23 +29,23 @@ import java.util.List;
 public class RiftCreatureMovesPanel {
     public static final int[] size = {220, 161};
 
-    public static ParentWidget<?> build(RiftCreature creature, PanelSyncManager syncManager, UISettings settings) {
+    public static ParentWidget<?> build(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         //selected move
-        IntSyncValue selectedMoveValue = new IntSyncValue(() -> creature.currentSelectedMoveUI, value -> creature.currentSelectedMoveUI = value);
+        IntSyncValue selectedMoveValue = new IntSyncValue(() -> data.currentSelectedMoveUI, value -> data.currentSelectedMoveUI = value);
         syncManager.syncValue("selectedMove", selectedMoveValue);
 
         //side in which selected move was from
-        BooleanSyncValue selectedMoveFromRight = new BooleanSyncValue(() -> creature.selectedMoveFromRightUI, value -> creature.selectedMoveFromRightUI = value);
+        BooleanSyncValue selectedMoveFromRight = new BooleanSyncValue(() -> data.selectedMoveFromRightUI, value -> data.selectedMoveFromRightUI = value);
         syncManager.syncValue("selectedMoveFromRight", selectedMoveFromRight);
 
         //move switching
-        BooleanSyncValue isMoveSwitching = new BooleanSyncValue(() -> creature.isMoveSwitchingUI, value -> creature.isMoveSwitchingUI = value);
+        BooleanSyncValue isMoveSwitching = new BooleanSyncValue(() -> data.isMoveSwitchingUI, value -> data.isMoveSwitchingUI = value);
         syncManager.syncValue("moveSwitching", isMoveSwitching);
 
         //helper sync value for helper class for swapping moves
         MoveSwapInfoSyncValue moveSwapInfo = new MoveSwapInfoSyncValue(
-                () -> creature.moveSwapInfoUI,
-                value -> creature.moveSwapInfoUI = value
+                () -> data.moveSwapInfoUI,
+                value -> data.moveSwapInfoUI = value
         );
         syncManager.syncValue("moveSwapInfo", moveSwapInfo);
 
@@ -52,26 +53,25 @@ public class RiftCreatureMovesPanel {
                 .child(new Row().coverChildren().childPadding(5)
                         //left side is the creature's current moves
                         .child(new ParentWidget<>().coverChildrenWidth().height(147)
-                                .child(currentMovesSide(creature, selectedMoveValue, selectedMoveFromRight, isMoveSwitching, moveSwapInfo))
+                                .child(currentMovesSide(data, selectedMoveValue, selectedMoveFromRight, isMoveSwitching, moveSwapInfo))
                         )
                         //separator line
                         .child(new Rectangle().setColor(0xFF000000).asWidget().size(1, 108))
                         //right side is info
                         .child(new ParentWidget<>().coverChildrenWidth().height(147)
-                                .child(learnableMovesSide(creature, selectedMoveValue, selectedMoveFromRight, isMoveSwitching, moveSwapInfo))
+                                .child(learnableMovesSide(data, selectedMoveValue, selectedMoveFromRight, isMoveSwitching, moveSwapInfo))
                         )
                 );
     }
 
-    private static Flow currentMovesSide(RiftCreature creature, IntSyncValue selectedMoveValue,
+    private static Flow currentMovesSide(CreatureGuiData data, IntSyncValue selectedMoveValue,
                                          BooleanSyncValue selectedMoveFromRight, BooleanSyncValue isMoveSwitching,
                                          MoveSwapInfoSyncValue moveSwapInfo) {
-
         return new Column().debugName("leftSide")
                 .childPadding(5).coverChildren()
                 //header
                 .child(new ParentWidget<>().width(96).coverChildrenHeight()
-                        .child(IKey.lang("tamepanel.current_moves", creature.getName(false)).asWidget().scale(0.75f).align(Alignment.CenterLeft))
+                        .child(IKey.lang("tamepanel.current_moves", data.getName(false)).asWidget().scale(0.75f).align(Alignment.CenterLeft))
                 )
                 //current moves
                 .child(new ParentWidget<>().size(80, 70)
@@ -80,7 +80,7 @@ public class RiftCreatureMovesPanel {
                                     widget.getChildren().clear();
 
                                     //add current creature moves
-                                    FixedSizeList<CreatureMove> creatureMoveList = creature.getLearnedMoves();
+                                    FixedSizeList<CreatureMove> creatureMoveList = data.getLearnedMoves();
                                     for (int i = 0; i < creatureMoveList.size(); i++) {
                                         CreatureMove creatureMove = creatureMoveList.get(i);
                                         int finalI = i;
@@ -100,7 +100,7 @@ public class RiftCreatureMovesPanel {
                                                                         new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, finalI)
                                                                 );
                                                                 if (!moveSwapInfo.getValue().canSwap()) return;
-                                                                moveSwapInfo.getValue().applySwap(creature);
+                                                                moveSwapInfo.getValue().applySwap(data);
                                                                 selectedMoveValue.setIntValue(-1);
                                                             }
                                                         })
@@ -120,7 +120,7 @@ public class RiftCreatureMovesPanel {
                 .child(new Rectangle().setColor(0xFF808080).setCornerRadius(5).asWidget().size(94, 58).align(Alignment.Center))
                 .child(new ParentWidget<>().size(90, 54).align(Alignment.Center)
                         .child(IKey.dynamic(() -> {
-                            FixedSizeList<CreatureMove> creatureMoveList = creature.getLearnedMoves();
+                            FixedSizeList<CreatureMove> creatureMoveList = data.getLearnedMoves();
 
                             if (selectedMoveValue.getIntValue() < 0) {
                                 if (isMoveSwitching.getBoolValue()) {
@@ -130,7 +130,7 @@ public class RiftCreatureMovesPanel {
                             }
                             else {
                                 if (selectedMoveFromRight.getBoolValue()) {
-                                    return creature.getLearnableMoves().get(selectedMoveValue.getIntValue()).getTranslatedDescription();
+                                    return data.getLearnableMoves().get(selectedMoveValue.getIntValue()).getTranslatedDescription();
                                 }
                                 return creatureMoveList.get(selectedMoveValue.getIntValue()).getTranslatedDescription();
                             }
@@ -139,7 +139,7 @@ public class RiftCreatureMovesPanel {
         );
     }
 
-    private static Flow learnableMovesSide(RiftCreature creature, IntSyncValue selectedMoveValue,
+    private static Flow learnableMovesSide(CreatureGuiData data, IntSyncValue selectedMoveValue,
                                            BooleanSyncValue selectedMoveFromRight, BooleanSyncValue isMoveSwitching,
                                            MoveSwapInfoSyncValue moveSwapInfo) {
         Flow movesColumn = new Column().coverChildrenWidth()
@@ -148,7 +148,7 @@ public class RiftCreatureMovesPanel {
                     widget.getChildren().clear();
 
                     //add buttons for moves
-                    List<CreatureMove> creatureMoveList = creature.getLearnableMoves();
+                    List<CreatureMove> creatureMoveList = data.getLearnableMoves();
                     for (int i = 0; i < creatureMoveList.size(); i++) {
                         CreatureMove creatureMove = creatureMoveList.get(i);
                         int finalI = i;
@@ -165,7 +165,7 @@ public class RiftCreatureMovesPanel {
                                                     new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, finalI)
                                             );
                                             if (moveSwapInfo.getValue().canSwap()) {
-                                                SelectedMoveInfo.SwapResult swapResult = moveSwapInfo.getValue().applySwap(creature);
+                                                SelectedMoveInfo.SwapResult swapResult = moveSwapInfo.getValue().applySwap(data);
                                                 if (!swapResult.swapSuccessful && swapResult.selfSelect) selectedMoveValue.setIntValue(-1);
                                             }
                                         })
@@ -185,7 +185,7 @@ public class RiftCreatureMovesPanel {
                                     moveSwapInfo.getValue().setMove(
                                             new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, -1)
                                     );
-                                    moveSwapInfo.getValue().applySwap(creature);
+                                    moveSwapInfo.getValue().applySwap(data);
                                     return true;
                                 })
                                 .overlay(IKey.lang("creature_move.no_move"))
@@ -220,8 +220,8 @@ public class RiftCreatureMovesPanel {
                         .child(new Rectangle().setColor(0xFF808080).setCornerRadius(5).asWidget().size(94, 128).align(Alignment.Center))
                         //moves
                         .child(new ParentWidget<>().size(92, 120).align(Alignment.Center)
-                                .childIf(creature.getLearnableMoves().size() <= 5, movesColumn)
-                                .childIf(creature.getLearnableMoves().size() > 5, new ListWidget<>()
+                                .childIf(data.getLearnableMoves().size() <= 5, movesColumn)
+                                .childIf(data.getLearnableMoves().size() > 5, new ListWidget<>()
                                         .size(92,120).child(movesColumn)
                                 )
                         )

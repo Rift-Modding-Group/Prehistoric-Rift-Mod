@@ -3,8 +3,10 @@ package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
+import anightdazingzoroark.prift.server.entity.MoveListUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -199,16 +201,7 @@ public class CreatureNBT {
         this.creatureNBT.setInteger("DeploymentType", deploymentType.ordinal());
     }
 
-    public NBTTagList getMovesListNBT() {
-        if (this.creatureNBT.isEmpty()) return new NBTTagList();
-        return this.creatureNBT.getTagList("LearnedMoves", 10);
-    }
-
-    public void setMovesListNBT(NBTTagList newMovesList) {
-        if (this.creatureNBT.isEmpty()) return;
-        this.creatureNBT.setTag("LearnedMoves", newMovesList);
-    }
-
+    @Deprecated
     public List<CreatureMove> getMovesList() {
         if (this.creatureNBT.isEmpty()) return new ArrayList<>();
         List<CreatureMove> toReturn = new ArrayList<>();
@@ -220,13 +213,102 @@ public class CreatureNBT {
         return toReturn;
     }
 
-    public void setMove(int pos, CreatureMove creatureMove) {
+    public NBTTagList getMovesListNBT() {
+        if (this.creatureNBT.isEmpty()) return new NBTTagList();
+        return this.creatureNBT.getTagList("LearnedMoves", 10);
+    }
+
+    public void setMovesListNBT(NBTTagList newMovesList) {
         if (this.creatureNBT.isEmpty()) return;
-        NBTTagList toReplace = this.getMovesListNBT();
+        this.creatureNBT.setTag("LearnedMoves", newMovesList);
+    }
+
+    public FixedSizeList<CreatureMove> getLearnedMoves() {
+        if (this.creatureNBT.isEmpty()) return new FixedSizeList<>(3);
+        return MoveListUtil.getFixedSizeListCreatureMoveFromNBT(this.creatureNBT.getCompoundTag("LearnedMoves"));
+    }
+
+    public void changeLearnedMove(int pos, CreatureMove move) {
+        if (this.creatureNBT.isEmpty()) return;
+
+        //create nbt for the move
         NBTTagCompound newMoveNBT = new NBTTagCompound();
-        newMoveNBT.setInteger("Move", creatureMove.ordinal());
-        toReplace.set(pos, newMoveNBT);
-        this.setMovesListNBT(toReplace);
+        newMoveNBT.setInteger("Move", move.ordinal());
+        newMoveNBT.setInteger("Index", pos);
+
+        //replace in nbt
+        NBTTagCompound newLearnedMoveListNBT = this.creatureNBT.getCompoundTag("LearnedMoves");
+        NBTTagList moveListNBTList = newLearnedMoveListNBT.getTagList("MoveList", 10);
+        for (int i = 0; i < moveListNBTList.tagCount(); i++) {
+            NBTTagCompound moveNBTToTest = moveListNBTList.getCompoundTagAt(i);
+            if (moveNBTToTest.getInteger("Index") == pos) moveListNBTList.set(pos, newMoveNBT);
+        }
+        newLearnedMoveListNBT.setTag("MoveList", moveListNBTList);
+        this.creatureNBT.setTag("LearnedMoves", newLearnedMoveListNBT);
+    }
+
+    public void removeLearnedMove(int pos) {
+        if (this.creatureNBT.isEmpty()) return;
+        NBTTagCompound newLearnedMoveListNBT = this.creatureNBT.getCompoundTag("LearnedMoves");
+        NBTTagList moveListNBTList = newLearnedMoveListNBT.getTagList("MoveList", 10);
+        int listPosToRemove = -1;
+        for (int i = 0; i < moveListNBTList.tagCount(); i++) {
+            NBTTagCompound moveNBTToTest = moveListNBTList.getCompoundTagAt(i);
+            if (moveNBTToTest.getInteger("Index") == pos) {
+                listPosToRemove = i;
+                break;
+            }
+        }
+        if (listPosToRemove >= 0) moveListNBTList.removeTag(listPosToRemove);
+        newLearnedMoveListNBT.setTag("MoveList", moveListNBTList);
+        this.creatureNBT.setTag("LearnedMoves", newLearnedMoveListNBT);
+    }
+
+    public List<CreatureMove> getLearnableMoves() {
+        if (this.creatureNBT.isEmpty()) return new ArrayList<>();
+        return MoveListUtil.getListCreatureMoveFromNBT(this.creatureNBT.getCompoundTag("LearnableMoves"));
+    }
+
+    public void changeLearnableMove(int pos, CreatureMove move) {
+        if (this.creatureNBT.isEmpty()) return;
+
+        //create nbt for the move
+        NBTTagCompound newMoveNBT = new NBTTagCompound();
+        newMoveNBT.setInteger("Move", move.ordinal());
+        newMoveNBT.setInteger("Index", pos);
+
+        //replace in nbt
+        NBTTagCompound newLearnableMoveListNBT = this.creatureNBT.getCompoundTag("LearnableMoves");
+        NBTTagList moveListNBTList = newLearnableMoveListNBT.getTagList("MoveList", 10);
+        for (int i = 0; i < moveListNBTList.tagCount(); i++) {
+            NBTTagCompound moveNBTToTest = moveListNBTList.getCompoundTagAt(i);
+            if (moveNBTToTest.getInteger("Index") == pos) moveListNBTList.set(pos, newMoveNBT);
+        }
+        newLearnableMoveListNBT.setTag("MoveList", moveListNBTList);
+        this.creatureNBT.setTag("LearnableMoves", newLearnableMoveListNBT);
+    }
+
+    public void addLearnableMove(CreatureMove move) {
+        List<CreatureMove> learnableMoves = MoveListUtil.getListCreatureMoveFromNBT(this.creatureNBT.getCompoundTag("LearnableMoves"));
+        learnableMoves.add(move);
+        this.creatureNBT.setTag("LearnableMoves", MoveListUtil.getNBTFromListCreatureMove(learnableMoves));
+    }
+
+    public void removeLearnableMove(int pos) {
+        if (this.creatureNBT.isEmpty()) return;
+        NBTTagCompound newLearnableMoveListNBT = this.creatureNBT.getCompoundTag("LearnableMoves");
+        NBTTagList moveListNBTList = newLearnableMoveListNBT.getTagList("MoveList", 10);
+        int listPosToRemove = -1;
+        for (int i = 0; i < moveListNBTList.tagCount(); i++) {
+            NBTTagCompound moveNBTToTest = moveListNBTList.getCompoundTagAt(i);
+            if (moveNBTToTest.getInteger("Index") == pos) {
+                listPosToRemove = i;
+                break;
+            }
+        }
+        if (listPosToRemove >= 0) moveListNBTList.removeTag(listPosToRemove);
+        newLearnableMoveListNBT.setTag("MoveList", moveListNBTList);
+        this.creatureNBT.setTag("LearnableMoves", newLearnableMoveListNBT);
     }
 
     public NBTTagList getLearnableMovesListNBT() {
@@ -237,17 +319,6 @@ public class CreatureNBT {
     public void setLearnableMovesListNBT(NBTTagList newMovesList) {
         if (this.creatureNBT.isEmpty()) return;
         this.creatureNBT.setTag("LearnableMoves", newMovesList);
-    }
-
-    public List<CreatureMove> getLearnableMovesList() {
-        if (this.creatureNBT.isEmpty()) return new ArrayList<>();
-        List<CreatureMove> toReturn = new ArrayList<>();
-        for (int i = 0; i < this.getLearnableMovesListNBT().tagCount(); i++) {
-            NBTTagCompound moveNBT = this.getLearnableMovesListNBT().getCompoundTagAt(i);
-            CreatureMove moveToAdd = CreatureMove.values()[moveNBT.getInteger("Move")];
-            toReturn.add(moveToAdd);
-        }
-        return toReturn;
     }
 
     public void setLearnableMove(int pos, CreatureMove creatureMove) {
@@ -285,11 +356,23 @@ public class CreatureNBT {
         }
     }
 
+    @Deprecated
     public NBTTagList getItemListNBT() {
         if (this.creatureNBT.isEmpty()) return new NBTTagList();
         return this.creatureNBT.getTagList("Items", 10);
     }
 
+    public NBTTagCompound getInventoryNBT() {
+        if (this.creatureNBT.isEmpty()) return new NBTTagCompound();
+        return this.creatureNBT.getCompoundTag("Inventory");
+    }
+
+    public NBTTagCompound getGearNBT() {
+        if (this.creatureNBT.isEmpty()) return new NBTTagCompound();
+        return this.creatureNBT.getCompoundTag("Gear");
+    }
+
+    @Deprecated
     public boolean inventoryIsEmpty() {
         if (this.creatureNBT.isEmpty()) return true;
         NBTTagList inventoryTagList = this.getItemListNBT();
@@ -305,6 +388,19 @@ public class CreatureNBT {
         return true;
     }
 
+    public boolean newInventoryIsEmpty() {
+        if (this.creatureNBT.isEmpty()) return true;
+        NBTTagCompound inventoryNBT = this.getInventoryNBT();
+        NBTTagList inventoryTagList = inventoryNBT.getTagList("Items", 10);
+        for (int i = 0; i < inventoryTagList.tagCount(); i++) {
+            NBTTagCompound itemNBT = inventoryTagList.getCompoundTagAt(i);
+            ItemStack stackToTest = new ItemStack(itemNBT);
+            if (!stackToTest.equals(ItemStack.EMPTY)) return false;
+        }
+        return true;
+    }
+
+    @Deprecated
     public void dropInventory(World world) {
         if (this.creatureNBT.isEmpty()) return;
 
@@ -318,6 +414,39 @@ public class CreatureNBT {
             //gear is exempted from the check
             if (j == getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)
                     || j == getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) continue;
+            ItemStack stackToTest = new ItemStack(itemNBT);
+            if (!stackToTest.equals(ItemStack.EMPTY)) {
+                itemsToDrop.add(stackToTest);
+                positionsToRemove.add(i);
+            }
+        }
+        if (itemsToDrop.isEmpty()) return;
+
+        //step 2: remove items
+        for (Integer posToRemove : positionsToRemove) inventoryTagList.removeTag(posToRemove);
+        this.creatureNBT.setTag("Items", inventoryTagList);
+
+        //step 3: drop all the items at the location of the owner
+        UUID ownerUUID = UUID.fromString(this.creatureNBT.getString("OwnerUUID"));
+        EntityPlayer player = (EntityPlayer) RiftUtil.getEntityFromUUID(world, ownerUUID);
+        if (player == null) return;
+        for (ItemStack item : itemsToDrop) {
+            EntityItem droppedItem = new EntityItem(world, player.posX, player.posY + 0.5, player.posZ);
+            droppedItem.setItem(item);
+            world.spawnEntity(droppedItem);
+        }
+    }
+
+    public void newDropInventory(World world) {
+        if (this.creatureNBT.isEmpty()) return;
+
+        //step 1: get all the items
+        NBTTagCompound inventoryNBT = this.getInventoryNBT();
+        NBTTagList inventoryTagList = inventoryNBT.getTagList("Items", 10);
+        List<ItemStack> itemsToDrop = new ArrayList<>();
+        List<Integer> positionsToRemove = new ArrayList<>();
+        for (int i = 0; i < inventoryTagList.tagCount(); i++) {
+            NBTTagCompound itemNBT = inventoryTagList.getCompoundTagAt(i);
             ItemStack stackToTest = new ItemStack(itemNBT);
             if (!stackToTest.equals(ItemStack.EMPTY)) {
                 itemsToDrop.add(stackToTest);
@@ -491,13 +620,11 @@ public class CreatureNBT {
 
             //corresponds to every 3 seconds, regen a variable no of health points
             //based on last food item slot
+            NBTTagCompound inventoryNBT = this.getInventoryNBT();
+            NBTTagList inventoryTagList = inventoryNBT.getTagList("Items", 10);
             if (GeneralConfig.creatureEatFromInventory && i % 60 == 0) {
-                for (int j = this.getItemListNBT().tagCount() - 1; j >= 0; j--) {
-                    NBTTagCompound itemNBT = (NBTTagCompound) this.getItemListNBT().get(j);
-
-                    //gear is exempted from the check
-                    if (j == this.getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)
-                            || j == this.getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) continue;
+                for (int j = inventoryTagList.tagCount() - 1; j >= 0; j--) {
+                    NBTTagCompound itemNBT = inventoryTagList.getCompoundTagAt(j);
 
                     ItemStack itemStack = new ItemStack(itemNBT);
                     if (this.isFavoriteFood(itemStack) && !this.isEnergyRegenItem(itemStack)) {
@@ -522,13 +649,11 @@ public class CreatureNBT {
                 if (toReturn > this.getCreatureEnergy()[1]) return this.getCreatureEnergy()[1];
             }
 
+            NBTTagCompound inventoryNBT = this.getInventoryNBT();
+            NBTTagList inventoryTagList = inventoryNBT.getTagList("Items", 10);
             if (GeneralConfig.creatureEatFromInventory && i % 60 == 0) {
-                for (int j = this.getItemListNBT().tagCount() - 1; j >= 0; j--) {
-                    NBTTagCompound itemNBT = (NBTTagCompound) this.getItemListNBT().get(j);
-
-                    //gear is exempted from the check
-                    if (j == this.getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.SADDLE)
-                            || j == this.getCreatureType().slotIndexForGear(RiftCreatureType.InventoryGearType.LARGE_WEAPON)) continue;
+                for (int j = inventoryTagList.tagCount() - 1; j >= 0; j--) {
+                    NBTTagCompound itemNBT = inventoryTagList.getCompoundTagAt(j);
 
                     ItemStack itemStack = new ItemStack(itemNBT);
                     if (this.isEnergyRegenItem(itemStack)) {
