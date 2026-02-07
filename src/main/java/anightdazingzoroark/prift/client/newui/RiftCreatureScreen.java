@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
-import anightdazingzoroark.prift.server.entity.NewCreatureGearHandler;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
@@ -14,7 +13,6 @@ import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
-import com.cleanroommc.modularui.factory.EntityGuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
@@ -35,7 +33,9 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.items.ItemStackHandler;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class RiftCreatureScreen {
     public static ModularPanel buildCreatureUI(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
@@ -74,44 +74,67 @@ public class RiftCreatureScreen {
                         };
                     }
                 })
-                .child(new Column()
-                        .debugName("creatureScreenTabColumn")
-                        .coverChildren()
-                        .leftRel(0f, 4, 1f)
-                        .child(new PageButton(0, tabController)
-                                .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
-                                .addTooltipElement(IKey.lang("tametab.inventory"))
-                                .tab(GuiTextures.TAB_LEFT, -1)
-                        )
-                        .child(new PageButton(1, tabController)
-                                .overlay(GuiTextures.GEAR.asIcon().size(24))
-                                .addTooltipElement(IKey.lang("tametab.manage"))
-                                .tab(GuiTextures.TAB_LEFT, 0)
-                        )
-                        .child(new PageButton(2, tabController)
-                                .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
-                                .addTooltipElement(IKey.lang("tametab.info"))
-                                .tab(GuiTextures.TAB_LEFT, 0)
-                        )
-                        .child(new PageButton(3, tabController)
-                                .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
-                                .addTooltipElement(IKey.lang("tametab.moves"))
-                                .tab(GuiTextures.TAB_LEFT, 0)
-                        )
+                .child(createPageButtons(data, tabController))
+                .child(createPages(data, syncManager, settings, tabController));
+    }
+
+    //this is temporary
+    private static Flow createPageButtons(CreatureGuiData data, PagedWidget.Controller tabController) {
+        AtomicInteger pageNum = new AtomicInteger();
+        Function<Boolean, Integer> pageCounter = (dataCheck) -> {
+            if (dataCheck) {
+                int toReturn = pageNum.get();
+                pageNum.addAndGet(1);
+                return toReturn;
+            }
+            return pageNum.get();
+        };
+        boolean openedFromCreature = data.dataType == CreatureGuiData.DataType.CREATURE;
+
+        return new Column()
+                .debugName("creatureScreenTabColumn")
+                .coverChildren()
+                .leftRel(0f, 4, 1f)
+                .childIf(openedFromCreature, new PageButton(pageCounter.apply(openedFromCreature), tabController)
+                        .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
+                        .addTooltipElement(IKey.lang("tametab.inventory"))
+                        .tab(GuiTextures.TAB_LEFT, -1)
                 )
-                .child(new PagedWidget<>()
-                        .debugName("pagedWidget")
-                        .controller(tabController)
-                        //page for creature inventory
-                        .addPage(creatureInventoryPage(data, syncManager))
-                        //page for creature settings
-                        .addPage(creatureSettingsPage(data, syncManager))
-                        //page for creature info
-                        .addPage(creatureInfoPage(data, syncManager, settings))
-                        //page for creature moves
-                        .addPage(creatureMovesPage(data, syncManager, settings))
-                        .widthRel(1f).coverChildrenHeight()
+                .childIf(openedFromCreature, new PageButton(pageCounter.apply(openedFromCreature), tabController)
+                        .overlay(GuiTextures.GEAR.asIcon().size(24))
+                        .addTooltipElement(IKey.lang("tametab.manage"))
+                        .tab(GuiTextures.TAB_LEFT, 0)
+                )
+                .child(new PageButton(pageCounter.apply(openedFromCreature), tabController)
+                        .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
+                        .addTooltipElement(IKey.lang("tametab.info"))
+                        .tab(GuiTextures.TAB_LEFT, 0)
+                )
+                .child(new PageButton(pageCounter.apply(openedFromCreature), tabController)
+                        .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
+                        .addTooltipElement(IKey.lang("tametab.moves"))
+                        .tab(GuiTextures.TAB_LEFT, 0)
                 );
+    }
+
+    //this too is temporary
+    private static PagedWidget<?> createPages(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings, PagedWidget.Controller tabController) {
+        boolean openedFromCreature = data.dataType == CreatureGuiData.DataType.CREATURE;
+        PagedWidget<?> toReturn =  new PagedWidget<>().debugName("pagedWidget")
+                .controller(tabController).widthRel(1f).coverChildrenHeight();
+
+        if (openedFromCreature) {
+            //page for creature inventory
+            toReturn.addPage(creatureInventoryPage(data, syncManager))
+                    //page for creature settings
+                    .addPage(creatureSettingsPage(data, syncManager));
+        }
+                //page for creature info
+        toReturn.addPage(creatureInfoPage(data, syncManager, settings))
+                //page for creature moves
+                .addPage(creatureMovesPage(data, syncManager, settings));
+
+        return toReturn;
     }
 
     private static ParentWidget<?> creatureInventoryPage(CreatureGuiData data, PanelSyncManager syncManager) {

@@ -78,5 +78,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftAddCreatureBoxData.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftRemoveCreatureBoxData.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetHypnotized.class, RiftLibMessageSide.BOTH);
+        WRAPPER.registerMessage(RiftOpenPartyScreen.class, RiftLibMessageSide.SERVER);
+        WRAPPER.registerMessage(RiftOpenCreatureScreen.class, RiftLibMessageSide.SERVER);
     }
 }

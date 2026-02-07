@@ -216,7 +216,7 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
         settings.getRecipeViewerSettings().disableRecipeViewer();
         RiftSac sacData = (RiftSac) data.getGuiHolder();
 
-        return ModularPanel.defaultPanel(UIPanelNames.EGG_SCREEN).size(176, 166)
+        return ModularPanel.defaultPanel(UIPanelNames.SAC_SCREEN).size(176, 166)
                 .child(new Column()
                         .coverChildrenHeight().align(Alignment.Center)
                         .childPadding(15)

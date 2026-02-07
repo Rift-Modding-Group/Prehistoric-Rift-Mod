@@ -520,4 +520,20 @@ public class RiftUtil {
     public static boolean itemStacksEqual(ItemStack itemStackOne, ItemStack itemStackTwo) {
         return itemStackOne.getItem() == itemStackTwo.getItem() && itemStackOne.getMetadata() == itemStackTwo.getMetadata();
     }
+
+    public static int maxWithinMultiple(int... values) {
+        int maxValue = values[0];
+        for (int value : values) {
+            if (value >= maxValue) maxValue = value;
+        }
+        return maxValue;
+    }
+
+    public static int minWithinMultiple(int... values) {
+        int minValue = values[0];
+        for (int value : values) {
+            if (value <= minValue) minValue = value;
+        }
+        return minValue;
+    }
 }

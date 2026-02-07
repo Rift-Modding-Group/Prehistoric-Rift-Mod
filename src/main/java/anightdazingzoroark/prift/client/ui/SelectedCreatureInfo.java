@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.client.ui;
 
+import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
+import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.server.RiftGui;
@@ -8,6 +10,10 @@ import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.Player
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
+import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -17,7 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.Arrays;
 
 //this helper class is for sending creature information to UIs and no less
-public class SelectedCreatureInfo {
+public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
     public final SelectedPosType selectedPosType;
     public final int[] pos;
     private MenuOpenedFrom menuOpenedFrom;
@@ -111,6 +117,11 @@ public class SelectedCreatureInfo {
         return infoToTest.selectedPosType == this.selectedPosType
                 && Arrays.equals(infoToTest.pos, this.pos)
                 && infoToTest.creatureBoxOpenedFrom.equals(this.creatureBoxOpenedFrom);
+    }
+
+    @Override
+    public ModularPanel buildUI(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        return RiftCreatureScreen.buildCreatureUI(data, syncManager, settings);
     }
 
     public enum SelectedPosType {
