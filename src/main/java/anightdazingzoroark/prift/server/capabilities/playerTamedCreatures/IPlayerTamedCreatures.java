@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,6 +21,7 @@ public interface IPlayerTamedCreatures {
     void setBoxNBT(CreatureBoxStorage creatureBoxStorage);
     CreatureBoxStorage getBoxNBT();
     void addToBoxNBT(CreatureNBT compound);
+    void setBoxMemNBT(int box, int posInBox, CreatureNBT compound);
     void setLastSelected(int value);
     int getLastSelected();
     //party extra info

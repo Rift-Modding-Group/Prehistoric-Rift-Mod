@@ -30,6 +30,29 @@ public class PlayerTamedCreaturesHelper {
         return player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
     }
 
+    public static CreatureNBT getCreatureNBT(EntityPlayer player, SelectedCreatureInfo selectionInfo) {
+        if (player == null) return new CreatureNBT();
+        if (player.world.isRemote) {
+            RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
+            if (selectionInfo.getMenuOpenedFrom() == SelectedCreatureInfo.MenuOpenedFrom.BOX) {
+                RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player));
+            }
+        }
+
+        switch (selectionInfo.selectedPosType) {
+            case PARTY: return getPlayerTamedCreatures(player).getPartyNBT().get(selectionInfo.pos[0]);
+            case BOX: return getPlayerTamedCreatures(player).getBoxNBT().getBoxContents(selectionInfo.pos[0]).get(selectionInfo.pos[1]);
+        }
+        return new CreatureNBT();
+    }
+
+    public static void setCreatureNBT(EntityPlayer player, CreatureNBT newCreatureNBT, SelectedCreatureInfo selectionInfo) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftSetCreatureNBT(player, newCreatureNBT, selectionInfo));
+    }
+
+
+
     public static void updateAllPartyMems(EntityPlayer player) {
         if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyDeployed(player));

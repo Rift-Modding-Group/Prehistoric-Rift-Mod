@@ -80,5 +80,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetHypnotized.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftOpenPartyScreen.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftOpenCreatureScreen.class, RiftLibMessageSide.SERVER);
+        WRAPPER.registerMessage(RiftSetCreatureNBT.class, RiftLibMessageSide.BOTH);
     }
 }

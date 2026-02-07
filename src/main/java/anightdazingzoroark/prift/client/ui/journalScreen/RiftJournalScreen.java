@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.client.ui.journalScreen;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalIndexSection;
 import anightdazingzoroark.prift.client.ui.journalScreen.elements.RiftJournalInfoSection;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.ui.RiftLibUI;

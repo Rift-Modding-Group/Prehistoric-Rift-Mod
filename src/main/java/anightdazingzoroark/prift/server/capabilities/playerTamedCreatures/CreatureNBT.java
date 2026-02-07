@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.MoveListUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.client.resources.I18n;
@@ -370,6 +371,16 @@ public class CreatureNBT {
     public NBTTagCompound getGearNBT() {
         if (this.creatureNBT.isEmpty()) return new NBTTagCompound();
         return this.creatureNBT.getCompoundTag("Gear");
+    }
+
+    public void setSaddled(boolean value) {
+        if (this.creatureNBT.isEmpty()) return;
+        this.creatureNBT.setBoolean("Saddled", value);
+    }
+
+    public void setLargeWeapon(RiftLargeWeaponType value) {
+        if (this.creatureNBT.isEmpty()) return;
+        this.creatureNBT.setByte("LargeWeapon", (byte) value.ordinal());
     }
 
     @Deprecated

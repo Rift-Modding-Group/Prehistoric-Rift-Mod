@@ -1,9 +1,6 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.newui.NewRiftPartyScreen;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
-import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -12,8 +9,6 @@ import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftOpenPartyScreen;
 import anightdazingzoroark.prift.server.message.RiftOpenWeaponInventory;
-import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
-import com.cleanroommc.modularui.factory.ClientGUI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.GameSettings;

@@ -105,12 +105,12 @@ public class RiftCreatureScreen {
                         .addTooltipElement(IKey.lang("tametab.manage"))
                         .tab(GuiTextures.TAB_LEFT, 0)
                 )
-                .child(new PageButton(pageCounter.apply(openedFromCreature), tabController)
+                .child(new PageButton(pageCounter.apply(true), tabController)
                         .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
                         .addTooltipElement(IKey.lang("tametab.info"))
-                        .tab(GuiTextures.TAB_LEFT, 0)
+                        .tab(GuiTextures.TAB_LEFT, openedFromCreature ? 0 : -1)
                 )
-                .child(new PageButton(pageCounter.apply(openedFromCreature), tabController)
+                .child(new PageButton(pageCounter.apply(true), tabController)
                         .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
                         .addTooltipElement(IKey.lang("tametab.moves"))
                         .tab(GuiTextures.TAB_LEFT, 0)
@@ -143,28 +143,28 @@ public class RiftCreatureScreen {
 
         //set up strings
         String playerName = player.getName();
-        String creatureGearName = I18n.format("inventory.gear", creature.getName(false));
-        String creatureInvName = I18n.format("inventory.inventory", creature.getName(false));
+        String creatureGearName = I18n.format("inventory.gear", data.getName(false));
+        String creatureInvName = I18n.format("inventory.inventory", data.getName(false));
 
         //creature inventory syncing stuff
-        syncManager.registerSlotGroup("creatureGear", Math.min(creature.creatureType.gearSlotCount(), 9));
+        syncManager.registerSlotGroup("creatureGear", Math.min(data.getCreatureType().gearSlotCount(), 9));
         syncManager.registerSlotGroup("creatureInventory", 9);
         CreatureGearHandler creatureGear = creature.creatureGear;
         ItemStackHandler creatureInventory = creature.creatureInventory;
         syncManager.bindPlayerInventory(player);
 
         //set if the creature has gear
-        boolean creatureHasGear = creature.creatureType.gearSlotCount() > 0;
+        boolean creatureHasGear = data.getCreatureType().gearSlotCount() > 0;
         //build creature gear slots
         SlotGroupWidget.Builder creatureGearBuilder = SlotGroupWidget.builder();
         if (creatureHasGear) {
             creatureGearBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureGear, index)
                     .slotGroup("creatureGear").filter(creatureGear::itemStackUsableAsGear)
-                    .accessibility(creature.getPassengers().isEmpty(), creature.getPassengers().isEmpty())
+                    .accessibility(data.gearSlotChangeable(), data.gearSlotChangeable())
                     .changeListener((newItem, onlyAmountChanged, client, init) -> {
                         if (!client) {
-                            creature.setSaddled(creatureGear.hasSaddle());
-                            creature.setLargeWeapon(creatureGear.getLargeWeapon());
+                            data.setSaddled(creatureGear.hasSaddle());
+                            data.setLargeWeapon(creatureGear.getLargeWeapon());
                         }
                     })
             ));

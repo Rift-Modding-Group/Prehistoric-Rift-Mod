@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.tileentity.TileEntity;
@@ -205,6 +206,11 @@ public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     @Override
     public void addToBoxNBT(CreatureNBT compound) {
         this.boxCreatures.addCreatureToBox(compound);
+    }
+
+    @Override
+    public void setBoxMemNBT(int box, int posInBox, CreatureNBT newCompound) {
+        this.boxCreatures.getBoxContents(box).set(posInBox, newCompound);
     }
 
     public enum DeploymentType {

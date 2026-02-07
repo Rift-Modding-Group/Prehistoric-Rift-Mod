@@ -54,7 +54,8 @@ public class NewRiftPartyScreen {
                                                 else {
                                                     SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
                                                             SelectedCreatureInfo.SelectedPosType.PARTY,
-                                                            new int[]{index}
+                                                            new int[]{index},
+                                                            SelectedCreatureInfo.MenuOpenedFrom.PARTY
                                                     );
                                                     RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo));
                                                 }

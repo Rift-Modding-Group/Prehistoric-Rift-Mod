@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.client.ui.creatureBoxInfoScreen.RiftCreatureBoxInfoScreen;
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.client.ui.journalScreen.RiftJournalScreen;
-import anightdazingzoroark.prift.client.ui.partyScreen.RiftPartyScreen;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
@@ -26,7 +25,6 @@ import javax.annotation.Nullable;
 
 public class RiftGui implements IGuiHandler {
     //NOTE: soon all of this will be replaced with modularui stuff
-    public static final int GUI_MENU_FROM_RADIAL = 3;
     public static final int GUI_WEAPON_INVENTORY = 4;
     public static final int GUI_FEEDING_TROUGH = 5;
     public static final int GUI_SEMI_MANUAL_EXTRACTOR = 6;
@@ -45,7 +43,6 @@ public class RiftGui implements IGuiHandler {
     public static void registerUI() {
         RiftLibUIRegistry.registerUI(CREATURE_BOX_SCREEN, RiftCreatureBoxScreen.class);
         RiftLibUIRegistry.registerUI(JOURNAL_SCREEN, RiftJournalScreen.class);
-        RiftLibUIRegistry.registerUI(PARTY_SCREEN, RiftPartyScreen.class);
         RiftLibUIRegistry.registerUI(CREATURE_BOX_INFO_SCREEN, RiftCreatureBoxInfoScreen.class);
         RiftLibUIRegistry.registerUI(EGG_SCREEN, RiftEggScreen.class);
     }
