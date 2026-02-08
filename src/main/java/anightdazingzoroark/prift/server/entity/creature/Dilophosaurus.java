@@ -35,7 +35,6 @@ public class Dilophosaurus extends RiftCreature {
         this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
         this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.isRideable = true;
-        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.2D;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
     }
@@ -110,11 +109,6 @@ public class Dilophosaurus extends RiftCreature {
     @Override
     public float rangedWidth() {
         return 12f;
-    }
-
-    @Override
-    public int slotCount() {
-        return 18;
     }
 
     @Override

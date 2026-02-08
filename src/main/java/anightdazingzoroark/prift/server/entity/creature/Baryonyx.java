@@ -32,7 +32,6 @@ public class Baryonyx extends RiftWaterCreature {
         this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
         this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.isRideable = true;
-        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.25D;
         this.waterSpeed = 5D;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
@@ -51,33 +50,9 @@ public class Baryonyx extends RiftWaterCreature {
         if (this.getActivePotionEffect(MobEffects.POISON) != null) this.removePotionEffect(MobEffects.POISON);
     }
 
-    /*
-    protected void initEntityAI() {
-        this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
-        this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
-        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(3, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
-        this.tasks.addTask(4, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(5, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(6, new RiftWaterCreatureFollowOwner(this, 1.0D, 8.0F, 4.0F));
-        this.tasks.addTask(7, new RiftGoToWater(this, 16, 1.0D));
-        this.tasks.addTask(8, new RiftWanderWater(this, 1.0D));
-        this.tasks.addTask(9, new RiftWander(this, 1.0D));
-    }
-     */
-
     @Override
     public boolean isAmphibious() {
         return true;
-    }
-
-    @Override
-    public int slotCount() {
-        return 27;
     }
 
     @Override

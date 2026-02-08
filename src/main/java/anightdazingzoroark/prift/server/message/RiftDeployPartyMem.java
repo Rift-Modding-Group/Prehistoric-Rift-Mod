@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -47,8 +48,9 @@ public class RiftDeployPartyMem extends RiftLibMessage<RiftDeployPartyMem> {
     @Override
     public void executeOnServer(MinecraftServer minecraftServer, RiftDeployPartyMem message, EntityPlayer messagePlayer, MessageContext messageContext) {
         EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{message.position});
         IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        CreatureNBT partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.position);
+        CreatureNBT partyMemNBT = PlayerTamedCreaturesHelper.getCreatureNBT(player, selectedCreatureInfo);
         UUID creatureUUID = partyMemNBT.getUniqueID();
 
         //if true, deploy the creature
@@ -64,7 +66,9 @@ public class RiftDeployPartyMem extends RiftLibMessage<RiftDeployPartyMem> {
             }
             else {
                 partyMemNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                playerTamedCreatures.setPartyMemNBT(message.position, partyMemNBT);
+                PlayerTamedCreaturesHelper.setCreatureNBT(player, partyMemNBT, selectedCreatureInfo);
+                //playerTamedCreatures.setPartyMemNBT(message.position, partyMemNBT);
+                System.out.println("is saddled on summon: "+partyMemNBT.isSaddled());
                 PlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
 
                 //create creature
@@ -85,16 +89,14 @@ public class RiftDeployPartyMem extends RiftLibMessage<RiftDeployPartyMem> {
             if (partyMember != null) {
                 CreatureNBT partyMemCurrentNBT = new CreatureNBT(partyMember);
                 partyMemCurrentNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                playerTamedCreatures.setPartyMemNBT(message.position, partyMemCurrentNBT);
-                PlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
+                PlayerTamedCreaturesHelper.setCreatureNBT(player, partyMemCurrentNBT, selectedCreatureInfo);
 
                 partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE); //creature and its hitboxes disappear once this is done
             }
             //otherwise just change the nbt
             else {
                 partyMemNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                playerTamedCreatures.setPartyMemNBT(message.position, partyMemNBT);
-                PlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
+                PlayerTamedCreaturesHelper.setCreatureNBT(player, partyMemNBT, selectedCreatureInfo);
             }
         }
     }

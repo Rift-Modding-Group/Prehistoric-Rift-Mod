@@ -54,7 +54,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         this.experienceValue = 20;
         this.speed = 0.15D;
         this.isRideable = true;
-        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
     }
 
     @Override
@@ -70,30 +69,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
         this.dataManager.register(LEAD_WORK_Y_POS, 0);
         this.dataManager.register(LEAD_WORK_Z_POS, 0);
     }
-
-    /*
-    protected void initEntityAI() {
-        this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
-        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
-        this.targetTasks.addTask(2, new RiftProtectOwner(this));
-        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(1, new RiftUseLeadPoweredCrank(this));
-        this.tasks.addTask(1, new RiftCreatureOperateWorkstation(this));
-        this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
-        this.tasks.addTask(5, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(7, new RiftHarvestOnWander(this, 1.2f, 0.6f));
-        this.tasks.addTask(8, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
-        this.tasks.addTask(9, new RiftHerdDistanceFromOtherMembers(this, 3D));
-        this.tasks.addTask(10, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(11, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(12, new RiftWander(this, 1.0D));
-        this.tasks.addTask(13, new RiftLookAround(this));
-    }
-     */
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
@@ -114,11 +89,6 @@ public class Ankylosaurus extends RiftCreature implements IHarvestWhenWandering,
     @Override
     public float[] ageScaleParams() {
         return new float[]{0.5f, 2.125f};
-    }
-
-    @Override
-    public int slotCount() {
-        return 27;
     }
 
     //move related stuff starts here

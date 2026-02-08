@@ -269,11 +269,6 @@ public class Parasaurolophus extends RiftCreature implements IWorkstationUser, I
     }
 
     @Override
-    public int slotCount() {
-        return 27;
-    }
-
-    @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;

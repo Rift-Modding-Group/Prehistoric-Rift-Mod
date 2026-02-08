@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity;
 
+import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
@@ -9,12 +10,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
-public class CreatureGearHandler extends ItemStackHandler {
-    private final RiftCreature creature;
+import javax.annotation.Nonnull;
 
-    public CreatureGearHandler(RiftCreature creature) {
-        super(creature.creatureType.gearSlotCount());
-        this.creature = creature;
+public class CreatureGearHandler extends ItemStackHandler {
+    private final RiftCreatureType creatureType;
+
+    public CreatureGearHandler(RiftCreatureType creatureType) {
+        super(creatureType.gearSlotCount());
+        this.creatureType = creatureType;
     }
 
     @Override
@@ -28,12 +31,12 @@ public class CreatureGearHandler extends ItemStackHandler {
         }
 
         //apply item to the stack
-        for (int i = 0; i < this.creature.creatureType.gearSlotCount(); i++) {
+        for (int i = 0; i < this.creatureType.gearSlotCount(); i++) {
             if (slot != i) continue;
-            RiftCreatureType.InventoryGearType gearType = this.creature.creatureType.usableGear[i];
+            RiftCreatureType.InventoryGearType gearType = this.creatureType.usableGear[i];
             switch (gearType) {
                 case SADDLE: {
-                    if (RiftUtil.itemStacksEqual(this.creature.saddleItemStack(), stack)) {
+                    if (RiftUtil.itemStacksEqual(this.saddleItemStack(), stack)) {
                         super.setStackInSlot(i, stack);
                     }
                     return;
@@ -50,11 +53,14 @@ public class CreatureGearHandler extends ItemStackHandler {
     }
 
     public boolean itemStackUsableAsGear(ItemStack itemStack) {
-        for (RiftCreatureType.InventoryGearType inventoryGearType : this.creature.creatureType.usableGear) {
-            System.out.println("inventoryGearType: "+inventoryGearType);
+        //empty itemstacks are valid
+        if (itemStack.isEmpty()) return true;
+
+        //go on to check valid itemstack types
+        for (RiftCreatureType.InventoryGearType inventoryGearType : this.creatureType.usableGear) {
             switch (inventoryGearType) {
                 case SADDLE: {
-                    if (RiftUtil.itemStacksEqual(this.creature.saddleItemStack(), itemStack)) return true;
+                    if (RiftUtil.itemStacksEqual(this.saddleItemStack(), itemStack)) return true;
                 }
                 case LARGE_WEAPON: {
                     if (RiftLargeWeaponType.itemStackIsLargeWeapon(itemStack)) return true;
@@ -67,7 +73,7 @@ public class CreatureGearHandler extends ItemStackHandler {
     public boolean hasSaddle() {
         int slot = this.getSlotForInventoryGearType(RiftCreatureType.InventoryGearType.SADDLE);
         return this.hasInventoryGearType(RiftCreatureType.InventoryGearType.SADDLE)
-                && slot >= 0 && this.getStackInSlot(slot) != ItemStack.EMPTY;
+                && slot >= 0 && !this.getStackInSlot(slot).isEmpty();
     }
 
     public boolean hasLargeWeapon() {
@@ -86,17 +92,22 @@ public class CreatureGearHandler extends ItemStackHandler {
     }
 
     private boolean hasInventoryGearType(RiftCreatureType.InventoryGearType gearTypeToSearch) {
-        for (RiftCreatureType.InventoryGearType gearType : this.creature.creatureType.usableGear) {
+        for (RiftCreatureType.InventoryGearType gearType : this.creatureType.usableGear) {
             if (gearTypeToSearch == gearType) return true;
         }
         return false;
     }
 
     private int getSlotForInventoryGearType(RiftCreatureType.InventoryGearType gearTypeToSearch) {
-        for (int i = 0; i < this.creature.creatureType.usableGear.length; i++) {
-            RiftCreatureType.InventoryGearType gearType = this.creature.creatureType.usableGear[i];
+        for (int i = 0; i < this.creatureType.usableGear.length; i++) {
+            RiftCreatureType.InventoryGearType gearType = this.creatureType.usableGear[i];
             if (gearTypeToSearch == gearType) return i;
         }
         return -1;
+    }
+
+    private ItemStack saddleItemStack() {
+        String saddleItemId = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
+        return RiftUtil.getItemStackFromString(saddleItemId);
     }
 }

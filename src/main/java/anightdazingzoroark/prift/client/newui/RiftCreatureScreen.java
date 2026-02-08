@@ -1,9 +1,13 @@
 package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.client.newui.custom.CreatureGearModularSlot;
+import anightdazingzoroark.prift.client.newui.custom.CreatureInventoryModularSlot;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
+import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
+import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
@@ -95,7 +99,7 @@ public class RiftCreatureScreen {
                 .debugName("creatureScreenTabColumn")
                 .coverChildren()
                 .leftRel(0f, 4, 1f)
-                .childIf(openedFromCreature, new PageButton(pageCounter.apply(openedFromCreature), tabController)
+                .child(new PageButton(pageCounter.apply(true), tabController)
                         .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
                         .addTooltipElement(IKey.lang("tametab.inventory"))
                         .tab(GuiTextures.TAB_LEFT, -1)
@@ -108,7 +112,7 @@ public class RiftCreatureScreen {
                 .child(new PageButton(pageCounter.apply(true), tabController)
                         .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
                         .addTooltipElement(IKey.lang("tametab.info"))
-                        .tab(GuiTextures.TAB_LEFT, openedFromCreature ? 0 : -1)
+                        .tab(GuiTextures.TAB_LEFT, 0)
                 )
                 .child(new PageButton(pageCounter.apply(true), tabController)
                         .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
@@ -123,11 +127,12 @@ public class RiftCreatureScreen {
         PagedWidget<?> toReturn =  new PagedWidget<>().debugName("pagedWidget")
                 .controller(tabController).widthRel(1f).coverChildrenHeight();
 
+        //page for creature inventory
+        toReturn.addPage(creatureInventoryPage(data, syncManager));
+
+        //page for creature settings
         if (openedFromCreature) {
-            //page for creature inventory
-            toReturn.addPage(creatureInventoryPage(data, syncManager))
-                    //page for creature settings
-                    .addPage(creatureSettingsPage(data, syncManager));
+            toReturn.addPage(creatureSettingsPage(data, syncManager));
         }
                 //page for creature info
         toReturn.addPage(creatureInfoPage(data, syncManager, settings))
@@ -138,7 +143,6 @@ public class RiftCreatureScreen {
     }
 
     private static ParentWidget<?> creatureInventoryPage(CreatureGuiData data, PanelSyncManager syncManager) {
-        RiftCreature creature = (RiftCreature) data.getGuiHolder();
         EntityPlayer player = data.getPlayer();
 
         //set up strings
@@ -149,8 +153,8 @@ public class RiftCreatureScreen {
         //creature inventory syncing stuff
         syncManager.registerSlotGroup("creatureGear", Math.min(data.getCreatureType().gearSlotCount(), 9));
         syncManager.registerSlotGroup("creatureInventory", 9);
-        CreatureGearHandler creatureGear = creature.creatureGear;
-        ItemStackHandler creatureInventory = creature.creatureInventory;
+        CreatureGearHandler creatureGear = data.getCreatureGear();
+        CreatureInventoryHandler creatureInventory = data.getCreatureInventory();
         syncManager.bindPlayerInventory(player);
 
         //set if the creature has gear
@@ -158,16 +162,24 @@ public class RiftCreatureScreen {
         //build creature gear slots
         SlotGroupWidget.Builder creatureGearBuilder = SlotGroupWidget.builder();
         if (creatureHasGear) {
-            creatureGearBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureGear, index)
-                    .slotGroup("creatureGear").filter(creatureGear::itemStackUsableAsGear)
-                    .accessibility(data.gearSlotChangeable(), data.gearSlotChangeable())
-                    .changeListener((newItem, onlyAmountChanged, client, init) -> {
-                        if (!client) {
-                            data.setSaddled(creatureGear.hasSaddle());
-                            data.setLargeWeapon(creatureGear.getLargeWeapon());
-                        }
-                    })
-            ));
+            //continue building widget for creature gear
+            creatureGearBuilder.key('I', index -> {
+                CreatureGearModularSlot modularSlot = new CreatureGearModularSlot(creatureGear, index);
+                if (data.dataType == CreatureGuiData.DataType.SELECTION) {
+                    modularSlot = new CreatureGearModularSlot((SelectedCreatureInfo) data.getGuiHolder(), creatureGear, index);
+                }
+
+                return new ItemSlot().slot(modularSlot
+                        .slotGroup("creatureGear").filter(creatureGear::itemStackUsableAsGear)
+                        .accessibility(data.gearSlotChangeable(), data.gearSlotChangeable())
+                        .changeListener((newItem, onlyAmountChanged, client, init) -> {
+                            if (!client) {
+                                data.setSaddled(creatureGear.hasSaddle());
+                                data.setLargeWeapon(creatureGear.getLargeWeapon());
+                            }
+                        })
+                );
+            });
 
             //get gear slot count
             String gearMatrixRow = "";
@@ -177,7 +189,13 @@ public class RiftCreatureScreen {
 
         //build creature inventory slots
         SlotGroupWidget.Builder creatureInvBuilder = SlotGroupWidget.builder();
-        creatureInvBuilder.key('I', index -> new ItemSlot().slot(SyncHandlers.itemSlot(creatureInventory, index).slotGroup("creatureInventory")));
+        creatureInvBuilder.key('I', index -> {
+            CreatureInventoryModularSlot modularSlot = new CreatureInventoryModularSlot(creatureInventory, index);
+            if (data.dataType == CreatureGuiData.DataType.SELECTION) {
+                modularSlot = new CreatureInventoryModularSlot((SelectedCreatureInfo) data.getGuiHolder(), creatureInventory, index);
+            }
+            return new ItemSlot().slot(modularSlot.slotGroup("creatureInventory"));
+        });
 
         //get creature slot count, and use the info to deal with the matrix
         int matrixHeight = (int) Math.ceil(creatureInventory.getSlots() / 9D);

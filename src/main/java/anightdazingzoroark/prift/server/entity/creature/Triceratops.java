@@ -302,11 +302,6 @@ public class Triceratops extends RiftCreature implements IWorkstationUser, ILead
     }
 
     @Override
-    public int slotCount() {
-        return 27;
-    }
-
-    @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;

@@ -4,11 +4,9 @@ import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
-import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import com.cleanroommc.modularui.factory.GuiData;
@@ -153,12 +151,30 @@ public class CreatureGuiData extends GuiData {
         return true;
     }
 
+    public CreatureInventoryHandler getCreatureInventory() {
+        if (this.dataType == DataType.CREATURE) return this.creature.creatureInventory;
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            if (!creatureNBT.nbtIsEmpty()) {
+                RiftCreatureType creatureType = creatureNBT.getCreatureType();
+                CreatureInventoryHandler creatureInventoryHandler = new CreatureInventoryHandler(creatureType.inventorySlots);
+                creatureInventoryHandler.deserializeNBT(creatureNBT.getInventoryNBT());
+                return creatureInventoryHandler;
+            }
+        }
+
+        return null;
+    }
+
     public CreatureGearHandler getCreatureGear() {
         if (this.dataType == DataType.CREATURE) return this.creature.creatureGear;
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
             if (!creatureNBT.nbtIsEmpty()) {
-
+                RiftCreatureType creatureType = creatureNBT.getCreatureType();
+                CreatureGearHandler creatureGearHandler = new CreatureGearHandler(creatureType);
+                creatureGearHandler.deserializeNBT(creatureNBT.getGearNBT());
+                return creatureGearHandler;
             }
         }
         return null;
@@ -169,10 +185,19 @@ public class CreatureGuiData extends GuiData {
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
             if (!creatureNBT.nbtIsEmpty()) {
-                creatureNBT.setSaddled(value);
-                PlayerTamedCreaturesHelper.setCreatureNBT(this.getPlayer(), creatureNBT, this.selectedCreatureInfo);
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.SADDLED.setValue(value);
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
             }
         }
+    }
+
+    public boolean isSaddled() {
+        if (this.dataType == DataType.CREATURE) return this.creature.isSaddled();
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            if (!creatureNBT.nbtIsEmpty()) return creatureNBT.isSaddled();
+        }
+        return false;
     }
 
     public void setLargeWeapon(RiftLargeWeaponType value) {
@@ -180,8 +205,8 @@ public class CreatureGuiData extends GuiData {
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
             if (!creatureNBT.nbtIsEmpty()) {
-                creatureNBT.setLargeWeapon(value);
-                PlayerTamedCreaturesHelper.setCreatureNBT(this.getPlayer(), creatureNBT, this.selectedCreatureInfo);
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.LARGE_WEAPON_TYPE.setValue((byte) value.ordinal());
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
             }
         }
     }
@@ -212,8 +237,11 @@ public class CreatureGuiData extends GuiData {
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
             if (!creatureNBT.nbtIsEmpty()) {
-                creatureNBT.changeLearnedMove(pos, move);
-                PlayerTamedCreaturesHelper.setCreatureNBT(this.getPlayer(), creatureNBT, this.selectedCreatureInfo);
+                FixedSizeList<CreatureMove> newLearnedMoves = creatureNBT.getLearnedMoves();
+                newLearnedMoves.set(pos, move);
+                NBTTagCompound newLearnedMovesNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(newLearnedMoves);
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.LEARNED_MOVES.setValue(newLearnedMovesNBT);
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
             }
         }
     }
@@ -223,8 +251,11 @@ public class CreatureGuiData extends GuiData {
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
             if (!creatureNBT.nbtIsEmpty()) {
-                creatureNBT.removeLearnedMove(pos);
-                PlayerTamedCreaturesHelper.setCreatureNBT(this.getPlayer(), creatureNBT, this.selectedCreatureInfo);
+                FixedSizeList<CreatureMove> newLearnedMoves = creatureNBT.getLearnedMoves();
+                newLearnedMoves.remove(pos);
+                NBTTagCompound newLearnedMovesNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(newLearnedMoves);
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.LEARNED_MOVES.setValue(newLearnedMovesNBT);
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
             }
         }
     }
@@ -243,8 +274,11 @@ public class CreatureGuiData extends GuiData {
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
             if (!creatureNBT.nbtIsEmpty()) {
-                creatureNBT.changeLearnableMove(pos, move);
-                PlayerTamedCreaturesHelper.setCreatureNBT(this.getPlayer(), creatureNBT, this.selectedCreatureInfo);
+                List<CreatureMove> newLearnableMoves = creatureNBT.getLearnableMoves();
+                newLearnableMoves.set(pos, move);
+                NBTTagCompound newLearnableMovesNBT = MoveListUtil.getNBTFromListCreatureMove(newLearnableMoves);
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.LEARNABLE_MOVES.setValue(newLearnableMovesNBT);
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
             }
         }
     }
@@ -254,8 +288,11 @@ public class CreatureGuiData extends GuiData {
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
             if (!creatureNBT.nbtIsEmpty()) {
-                creatureNBT.addLearnableMove(move);
-                PlayerTamedCreaturesHelper.setCreatureNBT(this.getPlayer(), creatureNBT, this.selectedCreatureInfo);
+                List<CreatureMove> newLearnableMoves = creatureNBT.getLearnableMoves();
+                newLearnableMoves.add(move);
+                NBTTagCompound newLearnableMovesNBT = MoveListUtil.getNBTFromListCreatureMove(newLearnableMoves);
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.LEARNABLE_MOVES.setValue(newLearnableMovesNBT);
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
             }
         }
     }
@@ -265,8 +302,11 @@ public class CreatureGuiData extends GuiData {
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
             if (!creatureNBT.nbtIsEmpty()) {
-                creatureNBT.removeLearnableMove(pos);
-                PlayerTamedCreaturesHelper.setCreatureNBT(this.getPlayer(), creatureNBT, this.selectedCreatureInfo);
+                List<CreatureMove> newLearnableMoves = creatureNBT.getLearnableMoves();
+                newLearnableMoves.remove(pos);
+                NBTTagCompound newLearnableMovesNBT = MoveListUtil.getNBTFromListCreatureMove(newLearnableMoves);
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.LEARNABLE_MOVES.setValue(newLearnableMovesNBT);
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
             }
         }
     }

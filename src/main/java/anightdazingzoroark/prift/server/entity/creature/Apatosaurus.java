@@ -191,11 +191,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         return true;
     }
 
-    @Override
-    public int slotCount() {
-        return 54;
-    }
-
     //move related stuff starts here
     @Override
     public WeightedList<List<CreatureMove>> possibleStartingMoves() {

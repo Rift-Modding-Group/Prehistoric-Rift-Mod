@@ -62,7 +62,7 @@ public class RiftSetCreatureNBT extends RiftLibMessage<RiftSetCreatureNBT> {
             }
         }
 
-
+        System.out.println("set saddled when set and sync: "+newCreatureNBT.isSaddled());
         //send to client
         RiftMessages.WRAPPER.sendTo(new RiftSetCreatureNBT(player, newCreatureNBT, selectedCreatureInfo), (EntityPlayerMP) player);
     }
@@ -87,5 +87,6 @@ public class RiftSetCreatureNBT extends RiftLibMessage<RiftSetCreatureNBT> {
                 break;
             }
         }
+        System.out.println("set saddled when set and sync: "+newCreatureNBT.isSaddled());
     }
 }

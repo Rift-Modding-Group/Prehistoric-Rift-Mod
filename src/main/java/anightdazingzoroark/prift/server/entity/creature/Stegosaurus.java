@@ -267,11 +267,6 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
     }
 
     @Override
-    public int slotCount() {
-        return 27;
-    }
-
-    @Override
     public float[] ageScaleParams() {
         return new float[]{0.3f, 2.125f};
     }

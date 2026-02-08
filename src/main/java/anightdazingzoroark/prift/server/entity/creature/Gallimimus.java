@@ -29,35 +29,7 @@ public class Gallimimus extends RiftCreature {
         this.experienceValue = 10;
         this.speed = 0.5D;
         this.isRideable = true;
-        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, false);
-    }
-
-    /*
-    protected void initEntityAI() {
-        this.targetTasks.addTask(1, new RiftHurtByTarget(this, true));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, true, true));
-        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
-        this.targetTasks.addTask(2, new RiftProtectOwner(this));
-        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(1, new RiftMate(this));
-        this.tasks.addTask(2, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(3, new RiftFleeFromEntities(this, 1f));
-        this.tasks.addTask(4, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(5, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
-        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 4.0F));
-        this.tasks.addTask(9, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(10, new RiftHerdDistanceFromOtherMembers(this, 1D));
-        this.tasks.addTask(11, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(12, new RiftWander(this, 0.5D));
-        this.tasks.addTask(13, new RiftLookAround(this));
-    }
-     */
-
-    @Override
-    public int slotCount() {
-        return 9;
     }
 
     @Override

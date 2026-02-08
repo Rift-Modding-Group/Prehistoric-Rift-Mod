@@ -98,7 +98,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.roarCooldownTicks = 0;
         this.roarCharge = 0;
         this.isRideable = true;
-        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
     }
 
@@ -111,28 +110,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
         this.dataManager.register(WORKSTATION_Z_POS, 0);
         this.setCanPickUpLoot(true);
     }
-
-    /*
-    protected void initEntityAI() {
-        this.targetTasks.addTask(1, new RiftHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new RiftGetTargets(this, false, true));
-        this.targetTasks.addTask(2, new RiftAggressiveModeGetTargets(this, true));
-        this.targetTasks.addTask(2, new RiftProtectOwner(this));
-        this.targetTasks.addTask(3, new RiftPickUpFavoriteFoods(this,true));
-        this.targetTasks.addTask(3, new RiftAttackForOwner(this));
-        this.tasks.addTask(0, new RiftCreatureOperateWorkstation(this));
-        this.tasks.addTask(1, new RiftLandDwellerSwim(this));
-        this.tasks.addTask(2, new RiftMate(this));
-        this.tasks.addTask(3, new RiftCreatureUseMoveMounted(this));
-        this.tasks.addTask(4, new RiftCreatureWarnTarget(this, 1.25f, 0.5f));
-        this.tasks.addTask(5, new RiftBreakBlockWhilePursuingTarget(this));
-        this.tasks.addTask(6, new RiftCreatureUseMoveUnmounted(this));
-        this.tasks.addTask(7, new RiftFollowOwner(this, 1.0D, 8.0F, 6.0F));
-        this.tasks.addTask(8, new RiftGoToLandFromWater(this, 16, 1.0D));
-        this.tasks.addTask(9, new RiftWander(this, 1.0D));
-        this.tasks.addTask(10, new RiftLookAround(this));
-    }
-     */
 
     @Override
     public void onLivingUpdate() {
@@ -296,11 +273,6 @@ public class Tyrannosaurus extends RiftCreature implements IApexPredator, IWorks
 
     public boolean canBeKnockedBack() {
         return true;
-    }
-
-    @Override
-    public int slotCount() {
-        return 54;
     }
 
     public float attackWidth() {

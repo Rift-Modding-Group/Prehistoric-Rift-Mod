@@ -27,7 +27,6 @@ public class Tenontosaurus extends RiftCreature {
         this.experienceValue = 20;
         this.speed = 0.2D;
         this.isRideable = true;
-        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
     }
 
     @Override
@@ -67,11 +66,6 @@ public class Tenontosaurus extends RiftCreature {
     @Override
     public float attackWidth() {
         return 3.5f;
-    }
-
-    @Override
-    public int slotCount() {
-        return 27;
     }
 
     @Override

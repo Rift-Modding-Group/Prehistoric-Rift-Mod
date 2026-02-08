@@ -29,7 +29,6 @@ public class Direwolf extends RiftCreature {
         this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.speed = 0.25D;
         this.isRideable = true;
-        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
     }
 
@@ -37,11 +36,6 @@ public class Direwolf extends RiftCreature {
     protected void entityInit() {
         super.entityInit();
         this.setCanPickUpLoot(true);
-    }
-
-    @Override
-    public int slotCount() {
-        return 18;
     }
 
     @Override

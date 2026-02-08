@@ -30,7 +30,6 @@ public class Utahraptor extends RiftCreature {
         this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.speed = 0.35D;
         this.isRideable = true;
-        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
     }
 
@@ -42,11 +41,6 @@ public class Utahraptor extends RiftCreature {
 
     protected PathNavigate createNavigator(World worldIn) {
         return new PathNavigateRiftClimber(this, worldIn);
-    }
-
-    @Override
-    public int slotCount() {
-        return 18;
     }
 
     //move related stuff starts here

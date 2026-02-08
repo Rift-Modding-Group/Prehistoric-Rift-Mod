@@ -50,15 +50,11 @@ public class RiftInitialize {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        //init logger
+        logger = event.getModLog();
+
         //init directory
         File directory = event.getModConfigurationDirectory();
-
-        //init mod content
-        logger = event.getModLog();
-        PROXY.preInit(event);
-
-        //init mob families
-        RiftMobFamilies.initMobFamilies(directory);
 
         //for general config
         configMain = new Configuration(new File(directory.getPath(), "prift/general.cfg"));
@@ -70,6 +66,12 @@ public class RiftInitialize {
             if (creatureType.getConfig() != null) configClasses.put(creatureType.name().toLowerCase(), creatureType.getConfig());
         }
         RiftConfigHandler.init(new File(event.getModConfigurationDirectory(), "prift/creatures/"), configClasses);
+
+        //init mod content
+        PROXY.preInit(event);
+
+        //init mob families
+        RiftMobFamilies.initMobFamilies(directory);
     }
 
     @Mod.EventHandler

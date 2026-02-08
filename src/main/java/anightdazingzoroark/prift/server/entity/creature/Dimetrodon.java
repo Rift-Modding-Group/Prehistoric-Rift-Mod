@@ -423,11 +423,6 @@ public class Dimetrodon extends RiftCreature {
         return 3f;
     }
 
-    @Override
-    public int slotCount() {
-        return 9;
-    }
-
     public EggTemperature getTemperature() {
         return EggTemperature.values()[this.dataManager.get(TEMPERATURE).byteValue()];
     }

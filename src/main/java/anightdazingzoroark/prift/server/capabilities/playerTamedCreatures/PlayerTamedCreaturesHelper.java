@@ -51,6 +51,10 @@ public class PlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftSetCreatureNBT(player, newCreatureNBT, selectionInfo));
     }
 
+    public static void setCreatureNBTParam(EntityPlayer player, NBTTagCompound nbtParam, SelectedCreatureInfo selectionInfo) {
+        if (player == null) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftSetCreatureNBTParam(player, nbtParam, selectionInfo));
+    }
 
 
     public static void updateAllPartyMems(EntityPlayer player) {

@@ -139,11 +139,6 @@ public class Palaeocastor extends RiftCreature implements IHarvestWhenWandering 
     }
 
     @Override
-    public int slotCount() {
-        return 9;
-    }
-
-    @Override
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;

@@ -32,7 +32,6 @@ public class Sarcosuchus extends RiftWaterCreature {
         this.favoriteFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteFood;
         this.tamingFood = RiftConfigHandler.getConfig(this.creatureType).general.favoriteMeals;
         this.isRideable = true;
-        this.saddleItem = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         this.speed = 0.2D;
         this.waterSpeed = 10D;
         this.targetList = RiftUtil.creatureTargets(RiftConfigHandler.getConfig(this.creatureType).general.targetWhitelist, RiftConfigHandler.getConfig(this.creatureType).general.targetBlacklist, true);
@@ -99,11 +98,6 @@ public class Sarcosuchus extends RiftWaterCreature {
     @Override
     public boolean isAmphibious() {
         return true;
-    }
-
-    @Override
-    public int slotCount() {
-        return 27;
     }
 
     @Override

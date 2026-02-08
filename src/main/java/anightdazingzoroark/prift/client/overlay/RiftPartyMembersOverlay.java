@@ -254,7 +254,6 @@ public class RiftPartyMembersOverlay {
             //for dismissing, when creature is deployed
             if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
                 PlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, false);
-                //NewPlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
                 player.sendStatusMessage(new TextComponentTranslation("journal.warning.dismiss_success"), false);
             }
             //for summoning, when creature is dismissed
