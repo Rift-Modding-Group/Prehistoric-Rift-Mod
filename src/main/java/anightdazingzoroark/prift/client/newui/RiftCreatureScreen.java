@@ -84,6 +84,7 @@ public class RiftCreatureScreen {
 
     //this is temporary
     private static Flow createPageButtons(CreatureGuiData data, PagedWidget.Controller tabController) {
+        /*
         AtomicInteger pageNum = new AtomicInteger();
         Function<Boolean, Integer> pageCounter = (dataCheck) -> {
             if (dataCheck) {
@@ -94,27 +95,28 @@ public class RiftCreatureScreen {
             return pageNum.get();
         };
         boolean openedFromCreature = data.dataType == CreatureGuiData.DataType.CREATURE;
+         */
 
         return new Column()
                 .debugName("creatureScreenTabColumn")
                 .coverChildren()
                 .leftRel(0f, 4, 1f)
-                .child(new PageButton(pageCounter.apply(true), tabController)
+                .child(new PageButton(0, tabController)
                         .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
                         .addTooltipElement(IKey.lang("tametab.inventory"))
                         .tab(GuiTextures.TAB_LEFT, -1)
                 )
-                .childIf(openedFromCreature, new PageButton(pageCounter.apply(openedFromCreature), tabController)
+                .child(new PageButton(1, tabController)
                         .overlay(GuiTextures.GEAR.asIcon().size(24))
                         .addTooltipElement(IKey.lang("tametab.manage"))
                         .tab(GuiTextures.TAB_LEFT, 0)
                 )
-                .child(new PageButton(pageCounter.apply(true), tabController)
+                .child(new PageButton(2, tabController)
                         .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
                         .addTooltipElement(IKey.lang("tametab.info"))
                         .tab(GuiTextures.TAB_LEFT, 0)
                 )
-                .child(new PageButton(pageCounter.apply(true), tabController)
+                .child(new PageButton(3, tabController)
                         .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
                         .addTooltipElement(IKey.lang("tametab.moves"))
                         .tab(GuiTextures.TAB_LEFT, 0)
@@ -123,21 +125,18 @@ public class RiftCreatureScreen {
 
     //this too is temporary
     private static PagedWidget<?> createPages(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings, PagedWidget.Controller tabController) {
-        boolean openedFromCreature = data.dataType == CreatureGuiData.DataType.CREATURE;
+        //boolean openedFromCreature = data.dataType == CreatureGuiData.DataType.CREATURE;
         PagedWidget<?> toReturn =  new PagedWidget<>().debugName("pagedWidget")
                 .controller(tabController).widthRel(1f).coverChildrenHeight();
 
         //page for creature inventory
         toReturn.addPage(creatureInventoryPage(data, syncManager));
-
         //page for creature settings
-        if (openedFromCreature) {
-            toReturn.addPage(creatureSettingsPage(data, syncManager));
-        }
-                //page for creature info
-        toReturn.addPage(creatureInfoPage(data, syncManager, settings))
-                //page for creature moves
-                .addPage(creatureMovesPage(data, syncManager, settings));
+        toReturn.addPage(creatureSettingsPage(data, syncManager));
+        //page for creature info
+        toReturn.addPage(creatureInfoPage(data, syncManager, settings));
+        //page for creature moves
+        toReturn.addPage(creatureMovesPage(data, syncManager, settings));
 
         return toReturn;
     }
@@ -254,22 +253,20 @@ public class RiftCreatureScreen {
     }
 
     private static ParentWidget<?> creatureSettingsPage(CreatureGuiData data, PanelSyncManager syncManager) {
-        RiftCreature creature = (RiftCreature) data.getGuiHolder();
-
         //creature sitting syncing
-        BooleanSyncValue sittingValue = new BooleanSyncValue(creature::isSitting, creature::setSitting);
+        BooleanSyncValue sittingValue = new BooleanSyncValue(data::isSitting, data::setSitting);
         syncManager.syncValue("creatureSitting", sittingValue);
 
         //turret mode syncing
-        BooleanSyncValue turretModeValue = new BooleanSyncValue(creature::isTurretMode, creature::setTurretMode);
+        BooleanSyncValue turretModeValue = new BooleanSyncValue(data::isTurretMode, data::setTurretMode);
         syncManager.syncValue("turretMode", turretModeValue);
 
         //define bottom parentwidget
-        boolean hasOptionsButtons = canHaveOptionsButtons(creature);
+        boolean hasOptionsButtons = canHaveOptionsButtons(data);
 
         //additional widgets that depend on value of turretModeValue
-        IWidget turretTargetingOptions = turretTargetingOptionGroup(creature, syncManager, hasOptionsButtons);
-        IWidget creatureBehavior = creatureBehaviorGroup(creature, syncManager, hasOptionsButtons);
+        IWidget turretTargetingOptions = turretTargetingOptionGroup(data, syncManager, hasOptionsButtons);
+        IWidget creatureBehavior = creatureBehaviorGroup(data, syncManager, hasOptionsButtons);
 
         //final return value
         return new ParentWidget<>()
@@ -307,8 +304,8 @@ public class RiftCreatureScreen {
                                                 )
                                         )
                                         //if creature has turret mode and is at base, add option
-                                        .childIf(creature.canEnterTurretMode()
-                                                && creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE, new Row()
+                                        .childIf(data.canEnterTurretMode()
+                                                && data.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE, new Row()
                                                 .coverChildrenHeight()
                                                 .crossAxisAlignment(Alignment.CrossAxis.CENTER)
                                                 .childPadding(2)
@@ -347,7 +344,7 @@ public class RiftCreatureScreen {
                                         .coverChildren()
                                         .align(Alignment.TopLeft)
                                 )
-                                .childIf(hasOptionsButtons, creatureOptionsGroup(creature, syncManager).align(Alignment.TopRight))
+                                .childIf(hasOptionsButtons, creatureOptionsGroup(data, syncManager).align(Alignment.TopRight))
                                 //if theres no options button section, its just the widget
                                 .childIf(!hasOptionsButtons, new ParentWidget<>()
                                         .onUpdateListener(widget -> {
@@ -370,13 +367,13 @@ public class RiftCreatureScreen {
                 .width(180).coverChildrenHeight();
     }
 
-    private static ParentWidget<?> creatureBehaviorGroup(RiftCreature creature, PanelSyncManager syncManager, boolean hasOptionsButtons) {
+    private static ParentWidget<?> creatureBehaviorGroup(CreatureGuiData data, PanelSyncManager syncManager, boolean hasOptionsButtons) {
         int buttonWidth = hasOptionsButtons ? 80 : 160;
 
         //creature tame behavior syncing
         IntSyncValue creatureBehaviorValue = new IntSyncValue(
-                () -> creature.getTameBehavior().ordinal(),
-                val -> creature.setTameBehavior(TameBehaviorType.values()[val])
+                () -> data.getTameBehavior().ordinal(),
+                val -> data.setTameBehavior(TameBehaviorType.values()[val])
         );
         syncManager.syncValue("creatureBehavior", creatureBehaviorValue);
 
@@ -391,7 +388,7 @@ public class RiftCreatureScreen {
                     new ToggleButton().size(buttonWidth, 20)
                             .overlay(IKey.lang(behavior.getTranslatedName()))
                             .value(new BoolValue.Dynamic(
-                                    () -> creatureBehaviorValue.getIntValue() == behavior.ordinal() && creature.getTameBehavior() == behavior,
+                                    () -> creatureBehaviorValue.getIntValue() == behavior.ordinal() && data.getTameBehavior() == behavior,
                                     value -> creatureBehaviorValue.setIntValue(behavior.ordinal())
                             ))
             );
@@ -400,13 +397,13 @@ public class RiftCreatureScreen {
         return behaviorOptions;
     }
 
-    private static ParentWidget<?> turretTargetingOptionGroup(RiftCreature creature, PanelSyncManager syncManager, boolean hasOptionsButtons) {
+    private static ParentWidget<?> turretTargetingOptionGroup(CreatureGuiData data, PanelSyncManager syncManager, boolean hasOptionsButtons) {
         int buttonWidth = hasOptionsButtons ? 80 : 160;
 
         //turret mode targeting syncing
         IntSyncValue turretTargetingValue = new IntSyncValue(
-                () -> creature.getTurretTargeting().ordinal(),
-                value -> creature.setTurretModeTargeting(TurretModeTargeting.values()[value])
+                () -> data.getTurretTargeting().ordinal(),
+                value -> data.setTurretModeTargeting(TurretModeTargeting.values()[value])
         );
         syncManager.syncValue("turretTargeting", turretTargetingValue);
 
@@ -420,7 +417,7 @@ public class RiftCreatureScreen {
                     new ToggleButton().size(buttonWidth, 20)
                             .overlay(IKey.lang(turretModeTargeting.getTranslatedName()))
                             .value(new BoolValue.Dynamic(
-                                    () -> turretTargetingValue.getIntValue() == turretModeTargeting.ordinal() && creature.getTurretTargeting() == turretModeTargeting,
+                                    () -> turretTargetingValue.getIntValue() == turretModeTargeting.ordinal() && data.getTurretTargeting() == turretModeTargeting,
                                     value -> turretTargetingValue.setIntValue(turretModeTargeting.ordinal())
                             ))
             );
@@ -429,12 +426,17 @@ public class RiftCreatureScreen {
         return turretModeOptions;
     }
 
-    private static boolean canHaveOptionsButtons(RiftCreature creature) {
+    private static boolean canHaveOptionsButtons(CreatureGuiData data) {
+        if (data.dataType == CreatureGuiData.DataType.SELECTION) return false;
+        RiftCreature creature = (RiftCreature) data.getGuiHolder();
         return creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE &&
                 (creature instanceof IWorkstationUser || creature instanceof IHarvestWhenWandering);
     }
 
-    private static ParentWidget<?> creatureOptionsGroup(RiftCreature creature, PanelSyncManager syncManager) {
+    private static ParentWidget<?> creatureOptionsGroup(CreatureGuiData data, PanelSyncManager syncManager) {
+        if (data.dataType == CreatureGuiData.DataType.SELECTION) return new ParentWidget<>();
+
+        RiftCreature creature = (RiftCreature) data.getGuiHolder();
         Flow creatureOptions = new Column()
                 .coverChildrenHeight().width(80)
                 .childPadding(3)

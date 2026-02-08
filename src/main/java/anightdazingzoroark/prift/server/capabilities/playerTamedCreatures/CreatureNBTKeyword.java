@@ -22,6 +22,10 @@ public class CreatureNBTKeyword<T> {
     public static final CreatureNBTKeyword<NBTTagCompound> LEARNABLE_MOVES = new CreatureNBTKeyword<>("LearnableMoves", NBTTagCompound.class);
     public static final CreatureNBTKeyword<NBTTagCompound> GEAR = new CreatureNBTKeyword<>("Gear", NBTTagCompound.class);
     public static final CreatureNBTKeyword<NBTTagCompound> INVENTORY = new CreatureNBTKeyword<>("Inventory", NBTTagCompound.class);
+    public static final CreatureNBTKeyword<Boolean> SITTING = new CreatureNBTKeyword<>("Sitting", Boolean.class);
+    public static final CreatureNBTKeyword<Boolean> TURRET_MODE = new CreatureNBTKeyword<>("TurretMode", Boolean.class);
+    public static final CreatureNBTKeyword<Byte> DEPLOYMENT_TYPE = new CreatureNBTKeyword<>("DeploymentType", Byte.class);
+    public static final CreatureNBTKeyword<Byte> TURRET_TARGETING = new CreatureNBTKeyword<>("TurretTargeting", Byte.class);
 
     public static <T> NBTTagCompound mergeResult(NBTTagCompound tagCompound, CreatureNBTKeyword<T> keyword, T keywordValue) {
         if (tagCompound.hasKey(keyword.name)) tagCompound.merge(keyword.setValue(keywordValue));
@@ -55,12 +59,20 @@ public class CreatureNBTKeyword<T> {
 
     public T parseValue(NBTTagCompound nbtTagCompound) {
         NBTBase filteredNBTBase = nbtTagCompound.getTag(this.name);
-        if (filteredNBTBase.isEmpty()) return null;
+        if (filteredNBTBase.isEmpty()) return this.getDefaultValue();
 
         if (this.clazz == Integer.class) return this.clazz.cast(nbtTagCompound.getInteger(this.name));
         else if (this.clazz == Boolean.class) return this.clazz.cast(nbtTagCompound.getBoolean(this.name));
         else if (this.clazz == Byte.class) return this.clazz.cast(nbtTagCompound.getByte(this.name));
         else if (this.clazz == NBTTagCompound.class) return this.clazz.cast(nbtTagCompound.getCompoundTag(this.name));
+        return null;
+    }
+
+    private T getDefaultValue() {
+        if (this.clazz == Integer.class) return this.clazz.cast(0);
+        else if (this.clazz == Boolean.class) return this.clazz.cast(false);
+        else if (this.clazz == Byte.class) return this.clazz.cast((byte) 0);
+        else if (this.clazz == NBTTagCompound.class) return this.clazz.cast(new NBTTagCompound());
         return null;
     }
 }

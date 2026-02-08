@@ -68,7 +68,6 @@ public class RiftDeployPartyMem extends RiftLibMessage<RiftDeployPartyMem> {
                 partyMemNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                 PlayerTamedCreaturesHelper.setCreatureNBT(player, partyMemNBT, selectedCreatureInfo);
                 //playerTamedCreatures.setPartyMemNBT(message.position, partyMemNBT);
-                System.out.println("is saddled on summon: "+partyMemNBT.isSaddled());
                 PlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
 
                 //create creature

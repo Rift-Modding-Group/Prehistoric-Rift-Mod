@@ -57,7 +57,6 @@ public class RiftSetCreatureNBTParam extends RiftLibMessage<RiftSetCreatureNBTPa
 
                 playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], mergedCreatureNBT);
                 CreatureNBT newCreatureNBT = playerTamedCreatures.getPartyNBT().get(selectedCreatureInfo.pos[0]);
-                System.out.println("set saddled when set and sync: "+newCreatureNBT.isSaddled());
                 break;
             }
             case BOX: {
@@ -88,7 +87,6 @@ public class RiftSetCreatureNBTParam extends RiftLibMessage<RiftSetCreatureNBTPa
 
                 playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], mergedCreatureNBT);
                 CreatureNBT newCreatureNBT = playerTamedCreatures.getPartyNBT().get(selectedCreatureInfo.pos[0]);
-                System.out.println("set saddled when set and sync: "+newCreatureNBT.isSaddled());
                 break;
             }
             case BOX: {

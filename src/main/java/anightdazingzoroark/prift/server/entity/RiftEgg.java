@@ -379,10 +379,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
         }
         else {
             if (this.getOwnerId() != null && this.getOwnerId().equals(player.getUniqueID())) {
-                if (!this.world.isRemote) {
-                    System.out.println(this);
-                    GuiFactories.entity().open(player, this);
-                }
+                if (!this.world.isRemote) GuiFactories.entity().open(player, this);
                 return true;
             }
         }

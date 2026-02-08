@@ -5,10 +5,13 @@ import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import com.cleanroommc.modularui.factory.GuiData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -141,6 +144,104 @@ public class CreatureGuiData extends GuiData {
             return creatureNBT.getAcquisitionInfoString();
         }
         return "";
+    }
+
+    public boolean isSitting() {
+        if (this.dataType == DataType.CREATURE) return this.creature.isSitting();
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            return creatureNBT.isSitting();
+        }
+        return false;
+    }
+
+    public void setSitting(boolean value) {
+        if (this.dataType == DataType.CREATURE) this.creature.setSitting(value);
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            if (!creatureNBT.nbtIsEmpty()) {
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.SITTING.setValue(value);
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
+            }
+        }
+    }
+
+    public boolean isTurretMode() {
+        if (this.dataType == DataType.CREATURE) return this.creature.isTurretMode();
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            return creatureNBT.isSitting();
+        }
+        return false;
+    }
+
+    public void setTurretMode(boolean value) {
+        if (this.dataType == DataType.CREATURE) this.creature.setTurretMode(value);
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            if (!creatureNBT.nbtIsEmpty()) {
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.TURRET_MODE.setValue(value);
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
+            }
+        }
+    }
+
+    public boolean canEnterTurretMode() {
+        if (this.dataType == DataType.CREATURE) return this.creature.canEnterTurretMode();
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            return creatureNBT.canEnterTurretMode();
+        }
+        return false;
+    }
+
+    public TurretModeTargeting getTurretTargeting() {
+        if (this.dataType == DataType.CREATURE) return this.creature.getTurretTargeting();
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            return creatureNBT.getTurretTargeting();
+        }
+        return null;
+    }
+
+    public void setTurretModeTargeting(TurretModeTargeting value) {
+        if (this.dataType == DataType.CREATURE) this.creature.setTurretModeTargeting(value);
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            if (!creatureNBT.nbtIsEmpty()) {
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.TURRET_TARGETING.setValue((byte) value.ordinal());
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
+            }
+        }
+    }
+
+    public PlayerTamedCreatures.DeploymentType getDeploymentType() {
+        if (this.dataType == DataType.CREATURE) return this.creature.getDeploymentType();
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            return creatureNBT.getDeploymentType();
+        }
+        return null;
+    }
+
+    public TameBehaviorType getTameBehavior() {
+        if (this.dataType == DataType.CREATURE) return this.creature.getTameBehavior();
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            return creatureNBT.getTameBehavior();
+        }
+        return null;
+    }
+
+    public void setTameBehavior(TameBehaviorType value) {
+        if (this.dataType == DataType.CREATURE) this.creature.setTameBehavior(value);
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            if (!creatureNBT.nbtIsEmpty()) {
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.TAME_BEHAVIOR.setValue((byte) value.ordinal());
+                PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), newNBTParam, this.selectedCreatureInfo);
+            }
+        }
     }
 
     //-----inventory and gear related stuff starts here-----

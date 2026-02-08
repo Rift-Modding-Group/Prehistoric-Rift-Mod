@@ -1326,7 +1326,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             compound.setInteger("HomePosY", this.getHomePos().getY());
             compound.setInteger("HomePosZ", this.getHomePos().getZ());
         }
-        compound.setInteger("DeploymentType", this.getDeploymentType().ordinal());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.DEPLOYMENT_TYPE, (byte) this.getDeploymentType().ordinal());
         compound.setInteger("BoxReviveTime", this.boxReviveTime);
 
         //for learned moves
@@ -1346,8 +1346,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             compound.setBoolean("IsPregnancy", this.isPregnant());
         }
         //for turret mode
-        compound.setBoolean("TurretMode", this.isTurretMode());
-        compound.setByte("TurretTargeting", (byte) this.getTurretTargeting().ordinal());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.TURRET_MODE, this.isTurretMode());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.TURRET_TARGETING, (byte) this.getTurretTargeting().ordinal());
         //for acquisition
         compound.setTag("AcquisitionInfo", this.getAcquisitionInfo().getNBT());
     }
@@ -1371,7 +1371,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (compound.getBoolean("HasHomePos")) {
             this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
         }
-        this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getInteger("DeploymentType")]);
+        this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[CreatureNBTKeyword.DEPLOYMENT_TYPE.parseValue(compound)]);
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
 
         //for learned moves
@@ -1390,8 +1390,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //for pregnancy
         if (this.canBePregnant()) this.setPregnant(compound.getBoolean("IsPregnancy"), compound.getInteger("PregnancyTime"));
         //for turret mode
-        this.setTurretMode(compound.getBoolean("TurretMode"));
-        this.setTurretModeTargeting(TurretModeTargeting.values()[compound.getByte("TurretTargeting")]);
+        this.setTurretMode(CreatureNBTKeyword.TURRET_MODE.parseValue(compound));
+        this.setTurretModeTargeting(TurretModeTargeting.values()[CreatureNBTKeyword.TURRET_TARGETING.parseValue(compound)]);
         //for acquisition
         NBTTagCompound acquisitionNBT = compound.getCompoundTag("AcquisitionInfo");
         this.setAcquisitionInfo(new CreatureAcquisitionInfo(acquisitionNBT));

@@ -8,6 +8,8 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityItem;
@@ -60,8 +62,6 @@ public class CreatureNBT {
         creature.readEntityFromNBT(this.creatureNBT);
         creature.setUniqueId(this.getUniqueID());
         creature.setCustomNameTag(this.getCustomName());
-
-        System.out.println("is saddled: "+creature.isSaddled());
 
         return creature;
     }
@@ -187,6 +187,40 @@ public class CreatureNBT {
         return acquisitionInfo.acquisitionInfoString();
     }
 
+    public TameBehaviorType getTameBehavior() {
+        if (this.creatureNBT.isEmpty()) return null;
+        return TameBehaviorType.values()[CreatureNBTKeyword.TAME_BEHAVIOR.parseValue(this.creatureNBT)];
+    }
+
+    public boolean isSitting() {
+        if (this.creatureNBT.isEmpty()) return false;
+        return CreatureNBTKeyword.SITTING.parseValue(this.creatureNBT);
+    }
+
+    public boolean isTurretMode() {
+        if (this.creatureNBT.isEmpty()) return false;
+        return CreatureNBTKeyword.TURRET_MODE.parseValue(this.creatureNBT);
+    }
+
+    public void setTurretMode(boolean value) {
+        if (this.nbtIsEmpty()) return;
+        CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.TURRET_MODE, value);
+    }
+
+    public boolean canEnterTurretMode() {
+        if (this.nbtIsEmpty()) return false;
+        FixedSizeList<CreatureMove> learnedMoves = this.getLearnedMoves();
+        return learnedMoves.getList().stream()
+                .anyMatch(m -> {
+                    return m != null && m.moveAnimType.moveType == CreatureMove.MoveType.RANGED;
+                });
+    }
+
+    public TurretModeTargeting getTurretTargeting() {
+        if (this.nbtIsEmpty()) return null;
+        return TurretModeTargeting.values()[CreatureNBTKeyword.TURRET_TARGETING.parseValue(this.creatureNBT)];
+    }
+
     public UUID getUniqueID() {
         if (this.creatureNBT.isEmpty()) return RiftUtil.nilUUID;
         return this.creatureNBT.getUniqueId("UniqueID");
@@ -194,12 +228,12 @@ public class CreatureNBT {
 
     public PlayerTamedCreatures.DeploymentType getDeploymentType() {
         if (this.creatureNBT.isEmpty()) return null;
-        return PlayerTamedCreatures.DeploymentType.values()[this.creatureNBT.getInteger("DeploymentType")];
+        return PlayerTamedCreatures.DeploymentType.values()[CreatureNBTKeyword.DEPLOYMENT_TYPE.parseValue(this.creatureNBT)];
     }
 
     public void setDeploymentType(PlayerTamedCreatures.DeploymentType deploymentType) {
         if (this.creatureNBT.isEmpty()) return;
-        this.creatureNBT.setInteger("DeploymentType", deploymentType.ordinal());
+        CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.DEPLOYMENT_TYPE, (byte) deploymentType.ordinal());
     }
 
     @Deprecated
@@ -243,7 +277,6 @@ public class CreatureNBT {
             if (moveNBTToTest.getInteger("Index") == pos) moveListNBTList.set(pos, newMoveNBT);
         }
         newLearnedMoveListNBT.setTag("MoveList", moveListNBTList);
-        //this.creatureNBT.merge(CreatureNBTKeyword.LEARNED_MOVES.setValue(newLearnedMoveListNBT));
         CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.LEARNED_MOVES, newLearnedMoveListNBT);
     }
 
@@ -261,7 +294,6 @@ public class CreatureNBT {
         }
         if (listPosToRemove >= 0) moveListNBTList.removeTag(listPosToRemove);
         newLearnedMoveListNBT.setTag("MoveList", moveListNBTList);
-        //this.creatureNBT.merge(CreatureNBTKeyword.LEARNED_MOVES.setValue(newLearnedMoveListNBT));
         CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.LEARNED_MOVES, newLearnedMoveListNBT);
     }
 
@@ -405,7 +437,6 @@ public class CreatureNBT {
 
     public void setLargeWeapon(RiftLargeWeaponType value) {
         if (this.creatureNBT.isEmpty()) return;
-        //this.creatureNBT.merge(CreatureNBTKeyword.LARGE_WEAPON_TYPE.setValue((byte) value.ordinal()));
         CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.LARGE_WEAPON_TYPE, (byte) value.ordinal());
     }
 
@@ -596,11 +627,6 @@ public class CreatureNBT {
         this.creatureNBT.removeTag("LeadWorkPosX");
         this.creatureNBT.removeTag("LeadWorkPosY");
         this.creatureNBT.removeTag("LeadWorkPosZ");
-    }
-
-    public void setTurretMode(boolean value) {
-        if (this.nbtIsEmpty()) return;
-        this.creatureNBT.setBoolean("TurretMode", value);
     }
 
     public boolean hasHarvestOnWanderData() {
