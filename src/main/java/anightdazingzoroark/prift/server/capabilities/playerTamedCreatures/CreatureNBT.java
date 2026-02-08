@@ -93,12 +93,12 @@ public class CreatureNBT {
 
     public RiftCreatureType getCreatureType() {
         if (this.creatureNBT.isEmpty()) return null;
-        return RiftCreatureType.values()[this.creatureNBT.getByte("CreatureType")];
+        return RiftCreatureType.values()[CreatureNBTKeyword.CREATURE_TYPE.parseValue(this.creatureNBT)];
     }
 
     public int getCreatureLevel() {
         if (this.creatureNBT.isEmpty()) return -1;
-        return this.creatureNBT.getInteger("Level");
+        return CreatureNBTKeyword.LEVEL.parseValue(this.creatureNBT);
     }
 
     public String getCreatureLevelWithText() {
@@ -146,35 +146,35 @@ public class CreatureNBT {
 
     public void setCreatureEnergy(int value) {
         if (this.creatureNBT.isEmpty()) return;
-        this.creatureNBT.setInteger("Energy", value);
+        CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.ENERGY, value);
     }
 
     //index 0 is current energy
     //index 1 is max energy
     public int[] getCreatureEnergy() {
         if (this.creatureNBT.isEmpty()) return new int[]{0, 0};
-        int energy = this.creatureNBT.getInteger("Energy");
+        int energy = CreatureNBTKeyword.ENERGY.parseValue(this.creatureNBT);
         int maxEnergy = RiftConfigHandler.getConfig(this.getCreatureType()).stats.maxEnergy;
         return new int[]{energy, maxEnergy};
     }
 
     public void setCreatureXP(int xp) {
         if (this.creatureNBT.isEmpty()) return;
-        this.creatureNBT.setInteger("XP", xp);
+        CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.XP, xp);
     }
 
     //index 0 is current xp
     //index 1 is max xp
     public int[] getCreatureXP() {
         if (this.creatureNBT.isEmpty()) return new int[]{0, 0};
-        int xp = this.creatureNBT.getInteger("XP");
-        int maxXP = this.getCreatureType().getMaxXP(this.creatureNBT.getInteger("Level"));
+        int xp = CreatureNBTKeyword.XP.parseValue(this.creatureNBT);
+        int maxXP = this.getCreatureType().getMaxXP(this.getCreatureLevel());
         return new int[]{xp, maxXP};
     }
 
     public int getAgeInTicks() {
         if (this.creatureNBT.isEmpty()) return -1;
-        return this.creatureNBT.getInteger("AgeTicks");
+        return CreatureNBTKeyword.AGE_TICKS.parseValue(this.creatureNBT);
     }
 
     public int getAgeInDays() {

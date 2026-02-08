@@ -5,6 +5,17 @@ import net.minecraft.nbt.NBTTagCompound;
 
 //helper class where strings corresponding to nbt values are to be placed in
 public class CreatureNBTKeyword<T> {
+    public static final CreatureNBTKeyword<Integer> LEVEL = new CreatureNBTKeyword<>("Level", Integer.class);
+    public static final CreatureNBTKeyword<Integer> XP = new CreatureNBTKeyword<>("XP", Integer.class);
+    public static final CreatureNBTKeyword<Integer> LOVE_COOLDOWN = new CreatureNBTKeyword<>("LoveCooldown", Integer.class);
+    public static final CreatureNBTKeyword<Integer> VARIANT = new CreatureNBTKeyword<>("Variant", Integer.class);
+    public static final CreatureNBTKeyword<Byte> CREATURE_TYPE = new CreatureNBTKeyword<>("CreatureType", Byte.class);
+    public static final CreatureNBTKeyword<Byte> TAME_BEHAVIOR = new CreatureNBTKeyword<>("TameBehavior", Byte.class);
+    public static final CreatureNBTKeyword<Integer> ENERGY = new CreatureNBTKeyword<>("Energy", Integer.class);
+    public static final CreatureNBTKeyword<Boolean> HAS_TARGET = new CreatureNBTKeyword<>("HasTarget", Boolean.class);
+    public static final CreatureNBTKeyword<Integer> AGE_TICKS = new CreatureNBTKeyword<>("AgeTicks", Integer.class);
+    public static final CreatureNBTKeyword<Boolean> JUST_SPAWNED = new CreatureNBTKeyword<>("JustSpawned", Boolean.class);
+    public static final CreatureNBTKeyword<Boolean> HAS_HOME_POS = new CreatureNBTKeyword<>("HasHomePos", Boolean.class);
     public static final CreatureNBTKeyword<Boolean> SADDLED = new CreatureNBTKeyword<>("Saddled", Boolean.class);
     public static final CreatureNBTKeyword<Byte> LARGE_WEAPON_TYPE = new CreatureNBTKeyword<>("LargeWeapon", Byte.class);
     public static final CreatureNBTKeyword<NBTTagCompound> LEARNED_MOVES = new CreatureNBTKeyword<>("LearnedMoves", NBTTagCompound.class);
@@ -24,6 +35,10 @@ public class CreatureNBTKeyword<T> {
     private CreatureNBTKeyword(String name, Class<T> clazz) {
         this.name = name;
         this.clazz = clazz;
+    }
+
+    public boolean existsInTagCompound(NBTTagCompound nbtTagCompound) {
+        return nbtTagCompound.hasKey(this.name);
     }
 
     public NBTTagCompound setValue(T value) {

@@ -16,6 +16,7 @@ import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -1305,22 +1306,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setInteger("Level", this.getLevel());
-        compound.setInteger("XP", this.getXP());
-        compound.setInteger("LoveCooldown", this.getLoveCooldown());
-        compound.setInteger("Variant", this.getVariant());
-        compound.setByte("CreatureType", (byte) this.creatureType.ordinal());
-        compound.setByte("TameBehavior", (byte) this.getTameBehavior().ordinal());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.LEVEL, this.getLevel());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.XP, this.getXP());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.LOVE_COOLDOWN, this.getLoveCooldown());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.VARIANT, this.getVariant());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.CREATURE_TYPE, (byte) this.creatureType.ordinal());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.TAME_BEHAVIOR, (byte) this.getTameBehavior().ordinal());
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.SADDLED, this.isSaddled());
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.LARGE_WEAPON_TYPE, (byte) this.getLargeWeapon().ordinal());
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.INVENTORY, this.creatureInventory.serializeNBT());
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.GEAR, this.creatureGear.serializeNBT());
-        compound.setInteger("Energy", this.getEnergy());
-        compound.setBoolean("HasTarget", this.hasTarget());
-        compound.setInteger("AgeTicks", this.getAgeInTicks());
-        compound.setBoolean("JustSpawned", this.justSpawned());
-        compound.setInteger("TameProgress", this.getTameProgress());
-        compound.setBoolean("HasHomePos", this.getHasHomePos());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.ENERGY, this.getEnergy());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.HAS_TARGET, this.hasTarget());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.AGE_TICKS, this.getAgeInTicks());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.JUST_SPAWNED, this.justSpawned());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.HAS_HOME_POS, this.getHasHomePos());
         if (this.getHasHomePos()) {
             compound.setInteger("HomePosX", this.getHomePos().getX());
             compound.setInteger("HomePosY", this.getHomePos().getY());
@@ -1355,21 +1355,22 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        this.setLevel(compound.getInteger("Level"));
-        this.setXP(compound.getInteger("XP"));
-        this.setLoveCooldown(compound.getInteger("LoveCooldown"));
-        this.setVariant(compound.getInteger("Variant"));
-        if (compound.hasKey("TameBehavior")) this.setTameBehavior(TameBehaviorType.values()[compound.getByte("TameBehavior")]);
+        this.setLevel(CreatureNBTKeyword.LEVEL.parseValue(compound));
+        this.setXP(CreatureNBTKeyword.XP.parseValue(compound));
+        this.setLoveCooldown(CreatureNBTKeyword.LOVE_COOLDOWN.parseValue(compound));
+        this.setVariant(CreatureNBTKeyword.VARIANT.parseValue(compound));
+        this.setTameBehavior(TameBehaviorType.values()[CreatureNBTKeyword.TAME_BEHAVIOR.parseValue(compound)]);
         this.setSaddled(CreatureNBTKeyword.SADDLED.parseValue(compound));
         this.setLargeWeapon(RiftLargeWeaponType.values()[CreatureNBTKeyword.LARGE_WEAPON_TYPE.parseValue(compound)]);
         this.creatureInventory.deserializeNBT(CreatureNBTKeyword.INVENTORY.parseValue(compound));
         this.creatureGear.deserializeNBT(CreatureNBTKeyword.GEAR.parseValue(compound));
-        this.setEnergy(compound.getInteger("Energy"));
-        this.setHasTarget(compound.getBoolean("HasTarget"));
-        this.setAgeInTicks(compound.getInteger("AgeTicks"));
-        this.setJustSpawned(compound.getBoolean("JustSpawned"));
-        this.setTameProgress(compound.getInteger("TameProgress"));
-        if (compound.getBoolean("HasHomePos")) this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
+        this.setEnergy(CreatureNBTKeyword.ENERGY.parseValue(compound));
+        this.setHasTarget(CreatureNBTKeyword.HAS_TARGET.parseValue(compound));
+        this.setAgeInTicks(CreatureNBTKeyword.AGE_TICKS.parseValue(compound));
+        this.setJustSpawned(CreatureNBTKeyword.JUST_SPAWNED.parseValue(compound));
+        if (compound.getBoolean("HasHomePos")) {
+            this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
+        }
         this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[compound.getInteger("DeploymentType")]);
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
 
@@ -2323,7 +2324,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //burrowing stuff ends here
 
     public TameBehaviorType getTameBehavior() {
-        return TameBehaviorType.values()[this.dataManager.get(BEHAVIOR).byteValue()];
+        return TameBehaviorType.values()[this.dataManager.get(BEHAVIOR)];
     }
     public void setTameBehavior(TameBehaviorType tameBehavior) {
         this.dataManager.set(BEHAVIOR, (byte) tameBehavior.ordinal());
@@ -2507,30 +2508,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void setCanUseMiddleClick(boolean value) {
         this.dataManager.set(CAN_USE_MIDDLE_CLICK, value);
-    }
-
-    public boolean canUseSpacebar() {
-        return this.dataManager.get(CAN_USE_SPACEBAR);
-    }
-
-    public void setCanUseSpacebar(boolean value) {
-        this.dataManager.set(CAN_USE_SPACEBAR, value);
-    }
-
-    public boolean isUsingSpacebar() {
-        return this.dataManager.get(USING_SPACEBAR);
-    }
-
-    public void setUsingSpacebar(boolean value) {
-        this.dataManager.set(USING_SPACEBAR, value);
-    }
-
-    public int getSpacebarUse() {
-        return this.dataManager.get(SPACEBAR_USE);
-    }
-
-    public void setSpacebarUse(int value) {
-        this.dataManager.set(SPACEBAR_USE, value);
     }
 
     public boolean hasTarget() {
