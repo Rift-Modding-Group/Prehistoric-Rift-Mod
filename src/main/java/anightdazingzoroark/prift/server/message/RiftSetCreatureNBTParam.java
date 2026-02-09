@@ -53,15 +53,18 @@ public class RiftSetCreatureNBTParam extends RiftLibMessage<RiftSetCreatureNBTPa
         switch (selectedCreatureInfo.selectedPosType) {
             case PARTY: {
                 CreatureNBT oldCreatureNBT = playerTamedCreatures.getPartyNBT().get(selectedCreatureInfo.pos[0]);
-                CreatureNBT mergedCreatureNBT = this.combineNBTs(oldCreatureNBT, message.param);
+                NBTTagCompound mergedNBT = oldCreatureNBT.getCreatureNBT();
+                mergedNBT.merge(message.param);
+                CreatureNBT mergedCreatureNBT = new CreatureNBT(mergedNBT);
 
                 playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], mergedCreatureNBT);
-                CreatureNBT newCreatureNBT = playerTamedCreatures.getPartyNBT().get(selectedCreatureInfo.pos[0]);
                 break;
             }
             case BOX: {
                 CreatureNBT oldCreatureNBT = playerTamedCreatures.getBoxNBT().getBoxContents(selectedCreatureInfo.pos[0]).get(selectedCreatureInfo.pos[1]);
-                CreatureNBT mergedCreatureNBT = this.combineNBTs(oldCreatureNBT, message.param);
+                NBTTagCompound mergedNBT = oldCreatureNBT.getCreatureNBT();
+                mergedNBT.merge(message.param);
+                CreatureNBT mergedCreatureNBT = new CreatureNBT(mergedNBT);
                 playerTamedCreatures.setBoxMemNBT(selectedCreatureInfo.pos[0], selectedCreatureInfo.pos[1], mergedCreatureNBT);
                 break;
             }
@@ -83,24 +86,21 @@ public class RiftSetCreatureNBTParam extends RiftLibMessage<RiftSetCreatureNBTPa
         switch (selectedCreatureInfo.selectedPosType) {
             case PARTY: {
                 CreatureNBT oldCreatureNBT = playerTamedCreatures.getPartyNBT().get(selectedCreatureInfo.pos[0]);
-                CreatureNBT mergedCreatureNBT = this.combineNBTs(oldCreatureNBT, message.param);
+                NBTTagCompound mergedNBT = oldCreatureNBT.getCreatureNBT();
+                mergedNBT.merge(message.param);
+                CreatureNBT mergedCreatureNBT = new CreatureNBT(mergedNBT);
 
                 playerTamedCreatures.setPartyMemNBT(selectedCreatureInfo.pos[0], mergedCreatureNBT);
-                CreatureNBT newCreatureNBT = playerTamedCreatures.getPartyNBT().get(selectedCreatureInfo.pos[0]);
                 break;
             }
             case BOX: {
                 CreatureNBT oldCreatureNBT = playerTamedCreatures.getBoxNBT().getBoxContents(selectedCreatureInfo.pos[0]).get(selectedCreatureInfo.pos[1]);
-                CreatureNBT mergedCreatureNBT = this.combineNBTs(oldCreatureNBT, message.param);
+                NBTTagCompound mergedNBT = oldCreatureNBT.getCreatureNBT();
+                mergedNBT.merge(message.param);
+                CreatureNBT mergedCreatureNBT = new CreatureNBT(mergedNBT);
                 playerTamedCreatures.setBoxMemNBT(selectedCreatureInfo.pos[0], selectedCreatureInfo.pos[1], mergedCreatureNBT);
                 break;
             }
         }
-    }
-
-    private CreatureNBT combineNBTs(CreatureNBT creatureNBT, NBTTagCompound nbtParam) {
-        NBTTagCompound toReturn = creatureNBT.getCreatureNBT();
-        toReturn.merge(nbtParam);
-        return new CreatureNBT(toReturn);
     }
 }

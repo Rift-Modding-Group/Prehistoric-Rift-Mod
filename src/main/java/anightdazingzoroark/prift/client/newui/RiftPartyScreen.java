@@ -1,20 +1,14 @@
 package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.newui.custom.PaddedGrid;
+import anightdazingzoroark.prift.client.newui.custom.PartyMemberButtonPopupWidget;
 import anightdazingzoroark.prift.client.newui.custom.PartyMemberButtonWidget;
-import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
-import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftOpenCreatureScreen;
 import com.cleanroommc.modularui.api.IPanelHandler;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.drawable.GuiTextures;
-import com.cleanroommc.modularui.drawable.ItemDrawable;
 import com.cleanroommc.modularui.factory.GuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
@@ -26,12 +20,20 @@ import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Grid;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class NewRiftPartyScreen {
+public class RiftPartyScreen {
     public static ModularPanel build(GuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disableRecipeViewer();
 
         EntityPlayer player = data.getPlayer();
         FixedSizeList<CreatureNBT> playerPartyNBT = PlayerTamedCreaturesHelper.getPlayerPartyNBT(player);
+
+        IPanelHandler popupPanelSyncHandler = syncManager.panel(
+                "partyScreenPopupPanel",
+                (panelSyncManager, syncHandler) -> {
+                    return popup(data, panelSyncManager, syncHandler);
+                },
+                true
+        );
 
         return new ModularPanel(UIPanelNames.PARTY_SCREEN)
                 .coverChildren().padding(7, 7)
@@ -47,6 +49,7 @@ public class NewRiftPartyScreen {
                                 .matrix(Grid.mapToMatrix(2, playerPartyNBT.getList(), (index, value) -> {
                                     return new PartyMemberButtonWidget(value)
                                             .onMousePressed(button -> {
+                                                /*
                                                 RiftCreature creature = value.findCorrespondingCreature(player.world);
                                                 if (creature != null) {
                                                     RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature));
@@ -59,10 +62,19 @@ public class NewRiftPartyScreen {
                                                     );
                                                     RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo));
                                                 }
+                                                 */
+                                                popupPanelSyncHandler.openPanel();
                                                 return true;
                                             });
                                 })).padding(4)
                         )
                 );
+    }
+
+    private static ModularPanel popup(GuiData data, PanelSyncManager syncManager, IPanelHandler syncHandler) {
+        return new Dialog<>(UIPanelNames.PARTY_SCREEN_DIALOG)
+                .setDraggable(false)
+                .setCloseOnOutOfBoundsClick(true)
+                .width(100);
     }
 }

@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.client.newui.data;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.newui.NewRiftPartyScreen;
+import anightdazingzoroark.prift.client.newui.RiftPartyScreen;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.factory.AbstractUIFactory;
 import com.cleanroommc.modularui.factory.GuiData;
@@ -48,7 +48,7 @@ public class PlayerGuiFactory extends AbstractUIFactory<GuiData> {
 
     @Override
     public ModularPanel createPanel(GuiData guiData, PanelSyncManager syncManager, UISettings settings) {
-        return NewRiftPartyScreen.build(guiData, syncManager, settings);
+        return RiftPartyScreen.build(guiData, syncManager, settings);
     }
 
     @Override

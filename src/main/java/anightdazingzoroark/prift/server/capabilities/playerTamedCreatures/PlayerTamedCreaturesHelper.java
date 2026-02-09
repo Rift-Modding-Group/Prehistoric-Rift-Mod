@@ -68,8 +68,12 @@ public class PlayerTamedCreaturesHelper {
     }
 
     public static FixedSizeList<CreatureNBT> getPlayerPartyNBT(EntityPlayer player) {
+        return getPlayerPartyNBT(player, true);
+    }
+
+    public static FixedSizeList<CreatureNBT> getPlayerPartyNBT(EntityPlayer player, boolean firstSyncFirst) {
         if (player == null) return new FixedSizeList<>(maxPartySize, new CreatureNBT());
-        if (player.world.isRemote) {
+        if (player.world.isRemote && firstSyncFirst) {
             RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
         }
         return getPlayerTamedCreatures(player).getPartyNBT();
@@ -208,8 +212,12 @@ public class PlayerTamedCreaturesHelper {
     }
 
     public static CreatureBoxStorage getCreatureBoxStorage(EntityPlayer player, boolean canCountdownRevival) {
+        return getCreatureBoxStorage(player, canCountdownRevival, true);
+    }
+
+    public static CreatureBoxStorage getCreatureBoxStorage(EntityPlayer player, boolean canCountdownRevival, boolean forceSyncFirst) {
         if (player == null) return new CreatureBoxStorage();
-        if (player.world.isRemote) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player, canCountdownRevival));
+        if (player.world.isRemote && forceSyncFirst) RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player, canCountdownRevival));
         return getPlayerTamedCreatures(player).getBoxNBT();
     }
 
@@ -231,12 +239,16 @@ public class PlayerTamedCreaturesHelper {
 
     //helper stuff for SelectedCreatureInfo class starts here
     public static CreatureNBT getCreatureNBTFromSelected(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
+        return getCreatureNBTFromSelected(player, selectedCreatureInfo, true);
+    }
+
+    public static CreatureNBT getCreatureNBTFromSelected(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, boolean forceSyncFirst) {
         if (player == null || selectedCreatureInfo == null) return new CreatureNBT();
         if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            return getPlayerPartyNBT(player).get(selectedCreatureInfo.pos[0]);
+            return getPlayerPartyNBT(player, forceSyncFirst).get(selectedCreatureInfo.pos[0]);
         }
         else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
-            return getCreatureBoxStorage(player).getBoxContents(selectedCreatureInfo.pos[0]).get(selectedCreatureInfo.pos[1]);
+            return getCreatureBoxStorage(player, false, forceSyncFirst).getBoxContents(selectedCreatureInfo.pos[0]).get(selectedCreatureInfo.pos[1]);
         }
         return new CreatureNBT();
     }

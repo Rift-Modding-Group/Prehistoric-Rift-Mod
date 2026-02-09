@@ -63,7 +63,7 @@ public class CreatureGuiData extends GuiData {
     public CreatureNBT getCreatureNBT() {
         if (this.dataType == DataType.CREATURE) return new CreatureNBT(this.creature);
         else if (this.dataType == DataType.SELECTION) {
-            return PlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.getPlayer(), this.selectedCreatureInfo);
+            return PlayerTamedCreaturesHelper.getCreatureNBTFromSelected(this.getPlayer(), this.selectedCreatureInfo, false);
         }
         return new CreatureNBT();
     }
@@ -170,7 +170,7 @@ public class CreatureGuiData extends GuiData {
         if (this.dataType == DataType.CREATURE) return this.creature.isTurretMode();
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
-            return creatureNBT.isSitting();
+            return creatureNBT.isTurretMode();
         }
         return false;
     }

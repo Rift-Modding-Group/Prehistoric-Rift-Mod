@@ -46,7 +46,7 @@ public class PartyMemberButtonWidget extends Widget<PartyMemberButtonWidget> imp
 
     @Override
     public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
-        WidgetTheme theme = this.getActiveWidgetTheme(widgetTheme, isHovering());
+        WidgetTheme theme = this.getActiveWidgetTheme(widgetTheme, this.isHovering());
         float textScale = 0.5f;
 
         if (!this.creatureNBT.nbtIsEmpty()) {
