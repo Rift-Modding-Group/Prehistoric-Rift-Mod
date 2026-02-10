@@ -26,6 +26,10 @@ public class RiftCreatureInfoPanel {
     public static final int[] size = {211, 122};
 
     public static ParentWidget<?> build(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        if (data.getGuiHolder() instanceof RiftCreature creature) {
+            System.out.println("creature: "+creature);
+        }
+
         return new ParentWidget<>().padding(7, 7).coverChildren()
                 .child(new Row().coverChildren().childPadding(5)
                         //left side is the entity and the name

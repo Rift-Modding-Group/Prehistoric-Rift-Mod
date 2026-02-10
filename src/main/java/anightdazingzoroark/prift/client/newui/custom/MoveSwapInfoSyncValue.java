@@ -65,12 +65,22 @@ public class MoveSwapInfoSyncValue extends ValueSyncHandler<SelectedMoveInfo.Swa
     }
 
     @Override
+    public Class<SelectedMoveInfo.SwapInfo> getValueType() {
+        return SelectedMoveInfo.SwapInfo.class;
+    }
+
+    @Override
     public boolean updateCacheFromSource(boolean isFirstSync) {
         if (isFirstSync || this.getter.getSwapInfo() != this.cache) {
             setValue(this.getter.getSwapInfo(), false, false);
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void notifyUpdate() {
+        this.setValue(this.getter.getSwapInfo(), false, true);
     }
 
     @Override

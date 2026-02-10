@@ -59,7 +59,7 @@ public class PaddedGrid extends AbstractScrollWidget<IWidget, PaddedGrid> implem
     }
 
     @Override
-    public void layoutWidgets() {
+    public boolean layoutWidgets() {
         IntList rowSizes = new IntArrayList();
         IntList colSizes = new IntArrayList();
 
@@ -106,6 +106,8 @@ public class PaddedGrid extends AbstractScrollWidget<IWidget, PaddedGrid> implem
         if (getScrollArea().getScrollY() != null) {
             getScrollArea().getScrollY().setScrollSize(y);
         }
+
+        return true;
     }
 
     @Override
