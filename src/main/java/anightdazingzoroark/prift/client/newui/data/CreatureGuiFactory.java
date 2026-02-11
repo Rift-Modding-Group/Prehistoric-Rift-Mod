@@ -19,9 +19,24 @@ import java.util.Objects;
 
 public class CreatureGuiFactory extends AbstractUIFactory<CreatureGuiData> {
     public static CreatureGuiFactory INSTANCE = new CreatureGuiFactory();
+    public static CreatureGuiFactory INSTANCE_FROM_PARTY = new CreatureGuiFactory(true);
+
+    public static CreatureGuiFactory openToPage(int page) {
+        CreatureGuiFactory toReturn = INSTANCE_FROM_PARTY;
+        toReturn.pageToOpenTo = page;
+        return toReturn;
+    }
+
+    private final boolean openedFromParty;
+    private int pageToOpenTo;
 
     protected CreatureGuiFactory() {
+        this(false);
+    }
+
+    protected CreatureGuiFactory(boolean openedFromParty) {
         super(RiftInitialize.MODID+":creature");
+        this.openedFromParty = openedFromParty;
     }
 
     private <E extends RiftCreature & IGuiHolder<CreatureGuiData>> void verifyEntity(EntityPlayer player, E entity) {
@@ -37,12 +52,12 @@ public class CreatureGuiFactory extends AbstractUIFactory<CreatureGuiData> {
     public <E extends RiftCreature & IGuiHolder<CreatureGuiData>> void open(EntityPlayer player, E entity) {
         Objects.requireNonNull(player);
         this.verifyEntity(player, entity);
-        GuiManager.open(this, new CreatureGuiData(player, entity), (EntityPlayerMP) player);
+        GuiManager.open(this, new CreatureGuiData(player, entity, this.openedFromParty, this.pageToOpenTo), (EntityPlayerMP) player);
     }
 
     public void open(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
         Objects.requireNonNull(selectedCreatureInfo);
-        GuiManager.open(this, new CreatureGuiData(player, selectedCreatureInfo), (EntityPlayerMP) player);
+        GuiManager.open(this, new CreatureGuiData(player, selectedCreatureInfo, this.openedFromParty, this.pageToOpenTo), (EntityPlayerMP) player);
     }
 
     @Override

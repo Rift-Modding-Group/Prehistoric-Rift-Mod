@@ -72,15 +72,7 @@ public class SelectedMoveInfo {
             }
             //second step of swap
             else if (this.moveOne != null && this.moveTwo == null) {
-                if (this.moveOne.moveType == SelectedMoveType.LEARNABLE
-                        && moveForSwap.moveType == SelectedMoveType.LEARNABLE
-                        && moveForSwap.movePos < 0
-                ) {
-                    System.out.println("cannot swap");
-                    return;
-                }
                 this.moveTwo = moveForSwap;
-                System.out.println("can swap");
             }
         }
 

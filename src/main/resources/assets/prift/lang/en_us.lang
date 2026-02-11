@@ -518,6 +518,7 @@ tametab.inventory=Inventory
 tametab.manage=Management
 tametab.info=Info
 tametab.moves=Moves
+tametab.return_to_party=Return to Party
 
 tamepanel.current_moves=%s Moves
 tamepanel.available_moves=Available Moves

@@ -34,7 +34,5 @@ public class RiftOpenPartyScreen extends RiftLibMessage<RiftOpenPartyScreen> {
     }
 
     @Override
-    public void executeOnClient(Minecraft minecraft, RiftOpenPartyScreen riftOpenPartyScreen, EntityPlayer entityPlayer, MessageContext messageContext) {
-
-    }
+    public void executeOnClient(Minecraft minecraft, RiftOpenPartyScreen riftOpenPartyScreen, EntityPlayer entityPlayer, MessageContext messageContext) {}
 }

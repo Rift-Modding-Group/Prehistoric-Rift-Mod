@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreatureGuiData extends GuiData {
+    //menu relation stuff
+    private final boolean openedFromParty;
+    private final int pageToOpenTo;
+
     //data type stuff
     public final DataType dataType;
     private RiftCreature creature;
@@ -30,21 +34,27 @@ public class CreatureGuiData extends GuiData {
     public SelectedMoveInfo selectedMoveInfoUI;
     public SelectedMoveInfo.SwapInfo moveSwapInfoUI = new SelectedMoveInfo.SwapInfo();
 
-    public CreatureGuiData(EntityPlayer player, RiftCreature creature) {
+    public CreatureGuiData(EntityPlayer player, RiftCreature creature, boolean openedFromParty, int pageToOpenTo) {
         super(player);
         this.creature = creature;
         this.dataType = DataType.CREATURE;
+        this.openedFromParty = openedFromParty;
+        this.pageToOpenTo = pageToOpenTo;
     }
 
-    public CreatureGuiData(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
+    public CreatureGuiData(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, boolean openedFromParty, int pageToOpenTo) {
         super(player);
         this.selectedCreatureInfo = selectedCreatureInfo;
         this.dataType = DataType.SELECTION;
+        this.openedFromParty = openedFromParty;
+        this.pageToOpenTo = pageToOpenTo;
     }
 
     public CreatureGuiData(EntityPlayer player, NBTTagCompound nbtTagCompound) {
         super(player);
         this.dataType = DataType.values()[nbtTagCompound.getInteger("DataType")];
+        this.openedFromParty = nbtTagCompound.getBoolean("OpenedFromParty");
+        this.pageToOpenTo = nbtTagCompound.getInteger("PageToOpenTo");
         if (this.dataType == DataType.CREATURE) {
             this.creature = (RiftCreature) player.world.getEntityByID(nbtTagCompound.getInteger("CreatureId"));
         }
@@ -57,6 +67,14 @@ public class CreatureGuiData extends GuiData {
         if (this.dataType == DataType.CREATURE) return this.creature;
         else if (this.dataType == DataType.SELECTION) return this.selectedCreatureInfo;
         return null;
+    }
+
+    public boolean getOpenedFromParty() {
+        return this.openedFromParty;
+    }
+
+    public int getPageToOpenTo() {
+        return this.pageToOpenTo;
     }
 
     public CreatureNBT getCreatureNBT() {
@@ -316,6 +334,8 @@ public class CreatureGuiData extends GuiData {
         NBTTagCompound toReturn = new NBTTagCompound();
 
         toReturn.setInteger("DataType", this.dataType.ordinal());
+        toReturn.setBoolean("OpenedFromParty", this.openedFromParty);
+        toReturn.setInteger("PageToOpenTo", this.pageToOpenTo);
         if (this.dataType == DataType.CREATURE) toReturn.setInteger("CreatureId", this.creature.getEntityId());
         else if (this.dataType == DataType.SELECTION) toReturn.setTag("SelectionInfo", this.selectedCreatureInfo.getNBT());
 
@@ -330,10 +350,6 @@ public class CreatureGuiData extends GuiData {
             return creatureNBT.getLearnedMoves();
         }
         return new FixedSizeList<>(3);
-    }
-
-    public void setLearnedMoves(FixedSizeList<CreatureMove> learnedMoves) {
-        if (this.dataType == DataType.CREATURE) this.creature.setLearnedMoves(learnedMoves);
     }
 
     public void changeLearnedMove(int pos, CreatureMove move) {

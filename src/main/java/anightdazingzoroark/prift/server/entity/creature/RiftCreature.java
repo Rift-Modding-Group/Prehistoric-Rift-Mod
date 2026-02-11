@@ -1511,8 +1511,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void removeLearnableMove(int pos) {
         List<CreatureMove> moveList = this.dataManager.get(LEARNABLE_MOVE_LIST);
-        CreatureMove moveToRemove = moveList.get(pos);
-        moveList = moveList.stream().filter(move -> move != moveToRemove).collect(Collectors.toList());
+        moveList.remove(pos);
         this.setLearnableMoves(moveList);
     }
 

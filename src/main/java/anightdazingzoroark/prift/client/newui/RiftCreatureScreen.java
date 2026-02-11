@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.client.newui.widget.CreatureGearModularSlot;
 import anightdazingzoroark.prift.client.newui.widget.CreatureInventoryModularSlot;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
+import anightdazingzoroark.prift.client.newui.widget.SideButton;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
@@ -13,6 +14,9 @@ import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftOpenCreatureScreen;
+import anightdazingzoroark.prift.server.message.RiftOpenPartyScreen;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
@@ -39,6 +43,11 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class RiftCreatureScreen {
+    public static final int inventoryPageNum = 0;
+    public static final int optionsPageNum = 1;
+    public static final int infoPageNum = 2;
+    public static final int movesPageNum = 3;
+
     public static ModularPanel buildCreatureUI(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disable();
 
@@ -79,22 +88,22 @@ public class RiftCreatureScreen {
                         .name("creatureScreenTabColumn")
                         .coverChildren()
                         .leftRel(0f, 4, 1f)
-                        .child(new PageButton(0, tabController)
+                        .child(new PageButton(inventoryPageNum, tabController)
                                 .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
                                 .addTooltipElement(IKey.lang("tametab.inventory"))
                                 .tab(GuiTextures.TAB_LEFT, -1)
                         )
-                        .child(new PageButton(1, tabController)
+                        .child(new PageButton(optionsPageNum, tabController)
                                 .overlay(GuiTextures.GEAR.asIcon().size(24))
                                 .addTooltipElement(IKey.lang("tametab.manage"))
                                 .tab(GuiTextures.TAB_LEFT, 0)
                         )
-                        .child(new PageButton(2, tabController)
+                        .child(new PageButton(infoPageNum, tabController)
                                 .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
                                 .addTooltipElement(IKey.lang("tametab.info"))
                                 .tab(GuiTextures.TAB_LEFT, 0)
                         )
-                        .child(new PageButton(3, tabController)
+                        .child(new PageButton(movesPageNum, tabController)
                                 .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
                                 .addTooltipElement(IKey.lang("tametab.moves"))
                                 .tab(GuiTextures.TAB_LEFT, 0)
@@ -106,6 +115,20 @@ public class RiftCreatureScreen {
                         .addPage(creatureSettingsPage(data, syncManager))
                         .addPage(creatureInfoPage(data, syncManager, settings))
                         .addPage(creatureMovesPage(data, syncManager, settings))
+                        .initialPage(data.getPageToOpenTo())
+                )
+                .childIf(data.getOpenedFromParty(), () -> new Column()
+                        .coverChildren()
+                        .rightRel(0f, 4, 1f)
+                        .child(new SideButton()
+                                .overlay(RiftUIIcons.BACK.asIcon().size(24))
+                                .onMousePressed(button -> {
+                                    RiftMessages.WRAPPER.sendToServer(new RiftOpenPartyScreen(data.getPlayer()));
+                                    return true;
+                                })
+                                .addTooltipElement(IKey.lang("tametab.return_to_party"))
+                                .tab(GuiTextures.TAB_RIGHT, -1)
+                        )
                 );
     }
 

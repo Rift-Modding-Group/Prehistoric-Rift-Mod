@@ -17,19 +17,22 @@ public class RiftOpenCreatureScreen extends RiftLibMessage<RiftOpenCreatureScree
     private int playerId;
     private int creatureId;
     private NBTTagCompound selectedCreatureInfoNBT;
+    private int pageToOpenTo;
 
     public RiftOpenCreatureScreen() {}
 
-    public RiftOpenCreatureScreen(EntityPlayer player, RiftCreature creature) {
+    public RiftOpenCreatureScreen(EntityPlayer player, RiftCreature creature, int pageToOpenTo) {
         this.playerId = player.getEntityId();
         this.creatureId = creature.getEntityId();
         this.useSelectedCreature = false;
+        this.pageToOpenTo = pageToOpenTo;
     }
 
-    public RiftOpenCreatureScreen(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
+    public RiftOpenCreatureScreen(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, int pageToOpenTo) {
         this.playerId = player.getEntityId();
         this.selectedCreatureInfoNBT = selectedCreatureInfo.getNBT();
         this.useSelectedCreature = true;
+        this.pageToOpenTo = pageToOpenTo;
     }
 
     @Override
@@ -38,6 +41,7 @@ public class RiftOpenCreatureScreen extends RiftLibMessage<RiftOpenCreatureScree
         this.playerId = byteBuf.readInt();
         this.creatureId = byteBuf.readInt();
         this.selectedCreatureInfoNBT = ByteBufUtils.readTag(byteBuf);
+        this.pageToOpenTo = byteBuf.readInt();
     }
 
     @Override
@@ -46,6 +50,7 @@ public class RiftOpenCreatureScreen extends RiftLibMessage<RiftOpenCreatureScree
         byteBuf.writeInt(this.playerId);
         byteBuf.writeInt(this.creatureId);
         ByteBufUtils.writeTag(byteBuf, this.selectedCreatureInfoNBT);
+        byteBuf.writeInt(this.pageToOpenTo);
     }
 
     @Override
@@ -53,11 +58,11 @@ public class RiftOpenCreatureScreen extends RiftLibMessage<RiftOpenCreatureScree
         EntityPlayer player = (EntityPlayer) minecraftServer.getEntityWorld().getEntityByID(message.playerId);
         if (message.useSelectedCreature) {
             SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
-            CreatureGuiFactory.INSTANCE.open(player, selectedCreatureInfo);
+            CreatureGuiFactory.openToPage(message.pageToOpenTo).open(player, selectedCreatureInfo);
         }
         else {
             RiftCreature creature = (RiftCreature) minecraftServer.getEntityWorld().getEntityByID(message.creatureId);
-            CreatureGuiFactory.INSTANCE.open(player, creature);
+            CreatureGuiFactory.openToPage(message.pageToOpenTo).open(player, creature);
         }
     }
 
