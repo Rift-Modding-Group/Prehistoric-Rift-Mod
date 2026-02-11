@@ -1,8 +1,6 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -22,6 +20,15 @@ public class SelectedMoveInfo {
         this.movePos = nbtTagCompound.getInteger("Position");
     }
 
+    public CreatureMove applyMove(CreatureGuiData guiData) {
+        if (this.moveType == SelectedMoveType.LEARNT) return guiData.getLearnedMoves().get(this.movePos);
+        else if (this.moveType == SelectedMoveType.LEARNABLE) {
+            if (this.movePos < 0) return null;
+            return guiData.getLearnableMoves().get(this.movePos);
+        }
+        return null;
+    }
+
     //this is mainly for use in packets
     public NBTTagCompound getNBT() {
         NBTTagCompound toReturn = new NBTTagCompound();
@@ -39,11 +46,13 @@ public class SelectedMoveInfo {
         private SelectedMoveInfo moveOne;
         private SelectedMoveInfo moveTwo;
 
+        //these are for updating move swap related sections
+        private boolean canUpdateLearntMoves;
+        private boolean canUpdateLearnableMoves;
+
         public SwapInfo() {}
 
         public SwapInfo(NBTTagCompound nbtTagCompound) {
-            if (nbtTagCompound == null) return;
-
             if (nbtTagCompound.hasKey("MoveOne")) {
                 this.moveOne = new SelectedMoveInfo(nbtTagCompound.getCompoundTag("MoveOne"));
             }
@@ -63,7 +72,15 @@ public class SelectedMoveInfo {
             }
             //second step of swap
             else if (this.moveOne != null && this.moveTwo == null) {
+                if (this.moveOne.moveType == SelectedMoveType.LEARNABLE
+                        && moveForSwap.moveType == SelectedMoveType.LEARNABLE
+                        && moveForSwap.movePos < 0
+                ) {
+                    System.out.println("cannot swap");
+                    return;
+                }
                 this.moveTwo = moveForSwap;
+                System.out.println("can swap");
             }
         }
 
@@ -71,11 +88,26 @@ public class SelectedMoveInfo {
             return this.moveOne != null && this.moveTwo == null;
         }
 
-        public SwapResult applySwap(CreatureGuiData data) {
-            if (!this.canSwap()) return new SwapResult(false, false);
+        public boolean getCanUpdate(SelectedMoveType section) {
+            if (section == SelectedMoveType.LEARNT) {
+                boolean toReturn = this.canUpdateLearntMoves;
+                this.canUpdateLearntMoves = false;
+                return toReturn;
+            }
+            else if (section == SelectedMoveType.LEARNABLE) {
+                boolean toReturn = this.canUpdateLearnableMoves;
+                this.canUpdateLearnableMoves = false;
+                return toReturn;
+            }
+            return false;
+        }
+
+        public void applySwap(CreatureGuiData data) {
+            if (!this.canSwap()) return;
 
             boolean swapSuccessful = false;
-            boolean selfSelect = false;
+            boolean tempCanUpdateLearntMoves = false;
+            boolean tempCanUpdateLearnableMoves = false;
 
             //within learnt moves swap
             if (this.moveOne.moveType == SelectedMoveType.LEARNT && this.moveTwo.moveType == SelectedMoveType.LEARNT) {
@@ -83,6 +115,7 @@ public class SelectedMoveInfo {
                 data.changeLearnedMove(this.moveOne.movePos, data.getLearnedMoves().get(this.moveTwo.movePos));
                 data.changeLearnedMove(this.moveTwo.movePos, moveToSwap);
                 swapSuccessful = true;
+                tempCanUpdateLearntMoves = true;
             }
             //learnable move x learnt move swap
             else if (this.moveOne.moveType == SelectedMoveType.LEARNABLE && this.moveTwo.moveType == SelectedMoveType.LEARNT) {
@@ -97,6 +130,8 @@ public class SelectedMoveInfo {
                     data.changeLearnedMove(this.moveTwo.movePos, moveToSwap);
                 }
                 swapSuccessful = true;
+                tempCanUpdateLearntMoves = true;
+                tempCanUpdateLearnableMoves = true;
             }
             //learnt move x learnable move swap
             else if (this.moveOne.moveType == SelectedMoveType.LEARNT && this.moveTwo.moveType == SelectedMoveType.LEARNABLE) {
@@ -110,22 +145,24 @@ public class SelectedMoveInfo {
                     data.addLearnableMove(moveToSwap);
                 }
                 swapSuccessful = true;
+                tempCanUpdateLearntMoves = true;
+                tempCanUpdateLearnableMoves = true;
             }
             //learnable move x learnable move, no swap will happen by this point, instead, moveTwo will be cleared
             //at put in moveOne
             else if (this.moveOne.moveType == SelectedMoveType.LEARNABLE && this.moveTwo.moveType == SelectedMoveType.LEARNABLE) {
-                if (this.moveOne.movePos == this.moveTwo.movePos) {
-                    this.clear();
-                    selfSelect = true;
-                }
+                if (this.moveOne.movePos == this.moveTwo.movePos) this.clear();
                 else {
                     this.moveOne = this.moveTwo;
                     this.moveTwo = null;
                 }
             }
 
-            if (swapSuccessful) this.clear();
-            return new SwapResult(swapSuccessful, selfSelect);
+            if (swapSuccessful) {
+                this.clear();
+                this.canUpdateLearntMoves = tempCanUpdateLearntMoves;
+                this.canUpdateLearnableMoves = tempCanUpdateLearnableMoves;
+            }
         }
 
         public boolean canSwap() {
@@ -148,16 +185,6 @@ public class SelectedMoveInfo {
             if (this.moveTwo != null) toReturn.setTag("MoveTwo", this.moveTwo.getNBT());
 
             return toReturn;
-        }
-    }
-
-    public static class SwapResult {
-        public final boolean swapSuccessful;
-        public final boolean selfSelect;
-
-        public SwapResult(boolean swapSuccessful, boolean selfSelect) {
-            this.swapSuccessful = swapSuccessful;
-            this.selfSelect = selfSelect;
         }
     }
 }

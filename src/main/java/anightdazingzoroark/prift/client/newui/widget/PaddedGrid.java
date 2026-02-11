@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.newui.custom;
+package anightdazingzoroark.prift.client.newui.widget;
 
 import com.cleanroommc.modularui.api.layout.ILayoutWidget;
 import com.cleanroommc.modularui.api.widget.IParentWidget;

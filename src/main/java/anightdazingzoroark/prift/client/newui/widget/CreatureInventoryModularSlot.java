@@ -1,7 +1,6 @@
-package anightdazingzoroark.prift.client.newui.custom;
+package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;

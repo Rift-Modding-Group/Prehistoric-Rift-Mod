@@ -1,8 +1,7 @@
 package anightdazingzoroark.prift.client.newui;
 
-import anightdazingzoroark.prift.client.newui.custom.PaddedGrid;
-import anightdazingzoroark.prift.client.newui.custom.PartyMemberButtonPopupWidget;
-import anightdazingzoroark.prift.client.newui.custom.PartyMemberButtonWidget;
+import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
+import anightdazingzoroark.prift.client.newui.widget.PartyMemberButtonWidget;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
@@ -38,7 +37,7 @@ public class RiftPartyScreen {
                         .child(new ParentWidget<>().coverChildrenHeight().widthRel(1f)
                                 .child(IKey.lang("journal.party_label.party").asWidget().align(Alignment.CenterLeft))
                                 .child(new ToggleButton().overlay().overlay(GuiTextures.REVERSE.asIcon().size(12))
-                                        .size(12).align(Alignment.TopRight)
+                                        .size(12).right(0)
                                 )
                         )
                         .child(new PaddedGrid().coverChildren()

@@ -1,42 +1,36 @@
 package anightdazingzoroark.prift.client.newui;
 
-import anightdazingzoroark.prift.client.newui.custom.MoveSwapInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.sync.MoveSwapInfoSyncValue;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
+import anightdazingzoroark.prift.client.newui.sync.SelectedMoveInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.widget.MoveListWidget;
 import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.screen.UISettings;
-import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.sync.BooleanSyncValue;
-import com.cleanroommc.modularui.value.sync.IntSyncValue;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widget.ParentWidget;
-import com.cleanroommc.modularui.widgets.ButtonWidget;
-import com.cleanroommc.modularui.widgets.ListWidget;
 import com.cleanroommc.modularui.widgets.ToggleButton;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Row;
 import net.minecraft.client.resources.I18n;
 
-import java.util.List;
-
 public class RiftCreatureMovesPanel {
-    public static final int[] size = {220, 161};
+    public static final int[] size = {220, 164};
 
     public static ParentWidget<?> build(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         //selected move
-        IntSyncValue selectedMoveValue = new IntSyncValue(() -> data.currentSelectedMoveUI, value -> data.currentSelectedMoveUI = value);
+        SelectedMoveInfoSyncValue selectedMoveValue = new SelectedMoveInfoSyncValue(
+                () -> data.selectedMoveInfoUI,
+                value -> data.selectedMoveInfoUI = value
+        );
         syncManager.syncValue("selectedMove", selectedMoveValue);
-
-        //side in which selected move was from
-        BooleanSyncValue selectedMoveFromRight = new BooleanSyncValue(() -> data.selectedMoveFromRightUI, value -> data.selectedMoveFromRightUI = value);
-        syncManager.syncValue("selectedMoveFromRight", selectedMoveFromRight);
 
         //move switching
         BooleanSyncValue isMoveSwitching = new BooleanSyncValue(() -> data.isMoveSwitchingUI, value -> data.isMoveSwitchingUI = value);
@@ -53,178 +47,74 @@ public class RiftCreatureMovesPanel {
                 .child(new Row().coverChildren().childPadding(5)
                         //left side is the creature's current moves
                         .child(new ParentWidget<>().coverChildrenWidth().height(147)
-                                .child(currentMovesSide(data, selectedMoveValue, selectedMoveFromRight, isMoveSwitching, moveSwapInfo))
+                                .child(currentMovesSide(data, selectedMoveValue, isMoveSwitching, moveSwapInfo))
                         )
                         //separator line
-                        .child(new Rectangle().setColor(0xFF000000).asWidget().size(1, 108))
+                        .child(new Rectangle().color(0xFF000000).asWidget().size(1, 108))
                         //right side is info
                         .child(new ParentWidget<>().coverChildrenWidth().height(147)
-                                .child(learnableMovesSide(data, selectedMoveValue, selectedMoveFromRight, isMoveSwitching, moveSwapInfo))
+                                .child(learnableMovesSide(data, selectedMoveValue, isMoveSwitching, moveSwapInfo))
                         )
                 );
     }
 
-    private static Flow currentMovesSide(CreatureGuiData data, IntSyncValue selectedMoveValue,
-                                         BooleanSyncValue selectedMoveFromRight, BooleanSyncValue isMoveSwitching,
+    private static Flow currentMovesSide(CreatureGuiData data, SelectedMoveInfoSyncValue selectedMoveValue, BooleanSyncValue isMoveSwitching,
                                          MoveSwapInfoSyncValue moveSwapInfo) {
-        return new Column().debugName("leftSide")
+        return new Column().name("leftSide")
                 .childPadding(5).coverChildren()
                 //header
                 .child(new ParentWidget<>().width(96).coverChildrenHeight()
-                        .child(IKey.lang("tamepanel.current_moves", data.getName(false)).asWidget().scale(0.75f).align(Alignment.CenterLeft))
+                        .child(IKey.lang("tamepanel.current_moves", data.getName(false)).asWidget().scale(0.75f).left(0))
                 )
                 //current moves
-                .child(new ParentWidget<>().size(80, 70)
-                        .child(new Column().coverChildren().childPadding(5)
-                                .onUpdateListener(widget -> {
-                                    widget.getChildren().clear();
-
-                                    //add current creature moves
-                                    FixedSizeList<CreatureMove> creatureMoveList = data.getLearnedMoves();
-                                    for (int i = 0; i < creatureMoveList.size(); i++) {
-                                        CreatureMove creatureMove = creatureMoveList.get(i);
-                                        int finalI = i;
-
-                                        widget.child(new ToggleButton().size(80, 20)
-                                                .value(new BoolValue.Dynamic(
-                                                        () -> selectedMoveValue.getIntValue() == finalI && !selectedMoveFromRight.getBoolValue(),
-                                                        value -> {
-                                                            //set selected move
-                                                            if (creatureMove != null || (isMoveSwitching.getBoolValue() && moveSwapInfo.getValue().canChooseNextMove())) {
-                                                                selectedMoveValue.setIntValue(finalI);
-                                                                selectedMoveFromRight.setBoolValue(false);
-                                                            }
-
-                                                            if (isMoveSwitching.getBoolValue() && (creatureMove != null || moveSwapInfo.getValue().canChooseNextMove())) {
-                                                                moveSwapInfo.getValue().setMove(
-                                                                        new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNT, finalI)
-                                                                );
-                                                                if (!moveSwapInfo.getValue().canSwap()) return;
-                                                                moveSwapInfo.getValue().applySwap(data);
-                                                                selectedMoveValue.setIntValue(-1);
-                                                            }
-                                                        })
-                                                )
-                                                .overlay(IKey.dynamic(() -> {
-                                                    if (creatureMove != null) return creatureMove.getTranslatedName();
-                                                    else return I18n.format("creature_move.no_move");
-                                                }))
-                                        );
-                                    }
-                                })
-                        )
-                )
+                .child(new MoveListWidget(data, selectedMoveValue, SelectedMoveInfo.SelectedMoveType.LEARNT, moveSwapInfo, isMoveSwitching).size(90, 70))
                 //add box where info about selected move will be placed
                 .child(new ParentWidget<>().size(96, 60)
-                .child(new Rectangle().setColor(0xFF000000).setCornerRadius(5).asWidget().size(96, 60))
-                .child(new Rectangle().setColor(0xFF808080).setCornerRadius(5).asWidget().size(94, 58).align(Alignment.Center))
-                .child(new ParentWidget<>().size(90, 54).align(Alignment.Center)
+                .child(new Rectangle().color(0xFF000000).cornerRadius(5).asWidget().size(96, 60))
+                .child(new Rectangle().color(0xFF808080).cornerRadius(5).asWidget().size(94, 58).center())
+                .child(new ParentWidget<>().size(90, 54).center()
                         .child(IKey.dynamic(() -> {
-                            FixedSizeList<CreatureMove> creatureMoveList = data.getLearnedMoves();
-
-                            if (selectedMoveValue.getIntValue() < 0) {
+                            if (selectedMoveValue.getValue() != null) {
+                                CreatureMove selectedMove = selectedMoveValue.getValue().applyMove(data);
+                                if (selectedMove != null) return selectedMove.getTranslatedDescription();
+                                return I18n.format("creature_move.none_selected_switch.description");
+                            }
+                            else {
                                 if (isMoveSwitching.getBoolValue()) {
                                     return I18n.format("creature_move.none_selected_switch.description");
                                 }
                                 return I18n.format("creature_move.none_selected.description");
                             }
-                            else {
-                                if (selectedMoveFromRight.getBoolValue()) {
-                                    return data.getLearnableMoves().get(selectedMoveValue.getIntValue()).getTranslatedDescription();
-                                }
-                                return creatureMoveList.get(selectedMoveValue.getIntValue()).getTranslatedDescription();
-                            }
-                        }).asWidget().scale(0.75f).align(Alignment.TopLeft))
+                        }).asWidget().scale(0.75f).left(0))
                 )
         );
     }
 
-    private static Flow learnableMovesSide(CreatureGuiData data, IntSyncValue selectedMoveValue,
-                                           BooleanSyncValue selectedMoveFromRight, BooleanSyncValue isMoveSwitching,
+    private static Flow learnableMovesSide(CreatureGuiData data, SelectedMoveInfoSyncValue selectedMoveValue, BooleanSyncValue isMoveSwitching,
                                            MoveSwapInfoSyncValue moveSwapInfo) {
-        Flow movesColumn = new Column().coverChildrenWidth()
-                .childPadding(3).align(Alignment.Center)
-                .onUpdateListener(widget -> {
-                    widget.getChildren().clear();
-
-                    //add buttons for moves
-                    List<CreatureMove> creatureMoveList = data.getLearnableMoves();
-                    for (int i = 0; i < creatureMoveList.size(); i++) {
-                        CreatureMove creatureMove = creatureMoveList.get(i);
-                        int finalI = i;
-
-                        widget.child(finalI, new ToggleButton().size(80, 20)
-                                .value(new BoolValue.Dynamic(
-                                        () -> selectedMoveValue.getIntValue() == finalI && selectedMoveFromRight.getBoolValue(),
-                                        value -> {
-                                            selectedMoveValue.setIntValue(finalI);
-                                            selectedMoveFromRight.setBoolValue(true);
-
-                                            if (moveSwapInfo.getValue() == null || !isMoveSwitching.getBoolValue()) return;
-                                            moveSwapInfo.getValue().setMove(
-                                                    new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, finalI)
-                                            );
-                                            if (moveSwapInfo.getValue().canSwap()) {
-                                                SelectedMoveInfo.SwapResult swapResult = moveSwapInfo.getValue().applySwap(data);
-                                                if (!swapResult.swapSuccessful && swapResult.selfSelect) selectedMoveValue.setIntValue(-1);
-                                            }
-                                        })
-                                )
-                                .overlay(IKey.str(creatureMove.getTranslatedName()))
-                        );
-                    }
-
-                    //add additional button that represents no move when in move swap mode
-                    if (isMoveSwitching.getBoolValue()) {
-                        widget.child(creatureMoveList.size(), new ButtonWidget<>().size(80, 20)
-                                .onMousePressed(button -> {
-                                    selectedMoveValue.setIntValue(-1);
-                                    selectedMoveFromRight.setBoolValue(true);
-
-                                    if (moveSwapInfo.getValue() == null) return true;
-                                    moveSwapInfo.getValue().setMove(
-                                            new SelectedMoveInfo(SelectedMoveInfo.SelectedMoveType.LEARNABLE, -1)
-                                    );
-                                    moveSwapInfo.getValue().applySwap(data);
-                                    return true;
-                                })
-                                .overlay(IKey.lang("creature_move.no_move"))
-                        );
-                    }
-
-                    //change height based on number of moves
-                    if (creatureMoveList.size() <= 5) widget.height(120);
-                    else widget.coverChildrenHeight();
-                });
-
-        return new Column().debugName("rightSide")
+        return new Column().name("rightSide")
                 .childPadding(5).coverChildren()
                 .child(new ParentWidget<>().width(96).coverChildrenHeight()
                         //header
-                        .child(IKey.lang("tamepanel.available_moves").asWidget().scale(0.75f).align(Alignment.CenterLeft))
+                        .child(IKey.lang("tamepanel.available_moves").asWidget().scale(0.75f).left(0))
                         //swap moves buttom
                         .child(new ToggleButton().overlay(GuiTextures.REVERSE.asIcon().size(12)).size(12)
                                 .value(new BoolValue.Dynamic(
                                         isMoveSwitching::getBoolValue,
                                         value -> {
                                             isMoveSwitching.setBoolValue(value);
-                                            selectedMoveValue.setIntValue(-1);
+                                            selectedMoveValue.setValue(null);
                                             moveSwapInfo.getValue().clear();
                                         })
-                                ).align(Alignment.CenterRight)
+                                ).right(0)
                         )
                 )
                 .child(new ParentWidget<>().coverChildrenWidth().height(130)
                         //background
-                        .child(new Rectangle().setColor(0xFF000000).setCornerRadius(5).asWidget().size(96, 130))
-                        .child(new Rectangle().setColor(0xFF808080).setCornerRadius(5).asWidget().size(94, 128).align(Alignment.Center))
-                        //moves
-                        .child(new ParentWidget<>().size(92, 120).align(Alignment.Center)
-                                .childIf(data.getLearnableMoves().size() <= 5, movesColumn)
-                                .childIf(data.getLearnableMoves().size() > 5, new ListWidget<>()
-                                        .size(92,120).child(movesColumn)
-                                )
-                        )
+                        .child(new Rectangle().color(0xFF000000).cornerRadius(5).asWidget().size(96, 130))
+                        .child(new Rectangle().color(0xFF808080).cornerRadius(5).asWidget().size(94, 128).center())
+                                .child(new MoveListWidget(data, selectedMoveValue, SelectedMoveInfo.SelectedMoveType.LEARNABLE, moveSwapInfo, isMoveSwitching)
+                                        .size(90, 120).center())
                 );
     }
 }

@@ -1,6 +1,5 @@
-package anightdazingzoroark.prift.client.newui.custom;
+package anightdazingzoroark.prift.client.newui.widget;
 
-import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
 import com.cleanroommc.modularui.theme.WidgetThemeEntry;
@@ -10,8 +9,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL11;
 
 public class EntityWidget<T extends EntityWidget<T>> extends Widget<T> {

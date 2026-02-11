@@ -26,9 +26,8 @@ public class CreatureGuiData extends GuiData {
     private SelectedCreatureInfo selectedCreatureInfo;
 
     //ui related stuff
-    public int currentSelectedMoveUI = -1;
-    public boolean selectedMoveFromRightUI = false;
     public boolean isMoveSwitchingUI = false;
+    public SelectedMoveInfo selectedMoveInfoUI;
     public SelectedMoveInfo.SwapInfo moveSwapInfoUI = new SelectedMoveInfo.SwapInfo();
 
     public CreatureGuiData(EntityPlayer player, RiftCreature creature) {
@@ -331,6 +330,10 @@ public class CreatureGuiData extends GuiData {
             return creatureNBT.getLearnedMoves();
         }
         return new FixedSizeList<>(3);
+    }
+
+    public void setLearnedMoves(FixedSizeList<CreatureMove> learnedMoves) {
+        if (this.dataType == DataType.CREATURE) this.creature.setLearnedMoves(learnedMoves);
     }
 
     public void changeLearnedMove(int pos, CreatureMove move) {

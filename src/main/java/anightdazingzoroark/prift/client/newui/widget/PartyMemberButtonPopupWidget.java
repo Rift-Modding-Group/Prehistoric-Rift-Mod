@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.newui.custom;
+package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import com.cleanroommc.modularui.api.drawable.IKey;

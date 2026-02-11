@@ -183,6 +183,7 @@ public class RiftCreatureControls {
 
     private void showMoveThreeControls(RiftCreature creature, int width, int height) {
         GameSettings settings = Minecraft.getMinecraft().gameSettings;
+        if (creature.getLearnedMoves().get(2) == null) return;
 
         //show middle mouse button icon
         float alpha = ((creature.getMoveThreeCooldown() > 0) ||

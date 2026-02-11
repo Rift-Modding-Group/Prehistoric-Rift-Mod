@@ -1,8 +1,8 @@
 package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.ClientProxy;
-import anightdazingzoroark.prift.client.newui.custom.CreatureGearModularSlot;
-import anightdazingzoroark.prift.client.newui.custom.CreatureInventoryModularSlot;
+import anightdazingzoroark.prift.client.newui.widget.CreatureGearModularSlot;
+import anightdazingzoroark.prift.client.newui.widget.CreatureInventoryModularSlot;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -34,16 +34,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.items.ItemStackHandler;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class RiftCreatureScreen {
     public static ModularPanel buildCreatureUI(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
-        settings.getRecipeViewerSettings().disableRecipeViewer();
+        settings.getRecipeViewerSettings().disable();
 
         //tab related stuff
         PagedWidget.Controller tabController = new PagedWidget.Controller();
@@ -78,67 +75,38 @@ public class RiftCreatureScreen {
                         };
                     }
                 })
-                .child(createPageButtons(data, tabController))
-                .child(createPages(data, syncManager, settings, tabController));
-    }
-
-    //this is temporary
-    private static Flow createPageButtons(CreatureGuiData data, PagedWidget.Controller tabController) {
-        /*
-        AtomicInteger pageNum = new AtomicInteger();
-        Function<Boolean, Integer> pageCounter = (dataCheck) -> {
-            if (dataCheck) {
-                int toReturn = pageNum.get();
-                pageNum.addAndGet(1);
-                return toReturn;
-            }
-            return pageNum.get();
-        };
-        boolean openedFromCreature = data.dataType == CreatureGuiData.DataType.CREATURE;
-         */
-
-        return new Column()
-                .debugName("creatureScreenTabColumn")
-                .coverChildren()
-                .leftRel(0f, 4, 1f)
-                .child(new PageButton(0, tabController)
-                        .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
-                        .addTooltipElement(IKey.lang("tametab.inventory"))
-                        .tab(GuiTextures.TAB_LEFT, -1)
+                .child(new Column()
+                        .name("creatureScreenTabColumn")
+                        .coverChildren()
+                        .leftRel(0f, 4, 1f)
+                        .child(new PageButton(0, tabController)
+                                .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
+                                .addTooltipElement(IKey.lang("tametab.inventory"))
+                                .tab(GuiTextures.TAB_LEFT, -1)
+                        )
+                        .child(new PageButton(1, tabController)
+                                .overlay(GuiTextures.GEAR.asIcon().size(24))
+                                .addTooltipElement(IKey.lang("tametab.manage"))
+                                .tab(GuiTextures.TAB_LEFT, 0)
+                        )
+                        .child(new PageButton(2, tabController)
+                                .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
+                                .addTooltipElement(IKey.lang("tametab.info"))
+                                .tab(GuiTextures.TAB_LEFT, 0)
+                        )
+                        .child(new PageButton(3, tabController)
+                                .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
+                                .addTooltipElement(IKey.lang("tametab.moves"))
+                                .tab(GuiTextures.TAB_LEFT, 0)
+                        )
                 )
-                .child(new PageButton(1, tabController)
-                        .overlay(GuiTextures.GEAR.asIcon().size(24))
-                        .addTooltipElement(IKey.lang("tametab.manage"))
-                        .tab(GuiTextures.TAB_LEFT, 0)
-                )
-                .child(new PageButton(2, tabController)
-                        .overlay(GuiTextures.EXCLAMATION.asIcon().size(24))
-                        .addTooltipElement(IKey.lang("tametab.info"))
-                        .tab(GuiTextures.TAB_LEFT, 0)
-                )
-                .child(new PageButton(3, tabController)
-                        .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
-                        .addTooltipElement(IKey.lang("tametab.moves"))
-                        .tab(GuiTextures.TAB_LEFT, 0)
+                .child(new PagedWidget<>().name("pagedWidget")
+                        .controller(tabController).widthRel(1f).coverChildrenHeight()
+                        .addPage(creatureInventoryPage(data, syncManager))
+                        .addPage(creatureSettingsPage(data, syncManager))
+                        .addPage(creatureInfoPage(data, syncManager, settings))
+                        .addPage(creatureMovesPage(data, syncManager, settings))
                 );
-    }
-
-    //this too is temporary
-    private static PagedWidget<?> createPages(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings, PagedWidget.Controller tabController) {
-        //boolean openedFromCreature = data.dataType == CreatureGuiData.DataType.CREATURE;
-        PagedWidget<?> toReturn =  new PagedWidget<>().debugName("pagedWidget")
-                .controller(tabController).widthRel(1f).coverChildrenHeight();
-
-        //page for creature inventory
-        toReturn.addPage(creatureInventoryPage(data, syncManager));
-        //page for creature settings
-        toReturn.addPage(creatureSettingsPage(data, syncManager));
-        //page for creature info
-        toReturn.addPage(creatureInfoPage(data, syncManager, settings));
-        //page for creature moves
-        toReturn.addPage(creatureMovesPage(data, syncManager, settings));
-
-        return toReturn;
     }
 
     private static ParentWidget<?> creatureInventoryPage(CreatureGuiData data, PanelSyncManager syncManager) {
@@ -210,19 +178,19 @@ public class RiftCreatureScreen {
         creatureInvBuilder.matrix(invMatrix);
 
         //continue w making the page
-        return new ParentWidget<>().debugName("inventoryPage")
+        return new ParentWidget<>().name("inventoryPage")
                 .padding(7, 7)
                 .child(new Column().coverChildrenHeight().childPadding(5)
                         //creature gear
-                        .childIf(creatureHasGear, new Column()
+                        .childIf(creatureHasGear, () -> new Column()
                                 .coverChildren()
                                 //header
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
-                                        .child(IKey.str(creatureGearName).asWidget().align(Alignment.CenterLeft))
+                                        .child(IKey.str(creatureGearName).asWidget().left(0))
                                 )
                                 //gear contents
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
-                                        .child(creatureGearBuilder.build().align(Alignment.CenterLeft).debugName("creature_gear"))
+                                        .child(creatureGearBuilder.build().left(0).name("creature_gear"))
                                 )
                         )
                         //creature inventory
@@ -230,22 +198,22 @@ public class RiftCreatureScreen {
                                 .coverChildren()
                                 //header
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
-                                        .child(IKey.str(creatureInvName).asWidget().align(Alignment.CenterLeft))
+                                        .child(IKey.str(creatureInvName).asWidget().left(0))
                                 )
                                 //if inventory is bigger than 27 slots, the inventory widget is to be a scrollable list
-                                .childIf(matrixHeight > 3, new ListWidget<>()
+                                .childIf(matrixHeight > 3, () -> new ListWidget<>()
                                         .size(168, 54)
                                         .horizontalCenter()
-                                        .child(creatureInvBuilder.build().debugName("creature_inventory"))
+                                        .child(creatureInvBuilder.build().name("creature_inventory"))
                                 )
                                 //otherwise, its just the inventory itself
-                                .childIf(matrixHeight <= 3, creatureInvBuilder.build().debugName("creature_inventory"))
+                                .childIf(matrixHeight <= 3, () -> creatureInvBuilder.build().name("creature_inventory"))
                         )
                         //player inventory
                         .child(new Column()
                                 .coverChildren()
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
-                                        .child(IKey.str(playerName).asWidget().align(Alignment.CenterLeft))
+                                        .child(IKey.str(playerName).asWidget().left(0))
                                 )
                                 .child(SlotGroupWidget.playerInventory(false))
                         )
@@ -270,20 +238,19 @@ public class RiftCreatureScreen {
 
         //final return value
         return new ParentWidget<>()
-                .debugName("settingsPage")
+                .name("settingsPage")
                 .padding(7, 7)
                 .child(new Column()
                         .childPadding(5)
                         .child(new ParentWidget<>()
-                                .debugName("top")
+                                .name("top")
                                 .widthRel(1f)
                                 .coverChildrenHeight()
                                 .child(new Column().coverChildren()
                                         .childPadding(2)
                                         .child(new Row()
-                                                .debugName("sittingRow")
+                                                .name("sittingRow")
                                                 .coverChildrenHeight()
-                                                .crossAxisAlignment(Alignment.CrossAxis.CENTER)
                                                 .childPadding(2)
                                                 .child(new CycleButtonWidget()
                                                         .value(new BoolValue.Dynamic(
@@ -305,9 +272,9 @@ public class RiftCreatureScreen {
                                         )
                                         //if creature has turret mode and is at base, add option
                                         .childIf(data.canEnterTurretMode()
-                                                && data.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE, new Row()
+                                                && data.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE,
+                                                () -> new Row()
                                                 .coverChildrenHeight()
-                                                .crossAxisAlignment(Alignment.CrossAxis.CENTER)
                                                 .childPadding(2)
                                                 .child(new CycleButtonWidget()
                                                         .value(new BoolValue.Dynamic(
@@ -325,11 +292,11 @@ public class RiftCreatureScreen {
                                 )
                         )
                         .child(new ParentWidget<>()
-                                .debugName("bottom")
+                                .name("bottom")
                                 .widthRel(1f)
                                 .coverChildrenHeight()
                                 //if there's an options button section, there's the widget with the options
-                                .childIf(hasOptionsButtons, new ParentWidget<>()
+                                .childIf(hasOptionsButtons, () -> new ParentWidget<>()
                                         .onUpdateListener(widget -> {
                                             if (turretModeValue.getBoolValue()) {
                                                 tryAddChild(widget, turretTargetingOptions);
@@ -340,13 +307,13 @@ public class RiftCreatureScreen {
                                                 tryRemoveChild(widget, turretTargetingOptions);
                                             }
                                         })
-                                        .debugName("creatureBehaviorOrTurretTargeting")
+                                        .name("creatureBehaviorOrTurretTargeting")
                                         .coverChildren()
-                                        .align(Alignment.TopLeft)
+                                        .left(0)
                                 )
-                                .childIf(hasOptionsButtons, creatureOptionsGroup(data, syncManager).align(Alignment.TopRight))
+                                .childIf(hasOptionsButtons, () -> creatureOptionsGroup(data, syncManager).align(Alignment.TopRight))
                                 //if theres no options button section, its just the widget
-                                .childIf(!hasOptionsButtons, new ParentWidget<>()
+                                .childIf(!hasOptionsButtons, () -> new ParentWidget<>()
                                         .onUpdateListener(widget -> {
                                             if (turretModeValue.getBoolValue()) {
                                                 tryAddChild(widget, turretTargetingOptions);
@@ -357,9 +324,8 @@ public class RiftCreatureScreen {
                                                 tryRemoveChild(widget, turretTargetingOptions);
                                             }
                                         })
-                                        .debugName("creatureBehaviorOrTurretTargeting")
+                                        .name("creatureBehaviorOrTurretTargeting")
                                         .coverChildren()
-                                        .align(Alignment.TopCenter)
                                 )
                         )
                         .coverChildrenHeight()
@@ -496,11 +462,11 @@ public class RiftCreatureScreen {
     }
 
     private static ParentWidget<?> creatureInfoPage(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
-        return RiftCreatureInfoPanel.build(data, syncManager, settings).debugName("infoPage");
+        return RiftCreatureInfoPanel.build(data, syncManager, settings).name("infoPage");
     }
 
     private static ParentWidget<?> creatureMovesPage(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
-        return RiftCreatureMovesPanel.build(data, syncManager, settings).debugName("movesPage");
+        return RiftCreatureMovesPanel.build(data, syncManager, settings).name("movesPage");
     }
 
     private static void tryAddChild(ParentWidget<?> parentWidget, IWidget childToAdd) {

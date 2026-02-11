@@ -1,18 +1,14 @@
-package anightdazingzoroark.prift.client.newui.custom;
+package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
-import com.cleanroommc.modularui.value.sync.ItemSlotSH;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.function.Consumer;
 
 public class CreatureGearModularSlot extends ModularSlot {
     private final SelectedCreatureInfo selectedCreatureInfo;

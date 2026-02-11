@@ -1469,10 +1469,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void removeLearnedMove(int pos) {
         FixedSizeList<CreatureMove> moveList = this.getLearnedMoves();
-        CreatureMove moveToRemove = moveList.get(pos);
-        List<CreatureMove> filteredList = moveList.getList()
-                .stream().filter(move -> move != moveToRemove).collect(Collectors.toList());
-        this.setLearnedMoves(new FixedSizeList<>(3, filteredList));
+        moveList.remove(pos);
+        this.setLearnedMoves(moveList);
     }
 
     public void setLearnedMoves(FixedSizeList<CreatureMove> values) {
@@ -1527,15 +1525,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     public int getMoveUse(int pos) {
-        switch (pos) {
-            case 0:
-                return this.getMoveOneUse();
-            case 1:
-                return this.getMoveTwoUse();
-            case 2:
-                return this.getMoveThreeUse();
-        }
-        return 0;
+        return switch (pos) {
+            case 0 -> this.getMoveOneUse();
+            case 1 -> this.getMoveTwoUse();
+            case 2 -> this.getMoveThreeUse();
+            default -> 0;
+        };
     }
 
     public int getMoveUse(CreatureMove value) {

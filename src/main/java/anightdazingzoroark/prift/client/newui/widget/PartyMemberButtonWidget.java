@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.newui.custom;
+package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.helper.RiftUtil;
@@ -17,7 +17,6 @@ import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.widget.Widget;
 import com.cleanroommc.modularui.widget.sizer.Area;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 
 public class PartyMemberButtonWidget extends Widget<PartyMemberButtonWidget> implements Interactable {
