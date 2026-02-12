@@ -21,7 +21,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftIncrementControlUse.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftLaunchLWeaponProjectile.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftCanUseMoveTriggerButton.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftDeployPartyMem.class, RiftLibMessageSide.SERVER);
+        WRAPPER.registerMessage(RiftDeployPartyMem.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftManageUtilizingControl.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftOpenInventoryFromMenu.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftOpenWeaponInventory.class, RiftLibMessageSide.SERVER);

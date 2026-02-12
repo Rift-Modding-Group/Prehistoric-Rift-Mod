@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -47,7 +48,7 @@ public class RiftSetCreatureNBTParam extends RiftLibMessage<RiftSetCreatureNBTPa
         SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
         if (player == null) return;
 
-        IPlayerTamedCreatures playerTamedCreatures = PlayerTamedCreaturesHelper.getPlayerTamedCreatures(player);
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
         if (playerTamedCreatures == null) return;
 
         switch (selectedCreatureInfo.selectedPosType) {
@@ -69,7 +70,6 @@ public class RiftSetCreatureNBTParam extends RiftLibMessage<RiftSetCreatureNBTPa
                 break;
             }
         }
-
         //send to client
         RiftMessages.WRAPPER.sendTo(new RiftSetCreatureNBTParam(player, message.param, selectedCreatureInfo), (EntityPlayerMP) player);
     }
@@ -80,7 +80,7 @@ public class RiftSetCreatureNBTParam extends RiftLibMessage<RiftSetCreatureNBTPa
         SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
         if (player == null) return;
 
-        IPlayerTamedCreatures playerTamedCreatures = PlayerTamedCreaturesHelper.getPlayerTamedCreatures(player);
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
         if (playerTamedCreatures == null) return;
 
         switch (selectedCreatureInfo.selectedPosType) {

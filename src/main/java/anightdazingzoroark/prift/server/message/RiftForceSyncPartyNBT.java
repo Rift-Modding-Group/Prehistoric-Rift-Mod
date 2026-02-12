@@ -88,7 +88,7 @@ public class RiftForceSyncPartyNBT extends RiftLibMessage<RiftForceSyncPartyNBT>
     private FixedSizeList<CreatureNBT> setNBTTagListToNBTList(NBTTagList tagList, int size) {
         FixedSizeList<CreatureNBT> compoundList = new FixedSizeList<>(size, new CreatureNBT());
         for (int x = 0; x < tagList.tagCount(); x++) {
-            CreatureNBT tagCompound = new CreatureNBT((NBTTagCompound) tagList.get(x));
+            CreatureNBT tagCompound = new CreatureNBT(tagList.getCompoundTagAt(x));
             compoundList.set(x, tagCompound);
         }
         return compoundList;

@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -8,13 +7,10 @@ import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.UUID;
 
@@ -48,12 +44,14 @@ public class RiftDeployPartyMem extends RiftLibMessage<RiftDeployPartyMem> {
     @Override
     public void executeOnServer(MinecraftServer minecraftServer, RiftDeployPartyMem message, EntityPlayer messagePlayer, MessageContext messageContext) {
         EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
-        SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{message.position});
+        if (player == null) return;
+
         IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        CreatureNBT partyMemNBT = PlayerTamedCreaturesHelper.getCreatureNBT(player, selectedCreatureInfo);
+        if (playerTamedCreatures == null) return;
+
+        CreatureNBT partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.position);
         UUID creatureUUID = partyMemNBT.getUniqueID();
 
-        //if true, deploy the creature
         if (message.deploy) {
             //due to the way creature dismissal works, there's a delay in when a creature gets dismissed
             //so if the deploy button is activated during that small delay, the process must stop and
@@ -65,10 +63,15 @@ public class RiftDeployPartyMem extends RiftLibMessage<RiftDeployPartyMem> {
                 if (creature != null) creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
             }
             else {
+                //update to local partymemnbt
                 partyMemNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                PlayerTamedCreaturesHelper.setCreatureNBT(player, partyMemNBT, selectedCreatureInfo);
-                //playerTamedCreatures.setPartyMemNBT(message.position, partyMemNBT);
-                PlayerTamedCreaturesHelper.forceSyncPartyNBT(player);
+
+                //update on player
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.DEPLOYMENT_TYPE.setValue((byte) PlayerTamedCreatures.DeploymentType.PARTY.ordinal());
+                NBTTagCompound mergedNBT = partyMemNBT.getCreatureNBT();
+                mergedNBT.merge(newNBTParam);
+                CreatureNBT mergedCreatureNBT = new CreatureNBT(mergedNBT);
+                playerTamedCreatures.setPartyMemNBT(message.position, mergedCreatureNBT);
 
                 //create creature
                 RiftCreature creature = partyMemNBT.getCreatureAsNBT(messagePlayer.world);
@@ -86,20 +89,59 @@ public class RiftDeployPartyMem extends RiftLibMessage<RiftDeployPartyMem> {
 
             //if not null, get its nbt, change its nbt to inactive, then remove the creature
             if (partyMember != null) {
-                CreatureNBT partyMemCurrentNBT = new CreatureNBT(partyMember);
-                partyMemCurrentNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                PlayerTamedCreaturesHelper.setCreatureNBT(player, partyMemCurrentNBT, selectedCreatureInfo);
+                //update on player
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.DEPLOYMENT_TYPE.setValue((byte) PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE.ordinal());
+                NBTTagCompound mergedNBT = partyMemNBT.getCreatureNBT();
+                mergedNBT.merge(newNBTParam);
+                CreatureNBT mergedCreatureNBT = new CreatureNBT(mergedNBT);
+                playerTamedCreatures.setPartyMemNBT(message.position, mergedCreatureNBT);
 
-                partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE); //creature and its hitboxes disappear once this is done
+                //creature and its hitboxes disappear once this is done
+                partyMember.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
             }
             //otherwise just change the nbt
             else {
-                partyMemNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-                PlayerTamedCreaturesHelper.setCreatureNBT(player, partyMemNBT, selectedCreatureInfo);
+                NBTTagCompound newNBTParam = CreatureNBTKeyword.DEPLOYMENT_TYPE.setValue((byte) PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE.ordinal());
+                NBTTagCompound mergedNBT = partyMemNBT.getCreatureNBT();
+                mergedNBT.merge(newNBTParam);
+                CreatureNBT mergedCreatureNBT = new CreatureNBT(mergedNBT);
+                playerTamedCreatures.setPartyMemNBT(message.position, mergedCreatureNBT);
             }
         }
+
+        //send to client
+        RiftMessages.WRAPPER.sendTo(new RiftDeployPartyMem(player, message.position, message.deploy), (EntityPlayerMP) player);
     }
 
     @Override
-    public void executeOnClient(Minecraft minecraft, RiftDeployPartyMem riftDeployPartyMem, EntityPlayer entityPlayer, MessageContext messageContext) {}
+    public void executeOnClient(Minecraft minecraft, RiftDeployPartyMem message, EntityPlayer entityPlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) minecraft.world.getEntityByID(message.playerId);
+        if (player == null) return;
+
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+        if (playerTamedCreatures == null) return;
+
+        CreatureNBT partyMemNBT = playerTamedCreatures.getPartyNBT().get(message.position);
+        UUID creatureUUID = partyMemNBT.getUniqueID();
+
+        if (message.deploy) {
+            //update to local partymemnbt
+            partyMemNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+
+            //update on player
+            NBTTagCompound newNBTParam = CreatureNBTKeyword.DEPLOYMENT_TYPE.setValue((byte) PlayerTamedCreatures.DeploymentType.PARTY.ordinal());
+            NBTTagCompound mergedNBT = partyMemNBT.getCreatureNBT();
+            mergedNBT.merge(newNBTParam);
+            CreatureNBT mergedCreatureNBT = new CreatureNBT(mergedNBT);
+            playerTamedCreatures.setPartyMemNBT(message.position, mergedCreatureNBT);
+        }
+        //if false, dismiss creature back to party
+        else {
+            NBTTagCompound newNBTParam = CreatureNBTKeyword.DEPLOYMENT_TYPE.setValue((byte) PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE.ordinal());
+            NBTTagCompound mergedNBT = partyMemNBT.getCreatureNBT();
+            mergedNBT.merge(newNBTParam);
+            CreatureNBT mergedCreatureNBT = new CreatureNBT(mergedNBT);
+            playerTamedCreatures.setPartyMemNBT(message.position, mergedCreatureNBT);
+        }
+    }
 }

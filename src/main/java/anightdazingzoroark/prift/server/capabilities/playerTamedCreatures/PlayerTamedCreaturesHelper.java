@@ -30,27 +30,6 @@ public class PlayerTamedCreaturesHelper {
         return player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
     }
 
-    public static CreatureNBT getCreatureNBT(EntityPlayer player, SelectedCreatureInfo selectionInfo) {
-        if (player == null) return new CreatureNBT();
-        if (player.world.isRemote) {
-            RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
-            if (selectionInfo.getMenuOpenedFrom() == SelectedCreatureInfo.MenuOpenedFrom.BOX) {
-                RiftMessages.WRAPPER.sendToServer(new RiftForceSyncBoxNBT(player));
-            }
-        }
-
-        switch (selectionInfo.selectedPosType) {
-            case PARTY: return getPlayerTamedCreatures(player).getPartyNBT().get(selectionInfo.pos[0]);
-            case BOX: return getPlayerTamedCreatures(player).getBoxNBT().getBoxContents(selectionInfo.pos[0]).get(selectionInfo.pos[1]);
-        }
-        return new CreatureNBT();
-    }
-
-    public static void setCreatureNBT(EntityPlayer player, CreatureNBT newCreatureNBT, SelectedCreatureInfo selectionInfo) {
-        if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftSetCreatureNBT(player, newCreatureNBT, selectionInfo));
-    }
-
     public static void setCreatureNBTParam(EntityPlayer player, NBTTagCompound nbtParam, SelectedCreatureInfo selectionInfo) {
         if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftSetCreatureNBTParam(player, nbtParam, selectionInfo));
@@ -150,6 +129,23 @@ public class PlayerTamedCreaturesHelper {
             if (player.world.getBlockState(player.getPosition()).getMaterial() == Material.WATER) return true;
             else if (player.world.getBlockState(player.getPosition().down()).getMaterial() != Material.AIR
                     && ((RiftWaterCreature)creature).isAmphibious()) return true;
+        }
+        else {
+            if (player.world.getBlockState(player.getPosition().down()).getMaterial() == Material.AIR
+                    && player.isRiding()) return true;
+            else if (player.world.getBlockState(player.getPosition().down()).getMaterial() != Material.AIR) return true;
+        }
+        return false;
+    }
+
+    public static boolean canBeDeployed(EntityPlayer player, CreatureNBT creatureNBT) {
+        if (player == null || creatureNBT == null || creatureNBT.nbtIsEmpty()) return false;
+        //this is temporary, it will be completely replaced when i redo creature registries w something even better :tm:
+        boolean isAquatic = creatureNBT.getCreatureType().getCreature().isAssignableFrom(RiftWaterCreature.class);
+        if (isAquatic) {
+            if (player.world.getBlockState(player.getPosition()).getMaterial() == Material.WATER) return true;
+            else if (player.world.getBlockState(player.getPosition().down()).getMaterial() != Material.AIR
+                    /*&& ((RiftWaterCreature) creature).isAmphibious()*/) return true;
         }
         else {
             if (player.world.getBlockState(player.getPosition().down()).getMaterial() == Material.AIR
@@ -274,29 +270,8 @@ public class PlayerTamedCreaturesHelper {
     }
     //getter stuff for SelectedCreatureInfo class ends here
 
-    //move swapping related stuff starts here
-    public static void swapCreatureMoves(EntityPlayer player, SelectedCreatureInfo selectedCreature, SelectedMoveInfo moveSelected, SelectedMoveInfo moveToSwap) {
-        if (player == null) return;
-    }
-    //move swapping related stuff ends here
-
     public static void setCreatureBoxLastOpenedTime(EntityPlayer player, int time) {
         if (player == null) return;
         RiftMessages.WRAPPER.sendToServer(new RiftCreatureBoxSetLastOpenedTime(player, time));
-    }
-
-    //helper functions for debugging
-    public static List<CreatureMove> getMoveListFromNBT(NBTTagList moveListNBT) {
-        List<CreatureMove> toReturn = new ArrayList<>();
-
-        if (moveListNBT != null && !moveListNBT.isEmpty()) {
-            for (int x = 0; x < moveListNBT.tagCount(); x++) {
-                NBTTagCompound moveNBT = moveListNBT.getCompoundTagAt(x);
-                CreatureMove move = CreatureMove.values()[moveNBT.getInteger("Move")];
-                toReturn.add(move);
-            }
-        }
-
-        return toReturn;
     }
 }

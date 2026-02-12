@@ -43,14 +43,14 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     private CreatureNBT creatureNBT;
 
     public PartyMemberButtonWidget(int indexIn) {
-        super(UIPanelNames.PARTY_DROPDOWN);
+        super(UIPanelNames.PARTY_DROPDOWN+indexIn);
         this.index = indexIn;
         this.requiresClick();
         this.size(80, 48);
         this.openDown();
         this.menuList(list -> {
             list.name("options").width(64).coverChildrenHeight().children(
-                    Arrays.asList(Option.values()), option -> new PartyMemberDropdownOptionWidget(index, option)
+                    Arrays.asList(Option.values()), option -> new PartyMemberDropdownOptionWidget(this, option)
             );
         });
     }
@@ -183,77 +183,132 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     }
 
     private enum Option {
-        INVENTORY((index, creatureNBTIn) -> {
-            EntityPlayer player = Minecraft.getMinecraft().player;
-            RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
-            if (creature != null) {
-                RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.inventoryPageNum));
-            }
-            else {
-                SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
-                        SelectedCreatureInfo.SelectedPosType.PARTY,
-                        new int[]{index},
-                        SelectedCreatureInfo.MenuOpenedFrom.PARTY
-                );
-                RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.inventoryPageNum));
-            }
-            return true;
-        }),
-        OPTIONS((index, creatureNBTIn) -> {
-            EntityPlayer player = Minecraft.getMinecraft().player;
-            RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
-            if (creature != null) {
-                RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.optionsPageNum));
-            }
-            else {
-                SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
-                        SelectedCreatureInfo.SelectedPosType.PARTY,
-                        new int[]{index},
-                        SelectedCreatureInfo.MenuOpenedFrom.PARTY
-                );
-                RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.optionsPageNum));
-            }
-            return true;
-        }),
-        INFO((index, creatureNBTIn) -> {
-            EntityPlayer player = Minecraft.getMinecraft().player;
-            RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
-            if (creature != null) {
-                RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.infoPageNum));
-            }
-            else {
-                SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
-                        SelectedCreatureInfo.SelectedPosType.PARTY,
-                        new int[]{index},
-                        SelectedCreatureInfo.MenuOpenedFrom.PARTY
-                );
-                RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.infoPageNum));
-            }
-            return true;
-        }),
-        MOVES((index, creatureNBTIn) -> {
-            EntityPlayer player = Minecraft.getMinecraft().player;
-            RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
-            if (creature != null) {
-                RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.movesPageNum));
-            }
-            else {
-                SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
-                        SelectedCreatureInfo.SelectedPosType.PARTY,
-                        new int[]{index},
-                        SelectedCreatureInfo.MenuOpenedFrom.PARTY
-                );
-                RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.movesPageNum));
-            }
-            return true;
-        }),
-        SUMMON_OR_DISMISS((index, creatureNBTIn) -> false),
-        TELEPORT((index, creatureNBTIn) -> false);
+        INVENTORY(
+                creatureNBTIn -> true,
+                (index, creatureNBTIn) -> {
+                    EntityPlayer player = Minecraft.getMinecraft().player;
+                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    if (creature != null) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.inventoryPageNum));
+                    }
+                    else {
+                        SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
+                                SelectedCreatureInfo.SelectedPosType.PARTY,
+                                new int[]{index},
+                                SelectedCreatureInfo.MenuOpenedFrom.PARTY
+                        );
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.inventoryPageNum));
+                    }
+                    return true;
+                }
+        ),
+        OPTIONS(
+                creatureNBTIn -> true,
+                (index, creatureNBTIn) -> {
+                    EntityPlayer player = Minecraft.getMinecraft().player;
+                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    if (creature != null) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.optionsPageNum));
+                    }
+                    else {
+                        SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
+                                SelectedCreatureInfo.SelectedPosType.PARTY,
+                                new int[]{index},
+                                SelectedCreatureInfo.MenuOpenedFrom.PARTY
+                        );
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.optionsPageNum));
+                    }
+                    return true;
+                }
+        ),
+        INFO(
+                creatureNBTIn -> true,
+                (index, creatureNBTIn) -> {
+                    EntityPlayer player = Minecraft.getMinecraft().player;
+                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    if (creature != null) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.infoPageNum));
+                    }
+                    else {
+                        SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
+                                SelectedCreatureInfo.SelectedPosType.PARTY,
+                                new int[]{index},
+                                SelectedCreatureInfo.MenuOpenedFrom.PARTY
+                        );
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.infoPageNum));
+                    }
+                    return true;
+                }
+        ),
+        MOVES(
+                creatureNBTIn -> true,
+                (index, creatureNBTIn) -> {
+                    EntityPlayer player = Minecraft.getMinecraft().player;
+                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    if (creature != null) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.movesPageNum));
+                    }
+                    else {
+                        SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
+                                SelectedCreatureInfo.SelectedPosType.PARTY,
+                                new int[]{index},
+                                SelectedCreatureInfo.MenuOpenedFrom.PARTY
+                        );
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.movesPageNum));
+                    }
+                    return true;
+                }
+        ),
+        SUMMON_OR_DISMISS(
+                creatureNBTIn -> {
+                    EntityPlayer player = Minecraft.getMinecraft().player;
+                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    //if creature is found, almost anything may be done with it
+                    if (creature != null) return true;
+                    else {
+                        //dont summon when creature is dead
+                        if (creatureNBTIn.getCreatureHealth()[0] <= 0) return false;
+                        //dont summon when player not in apt position
+                        else if (!PlayerTamedCreaturesHelper.canBeDeployed(player, creatureNBTIn)) return false;
+                        //final return value
+                        else return true;
+                    }
+                },
+                (index, creatureNBTIn) -> {
+                    EntityPlayer player = Minecraft.getMinecraft().player;
+                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
 
+                    //creature is not found, time to try summon it
+                    if (creature == null) {
+                        //for summoning when creature is not found and conditions are just right
+                        PlayerTamedCreaturesHelper.deployCreatureFromParty(player, index, true);
+                        return true;
+                    }
+                    else {
+                        //for dismissing, when creature is deployed
+                        if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                            PlayerTamedCreaturesHelper.deployCreatureFromParty(player, index, false);
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+        ),
+        TELEPORT(
+                creatureNBTIn -> true,
+                (index, creatureNBTIn) -> false
+        );
+
+        private final Function<CreatureNBT, Boolean> canBeClicked;
         private final BiFunction<Integer, CreatureNBT, Boolean> clickResult;
 
-        Option(BiFunction<Integer, CreatureNBT, Boolean> clickResult) {
+        Option(Function<CreatureNBT, Boolean> canBeClicked, BiFunction<Integer, CreatureNBT, Boolean> clickResult) {
+            this.canBeClicked = canBeClicked;
             this.clickResult = clickResult;
+        }
+
+        public boolean canBeClicked(CreatureNBT creatureNBT) {
+            return this.canBeClicked.apply(creatureNBT);
         }
 
         public boolean click(int index, CreatureNBT creatureNBT) {
@@ -262,31 +317,24 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     }
 
     private static class PartyMemberDropdownOptionWidget extends ButtonWidget<PartyMemberDropdownOptionWidget> {
-        private final int parentIndex;
+        private final PartyMemberButtonWidget parent;
         private final Option option;
-        private CreatureNBT creatureNBT;
 
-        public PartyMemberDropdownOptionWidget(int parentIndex, Option optionIn) {
-            this.parentIndex = parentIndex;
+        public PartyMemberDropdownOptionWidget(@NotNull PartyMemberButtonWidget parent, Option optionIn) {
+            this.parent = parent;
             this.option = optionIn;
             this.widthRel(1f).height(10);
-            this.overlay(IKey.str(option.name()).scale(0.5f));
-        }
-
-        @Override
-        public void onInit() {
-            super.onInit();
-            this.creatureNBT = PlayerTamedCreaturesHelper.getCreatureNBTFromSelected(
-                    Minecraft.getMinecraft().player,
-                    new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{this.parentIndex})
-            );
         }
 
         @Override
         @NotNull
         public Result onMousePressed(int mouseButton) {
-            if (this.creatureNBT != null && !this.creatureNBT.nbtIsEmpty() && this.option.click(this.parentIndex, this.creatureNBT)) {
+            if (this.parent == null) return Result.ACCEPT;
+            if (this.parent.creatureNBT == null || this.parent.creatureNBT.nbtIsEmpty()) return Result.ACCEPT;
+            if (!this.option.canBeClicked(this.parent.creatureNBT)) return Result.ACCEPT;
+            if (this.option.click(this.parent.index, this.parent.creatureNBT)) {
                 Interactable.playButtonClickSound();
+                this.parent.setCreatureNBT();
                 return Result.SUCCESS;
             }
             return Result.ACCEPT;
@@ -294,16 +342,22 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
 
         @Override
         public IDrawable getOverlay() {
+            if (this.parent == null || this.parent.creatureNBT == null || this.parent.creatureNBT.nbtIsEmpty()) return IKey.NONE;
+            String text = (this.option.canBeClicked(this.parent.creatureNBT) ? "" : IKey.STRIKETHROUGH)+this.option.name();
             int textColor = this.isHovering() ? 0xFFFFFFFF : IKey.TEXT_COLOR;
-            return IKey.str(this.option.name()).scale(0.5f).color(textColor);
+            return IKey.str(text).scale(0.5f).color(textColor);
         }
 
         @Override
         public IDrawable getHoverBackground() {
-            return new DrawableStack(
-                    new Rectangle().color(0xFFB5377B),
-                    new Rectangle().color(0xFF942C64).hollow(0.5f)
-            );
+            if (this.parent == null || this.parent.creatureNBT == null || this.parent.creatureNBT.nbtIsEmpty()) return IKey.NONE;
+            if (this.option.canBeClicked(this.parent.creatureNBT)) {
+                return new DrawableStack(
+                        new Rectangle().color(0xFFB5377B),
+                        new Rectangle().color(0xFF942C64).hollow(0.5f)
+                );
+            }
+            return IKey.NONE;
         }
     }
 }
