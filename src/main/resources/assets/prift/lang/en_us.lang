@@ -233,13 +233,8 @@ journal.party_button.journal=Journal
 journal.party_button.feed=Feed
 journal.party_button.rearrange_party=Rearrange Party
 journal.party_button.stop_rearrange_party=Finished
-journal.warning.cannot_summon=This creature cannot be summoned in your location!
-journal.warning.cannot_summon_dead=This creature is dead! It cannot be summoned!
-journal.warning.cannot_teleport=This creature cannot be teleported to your location!
 journal.warning.rearrange_instructions=Click on a creature, then on another creature to swap their positions!
 journal.warning.no_party_members=you have no party members lol
-journal.warning.summon_success=Successfully summoned creature
-journal.warning.dismiss_success=Successfully dismissed creature
 journal.entry.locked=§oKill of tame this creature to unlock more information! Check Info for the food required to tame it!
 journal.taming_or_breeding_foods=Taming/Breeding Foods:
 journal.breeding_foods=Taming/Breeding Foods:
@@ -522,6 +517,20 @@ tametab.return_to_party=Return to Party
 
 tamepanel.current_moves=%s Moves
 tamepanel.available_moves=Available Moves
+
+party.warning.cannot_summon=This creature cannot be summoned in your location!
+party.warning.cannot_summon_dead=This creature is dead! It cannot be summoned!
+party.warning.cannot_teleport=This creature cannot be teleported to your location!
+party.warning.summon_success=Successfully summoned creature
+party.warning.dismiss_success=Successfully dismissed creature
+
+party.dropdown.inventory=Inventory
+party.dropdown.options=Options
+party.dropdown.info=Info
+party.dropdown.moves=Moves
+party.dropdown.summon=Summon
+party.dropdown.dismiss=Dismiss
+party.dropdown.teleport=Teleport
 
 type.creature.back=Back
 type.creature.all=All

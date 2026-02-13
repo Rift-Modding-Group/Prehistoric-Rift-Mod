@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
+import anightdazingzoroark.prift.client.newui.data.PlayerGuiData;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -100,8 +101,7 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
     @Override
     public boolean equals(Object object) {
         if (object == null) return false;
-        if (!(object instanceof SelectedCreatureInfo) || this.creatureBoxOpenedFrom == null) return false;
-        SelectedCreatureInfo infoToTest = (SelectedCreatureInfo) object;
+        if (!(object instanceof SelectedCreatureInfo infoToTest) || this.creatureBoxOpenedFrom == null) return false;
         return infoToTest.selectedPosType == this.selectedPosType
                 && Arrays.equals(infoToTest.pos, this.pos)
                 && infoToTest.creatureBoxOpenedFrom.equals(this.creatureBoxOpenedFrom);
@@ -121,5 +121,60 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
     public enum MenuOpenedFrom {
         PARTY,
         BOX
+    }
+
+    public static class SwapInfo {
+        private SelectedCreatureInfo creatureOne;
+        private SelectedCreatureInfo creatureTwo;
+
+        public SwapInfo() {}
+
+        public SwapInfo(NBTTagCompound nbtTagCompound) {
+            if (nbtTagCompound.hasKey("CreatureOne")) {
+                this.creatureOne = new SelectedCreatureInfo(nbtTagCompound.getCompoundTag("CreatureOne"));
+            }
+
+            if (nbtTagCompound.hasKey("CreatureTwo")) {
+                this.creatureTwo = new SelectedCreatureInfo(nbtTagCompound.getCompoundTag("CreatureTwo"));
+            }
+        }
+
+        public void setCreature(SelectedCreatureInfo creatureForSwap) {
+            if (creatureForSwap == null) return;
+            if (this.canSwap()) return;
+
+            //first step of swap
+            if (this.creatureOne == null && this.creatureTwo == null) {
+                this.creatureOne = creatureForSwap;
+            }
+            //second step of swap
+            else if (this.creatureOne != null && this.creatureTwo == null) {
+                this.creatureTwo = creatureForSwap;
+            }
+        }
+
+        public boolean canSwap() {
+            return this.creatureOne != null && this.creatureTwo != null;
+        }
+
+        public void applySwap(PlayerGuiData data) {
+            if (!this.canSwap()) return;
+            PlayerTamedCreaturesHelper.swapCreatures(data.getPlayer(), this.creatureOne, this.creatureTwo);
+            this.clear();
+        }
+
+        public void clear() {
+            this.creatureOne = null;
+            this.creatureTwo = null;
+        }
+
+        public NBTTagCompound getNBT() {
+            NBTTagCompound toReturn = new NBTTagCompound();
+
+            if (this.creatureOne != null) toReturn.setTag("CreatureOne", this.creatureOne.getNBT());
+            if (this.creatureTwo != null) toReturn.setTag("CreatureTwo", this.creatureTwo.getNBT());
+
+            return toReturn;
+        }
     }
 }

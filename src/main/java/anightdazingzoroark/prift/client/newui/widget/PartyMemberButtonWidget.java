@@ -4,6 +4,8 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
+import anightdazingzoroark.prift.client.newui.data.PlayerGuiData;
+import anightdazingzoroark.prift.client.newui.sync.CreatureSwapInfoSyncValue;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
@@ -25,12 +27,14 @@ import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
 import com.cleanroommc.modularui.theme.WidgetTheme;
 import com.cleanroommc.modularui.theme.WidgetThemeEntry;
 import com.cleanroommc.modularui.utils.Alignment;
+import com.cleanroommc.modularui.value.sync.BooleanSyncValue;
 import com.cleanroommc.modularui.widget.sizer.Area;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.ListWidget;
 import com.cleanroommc.modularui.widgets.menu.ContextMenuButton;
 import com.cleanroommc.modularui.widgets.menu.Menu;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -40,11 +44,20 @@ import java.util.function.*;
 
 public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButtonWidget> implements Interactable {
     private final int index;
+    private final PlayerGuiData data;
+    private final BooleanSyncValue isCreatureSwitching;
+    private final CreatureSwapInfoSyncValue swapInfo;
+    private final SelectedCreatureInfo selectedCreatureInfo;
+    private boolean isSelected;
     private CreatureNBT creatureNBT;
 
-    public PartyMemberButtonWidget(int indexIn) {
+    public PartyMemberButtonWidget(int indexIn, PlayerGuiData data, BooleanSyncValue isCreatureSwitching, CreatureSwapInfoSyncValue swapInfo) {
         super(UIPanelNames.PARTY_DROPDOWN+indexIn);
         this.index = indexIn;
+        this.data = data;
+        this.isCreatureSwitching = isCreatureSwitching;
+        this.swapInfo = swapInfo;
+        this.selectedCreatureInfo = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{indexIn});
         this.requiresClick();
         this.size(80, 48);
         this.openDown();
@@ -61,10 +74,39 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         this.setCreatureNBT();
     }
 
+    @Override
+    @NotNull
+    public Result onMousePressed(int mouseButton) {
+        this.isSelected = !this.isSelected;
+        if (!(this.getParent() instanceof PaddedGrid gridParent)) return super.onMousePressed(mouseButton);
+
+        //clear other already opened dropdowns and their selected flags
+        for (IWidget child : gridParent.getChildren()) {
+            if (!(child instanceof PartyMemberButtonWidget partyMemButton)) continue;
+            if (!partyMemButton.getMenu().isValid()) continue;
+            if (partyMemButton.index != this.index) partyMemButton.isSelected = false;
+            partyMemButton.getMenu().getPanel().closeIfOpen();
+        }
+
+        //when not swapping, just return default value
+        if (!this.isCreatureSwitching.getBoolValue()) return super.onMousePressed(mouseButton);
+        //otherwise, regular swapping operations
+        if (!this.swapInfo.getValue().canSwap()) {
+            System.out.println("select for swapping");
+            this.swapInfo.getValue().setCreature(this.selectedCreatureInfo);
+        }
+        if (this.swapInfo.getValue().canSwap()) {
+            System.out.println("start swapping");
+            this.swapInfo.getValue().applySwap(this.data);
+            this.setCreatureNBT();
+            this.isSelected = false;
+        }
+        return Result.SUCCESS;
+    }
+
     private void setCreatureNBT() {
         this.creatureNBT = PlayerTamedCreaturesHelper.getCreatureNBTFromSelected(
-                Minecraft.getMinecraft().player,
-                new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{this.index})
+                Minecraft.getMinecraft().player, this.selectedCreatureInfo
         );
     }
 
@@ -75,8 +117,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
 
         if (this.creatureNBT != null && !this.creatureNBT.nbtIsEmpty()) {
             //draw border, color changes depending on whether or not its hovered
-            int borderHoverColor = this.isHovering() ? 0xFFFFFFFF : 0xFF000000;
-            new Rectangle().color(borderHoverColor).cornerRadius(5).drawAtZero(context, this.getArea(), theme);
+            new Rectangle().color(this.getOutlineColor()).cornerRadius(5).drawAtZero(context, this.getArea(), theme);
 
             //draw background
             Area bgArea = new Area(this.getArea());
@@ -85,8 +126,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
             new Rectangle().color(0xFFC6C6C6).cornerRadius(5).draw(context, 1, 1, bgArea.w(), bgArea.h(), theme);
 
             //draw container for creature icon
-            int iconHoverColor = this.isHovering() ? 0xFFFFFFFF : 0xFF000000;
-            new Rectangle().color(iconHoverColor).cornerRadius(5).draw(context, 2, 2, 28, 28, theme);
+            new Rectangle().color(this.getOutlineColor()).cornerRadius(5).draw(context, 2, 2, 28, 28, theme);
             new Rectangle().color(this.getIconBGColor()).cornerRadius(5).draw(context, 3, 3, 26, 26, theme);
 
             //draw creature icon
@@ -173,6 +213,12 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     @Override
     protected WidgetThemeEntry<?> getWidgetThemeInternal(ITheme theme) {
         return theme.getFallback();
+    }
+
+    private int getOutlineColor() {
+        if (this.isHovering()) return 0xFFFFFFFF;
+        else if (this.isSelected) return 0xFFFFFF00;
+        return 0xFF000000;
     }
 
     private int getIconBGColor() {
@@ -292,19 +338,50 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
                         }
                     }
                     return false;
+                },
+                creatureNBTIn -> {
+                    EntityPlayer player = Minecraft.getMinecraft().player;
+                    if (creatureNBTIn.getCreatureHealth()[0] <= 0) return I18n.format("party.warning.cannot_summon_dead");
+                    else if (!PlayerTamedCreaturesHelper.canBeDeployed(player, creatureNBTIn)) return I18n.format("party.warning.cannot_summon");
+                    return "";
                 }
         ),
         TELEPORT(
-                creatureNBTIn -> true,
-                (index, creatureNBTIn) -> false
+                creatureNBTIn -> {
+                    EntityPlayer player = Minecraft.getMinecraft().player;
+                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+
+                    //return value is based on if creature exists in the world or not
+                    return creature != null;
+                },
+                (index, creatureNBTIn) -> {
+                    EntityPlayer player = Minecraft.getMinecraft().player;
+                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+
+                    if (creature != null) {
+                        //check first if the creature can be teleported to that spot first
+                        if (PlayerTamedCreaturesHelper.canBeDeployed(player, creatureNBTIn)) {
+                            PlayerTamedCreaturesHelper.teleportCreatureToPlayer(player, index);
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                creatureNBTIn -> I18n.format("party.warning.cannot_teleport")
         );
 
         private final Function<CreatureNBT, Boolean> canBeClicked;
         private final BiFunction<Integer, CreatureNBT, Boolean> clickResult;
+        private final Function<CreatureNBT, String> ineligibilityText;
 
         Option(Function<CreatureNBT, Boolean> canBeClicked, BiFunction<Integer, CreatureNBT, Boolean> clickResult) {
+            this(canBeClicked, clickResult, null);
+        }
+
+        Option(Function<CreatureNBT, Boolean> canBeClicked, BiFunction<Integer, CreatureNBT, Boolean> clickResult, Function<CreatureNBT, String> ineligibilityText) {
             this.canBeClicked = canBeClicked;
             this.clickResult = clickResult;
+            this.ineligibilityText = ineligibilityText;
         }
 
         public boolean canBeClicked(CreatureNBT creatureNBT) {
@@ -313,6 +390,28 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
 
         public boolean click(int index, CreatureNBT creatureNBT) {
             return this.clickResult.apply(index, creatureNBT);
+        }
+
+        public String getIneligibilityText(CreatureNBT creatureNBT) {
+            if (this.ineligibilityText == null) return "";
+            return this.ineligibilityText.apply(creatureNBT);
+        }
+
+        public boolean hasIneligibilityText() {
+            return this.ineligibilityText != null;
+        }
+
+        public String getTranslatedName(CreatureNBT creatureNBT) {
+            String strikethrough = !this.canBeClicked.apply(creatureNBT) ? IKey.STRIKETHROUGH.toString() : "";
+            if (this != SUMMON_OR_DISMISS) return strikethrough+I18n.format("party.dropdown."+this.name().toLowerCase());
+            if (creatureNBT == null || creatureNBT.nbtIsEmpty()) return "";
+            if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                return strikethrough+I18n.format("party.dropdown.dismiss");
+            }
+            else if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                return strikethrough+I18n.format("party.dropdown.summon");
+            }
+            return "";
         }
     }
 
@@ -323,7 +422,15 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         public PartyMemberDropdownOptionWidget(@NotNull PartyMemberButtonWidget parent, Option optionIn) {
             this.parent = parent;
             this.option = optionIn;
+            this.name("Dropdown");
             this.widthRel(1f).height(10);
+            this.tooltipBuilder(tooltipBuilder -> {
+                if (this.parent.creatureNBT == null || this.parent.creatureNBT.nbtIsEmpty()) return;
+                if (this.option.hasIneligibilityText() && !this.option.canBeClicked(this.parent.creatureNBT)) {
+                    String result = this.option.getIneligibilityText(this.parent.creatureNBT);
+                    if (!result.isEmpty()) tooltipBuilder.addLine(result);
+                }
+            });
         }
 
         @Override
@@ -335,15 +442,24 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
             if (this.option.click(this.parent.index, this.parent.creatureNBT)) {
                 Interactable.playButtonClickSound();
                 this.parent.setCreatureNBT();
+                this.markAllTooltipsDirty();
                 return Result.SUCCESS;
             }
             return Result.ACCEPT;
         }
 
+        private void markAllTooltipsDirty() {
+            if (!(this.getParent() instanceof ListWidget<?,?> listWidgetParent)) return;
+            for (IWidget child : listWidgetParent.getChildren()) {
+                if (!(child instanceof PartyMemberDropdownOptionWidget optionWidget)) continue;
+                optionWidget.markTooltipDirty();
+            }
+        }
+
         @Override
         public IDrawable getOverlay() {
             if (this.parent == null || this.parent.creatureNBT == null || this.parent.creatureNBT.nbtIsEmpty()) return IKey.NONE;
-            String text = (this.option.canBeClicked(this.parent.creatureNBT) ? "" : IKey.STRIKETHROUGH)+this.option.name();
+            String text = this.option.getTranslatedName(this.parent.creatureNBT);
             int textColor = this.isHovering() ? 0xFFFFFFFF : IKey.TEXT_COLOR;
             return IKey.str(text).scale(0.5f).color(textColor);
         }

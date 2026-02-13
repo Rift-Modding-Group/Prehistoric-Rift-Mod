@@ -254,22 +254,22 @@ public class RiftPartyMembersOverlay {
             //for dismissing, when creature is deployed
             if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
                 PlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, false);
-                player.sendStatusMessage(new TextComponentTranslation("journal.warning.dismiss_success"), false);
+                player.sendStatusMessage(new TextComponentTranslation("party.warning.dismiss_success"), false);
             }
             //for summoning, when creature is dismissed
             else if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                 //dont summon when creature is dead
                 float health = partyMemNBT.getCreatureHealth()[0];
                 if (health <= 0) {
-                    player.sendStatusMessage(new TextComponentTranslation("journal.warning.cannot_summon_dead"), false);
+                    player.sendStatusMessage(new TextComponentTranslation("party.warning.cannot_summon_dead"), false);
                 }
                 //dont summon when player not in apt position
                 else if (!PlayerTamedCreaturesHelper.canBeDeployed(player, this.selectedPos)) {
-                    player.sendStatusMessage(new TextComponentTranslation("journal.warning.cannot_summon"), false);
+                    player.sendStatusMessage(new TextComponentTranslation("party.warning.cannot_summon"), false);
                 }
                 else {
                     PlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, true);
-                    player.sendStatusMessage(new TextComponentTranslation("journal.warning.summon_success"), false);
+                    player.sendStatusMessage(new TextComponentTranslation("party.warning.summon_success"), false);
                 }
             }
 

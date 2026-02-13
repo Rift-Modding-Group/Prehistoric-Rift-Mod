@@ -10,6 +10,7 @@ import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -140,10 +141,104 @@ public class RiftSwapCreaturePositions extends RiftLibMessage<RiftSwapCreaturePo
                 }
             }
         }
+
+        RiftMessages.WRAPPER.sendTo(new RiftSwapCreaturePositions(player, selectedPos, posToSwap), (EntityPlayerMP) player);
     }
 
     @Override
-    public void executeOnClient(Minecraft minecraft, RiftSwapCreaturePositions message, EntityPlayer messagePlayer, MessageContext messageContext) {}
+    public void executeOnClient(Minecraft minecraft, RiftSwapCreaturePositions message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) messagePlayer.world.getEntityByID(message.playerId);
+        IPlayerTamedCreatures playerTamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
+        SelectedCreatureInfo selectedPos = new SelectedCreatureInfo(message.selectedPosNBT);
+        SelectedCreatureInfo posToSwap = new SelectedCreatureInfo(message.posToSwapNBT);
+
+        if (playerTamedCreatures != null) {
+            if (selectedPos.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                    playerTamedCreatures.rearrangePartyCreatures(
+                            selectedPos.pos[0],
+                            posToSwap.pos[0]
+                    );
+                }
+                else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                    this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                    playerTamedCreatures.boxPartySwap(
+                            posToSwap.pos[0],
+                            posToSwap.pos[1],
+                            selectedPos.pos[0]
+                    );
+                }
+                else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                    this.attachCreatureToCreatureBox(player, posToSwap.getCreatureBoxOpenedFrom(), selectedPos);
+                    this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                    playerTamedCreatures.boxDeployedPartySwap(
+                            messagePlayer.world,
+                            posToSwap.getCreatureBoxOpenedFrom(),
+                            posToSwap.pos[0],
+                            selectedPos.pos[0]
+                    );
+                }
+            }
+            else if (selectedPos.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                    this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                    playerTamedCreatures.boxPartySwap(
+                            selectedPos.pos[0],
+                            selectedPos.pos[1],
+                            posToSwap.pos[0]
+                    );
+                }
+                else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                    playerTamedCreatures.rearrangeBoxCreatures(
+                            posToSwap.pos[0],
+                            posToSwap.pos[1],
+                            selectedPos.pos[0],
+                            selectedPos.pos[1]
+                    );
+                }
+                else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                    this.setSpawnedCreatureDeployment(player, posToSwap, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                    playerTamedCreatures.boxDeployedBoxSwap(
+                            messagePlayer.world,
+                            posToSwap.getCreatureBoxOpenedFrom(),
+                            posToSwap.pos[0],
+                            selectedPos.pos[0],
+                            selectedPos.pos[1]
+                    );
+                }
+            }
+            else if (selectedPos.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+                    this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                    this.attachCreatureToCreatureBox(player, selectedPos.getCreatureBoxOpenedFrom(), posToSwap);
+                    playerTamedCreatures.boxDeployedPartySwap(
+                            messagePlayer.world,
+                            selectedPos.getCreatureBoxOpenedFrom(),
+                            selectedPos.pos[0],
+                            posToSwap.pos[0]
+                    );
+                }
+                else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+                    this.setSpawnedCreatureDeployment(player, selectedPos, PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                    playerTamedCreatures.boxDeployedBoxSwap(
+                            messagePlayer.world,
+                            selectedPos.getCreatureBoxOpenedFrom(),
+                            selectedPos.pos[0],
+                            posToSwap.pos[0],
+                            posToSwap.pos[1]
+                    );
+                }
+                else if (posToSwap.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+                    playerTamedCreatures.rearrangeDeployedBoxCreatures(
+                            messagePlayer.world,
+                            selectedPos.getCreatureBoxOpenedFrom(),
+                            selectedPos.pos[0],
+                            posToSwap.pos[0]
+                    );
+                }
+            }
+        }
+    }
 
     private void setSpawnedCreatureDeployment(EntityPlayer player, SelectedCreatureInfo posToDespawn, PlayerTamedCreatures.DeploymentType deploymentType) {
         RiftCreature creature = (RiftCreature) RiftUtil.getEntityFromUUID(player.world, posToDespawn.getCreatureNBT(player).getUniqueID());

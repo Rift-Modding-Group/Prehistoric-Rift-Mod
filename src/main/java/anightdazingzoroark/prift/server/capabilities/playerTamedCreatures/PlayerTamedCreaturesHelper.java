@@ -41,11 +41,6 @@ public class PlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftUpdatePartyDeployed(player));
     }
 
-    public static void forceSyncPartyNBT(EntityPlayer player) {
-        if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftForceSyncPartyNBT(player));
-    }
-
     public static FixedSizeList<CreatureNBT> getPlayerPartyNBT(EntityPlayer player) {
         return getPlayerPartyNBT(player, true);
     }
@@ -153,6 +148,10 @@ public class PlayerTamedCreaturesHelper {
             else if (player.world.getBlockState(player.getPosition().down()).getMaterial() != Material.AIR) return true;
         }
         return false;
+    }
+
+    public static void teleportCreatureToPlayer(EntityPlayer player, int index) {
+        RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(player, index));
     }
 
     public static NBTTagCompound createNBTFromCreature(RiftCreature creature) {

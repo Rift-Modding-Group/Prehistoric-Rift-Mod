@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class PlayerGuiFactory extends AbstractUIFactory<GuiData> {
+public class PlayerGuiFactory extends AbstractUIFactory<PlayerGuiData> {
     public static PlayerGuiFactory INSTANCE = new PlayerGuiFactory();
 
     protected PlayerGuiFactory() {
@@ -25,34 +25,34 @@ public class PlayerGuiFactory extends AbstractUIFactory<GuiData> {
     }
 
     @Override
-    public IGuiHolder<GuiData> getGuiHolder(GuiData data) {
+    public IGuiHolder<PlayerGuiData> getGuiHolder(PlayerGuiData data) {
         return null;
     }
 
     @Override
-    public void writeGuiData(GuiData guiData, PacketBuffer buffer) {
+    public void writeGuiData(PlayerGuiData guiData, PacketBuffer buffer) {
         buffer.writeInt(guiData.getPlayer().getEntityId());
     }
 
     @Override
-    public @NotNull GuiData readGuiData(EntityPlayer player, PacketBuffer buffer) {
+    public @NotNull PlayerGuiData readGuiData(EntityPlayer player, PacketBuffer buffer) {
         int playerId = buffer.readInt();
         EntityPlayer guiDataPlayer = (EntityPlayer) player.world.getEntityByID(playerId);
-        return new GuiData(Objects.requireNonNull(guiDataPlayer));
+        return new PlayerGuiData(Objects.requireNonNull(guiDataPlayer));
     }
 
     public void open(EntityPlayer player) {
         Objects.requireNonNull(player);
-        GuiManager.open(this, new GuiData(player), (EntityPlayerMP) player);
+        GuiManager.open(this, new PlayerGuiData(player), (EntityPlayerMP) player);
     }
 
     @Override
-    public ModularPanel createPanel(GuiData guiData, PanelSyncManager syncManager, UISettings settings) {
+    public ModularPanel createPanel(PlayerGuiData guiData, PanelSyncManager syncManager, UISettings settings) {
         return RiftPartyScreen.build(guiData, syncManager, settings);
     }
 
     @Override
-    public ModularScreen createScreen(GuiData guiData, ModularPanel mainPanel) {
-        return new ModularScreen(mainPanel);
+    public ModularScreen createScreen(PlayerGuiData guiData, ModularPanel mainPanel) {
+        return new ModularScreen(RiftInitialize.MODID, mainPanel);
     }
 }
