@@ -82,5 +82,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftOpenCreatureScreen.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetCreatureNBT.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftSetCreatureNBTParam.class, RiftLibMessageSide.BOTH);
+        WRAPPER.registerMessage(NewRiftDeployPartyMem.class, RiftLibMessageSide.SERVER);
     }
 }

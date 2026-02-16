@@ -2,8 +2,10 @@ package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.newui.data.PlayerGuiData;
 import anightdazingzoroark.prift.client.newui.sync.CreatureSwapInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.sync.PlayerPartySyncValue;
 import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
 import anightdazingzoroark.prift.client.newui.widget.PartyMemberButtonWidget;
+import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.drawable.GuiTextures;
@@ -21,6 +23,13 @@ import com.cleanroommc.modularui.widgets.layout.Grid;
 public class RiftPartyScreen {
     public static ModularPanel build(PlayerGuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disable();
+
+        PlayerPartySyncValue playerParty = new PlayerPartySyncValue(
+                data.getPlayer(),
+                () -> data.playerParty,
+                value -> data.playerParty = value
+        );
+        syncManager.syncValue("playerPartySynced", playerParty);
 
         BooleanSyncValue isCreatureSwitching = new BooleanSyncValue(() -> data.isMoveSwitchingUI, value -> data.isMoveSwitchingUI = value);
         syncManager.syncValue("creatureSwitching", isCreatureSwitching);
@@ -48,8 +57,8 @@ public class RiftPartyScreen {
                         )
                         .child(new PaddedGrid().coverChildren()
                                 .matrix(Grid.mapToMatrix(
-                                        2, PlayerTamedCreaturesHelper.maxPartySize,
-                                        index -> new PartyMemberButtonWidget(index, data, isCreatureSwitching, swapInfo)
+                                        2, PlayerPartyHelper.maxSize,
+                                        index -> new PartyMemberButtonWidget(index, playerParty, isCreatureSwitching, swapInfo)
                                 ))
                                 .padding(4)
                         )

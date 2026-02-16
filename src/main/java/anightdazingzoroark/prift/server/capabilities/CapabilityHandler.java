@@ -9,6 +9,8 @@ import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotion
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
+import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
+import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -37,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 
 public class CapabilityHandler {
+    public static final ResourceLocation PLAYER_PARTY_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playerparty");
+    
     public static final ResourceLocation PLAYER_TAMED_CREATURES_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playertamedcreatures");
     public static final ResourceLocation PLAYER_JOURNAL_PROGRESS_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playerjournalprogress");
     public static final ResourceLocation NON_POTION_EFFECTS = new ResourceLocation(RiftInitialize.MODID, "nonpotioneffects");
@@ -49,6 +53,7 @@ public class CapabilityHandler {
     @SubscribeEvent
     public void attachCapabilityToEntity(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof EntityPlayer) {
+            event.addCapability(PLAYER_PARTY_CAPABILITY, new PlayerPartyProvider());
             event.addCapability(PLAYER_TAMED_CREATURES_CAPABILITY, new PlayerTamedCreaturesProvider());
             event.addCapability(PLAYER_JOURNAL_PROGRESS_CAPABILITY, new PlayerJournalProgressProvider());
         }
@@ -62,10 +67,10 @@ public class CapabilityHandler {
         event.addCapability(CREATURE_BOX_DATA, new CreatureBoxDataProvider());
     }
 
+    /*
     @SubscribeEvent
     public void onEntityJoinWorldPlayerTamedCreatures(EntityJoinWorldEvent event) {
-        if (!event.getEntity().world.isRemote && event.getEntity() instanceof EntityPlayer) {
-            EntityPlayer player = (EntityPlayer) event.getEntity();
+        if (!event.getEntity().world.isRemote && event.getEntity() instanceof EntityPlayer player) {
             IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
             if (tamedCreatures == null) return;
             RiftMessages.WRAPPER.sendToAll(new RiftUpdatePlayerTamedCreatures(PlayerTamedCreaturesProvider.writeNBT(tamedCreatures, null), player));
@@ -90,10 +95,16 @@ public class CapabilityHandler {
             RiftMessages.WRAPPER.sendToAll(new RiftUpdateNonPotionEffects(NonPotionEffectsProvider.writeNBT(nonPotionEffects, null), (EntityLivingBase) event.getEntity()));
         }
     }
+     */
 
     @SubscribeEvent
     public void onPlayerClone(PlayerEvent.Clone event) {
         EntityPlayer player = event.getEntityPlayer();
+
+        //replicate party creatures
+        IPlayerParty playerParty = player.getCapability(PlayerPartyProvider.PLAYER_PARTY_CAPABILITY, null);
+        IPlayerParty oldPlayerParty = event.getOriginal().getCapability(PlayerPartyProvider.PLAYER_PARTY_CAPABILITY, null);
+        playerParty.parseNBTListToParty(oldPlayerParty.getPartyAsNBTList());
 
         //replicate tamed creatures
         IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
@@ -229,6 +240,7 @@ public class CapabilityHandler {
         }
     }
 
+    /*
     //managed regen when not deployed for player tamed creatures
     @SubscribeEvent
     public void playerTamedCreaturesTicker(LivingEvent.LivingUpdateEvent event) {
@@ -282,4 +294,5 @@ public class CapabilityHandler {
             }
         }
     }
+     */
 }

@@ -6,8 +6,11 @@ import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.data.PlayerGuiData;
 import anightdazingzoroark.prift.client.newui.sync.CreatureSwapInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.sync.PlayerPartySyncValue;
 import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
+import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
@@ -44,17 +47,20 @@ import java.util.function.*;
 
 public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButtonWidget> implements Interactable {
     private final int index;
-    private final PlayerGuiData data;
+    private final PlayerPartySyncValue playerParty;
     private final BooleanSyncValue isCreatureSwitching;
+
     private final CreatureSwapInfoSyncValue swapInfo;
     private final SelectedCreatureInfo selectedCreatureInfo;
     private boolean isSelected;
+    private boolean isSwitching;
     private CreatureNBT creatureNBT;
+    private boolean markForSync = true;
 
-    public PartyMemberButtonWidget(int indexIn, PlayerGuiData data, BooleanSyncValue isCreatureSwitching, CreatureSwapInfoSyncValue swapInfo) {
+    public PartyMemberButtonWidget(int indexIn, PlayerPartySyncValue playerParty, BooleanSyncValue isCreatureSwitching, CreatureSwapInfoSyncValue swapInfo) {
         super(UIPanelNames.PARTY_DROPDOWN+indexIn);
         this.index = indexIn;
-        this.data = data;
+        this.playerParty = playerParty;
         this.isCreatureSwitching = isCreatureSwitching;
         this.swapInfo = swapInfo;
         this.selectedCreatureInfo = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{indexIn});
@@ -69,14 +75,33 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     }
 
     @Override
-    public void onInit() {
-        super.onInit();
-        this.setCreatureNBT();
+    public void onUpdate() {
+        super.onUpdate();
+        if (!this.isValid()) return;
+
+        //setting nbt based on flags for syncing
+        if (this.markForSync && this.playerParty.isClientSyncInitialized()) {
+            this.creatureNBT = this.playerParty.getValue().getPartyMember(this.index);
+            this.markForSync = false;
+        }
+
+        //changes based on activation of switching mode
+        if (this.isCreatureSwitching.getBoolValue() != this.isSwitching) {
+            this.isSwitching = this.isCreatureSwitching.getBoolValue();
+
+            //resetting isSelected based on if isCreatureSwitching just got changed
+            this.isSelected = false;
+
+            //close dropdowns
+            if (this.getMenu().isValid()) this.getMenu().getPanel().closeIfOpen();
+
+        }
     }
 
     @Override
     @NotNull
     public Result onMousePressed(int mouseButton) {
+        Interactable.playButtonClickSound();
         this.isSelected = !this.isSelected;
         if (!(this.getParent() instanceof PaddedGrid gridParent)) return super.onMousePressed(mouseButton);
 
@@ -90,24 +115,22 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
 
         //when not swapping, just return default value
         if (!this.isCreatureSwitching.getBoolValue()) return super.onMousePressed(mouseButton);
+
         //otherwise, regular swapping operations
         if (!this.swapInfo.getValue().canSwap()) {
-            System.out.println("select for swapping");
             this.swapInfo.getValue().setCreature(this.selectedCreatureInfo);
         }
         if (this.swapInfo.getValue().canSwap()) {
-            System.out.println("start swapping");
-            this.swapInfo.getValue().applySwap(this.data);
-            this.setCreatureNBT();
-            this.isSelected = false;
+            this.swapInfo.getValue().applySwap(this.playerParty);
+
+            //apply change to all buttons
+            for (IWidget child : gridParent.getChildren()) {
+                if (!(child instanceof PartyMemberButtonWidget partyMemButton)) continue;
+                partyMemButton.markForSync = true;
+                partyMemButton.isSelected = false;
+            }
         }
         return Result.SUCCESS;
-    }
-
-    private void setCreatureNBT() {
-        this.creatureNBT = PlayerTamedCreaturesHelper.getCreatureNBTFromSelected(
-                Minecraft.getMinecraft().player, this.selectedCreatureInfo
-        );
     }
 
     @Override
@@ -230,10 +253,11 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
 
     private enum Option {
         INVENTORY(
-                creatureNBTIn -> true,
-                (index, creatureNBTIn) -> {
+                (index, playerPartySyncValue) -> true,
+                (index, playerPartySyncValue) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    CreatureNBT creatureNBT = playerPartySyncValue.getValue().getParty().get(index);
+                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
                     if (creature != null) {
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.inventoryPageNum));
                     }
@@ -249,10 +273,11 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
                 }
         ),
         OPTIONS(
-                creatureNBTIn -> true,
-                (index, creatureNBTIn) -> {
+                (index, playerPartySyncValue) -> true,
+                (index, playerPartySyncValue) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    CreatureNBT creatureNBT = playerPartySyncValue.getValue().getParty().get(index);
+                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
                     if (creature != null) {
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.optionsPageNum));
                     }
@@ -268,10 +293,11 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
                 }
         ),
         INFO(
-                creatureNBTIn -> true,
-                (index, creatureNBTIn) -> {
+                (index, playerPartySyncValue) -> true,
+                (index, playerPartySyncValue) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    CreatureNBT creatureNBT = playerPartySyncValue.getValue().getParty().get(index);
+                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
                     if (creature != null) {
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.infoPageNum));
                     }
@@ -287,10 +313,11 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
                 }
         ),
         MOVES(
-                creatureNBTIn -> true,
-                (index, creatureNBTIn) -> {
+                (index, playerPartySyncValue) -> true,
+                (index, playerPartySyncValue) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    CreatureNBT creatureNBT = playerPartySyncValue.getValue().getParty().get(index);
+                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
                     if (creature != null) {
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.movesPageNum));
                     }
@@ -306,103 +333,100 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
                 }
         ),
         SUMMON_OR_DISMISS(
-                creatureNBTIn -> {
+                (index, playerPartySyncValue) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    CreatureNBT creatureNBT = playerPartySyncValue.getValue().getParty().get(index);
+                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
+
                     //if creature is found, almost anything may be done with it
                     if (creature != null) return true;
                     else {
                         //dont summon when creature is dead
-                        if (creatureNBTIn.getCreatureHealth()[0] <= 0) return false;
+                        if (creatureNBT.getCreatureHealth()[0] <= 0) return false;
                         //dont summon when player not in apt position
-                        else if (!PlayerTamedCreaturesHelper.canBeDeployed(player, creatureNBTIn)) return false;
+                        else if (!playerPartySyncValue.getValue().canDeployPartyMember(index, player)) return false;
                         //final return value
                         else return true;
                     }
                 },
-                (index, creatureNBTIn) -> {
-                    EntityPlayer player = Minecraft.getMinecraft().player;
-                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                (index, playerPartySyncValue) -> {
+                    CreatureNBT creatureNBT = playerPartySyncValue.getValue().getParty().get(index);
+                    boolean deploymentToggle = creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE;
 
-                    //creature is not found, time to try summon it
-                    if (creature == null) {
-                        //for summoning when creature is not found and conditions are just right
-                        PlayerTamedCreaturesHelper.deployCreatureFromParty(player, index, true);
-                        return true;
-                    }
-                    else {
-                        //for dismissing, when creature is deployed
-                        if (creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
-                            PlayerTamedCreaturesHelper.deployCreatureFromParty(player, index, false);
-                            return true;
-                        }
-                    }
-                    return false;
+                    playerPartySyncValue.deployAtIndex(index, deploymentToggle);
+                    return true;
                 },
-                creatureNBTIn -> {
+                (index, playerPartySyncValue) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    if (creatureNBTIn.getCreatureHealth()[0] <= 0) return I18n.format("party.warning.cannot_summon_dead");
-                    else if (!PlayerTamedCreaturesHelper.canBeDeployed(player, creatureNBTIn)) return I18n.format("party.warning.cannot_summon");
+                    CreatureNBT creatureNBT = playerPartySyncValue.getValue().getParty().get(index);
+
+                    if (creatureNBT.getCreatureHealth()[0] <= 0) return I18n.format("party.warning.cannot_summon_dead");
+                    else if (!playerPartySyncValue.getValue().canDeployPartyMember(index, player)) return I18n.format("party.warning.cannot_summon");
                     return "";
                 }
         ),
         TELEPORT(
-                creatureNBTIn -> {
+                (index, playerPartySyncValue) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    CreatureNBT creatureNBT = playerPartySyncValue.getValue().getParty().get(index);
+                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
 
                     //return value is based on if creature exists in the world or not
                     return creature != null;
                 },
-                (index, creatureNBTIn) -> {
+                (index, playerPartySyncValue) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    RiftCreature creature = creatureNBTIn.findCorrespondingCreature(player.world);
+                    CreatureNBT creatureNBT = playerPartySyncValue.getValue().getParty().get(index);
+                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
 
                     if (creature != null) {
                         //check first if the creature can be teleported to that spot first
-                        if (PlayerTamedCreaturesHelper.canBeDeployed(player, creatureNBTIn)) {
-                            PlayerTamedCreaturesHelper.teleportCreatureToPlayer(player, index);
+                        if (playerPartySyncValue.getValue().canDeployPartyMember(index, player)) {
+                            playerPartySyncValue.teleportAtIndex(index);
                             return true;
                         }
                     }
                     return false;
                 },
-                creatureNBTIn -> I18n.format("party.warning.cannot_teleport")
+                (index, playerPartySyncValue) -> I18n.format("party.warning.cannot_teleport")
         );
 
-        private final Function<CreatureNBT, Boolean> canBeClicked;
-        private final BiFunction<Integer, CreatureNBT, Boolean> clickResult;
-        private final Function<CreatureNBT, String> ineligibilityText;
+        private final BiFunction<Integer, PlayerPartySyncValue, Boolean> canBeClicked;
+        private final BiFunction<Integer, PlayerPartySyncValue, Boolean> clickResult;
+        private final BiFunction<Integer, PlayerPartySyncValue, String> ineligibilityText;
 
-        Option(Function<CreatureNBT, Boolean> canBeClicked, BiFunction<Integer, CreatureNBT, Boolean> clickResult) {
+        Option(BiFunction<Integer, PlayerPartySyncValue, Boolean> canBeClicked, BiFunction<Integer, PlayerPartySyncValue, Boolean> clickResult) {
             this(canBeClicked, clickResult, null);
         }
 
-        Option(Function<CreatureNBT, Boolean> canBeClicked, BiFunction<Integer, CreatureNBT, Boolean> clickResult, Function<CreatureNBT, String> ineligibilityText) {
+        Option(BiFunction<Integer, PlayerPartySyncValue, Boolean> canBeClicked,
+               BiFunction<Integer, PlayerPartySyncValue, Boolean> clickResult,
+               BiFunction<Integer, PlayerPartySyncValue, String> ineligibilityText) {
             this.canBeClicked = canBeClicked;
             this.clickResult = clickResult;
             this.ineligibilityText = ineligibilityText;
         }
 
-        public boolean canBeClicked(CreatureNBT creatureNBT) {
-            return this.canBeClicked.apply(creatureNBT);
+        public boolean canBeClicked(int index, PlayerPartySyncValue playerPartySyncValue) {
+            return this.canBeClicked.apply(index, playerPartySyncValue);
         }
 
-        public boolean click(int index, CreatureNBT creatureNBT) {
-            return this.clickResult.apply(index, creatureNBT);
+        public boolean click(int index, PlayerPartySyncValue playerPartySyncValue) {
+            return this.clickResult.apply(index, playerPartySyncValue);
         }
 
-        public String getIneligibilityText(CreatureNBT creatureNBT) {
+        public String getIneligibilityText(int index, PlayerPartySyncValue playerPartySyncValue) {
             if (this.ineligibilityText == null) return "";
-            return this.ineligibilityText.apply(creatureNBT);
+            return this.ineligibilityText.apply(index, playerPartySyncValue);
         }
 
         public boolean hasIneligibilityText() {
             return this.ineligibilityText != null;
         }
 
-        public String getTranslatedName(CreatureNBT creatureNBT) {
-            String strikethrough = !this.canBeClicked.apply(creatureNBT) ? IKey.STRIKETHROUGH.toString() : "";
+        public String getTranslatedName(int index, PlayerPartySyncValue playerPartySyncValue) {
+            CreatureNBT creatureNBT = playerPartySyncValue.getValue().getPartyMember(index);
+            String strikethrough = !this.canBeClicked.apply(index, playerPartySyncValue) ? IKey.STRIKETHROUGH.toString() : "";
             if (this != SUMMON_OR_DISMISS) return strikethrough+I18n.format("party.dropdown."+this.name().toLowerCase());
             if (creatureNBT == null || creatureNBT.nbtIsEmpty()) return "";
             if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
@@ -426,8 +450,8 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
             this.widthRel(1f).height(10);
             this.tooltipBuilder(tooltipBuilder -> {
                 if (this.parent.creatureNBT == null || this.parent.creatureNBT.nbtIsEmpty()) return;
-                if (this.option.hasIneligibilityText() && !this.option.canBeClicked(this.parent.creatureNBT)) {
-                    String result = this.option.getIneligibilityText(this.parent.creatureNBT);
+                if (this.option.hasIneligibilityText() && !this.option.canBeClicked(this.parent.index, this.parent.playerParty)) {
+                    String result = this.option.getIneligibilityText(this.parent.index, this.parent.playerParty);
                     if (!result.isEmpty()) tooltipBuilder.addLine(result);
                 }
             });
@@ -438,10 +462,10 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         public Result onMousePressed(int mouseButton) {
             if (this.parent == null) return Result.ACCEPT;
             if (this.parent.creatureNBT == null || this.parent.creatureNBT.nbtIsEmpty()) return Result.ACCEPT;
-            if (!this.option.canBeClicked(this.parent.creatureNBT)) return Result.ACCEPT;
-            if (this.option.click(this.parent.index, this.parent.creatureNBT)) {
+            if (!this.option.canBeClicked(this.parent.index, this.parent.playerParty)) return Result.ACCEPT;
+            if (this.option.click(this.parent.index, this.parent.playerParty)) {
                 Interactable.playButtonClickSound();
-                this.parent.setCreatureNBT();
+                this.parent.markForSync = true;
                 this.markAllTooltipsDirty();
                 return Result.SUCCESS;
             }
@@ -459,7 +483,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         @Override
         public IDrawable getOverlay() {
             if (this.parent == null || this.parent.creatureNBT == null || this.parent.creatureNBT.nbtIsEmpty()) return IKey.NONE;
-            String text = this.option.getTranslatedName(this.parent.creatureNBT);
+            String text = this.option.getTranslatedName(this.parent.index, this.parent.playerParty);
             int textColor = this.isHovering() ? 0xFFFFFFFF : IKey.TEXT_COLOR;
             return IKey.str(text).scale(0.5f).color(textColor);
         }
@@ -467,7 +491,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         @Override
         public IDrawable getHoverBackground() {
             if (this.parent == null || this.parent.creatureNBT == null || this.parent.creatureNBT.nbtIsEmpty()) return IKey.NONE;
-            if (this.option.canBeClicked(this.parent.creatureNBT)) {
+            if (this.option.canBeClicked(this.parent.index, this.parent.playerParty)) {
                 return new DrawableStack(
                         new Rectangle().color(0xFFB5377B),
                         new Rectangle().color(0xFF942C64).hollow(0.5f)

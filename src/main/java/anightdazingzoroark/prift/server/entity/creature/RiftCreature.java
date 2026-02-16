@@ -16,6 +16,8 @@ import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
+import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerParty;
+import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
@@ -924,13 +926,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
-                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getLoveCooldown() == 0 && !this.isSitting() && (PlayerTamedCreaturesHelper.canAddToParty(player) || PlayerTamedCreaturesHelper.canAddCreatureToBox(player))) {
+                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getLoveCooldown() == 0 && !this.isSitting() && (PlayerPartyHelper.canAddToParty(player) || PlayerTamedCreaturesHelper.canAddCreatureToBox(player))) {
                         this.consumeItemFromStack(player, itemstack);
                         this.setInLove(player);
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                         this.spawnItemCrackParticles(itemstack.getItem());
                     }
-                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getLoveCooldown() == 0 && !this.isSitting() && !PlayerTamedCreaturesHelper.canAddToParty(player) && !PlayerTamedCreaturesHelper.canAddCreatureToBox(player)) {
+                    else if ((this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && this.getHealth() >= this.getMaxHealth() && !this.isBaby() && this.getLoveCooldown() == 0 && !this.isSitting() && !PlayerPartyHelper.canAddToParty(player) && !PlayerTamedCreaturesHelper.canAddCreatureToBox(player)) {
                         player.sendStatusMessage(new TextComponentTranslation("reminder.cannot_breed_more_creatures"), false);
                     }
                     else if (this.isEnergyRegenItem(itemstack) && this.getEnergy() < this.getMaxEnergy()) {
@@ -1007,7 +1009,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         else if (!this.isTamed() && !this.isSleeping()) {
-            if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.creatureType.isTameableByFeeding && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && (PlayerTamedCreaturesHelper.canAddToParty(player) || PlayerTamedCreaturesHelper.canAddCreatureToBox(player)) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
+            if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.creatureType.isTameableByFeeding && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && (PlayerPartyHelper.canAddToParty(player) || PlayerTamedCreaturesHelper.canAddCreatureToBox(player)) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                 if (this.getTamingFoodAdd(itemstack) + this.getTameProgress() >= 100) {
                     this.consumeItemFromStack(player, itemstack);
                     this.tameCreature(player);
@@ -1021,7 +1023,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
                 return true;
             }
-            else if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.creatureType.isTameableByFeeding && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && !PlayerTamedCreaturesHelper.canAddToParty(player) && !PlayerTamedCreaturesHelper.canAddCreatureToBox(player) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
+            else if (!itemstack.isEmpty() && (this.creatureType != RiftCreatureType.DODO) && (this.creatureType.isTameableByFeeding && this.isTamingFood(itemstack) || itemstack.getItem() == RiftItems.CREATIVE_MEAL) && !PlayerPartyHelper.canAddToParty(player) && !PlayerTamedCreaturesHelper.canAddCreatureToBox(player) && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                 player.sendStatusMessage(new TextComponentTranslation("reminder.cannot_tame_more_creatures"), false);
                 return true;
             }
@@ -1062,9 +1064,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
 
             //update party of player that tamed the creature
-            if (PlayerTamedCreaturesHelper.canAddToParty(player)) {
+            if (PlayerPartyHelper.canAddToParty(player)) {
                 this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                PlayerTamedCreaturesHelper.addCreatureToParty(player, this);
+                PlayerPartyHelper.addCreatureToParty(player, this);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
             }
             //update box of player that tamed the creature
@@ -1917,10 +1919,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 }
 
                 //update player tamed creatures
-                if (PlayerTamedCreaturesHelper.canAddToParty(owner)) {
+                if (PlayerPartyHelper.canAddToParty(owner)) {
                     baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                     this.world.spawnEntity(baby);
-                    PlayerTamedCreaturesHelper.addCreatureToParty(owner, baby);
+                    PlayerPartyHelper.addCreatureToParty(owner, baby);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed_to_party", this.getName()), false);
                 }
                 else if (PlayerTamedCreaturesHelper.canAddCreatureToBox(owner)) {
@@ -3118,7 +3120,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setBoxReviveTime(GeneralConfig.creatureBoxReviveTime);
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
             this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-            PlayerTamedCreaturesHelper.updateIndividualPartyMemServer((EntityPlayer) this.getOwner(), this);
+            PlayerPartyHelper.updatePartyCreature((EntityPlayer) this.getOwner(), this);
             PlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
         }
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {

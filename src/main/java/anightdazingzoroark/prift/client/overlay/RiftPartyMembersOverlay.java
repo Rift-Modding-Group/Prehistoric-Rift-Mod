@@ -3,6 +3,8 @@ package anightdazingzoroark.prift.client.overlay;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
+import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
@@ -36,9 +38,9 @@ public class RiftPartyMembersOverlay {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPreRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
-        IPlayerTamedCreatures playerTamedCreatures = PlayerTamedCreaturesHelper.getPlayerTamedCreatures(player);
+        IPlayerParty playerParty = PlayerPartyHelper.getPlayerParty(player);
 
-        if (playerTamedCreatures == null) return;
+        if (playerParty == null) return;
 
         //selectedPos starts out as -1, to reduce potential lag
         //from repeatedly sending in packets for selected pos for overlay
@@ -49,7 +51,7 @@ public class RiftPartyMembersOverlay {
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
             ScaledResolution resolution = event.getResolution();
-            FixedSizeList<CreatureNBT> partyNBT = playerTamedCreatures.getPartyNBT();
+            FixedSizeList<CreatureNBT> partyNBT = playerParty.getParty();
             this.renderHUD(partyNBT, resolution.getScaledWidth(), resolution.getScaledHeight());
         }
     }

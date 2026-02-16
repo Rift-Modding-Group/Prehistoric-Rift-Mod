@@ -40,9 +40,7 @@ public class PlayerTamedCreaturesStorage implements Capability.IStorage<IPlayerT
     public void readNBT(Capability<IPlayerTamedCreatures> capability, IPlayerTamedCreatures instance, EnumFacing side, NBTBase nbt) {
         if (instance == null || nbt == null) return;
 
-        if (nbt instanceof NBTTagCompound) {
-            NBTTagCompound compound = (NBTTagCompound)nbt;
-
+        if (nbt instanceof NBTTagCompound compound) {
             instance.setLastSelected(compound.getInteger("LastSelected"));
 
             //for party creatures

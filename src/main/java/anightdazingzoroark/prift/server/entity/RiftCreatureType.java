@@ -24,6 +24,7 @@ public enum RiftCreatureType {
             true,
             false,
             true,
+            false, false,
             54,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -43,6 +44,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             27,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -62,6 +64,7 @@ public enum RiftCreatureType {
             false,
             false,
             true,
+            false, false,
             0,
             new InventoryGearType[]{},
             CreatureCategory.BIRD,
@@ -81,6 +84,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             27,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -100,6 +104,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             18,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -119,6 +124,7 @@ public enum RiftCreatureType {
             true,
             false,
             true,
+            false, false,
             54,
             new InventoryGearType[]{InventoryGearType.SADDLE, InventoryGearType.LARGE_WEAPON},
             CreatureCategory.DINOSAUR,
@@ -138,6 +144,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             27,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -157,6 +164,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             9,
             new InventoryGearType[]{},
             CreatureCategory.MAMMAL,
@@ -176,6 +184,7 @@ public enum RiftCreatureType {
             false,
             false,
             false,
+            true, false,
             0,
             new InventoryGearType[]{},
             CreatureCategory.FISH,
@@ -195,6 +204,7 @@ public enum RiftCreatureType {
             false,
             false,
             false,
+            true, false,
             0,
             new InventoryGearType[]{},
             CreatureCategory.FISH,
@@ -214,6 +224,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            true, true,
             27,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.REPTILE,
@@ -233,6 +244,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            true, false,
             27,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.INVERTEBRATE,
@@ -252,6 +264,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             27,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -271,6 +284,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             18,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.MAMMAL,
@@ -290,6 +304,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             18,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.MAMMAL,
@@ -309,6 +324,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            true, true,
             27,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -328,6 +344,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             9,
             new InventoryGearType[]{},
             CreatureCategory.MAMMAL,
@@ -347,6 +364,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             27,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -366,6 +384,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             18,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -385,6 +404,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             9,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -404,6 +424,7 @@ public enum RiftCreatureType {
             true,
             true,
             true,
+            false, false,
             27,
             new InventoryGearType[]{InventoryGearType.SADDLE},
             CreatureCategory.DINOSAUR,
@@ -423,6 +444,8 @@ public enum RiftCreatureType {
     public final boolean isTameable;
     public final boolean isTameableByFeeding;
     public final boolean isBreedable;
+    public final boolean isAquatic;
+    public final boolean isAmphibious;
     public final int inventorySlots;
     public final InventoryGearType[] usableGear;
     private final CreatureCategory creatureCategory;
@@ -439,12 +462,14 @@ public enum RiftCreatureType {
     public Item sacItem;
     public final String friendlyName;
 
-    RiftCreatureType(Class<? extends RiftCreature> creature, Class<? extends RiftCreatureConfig> config, boolean isTameable, boolean isTameableByFeeding, boolean isBreedable, int inventorySlots, InventoryGearType[] usableGear, CreatureCategory creatureCategory, EnergyRechargeCategory energyRechargeCategory, CreatureDiet creatureDiet, LevelupRate levelupRate, Behavior[] behaviors, int eggPrimary, int eggSecondary, int hatchTime, float eggScale, EggTemperature eggTemperature) {
+    RiftCreatureType(Class<? extends RiftCreature> creature, Class<? extends RiftCreatureConfig> config, boolean isTameable, boolean isTameableByFeeding, boolean isBreedable, boolean isAquatic, boolean isAmphibious, int inventorySlots, InventoryGearType[] usableGear, CreatureCategory creatureCategory, EnergyRechargeCategory energyRechargeCategory, CreatureDiet creatureDiet, LevelupRate levelupRate, Behavior[] behaviors, int eggPrimary, int eggSecondary, int hatchTime, float eggScale, EggTemperature eggTemperature) {
         this.creature = creature;
         this.config = config;
         this.isTameable = isTameable;
         this.isTameableByFeeding = isTameableByFeeding;
         this.isBreedable = isBreedable;
+        this.isAquatic = isAquatic;
+        this.isAmphibious = isAquatic && isAmphibious;
         this.inventorySlots = inventorySlots;
         this.usableGear = usableGear;
         this.creatureCategory = creatureCategory;

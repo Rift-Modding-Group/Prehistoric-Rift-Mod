@@ -7,6 +7,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+@Deprecated
 public class PlayerTamedCreatures implements IPlayerTamedCreatures {
     private FixedSizeList<CreatureNBT> partyCreatures = new FixedSizeList(6, new CreatureNBT());
     private CreatureBoxStorage boxCreatures = new CreatureBoxStorage();

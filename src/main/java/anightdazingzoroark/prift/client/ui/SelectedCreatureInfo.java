@@ -3,6 +3,8 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.client.newui.data.PlayerGuiData;
+import anightdazingzoroark.prift.client.newui.sync.PlayerPartySyncValue;
+import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -157,9 +159,19 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
             return this.creatureOne != null && this.creatureTwo != null;
         }
 
-        public void applySwap(PlayerGuiData data) {
+        public void applySwap(PlayerPartySyncValue playerPartySyncValue) {
             if (!this.canSwap()) return;
-            PlayerTamedCreaturesHelper.swapCreatures(data.getPlayer(), this.creatureOne, this.creatureTwo);
+
+            if (this.creatureOne.selectedPosType == SelectedPosType.PARTY && this.creatureTwo.selectedPosType == SelectedPosType.PARTY) {
+                CreatureNBT nbtOne = playerPartySyncValue.getValue().getPartyMember(this.creatureOne.pos[0]);
+                CreatureNBT nbtTwo = playerPartySyncValue.getValue().getPartyMember(this.creatureTwo.pos[0]);
+
+                IPlayerParty playerPartyToSet = playerPartySyncValue.getValue();
+                playerPartyToSet.setPartyMember(this.creatureOne.pos[0], nbtTwo);
+                playerPartyToSet.setPartyMember(this.creatureTwo.pos[0], nbtOne);
+                playerPartySyncValue.setValue(playerPartyToSet, false, true);
+            }
+
             this.clear();
         }
 

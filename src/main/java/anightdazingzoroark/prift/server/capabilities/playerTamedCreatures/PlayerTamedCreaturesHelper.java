@@ -21,6 +21,7 @@ this means that all getter functions on client side update client to sync w serv
 and on server side they just return the value
 while setter functions update only server side
 */
+@Deprecated
 public class PlayerTamedCreaturesHelper {
     public static final int maxPartySize = 6;
 
