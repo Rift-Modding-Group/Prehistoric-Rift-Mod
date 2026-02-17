@@ -15,6 +15,7 @@ import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import com.cleanroommc.modularui.factory.GuiData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ public class CreatureGuiData extends GuiData {
     private final int pageToOpenTo;
 
     //data type stuff
+    @NotNull
     public final DataType dataType;
     private RiftCreature creature;
     private SelectedCreatureInfo selectedCreatureInfo;

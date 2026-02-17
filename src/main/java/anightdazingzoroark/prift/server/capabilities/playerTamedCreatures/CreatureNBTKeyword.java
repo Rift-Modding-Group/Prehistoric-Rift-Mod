@@ -22,7 +22,7 @@ public class CreatureNBTKeyword<T> {
     public static final CreatureNBTKeyword<NBTTagCompound> LEARNABLE_MOVES = new CreatureNBTKeyword<>("LearnableMoves", NBTTagCompound.class);
     public static final CreatureNBTKeyword<NBTTagCompound> GEAR = new CreatureNBTKeyword<>("Gear", NBTTagCompound.class);
     public static final CreatureNBTKeyword<NBTTagCompound> INVENTORY = new CreatureNBTKeyword<>("Inventory", NBTTagCompound.class);
-    public static final CreatureNBTKeyword<Boolean> SITTING = new CreatureNBTKeyword<>("Sitting", Boolean.class);
+    public static final CreatureNBTKeyword<Boolean> SITTING = new CreatureNBTKeyword<>("CreatureSitting", Boolean.class);
     public static final CreatureNBTKeyword<Boolean> TURRET_MODE = new CreatureNBTKeyword<>("TurretMode", Boolean.class);
     public static final CreatureNBTKeyword<Byte> DEPLOYMENT_TYPE = new CreatureNBTKeyword<>("DeploymentType", Byte.class);
     public static final CreatureNBTKeyword<Byte> TURRET_TARGETING = new CreatureNBTKeyword<>("TurretTargeting", Byte.class);
@@ -59,6 +59,8 @@ public class CreatureNBTKeyword<T> {
     }
 
     public T parseValue(NBTTagCompound nbtTagCompound) {
+        if (!nbtTagCompound.hasKey(this.name)) return this.getDefaultValue();
+
         NBTBase filteredNBTBase = nbtTagCompound.getTag(this.name);
         if (filteredNBTBase.isEmpty()) return this.getDefaultValue();
 

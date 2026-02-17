@@ -260,12 +260,8 @@ public class RiftCreatureScreen {
                                                 .childPadding(2)
                                                 .child(new CycleButtonWidget()
                                                         .value(new BoolValue.Dynamic(
-                                                                () -> {
-                                                                    return sittingValue.getValue() && !turretModeValue.getValue();
-                                                                },
-                                                                value -> {
-                                                                    sittingValue.setBoolValue(value && !turretModeValue.getValue());
-                                                                }
+                                                                () -> sittingValue.getValue() && !turretModeValue.getValue(),
+                                                                value -> sittingValue.setBoolValue(value && !turretModeValue.getValue())
                                                         ))
                                                         .stateOverlay(GuiTextures.CHECK_BOX)
                                                         .size(14, 14)

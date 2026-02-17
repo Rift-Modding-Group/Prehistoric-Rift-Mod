@@ -50,7 +50,7 @@ public class CreatureNBT {
     }
 
     public RiftCreature getCreatureAsNBT(World world) {
-        if (this.creatureNBT == null || this.creatureNBT.isEmpty()) return null;
+        if (this.nbtIsEmpty()) return null;
         RiftCreature creature = this.getCreatureType().invokeClass(world);
 
         //attributes and creature health dont carry over on client side, this should be a workaround
@@ -67,7 +67,7 @@ public class CreatureNBT {
     }
 
     public RiftCreature recreateCreatureAsNBT(World world) {
-        if (this.creatureNBT == null || this.creatureNBT.isEmpty()) return null;
+        if (this.nbtIsEmpty()) return null;
         RiftCreature creature = this.getCreatureType().invokeClass(world);
 
         //attributes and creature health dont carry over on client side, this should be a workaround
@@ -198,8 +198,13 @@ public class CreatureNBT {
     }
 
     public boolean isSitting() {
-        if (this.creatureNBT.isEmpty()) return false;
+        if (this.nbtIsEmpty()) return false;
         return CreatureNBTKeyword.SITTING.parseValue(this.creatureNBT);
+    }
+
+    public void setSitting(boolean value) {
+        if (this.nbtIsEmpty()) return;
+        CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.SITTING, value);
     }
 
     public boolean isTurretMode() {
@@ -599,11 +604,6 @@ public class CreatureNBT {
     public void resetHarvestOnWander() {
         if (this.nbtIsEmpty() || !this.hasHarvestOnWanderData()) return;
         this.creatureNBT.setBoolean("CanHarvest", false);
-    }
-
-    public void setSitting(boolean value) {
-        if (this.nbtIsEmpty()) return;
-        this.creatureNBT.setBoolean("Sitting", value);
     }
 
     public boolean isBaby() {

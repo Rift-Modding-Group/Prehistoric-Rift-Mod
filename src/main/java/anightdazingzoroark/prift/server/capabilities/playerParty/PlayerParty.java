@@ -112,7 +112,7 @@ public class PlayerParty implements IPlayerParty {
     }
 
     public void applyDeploymentOrTeleportation(EntityPlayer player) {
-        if (player == null || player.world.isRemote) return;
+        if (player == null) return;
 
         for (int index = 0; index < this.party.size(); index++) {
             CreatureNBT creatureNBT = this.party.get(index);
@@ -123,25 +123,24 @@ public class PlayerParty implements IPlayerParty {
             //creature is found in world
             if (corresponded != null) {
                 //-----deployment-----
-                //if creature is in the world for some reason, just set
                 if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                     corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                    this.setPartyMember(index, new CreatureNBT(corresponded));
                 }
-                //get information first, then forcibly remove the creature
                 else if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                     corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
                     this.setPartyMember(index, new CreatureNBT(corresponded));
                 }
 
-                //-----teleportation-----
-                if (this.teleportationMarker.getLeft() == index && this.teleportationMarker.getRight() != null) {
+                //-----teleportation (server only cos well)-----
+                if (this.teleportationMarker.getLeft() == index && this.teleportationMarker.getRight() != null && !player.world.isRemote) {
                     BlockPos posToTeleportTo = this.teleportationMarker.getRight();
                     corresponded.setPosition(posToTeleportTo.getX(), posToTeleportTo.getY(), posToTeleportTo.getZ());
                 }
             }
             else {
-                //create the creature
-                if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                //create the creature, note that its server only
+                if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY && !player.world.isRemote) {
                     RiftCreature toCreate = creatureNBT.getCreatureAsNBT(player.world);
                     toCreate.setPosition(player.posX, player.posY, player.posZ);
                     player.world.spawnEntity(toCreate);

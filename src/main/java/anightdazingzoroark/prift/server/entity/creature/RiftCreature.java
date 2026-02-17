@@ -1319,6 +1319,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.HAS_TARGET, this.hasTarget());
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.AGE_TICKS, this.getAgeInTicks());
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.JUST_SPAWNED, this.justSpawned());
+        CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.SITTING, this.isSitting());
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.HAS_HOME_POS, this.getHasHomePos());
         if (this.getHasHomePos()) {
             compound.setInteger("HomePosX", this.getHomePos().getX());
@@ -1367,6 +1368,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setHasTarget(CreatureNBTKeyword.HAS_TARGET.parseValue(compound));
         this.setAgeInTicks(CreatureNBTKeyword.AGE_TICKS.parseValue(compound));
         this.setJustSpawned(CreatureNBTKeyword.JUST_SPAWNED.parseValue(compound));
+        this.setSitting(CreatureNBTKeyword.SITTING.parseValue(compound));
         if (compound.getBoolean("HasHomePos")) {
             this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
         }
@@ -2225,10 +2227,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
     //old move anims end here
 
+    @Override
     public boolean isSitting() {
         return this.dataManager.get(SITTING);
     }
 
+    @Override
     public void setSitting(boolean value) {
         this.dataManager.set(SITTING, value);
     }
