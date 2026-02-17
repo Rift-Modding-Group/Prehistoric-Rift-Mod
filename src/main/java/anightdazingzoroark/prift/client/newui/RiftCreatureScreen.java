@@ -5,7 +5,6 @@ import anightdazingzoroark.prift.client.newui.widget.CreatureGearModularSlot;
 import anightdazingzoroark.prift.client.newui.widget.CreatureInventoryModularSlot;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.client.newui.widget.SideButton;
-import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
 import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
@@ -15,7 +14,6 @@ import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftOpenCreatureScreen;
 import anightdazingzoroark.prift.server.message.RiftOpenPartyScreen;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
@@ -50,6 +48,10 @@ public class RiftCreatureScreen {
 
     public static ModularPanel buildCreatureUI(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disable();
+
+        if (data.dataType == CreatureGuiData.DataType.SELECTION) {
+            syncManager.syncValue("selectedCreatureSynced", data.getSyncedNBT());
+        }
 
         //tab related stuff
         PagedWidget.Controller tabController = new PagedWidget.Controller();
@@ -153,23 +155,9 @@ public class RiftCreatureScreen {
         SlotGroupWidget.Builder creatureGearBuilder = SlotGroupWidget.builder();
         if (creatureHasGear) {
             //continue building widget for creature gear
-            creatureGearBuilder.key('I', index -> {
-                CreatureGearModularSlot modularSlot = new CreatureGearModularSlot(creatureGear, index);
-                if (data.dataType == CreatureGuiData.DataType.SELECTION) {
-                    modularSlot = new CreatureGearModularSlot((SelectedCreatureInfo) data.getGuiHolder(), creatureGear, index);
-                }
-
-                return new ItemSlot().slot(modularSlot
-                        .slotGroup("creatureGear").filter(creatureGear::itemStackUsableAsGear)
-                        .accessibility(data.gearSlotChangeable(), data.gearSlotChangeable())
-                        .changeListener((newItem, onlyAmountChanged, client, init) -> {
-                            if (!client) {
-                                data.setSaddled(creatureGear.hasSaddle());
-                                data.setLargeWeapon(creatureGear.getLargeWeapon());
-                            }
-                        })
-                );
-            });
+            creatureGearBuilder.key('I', index -> new ItemSlot().slot(new CreatureGearModularSlot(data, index)
+                    .slotGroup("creatureGear")
+            ));
 
             //get gear slot count
             String gearMatrixRow = "";
@@ -179,13 +167,8 @@ public class RiftCreatureScreen {
 
         //build creature inventory slots
         SlotGroupWidget.Builder creatureInvBuilder = SlotGroupWidget.builder();
-        creatureInvBuilder.key('I', index -> {
-            CreatureInventoryModularSlot modularSlot = new CreatureInventoryModularSlot(creatureInventory, index);
-            if (data.dataType == CreatureGuiData.DataType.SELECTION) {
-                modularSlot = new CreatureInventoryModularSlot((SelectedCreatureInfo) data.getGuiHolder(), creatureInventory, index);
-            }
-            return new ItemSlot().slot(modularSlot.slotGroup("creatureInventory"));
-        });
+        creatureInvBuilder.key('I', index -> new ItemSlot().slot(new CreatureInventoryModularSlot(data, index)
+                .slotGroup("creatureInventory")));
 
         //get creature slot count, and use the info to deal with the matrix
         int matrixHeight = (int) Math.ceil(creatureInventory.getSlots() / 9D);

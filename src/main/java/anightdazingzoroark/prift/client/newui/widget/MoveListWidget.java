@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client.newui.widget;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.client.newui.sync.MoveSwapInfoSyncValue;
 import anightdazingzoroark.prift.client.newui.sync.SelectedMoveInfoSyncValue;
-import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
+import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import com.cleanroommc.modularui.api.GuiAxis;
 import com.cleanroommc.modularui.api.drawable.IIcon;
@@ -160,7 +160,6 @@ public class MoveListWidget extends ListValueWidget<CreatureMove, MoveListWidget
                         if (creatureMove != null || parent.moveSwapInfo.getValue().canChooseNextMove()) {
                             parent.moveSwapInfo.getValue().setMove(parent.selectedMoveInfo.getValue());
                             if (!parent.moveSwapInfo.getValue().canSwap()) return;
-                            System.out.println("can swap (in button)");
                             parent.moveSwapInfo.getValue().applySwap(parent.creatureGuiData);
                         }
                     })

@@ -1,8 +1,8 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.newui.holder;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.client.newui.data.PlayerGuiData;
 import anightdazingzoroark.prift.client.newui.sync.PlayerPartySyncValue;
 import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.ModularScreen;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -107,6 +108,11 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
         return infoToTest.selectedPosType == this.selectedPosType
                 && Arrays.equals(infoToTest.pos, this.pos)
                 && infoToTest.creatureBoxOpenedFrom.equals(this.creatureBoxOpenedFrom);
+    }
+
+    @Override
+    public ModularScreen createScreen(CreatureGuiData data, ModularPanel mainPanel) {
+        return new ModularScreen(RiftInitialize.MODID, mainPanel);
     }
 
     @Override

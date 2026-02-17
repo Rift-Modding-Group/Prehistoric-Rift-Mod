@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.client.newui.sync;
 
 import anightdazingzoroark.prift.client.newui.function.SelectedMoveInfoConsumer;
 import anightdazingzoroark.prift.client.newui.function.SelectedMoveInfoSupplier;
-import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
+import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;

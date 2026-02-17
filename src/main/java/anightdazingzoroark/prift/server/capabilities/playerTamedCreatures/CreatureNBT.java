@@ -192,6 +192,11 @@ public class CreatureNBT {
         return TameBehaviorType.values()[CreatureNBTKeyword.TAME_BEHAVIOR.parseValue(this.creatureNBT)];
     }
 
+    public void setTameBehavior(TameBehaviorType value) {
+        if (this.nbtIsEmpty()) return;
+        CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.TAME_BEHAVIOR, (byte) value.ordinal());
+    }
+
     public boolean isSitting() {
         if (this.creatureNBT.isEmpty()) return false;
         return CreatureNBTKeyword.SITTING.parseValue(this.creatureNBT);
@@ -219,6 +224,11 @@ public class CreatureNBT {
     public TurretModeTargeting getTurretTargeting() {
         if (this.nbtIsEmpty()) return null;
         return TurretModeTargeting.values()[CreatureNBTKeyword.TURRET_TARGETING.parseValue(this.creatureNBT)];
+    }
+
+    public void setTurretTargeting(TurretModeTargeting value) {
+        if (this.nbtIsEmpty()) return;
+        CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.TURRET_TARGETING, (byte) value.ordinal());
     }
 
     public UUID getUniqueID() {
@@ -264,36 +274,20 @@ public class CreatureNBT {
     public void changeLearnedMove(int pos, CreatureMove move) {
         if (this.creatureNBT.isEmpty()) return;
 
-        //create nbt for the move
-        NBTTagCompound newMoveNBT = new NBTTagCompound();
-        newMoveNBT.setInteger("Move", move.ordinal());
-        newMoveNBT.setInteger("Index", pos);
-
-        //replace in nbt
-        NBTTagCompound newLearnedMoveListNBT = CreatureNBTKeyword.LEARNED_MOVES.parseValue(this.creatureNBT);
-        NBTTagList moveListNBTList = newLearnedMoveListNBT.getTagList("MoveList", 10);
-        for (int i = 0; i < moveListNBTList.tagCount(); i++) {
-            NBTTagCompound moveNBTToTest = moveListNBTList.getCompoundTagAt(i);
-            if (moveNBTToTest.getInteger("Index") == pos) moveListNBTList.set(pos, newMoveNBT);
-        }
-        newLearnedMoveListNBT.setTag("MoveList", moveListNBTList);
+        NBTTagCompound learnedMoveListNBT = CreatureNBTKeyword.LEARNED_MOVES.parseValue(this.creatureNBT);
+        FixedSizeList<CreatureMove> learnedMoves = MoveListUtil.getFixedSizeListCreatureMoveFromNBT(learnedMoveListNBT);
+        learnedMoves.set(pos, move);
+        NBTTagCompound newLearnedMoveListNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(learnedMoves);
         CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.LEARNED_MOVES, newLearnedMoveListNBT);
     }
 
     public void removeLearnedMove(int pos) {
         if (this.creatureNBT.isEmpty()) return;
-        NBTTagCompound newLearnedMoveListNBT = CreatureNBTKeyword.LEARNED_MOVES.parseValue(this.creatureNBT);
-        NBTTagList moveListNBTList = newLearnedMoveListNBT.getTagList("MoveList", 10);
-        int listPosToRemove = -1;
-        for (int i = 0; i < moveListNBTList.tagCount(); i++) {
-            NBTTagCompound moveNBTToTest = moveListNBTList.getCompoundTagAt(i);
-            if (moveNBTToTest.getInteger("Index") == pos) {
-                listPosToRemove = i;
-                break;
-            }
-        }
-        if (listPosToRemove >= 0) moveListNBTList.removeTag(listPosToRemove);
-        newLearnedMoveListNBT.setTag("MoveList", moveListNBTList);
+
+        NBTTagCompound learnedMoveListNBT = CreatureNBTKeyword.LEARNED_MOVES.parseValue(this.creatureNBT);
+        FixedSizeList<CreatureMove> learnedMoves = MoveListUtil.getFixedSizeListCreatureMoveFromNBT(learnedMoveListNBT);
+        learnedMoves.set(pos, null);
+        NBTTagCompound newLearnedMoveListNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(learnedMoves);
         CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.LEARNED_MOVES, newLearnedMoveListNBT);
     }
 
@@ -307,24 +301,18 @@ public class CreatureNBT {
     public void changeLearnableMove(int pos, CreatureMove move) {
         if (this.creatureNBT.isEmpty()) return;
 
-        //create nbt for the move
-        NBTTagCompound newMoveNBT = new NBTTagCompound();
-        newMoveNBT.setInteger("Move", move.ordinal());
-        newMoveNBT.setInteger("Index", pos);
-
-        //replace in nbt
-        NBTTagCompound newLearnableMoveListNBT = CreatureNBTKeyword.LEARNABLE_MOVES.parseValue(this.creatureNBT);
-        NBTTagList moveListNBTList = newLearnableMoveListNBT.getTagList("MoveList", 10);
-        for (int i = 0; i < moveListNBTList.tagCount(); i++) {
-            NBTTagCompound moveNBTToTest = moveListNBTList.getCompoundTagAt(i);
-            if (moveNBTToTest.getInteger("Index") == pos) moveListNBTList.set(pos, newMoveNBT);
-        }
-        newLearnableMoveListNBT.setTag("MoveList", moveListNBTList);
+        NBTTagCompound learnableMoveListNBT = CreatureNBTKeyword.LEARNABLE_MOVES.parseValue(this.creatureNBT);
+        List<CreatureMove> learnableMoves = MoveListUtil.getListCreatureMoveFromNBT(learnableMoveListNBT);
+        learnableMoves.set(pos, move);
+        NBTTagCompound newLearnableMoveListNBT = MoveListUtil.getNBTFromListCreatureMove(learnableMoves);
         CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.LEARNABLE_MOVES, newLearnableMoveListNBT);
     }
 
     public void addLearnableMove(CreatureMove move) {
-        List<CreatureMove> learnableMoves = MoveListUtil.getListCreatureMoveFromNBT(CreatureNBTKeyword.LEARNABLE_MOVES.parseValue(this.creatureNBT));
+        if (this.creatureNBT.isEmpty()) return;
+
+        NBTTagCompound learnableMoveListNBT = CreatureNBTKeyword.LEARNABLE_MOVES.parseValue(this.creatureNBT);
+        List<CreatureMove> learnableMoves = MoveListUtil.getListCreatureMoveFromNBT(learnableMoveListNBT);
         learnableMoves.add(move);
         CreatureNBTKeyword.mergeResult(
                 this.creatureNBT,
@@ -335,40 +323,15 @@ public class CreatureNBT {
 
     public void removeLearnableMove(int pos) {
         if (this.creatureNBT.isEmpty()) return;
-        NBTTagCompound newLearnableMoveListNBT = CreatureNBTKeyword.LEARNABLE_MOVES.parseValue(this.creatureNBT);
-        NBTTagList moveListNBTList = newLearnableMoveListNBT.getTagList("MoveList", 10);
-        int listPosToRemove = -1;
-        for (int i = 0; i < moveListNBTList.tagCount(); i++) {
-            NBTTagCompound moveNBTToTest = moveListNBTList.getCompoundTagAt(i);
-            if (moveNBTToTest.getInteger("Index") == pos) {
-                listPosToRemove = i;
-                break;
-            }
-        }
-        if (listPosToRemove >= 0) moveListNBTList.removeTag(listPosToRemove);
-        newLearnableMoveListNBT.setTag("MoveList", moveListNBTList);
-        CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.LEARNABLE_MOVES, newLearnableMoveListNBT);
-    }
 
-    @Deprecated
-    public NBTTagList getLearnableMovesListNBT() {
-        if (this.creatureNBT.isEmpty()) return new NBTTagList();
-        return this.creatureNBT.getTagList("LearnableMoves", 10);
-    }
-
-    @Deprecated
-    public void setLearnableMovesListNBT(NBTTagList newMovesList) {
-        if (this.creatureNBT.isEmpty()) return;
-        this.creatureNBT.setTag("LearnableMoves", newMovesList);
-    }
-
-    public void setLearnableMove(int pos, CreatureMove creatureMove) {
-        if (this.creatureNBT.isEmpty()) return;
-        NBTTagList toReplace = this.getLearnableMovesListNBT();
-        NBTTagCompound newMoveNBT = new NBTTagCompound();
-        newMoveNBT.setInteger("Move", creatureMove.ordinal());
-        toReplace.set(pos, newMoveNBT);
-        this.setLearnableMovesListNBT(toReplace);
+        NBTTagCompound learnableMoveListNBT = CreatureNBTKeyword.LEARNABLE_MOVES.parseValue(this.creatureNBT);
+        List<CreatureMove> learnableMoves = MoveListUtil.getListCreatureMoveFromNBT(learnableMoveListNBT);
+        learnableMoves.remove(pos);
+        CreatureNBTKeyword.mergeResult(
+                this.creatureNBT,
+                CreatureNBTKeyword.LEARNABLE_MOVES,
+                MoveListUtil.getNBTFromListCreatureMove(learnableMoves)
+        );
     }
 
     public int getMoveCooldown(int moveIndex) {

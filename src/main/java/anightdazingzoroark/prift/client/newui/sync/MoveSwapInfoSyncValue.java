@@ -2,13 +2,11 @@ package anightdazingzoroark.prift.client.newui.sync;
 
 import anightdazingzoroark.prift.client.newui.function.MoveSwapInfoConsumer;
 import anightdazingzoroark.prift.client.newui.function.MoveSwapInfoSupplier;
-import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
-import com.cleanroommc.modularui.network.NetworkUtils;
+import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

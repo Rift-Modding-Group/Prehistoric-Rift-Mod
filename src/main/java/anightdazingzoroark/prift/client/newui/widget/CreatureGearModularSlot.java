@@ -1,6 +1,9 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
-import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
+import anightdazingzoroark.prift.client.newui.holder.HolderHelper;
+import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
@@ -11,15 +14,19 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.jetbrains.annotations.NotNull;
 
 public class CreatureGearModularSlot extends ModularSlot {
-    private final SelectedCreatureInfo selectedCreatureInfo;
+    private final CreatureGuiData guiData;
 
-    public CreatureGearModularSlot(CreatureGearHandler creatureInventoryHandler, int index) {
-        this(null, creatureInventoryHandler, index);
-    }
-
-    public CreatureGearModularSlot(SelectedCreatureInfo selectedCreatureInfo, CreatureGearHandler creatureInventoryHandler, int index) {
-        super(creatureInventoryHandler, index);
-        this.selectedCreatureInfo = selectedCreatureInfo;
+    public CreatureGearModularSlot(CreatureGuiData guiData, int index) {
+        super(guiData.getCreatureGear(), index);
+        this.filter(guiData.getCreatureGear()::itemStackUsableAsGear);
+        this.accessibility(guiData.gearSlotChangeable(), guiData.gearSlotChangeable());
+        this.changeListener((newItem, onlyAmountChanged, client, init) -> {
+            if (!client) {
+                guiData.setSaddled(guiData.getCreatureGear().hasSaddle());
+                guiData.setLargeWeapon(guiData.getCreatureGear().getLargeWeapon());
+            }
+        });
+        this.guiData = guiData;
     }
 
     @Override
@@ -45,9 +52,17 @@ public class CreatureGearModularSlot extends ModularSlot {
     }
 
     private void updateSelectedCreatureNBT() {
-        if (this.selectedCreatureInfo == null) return;
+        if (this.guiData.dataType == CreatureGuiData.DataType.CREATURE) return;
         CreatureGearHandler creatureGearHandler = (CreatureGearHandler) this.getItemHandler();
-        NBTTagCompound paramArg = CreatureNBTKeyword.GEAR.setValue(creatureGearHandler.serializeNBT());
-        PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), paramArg, this.selectedCreatureInfo);
+
+        CreatureNBT creatureNBT = this.guiData.getSyncedNBT().getValue();
+        NBTTagCompound creatureNBTCompound = creatureNBT.getCreatureNBT();
+        CreatureNBTKeyword.mergeResult(creatureNBTCompound, CreatureNBTKeyword.GEAR, creatureGearHandler.serializeNBT());
+        CreatureNBTKeyword.mergeResult(creatureNBTCompound, CreatureNBTKeyword.SADDLED, creatureGearHandler.hasSaddle());
+        CreatureNBTKeyword.mergeResult(creatureNBTCompound, CreatureNBTKeyword.LARGE_WEAPON_TYPE, (byte) creatureGearHandler.getLargeWeapon().ordinal());
+        CreatureNBT newCreatureNBT = new CreatureNBT(creatureNBTCompound);
+
+        this.guiData.getSyncedNBT().setCreatureNBT(newCreatureNBT);
+        this.guiData.getSyncedNBT().notifyUpdate();
     }
 }

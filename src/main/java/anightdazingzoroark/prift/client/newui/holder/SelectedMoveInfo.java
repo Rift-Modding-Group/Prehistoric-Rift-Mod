@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.newui.holder;
 
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;

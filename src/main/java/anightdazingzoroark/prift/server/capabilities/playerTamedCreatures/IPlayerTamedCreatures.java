@@ -1,14 +1,8 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
-import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.List;
-import java.util.UUID;
 
 public interface IPlayerTamedCreatures {
     //for direct values

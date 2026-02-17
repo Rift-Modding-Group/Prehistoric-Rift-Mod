@@ -1,6 +1,9 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
-import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
+import anightdazingzoroark.prift.client.newui.holder.HolderHelper;
+import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
@@ -11,15 +14,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.jetbrains.annotations.NotNull;
 
 public class CreatureInventoryModularSlot extends ModularSlot {
-    private final SelectedCreatureInfo selectedCreatureInfo;
+    private final CreatureGuiData guiData;
 
-    public CreatureInventoryModularSlot(CreatureInventoryHandler creatureInventoryHandler, int index) {
-        this(null, creatureInventoryHandler, index);
-    }
-
-    public CreatureInventoryModularSlot(SelectedCreatureInfo selectedCreatureInfo, CreatureInventoryHandler creatureInventoryHandler, int index) {
-        super(creatureInventoryHandler, index);
-        this.selectedCreatureInfo = selectedCreatureInfo;
+    public CreatureInventoryModularSlot(CreatureGuiData guiData, int index) {
+        super(guiData.getCreatureInventory(), index);
+        this.guiData = guiData;
     }
 
     @Override
@@ -45,9 +44,15 @@ public class CreatureInventoryModularSlot extends ModularSlot {
     }
 
     private void updateSelectedCreatureNBT() {
-        if (this.selectedCreatureInfo == null) return;
+        if (this.guiData.dataType == CreatureGuiData.DataType.CREATURE) return;
         CreatureInventoryHandler creatureInventoryHandler = (CreatureInventoryHandler) this.getItemHandler();
-        NBTTagCompound paramArg = CreatureNBTKeyword.INVENTORY.setValue(creatureInventoryHandler.serializeNBT());
-        PlayerTamedCreaturesHelper.setCreatureNBTParam(this.getPlayer(), paramArg, this.selectedCreatureInfo);
+
+        CreatureNBT creatureNBT = this.guiData.getSyncedNBT().getValue();
+        NBTTagCompound creatureNBTCompound = creatureNBT.getCreatureNBT();
+        CreatureNBTKeyword.mergeResult(creatureNBTCompound, CreatureNBTKeyword.INVENTORY, creatureInventoryHandler.serializeNBT());
+        CreatureNBT newCreatureNBT = new CreatureNBT(creatureNBTCompound);
+
+        this.guiData.getSyncedNBT().setCreatureNBT(newCreatureNBT);
+        this.guiData.getSyncedNBT().notifyUpdate();
     }
 }

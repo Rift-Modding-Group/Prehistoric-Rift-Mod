@@ -53,6 +53,7 @@ public class CreatureNBTKeyword<T> {
         if (value instanceof Integer) nbtToSetTo.setInteger(this.name, (Integer) value);
         else if (value instanceof Boolean) nbtToSetTo.setBoolean(this.name, (Boolean) value);
         else if (value instanceof Byte) nbtToSetTo.setByte(this.name, (Byte) value);
+        //else if (value instanceof Enum<?>) nbtToSetTo.setByte(this.name, (byte) ((Enum<?>) value).ordinal());
         else if (value instanceof NBTTagCompound) nbtToSetTo.setTag(this.name, (NBTTagCompound) value);
         return nbtToSetTo;
     }
@@ -64,6 +65,7 @@ public class CreatureNBTKeyword<T> {
         if (this.clazz == Integer.class) return this.clazz.cast(nbtTagCompound.getInteger(this.name));
         else if (this.clazz == Boolean.class) return this.clazz.cast(nbtTagCompound.getBoolean(this.name));
         else if (this.clazz == Byte.class) return this.clazz.cast(nbtTagCompound.getByte(this.name));
+        //else if (this.clazz == Enum.class) return this.clazz.cast(nbtTagCompound.getByte(this.name));
         else if (this.clazz == NBTTagCompound.class) return this.clazz.cast(nbtTagCompound.getCompoundTag(this.name));
         return null;
     }
@@ -72,6 +74,7 @@ public class CreatureNBTKeyword<T> {
         if (this.clazz == Integer.class) return this.clazz.cast(0);
         else if (this.clazz == Boolean.class) return this.clazz.cast(false);
         else if (this.clazz == Byte.class) return this.clazz.cast((byte) 0);
+        //else if (this.clazz == Enum.class) return null;
         else if (this.clazz == NBTTagCompound.class) return this.clazz.cast(new NBTTagCompound());
         return null;
     }

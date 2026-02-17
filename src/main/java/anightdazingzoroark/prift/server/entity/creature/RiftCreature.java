@@ -1,10 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
 import anightdazingzoroark.prift.client.ui.RiftEggScreen;
-import anightdazingzoroark.prift.client.ui.SelectedMoveInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
@@ -16,9 +16,7 @@ import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
-import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerParty;
 import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -43,10 +41,10 @@ import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
 import anightdazingzoroark.riftlib.ui.RiftLibUIData;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
+import com.cleanroommc.modularui.ModularUI;
 import com.cleanroommc.modularui.api.IGuiHolder;
-import com.cleanroommc.modularui.factory.EntityGuiData;
-import com.cleanroommc.modularui.factory.GuiFactories;
 import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.ModularScreen;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.google.common.base.Predicate;
@@ -69,7 +67,6 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.*;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -93,7 +90,7 @@ import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
-import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -665,7 +662,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private boolean canFireCannon() {
         EntityPlayer rider = (EntityPlayer) this.getControllingPassenger();
         if (rider == null) return false;
-        boolean hasCannonballFlag = this.creatureInventory.findItem(CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, RiftItems.CANNONBALL).successful;
+        boolean hasCannonballFlag = this.creatureInventory.findItem(CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, RiftItems.CANNONBALL).successful();
         boolean riderCreativeFlag = rider.isCreative();
         return hasCannonballFlag || riderCreativeFlag;
     }
@@ -673,7 +670,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private boolean canFireMortar() {
         EntityPlayer rider = (EntityPlayer)this.getControllingPassenger();
         if (rider == null) return false;
-        boolean hasMortarShellFlag = this.creatureInventory.findItem(CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, RiftItems.MORTAR_SHELL).successful;
+        boolean hasMortarShellFlag = this.creatureInventory.findItem(CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, RiftItems.MORTAR_SHELL).successful();
         boolean riderCreativeFlag = rider.isCreative();
         return hasMortarShellFlag || riderCreativeFlag;
     }
@@ -681,7 +678,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private boolean canFireCatapult() {
         EntityPlayer rider = (EntityPlayer)this.getControllingPassenger();
         if (rider == null) return false;
-        boolean hasCatapultBoulderFlag = this.creatureInventory.findItem(CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, RiftItems.CATAPULT_BOULDER).successful;
+        boolean hasCatapultBoulderFlag = this.creatureInventory.findItem(CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, RiftItems.CATAPULT_BOULDER).successful();
         boolean riderCreativeFlag = rider.isCreative();
         return hasCatapultBoulderFlag || riderCreativeFlag;
     }
@@ -778,8 +775,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST,
                     itemStack -> isFavoriteFood(itemStack) && eatFromInvCooldown > 60 && !isEnergyRegenItem(itemStack)
             );
-            if (healFoodSearchResult.successful) {
-                this.eatFoodForHealing(healFoodSearchResult.foundStack);
+            if (healFoodSearchResult.successful()) {
+                this.eatFoodForHealing(healFoodSearchResult.foundStack());
                 this.eatFromInvCooldown = 0;
             }
         }
@@ -791,8 +788,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     CreatureInventoryHandler.ItemSearchDirection.LAST_TO_FIRST,
                     itemStack -> isEnergyRegenItem(itemStack) && eatFromInvForEnergyCooldown > 60
             );
-            if (energyFoodSearchResult.successful) {
-                this.eatFoodForEnergyRegen(energyFoodSearchResult.foundStack);
+            if (energyFoodSearchResult.successful()) {
+                this.eatFoodForEnergyRegen(energyFoodSearchResult.foundStack());
                 this.eatFromInvForEnergyCooldown = 0;
             }
         }
@@ -1306,7 +1303,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
+    public void writeEntityToNBT(@NotNull NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.LEVEL, this.getLevel());
         CreatureNBTKeyword.mergeResult(compound, CreatureNBTKeyword.XP, this.getXP());
@@ -3389,6 +3386,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public SoundEvent getWarnSound() {
         return null;
+    }
+
+    @Override
+    public ModularScreen createScreen(CreatureGuiData data, ModularPanel mainPanel) {
+        return new ModularScreen(RiftInitialize.MODID, mainPanel);
     }
 
     @Override

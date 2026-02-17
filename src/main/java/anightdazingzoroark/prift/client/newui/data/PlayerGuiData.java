@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.client.newui.data;
 
-import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
 import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
 import com.cleanroommc.modularui.factory.GuiData;

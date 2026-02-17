@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.client.newui.sync;
 
 import anightdazingzoroark.prift.client.newui.function.CreatureSwapInfoConsumer;
 import anightdazingzoroark.prift.client.newui.function.CreatureSwapInfoSupplier;
-import anightdazingzoroark.prift.client.ui.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;

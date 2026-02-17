@@ -127,9 +127,10 @@ public class PlayerParty implements IPlayerParty {
                 if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
                     corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                 }
-                //forcibly remove the creature
+                //get information first, then forcibly remove the creature
                 else if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
                     corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+                    this.setPartyMember(index, new CreatureNBT(corresponded));
                 }
 
                 //-----teleportation-----

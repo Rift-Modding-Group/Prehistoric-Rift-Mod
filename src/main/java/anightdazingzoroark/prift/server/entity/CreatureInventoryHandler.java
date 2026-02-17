@@ -1,9 +1,11 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import com.github.bsideup.jabel.Desugar;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
@@ -40,7 +42,7 @@ public class CreatureInventoryHandler extends ItemStackHandler {
         else return itemStackToAdd;
     }
 
-    public void removeItem(ItemSearchDirection itemSearchDirection, ItemStack itemStackToRemove) {
+    public void removeItem(@NotNull ItemSearchDirection itemSearchDirection, ItemStack itemStackToRemove) {
         ItemSearchResult similarItemResult = this.findItem(itemSearchDirection, itemStackToRemove);
 
         if (similarItemResult.successful) {
@@ -53,7 +55,7 @@ public class CreatureInventoryHandler extends ItemStackHandler {
         }
     }
 
-    public ItemSearchResult findItem(ItemSearchDirection searchDirection, ItemStack itemToSearch) {
+    public ItemSearchResult findItem(@NotNull ItemSearchDirection searchDirection, ItemStack itemToSearch) {
         if (searchDirection == ItemSearchDirection.FIRST_TO_LAST) {
             for (int i = 0; i < this.stacks.size(); i++) {
                 ItemStack itemStack = this.stacks.get(i);
@@ -75,7 +77,7 @@ public class CreatureInventoryHandler extends ItemStackHandler {
         return this.noItemFound;
     }
 
-    public ItemSearchResult findItem(ItemSearchDirection searchDirection, Item itemToSearch) {
+    public ItemSearchResult findItem(@NotNull ItemSearchDirection searchDirection, Item itemToSearch) {
         if (searchDirection == ItemSearchDirection.FIRST_TO_LAST) {
             for (int i = 0; i < this.stacks.size(); i++) {
                 ItemStack itemStack = this.stacks.get(i);
@@ -97,7 +99,7 @@ public class CreatureInventoryHandler extends ItemStackHandler {
         return this.noItemFound;
     }
 
-    public ItemSearchResult findItem(ItemSearchDirection searchDirection, Function<ItemStack, Boolean> itemSearchFunction) {
+    public ItemSearchResult findItem(@NotNull ItemSearchDirection searchDirection, Function<ItemStack, Boolean> itemSearchFunction) {
         if (searchDirection == ItemSearchDirection.FIRST_TO_LAST) {
             for (int i = 0; i < this.stacks.size(); i++) {
                 ItemStack itemStack = this.stacks.get(i);
@@ -115,17 +117,12 @@ public class CreatureInventoryHandler extends ItemStackHandler {
         return this.noItemFound;
     }
 
-    public static class ItemSearchResult {
-        public final boolean successful;
-        public final ItemStack foundStack;
-        public final int slot;
-
-        public ItemSearchResult(boolean successful, ItemStack foundStack, int slot) {
-            this.successful = successful;
-            this.foundStack = foundStack;
-            this.slot = slot;
-        }
+    @Override
+    public String toString() {
+        return this.stacks.toString();
     }
+
+    public @Desugar record ItemSearchResult(boolean successful, ItemStack foundStack, int slot) {}
 
     public enum ItemSearchDirection {
         FIRST_TO_LAST,
