@@ -501,6 +501,10 @@ turrettargeting.players_and_other_tames=%s will now target other players and the
 turrettargeting.hostiles=%s will now target hostile mobs
 turrettargeting.all=%s will now target anything it deems unfriendly
 
+party.label=Your Party
+party.swap_creatures=Swap Creatures
+party.open_journal=Journal
+
 tametrait.level=Level %s
 tametrait.health=Health: %s/%s
 tametrait.energy=Energy: %s/%s
@@ -517,6 +521,7 @@ tametab.return_to_party=Return to Party
 
 tamepanel.current_moves=%s Moves
 tamepanel.available_moves=Available Moves
+tamepanel.swap_moves=Swap Moves
 
 party.warning.cannot_summon=This creature cannot be summoned in your location!
 party.warning.cannot_summon_dead=This creature is dead! It cannot be summoned!

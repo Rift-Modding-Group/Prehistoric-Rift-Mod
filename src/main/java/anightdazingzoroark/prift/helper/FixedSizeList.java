@@ -96,6 +96,10 @@ public class FixedSizeList<T> {
         return this.list.contains(value);
     }
 
+    public void clear() {
+        for (int i = 0; i < this.maxSize; i++) this.list.set(i, this.defaultValue);
+    }
+
     public boolean isEmpty() {
         //check if entire list is default values
         for (T value : this.list) {

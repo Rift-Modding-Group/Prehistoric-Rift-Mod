@@ -169,6 +169,7 @@ public class PlayerParty implements IPlayerParty {
 
     @Override
     public void parseNBTListToParty(NBTTagList nbtTagList) {
+        this.party.clear();
         for (int index = 0; index < nbtTagList.tagCount(); index++) {
             NBTTagCompound compound = nbtTagList.getCompoundTagAt(index);
             if (compound.isEmpty()) continue;

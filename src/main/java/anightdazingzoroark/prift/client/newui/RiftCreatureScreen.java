@@ -1,14 +1,18 @@
 package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.client.ClientProxy;
-import anightdazingzoroark.prift.client.newui.widget.CreatureGearModularSlot;
-import anightdazingzoroark.prift.client.newui.widget.CreatureInventoryModularSlot;
+import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
+import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
+import anightdazingzoroark.prift.client.newui.sync.MoveSwapInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.sync.SelectedMoveInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.widget.*;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.client.newui.widget.SideButton;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
 import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
@@ -19,12 +23,14 @@ import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
+import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widget.ParentWidget;
+import com.cleanroommc.modularui.widget.sizer.Unit;
 import com.cleanroommc.modularui.widgets.*;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
@@ -38,6 +44,7 @@ import net.minecraft.init.Items;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class RiftCreatureScreen {
@@ -49,14 +56,22 @@ public class RiftCreatureScreen {
     public static ModularPanel buildCreatureUI(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disable();
 
+        //relevant for syncing selected creatures that are not deployed in world
         if (data.dataType == CreatureGuiData.DataType.SELECTION) {
             syncManager.syncValue("selectedCreatureSynced", data.getSyncedNBT());
         }
 
-        //tab related stuff
+        //tab controlling
         PagedWidget.Controller tabController = new PagedWidget.Controller();
 
-        return new ModularPanel(UIPanelNames.INTERACTED_CREATURE_SCREEN)
+        return new ModularPanelExitAffectable(UIPanelNames.INTERACTED_CREATURE_SCREEN)
+                .onEscPressed(panel -> {
+                    if (data.getOpenedFromParty()) {
+                        RiftMessages.WRAPPER.sendToServer(new RiftOpenPartyScreen(data.getPlayer()));
+                        return true;
+                    }
+                    return false;
+                })
                 .onUpdateListener(new Consumer<ModularPanel>() {
                     @Override
                     public void accept(ModularPanel modularPanel) {
@@ -113,11 +128,25 @@ public class RiftCreatureScreen {
                 )
                 .child(new PagedWidget<>().name("pagedWidget")
                         .controller(tabController).widthRel(1f).coverChildrenHeight()
+                        .onPageChange(page -> {
+                            //reset move selection when switching page
+                            SyncHandler selectedMoveSyncHandler = syncManager.getSyncHandlerFromMapKey("selectedMove:0");
+                            SyncHandler moveSwapSyncHandler = syncManager.getSyncHandlerFromMapKey("moveSwapInfo:0");
+                            SyncHandler moveSwitchingSyncHandler = syncManager.getSyncHandlerFromMapKey("moveSwitching:0");
+
+                            if (!(selectedMoveSyncHandler instanceof SelectedMoveInfoSyncValue selectedMoveValue)
+                                    || !(moveSwapSyncHandler instanceof MoveSwapInfoSyncValue moveSwapValue)
+                                    || !(moveSwitchingSyncHandler instanceof BooleanSyncValue moveSwitchingValue)) return;
+
+                            selectedMoveValue.setValue(null);
+                            moveSwapValue.getValue().clear();
+                            moveSwitchingValue.setBoolValue(false);
+                        })
+                        .initialPage(data.getPageToOpenTo())
                         .addPage(creatureInventoryPage(data, syncManager))
                         .addPage(creatureSettingsPage(data, syncManager))
                         .addPage(creatureInfoPage(data, syncManager, settings))
                         .addPage(creatureMovesPage(data, syncManager, settings))
-                        .initialPage(data.getPageToOpenTo())
                 )
                 .childIf(data.getOpenedFromParty(), () -> new Column()
                         .coverChildren()
@@ -464,11 +493,185 @@ public class RiftCreatureScreen {
     }
 
     private static ParentWidget<?> creatureInfoPage(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
-        return RiftCreatureInfoPanel.build(data, syncManager, settings).name("infoPage");
+        return new ParentWidget<>().padding(7, 7).coverChildren()
+                .child(new Row().coverChildren().childPadding(5)
+                        //left side is the entity and the name
+                        .child(new Column().name("leftSide")
+                                .childPadding(5).coverChildren()
+                                .child(new ParentWidget<>().size(96, 64)
+                                        .child(new Rectangle().color(0xFF000000).cornerRadius(5)
+                                                .asWidget().size(96, 64))
+                                        .child(new Rectangle().color(0xFF808080).cornerRadius(5)
+                                                .asWidget().size(94, 62).center())
+                                        .child(new EntityWidget<>(duplicateCreatureForRender(data), 10f)
+                                                .size(92, 60).center().yawRotationAngle(135f))
+                                )
+                                .child(IKey.str(data.getName(false)).scale(0.75f).asWidget())
+                                .child(IKey.lang("tametrait.level", data.getLevel()).scale(0.75f).asWidget())
+                        )
+                        //separator line
+                        .child(new Rectangle().color(0xFF000000).asWidget().size(1, 108))
+                        //right side is info
+                        .child(new Column().name("rightSide")
+                                .childPadding(5).coverChildren()
+                                //species name
+                                .child(new ParentWidget<>().width(96).coverChildrenHeight()
+                                        .child(IKey.lang("tametrait.species", Objects.requireNonNull(data.getCreatureType()).getTranslatedName())
+                                                .scale(0.5f).asWidget().left(0)
+                                        )
+                                )
+                                //health
+                                .child(new Column().childPadding(2).coverChildren()
+                                        .child(new ParentWidget<>().width(96).coverChildrenHeight()
+                                                .child(IKey.lang("tametrait.health", (int) data.getHealth()[0], (int) data.getHealth()[1])
+                                                        .scale(0.5f).asWidget().left(0)
+                                                )
+                                        )
+                                        .child(new ParentWidget<>().size(96, 3)
+                                                .child(new Rectangle().color(UIColors.barBorderColor).asWidget().size(96, 3))
+                                                .child(new Rectangle().color(UIColors.barEmptyColor).asWidget().size(94, 1).center())
+                                                .child(new Rectangle().color(UIColors.barHealthColor).asWidget().height(1)
+                                                        .width(() -> (94 * data.getHealth()[0] / data.getHealth()[1]), Unit.Measure.PIXEL)
+                                                        .right(() -> (94 - (94 * data.getHealth()[0] / data.getHealth()[1]) + 1), Unit.Measure.PIXEL)
+                                                        .bottom(1)
+                                                )
+                                        )
+                                )
+                                //energy
+                                .child(new Column().childPadding(2).coverChildren()
+                                        .child(new ParentWidget<>().width(96).coverChildrenHeight()
+                                                .child(IKey.lang("tametrait.energy", data.getEnergy()[0], data.getEnergy()[1])
+                                                        .scale(0.5f).asWidget().left(0)
+                                                )
+                                        )
+                                        .child(new ParentWidget<>().size(96, 3)
+                                                .child(new Rectangle().color(UIColors.barBorderColor).asWidget().size(96, 3))
+                                                .child(new Rectangle().color(UIColors.barEmptyColor).asWidget().size(94, 1).center())
+                                                .child(new Rectangle().color(UIColors.barEnergyColor).asWidget().height(1)
+                                                        .width(() -> ((double) (94 * data.getEnergy()[0]) / data.getEnergy()[1]), Unit.Measure.PIXEL)
+                                                        .right(() -> (94 - ((double) (94 * data.getEnergy()[0]) / data.getEnergy()[1]) + 1), Unit.Measure.PIXEL)
+                                                        .bottom(1)
+                                                )
+                                        )
+                                )
+                                //experience
+                                .child(new Column().childPadding(2).coverChildren()
+                                        .child(new ParentWidget<>().width(96).coverChildrenHeight()
+                                                .child(IKey.lang("tametrait.xp", data.getXP()[0], data.getXP()[1])
+                                                        .scale(0.5f).asWidget().left(0)
+                                                )
+                                        )
+                                        .child(new ParentWidget<>().size(96, 3)
+                                                .child(new Rectangle().color(UIColors.barBorderColor).asWidget().size(96, 3))
+                                                .child(new Rectangle().color(UIColors.barEmptyColor).asWidget().size(94, 1).center())
+                                                .child(new Rectangle().color(UIColors.barXpColor).asWidget().height(1)
+                                                        .width(() -> ((double) (94 * data.getXP()[0]) / data.getXP()[1]), Unit.Measure.PIXEL)
+                                                        .right(() -> (94 - ((double) (94 * data.getXP()[0]) / data.getXP()[1]) + 1), Unit.Measure.PIXEL)
+                                                        .bottom(1)
+                                                )
+                                        )
+                                )
+                                //age
+                                .child(new ParentWidget<>().width(96).coverChildrenHeight()
+                                        .child(IKey.lang("tametrait.age", data.getAgeInDays())
+                                                .scale(0.5f).asWidget().left(0)
+                                        )
+                                )
+                                //acquisition info
+                                .child(new ParentWidget<>().width(96).coverChildrenHeight()
+                                        .child(IKey.str(data.getAcquisitionInfoString())
+                                                .scale(0.5f).asWidget()
+                                        )
+                                )
+                        )
+                );
     }
 
     private static ParentWidget<?> creatureMovesPage(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
-        return RiftCreatureMovesPanel.build(data, syncManager, settings).name("movesPage");
+        //selected move
+        SelectedMoveInfoSyncValue selectedMoveValue = new SelectedMoveInfoSyncValue(
+                () -> data.selectedMoveInfoUI,
+                value -> data.selectedMoveInfoUI = value
+        );
+        syncManager.syncValue("selectedMove", selectedMoveValue);
+
+        //move switching
+        BooleanSyncValue isMoveSwitching = new BooleanSyncValue(() -> data.isMoveSwitchingUI, value -> data.isMoveSwitchingUI = value);
+        syncManager.syncValue("moveSwitching", isMoveSwitching);
+
+        //helper sync value for helper class for swapping moves
+        MoveSwapInfoSyncValue moveSwapInfo = new MoveSwapInfoSyncValue(
+                () -> data.moveSwapInfoUI,
+                value -> data.moveSwapInfoUI = value
+        );
+        syncManager.syncValue("moveSwapInfo", moveSwapInfo);
+
+        return new ParentWidget<>().padding(7, 7).coverChildrenHeight().width(220)
+                .child(new Row().coverChildren().childPadding(5)
+                        //left side is the creature's current moves
+                        .child(new ParentWidget<>().coverChildrenWidth().height(147)
+                                .child(new Column().name("leftSide")
+                                        .childPadding(5).coverChildren()
+                                        //header
+                                        .child(new ParentWidget<>().width(96).coverChildrenHeight()
+                                                .child(IKey.lang("tamepanel.current_moves", data.getName(false)).asWidget().scale(0.75f).left(0))
+                                        )
+                                        //current moves
+                                        .child(new MoveListWidget(data, selectedMoveValue, SelectedMoveInfo.SelectedMoveType.LEARNT, moveSwapInfo, isMoveSwitching).size(90, 70))
+                                        //add box where info about selected move will be placed
+                                        .child(new ParentWidget<>().size(96, 60)
+                                                .child(new Rectangle().color(0xFF000000).cornerRadius(5).asWidget().size(96, 60))
+                                                .child(new Rectangle().color(0xFF808080).cornerRadius(5).asWidget().size(94, 58).center())
+                                                .child(new ParentWidget<>().size(90, 54).center()
+                                                        .child(IKey.dynamic(() -> {
+                                                            if (selectedMoveValue.getValue() != null) {
+                                                                CreatureMove selectedMove = selectedMoveValue.getValue().applyMove(data);
+                                                                if (selectedMove != null) return selectedMove.getTranslatedDescription();
+                                                                return I18n.format("creature_move.none_selected_switch.description");
+                                                            }
+                                                            else {
+                                                                if (isMoveSwitching.getBoolValue()) {
+                                                                    return I18n.format("creature_move.none_selected_switch.description");
+                                                                }
+                                                                return I18n.format("creature_move.none_selected.description");
+                                                            }
+                                                        }).asWidget().scale(0.75f).left(0))
+                                                )
+                                        )
+                                )
+                        )
+                        //separator line
+                        .child(new Rectangle().color(0xFF000000).asWidget().size(1, 108))
+                        //right side is info
+                        .child(new ParentWidget<>().coverChildrenWidth().height(147)
+                                .child(new Column().name("rightSide")
+                                        .childPadding(5).coverChildren()
+                                        .child(new ParentWidget<>().width(96).coverChildrenHeight()
+                                                //header
+                                                .child(IKey.lang("tamepanel.available_moves").asWidget().scale(0.75f).left(0))
+                                                //swap moves buttom
+                                                .child(new ToggleButton().overlay(GuiTextures.REVERSE.asIcon().size(12)).size(12)
+                                                        .addTooltipElement(IKey.lang("tamepanel.swap_moves"))
+                                                        .value(new BoolValue.Dynamic(
+                                                                isMoveSwitching::getBoolValue,
+                                                                value -> {
+                                                                    isMoveSwitching.setBoolValue(value);
+                                                                    selectedMoveValue.setValue(null);
+                                                                    moveSwapInfo.getValue().clear();
+                                                                })
+                                                        ).right(0)
+                                                )
+                                        )
+                                        .child(new ParentWidget<>().coverChildrenWidth().height(130)
+                                                //background
+                                                .child(new Rectangle().color(0xFF000000).cornerRadius(5).asWidget().size(96, 130))
+                                                .child(new Rectangle().color(0xFF808080).cornerRadius(5).asWidget().size(94, 128).center())
+                                                .child(new MoveListWidget(data, selectedMoveValue, SelectedMoveInfo.SelectedMoveType.LEARNABLE, moveSwapInfo, isMoveSwitching)
+                                                        .size(90, 120).center())
+                                        )
+                                )
+                        )
+                );
     }
 
     private static void tryAddChild(ParentWidget<?> parentWidget, IWidget childToAdd) {
@@ -483,5 +686,11 @@ public class RiftCreatureScreen {
             parentWidget.remove(childToRemove);
             parentWidget.scheduleResize();
         }
+    }
+
+    private static RiftCreature duplicateCreatureForRender(CreatureGuiData data) {
+        if (data == null) return null;
+        CreatureNBT creatureNBT = data.getCreatureNBT();
+        return creatureNBT.recreateCreatureAsNBT(data.getWorld());
     }
 }

@@ -161,6 +161,10 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
             }
         }
 
+        public boolean canSwapHalfway() {
+            return this.creatureOne != null && this.creatureTwo == null;
+        }
+
         public boolean canSwap() {
             return this.creatureOne != null && this.creatureTwo != null;
         }

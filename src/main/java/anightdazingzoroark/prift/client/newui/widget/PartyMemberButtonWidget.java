@@ -85,18 +85,27 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         if (this.isCreatureSwitching.getBoolValue() != this.isSwitching) {
             this.isSwitching = this.isCreatureSwitching.getBoolValue();
 
+            //reset swap info
+            this.swapInfo.getValue().clear();
+
             //resetting isSelected based on if isCreatureSwitching just got changed
             this.isSelected = false;
 
             //close dropdowns
             if (this.getMenu().isValid()) this.getMenu().getPanel().closeIfOpen();
-
         }
     }
 
     @Override
     @NotNull
     public Result onMousePressed(int mouseButton) {
+        //do not continue if creatureNBT is null
+        if (this.creatureNBT == null) return Result.ACCEPT;
+
+        //only continue if nbt is not empty, or if nbt is empty but switching is enabled
+        boolean canUseCondition = !this.creatureNBT.nbtIsEmpty() || (this.creatureNBT.nbtIsEmpty() && this.isCreatureSwitching.getBoolValue() && this.swapInfo.getValue().canSwapHalfway());
+        if (!canUseCondition) return Result.ACCEPT;
+
         Interactable.playButtonClickSound();
         this.isSelected = !this.isSelected;
         if (!(this.getParent() instanceof PaddedGrid gridParent)) return super.onMousePressed(mouseButton);
@@ -127,6 +136,16 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
             }
         }
         return Result.SUCCESS;
+    }
+
+    public Menu<?> getButtonMenu() {
+        if (!this.getMenu().isValid()) return null;
+        return this.getMenu();
+    }
+
+    public void closeButtonMenu() {
+        this.isSelected = false;
+        this.closeMenu(false);
     }
 
     @Override
@@ -217,7 +236,20 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
             int xpBar = (int) (xpPercentage * barWidth);
             new Rectangle().color(UIColors.barXpColor).draw(context, 4, 41, xpBar, 1, theme);
         }
-        else new Rectangle().color(0xFF212121).cornerRadius(5).drawAtZero(context, this.getArea(), theme);
+        else {
+            //to give the illusion that there's a border since rectangles w corner radiuses cant be hollow
+            //we doin this trick where the border is same color as contents until it hovered and when we doin
+            //swappin
+            boolean canHaveBorder = this.creatureNBT != null && this.creatureNBT.nbtIsEmpty() && this.isCreatureSwitching.getBoolValue();
+            int hoveredColor = (canHaveBorder && this.isHovering()) ? 0xFFFFFFFF : 0xFF212121;
+            new Rectangle().color(hoveredColor).cornerRadius(5).drawAtZero(context, this.getArea(), theme);
+
+            //le empty box
+            Area bgArea = new Area(this.getArea());
+            bgArea.h(bgArea.h() - 2);
+            bgArea.w(bgArea.w() - 2);
+            new Rectangle().color(0xFF212121).cornerRadius(5).draw(context, 1, 1, bgArea.w(), bgArea.h(), theme);
+        }
     }
 
     @Override
