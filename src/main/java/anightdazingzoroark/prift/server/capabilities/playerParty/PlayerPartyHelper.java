@@ -3,12 +3,8 @@ package anightdazingzoroark.prift.server.capabilities.playerParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import anightdazingzoroark.prift.server.message.NewRiftDeployPartyMem;
-import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class PlayerPartyHelper {
     public static final int maxSize = 6;
@@ -48,10 +44,5 @@ public class PlayerPartyHelper {
             else if (player.world.getBlockState(player.getPosition().down()).getMaterial() != Material.AIR) return true;
         }
         return false;
-    }
-
-    public static void deployCreatureFromParty(EntityPlayer player, int index, boolean deploy) {
-        if (player == null || index < 0 || index >= maxSize) return;
-        RiftMessages.WRAPPER.sendToServer(new NewRiftDeployPartyMem(player, index, deploy));
     }
 }

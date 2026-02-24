@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.capabilities.playerJournalProgress;
 
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 
 import java.util.*;
 
@@ -57,5 +59,28 @@ public class PlayerJournalProgress implements IPlayerJournalProgress {
             else if (!this.encounteredCreatures.isEmpty()) categoryList.add(category);
         }
         return categoryList;
+    }
+
+    public NBTTagList getProgressAsNBTList() {
+        NBTTagList toReturn = new NBTTagList();
+        for (Map.Entry<RiftCreatureType, Boolean> encounteredEntry : this.encounteredCreatures.entrySet()) {
+            NBTTagCompound entry = new NBTTagCompound();
+            entry.setByte("Creature", (byte) encounteredEntry.getKey().ordinal());
+            entry.setBoolean("IsUnlocked", encounteredEntry.getValue());
+            toReturn.appendTag(entry);
+        }
+        return toReturn;
+    }
+
+    public void parseNBTListToProgress(NBTTagList nbtTagList) {
+        this.encounteredCreatures.clear();
+
+        for (int index = 0; index < nbtTagList.tagCount(); index++) {
+            NBTTagCompound entry = nbtTagList.getCompoundTagAt(index);
+            this.encounteredCreatures.put(
+                    RiftCreatureType.values()[entry.getByte("Creature")],
+                    entry.getBoolean("IsUnlocked")
+            );
+        }
     }
 }

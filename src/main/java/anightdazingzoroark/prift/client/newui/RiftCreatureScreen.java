@@ -17,8 +17,6 @@ import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftOpenPartyScreen;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
@@ -67,7 +65,7 @@ public class RiftCreatureScreen {
         return new ModularPanelExitAffectable(UIPanelNames.INTERACTED_CREATURE_SCREEN)
                 .onEscPressed(panel -> {
                     if (data.getOpenedFromParty()) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenPartyScreen(data.getPlayer()));
+                        PlayerUIHelper.openUI(data.getPlayer(), UIPanelNames.PARTY_SCREEN);
                         return true;
                     }
                     return false;
@@ -154,7 +152,7 @@ public class RiftCreatureScreen {
                         .child(new SideButton()
                                 .overlay(RiftUIIcons.BACK.asIcon().size(24))
                                 .onMousePressed(button -> {
-                                    RiftMessages.WRAPPER.sendToServer(new RiftOpenPartyScreen(data.getPlayer()));
+                                    PlayerUIHelper.openUI(data.getPlayer(), UIPanelNames.PARTY_SCREEN);
                                     return true;
                                 })
                                 .addTooltipElement(IKey.lang("tametab.return_to_party"))

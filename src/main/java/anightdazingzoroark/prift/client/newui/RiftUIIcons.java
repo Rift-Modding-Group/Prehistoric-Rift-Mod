@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.client.newui;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.cleanroommc.modularui.drawable.UITexture;
 import net.minecraft.util.ResourceLocation;
 
@@ -14,6 +16,26 @@ public class RiftUIIcons {
                 .subAreaXYWH(x, y, 16, 16)
                 .iconColorType()
                 .name(name)
+                .build();
+    }
+
+    public static UITexture creatureIcon(RiftCreatureType creatureType) {
+        return UITexture.builder()
+                .location(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+creatureType.toString().toLowerCase()+"_icon.png"))
+                .imageSize(32, 32)
+                .subAreaXYWH(0, 0, 24, 24)
+                .iconColorType()
+                .name(creatureType.friendlyName)
+                .build();
+    }
+
+    public static UITexture creatureIllustration(RiftCreatureType creatureType) {
+        return UITexture.builder()
+                .location(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+creatureType.toString().toLowerCase()+"_icon.png"))
+                .imageSize(32, 32)
+                .subAreaXYWH(0, 0, 24, 24)
+                .iconColorType()
+                .name(creatureType.friendlyName)
                 .build();
     }
 }

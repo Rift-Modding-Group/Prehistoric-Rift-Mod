@@ -1,13 +1,14 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.newui.PlayerUIHelper;
+import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenInventoryFromMenu;
-import anightdazingzoroark.prift.server.message.RiftOpenPartyScreen;
 import anightdazingzoroark.prift.server.message.RiftOpenWeaponInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
@@ -130,10 +131,6 @@ public class ClientEvents {
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
     public void openParty(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
-        if (RiftControls.openParty.isKeyDown()) {
-            RiftMessages.WRAPPER.sendToServer(new RiftOpenPartyScreen(player));
-            //ClientGUI.open(new NewRiftPartyScreen());
-            //RiftLibUIHelper.showUI(player, RiftGui.PARTY_SCREEN, 0, 0, 0);
-        }
+        if (RiftControls.openParty.isKeyDown()) PlayerUIHelper.openUI(player, UIPanelNames.PARTY_SCREEN);
     }
 }

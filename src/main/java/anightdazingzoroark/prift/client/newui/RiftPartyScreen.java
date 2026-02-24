@@ -8,8 +8,6 @@ import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
 import anightdazingzoroark.prift.client.newui.widget.PartyMemberButtonWidget;
 import anightdazingzoroark.prift.client.newui.widget.SideButton;
 import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftOpenPartyScreen;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
@@ -108,7 +106,7 @@ public class RiftPartyScreen {
                         .child(new SideButton()
                                 .overlay(new ItemDrawable(Items.BOOK).asIcon())
                                 .onMousePressed(button -> {
-                                    //RiftMessages.WRAPPER.sendToServer(new RiftOpenPartyScreen(data.getPlayer()));
+                                    PlayerUIHelper.openUI(data.getPlayer(), UIPanelNames.JOURNAL_SCREEN);
                                     return true;
                                 })
                                 .addTooltipElement(IKey.lang("party.open_journal"))

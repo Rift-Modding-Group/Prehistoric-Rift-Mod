@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.newui.UIThemes;
 import anightdazingzoroark.prift.client.overlay.RiftCreatureControls;
 import anightdazingzoroark.prift.client.overlay.RiftLargeWeaponControls;
 import anightdazingzoroark.prift.client.overlay.RiftMountEnergyBar;
@@ -20,6 +21,7 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureRidePosLinker;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.RiftLibLinkerRegistry;
 import anightdazingzoroark.riftlib.ui.RiftLibUIRegistry;
+import com.cleanroommc.modularui.api.IThemeApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.util.math.BlockPos;
@@ -56,6 +58,7 @@ public class ClientProxy extends ServerProxy {
         EntityRenderer.registerRenderers();
         BlockRenderer.registerRenderers();
         RiftGui.registerUI();
+        IThemeApi.get().registerTheme(UIThemes.JOURNAL_THEME);
         MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());
         MinecraftForge.EVENT_BUS.register(new RiftCreatureControls());
         MinecraftForge.EVENT_BUS.register(new RiftLargeWeaponControls());
