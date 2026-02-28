@@ -7,7 +7,7 @@ import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
 import anightdazingzoroark.prift.client.newui.widget.PartyMemberButtonWidget;
 import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
 import anightdazingzoroark.prift.client.newui.widget.SideButton;
-import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;

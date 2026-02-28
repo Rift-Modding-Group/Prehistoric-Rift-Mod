@@ -1,0 +1,33 @@
+package anightdazingzoroark.prift.server.properties.playerParty;
+
+import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.propertySystem.Property;
+import anightdazingzoroark.prift.server.message.RiftApplyCreatureSwap;
+import anightdazingzoroark.prift.server.message.RiftDeployPartyMem;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
+import anightdazingzoroark.prift.server.properties.RiftPropertyRegistry;
+import net.minecraft.entity.player.EntityPlayer;
+
+public class PlayerPartyHelper {
+    public static final int maxSize = 6;
+
+    public static PlayerPartyProperties getPlayerParty(EntityPlayer player) {
+        return Property.getProperty(RiftPropertyRegistry.PLAYER_PARTY, player);
+    }
+
+    public static void applyCreatureSwapClient(EntityPlayer player, SelectedCreatureInfo.SwapInfo swapInfo) {
+        if (!player.world.isRemote) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftApplyCreatureSwap(player, swapInfo));
+    }
+
+    public static void deployCreatureClient(EntityPlayer player, int index, boolean deploy) {
+        if (!player.world.isRemote) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftDeployPartyMem(player, index, deploy));
+    }
+
+    public static void teleportCreatureClient(EntityPlayer player, int index) {
+        if (!player.world.isRemote) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(player, index));
+    }
+}

@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.client;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.screens.player.PlayerUIHelper;
-import anightdazingzoroark.prift.client.newui.screens.player.RiftPartyScreen;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -11,7 +10,6 @@ import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftOpenWeaponInventory;
-import com.cleanroommc.modularui.factory.ClientGUI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.GameSettings;
@@ -129,7 +127,6 @@ public class ClientEvents {
     }
 
     //open party when pressing the party button
-    //player.openGui(RiftInitialize.instance, ServerProxy.GUI_CREATURE_INVENTORY, world, message.creatureId, 0, 0);
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
     public void openParty(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;

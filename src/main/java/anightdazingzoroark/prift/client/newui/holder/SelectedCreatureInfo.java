@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.client.newui.holder;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -146,6 +145,14 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
             }
         }
 
+        public SelectedCreatureInfo getCreatureOne() {
+            return this.creatureOne;
+        }
+
+        public SelectedCreatureInfo getCreatureTwo() {
+            return this.creatureTwo;
+        }
+
         public void setCreature(SelectedCreatureInfo creatureForSwap) {
             if (creatureForSwap == null) return;
             if (this.canSwap()) return;
@@ -166,25 +173,6 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
 
         public boolean canSwap() {
             return this.creatureOne != null && this.creatureTwo != null;
-        }
-
-        public boolean applySwap(IPlayerParty playerParty) {
-            if (!this.canSwap() || playerParty == null) return false;
-
-            boolean swapSuccess = false;
-            if (this.creatureOne.selectedPosType == SelectedPosType.PARTY && this.creatureTwo.selectedPosType == SelectedPosType.PARTY) {
-                CreatureNBT nbtOne = playerParty.getPartyMember(this.creatureOne.pos[0]);
-                CreatureNBT nbtTwo = playerParty.getPartyMember(this.creatureTwo.pos[0]);
-
-                playerParty.setPartyMember(this.creatureOne.pos[0], nbtTwo);
-                playerParty.setPartyMember(this.creatureTwo.pos[0], nbtOne);
-
-                swapSuccess = true;
-            }
-
-            this.clear();
-
-            return swapSuccess;
         }
 
         public void clear() {

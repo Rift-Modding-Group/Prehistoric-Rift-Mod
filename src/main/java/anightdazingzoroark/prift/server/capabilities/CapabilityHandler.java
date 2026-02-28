@@ -9,12 +9,7 @@ import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotion
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
-import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
-import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
-import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyProvider;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
@@ -22,26 +17,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class CapabilityHandler {
-    public static final ResourceLocation PLAYER_PARTY_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playerparty");
-    
     public static final ResourceLocation PLAYER_TAMED_CREATURES_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playertamedcreatures");
     public static final ResourceLocation PLAYER_JOURNAL_PROGRESS_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playerjournalprogress");
     public static final ResourceLocation NON_POTION_EFFECTS = new ResourceLocation(RiftInitialize.MODID, "nonpotioneffects");
@@ -54,7 +39,6 @@ public class CapabilityHandler {
     @SubscribeEvent
     public void attachCapabilityToEntity(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof EntityPlayer player) {
-            event.addCapability(PLAYER_PARTY_CAPABILITY, new PlayerPartyProvider());
             event.addCapability(PLAYER_TAMED_CREATURES_CAPABILITY, new PlayerTamedCreaturesProvider());
             event.addCapability(PLAYER_JOURNAL_PROGRESS_CAPABILITY, new PlayerJournalProgressProvider());
         }
@@ -101,11 +85,6 @@ public class CapabilityHandler {
     @SubscribeEvent
     public void onPlayerClone(PlayerEvent.Clone event) {
         EntityPlayer player = event.getEntityPlayer();
-
-        //replicate party creatures
-        IPlayerParty playerParty = player.getCapability(PlayerPartyProvider.PLAYER_PARTY_CAPABILITY, null);
-        IPlayerParty oldPlayerParty = event.getOriginal().getCapability(PlayerPartyProvider.PLAYER_PARTY_CAPABILITY, null);
-        playerParty.parseNBTListToParty(oldPlayerParty.getPartyAsNBTList());
 
         //replicate tamed creatures
         IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);

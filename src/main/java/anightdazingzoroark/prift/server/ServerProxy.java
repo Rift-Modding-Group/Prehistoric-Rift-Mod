@@ -2,9 +2,9 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
-import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
-import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerParty;
-import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyStorage;
+import anightdazingzoroark.prift.propertySystem.networking.PropertiesNetworking;
+import anightdazingzoroark.prift.propertySystem.registry.PropertiesBootstrap;
+import anightdazingzoroark.prift.propertySystem.sync.PropertySyncEvents;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
 import anightdazingzoroark.prift.compat.crafttweaker.RiftCrafttweaker;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
@@ -33,6 +33,7 @@ import anightdazingzoroark.prift.server.events.ServerEvents;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.properties.RiftPropertyRegistry;
 import anightdazingzoroark.prift.server.recipes.RiftRecipes;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntities;
 import anightdazingzoroark.prift.server.world.RiftPlantGenerator;
@@ -59,7 +60,7 @@ public class ServerProxy {
         registryPrimer = new InternalRegistryPrimer();
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));
 
-        CapabilityManager.INSTANCE.register(IPlayerParty.class, new PlayerPartyStorage(), PlayerParty::new);
+
         CapabilityManager.INSTANCE.register(IPlayerTamedCreatures.class, new PlayerTamedCreaturesStorage(), PlayerTamedCreatures::new);
         CapabilityManager.INSTANCE.register(IPlayerJournalProgress.class, new PlayerJournalProgressStorage(), PlayerJournalProgress::new);
         CapabilityManager.INSTANCE.register(INonPotionEffects.class, new NonPotionEffectsStorage(), NonPotionEffects::new);
@@ -84,6 +85,12 @@ public class ServerProxy {
         MinecraftForge.EVENT_BUS.register(new RiftEffects());
         RiftEntities.registerEntities();
         if (GeneralConfig.canUseSimpleDiff()) loadTemperatureRegistry();
+
+        //custom entity property system
+        PropertiesBootstrap.register();
+        PropertiesNetworking.register();
+        MinecraftForge.EVENT_BUS.register(new PropertySyncEvents());
+        RiftPropertyRegistry.register();
 
         GuiManager.registerFactory(CreatureGuiFactory.INSTANCE);
 

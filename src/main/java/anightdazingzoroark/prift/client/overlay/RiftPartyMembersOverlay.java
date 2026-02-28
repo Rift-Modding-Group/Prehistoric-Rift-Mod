@@ -3,16 +3,13 @@ package anightdazingzoroark.prift.client.overlay;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.server.capabilities.CapabilitySyncDirection;
-import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
-import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.message.RiftSyncPlayerParty;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -30,48 +27,26 @@ import static net.minecraft.client.gui.Gui.drawRect;
 
 public class RiftPartyMembersOverlay {
     private static final ResourceLocation hud = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
-    private boolean syncFromServerFlag = true;
-    private boolean syncToServerFlag = false;
-    private IPlayerParty playerParty;
+    private boolean partyLoaded = true;
+    private PlayerPartyProperties playerParty;
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPreRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        EntityPlayer player = Minecraft.getMinecraft().player;
 
         //sync
-        this.syncFromServer(player);
-        this.syncToServer(player);
+        if (this.partyLoaded) {
+            this.playerParty = PlayerPartyHelper.getPlayerParty(player);
+            this.partyLoaded = false;
+        }
 
         //block if the player party isn't defined yet
         if (this.playerParty == null) return;
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
             ScaledResolution resolution = event.getResolution();
-            FixedSizeList<CreatureNBT> partyNBT = playerParty.getParty();
+            FixedSizeList<CreatureNBT> partyNBT = this.playerParty.getPlayerParty();
             this.renderHUD(partyNBT, resolution.getScaledWidth(), resolution.getScaledHeight());
-        }
-    }
-
-    private void setSyncFromServer() {
-        this.syncFromServerFlag = true;
-    }
-
-    private void syncFromServer(EntityPlayer player) {
-        if (this.syncFromServerFlag) {
-            PlayerPartyHelper.syncPlayerParty(player, CapabilitySyncDirection.SERVER_TO_CLIENT);
-            this.playerParty = PlayerPartyHelper.getPlayerParty(player);
-            this.syncFromServerFlag = false;
-        }
-    }
-
-    private void setSyncToServer() {
-        this.syncToServerFlag = true;
-    }
-
-    private void syncToServer(EntityPlayer player) {
-        if (this.syncToServerFlag) {
-            PlayerPartyHelper.syncPlayerParty(player, CapabilitySyncDirection.CLIENT_TO_SERVER);
-            this.syncToServerFlag = false;
         }
     }
 
@@ -258,12 +233,10 @@ public class RiftPartyMembersOverlay {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (RiftControls.switchUpwards.isKeyDown()) {
             this.playerParty.prevQuickSelectPos();
-            this.setSyncToServer();
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
         if (RiftControls.switchDownwards.isKeyDown()) {
             this.playerParty.nextQuickSelectPos();
-            this.setSyncToServer();
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
         /*
