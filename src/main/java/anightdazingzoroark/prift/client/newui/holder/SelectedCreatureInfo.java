@@ -1,9 +1,8 @@
 package anightdazingzoroark.prift.client.newui.holder;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
+import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.client.newui.sync.PlayerPartySyncValue;
 import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
@@ -169,20 +168,23 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
             return this.creatureOne != null && this.creatureTwo != null;
         }
 
-        public void applySwap(PlayerPartySyncValue playerPartySyncValue) {
-            if (!this.canSwap()) return;
+        public boolean applySwap(IPlayerParty playerParty) {
+            if (!this.canSwap() || playerParty == null) return false;
 
+            boolean swapSuccess = false;
             if (this.creatureOne.selectedPosType == SelectedPosType.PARTY && this.creatureTwo.selectedPosType == SelectedPosType.PARTY) {
-                CreatureNBT nbtOne = playerPartySyncValue.getValue().getPartyMember(this.creatureOne.pos[0]);
-                CreatureNBT nbtTwo = playerPartySyncValue.getValue().getPartyMember(this.creatureTwo.pos[0]);
+                CreatureNBT nbtOne = playerParty.getPartyMember(this.creatureOne.pos[0]);
+                CreatureNBT nbtTwo = playerParty.getPartyMember(this.creatureTwo.pos[0]);
 
-                IPlayerParty playerPartyToSet = playerPartySyncValue.getValue();
-                playerPartyToSet.setPartyMember(this.creatureOne.pos[0], nbtTwo);
-                playerPartyToSet.setPartyMember(this.creatureTwo.pos[0], nbtOne);
-                playerPartySyncValue.setValue(playerPartyToSet, false, true);
+                playerParty.setPartyMember(this.creatureOne.pos[0], nbtTwo);
+                playerParty.setPartyMember(this.creatureTwo.pos[0], nbtOne);
+
+                swapSuccess = true;
             }
 
             this.clear();
+
+            return swapSuccess;
         }
 
         public void clear() {

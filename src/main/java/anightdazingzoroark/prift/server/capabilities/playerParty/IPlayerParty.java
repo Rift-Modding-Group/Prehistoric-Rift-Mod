@@ -27,12 +27,29 @@ public interface IPlayerParty {
     //note that this is for editing nbt only, applyDeploymentOrTeleportation is where it gets applied only on the server
     void deployPartyMember(int index, boolean deploy, EntityPlayer player);
     void teleportPartyMember(int index, EntityPlayer player);
+    void resetTeleportationMarker();
     boolean canDeployPartyMember(int index, EntityPlayer player);
     void applyDeploymentOrTeleportation(EntityPlayer player);
 
-    //-----for parsing and exporting this into nbt-----
+    //-----for the selected position in the quick select hud-----
+    int getQuickSelectPos();
+    int getNextQuickSelectPos();
+    int getPrevQuickSelectPos();
+    void nextQuickSelectPos();
+    void prevQuickSelectPos();
+
+    //-----for parsing and exporting party and selected pos into nbt-----
+    NBTTagCompound getPartyNBT();
+    void parsePartyNBT(NBTTagCompound nbtTagCompound);
+
+    //-----for parsing and exporting party and tp information-----
+    NBTTagCompound getPartyNBTForSync();
+    void parsePartyNBTForSync(NBTTagCompound nbtTagCompound);
+
+    //-----for parsing and exporting only the party-----
     NBTTagList getPartyAsNBTList();
     void parseNBTListToParty(NBTTagList nbtTagList);
+
     NBTTagCompound getTeleportationMarkerAsNBT();
     void parseNBTTeleportationMarker(NBTTagCompound nbtTagCompound);
 }

@@ -1,8 +1,8 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.client.newui.sync.MoveSwapInfoSyncValue;
-import anightdazingzoroark.prift.client.newui.sync.SelectedMoveInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.value.MoveSwapInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.value.SelectedMoveInfoSyncValue;
 import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import com.cleanroommc.modularui.api.GuiAxis;

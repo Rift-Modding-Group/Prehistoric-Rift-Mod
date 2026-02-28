@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
-import anightdazingzoroark.prift.client.newui.sync.NullableEnumSyncValue;
-import anightdazingzoroark.prift.client.newui.sync.PlayerJournalProgressSyncValue;
+import anightdazingzoroark.prift.client.newui.value.NullableEnumSyncValue;
+import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
+import anightdazingzoroark.prift.client.newui.value.PlayerJournalProgressSyncValue;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.widget.ParentWidget;
@@ -9,12 +11,13 @@ import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 
 public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget> {
-    private final PlayerJournalProgressSyncValue journalProgressSync;
-    private final NullableEnumSyncValue<RiftCreatureType> currentCreature;
+    private final IPlayerJournalProgress journalProgress;
+    private final NullableEnumValue.Dynamic<RiftCreatureType> currentCreature;
+
     private boolean markForWidgetUpdate = true;
 
-    public JournalRightPageWidget(PlayerJournalProgressSyncValue journalProgressSync, NullableEnumSyncValue<RiftCreatureType> currentCreature) {
-        this.journalProgressSync = journalProgressSync;
+    public JournalRightPageWidget(IPlayerJournalProgress journalProgress, NullableEnumValue.Dynamic<RiftCreatureType> currentCreature) {
+        this.journalProgress = journalProgress;
         this.currentCreature = currentCreature;
     }
 

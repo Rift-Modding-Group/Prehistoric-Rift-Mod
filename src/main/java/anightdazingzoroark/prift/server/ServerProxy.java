@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
-import anightdazingzoroark.prift.client.newui.data.PlayerGuiFactory;
 import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
 import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerParty;
 import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyStorage;
@@ -87,7 +86,6 @@ public class ServerProxy {
         if (GeneralConfig.canUseSimpleDiff()) loadTemperatureRegistry();
 
         GuiManager.registerFactory(CreatureGuiFactory.INSTANCE);
-        GuiManager.registerFactory(PlayerGuiFactory.INSTANCE);
 
         //load modded recipes
         if (GeneralConfig.canUseMM() && Loader.isModLoaded(RiftInitialize.HARVESTCRAFT_MOD_ID)) RiftMMRecipes.registerHarvestCraftRecipes();

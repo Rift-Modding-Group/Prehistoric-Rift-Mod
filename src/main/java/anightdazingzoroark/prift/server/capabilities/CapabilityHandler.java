@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionE
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
+import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
@@ -52,7 +53,7 @@ public class CapabilityHandler {
 
     @SubscribeEvent
     public void attachCapabilityToEntity(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof EntityPlayer) {
+        if (event.getObject() instanceof EntityPlayer player) {
             event.addCapability(PLAYER_PARTY_CAPABILITY, new PlayerPartyProvider());
             event.addCapability(PLAYER_TAMED_CREATURES_CAPABILITY, new PlayerTamedCreaturesProvider());
             event.addCapability(PLAYER_JOURNAL_PROGRESS_CAPABILITY, new PlayerJournalProgressProvider());

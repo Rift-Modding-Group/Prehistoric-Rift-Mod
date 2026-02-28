@@ -1,8 +1,8 @@
-package anightdazingzoroark.prift.client.newui.sync;
+package anightdazingzoroark.prift.client.newui.value;
 
-import anightdazingzoroark.prift.client.newui.function.CreatureSwapInfoConsumer;
-import anightdazingzoroark.prift.client.newui.function.CreatureSwapInfoSupplier;
-import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.function.MoveSwapInfoConsumer;
+import anightdazingzoroark.prift.client.newui.function.MoveSwapInfoSupplier;
+import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -13,22 +13,32 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.Objects;
 
-public class CreatureSwapInfoSyncValue extends ValueSyncHandler<SelectedCreatureInfo.SwapInfo> {
-    private final CreatureSwapInfoSupplier getter;
-    private final CreatureSwapInfoConsumer setter;
-    private SelectedCreatureInfo.SwapInfo cache;
+public class MoveSwapInfoSyncValue extends ValueSyncHandler<SelectedMoveInfo.SwapInfo> {
+    private final MoveSwapInfoSupplier getter;
+    private final MoveSwapInfoConsumer setter;
+    private SelectedMoveInfo.SwapInfo cache;
 
-    public CreatureSwapInfoSyncValue(@NotNull CreatureSwapInfoSupplier getter, @Nullable CreatureSwapInfoConsumer setter) {
+    public MoveSwapInfoSyncValue(@NotNull MoveSwapInfoSupplier getter, @Nullable MoveSwapInfoConsumer setter) {
         this.getter = Objects.requireNonNull(getter);
         this.setter = setter;
         this.cache = getter.getSwapInfo();
     }
 
     @Override
-    public void setValue(SelectedCreatureInfo.SwapInfo value, boolean setSource, boolean sync) {
+    public void setValue(SelectedMoveInfo.SwapInfo value, boolean setSource, boolean sync) {
         this.cache = value;
         if (setSource && this.setter != null) this.setter.accept(value);
         if (sync) sync(0, this::write);
+    }
+
+    @Override
+    public SelectedMoveInfo.SwapInfo getValue() {
+        return this.cache;
+    }
+
+    @Override
+    public Class<SelectedMoveInfo.SwapInfo> getValueType() {
+        return SelectedMoveInfo.SwapInfo.class;
     }
 
     @Override
@@ -55,17 +65,7 @@ public class CreatureSwapInfoSyncValue extends ValueSyncHandler<SelectedCreature
     public void read(PacketBuffer buffer) throws IOException {
         NBTTagCompound readNBT = ByteBufUtils.readTag(buffer);
         if (readNBT == null) return;
-        SelectedCreatureInfo.SwapInfo readSwapInfo = new SelectedCreatureInfo.SwapInfo(readNBT);
+        SelectedMoveInfo.SwapInfo readSwapInfo = new SelectedMoveInfo.SwapInfo(readNBT);
         this.setValue(readSwapInfo, true, false);
-    }
-
-    @Override
-    public SelectedCreatureInfo.SwapInfo getValue() {
-        return this.cache;
-    }
-
-    @Override
-    public Class<SelectedCreatureInfo.SwapInfo> getValueType() {
-        return SelectedCreatureInfo.SwapInfo.class;
     }
 }

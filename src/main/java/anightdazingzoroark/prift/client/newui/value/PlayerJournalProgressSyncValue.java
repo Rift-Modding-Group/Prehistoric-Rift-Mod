@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.newui.sync;
+package anightdazingzoroark.prift.client.newui.value;
 
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;

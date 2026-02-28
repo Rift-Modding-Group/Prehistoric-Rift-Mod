@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.newui.RiftCreatureScreen;
+import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
 import anightdazingzoroark.prift.client.ui.RiftEggScreen;
@@ -15,6 +15,8 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.NewPlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
@@ -41,7 +43,6 @@ import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
 import anightdazingzoroark.riftlib.ui.RiftLibUIData;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
-import com.cleanroommc.modularui.ModularUI;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
@@ -686,18 +687,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     private void manageDiscoveryByPlayer() {
         AxisAlignedBB axisAlignedBB = new AxisAlignedBB(this.posX - 12, this.posY - 8, this.posZ - 12, this.posX + 12, this.posY + 8, this.posZ + 12);
-        for (EntityPlayer player : this.world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB, new Predicate<EntityPlayer>() {
-            @Override
-            public boolean apply(@Nullable EntityPlayer player) {
-                return !PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(creatureType);
-            }
-        })) {
+        for (EntityPlayer player : this.world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB, null)) {
+            IPlayerJournalProgress journalProgress = NewPlayerJournalProgressHelper.getPlayerJournalProgress(player);
+            if (journalProgress.getEncounteredCreatures().containsKey(this.creatureType)) continue;
+
             if (this.creatureType.isTameable) {
-                PlayerJournalProgressHelper.discoverCreature(player, this.creatureType);
+                journalProgress.discoverCreature(this.creatureType);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.discovered_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
             }
             else {
-                PlayerJournalProgressHelper.unlockCreature(player, this.creatureType);
+                journalProgress.unlockCreature(this.creatureType);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
             }
         }
@@ -1055,8 +1054,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         if (!this.world.isRemote) {
             //update journal
-            if (PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(this.creatureType) && !PlayerJournalProgressHelper.getUnlockedCreatures(player).get(this.creatureType)) {
-                PlayerJournalProgressHelper.unlockCreature(player, this.creatureType);
+            IPlayerJournalProgress journalProgress = NewPlayerJournalProgressHelper.getPlayerJournalProgress(player);
+            if (journalProgress.getEncounteredCreatures().containsKey(this.creatureType) && !journalProgress.getEncounteredCreatures().get(this.creatureType)) {
+                journalProgress.unlockCreature(this.creatureType);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
             }
 
@@ -1912,9 +1912,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 EntityPlayer owner = (EntityPlayer) this.getOwner();
 
                 //update journal
-                if (PlayerJournalProgressHelper.getUnlockedCreatures(owner).containsKey(baby.creatureType) && !PlayerJournalProgressHelper.getUnlockedCreatures(owner).get(baby.creatureType)) {
-                    PlayerJournalProgressHelper.unlockCreature(owner, baby.creatureType);
-                    owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", baby.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
+                IPlayerJournalProgress journalProgress = NewPlayerJournalProgressHelper.getPlayerJournalProgress(owner);
+                if (journalProgress != null) {
+                    if (journalProgress.getEncounteredCreatures().containsKey(baby.creatureType) && !journalProgress.getEncounteredCreatures().get(baby.creatureType)) {
+                        journalProgress.unlockCreature(baby.creatureType);
+                        owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", baby.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
+                    }
                 }
 
                 //update player tamed creatures

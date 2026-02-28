@@ -1,10 +1,14 @@
-package anightdazingzoroark.prift.client.newui;
+package anightdazingzoroark.prift.client.newui.screens.synced;
 
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.client.newui.screens.player.PlayerUIHelper;
+import anightdazingzoroark.prift.client.newui.RiftUIIcons;
+import anightdazingzoroark.prift.client.newui.UIColors;
+import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
 import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
-import anightdazingzoroark.prift.client.newui.sync.MoveSwapInfoSyncValue;
-import anightdazingzoroark.prift.client.newui.sync.SelectedMoveInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.value.MoveSwapInfoSyncValue;
+import anightdazingzoroark.prift.client.newui.value.SelectedMoveInfoSyncValue;
 import anightdazingzoroark.prift.client.newui.widget.*;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;

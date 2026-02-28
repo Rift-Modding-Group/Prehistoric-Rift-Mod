@@ -1,8 +1,10 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
-import anightdazingzoroark.prift.client.newui.sync.NullableEnumSyncValue;
-import anightdazingzoroark.prift.client.newui.sync.PlayerJournalProgressSyncValue;
+import anightdazingzoroark.prift.client.newui.value.NullableEnumSyncValue;
+import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
+import anightdazingzoroark.prift.client.newui.value.PlayerJournalProgressSyncValue;
+import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
@@ -20,14 +22,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
-    private final PlayerJournalProgressSyncValue journalProgressSync;
-    private final NullableEnumSyncValue<RiftCreatureType> currentCreature;
+    private final IPlayerJournalProgress journalProgress;
+    private final NullableEnumValue.Dynamic<RiftCreatureType> currentCreature;
+
     private RiftCreatureType.CreatureCategory currentCategory;
     private boolean markForWidgetUpdate = true;
 
-    public JournalLeftPageWidget(PlayerJournalProgressSyncValue journalProgressSync,
-                                 NullableEnumSyncValue<RiftCreatureType> currentCreature) {
-        this.journalProgressSync = journalProgressSync;
+    public JournalLeftPageWidget(IPlayerJournalProgress journalProgress, NullableEnumValue.Dynamic<RiftCreatureType> currentCreature) {
+        this.journalProgress = journalProgress;
         this.currentCreature = currentCreature;
     }
 
@@ -74,7 +76,7 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
                 .child(this.headerSection());
 
         //children
-        List<RiftCreatureType.CreatureCategory> categoryList = this.journalProgressSync.getValue().getUnlockedCategories();
+        List<RiftCreatureType.CreatureCategory> categoryList = this.journalProgress.getUnlockedCategories();
         for (RiftCreatureType.CreatureCategory creatureCategory : categoryList) {
             toReturn.child(new ButtonWidget<>().height(20).widthRel(0.75f)
                     .overlay(IKey.str(creatureCategory.getTranslatedName(true)))
@@ -94,7 +96,7 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
                 .child(this.headerSection());
 
         //children
-        Map<RiftCreatureType, Boolean> creatureTypeMap = this.journalProgressSync.getValue().getEncounteredCreatures();
+        Map<RiftCreatureType, Boolean> creatureTypeMap = this.journalProgress.getEncounteredCreatures();
         List<RiftCreatureType> creatureTypeList = this.orderedCreatureTypes();
 
         for (RiftCreatureType creatureType : creatureTypeList) {
@@ -117,10 +119,10 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
     }
 
     private List<RiftCreatureType> orderedCreatureTypes() {
-        if (this.journalProgressSync.getValue() == null) return new ArrayList<>();
+        if (this.journalProgress == null) return new ArrayList<>();
 
         //get map
-        Map<RiftCreatureType, Boolean> creatureTypeMap = this.journalProgressSync.getValue().getEncounteredCreatures();
+        Map<RiftCreatureType, Boolean> creatureTypeMap = this.journalProgress.getEncounteredCreatures();
 
         //get ordered string list
         return new ArrayList<>(creatureTypeMap.keySet())

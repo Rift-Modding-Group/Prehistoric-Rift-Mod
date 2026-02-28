@@ -10,18 +10,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.HashMap;
-import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
 
 public class PlayerParty implements IPlayerParty {
     //creature party is set here
     private final FixedSizeList<CreatureNBT> party = new FixedSizeList<>(6, new CreatureNBT());
     //teleportation markers are set in this map
     private final MutablePair<Integer, BlockPos> teleportationMarker = new MutablePair<>(-1, null);
+    private int selectedPos;
 
     @Override
     public FixedSizeList<CreatureNBT> getParty() {
@@ -93,6 +90,12 @@ public class PlayerParty implements IPlayerParty {
     }
 
     @Override
+    public void resetTeleportationMarker() {
+        this.teleportationMarker.setLeft(-1);
+        this.teleportationMarker.setRight(null);
+    }
+
+    @Override
     public boolean canDeployPartyMember(int index, EntityPlayer player) {
         if (player == null) return false;
         CreatureNBT creatureNBT = this.getPartyMember(index);
@@ -136,6 +139,9 @@ public class PlayerParty implements IPlayerParty {
                 if (this.teleportationMarker.getLeft() == index && this.teleportationMarker.getRight() != null && !player.world.isRemote) {
                     BlockPos posToTeleportTo = this.teleportationMarker.getRight();
                     corresponded.setPosition(posToTeleportTo.getX(), posToTeleportTo.getY(), posToTeleportTo.getZ());
+
+                    //reset marker
+                    this.resetTeleportationMarker();
                 }
             }
             else {
@@ -152,6 +158,82 @@ public class PlayerParty implements IPlayerParty {
     }
 
     @Override
+    public int getQuickSelectPos() {
+        return this.selectedPos;
+    }
+
+    @Override
+    public int getNextQuickSelectPos() {
+        return this.selectedPos + 1 < PlayerPartyHelper.maxSize ? this.selectedPos + 1 : 0;
+    }
+
+    @Override
+    public int getPrevQuickSelectPos() {
+        return this.selectedPos - 1 >= 0 ? this.selectedPos - 1 : PlayerPartyHelper.maxSize - 1;
+    }
+
+    @Override
+    public void nextQuickSelectPos() {
+        this.selectedPos = this.getNextQuickSelectPos();
+    }
+
+    @Override
+    public void prevQuickSelectPos() {
+        this.selectedPos = this.getPrevQuickSelectPos();
+    }
+
+    @Override
+    public NBTTagCompound getPartyNBT() {
+        NBTTagCompound toReturn = new NBTTagCompound();
+
+        //party
+        NBTTagList partyTagList = this.getPartyAsNBTList();
+        toReturn.setTag("PartyMembers", partyTagList);
+
+        //selected pos
+        toReturn.setInteger("SelectedPos", this.selectedPos);
+
+        return toReturn;
+    }
+
+    @Override
+    public void parsePartyNBT(NBTTagCompound nbtTagCompound) {
+        //party
+        NBTTagList partyNBTTagList = nbtTagCompound.getTagList("PartyMembers", 10);
+        this.parseNBTListToParty(partyNBTTagList);
+
+        //selected pos
+        this.selectedPos = nbtTagCompound.getInteger("SelectedPos");
+    }
+
+    @Override
+    public NBTTagCompound getPartyNBTForSync() {
+        NBTTagCompound toReturn = new NBTTagCompound();
+
+        //party
+        NBTTagList partyTagList = this.getPartyAsNBTList();
+        toReturn.setTag("PartyMembers", partyTagList);
+
+        //teleportation info
+        NBTTagCompound tpInfo = this.getTeleportationMarkerAsNBT();
+        toReturn.setTag("TeleportationMarker", tpInfo);
+
+        return toReturn;
+    }
+
+    @Override
+    public void parsePartyNBTForSync(NBTTagCompound nbtTagCompound) {
+        //party
+        NBTTagList partyNBTTagList = nbtTagCompound.getTagList("PartyMembers", 10);
+        this.parseNBTListToParty(partyNBTTagList);
+
+        //teleportation info
+        NBTTagCompound tpInfo = nbtTagCompound.getCompoundTag("TeleportationMarker");
+        this.parseNBTTeleportationMarker(tpInfo);
+    }
+
+    @Override
+    @NotNull
     public NBTTagList getPartyAsNBTList() {
         NBTTagList toReturn = new NBTTagList();
 

@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.capabilities.playerParty;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.server.capabilities.CapabilitySyncDirection;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
-import net.minecraft.block.material.Material;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftSyncPlayerParty;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class PlayerPartyHelper {
@@ -12,6 +12,20 @@ public class PlayerPartyHelper {
     public static IPlayerParty getPlayerParty(EntityPlayer player) {
         if (player == null) return null;
         return player.getCapability(PlayerPartyProvider.PLAYER_PARTY_CAPABILITY, null);
+    }
+
+    public static void syncPlayerParty(EntityPlayer player, CapabilitySyncDirection direction) {
+        if (player == null || !player.world.isRemote) return;
+        if (direction == CapabilitySyncDirection.SERVER_TO_CLIENT) {
+            RiftMessages.WRAPPER.sendToServer(new RiftSyncPlayerParty(player, CapabilitySyncDirection.SERVER_TO_CLIENT));
+        }
+        else if (direction == CapabilitySyncDirection.CLIENT_TO_SERVER) {
+            IPlayerParty playerParty = getPlayerParty(player);
+            RiftMessages.WRAPPER.sendToServer(new RiftSyncPlayerParty(player, CapabilitySyncDirection.CLIENT_TO_SERVER, playerParty.getPartyNBTForSync()));
+
+            //reset tp info afterwards
+            playerParty.resetTeleportationMarker();
+        }
     }
 
     public static void addCreatureToParty(EntityPlayer player, RiftCreature creature) {
@@ -27,22 +41,5 @@ public class PlayerPartyHelper {
     public static boolean canAddToParty(EntityPlayer player) {
         if (player == null) return false;
         return getPlayerParty(player).canAddToParty();
-    }
-
-    public static boolean canBeDeployed(EntityPlayer player, CreatureNBT creatureNBT) {
-        if (player == null || creatureNBT == null || creatureNBT.nbtIsEmpty()) return false;
-        //this is temporary, it will be completely replaced when i redo creature registries w something even better :tm:
-        boolean isAquatic = creatureNBT.getCreatureType().getCreature().isAssignableFrom(RiftWaterCreature.class);
-        if (isAquatic) {
-            if (player.world.getBlockState(player.getPosition()).getMaterial() == Material.WATER) return true;
-            else if (player.world.getBlockState(player.getPosition().down()).getMaterial() != Material.AIR
-                /*&& ((RiftWaterCreature) creature).isAmphibious()*/) return true;
-        }
-        else {
-            if (player.world.getBlockState(player.getPosition().down()).getMaterial() == Material.AIR
-                    && player.isRiding()) return true;
-            else if (player.world.getBlockState(player.getPosition().down()).getMaterial() != Material.AIR) return true;
-        }
-        return false;
     }
 }

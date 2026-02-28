@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.newui.sync;
+package anightdazingzoroark.prift.client.newui.value;
 
 import anightdazingzoroark.prift.client.newui.function.SelectedMoveInfoConsumer;
 import anightdazingzoroark.prift.client.newui.function.SelectedMoveInfoSupplier;

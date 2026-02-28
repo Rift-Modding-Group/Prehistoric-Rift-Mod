@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.newui.sync;
+package anightdazingzoroark.prift.client.newui.value;
 
 import com.cleanroommc.modularui.api.value.IEnumValue;
 import com.cleanroommc.modularui.api.value.sync.IIntSyncValue;

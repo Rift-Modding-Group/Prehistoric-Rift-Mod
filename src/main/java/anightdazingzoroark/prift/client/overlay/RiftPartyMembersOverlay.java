@@ -3,13 +3,13 @@ package anightdazingzoroark.prift.client.overlay;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.server.capabilities.CapabilitySyncDirection;
 import anightdazingzoroark.prift.server.capabilities.playerParty.IPlayerParty;
 import anightdazingzoroark.prift.server.capabilities.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.message.RiftSyncPlayerParty;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -19,10 +19,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -33,21 +30,20 @@ import static net.minecraft.client.gui.Gui.drawRect;
 
 public class RiftPartyMembersOverlay {
     private static final ResourceLocation hud = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
-    private int selectedPos = -1;
+    private boolean syncFromServerFlag = true;
+    private boolean syncToServerFlag = false;
+    private IPlayerParty playerParty;
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPreRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
-        IPlayerParty playerParty = PlayerPartyHelper.getPlayerParty(player);
 
-        if (playerParty == null) return;
+        //sync
+        this.syncFromServer(player);
+        this.syncToServer(player);
 
-        //selectedPos starts out as -1, to reduce potential lag
-        //from repeatedly sending in packets for selected pos for overlay
-        //this is here
-        if (this.selectedPos < 0) {
-            this.selectedPos = PlayerTamedCreaturesHelper.getSelectedPartyPosFromOverlay(player);
-        }
+        //block if the player party isn't defined yet
+        if (this.playerParty == null) return;
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
             ScaledResolution resolution = event.getResolution();
@@ -56,8 +52,31 @@ public class RiftPartyMembersOverlay {
         }
     }
 
+    private void setSyncFromServer() {
+        this.syncFromServerFlag = true;
+    }
+
+    private void syncFromServer(EntityPlayer player) {
+        if (this.syncFromServerFlag) {
+            PlayerPartyHelper.syncPlayerParty(player, CapabilitySyncDirection.SERVER_TO_CLIENT);
+            this.playerParty = PlayerPartyHelper.getPlayerParty(player);
+            this.syncFromServerFlag = false;
+        }
+    }
+
+    private void setSyncToServer() {
+        this.syncToServerFlag = true;
+    }
+
+    private void syncToServer(EntityPlayer player) {
+        if (this.syncToServerFlag) {
+            PlayerPartyHelper.syncPlayerParty(player, CapabilitySyncDirection.CLIENT_TO_SERVER);
+            this.syncToServerFlag = false;
+        }
+    }
+
     private void renderHUD(FixedSizeList<CreatureNBT> partyNBT, int xSize, int ySize) {
-        CreatureNBT middlePartyMemNBT = partyNBT.get(this.selectedPos);
+        CreatureNBT middlePartyMemNBT = partyNBT.get(this.playerParty.getQuickSelectPos());
 
         //black transparent background and middle creature info
         this.drawSelectedInfo(middlePartyMemNBT, xSize, ySize);
@@ -66,16 +85,14 @@ public class RiftPartyMembersOverlay {
         this.drawArrow(xSize, ySize, true);
 
         //render up
-        int upPos = this.selectedPos - 1 < 0 ? PlayerTamedCreaturesHelper.maxPartySize - 1 : this.selectedPos - 1;
-        CreatureNBT leftPartyMemNBT = partyNBT.get(upPos);
+        CreatureNBT leftPartyMemNBT = partyNBT.get(this.playerParty.getPrevQuickSelectPos());
         this.renderPartySlot(leftPartyMemNBT, xSize, ySize, 0.5f, 0.5f, -30);
 
         //render middle
         this.renderPartySlot(middlePartyMemNBT, xSize, ySize, 0.75f, 0.75f, 0);
 
         //render down
-        int downPos = this.selectedPos + 1 >= PlayerTamedCreaturesHelper.maxPartySize ? 0 : this.selectedPos + 1;
-        CreatureNBT rightPartyMemNBT = partyNBT.get(downPos);
+        CreatureNBT rightPartyMemNBT = partyNBT.get(this.playerParty.getNextQuickSelectPos());
         this.renderPartySlot(rightPartyMemNBT, xSize, ySize, 0.5f, 0.5f, 30);
 
         //down arrow
@@ -240,17 +257,18 @@ public class RiftPartyMembersOverlay {
     public void changeSelectedPartyPos(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (RiftControls.switchUpwards.isKeyDown()) {
-            this.selectedPos = this.selectedPos - 1 < 0 ? PlayerTamedCreaturesHelper.maxPartySize - 1 : this.selectedPos - 1;
-            PlayerTamedCreaturesHelper.setSelectedPartyPosFromOverlay(player, this.selectedPos);
+            this.playerParty.prevQuickSelectPos();
+            this.setSyncToServer();
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
         if (RiftControls.switchDownwards.isKeyDown()) {
-            this.selectedPos = this.selectedPos + 1 >= PlayerTamedCreaturesHelper.maxPartySize ? 0 : this.selectedPos + 1;
-            PlayerTamedCreaturesHelper.setSelectedPartyPosFromOverlay(player, this.selectedPos);
+            this.playerParty.nextQuickSelectPos();
+            this.setSyncToServer();
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
-        if (RiftControls.quickSummonAndDismiss.isKeyDown() && this.selectedPos >= 0) {
-            CreatureNBT partyMemNBT = PlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.selectedPos);
+        /*
+        if (RiftControls.quickSummonAndDismiss.isKeyDown()) {
+            CreatureNBT partyMemNBT = this.playerParty.getParty().get(this.playerParty.getQuickSelectPos());
             PlayerTamedCreatures.DeploymentType deploymentType = partyMemNBT.getDeploymentType();
 
             //for dismissing, when creature is deployed
@@ -277,5 +295,6 @@ public class RiftPartyMembersOverlay {
 
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
+         */
     }
 }

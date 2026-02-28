@@ -64,17 +64,17 @@ public class FixedSizeList<T> {
     public void set(int pos, T value) {
         if (value == null && this.defaultValue != null) throw new UnsupportedOperationException("Cannot set null value in FixedSizeList");
         if (pos >= 0 && pos < this.maxSize) this.list.set(pos, value);
-        else throw new UnsupportedOperationException("Invalid position "+pos+" to add to FixedSizeList of size "+this.maxSize);
+        else throw new UnsupportedOperationException("Invalid position ("+pos+") to add to FixedSizeList of size "+this.maxSize);
     }
 
     public T get(int pos) {
         if (pos >= 0 && pos < this.maxSize) return this.list.get(pos);
-        else throw new UnsupportedOperationException("Invalid position to get from FixedSizeList");
+        else throw new UnsupportedOperationException("Invalid position ("+pos+") to get from FixedSizeList");
     }
 
     public void remove(int pos) {
         if (pos >= 0 && pos < this.maxSize) this.list.set(pos, this.defaultValue);
-        else throw new UnsupportedOperationException("Invalid position to remove from FixedSizeList");
+        else throw new UnsupportedOperationException("Invalid position ("+pos+") to remove from FixedSizeList");
     }
 
     public void remove(T value) {
