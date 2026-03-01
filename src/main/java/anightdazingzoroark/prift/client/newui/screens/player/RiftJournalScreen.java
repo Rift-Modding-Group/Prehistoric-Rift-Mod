@@ -20,10 +20,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import org.jetbrains.annotations.NotNull;
 
-public class NewRiftJournalScreen extends CustomModularScreen {
+import java.util.function.Function;
+
+public class RiftJournalScreen extends CustomModularScreen {
+    private RiftCreatureType.CreatureCategory currentCategory;
     private RiftCreatureType currentCreature;
 
-    public NewRiftJournalScreen() {
+    public RiftJournalScreen() {
         super(RiftInitialize.MODID);
     }
 
@@ -32,6 +35,11 @@ public class NewRiftJournalScreen extends CustomModularScreen {
         EntityPlayer player = Minecraft.getMinecraft().player;
         JournalProgressProperties journalProgress = JournalProgressHelper.getJournalProgress(player);
 
+        NullableEnumValue.Dynamic<RiftCreatureType.CreatureCategory> currentCategoryDynamic = new NullableEnumValue.Dynamic<>(
+                RiftCreatureType.CreatureCategory.class,
+                () -> this.currentCategory,
+                value -> this.currentCategory = value
+        );
         NullableEnumValue.Dynamic<RiftCreatureType> currentCreatureDynamic = new NullableEnumValue.Dynamic<>(
                 RiftCreatureType.class,
                 () -> this.currentCreature,
@@ -39,36 +47,34 @@ public class NewRiftJournalScreen extends CustomModularScreen {
         );
 
         return new ModularPanelExitAffectable(UIPanelNames.JOURNAL_SCREEN)
-                .onEscPressed(panel -> {
-                    PlayerUIHelper.openUI(player, UIPanelNames.PARTY_SCREEN);
-                    return true;
+                .onEscPressed(new Function<ModularPanelExitAffectable, Boolean>() {
+                    @Override
+                    public Boolean apply(ModularPanelExitAffectable panel) {
+                        if (currentCategoryDynamic.getValue() != null) {
+                            currentCategoryDynamic.setValue(null);
+                            currentCreatureDynamic.setValue(null);
+                            JournalLeftPageWidget leftPageWidget = this.getLeftPageWidget(panel);
+                            if (leftPageWidget != null) leftPageWidget.updatePages();
+                        }
+                        else PlayerUIHelper.openUI(player, UIPanelNames.PARTY_SCREEN);
+                        return true;
+                    }
+
+                    private JournalLeftPageWidget getLeftPageWidget(@NotNull ModularPanelExitAffectable panel) {
+                        for (IWidget child : panel.getChildren()) {
+                            if (child instanceof JournalLeftPageWidget leftPageWidget) return leftPageWidget;
+                        }
+                        return null;
+                    }
                 })
                 .widgetTheme(UIThemes.JOURNAL_PANEL)
                 //-----left page-----
-                .child(new JournalLeftPageWidget(journalProgress, currentCreatureDynamic)
+                .child(new JournalLeftPageWidget(journalProgress, currentCategoryDynamic, currentCreatureDynamic)
                         .name("leftPage").size(189, 225).left(8).top(8)
                 )
                 //-----right page-----
-                .child(new JournalRightPageWidget(journalProgress, currentCreatureDynamic)
+                .child(new JournalRightPageWidget(currentCreatureDynamic)
                         .name("rightPage").size(189, 225).right(8).top(8)
                 );
-    }
-
-    private static IKey str(String value) {
-        return IKey.str(value).scale(0.75f);
-    }
-
-    private static void tryAddChild(ParentWidget<?> parentWidget, IWidget childToAdd) {
-        if (!parentWidget.getChildren().contains(childToAdd)) {
-            parentWidget.child(childToAdd);
-            parentWidget.scheduleResize();
-        }
-    }
-
-    private static void tryRemoveChild(ParentWidget<?> parentWidget, IWidget childToRemove) {
-        if (parentWidget.getChildren().contains(childToRemove)) {
-            parentWidget.remove(childToRemove);
-            parentWidget.scheduleResize();
-        }
     }
 }

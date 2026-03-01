@@ -22,7 +22,7 @@ public class RiftUIIcons {
     public static UITexture creatureIcon(RiftCreatureType creatureType) {
         return UITexture.builder()
                 .location(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+creatureType.toString().toLowerCase()+"_icon.png"))
-                .imageSize(32, 32)
+                .imageSize(24, 24)
                 .subAreaXYWH(0, 0, 24, 24)
                 .iconColorType()
                 .name(creatureType.friendlyName)
@@ -31,9 +31,9 @@ public class RiftUIIcons {
 
     public static UITexture creatureIllustration(RiftCreatureType creatureType) {
         return UITexture.builder()
-                .location(new ResourceLocation(RiftInitialize.MODID, "textures/icons/"+creatureType.toString().toLowerCase()+"_icon.png"))
-                .imageSize(32, 32)
-                .subAreaXYWH(0, 0, 24, 24)
+                .location(new ResourceLocation(RiftInitialize.MODID, "textures/journal/"+creatureType.toString().toLowerCase()+"_journal.png"))
+                .imageSize(240, 180)
+                .subAreaXYWH(0, 0, 240, 180)
                 .iconColorType()
                 .name(creatureType.friendlyName)
                 .build();

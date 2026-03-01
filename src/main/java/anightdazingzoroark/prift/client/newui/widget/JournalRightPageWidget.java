@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
+import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
@@ -9,13 +10,11 @@ import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 
 public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget> {
-    private final JournalProgressProperties journalProgress;
     private final NullableEnumValue.Dynamic<RiftCreatureType> currentCreature;
 
     private boolean markForWidgetUpdate = true;
 
-    public JournalRightPageWidget(JournalProgressProperties journalProgress, NullableEnumValue.Dynamic<RiftCreatureType> currentCreature) {
-        this.journalProgress = journalProgress;
+    public JournalRightPageWidget(NullableEnumValue.Dynamic<RiftCreatureType> currentCreature) {
         this.currentCreature = currentCreature;
     }
 
@@ -39,7 +38,8 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
 
     private Flow creaturePageContents() {
         return new Column().sizeRel(1f).childPadding(5)
-                .child(IKey.str(this.currentCreature.getValue().getTranslatedName()).asWidget().left(0));
+                .child(IKey.str(this.currentCreature.getValue().getTranslatedName()).asWidget().left(0))
+                .child(RiftUIIcons.creatureIllustration(this.currentCreature.getValue()).asWidget().size(120, 90));
     }
 
     public void updatePage() {

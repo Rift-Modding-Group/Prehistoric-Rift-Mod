@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.properties.journalProgress;
 
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.propertyValues.JournalEncounteredCreaturesValue;
 import net.minecraft.entity.Entity;
 import org.jetbrains.annotations.NotNull;

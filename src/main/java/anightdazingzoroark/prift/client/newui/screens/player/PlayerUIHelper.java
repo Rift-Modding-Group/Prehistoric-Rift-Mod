@@ -8,6 +8,6 @@ public class PlayerUIHelper {
     public static void openUI(EntityPlayer player, String uiName) {
         if (!player.world.isRemote) return;
         if (uiName.equals(UIPanelNames.PARTY_SCREEN)) ClientGUI.open(new RiftPartyScreen());
-        else if (uiName.equals(UIPanelNames.JOURNAL_SCREEN)) ClientGUI.open(new NewRiftJournalScreen());
+        else if (uiName.equals(UIPanelNames.JOURNAL_SCREEN)) ClientGUI.open(new RiftJournalScreen());
     }
 }
